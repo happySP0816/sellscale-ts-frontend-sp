@@ -647,8 +647,10 @@ export default function Utilization() {
                       minSize: 120,
                       enableResizing: true,
                       cell: (cell) => {
-                        const { num_total_linkedin, num_total_email } =
-                          cell.row.original;
+                        const {
+                          num_total_linkedin,
+                          num_total_email,
+                        } = cell.row.original;
 
                         return (
                           <Flex
@@ -713,7 +715,10 @@ export default function Utilization() {
                               gap={"8px"}
                               px={"xs"}
                             >
-                              <Progress value={50} w={"100%"} />
+                              <Progress
+                                value={(num_used_total / num_total) * 100}
+                                w={"100%"}
+                              />
                               <Text color="#228be6" fw={500}>
                                 {Math.round((num_used_total / num_total) * 100)}
                                 %
@@ -726,8 +731,29 @@ export default function Utilization() {
                                   Sent
                                 </span>
                               </Text>
-                              <IconPoint fill="gray" color="white" />
-                              <Text color={"red"}>{1} day left</Text>
+                              {Math.round((num_total - num_used_total) / 20) <
+                              3 ? (
+                                <IconPoint fill="gray" color="white" />
+                              ) : null}
+                              <Text
+                                color={"red"}
+                                sx={{
+                                  display:
+                                    Math.round(
+                                      (num_total - num_used_total) / 20
+                                    ) < 3
+                                      ? "block"
+                                      : "none",
+                                }}
+                              >
+                                {Math.round((num_total - num_used_total) / 20)}{" "}
+                                day
+                                {Math.round((num_total - num_used_total) / 20) <
+                                3
+                                  ? "s"
+                                  : ""}{" "}
+                                left
+                              </Text>
                             </Flex>
                           </Flex>
                         );
@@ -1318,7 +1344,11 @@ export default function Utilization() {
                       ),
                       enableResizing: true,
                       cell: (cell) => {
-                        const { linkedin_setup } = cell.row.original;
+                        const {
+                          linkedin_setup,
+                          email_setup,
+                          prospects,
+                        } = cell.row.original;
 
                         return (
                           <Flex
@@ -1328,10 +1358,7 @@ export default function Utilization() {
                             w={"100%"}
                             h={"100%"}
                           >
-                            <Text fw={500} color="gray">
-                              Step {2} / {3}:
-                            </Text>
-                            <Text fw={500}>{linkedin_setup}</Text>
+                            {prospects} - {email_setup} - {linkedin_setup}
                           </Flex>
                         );
                       },
@@ -1902,8 +1929,10 @@ export default function Utilization() {
                       minSize: 120,
                       enableResizing: true,
                       cell: (cell) => {
-                        const { num_used_linkedin, num_used_email } =
-                          cell.row.original;
+                        const {
+                          num_used_linkedin,
+                          num_used_email,
+                        } = cell.row.original;
 
                         return (
                           <Flex

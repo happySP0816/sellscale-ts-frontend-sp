@@ -10,10 +10,8 @@ import {
   Flex,
   Popover,
   Progress,
-  RingProgress,
   ScrollArea,
   Select,
-  Switch,
   Text,
   Title,
   useMantineTheme,
@@ -23,35 +21,25 @@ import {
   IconBolt,
   IconBrandLinkedin,
   IconCalendar,
-  IconCheckbox,
-  IconChecks,
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
   IconChevronUp,
   IconCircleCheck,
-  IconCircleX,
-  IconCloudUpload,
   IconExternalLink,
-  IconFileUnknown,
   IconInfoCircle,
   IconLetterT,
   IconLoader,
   IconMail,
   IconPlus,
   IconPoint,
-  IconRosette,
-  IconSend,
   IconTargetArrow,
   IconToggleRight,
   IconUserCircle,
 } from "@tabler/icons";
 import {
-  IconCrossFilled,
   IconInfoHexagon,
   IconInfoTriangle,
-  IconMessageCheck,
-  IconNumber12Small,
   IconSparkles,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
@@ -59,12 +47,11 @@ import { useDisclosure } from "@mantine/hooks";
 import { DataGrid } from "mantine-data-grid";
 import { Doughnut } from "react-chartjs-2";
 import { useRecoilValue } from "recoil";
-import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { useQuery } from "@tanstack/react-query";
-import { getPersonasCampaignView } from "@utils/requests/getPersonas";
-import { CampaignPersona } from "@common/campaigns/PersonaCampaigns";
+import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import { openContextModal } from "@mantine/modals";
+import moment from "moment";
+import { valueToColor, nameToInitials } from "@utils/general";
 
 interface outboundType {
   message_active: number;
@@ -73,49 +60,81 @@ interface outboundType {
   seat_total: number;
 }
 
+interface activeCampaignType {
+  campaign: string;
+  email_active: boolean;
+  linkedin_active: boolean;
+  num_total: number;
+  num_total_email: number;
+  num_total_linkedin: number;
+  num_used_email: number;
+  num_used_linkedin: number;
+  num_used_total: number;
+  rep: string;
+  rep_profile_picture: string;
+  status: string;
+}
+
+interface repCampaignType {
+  campaign: string;
+  num_open_tasks: number;
+  open_task_ids: [];
+  open_task_titles: [];
+  rep: string;
+  rep_profile_picture: string;
+  status: string;
+}
+
+interface aiCampaignType {
+  campaign: string;
+  email_setup: string;
+  linkedin_setup: string;
+  prospects: string;
+  rep: string;
+  rep_profile_picture: string;
+  status: string;
+}
+
+interface noCampaignType {
+  campaign: string;
+  recommended_segments: [];
+  rep: string;
+  rep_profile_picture: string;
+  status: string;
+}
+
+interface completedCampaignType {
+  campaign: string;
+  email_active: boolean;
+  linkedin_active: boolean;
+  num_total: number;
+  num_total_email: number;
+  num_total_linkedin: number;
+  num_used_email: number;
+  num_used_linkedin: number;
+  num_used_total: number;
+  rep: string;
+  rep_profile_picture: string;
+  status: string;
+}
+
+interface seatDataType {
+  num_campaigns: number;
+  rep: string;
+  rep_image: string;
+}
+
 export default function Utilization() {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
-  const userData = useRecoilValue(userDataState);
-  const [activeCampaignOpen, { toggle: activeCampaignToggle }] = useDisclosure(
-    false
-  );
+
+  const currentTime = moment().format("ddd, DD MMM YYYY HH:mm:ss");
+
   const [activeOpened, { toggle: activeToggle }] = useDisclosure(true);
   const [repOpened, { toggle: repToggle }] = useDisclosure(true);
   const [aiOpened, { toggle: aiToggle }] = useDisclosure(true);
   const [noOpened, { toggle: noToggle }] = useDisclosure(true);
   const [completeOpened, { toggle: completeToggle }] = useDisclosure(true);
-
-  const { data: campaigns } = useQuery({
-    queryKey: [`query-get-campaigns`],
-    queryFn: async () => {
-      const response = await getPersonasCampaignView(userToken);
-      const result =
-        response.status === "success"
-          ? (response.data as CampaignPersona[])
-          : [];
-
-      return result;
-    },
-  });
-
-  const { data: ccData } = useQuery({
-    queryKey: [`query-get-client-campaign-data`],
-    queryFn: async () => {
-      const response = await fetch(
-        `${API_URL}/campaigns/client_campaign_view_data`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-          method: "POST",
-        }
-      );
-      return (await response.json()).data.records as Record<string, any>[];
-    },
-  });
 
   const [acPageSize, setAcPageSize] = useState("25");
   const [raPageSize, setRaPageSize] = useState("25");
@@ -123,6 +142,16 @@ export default function Utilization() {
   const [cdPageSize, setCdPageSize] = useState("25");
   const [ncPageSize, setNcPageSize] = useState("25");
 
+  const [activeCampaign, setActiveCampaign] = useState<activeCampaignType[]>(
+    []
+  );
+  const [repCampaign, setRepCampaign] = useState<repCampaignType[]>([]);
+  const [aiCampaign, setAICampaign] = useState<aiCampaignType[]>([]);
+  const [noCampaign, setNoCampaign] = useState<noCampaignType[]>([]);
+  const [completedCampaign, setCompletedCampaign] = useState<
+    completedCampaignType[]
+  >([]);
+  const [seatData, setSeatData] = useState<seatDataType[]>([]);
   const [outboundData, setOutboundData] = useState<outboundType>();
 
   const seat_data = {
@@ -197,115 +226,43 @@ export default function Utilization() {
     },
   };
 
-  const processedCampaigns =
-    campaigns
-      ?.map((c) => {
-        return {
-          status: c.active,
-          percentage: Math.ceil((c.total_sent / c.total_prospects) * 100 || 0),
-          campaign: c.name,
-          sent: c.total_sent,
-          open: c.total_opened,
-          reply: c.total_replied,
-          demo: c.total_demo,
-          linkedin: c.linkedin_active,
-          email: c.email_active,
-        };
-      })
-      .filter((c) => c.linkedin || c.email)
-      .sort((a, b) => (a.linkedin || a.email ? -1 : 1)) ?? [];
+  useEffect(() => {
+    const fetchUtilizationData = async () => {
+      const response = await fetch(`${API_URL}/utilizationv2/`, {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        method: "GET",
+      });
+      const data = await response.json();
 
-  const completedData =
-    campaigns
-      ?.map((c) => {
-        return {
-          status: c.active,
-          percentage: Math.ceil((c.total_sent / c.total_prospects) * 100 || 0),
-          campaign: c.name,
-          sdr: c.sdr_name,
-          last_send_date: c.created_at, // TODO
-          num_sent: c.total_sent,
-          linkedin: c.linkedin_active,
-          email: c.email_active,
-        };
-      })
-      .filter((c) => c.percentage === 100) ?? [];
+      setActiveCampaign(data?.active_campaign);
+      setRepCampaign(data?.rep_needed_campaign);
+      setAICampaign(data?.ai_setting_up);
+      setNoCampaign(data?.no_campaign);
+      setCompletedCampaign(data?.completed_campaign);
+      setSeatData(data?.seat_utilization);
+    };
+    const handleGetOutboundData = async () => {
+      const response = await fetch(`${API_URL}/campaigns/utilization`, {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        method: "GET",
+      });
+      if (response.status === 200) {
+        const data = await response.json();
+        setOutboundData(data);
+      }
+    };
 
-  const ccRepActions =
-    ccData?.filter((c) => c.status.endsWith("Rep Action Needed")) ?? [];
-  const repNeedData =
-    ccRepActions.map((a) => {
-      const campaign = campaigns?.find((c) => a.campaign.endsWith(c.name));
-      if (!campaign)
-        return {
-          campaign: "",
-          campaign_id: -1,
-          sdr: "",
-          company: "",
-        };
-
-      return {
-        campaign: campaign.name,
-        campaign_id: campaign.id,
-        sdr: a.rep as string,
-        company: a.company as string,
-      };
-    }) ?? [];
-
-  const upladingData =
-    ccData
-      ?.filter((c) => c.status.endsWith("Uploading to SellScale"))
-      .map((c) => {
-        return {
-          status: "uploading by sellscale",
-          campaign: c.campaign,
-          sdr: c.rep,
-          campaign_id: -1,
-        };
-      }) ?? [];
-
-  const noCampaignData =
-    ccData
-      ?.filter((c) => c.status.endsWith("No Campaign Found"))
-      .map((c) => {
-        return {
-          status: "No Campaign Found",
-          sdr: c.rep,
-        };
-      }) ?? [];
-
-  const [seatData, setSeatData] = useState([
-    {
-      avatar: "",
-      name: "Tim Bruno",
-      type: true,
-      count: 5,
-    },
-    {
-      avatar: "",
-      name: "Tim Bruno",
-      type: true,
-      count: 5,
-    },
-    {
-      avatar: "",
-      name: "Tim Bruno",
-      type: false,
-      count: 5,
-    },
-    {
-      avatar: "",
-      name: "Tim Bruno",
-      type: false,
-      count: 5,
-    },
-    {
-      avatar: "",
-      name: "Tim Bruno",
-      type: false,
-      count: 5,
-    },
-  ]);
+    handleGetOutboundData();
+    fetchUtilizationData();
+  }, []);
 
   return (
     <Container maw={1500} mt={"xl"}>
@@ -379,7 +336,7 @@ export default function Utilization() {
                       Seat Utilization
                     </Text>
                     <Popover
-                      width={370}
+                      width={390}
                       position="bottom"
                       withArrow
                       shadow="lg"
@@ -411,6 +368,7 @@ export default function Utilization() {
                           {seatData?.map((item, index) => {
                             return (
                               <Box
+                                key={index}
                                 mt={"md"}
                                 sx={{
                                   border: "1px solid #dee2e6",
@@ -423,16 +381,28 @@ export default function Utilization() {
                                   <Flex w={"100%"} gap={"5px"}>
                                     <Avatar
                                       size={"sm"}
-                                      src={item?.avatar}
+                                      src={
+                                        item?.rep_image
+                                          ? item?.rep_image
+                                          : item.rep
+                                      }
+                                      color={valueToColor(theme, item?.rep)}
                                       radius={"xl"}
-                                    />
-                                    <Text tt={"uppercase"} w={"100%"} fw={600}>
-                                      {item?.name}
+                                    >
+                                      {nameToInitials(item?.rep)}
+                                    </Avatar>
+                                    <Text
+                                      tt={"uppercase"}
+                                      w={"100%"}
+                                      fw={600}
+                                      sx={{ whiteSpace: "nowrap" }}
+                                    >
+                                      {item?.rep}
                                     </Text>
                                   </Flex>
                                   <Divider w={"100%"} />
                                   <Flex w={"fit-content"}>
-                                    {item?.type ? (
+                                    {item?.num_campaigns > 0 ? (
                                       <IconCircleCheck
                                         color="white"
                                         size={"1.2rem"}
@@ -449,8 +419,10 @@ export default function Utilization() {
                                 </Flex>
                                 <Flex>
                                   <Text color="gray" size={"xs"}>
-                                    {item?.type ? item.count : "No"} active
-                                    campaigns
+                                    {item?.num_campaigns > 0
+                                      ? item.num_campaigns
+                                      : "No"}{" "}
+                                    active campaigns
                                   </Text>
                                 </Flex>
                               </Box>
@@ -469,7 +441,8 @@ export default function Utilization() {
                         color: "black",
                       }}
                     >
-                      {outboundData?.seat_active} / {outboundData?.seat_total}
+                      {outboundData?.seat_active || 0} /{" "}
+                      {outboundData?.seat_total || 0}
                     </span>{" "}
                     Seats with Active Campaings
                   </Text>
@@ -517,86 +490,6 @@ export default function Utilization() {
                       <div className=" rounded-full bg-[#d444f1] w-[8px] h-[8px]"></div>
                       Message Utilization
                     </Text>
-                    <Popover
-                      width={370}
-                      position="bottom"
-                      withArrow
-                      shadow="lg"
-                    >
-                      <Popover.Target>
-                        <Badge
-                          color="blue"
-                          variant="filled"
-                          sx={{ textTransform: "none", cursor: "pointer" }}
-                          leftSection={
-                            <IconInfoCircle
-                              size={"0.9rem"}
-                              style={{ marginTop: "4px" }}
-                            />
-                          }
-                        >
-                          View Details
-                        </Badge>
-                      </Popover.Target>
-                      <Popover.Dropdown sx={{ borderRadius: "8px" }} p={"xl"}>
-                        <Flex gap={"sm"} align={"center"}>
-                          <IconUserCircle color="#d444f1" />
-                          <Text fw={700} size={"lg"}>
-                            Message Utilization by Rep
-                          </Text>
-                        </Flex>
-                        <ScrollArea h={350} mr={"-15px"} scrollbarSize={10}>
-                          {seatData?.map((item, index) => {
-                            return (
-                              <Box
-                                mt={"md"}
-                                sx={{
-                                  border: "1px solid #dee2e6",
-                                  borderRadius: "4px",
-                                }}
-                                p={"sm"}
-                                mr={"15px"}
-                              >
-                                <Flex align={"center"} gap={"5px"}>
-                                  <Flex w={"100%"} gap={"5px"}>
-                                    <Avatar
-                                      size={"sm"}
-                                      src={item?.avatar}
-                                      radius={"xl"}
-                                    />
-                                    <Text tt={"uppercase"} w={"100%"} fw={600}>
-                                      {item?.name}
-                                    </Text>
-                                  </Flex>
-                                  <Divider w={"100%"} />
-                                  <Flex w={"fit-content"}>
-                                    {item?.type ? (
-                                      <IconCircleCheck
-                                        color="white"
-                                        size={"1.2rem"}
-                                        fill="green"
-                                      />
-                                    ) : (
-                                      <IconInfoCircle
-                                        color="white"
-                                        fill="red"
-                                        size={"1.2rem"}
-                                      />
-                                    )}
-                                  </Flex>
-                                </Flex>
-                                <Flex>
-                                  <Text color="gray" size={"xs"}>
-                                    {item?.type ? item.count : "No"} active
-                                    campaigns
-                                  </Text>
-                                </Flex>
-                              </Box>
-                            );
-                          })}
-                        </ScrollArea>
-                      </Popover.Dropdown>
-                    </Popover>
                   </Flex>
                   <Text color="gray">
                     <span
@@ -606,8 +499,8 @@ export default function Utilization() {
                         color: "black",
                       }}
                     >
-                      {outboundData?.message_active} /{" "}
-                      {outboundData?.message_total}
+                      {outboundData?.message_active || 0} /{" "}
+                      {outboundData?.message_total || 0}
                     </span>{" "}
                     Available Sending Out
                   </Text>
@@ -617,16 +510,21 @@ export default function Utilization() {
             <Flex direction={"column"} gap={"sm"}>
               <Flex align={"center"} gap={"5px"}>
                 <Text
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    whiteSpace: "nowrap",
+                  }}
                   color="gray"
                   fw={700}
                   size={"lg"}
-                  w={"320px"}
+                  // w={"320px"}
                 >
                   <IconTargetArrow color="#228be6" />
                   <span>Active Campaigns</span>
                   <Badge sx={{ background: "#228be6", color: "white" }}>
-                    {processedCampaigns.filter((c) => c.status).length}
+                    {activeCampaign?.length}
                   </Badge>
                 </Text>
                 <Divider w={"100%"} />
@@ -636,7 +534,7 @@ export default function Utilization() {
               </Flex>
               <Collapse in={activeOpened}>
                 <DataGrid
-                  data={processedCampaigns.filter((c) => c.status)}
+                  data={activeCampaign}
                   highlightOnHover
                   withPagination
                   withSorting
@@ -654,8 +552,8 @@ export default function Utilization() {
                   columns={[
                     {
                       accessorKey: "Status",
-                      minSize: 210,
-                      maxSize: 210,
+                      minSize: 180,
+                      maxSize: 180,
                       header: () => (
                         <Flex align={"center"} gap={"3px"}>
                           <IconLoader color="gray" size={"0.9rem"} />
@@ -663,7 +561,7 @@ export default function Utilization() {
                         </Flex>
                       ),
                       cell: (cell) => {
-                        const { status, percentage } = cell.row.original;
+                        const { status } = cell.row.original;
 
                         return (
                           <Flex
@@ -673,7 +571,7 @@ export default function Utilization() {
                             align={"center"}
                             justify={"center"}
                           >
-                            <Badge>active</Badge>
+                            <Badge>{status}</Badge>
                           </Flex>
                         );
                       },
@@ -715,6 +613,8 @@ export default function Utilization() {
                         </Flex>
                       ),
                       cell: (cell) => {
+                        const { rep, rep_profile_picture } = cell.row.original;
+
                         return (
                           <Flex
                             gap={"sm"}
@@ -723,8 +623,14 @@ export default function Utilization() {
                             h={"100%"}
                             align={"center"}
                           >
-                            <Avatar src={""} size={"sm"} radius={"xl"} />
-                            <Text fw={500}>{"Mary S."}</Text>
+                            <Avatar
+                              src={rep_profile_picture}
+                              color={valueToColor(theme, rep)}
+                              radius={"xl"}
+                            >
+                              {nameToInitials(rep)}
+                            </Avatar>
+                            <Text fw={500}>{rep}</Text>
                           </Flex>
                         );
                       },
@@ -737,10 +643,14 @@ export default function Utilization() {
                           <Text color="gray">Channels</Text>
                         </Flex>
                       ),
-                      maxSize: 180,
+                      maxSize: 120,
+                      minSize: 120,
                       enableResizing: true,
                       cell: (cell) => {
-                        const { linkedin, email } = cell.row.original;
+                        const {
+                          num_total_linkedin,
+                          num_total_email,
+                        } = cell.row.original;
 
                         return (
                           <Flex
@@ -757,14 +667,14 @@ export default function Utilization() {
                               align={"center"}
                               gap={"md"}
                             >
-                              {linkedin && (
+                              {num_total_linkedin > 0 && (
                                 <IconBrandLinkedin
                                   size={"1.3rem"}
                                   fill="#228be6"
                                   color="white"
                                 />
                               )}
-                              {email && (
+                              {num_total_email > 0 && (
                                 <IconMail
                                   size={"1.3rem"}
                                   fill="#228be6"
@@ -784,9 +694,12 @@ export default function Utilization() {
                           <Text color="gray">Progress</Text>
                         </Flex>
                       ),
-                      maxSize: 280,
+                      maxSize: 220,
+                      minSize: 220,
                       enableResizing: true,
                       cell: (cell) => {
+                        const { num_used_total, num_total } = cell.row.original;
+
                         return (
                           <Flex
                             direction={"column"}
@@ -794,6 +707,7 @@ export default function Utilization() {
                             justify={"center"}
                             w={"100%"}
                             h={"100%"}
+                            py={"sm"}
                           >
                             <Flex
                               w={"100%"}
@@ -801,20 +715,45 @@ export default function Utilization() {
                               gap={"8px"}
                               px={"xs"}
                             >
-                              <Progress value={50} w={"100%"} />
+                              <Progress
+                                value={(num_used_total / num_total) * 100}
+                                w={"100%"}
+                              />
                               <Text color="#228be6" fw={500}>
-                                {"63"}%
+                                {Math.round((num_used_total / num_total) * 100)}
+                                %
                               </Text>
                             </Flex>
                             <Flex align={"center"}>
                               <Text fw={500}>
-                                {"521"} / {"750"}{" "}
+                                {num_used_total} / {num_total}{" "}
                                 <span style={{ color: "gray !important" }}>
                                   Sent
                                 </span>
                               </Text>
-                              <IconPoint fill="gray" color="white" />
-                              <Text color={"red"}>{1} day left</Text>
+                              {Math.round((num_total - num_used_total) / 20) <
+                              3 ? (
+                                <IconPoint fill="gray" color="white" />
+                              ) : null}
+                              <Text
+                                color={"red"}
+                                sx={{
+                                  display:
+                                    Math.round(
+                                      (num_total - num_used_total) / 20
+                                    ) < 3
+                                      ? "block"
+                                      : "none",
+                                }}
+                              >
+                                {Math.round((num_total - num_used_total) / 20)}{" "}
+                                day
+                                {Math.round((num_total - num_used_total) / 20) <
+                                3
+                                  ? "s"
+                                  : ""}{" "}
+                                left
+                              </Text>
                             </Flex>
                           </Flex>
                         );
@@ -829,6 +768,7 @@ export default function Utilization() {
                         </Flex>
                       ),
                       enableResizing: true,
+                      minSize: 230,
                       cell: (cell) => {
                         return (
                           <Flex
@@ -841,7 +781,7 @@ export default function Utilization() {
                             h={"100%"}
                           >
                             <Text color="gray" fw={500}>
-                              {"Mar 7, 2024 8:43 PM"}
+                              {currentTime}
                             </Text>
                           </Flex>
                         );
@@ -975,16 +915,20 @@ export default function Utilization() {
             <Flex direction={"column"} gap={"sm"}>
               <Flex align={"center"} gap={"5px"}>
                 <Text
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    whiteSpace: "nowrap",
+                  }}
                   color="gray"
                   fw={700}
                   size={"lg"}
-                  w={"320px"}
                 >
                   <IconInfoTriangle color="orange" />
                   <span>Rep Action Needed</span>
                   <Badge color="orange" variant="filled">
-                    {repNeedData.length}
+                    {repCampaign?.length}
                   </Badge>
                 </Text>
                 <Divider w={"100%"} />
@@ -994,7 +938,7 @@ export default function Utilization() {
               </Flex>
               <Collapse in={repOpened}>
                 <DataGrid
-                  data={repNeedData}
+                  data={repCampaign}
                   highlightOnHover
                   withPagination
                   withColumnBorders
@@ -1009,8 +953,8 @@ export default function Utilization() {
                   columns={[
                     {
                       accessorKey: "Status",
-                      minSize: 210,
-                      maxSize: 210,
+                      minSize: 180,
+                      maxSize: 180,
                       header: () => (
                         <Flex align={"center"} gap={"3px"}>
                           <IconLetterT color="gray" size={"0.9rem"} />
@@ -1018,6 +962,8 @@ export default function Utilization() {
                         </Flex>
                       ),
                       cell: (cell) => {
+                        const { status } = cell.row.original;
+
                         return (
                           <Flex
                             gap={"xs"}
@@ -1026,7 +972,7 @@ export default function Utilization() {
                             align={"center"}
                             justify={"center"}
                           >
-                            <Badge color={"orange"}>rep action needed</Badge>
+                            <Badge color={"orange"}>{status}</Badge>
                           </Flex>
                         );
                       },
@@ -1046,7 +992,7 @@ export default function Utilization() {
 
                         return (
                           <Flex w={"100%"} h={"100%"} align={"center"}>
-                            <Text lineClamp={1}>
+                            <Text lineClamp={1} color={campaign ? "" : "gray"}>
                               {campaign ? campaign : "No Campaign"}
                             </Text>
                           </Flex>
@@ -1065,7 +1011,7 @@ export default function Utilization() {
                       ),
                       enableResizing: true,
                       cell: (cell) => {
-                        const { sdr } = cell.row.original;
+                        const { rep, rep_profile_picture } = cell.row.original;
 
                         return (
                           <Flex
@@ -1075,8 +1021,14 @@ export default function Utilization() {
                             w={"100%"}
                             h={"100%"}
                           >
-                            <Avatar src={""} radius={"xl"} />
-                            <Text>{sdr}</Text>
+                            <Avatar
+                              src={rep_profile_picture}
+                              color={valueToColor(theme, rep)}
+                              radius={"xl"}
+                            >
+                              {nameToInitials(rep)}
+                            </Avatar>
+                            <Text>{rep}</Text>
                           </Flex>
                         );
                       },
@@ -1091,7 +1043,7 @@ export default function Utilization() {
                       ),
                       enableResizing: true,
                       cell: (cell) => {
-                        const { sdr } = cell.row.original;
+                        const { num_open_tasks } = cell.row.original;
 
                         return (
                           <Flex
@@ -1101,7 +1053,7 @@ export default function Utilization() {
                             w={"100%"}
                             h={"100%"}
                           >
-                            <Text fw={500}>{3}</Text>
+                            <Text fw={500}>{num_open_tasks}</Text>
                             <Text fw={500} color="gray">
                               Open Tasks
                             </Text>
@@ -1262,16 +1214,20 @@ export default function Utilization() {
             <Flex direction={"column"} gap={"sm"}>
               <Flex align={"center"} gap={"5px"}>
                 <Text
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    whiteSpace: "nowrap",
+                  }}
                   color="gray"
                   fw={700}
                   size={"lg"}
-                  w={"260px"}
                 >
                   <IconSparkles color="#d549f2" />
                   <span>AI is Setting Up</span>
                   <Badge sx={{ background: "#d549f2" }} variant="filled">
-                    {upladingData.length}
+                    {aiCampaign.length}
                   </Badge>
                 </Text>
                 <Divider w={"100%"} />
@@ -1281,7 +1237,7 @@ export default function Utilization() {
               </Flex>
               <Collapse in={aiOpened}>
                 <DataGrid
-                  data={upladingData}
+                  data={aiCampaign}
                   highlightOnHover
                   withPagination
                   withSorting
@@ -1296,8 +1252,8 @@ export default function Utilization() {
                   columns={[
                     {
                       accessorKey: "Status",
-                      minSize: 210,
-                      maxSize: 210,
+                      minSize: 180,
+                      maxSize: 180,
                       header: () => (
                         <Flex align={"center"} gap={"3px"}>
                           <IconLetterT color="gray" size={"0.9rem"} />
@@ -1318,7 +1274,7 @@ export default function Utilization() {
                             <Badge
                               sx={{ color: "#d549f2", background: "#fbebfe" }}
                             >
-                              ai is setting up
+                              {status}
                             </Badge>
                           </Flex>
                         );
@@ -1356,7 +1312,7 @@ export default function Utilization() {
                       ),
                       enableResizing: true,
                       cell: (cell) => {
-                        const { sdr } = cell.row.original;
+                        const { rep, rep_profile_picture } = cell.row.original;
 
                         return (
                           <Flex
@@ -1366,8 +1322,14 @@ export default function Utilization() {
                             w={"100%"}
                             h={"100%"}
                           >
-                            <Avatar src={""} radius={"xl"} />
-                            <Text>{sdr}</Text>
+                            <Avatar
+                              src={rep_profile_picture}
+                              color={valueToColor(theme, rep)}
+                              radius={"xl"}
+                            >
+                              {nameToInitials(rep)}
+                            </Avatar>
+                            <Text>{rep}</Text>
                           </Flex>
                         );
                       },
@@ -1382,7 +1344,11 @@ export default function Utilization() {
                       ),
                       enableResizing: true,
                       cell: (cell) => {
-                        const { sdr } = cell.row.original;
+                        const {
+                          linkedin_setup,
+                          email_setup,
+                          prospects,
+                        } = cell.row.original;
 
                         return (
                           <Flex
@@ -1392,10 +1358,7 @@ export default function Utilization() {
                             w={"100%"}
                             h={"100%"}
                           >
-                            <Text fw={500} color="gray">
-                              Step {2} / {3}:
-                            </Text>
-                            <Text fw={500}>Writing Sequence</Text>
+                            {prospects} - {email_setup} - {linkedin_setup}
                           </Flex>
                         );
                       },
@@ -1529,16 +1492,20 @@ export default function Utilization() {
             <Flex direction={"column"} gap={"sm"}>
               <Flex align={"center"} gap={"5px"}>
                 <Text
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    whiteSpace: "nowrap",
+                  }}
                   color="gray"
                   fw={700}
                   size={"lg"}
-                  w={"365px"}
                 >
                   <IconInfoHexagon color="red" />
                   <span>No Campaign Found</span>
                   <Badge color="red" variant="filled">
-                    {noCampaignData.length}
+                    {noCampaign.length}
                   </Badge>
                 </Text>
                 <Divider w={"100%"} />
@@ -1548,7 +1515,7 @@ export default function Utilization() {
               </Flex>
               <Collapse in={noOpened}>
                 <DataGrid
-                  data={noCampaignData}
+                  data={noCampaign}
                   highlightOnHover
                   withPagination
                   withSorting
@@ -1563,8 +1530,8 @@ export default function Utilization() {
                   columns={[
                     {
                       accessorKey: "Status",
-                      minSize: 210,
-                      maxSize: 210,
+                      minSize: 180,
+                      maxSize: 180,
                       header: () => (
                         <Flex align={"center"} gap={"3px"}>
                           <IconLetterT color="gray" size={"0.9rem"} />
@@ -1598,9 +1565,13 @@ export default function Utilization() {
                         </Flex>
                       ),
                       cell: (cell) => {
+                        const { campaign } = cell.row.original;
+
                         return (
                           <Flex w={"100%"} h={"100%"} align={"center"}>
-                            <Text lineClamp={1}>{"No Campaign"}</Text>
+                            <Text lineClamp={1} color={campaign ? "" : "gray"}>
+                              {campaign ? campaign : "No Campaign"}
+                            </Text>
                           </Flex>
                         );
                       },
@@ -1617,6 +1588,8 @@ export default function Utilization() {
                       ),
                       enableResizing: true,
                       cell: (cell) => {
+                        const { rep, rep_profile_picture } = cell.row.original;
+
                         return (
                           <Flex
                             align={"center"}
@@ -1625,8 +1598,14 @@ export default function Utilization() {
                             w={"100%"}
                             h={"100%"}
                           >
-                            <Avatar src={""} radius={"xl"} size={"sm"} />
-                            <Text>{"Mary S."}</Text>
+                            <Avatar
+                              src={rep_profile_picture}
+                              color={valueToColor(theme, rep)}
+                              radius={"xl"}
+                            >
+                              {nameToInitials(rep)}
+                            </Avatar>
+                            <Text>{rep}</Text>
                           </Flex>
                         );
                       },
@@ -1822,16 +1801,20 @@ export default function Utilization() {
             <Flex direction={"column"} gap={"sm"}>
               <Flex align={"center"} gap={"5px"}>
                 <Text
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    whiteSpace: "nowrap",
+                  }}
                   color="gray"
                   fw={700}
                   size={"lg"}
-                  w={"400px"}
                 >
                   <IconCircleCheck color="green" />
                   <span>Completed Campaigns</span>
                   <Badge color="green" variant="filled">
-                    {completedData.length}
+                    {completedCampaign.length}
                   </Badge>
                 </Text>
                 <Divider w={"100%"} />
@@ -1841,7 +1824,7 @@ export default function Utilization() {
               </Flex>
               <Collapse in={completeOpened}>
                 <DataGrid
-                  data={completedData}
+                  data={completedCampaign}
                   highlightOnHover
                   withPagination
                   withSorting
@@ -1856,8 +1839,8 @@ export default function Utilization() {
                   columns={[
                     {
                       accessorKey: "Status",
-                      minSize: 210,
-                      maxSize: 210,
+                      minSize: 180,
+                      maxSize: 180,
                       header: () => (
                         <Flex align={"center"} gap={"3px"}>
                           <IconLetterT color="gray" size={"0.9rem"} />
@@ -1875,7 +1858,7 @@ export default function Utilization() {
                             justify={"center"}
                             align={"center"}
                           >
-                            <Badge color="green">completed</Badge>
+                            <Badge color="green">{status}</Badge>
                           </Flex>
                         );
                       },
@@ -1912,6 +1895,8 @@ export default function Utilization() {
                       ),
                       enableResizing: true,
                       cell: (cell) => {
+                        const { rep, rep_profile_picture } = cell.row.original;
+
                         return (
                           <Flex
                             align={"center"}
@@ -1920,8 +1905,14 @@ export default function Utilization() {
                             w={"100%"}
                             h={"100%"}
                           >
-                            <Avatar src={""} radius={"xl"} />
-                            <Text fw={500}>{"Mary S."}</Text>
+                            <Avatar
+                              src={rep_profile_picture}
+                              color={valueToColor(theme, rep)}
+                              radius={"xl"}
+                            >
+                              {nameToInitials(rep)}
+                            </Avatar>
+                            <Text fw={500}>{rep}</Text>
                           </Flex>
                         );
                       },
@@ -1934,10 +1925,14 @@ export default function Utilization() {
                           <Text color="gray">Channels</Text>
                         </Flex>
                       ),
-                      maxSize: 180,
+                      maxSize: 120,
+                      minSize: 120,
                       enableResizing: true,
                       cell: (cell) => {
-                        const { linkedin, email } = cell.row.original;
+                        const {
+                          num_used_linkedin,
+                          num_used_email,
+                        } = cell.row.original;
 
                         return (
                           <Flex
@@ -1954,14 +1949,14 @@ export default function Utilization() {
                               align={"center"}
                               gap={"md"}
                             >
-                              {linkedin && (
+                              {num_used_linkedin > 0 && (
                                 <IconBrandLinkedin
                                   size={"1.3rem"}
                                   fill="#228be6"
                                   color="white"
                                 />
                               )}
-                              {email && (
+                              {num_used_email > 0 && (
                                 <IconMail
                                   size={"1.3rem"}
                                   fill="#228be6"
@@ -1981,9 +1976,12 @@ export default function Utilization() {
                           <Text color="gray">Progress</Text>
                         </Flex>
                       ),
-                      maxSize: 280,
+                      maxSize: 220,
+                      minSize: 220,
                       enableResizing: true,
                       cell: (cell) => {
+                        const { num_total } = cell.row.original;
+
                         return (
                           <Flex
                             direction={"column"}
@@ -2005,7 +2003,7 @@ export default function Utilization() {
                             </Flex>
                             <Flex align={"start"} px={"xs"}>
                               <Text fw={500}>
-                                {"521"} / {"521"}{" "}
+                                {num_total} / {num_total}{" "}
                                 <span style={{ color: "gray !important" }}>
                                   Sent
                                 </span>
@@ -2024,9 +2022,8 @@ export default function Utilization() {
                         </Flex>
                       ),
                       enableResizing: true,
+                      minSize: 230,
                       cell: (cell) => {
-                        const { last_send_date } = cell.row.original;
-
                         return (
                           <Flex
                             align={"center"}
@@ -2034,9 +2031,10 @@ export default function Utilization() {
                             py={"sm"}
                             w={"100%"}
                             h={"100%"}
+                            justify={"center"}
                           >
                             <Text color="gray" fw={500}>
-                              {last_send_date}
+                              {currentTime}
                             </Text>
                           </Flex>
                         );

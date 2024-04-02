@@ -886,7 +886,7 @@ export function PersonCampaignCard(props: {
     // LI: Otherwise if we have prospects left and have sent messages, then we calculate the completion percentage
     liNumerator += props.persona.li_used;
     liDenominator += props.persona.li_used + props.persona.total_prospects_left_linkedin;
-  } else if (props.persona.li_queued) {
+  } else if (props.persona.li_queued && props.persona.linkedin_active) {
     liNumerator += props.persona.li_sent ? props.persona.li_used : 0; // This is weird logic. It checks to make sure that we don't count the LI used if we haven't sent any messages yet. Usually happens at the beginning of campaigns.
     liDenominator += props.persona.li_used + props.persona.total_prospects_left_linkedin;
   }

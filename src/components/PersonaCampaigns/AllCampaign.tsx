@@ -1,25 +1,22 @@
-import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { Badge, Box, Button, Divider, Flex, Input, Title } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
-import { getAnalytics } from "@utils/requests/getAnalytics";
-import { useRecoilValue } from "recoil";
-import { useEffect, useMemo, useState } from "react";
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { Badge, Box, Button, Divider, Flex, Input, ScrollArea, Title } from '@mantine/core';
+import { useQuery } from '@tanstack/react-query';
+import { getAnalytics } from '@utils/requests/getAnalytics';
+import { useRecoilValue } from 'recoil';
+import { useEffect, useMemo, useState } from 'react';
 
-import { IconBrandLinkedin, IconMail, IconSearch } from "@tabler/icons";
-import {
-  CampaignPersona,
-  PersonCampaignTable,
-} from "@common/campaigns/PersonaCampaigns";
+import { IconBrandLinkedin, IconMail, IconSearch } from '@tabler/icons';
+import { CampaignPersona, PersonCampaignTable } from '@common/campaigns/PersonaCampaigns';
 
-export type Status = "Complete" | "Setup" | "Active";
+export type Status = 'Complete' | 'Setup' | 'Active';
 type PropsType = {
   campaigns: CampaignPersona[];
 };
 const AllCampaign = (props: PropsType) => {
   const userData = useRecoilValue(userDataState);
 
-  const [input, setInput] = useState("");
-  const [status, setStatus] = useState("All");
+  const [input, setInput] = useState('');
+  const [status, setStatus] = useState('All');
 
   const [activeStatusesShow, setActiveStatusesShow] = useState([true]);
 
@@ -45,13 +42,13 @@ const AllCampaign = (props: PropsType) => {
       return activeStatusesShow.includes(a.active);
     })
     .filter((a: CampaignPersona) => {
-      if (status === "All") {
+      if (status === 'All') {
         return true;
-      } else if (status === "Active" && a.active && a.total_sent > 0) {
+      } else if (status === 'Active' && a.active && a.total_sent > 0) {
         return a.active;
-      } else if (status === "Complete" && !a.active && a.total_sent > 0) {
+      } else if (status === 'Complete' && !a.active && a.total_sent > 0) {
         return true;
-      } else if (status === "Setup" && a.total_sent === 0 && !a.active) {
+      } else if (status === 'Setup' && a.total_sent === 0 && !a.active) {
         return true;
       }
       return false;
@@ -60,97 +57,60 @@ const AllCampaign = (props: PropsType) => {
   return (
     <>
       <Box>
-        <Flex justify={"space-between"} align={"center"} mt="md">
-          <Title color="gray.6" order={3}>
+        <Flex justify={'space-between'} align={'center'} mt='md'>
+          <Title color='gray.6' order={3}>
             All Campaigns
           </Title>
 
-          <Flex gap={"sm"} wrap={"wrap"} align={"center"} mb="md">
-            <Button
-              variant={status === "All" ? "filled" : "light"}
-              color="dark"
-              size="sm"
-              onClick={() => setStatus("All")}
-            >
+          <Flex gap={'sm'} wrap={'wrap'} align={'center'} mb='md'>
+            <Button variant={status === 'All' ? 'filled' : 'light'} color='dark' size='sm' onClick={() => setStatus('All')}>
               All
-              <Badge
-                color="dark"
-                variant={status === "All" ? "light" : "filled"}
-                ml={"xs"}
-              >
+              <Badge color='dark' variant={status === 'All' ? 'light' : 'filled'} ml={'xs'}>
                 {props.campaigns.length}
               </Badge>
             </Button>
-            <Button
-              variant={status === "Active" ? "filled" : "light"}
-              color="blue"
-              size="sm"
-              onClick={() => setStatus("Active")}
-            >
+            <Button variant={status === 'Active' ? 'filled' : 'light'} color='blue' size='sm' onClick={() => setStatus('Active')}>
               Active
-              <Badge color="blue" ml={"xs"}>
-                {
-                  props.campaigns.filter((r) => r.active && r.total_sent > 0)
-                    .length
-                }
+              <Badge color='blue' ml={'xs'}>
+                {props.campaigns.filter((r) => r.active && r.total_sent > 0).length}
               </Badge>
             </Button>
-            <Button
-              variant={status === "Setup" ? "filled" : "light"}
-              color="yellow"
-              size="sm"
-              onClick={() => setStatus("Setup")}
-            >
+            <Button variant={status === 'Setup' ? 'filled' : 'light'} color='yellow' size='sm' onClick={() => setStatus('Setup')}>
               Setup
-              <Badge color="yellow" ml={"xs"}>
-                {
-                  props.campaigns.filter((r) => r.total_sent === 0 && !r.active)
-                    .length
-                }
+              <Badge color='yellow' ml={'xs'}>
+                {props.campaigns.filter((r) => r.total_sent === 0 && !r.active).length}
               </Badge>
             </Button>
-            <Button
-              variant={status === "Complete" ? "filled" : "light"}
-              color="green"
-              size="sm"
-              onClick={() => setStatus("Complete")}
-            >
+            <Button variant={status === 'Complete' ? 'filled' : 'light'} color='green' size='sm' onClick={() => setStatus('Complete')}>
               Completed
-              <Badge color="green" ml={"xs"}>
-                {
-                  props.campaigns.filter((r) => !r.active && r.total_sent > 0)
-                    .length
-                }
+              <Badge color='green' ml={'xs'}>
+                {props.campaigns.filter((r) => !r.active && r.total_sent > 0).length}
               </Badge>
             </Button>
 
-            <Input
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
-              placeholder={"Search"}
-              icon={<IconSearch size={20} />}
-            />
+            <Input onChange={(e) => setInput(e.target.value)} value={input} placeholder={'Search'} icon={<IconSearch size={20} />} />
           </Flex>
         </Flex>
-        <PersonCampaignTable
-          campaignViewMode="node-view"
-          filteredProjects={filteredCampaigns}
-          onPersonaActiveStatusUpdate={async (
-            id: number,
-            active: boolean
-          ) => {}}
-        />
+        <div className='w-full overflow-auto'>
+          <div className='min-w-[1280px]'>
+            <PersonCampaignTable
+              campaignViewMode='node-view'
+              filteredProjects={filteredCampaigns}
+              onPersonaActiveStatusUpdate={async (id: number, active: boolean) => {}}
+            />
+          </div>
+        </div>
 
-        <Box w="100%" sx={{ textAlign: "center" }}>
+        <Box w='100%' sx={{ textAlign: 'center' }}>
           {props.campaigns.filter((persona) => !persona.active).length > 0 && (
             <Button
-              color="gray"
-              variant="outline"
-              size="xs"
-              w="300px"
-              ml="auto"
-              mr="auto"
-              sx={{ borderRadius: "0.5rem" }}
+              color='gray'
+              variant='outline'
+              size='xs'
+              w='300px'
+              ml='auto'
+              mr='auto'
+              sx={{ borderRadius: '0.5rem' }}
               onClick={() => {
                 if (activeStatusesShow.length == 2) {
                   setActiveStatusesShow([true]);
@@ -158,11 +118,10 @@ const AllCampaign = (props: PropsType) => {
                   setActiveStatusesShow([true, false]);
                 }
               }}
-              mt="md"
-              mb="md"
+              mt='md'
+              mb='md'
             >
-              Show All
-              Campaigns
+              Show All Campaigns
             </Button>
           )}
         </Box>

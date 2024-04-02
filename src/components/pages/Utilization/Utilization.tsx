@@ -48,7 +48,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { DataGrid } from "mantine-data-grid";
 import { Doughnut } from "react-chartjs-2";
 import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import { openContextModal } from "@mantine/modals";
 import moment from "moment";
@@ -77,6 +77,7 @@ interface activeCampaignType {
   rep_profile_picture: string;
   status: string;
   persona_id: number;
+  rep_id: number;
 }
 
 interface repCampaignType {
@@ -131,6 +132,8 @@ interface seatDataType {
 export default function Utilization() {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
+  const userId = userData?.id;
 
   const currentTime = moment().format("ddd, DD MMM YYYY HH:mm:ss");
 
@@ -532,8 +535,8 @@ export default function Utilization() {
                         color: "black",
                       }}
                     >
-                      {outboundData?.message_active || 0} /{" "}
-                      {outboundData?.message_total || 0}
+                      {outboundData?.message_active?.toLocaleString() || 0} /{" "}
+                      {outboundData?.message_total?.toLocaleString() || 0}
                     </span>{" "}
                     Available Sending Out
                   </Text>
@@ -679,8 +682,10 @@ export default function Utilization() {
                       minSize: 120,
                       enableResizing: true,
                       cell: (cell) => {
-                        const { num_total_linkedin, num_total_email } =
-                          cell.row.original;
+                        const {
+                          num_total_linkedin,
+                          num_total_email,
+                        } = cell.row.original;
 
                         return (
                           <Flex
@@ -800,7 +805,7 @@ export default function Utilization() {
                       enableResizing: true,
                       minSize: 230,
                       cell: (cell) => {
-                        const { persona_id } = cell.row.original;
+                        const { persona_id, rep_id } = cell.row.original;
 
                         return (
                           <Flex
@@ -814,6 +819,7 @@ export default function Utilization() {
                           >
                             <Switch
                               checked
+                              disabled={rep_id == userId ? false : true}
                               onClick={() => handleDeactive(persona_id)}
                             />
                           </Flex>
@@ -1379,8 +1385,11 @@ export default function Utilization() {
                       ),
                       enableResizing: true,
                       cell: (cell) => {
-                        const { linkedin_setup, email_setup, prospects } =
-                          cell.row.original;
+                        const {
+                          linkedin_setup,
+                          email_setup,
+                          prospects,
+                        } = cell.row.original;
 
                         return (
                           <Flex
@@ -1963,8 +1972,10 @@ export default function Utilization() {
                       minSize: 120,
                       enableResizing: true,
                       cell: (cell) => {
-                        const { num_used_linkedin, num_used_email } =
-                          cell.row.original;
+                        const {
+                          num_used_linkedin,
+                          num_used_email,
+                        } = cell.row.original;
 
                         return (
                           <Flex

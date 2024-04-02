@@ -37,6 +37,8 @@ import {
   Anchor,
   ThemeIcon,
   Grid,
+  Progress,
+  List,
 } from '@mantine/core';
 import { useDisclosure, useHover } from '@mantine/hooks';
 import { openContextModal } from '@mantine/modals';
@@ -55,6 +57,7 @@ import {
   IconExternalLink,
   IconLoader,
   IconMail,
+  IconMailbox,
   IconMan,
   IconPhoto,
   IconPlaystationCircle,
@@ -87,6 +90,7 @@ import AllCampaign from '../../PersonaCampaigns/AllCampaign';
 import TriggersList from '@pages/TriggersList';
 import postTogglePersonaActive from '@utils/requests/postTogglePersonaActive';
 import ClientCampaignView from '@pages/ClientCampaignView/ClientCampaignView';
+import { ListItem } from '@mantine/core/lib/List/ListItem/ListItem';
 
 export type CampaignPersona = {
   id: number;
@@ -873,6 +877,7 @@ export function PersonCampaignCard(props: {
   let liNumerator = 0;
   let liDenominator = 0;
   let linkedinCompletionPercentage;
+  console.log(props.persona.name, props.persona)
   if (props.persona.total_prospects_left_linkedin == 0 && props.persona.li_sent > 0) {
     // LI: If we have no more eligible prospects and we've sent some messages, then we can assume LI is complete
     liNumerator += props.persona.li_used;
@@ -880,6 +885,9 @@ export function PersonCampaignCard(props: {
   } else if (props.persona.li_sent) {
     // LI: Otherwise if we have prospects left and have sent messages, then we calculate the completion percentage
     liNumerator += props.persona.li_used;
+    liDenominator += props.persona.li_used + props.persona.total_prospects_left_linkedin;
+  } else if (props.persona.li_queued) {
+    liNumerator += props.persona.li_sent ? props.persona.li_used : 0; // This is weird logic. It checks to make sure that we don't count the LI used if we haven't sent any messages yet. Usually happens at the beginning of campaigns.
     liDenominator += props.persona.li_used + props.persona.total_prospects_left_linkedin;
   }
   linkedinCompletionPercentage = Math.min(100, Math.floor((liNumerator / liDenominator) * 100)) || 0;
@@ -959,7 +967,7 @@ export function PersonCampaignCard(props: {
               align={'center'}
               justify={'center'}
             >
-              <Popover width={200 * numberOfRings} position='bottom' withArrow shadow='md' opened={popoverOpened}>
+              <Popover width={340 * numberOfRings} position='bottom' withArrow shadow='md' opened={popoverOpened}>
                 <Popover.Target>
                   <Button variant='outline' radius='xl' size='sm' h={55} color='gray' sx={{ border: 'solid 1px #f1f1f1' }} maw={'fit-content'}>
                     <RingProgress
@@ -982,31 +990,30 @@ export function PersonCampaignCard(props: {
                     />
                   </Button>
                 </Popover.Target>
-                <Popover.Dropdown sx={{ pointerEvents: 'none' }} bg={'blue'}>
-                  <Grid>
+                <Popover.Dropdown sx={{ pointerEvents: 'none', border: '2px solid #228be6', borderRadius: '8px' }}>
+                  <Flex gap={'lg'} align={'center'}>
                     {(linkedinCompletionPercentage > 0 || props.persona.linkedin_active) && (
-                      <Grid.Col span={completionsActiveSpan}>
-                        <CampaignProgressDropdown
-                          persona={props.persona}
-                          numerator={liNumerator}
-                          denominator={liDenominator}
-                          completionPercentage={linkedinCompletionPercentage}
-                          channel='LINKEDIN'
-                        />
-                      </Grid.Col>
+                      <CampaignProgressDropdown
+                        persona={props.persona}
+                        numerator={liNumerator}
+                        denominator={liDenominator}
+                        completionPercentage={linkedinCompletionPercentage}
+                        channel='LINKEDIN'
+                      />
+                    )}
+                    {(linkedinCompletionPercentage > 0 || props.persona.linkedin_active) && (emailCompletionPercentage > 0 || props.persona.email_active) && (
+                      <Divider orientation='vertical' />
                     )}
                     {(emailCompletionPercentage > 0 || props.persona.email_active) && (
-                      <Grid.Col span={completionsActiveSpan}>
-                        <CampaignProgressDropdown
-                          persona={props.persona}
-                          numerator={emailNumerator}
-                          denominator={emailDenominator}
-                          completionPercentage={emailCompletionPercentage}
-                          channel='EMAIL'
-                        />
-                      </Grid.Col>
+                      <CampaignProgressDropdown
+                        persona={props.persona}
+                        numerator={emailNumerator}
+                        denominator={emailDenominator}
+                        completionPercentage={emailCompletionPercentage}
+                        channel='EMAIL'
+                      />
                     )}
-                  </Grid>
+                  </Flex>
                 </Popover.Dropdown>
               </Popover>
               <Popover width={350} position='bottom' shadow='lg' opened={statuspopoverOpened}>
@@ -1573,112 +1580,126 @@ function CampaignProgressDropdown(props: {
   }
 
   return (
-    <Flex direction='column' w='100%'>
+    <Flex direction='column' miw={'300px'} px='md' py='sm'>
       <Box mt={'2px'}>
-        <Flex justify={'center'} align={'center'} direction='column'>
-          <RingProgress
-            size={55}
-            thickness={5}
-            label={
-              <Text size='xs' align='center' color='white'>
-                {props.completionPercentage}%
-              </Text>
-            }
-            variant='animated'
-            sections={[
-              {
-                value: props.completionPercentage,
-                color: props.completionPercentage >= 100 ? 'green' : 'green',
-              },
-            ]}
-          />
-          <Text color='white' size='xs'>
-            {channel}
-          </Text>
-          <Text color='white' size='8px'>
-            {props.numerator} / {props.denominator}
+        <Flex align={'center'} gap={'sm'}>
+          {props.channel === 'EMAIL' ? (
+            <IconMail fill='orange' color='white' size={'1.2rem'} style={{ marginBottom: '1px' }} />
+          ) : (
+            <IconBrandLinkedin fill='#228be6' color='white' size={'1.2rem'} style={{ marginBottom: '1px' }} />
+          )}
+          <Text fw={700}>{channel} Summary</Text>
+        </Flex>
+        <Flex align={'center'} gap={'sm'} mt={'sm'}>
+          <Progress w={'100%'} color={props.completionPercentage === 100 ? 'green' : 'blue'} value={props.completionPercentage} />
+          <Text fw={500} sx={{ whiteSpace: 'nowrap' }}>
+          {props.completionPercentage}%
           </Text>
         </Flex>
+        <Text fw={500} size={'sm'} sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {props.numerator} / {props.denominator}
+          <span style={{ color: 'gray' }}>Sent</span>
+        </Text>
       </Box>
 
-      <Divider my={'sm'} />
-
-      <Box>
-        <Text color='white' size={'sm'} fw={600}>
+      <Box mt={'md'}>
+        <Text size={'md'} fw={700}>
           SUMMARY
         </Text>
-
-        <Text color='white' size={'sm'} fw={600}>
-          <Flex>
-            <Text fw='bold'># {channel} Sourced: </Text> <Text ml='auto'>{channel_total_prospect}</Text>
-          </Flex>
-        </Text>
-
-        <Text color='white' size={'sm'} fw={600}>
-          <Flex>
-            <Text fw='bold'># {channel} Usable: </Text> <Text ml='auto'>{total_usabled}</Text>
-          </Flex>
-        </Text>
-
-        <Text color='white' size={'sm'} fw={600}>
-          <Flex>
-            <Text fw='bold'>Total # Used: </Text> <Text ml='auto'>{total_used}</Text>
-          </Flex>
-        </Text>
       </Box>
+
+      <List mt={'xs'}>
+        <Flex align={'center'} justify={'space-between'}>
+          <List.Item sx={{ color: 'gray', fontSize: '14px' }}>{channel} Sourced:</List.Item>
+          <Text fw={600} size={'sm'}>
+            {channel_total_prospect}
+          </Text>
+        </Flex>
+        <Flex align={'center'} justify={'space-between'}>
+          <List.Item sx={{ color: 'gray', fontSize: '14px' }}>{channel} Usable:</List.Item>
+          <Text fw={600} size={'sm'}>
+            {total_usabled}
+          </Text>
+        </Flex>
+        <Flex align={'center'} justify={'space-between'}>
+          <List.Item sx={{ color: 'gray', fontSize: '14px' }}>Total Used:</List.Item>
+          <Text fw={600} size={'sm'}>
+            {total_used}
+          </Text>
+        </Flex>
+      </List>
+
+      <Divider my={'sm'} />
+      <Divider my={'sm'} />
+
+      <List>
+        <Flex align={'center'} justify={'space-between'}>
+          <List.Item sx={{ color: 'gray', fontSize: '14px' }} fw={500}>
+            Queued:
+          </List.Item>
+          <Text fw={600} size={'sm'}>
+            {total_queued}
+          </Text>
+        </Flex>
+      </List>
 
       <Divider my={'sm'} />
 
       <Box>
-        <Text color='white' size={'sm'} fw={600}>
-          <Flex>
-            <Text fw='bold'>QUEUED: </Text> <Text ml='auto'>{total_queued}</Text>
-          </Flex>
-        </Text>
-      </Box>
-
-      <Divider my={'sm'} />
-
-      <Box>
-        <Text color='white' size={'sm'}>
+        <Text size={'md'} fw={700}>
           BY STATUS
         </Text>
 
-        <Text color='white' size={'sm'} fw={600}>
-          <Flex>
-            <Text fw='bold'>Prospected: </Text> <Text ml='auto'>{total_prospected}</Text>
+        <List mt={'xs'}>
+          <Flex align={'center'} justify={'space-between'}>
+            <List.Item sx={{ color: 'gray', fontSize: '14px' }} fw={500}>
+              Prospected:
+            </List.Item>
+            <Text fw={600} size={'sm'}>
+              {total_prospected}
+            </Text>
           </Flex>
-        </Text>
-
-        <Text color='white' size={'sm'} fw={600}>
-          <Flex>
-            <Text fw='bold'>Sent: </Text> <Text ml='auto'>{total_sent}</Text>
+          <Flex align={'center'} justify={'space-between'}>
+            <List.Item sx={{ color: 'gray', fontSize: '14px' }} fw={500}>
+              Sent:
+            </List.Item>
+            <Text fw={600} size={'sm'}>
+              {total_sent}
+            </Text>
           </Flex>
-        </Text>
-
-        <Text color='white' size={'sm'} fw={600}>
-          <Flex>
-            <Text fw='bold'>Opened: </Text> <Text ml='auto'>{total_opened}</Text>
+          <Flex align={'center'} justify={'space-between'}>
+            <List.Item sx={{ color: 'gray', fontSize: '14px' }} fw={500}>
+              Opened:
+            </List.Item>
+            <Text fw={600} size={'sm'}>
+              {total_opened}
+            </Text>
           </Flex>
-        </Text>
-
-        <Text color='white' size={'sm'} fw={600}>
-          <Flex>
-            <Text fw='bold'>Replies: </Text> <Text ml='auto'>{total_replied}</Text>
+          <Flex align={'center'} justify={'space-between'}>
+            <List.Item sx={{ color: 'gray', fontSize: '14px' }} fw={500}>
+              Replies:
+            </List.Item>
+            <Text fw={600} size={'sm'}>
+              {total_replied}
+            </Text>
           </Flex>
-        </Text>
-
-        <Text color='white' size={'sm'} fw={600}>
-          <Flex>
-            <Text fw='bold'>Demo Set: </Text> <Text ml='auto'>{total_demo}</Text>
+          <Flex align={'center'} justify={'space-between'}>
+            <List.Item sx={{ color: 'gray', fontSize: '14px' }} fw={500}>
+              Demo Set:
+            </List.Item>
+            <Text fw={600} size={'sm'}>
+              {total_demo}
+            </Text>
           </Flex>
-        </Text>
-
-        <Text color='white' size={'sm'} fw={600}>
-          <Flex>
-            <Text fw='bold'>Others: </Text> <Text ml='auto'>{total_other}</Text>
+          <Flex align={'center'} justify={'space-between'}>
+            <List.Item sx={{ color: 'gray', fontSize: '14px' }} fw={500}>
+              Others:
+            </List.Item>
+            <Text fw={600} size={'sm'}>
+              {total_other}
+            </Text>
           </Flex>
-        </Text>
+        </List>
       </Box>
     </Flex>
   );

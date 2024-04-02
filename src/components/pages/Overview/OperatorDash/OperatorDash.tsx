@@ -160,39 +160,17 @@ const OperatorDashboard = (props: PropsType) => {
                 align={"center"}
                 bg={
                   task.status === "COMPLETED"
-                    ? theme.colors.green[0]
+                    ? theme.colors.green[2]
                     : task.status === "PENDING" && task.urgency === "HIGH"
-                    ? theme.colors.red[0]
+                    ? theme.colors.red[2]
                     : task.status === "PENDING" && task.urgency === "MEDIUM"
-                    ? theme.colors.orange[0]
+                    ? theme.colors.orange[2]
                     : task.status === "PENDING" && task.urgency === "LOW"
-                    ? theme.colors.gray[0]
-                    : theme.colors.green[0]
+                    ? theme.colors.gray[2]
+                    : theme.colors.green[2]
                 }
               >
-                {task.status === "COMPLETED" ? (
-                  <IconTargetArrow
-                    color={theme.colors.green[4]}
-                    size={"1.2rem"}
-                  />
-                ) : task.status === "PENDING" && task.urgency === "MEDIUM" ? (
-                  <img src={WhiteLogo} className="w-[20px] h-[20px]" />
-                ) : task.status === "PENDING" && task.urgency === "HIGH" ? (
-                  <IconTargetArrow
-                    color={theme.colors.red[4]}
-                    size={"1.2rem"}
-                  />
-                ) : task.status === "PENDING" && task.urgency === "MEDIUM" ? (
-                  <IconTargetArrow
-                    color={theme.colors.orange[4]}
-                    size={"1.2rem"}
-                  />
-                ) : (
-                  <IconTargetArrow
-                    color={theme.colors.green[4]}
-                    size={"1.2rem"}
-                  />
-                )}
+                {task.emoji}
               </Flex>
               {task.status === "PENDING" && task.urgency === "HIGH" && (
                 <Badge size="lg" color={"red"}>

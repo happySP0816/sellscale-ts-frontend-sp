@@ -83,6 +83,7 @@ import { getLIWarmupSnapshots } from "@utils/requests/getLIWarmupSnapshots";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import OperatorDashboard, { Task } from "./Overview/OperatorDash/OperatorDash";
 import WhiteLogo from "../../../public/favicon.svg";
+import Utilization from "./Utilization/Utilization";
 
 const options = {
   scales: {
@@ -1861,7 +1862,7 @@ export default function OverviewPage() {
   }, []);
   const [activeTab, setActiveTab] = useState<string | null>("operator_dash");
   return (
-    <Box p="xl" maw="1000px" ml="auto" mr="auto">
+    <Box p="xl" maw="1300px" ml="auto" mr="auto">
       <Tabs
         defaultValue="operator_dash"
         value={activeTab}
@@ -1897,6 +1898,29 @@ export default function OverviewPage() {
               radius={"md"}
             >
               AI Dashboard
+            </Button>
+            <Button
+              variant={activeTab === "utilization" ? "filled" : "outline"}
+              color={activeTab === "utilization" ? "" : "gray"}
+              sx={{
+                backgroundColor:
+                  activeTab === "utilization" ? "rgb(72 72 72)" : "white",
+                color: activeTab === "utilization" ? "white" : "",
+                "&:hover": {
+                  backgroundColor:
+                    activeTab === "utilization" ? "rgb(72 72 72)" : "none",
+                },
+              }}
+              leftIcon={
+                <IconSparkles
+                  size={"1rem"}
+                  fill={activeTab === "utilization" ? "" : "rgb(72 72 72)"}
+                />
+              }
+              onClick={() => setActiveTab("utilization")}
+              radius={"md"}
+            >
+              Utilization
             </Button>
             <Button
               variant={activeTab === "overview" ? "filled" : "outline"}
@@ -1974,6 +1998,10 @@ export default function OverviewPage() {
               setNumOperatorDashItems(task.length);
             }}
           />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="utilization">
+          <Utilization />
         </Tabs.Panel>
 
         <Tabs.Panel value="operation_overview">

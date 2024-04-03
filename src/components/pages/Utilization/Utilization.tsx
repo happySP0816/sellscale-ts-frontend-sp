@@ -1681,8 +1681,6 @@ export default function Utilization() {
                             <Flex w={"100%"} justify={"center"}>
                               <ActionIcon w={"fit-content"}>
                                 <Button
-<<<<<<< Updated upstream
-=======
                                   size="xs"
                                   mr="xs"
                                   onClick={() => {
@@ -1694,7 +1692,6 @@ export default function Utilization() {
                               </ActionIcon>
                               <ActionIcon w={"fit-content"}>
                                 <Button
->>>>>>> Stashed changes
                                   color="blue"
                                   variant="filled"
                                   w={"100%"}

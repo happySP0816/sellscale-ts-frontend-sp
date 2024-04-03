@@ -1669,6 +1669,7 @@ export default function Utilization() {
                       ),
                       enableResizing: true,
                       cell: (cell) => {
+                        const { rep, recommended_segments } = cell.row.original;
                         return (
                           <Flex
                             align={"center"}
@@ -1680,6 +1681,20 @@ export default function Utilization() {
                             <Flex w={"100%"} justify={"center"}>
                               <ActionIcon w={"fit-content"}>
                                 <Button
+<<<<<<< Updated upstream
+=======
+                                  size="xs"
+                                  mr="xs"
+                                  onClick={() => {
+                                    window.location.href = "/contacts/overview";
+                                  }}
+                                >
+                                  View Segments
+                                </Button>
+                              </ActionIcon>
+                              <ActionIcon w={"fit-content"}>
+                                <Button
+>>>>>>> Stashed changes
                                   color="blue"
                                   variant="filled"
                                   w={"100%"}

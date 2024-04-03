@@ -18,6 +18,7 @@ import {
   Textarea,
   NumberInput,
   LoadingOverlay,
+  Badge,
 } from '@mantine/core';
 import AssetLibraryRetool from '@pages/AssetLibraryRetool';
 import { useQuery } from '@tanstack/react-query';
@@ -26,8 +27,11 @@ import { getClientArchetypes } from '@utils/requests/getClientArchetypes';
 import { getClientSdrAccess } from '@utils/requests/getClientSdrAccess';
 import { getClients } from '@utils/requests/getClients';
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useRecoilValue } from 'recoil';
 import { Archetype, Client } from 'src';
+
+const EXAMPLE_COUNT = 5;
 
 export default function SequenceBuilderV3() {
   const userToken = useRecoilValue(userTokenState);
@@ -76,11 +80,15 @@ export default function SequenceBuilderV3() {
     enabled: !!clientId,
   });
 
+  const [steps, setSteps] = useState<Step[]>([]);
+
+  console.log(steps);
+
   return (
     <Box p='lg'>
-      <LoadingOverlay visible={loading} />
       <Group align='start' grow noWrap>
         <Paper maw='30vw'>
+          <LoadingOverlay visible={loading} />
           <Stack h='90vh' p='lg'>
             <Title order={3}>Sequence Builder V3</Title>
             <Autocomplete
@@ -127,7 +135,7 @@ export default function SequenceBuilderV3() {
                 data={[
                   { value: 'LINKEDIN-CTA', label: 'LinkedIn (CTAs)' },
                   { value: 'LINKEDIN-TEMPLATE', label: 'LinkedIn (Templates)' },
-                  { value: 'Email', label: 'Email' },
+                  { value: 'EMAIL', label: 'Email' },
                 ]}
                 miw={200}
                 value={sequenceType}
@@ -159,14 +167,36 @@ export default function SequenceBuilderV3() {
                 if (!clientId || !archetypeId || !sequenceType || !numSteps) return;
 
                 setLoading(true);
-                await generateSequence(
-                  userToken,
-                  clientId,
-                  archetypeId,
-                  sequenceType,
-                  numSteps,
-                  additionalPrompting
-                );
+
+                for (let i = 0; i < numSteps; i++) {
+                  for (let j = 0; j < EXAMPLE_COUNT; j++) {
+                    generateSequence(
+                      userToken,
+                      clientId,
+                      archetypeId,
+                      sequenceType,
+                      i,
+                      additionalPrompting
+                    ).then((response) => {
+                      if (response.status === 'success') {
+                        const data = response.data;
+                        setSteps((prev) => {
+                          const newSteps = [...prev];
+                          if (newSteps.length <= i) {
+                            newSteps.push({ num: i + 1, messages: [] });
+                          }
+                          newSteps[i].messages.push({
+                            angle: data.angle,
+                            message: data.message,
+                            used: false,
+                          });
+                          return newSteps;
+                        });
+                      }
+                    });
+                  }
+                }
+
                 setLoading(false);
               }}
             >
@@ -181,7 +211,7 @@ export default function SequenceBuilderV3() {
               <Button radius='lg'>Add Sequence</Button>
             </Group>
             <TitleGenerationSection />
-            <StepGenerationSection />
+            <StepGenerationSection steps={steps} />
           </Stack>
         </Box>
       </Group>
@@ -208,22 +238,52 @@ function TitleGenerationSection(props: {}) {
   );
 }
 
-function StepGenerationSection(props: {}) {
+interface Step {
+  num: number;
+  messages: Message[];
+}
+
+interface Message {
+  angle: string;
+  message: string;
+  used: boolean;
+}
+
+function StepGenerationSection(props: { steps: Step[] }) {
   return (
     <Paper p='lg'>
       <Tabs variant='pills' defaultValue='gallery'>
         <Tabs.List>
-          <Tabs.Tab value='gallery'>Step 1 (3)</Tabs.Tab>
-          <Tabs.Tab value='messages'>Step 2 (0)</Tabs.Tab>
-          <Tabs.Tab value='settings'>Step 3 (2)</Tabs.Tab>
+          {props.steps.map((step, index) => (
+            <Tabs.Tab key={index} value={`step-${step.num}`}>
+              Step {step.num} ({step.messages.filter((m) => !m.used).length} /{' '}
+              {step.messages.length})
+            </Tabs.Tab>
+          ))}
         </Tabs.List>
         <Divider my={5} />
 
-        <Tabs.Panel value='gallery'>Gallery tab content</Tabs.Panel>
-
-        <Tabs.Panel value='messages'>Messages tab content</Tabs.Panel>
-
-        <Tabs.Panel value='settings'>Settings tab content</Tabs.Panel>
+        {props.steps.map((step, index) => (
+          <Tabs.Panel key={index} value={`step-${step.num}`}>
+            <Stack spacing={5}>
+              {step.messages.map((message, index) => (
+                <Group key={index} spacing={5} noWrap>
+                  <Badge
+                    color='blue'
+                    variant='light'
+                    styles={{ root: { textTransform: 'initial' } }}
+                  >
+                    {message.angle}
+                  </Badge>
+                  <ReactMarkdown>{message.message}</ReactMarkdown>
+                  <Button variant={message.used ? 'filled' : 'outline'}>
+                    {message.used ? 'Used' : 'Use'}
+                  </Button>
+                </Group>
+              ))}
+            </Stack>
+          </Tabs.Panel>
+        ))}
       </Tabs>
     </Paper>
   );

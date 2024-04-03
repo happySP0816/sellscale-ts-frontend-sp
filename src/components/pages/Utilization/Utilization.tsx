@@ -134,6 +134,7 @@ export default function Utilization() {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const userId = userData?.id;
+  const repName = userData?.sdr_name;
 
   const currentTime = moment().format("ddd, DD MMM YYYY HH:mm:ss");
 
@@ -433,7 +434,8 @@ export default function Utilization() {
                                       fw={600}
                                       sx={{ whiteSpace: "nowrap" }}
                                     >
-                                      {item?.rep}
+                                      {item?.rep.substring(0, 25)}{" "}
+                                      {item?.rep.length > 25 ? "..." : ""}
                                     </Text>
                                   </Flex>
                                   <Divider w={"100%"} />
@@ -1111,13 +1113,18 @@ export default function Utilization() {
                       ),
                       maxSize: 200,
                       enableResizing: true,
-                      cell: () => {
+                      cell: (cell) => {
+                        const { rep } = cell.row.original;
                         return (
                           <Flex align={"center"} h={"100%"} justify={"center"}>
                             <Button
                               rightIcon={<IconExternalLink size={"0.9rem"} />}
                               style={{ borderRadius: "16px", height: "1.3rem" }}
                               size="xs"
+                              disabled={rep !== repName}
+                              onClick={() => {
+                                window.location.href = "/overview";
+                              }}
                             >
                               View Task
                             </Button>
@@ -1672,7 +1679,7 @@ export default function Utilization() {
                           >
                             <Flex w={"100%"} justify={"center"}>
                               <ActionIcon w={"fit-content"}>
-                                <Badge
+                                <Button
                                   color="blue"
                                   variant="filled"
                                   w={"100%"}
@@ -1680,12 +1687,8 @@ export default function Utilization() {
                                     textTransform: "none",
                                     cursor: "pointer",
                                   }}
-                                  leftSection={
-                                    <IconPlus
-                                      size={"0.9rem"}
-                                      style={{ marginTop: "4px" }}
-                                    />
-                                  }
+                                  size="xs"
+                                  disabled={cell.row.original.rep_id !== userId}
                                   onClick={() => {
                                     openContextModal({
                                       modal: "uploadProspects",
@@ -1706,8 +1709,8 @@ export default function Utilization() {
                                     });
                                   }}
                                 >
-                                  Add Campaign for Adam
-                                </Badge>
+                                  Add Campaign for Rep
+                                </Button>
                               </ActionIcon>
                             </Flex>
                           </Flex>

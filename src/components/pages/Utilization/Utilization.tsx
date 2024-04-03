@@ -1700,7 +1700,7 @@ export default function Utilization() {
                                     cursor: "pointer",
                                   }}
                                   size="xs"
-                                  disabled={cell.row.original.rep_id !== userId}
+                                  disabled={cell.row.original.rep !== repName}
                                   onClick={() => {
                                     openContextModal({
                                       modal: "uploadProspects",

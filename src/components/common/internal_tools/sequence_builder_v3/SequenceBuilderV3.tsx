@@ -82,12 +82,10 @@ export default function SequenceBuilderV3() {
 
   const [steps, setSteps] = useState<Step[]>([]);
 
-  console.log(steps);
-
   return (
     <Box p='lg'>
       <Group align='start' grow noWrap>
-        <Paper maw='30vw'>
+        <Paper maw='30vw' style={{ position: 'relative' }}>
           <LoadingOverlay visible={loading} />
           <Stack h='90vh' p='lg'>
             <Title order={3}>Sequence Builder V3</Title>
@@ -168,36 +166,37 @@ export default function SequenceBuilderV3() {
 
                 setLoading(true);
 
-                for (let i = 0; i < numSteps; i++) {
-                  for (let j = 0; j < EXAMPLE_COUNT; j++) {
-                    generateSequence(
-                      userToken,
-                      clientId,
-                      archetypeId,
-                      sequenceType,
-                      i,
-                      additionalPrompting
-                    ).then((response) => {
-                      if (response.status === 'success') {
-                        const data = response.data;
-                        setSteps((prev) => {
-                          const newSteps = [...prev];
-                          if (newSteps.length <= i) {
-                            newSteps.push({ num: i + 1, messages: [] });
-                          }
-                          newSteps[i].messages.push({
-                            angle: data.angle,
-                            message: data.message,
-                            used: false,
-                          });
-                          return newSteps;
-                        });
-                      }
-                    });
-                  }
-                }
+                for (let j = 0; j < EXAMPLE_COUNT; j++) {
+                  generateSequence(
+                    userToken,
+                    clientId,
+                    archetypeId,
+                    sequenceType,
+                    numSteps,
+                    additionalPrompting
+                  ).then((response) => {
+                    if (response.status === 'success') {
+                      const data = response.data;
+                      console.log(data);
+                      // const data = response.data;
+                      // setSteps((prev) => {
+                      //   const newSteps = [...prev];
+                      //   if (newSteps.length <= i) {
+                      //     newSteps.push({ num: i + 1, messages: [] });
+                      //   }
+                      //   newSteps[i].messages.push({
+                      //     angle: data.angle,
+                      //     message: data.message,
+                      //     used: false,
+                      //   });
+                      //   return newSteps;
+                      // });
+                    }
 
-                setLoading(false);
+                    // Finish loading
+                    if (j === EXAMPLE_COUNT - 1) setLoading(false);
+                  });
+                }
               }}
             >
               Generate Sequence
@@ -233,7 +232,7 @@ function TitleGenerationSection(props: {}) {
   return (
     <Stack spacing={5}>
       <Title order={5}>CTAs / Subject Lines (2)</Title>
-      <Paper p='lg'>dwd</Paper>
+      <Paper p='lg'>TODO</Paper>
     </Stack>
   );
 }
@@ -265,20 +264,31 @@ function StepGenerationSection(props: { steps: Step[] }) {
 
         {props.steps.map((step, index) => (
           <Tabs.Panel key={index} value={`step-${step.num}`}>
-            <Stack spacing={5}>
+            <Stack spacing={10}>
               {step.messages.map((message, index) => (
-                <Group key={index} spacing={5} noWrap>
-                  <Badge
+                <Group key={index} spacing={10} align='start' noWrap>
+                  {/* <Badge
                     color='blue'
                     variant='light'
+
                     styles={{ root: { textTransform: 'initial' } }}
                   >
                     {message.angle}
-                  </Badge>
-                  <ReactMarkdown>{message.message}</ReactMarkdown>
-                  <Button variant={message.used ? 'filled' : 'outline'}>
-                    {message.used ? 'Used' : 'Use'}
-                  </Button>
+                  </Badge> */}
+                  <Stack p={10}>
+                    <Button w={200} variant={message.used ? 'filled' : 'outline'}>
+                      {message.used ? 'Used' : 'Use'}
+                    </Button>
+                    <Text fs='italic' fz='sm'>
+                      {message.angle}
+                    </Text>
+                  </Stack>
+
+                  <Paper withBorder px={10}>
+                    <Text fz='sm'>
+                      <ReactMarkdown>{message.message}</ReactMarkdown>
+                    </Text>
+                  </Paper>
                 </Group>
               ))}
             </Stack>

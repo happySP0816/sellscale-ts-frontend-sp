@@ -79,7 +79,7 @@ export async function generateSequence(
   client_id: number,
   archetype_id: number,
   sequence_type: string,
-  step_num: number,
+  num_steps: number,
   additional_prompting: string
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/personas/generate_sequence`, {
@@ -92,7 +92,7 @@ export async function generateSequence(
       client_id: client_id,
       archetype_id: archetype_id,
       sequence_type: sequence_type,
-      step_num: step_num,
+      num_steps: num_steps,
       additional_prompting: additional_prompting,
     }),
   });

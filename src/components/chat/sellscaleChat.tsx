@@ -337,8 +337,6 @@ export default function SellscaleChat() {
     viewport.current?.scrollTo({ top: viewport.current.scrollHeight });
   }, []);
 
-  console.log('qqqqqqqqqqqqqqqqqqqqq', pulseAnimation);
-
   return (
     <>
       <Popover offset={{ mainAxis: 10, crossAxis: -85 }}>

@@ -12,7 +12,7 @@ import { API_URL } from "@constants/data";
 export async function createProspectFromLinkedinLink(userToken: string, archetypeID: number, url: string): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${API_URL}/prospect/from_link`,
+    `${API_URL}/prospect/upload/linkedin_link`,
     {
       method: "POST",
       headers: {

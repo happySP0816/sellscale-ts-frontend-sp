@@ -53,11 +53,20 @@ import FlexSeparate from "@common/library/FlexSeparate";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import getPersonas, {
   getAllUploads,
+  getOLDUploadDetails,
   getUploadDetails,
 } from "@utils/requests/getPersonas";
 import _ from "lodash";
 
 const PAGE_SIZE = 20;
+
+type UploadData = {
+  total: number;
+  success: number;
+  queued: number;
+  failed: number;
+  disqualified: number;
+};
 
 export default function UploadDetailsDrawer() {
   const theme = useMantineTheme();
@@ -78,6 +87,13 @@ export default function UploadDetailsDrawer() {
     setSortStatus(status);
   };
 
+  const [uploadData, setUploadData] = useState<UploadData>({
+    total: 0,
+    success: 0,
+    queued: 0,
+    failed: 0,
+    disqualified: 0,
+  });
   // Fetch upload details (table data)
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-upload-details-${uploadId}`, { page, sortStatus }],
@@ -91,7 +107,8 @@ export default function UploadDetailsDrawer() {
       }
 
       const response = await getUploadDetails(userToken, uploadId);
-      const results = response.status === "success" ? response.data : null;
+      const results =
+        response.status === "success" ? response.data.details.uploads : null;
 
       // Split results into pages
       totalRecords.current = results.length;
@@ -107,6 +124,36 @@ export default function UploadDetailsDrawer() {
           ? "id"
           : sortStatus.columnAccessor
       );
+
+      // Need to get the uploadData
+      let uploads = response.data.details.uploads;
+      let uploadDataNew = {
+        total: 0,
+        success: 0,
+        queued: 0,
+        failed: 0,
+        disqualified: 0,
+      };
+      for (const upload of uploads) {
+        uploadDataNew.total += 1;
+        if (upload.status === "UPLOAD_COMPLETE") {
+          uploadDataNew.success += 1;
+        } else if (upload.status === "UPLOAD_QUEUED") {
+          uploadDataNew.queued += 1;
+        } else if (upload.status === "UPLOAD_IN_PROGRESS") {
+          uploadDataNew.queued += 1;
+        } else if (upload.status === "UPLOAD_FAILED") {
+          uploadDataNew.failed += 1;
+        } else if (upload.status === "UPLOAD_NOT_STARTED") {
+          uploadDataNew.queued += 1;
+        } else if (upload.status === "DISQUALIFIED") {
+          uploadDataNew.disqualified += 1;
+        } else {
+          uploadDataNew.failed += 1;
+        }
+      }
+      setUploadData(uploadDataNew);
+
       return sortStatus.direction === "desc" ? pageData.reverse() : pageData;
     },
     refetchOnWindowFocus: false,
@@ -140,7 +187,6 @@ export default function UploadDetailsDrawer() {
       return upload.id === uploadId;
     });
   });
-  const uploadData = persona?.uploads?.find((upload) => upload.id === uploadId);
 
   // Refresh drawer state
   const refreshDrawer = () => {
@@ -201,7 +247,7 @@ export default function UploadDetailsDrawer() {
                   px={14}
                   style={{ border: "3px solid #f4f2f5", borderRadius: "10px" }}
                 >
-                  {uploadData?.stats.total}
+                  {uploadData?.total}
                 </Text>
               </Flex>
               <Flex align={"center"} gap={5} w={"100%"}>
@@ -252,10 +298,10 @@ export default function UploadDetailsDrawer() {
                 <Text size={"md"}>Success</Text>
                 <Text size={28} color="#009600">
                   {" "}
-                  {uploadData?.stats.success}
+                  {uploadData?.success}
                 </Text>
                 <Text size={12} w={"100%"}>
-                  Potential prospects
+                  New Prospects
                 </Text>
               </Box>
               <Box
@@ -272,10 +318,10 @@ export default function UploadDetailsDrawer() {
                 </Flex>
                 <Text size={28} color="#f9b31c">
                   {" "}
-                  {uploadData?.stats.queued}
+                  {uploadData?.queued}
                 </Text>
                 <Text size={12} w={"100%"}>
-                  Potential identified
+                  Waiting or In Progress
                 </Text>
               </Box>
               <Box
@@ -289,20 +335,20 @@ export default function UploadDetailsDrawer() {
                 <Text>Failed</Text>
                 <Text size={28} color="#fa5757">
                   {" "}
-                  {uploadData?.stats.failed}
+                  {uploadData?.failed}
                 </Text>
                 <Text size={12} w={"100%"}>
-                  Lorem Ipsurm
+                  Error Occurred
                 </Text>
               </Box>
               <Box w={"100%"} p={16}>
                 <Text>Disqualified</Text>
                 <Text size={28} color="#717171">
                   {" "}
-                  {uploadData?.stats.disqualified}
+                  {uploadData?.disqualified}
                 </Text>
                 <Text size={12} w={"100%"}>
-                  Error Occurred
+                  Not Qualified
                 </Text>
               </Box>
             </Flex>
@@ -347,18 +393,20 @@ export default function UploadDetailsDrawer() {
               }}
               columns={[
                 {
-                  accessor: "csv_row_hash",
-                  title: "Row ID",
+                  accessor: "any",
+                  title: "Prospect",
                   width: 100,
                   sortable: true,
-                  render: ({ csv_row_hash }) => (
-                    <Text truncate>{csv_row_hash}</Text>
-                  ),
-                },
-                {
-                  accessor: "upload_attempts",
-                  title: "Attempts",
-                  sortable: true,
+                  render: (row) => {
+                    let name;
+                    if (row.data) {
+                      name = row.data.first_name + " " + row.data.last_name;
+                      if (name === " ") {
+                        name = row.data.linkedin_url;
+                      }
+                    }
+                    return <Text truncate>{name}</Text>;
+                  },
                 },
                 {
                   accessor: "status",
@@ -371,6 +419,11 @@ export default function UploadDetailsDrawer() {
                       {formatToLabel(status)}
                     </Badge>
                   ),
+                },
+                {
+                  accessor: "upload_attempts",
+                  title: "Attempts",
+                  sortable: true,
                 },
                 {
                   accessor: "error_type",

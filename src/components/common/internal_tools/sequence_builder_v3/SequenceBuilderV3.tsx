@@ -19,6 +19,8 @@ import {
   NumberInput,
   LoadingOverlay,
   Badge,
+  HoverCard,
+  ScrollArea,
 } from '@mantine/core';
 import AssetLibraryRetool from '@pages/AssetLibraryRetool';
 import { useQuery } from '@tanstack/react-query';
@@ -26,12 +28,13 @@ import { generateSequence } from '@utils/requests/generateSequence';
 import { getClientArchetypes } from '@utils/requests/getClientArchetypes';
 import { getClientSdrAccess } from '@utils/requests/getClientSdrAccess';
 import { getClients } from '@utils/requests/getClients';
+import _ from 'lodash';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useRecoilValue } from 'recoil';
 import { Archetype, Client } from 'src';
 
-const EXAMPLE_COUNT = 5;
+const EXAMPLE_COUNT = 1;
 
 export default function SequenceBuilderV3() {
   const userToken = useRecoilValue(userTokenState);
@@ -80,7 +83,7 @@ export default function SequenceBuilderV3() {
     enabled: !!clientId,
   });
 
-  const [steps, setSteps] = useState<Step[]>([]);
+  const [results, setResults] = useState<MessageResult[]>([]);
 
   return (
     <Box p='lg'>
@@ -176,21 +179,8 @@ export default function SequenceBuilderV3() {
                     additionalPrompting
                   ).then((response) => {
                     if (response.status === 'success') {
-                      const data = response.data;
-                      console.log(data);
-                      // const data = response.data;
-                      // setSteps((prev) => {
-                      //   const newSteps = [...prev];
-                      //   if (newSteps.length <= i) {
-                      //     newSteps.push({ num: i + 1, messages: [] });
-                      //   }
-                      //   newSteps[i].messages.push({
-                      //     angle: data.angle,
-                      //     message: data.message,
-                      //     used: false,
-                      //   });
-                      //   return newSteps;
-                      // });
+                      const data = response.data as MessageResult[];
+                      setResults(data);
                     }
 
                     // Finish loading
@@ -209,8 +199,8 @@ export default function SequenceBuilderV3() {
               <Title order={3}>Generated Sequence</Title>
               <Button radius='lg'>Add Sequence</Button>
             </Group>
-            <TitleGenerationSection />
-            <StepGenerationSection steps={steps} />
+            <TitleGenerationSection results={results} />
+            <StepGenerationSection results={results} />
           </Stack>
         </Box>
       </Group>
@@ -228,68 +218,116 @@ export default function SequenceBuilderV3() {
   );
 }
 
-function TitleGenerationSection(props: {}) {
+function TitleGenerationSection(props: { results: MessageResult[] }) {
+  const subjects = props.results
+    .map((message) => message.result.map((m) => m.subject))
+    .flat()
+    .filter((s) => s.trim());
+
+  const used = false;
+
   return (
     <Stack spacing={5}>
-      <Title order={5}>CTAs / Subject Lines (2)</Title>
-      <Paper p='lg'>TODO</Paper>
+      <Title order={5}>CTAs / Subject Lines ({subjects.length})</Title>
+      <Paper p='lg'>
+        <ScrollArea h={200}>
+          {subjects.map((subject, index) => (
+            <Group key={index} py={5} noWrap>
+              <Textarea w='100%' m='auto' readOnly autosize>
+                {subject}
+              </Textarea>
+              <Box>
+                <Button w={200} variant={used ? 'filled' : 'outline'}>
+                  {used ? 'Used' : 'Use'}
+                </Button>
+              </Box>
+            </Group>
+          ))}
+        </ScrollArea>
+      </Paper>
     </Stack>
   );
 }
 
-interface Step {
-  num: number;
-  messages: Message[];
+interface MessageResult {
+  assets: Asset[];
+  result: {
+    angle: string;
+    angle_description: string;
+    subject: string;
+    message: string;
+    used?: boolean;
+  }[];
+  step_num: number;
 }
 
-interface Message {
-  angle: string;
-  message: string;
-  used: boolean;
+interface Asset {
+  id: number;
+  tag: string;
+  title: string;
+  value: string;
 }
 
-function StepGenerationSection(props: { steps: Step[] }) {
+function StepGenerationSection(props: { results: MessageResult[] }) {
+  const steps = _.groupBy(props.results, (r) => r.step_num);
+
   return (
     <Paper p='lg'>
-      <Tabs variant='pills' defaultValue='gallery'>
+      <Tabs variant='pills' defaultValue='step-1'>
         <Tabs.List>
-          {props.steps.map((step, index) => (
-            <Tabs.Tab key={index} value={`step-${step.num}`}>
-              Step {step.num} ({step.messages.filter((m) => !m.used).length} /{' '}
-              {step.messages.length})
+          {Object.keys(steps).map((step_num, index) => (
+            <Tabs.Tab key={index} value={`step-${step_num}`}>
+              Step {step_num}
+              {/* {steps[step_num].filter((m) => !m.result.find((mm) => mm.used)).length} /{' '}
+              {steps[step_num].length}) */}
             </Tabs.Tab>
           ))}
         </Tabs.List>
         <Divider my={5} />
 
-        {props.steps.map((step, index) => (
-          <Tabs.Panel key={index} value={`step-${step.num}`}>
+        {Object.keys(steps).map((step_num, index) => (
+          <Tabs.Panel key={index} value={`step-${step_num}`}>
             <Stack spacing={10}>
-              {step.messages.map((message, index) => (
-                <Group key={index} spacing={10} align='start' noWrap>
-                  {/* <Badge
-                    color='blue'
-                    variant='light'
+              {steps[step_num].map((message, index) => (
+                <Stack key={index}>
+                  {message.result.map((msg, index) => (
+                    <Group key={index} spacing={10} align='start' noWrap>
+                      <Stack p={10} w={400}>
+                        <Button w={200} variant={msg.used ? 'filled' : 'outline'}>
+                          {msg.used ? 'Used' : 'Use'}
+                        </Button>
+                        <Text fs='italic' fz='sm'>
+                          {msg.angle}
+                        </Text>
+                        <Group>
+                          {message.assets.map((asset, index) => (
+                            <HoverCard width={280} shadow='md'>
+                              <HoverCard.Target>
+                                <Badge
+                                  key={index}
+                                  color='blue'
+                                  variant='light'
+                                  styles={{ root: { textTransform: 'initial' } }}
+                                >
+                                  {asset.tag} - {asset.title}
+                                </Badge>
+                              </HoverCard.Target>
+                              <HoverCard.Dropdown>
+                                <Text size='sm'>{asset.value}</Text>
+                              </HoverCard.Dropdown>
+                            </HoverCard>
+                          ))}
+                        </Group>
+                      </Stack>
 
-                    styles={{ root: { textTransform: 'initial' } }}
-                  >
-                    {message.angle}
-                  </Badge> */}
-                  <Stack p={10}>
-                    <Button w={200} variant={message.used ? 'filled' : 'outline'}>
-                      {message.used ? 'Used' : 'Use'}
-                    </Button>
-                    <Text fs='italic' fz='sm'>
-                      {message.angle}
-                    </Text>
-                  </Stack>
-
-                  <Paper withBorder px={10}>
-                    <Text fz='sm'>
-                      <ReactMarkdown>{message.message}</ReactMarkdown>
-                    </Text>
-                  </Paper>
-                </Group>
+                      <Paper withBorder px={10}>
+                        <Text fz='sm'>
+                          <ReactMarkdown>{msg.message}</ReactMarkdown>
+                        </Text>
+                      </Paper>
+                    </Group>
+                  ))}
+                </Stack>
               ))}
             </Stack>
           </Tabs.Panel>

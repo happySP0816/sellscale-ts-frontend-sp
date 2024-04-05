@@ -1989,7 +1989,7 @@ export default function OverviewPage() {
           </Box>
           <BarChart />
           <ActiveChannels />
-          <ActiveCampaigns />
+          {/* <ActiveCampaigns /> */}
         </Tabs.Panel>
 
         <Tabs.Panel value="operator_dash">

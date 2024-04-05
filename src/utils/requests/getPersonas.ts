@@ -6,53 +6,47 @@ import { API_URL } from "@constants/data";
 
 /**
  * Get all personas for a user
- * @param userToken 
+ * @param userToken
  * @returns - MsgResponse
  */
-export default async function getPersonas(userToken: string): Promise<MsgResponse> {
-
-  const response = await fetch(
-    `${API_URL}/client/archetype/get_archetypes`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-      },
-    }
-  );
-  return await processResponse(response, 'archetypes');
-
+export default async function getPersonas(
+  userToken: string
+): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/client/archetype/get_archetypes`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
+  return await processResponse(response, "archetypes");
 }
-
 
 /**
  * Get persona from an SDR
- * @param userToken 
+ * @param userToken
  * @returns - MsgResponse
  */
-export async function getSinglePersona(userToken: string, personaId: number): Promise<MsgResponse> {
-
-  const response = await fetch(
-    `${API_URL}/client/archetype/${personaId}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-      },
-    }
-  );
+export async function getSinglePersona(
+  userToken: string,
+  personaId: number
+): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/client/archetype/${personaId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
   return await processResponse(response);
-
 }
-
 
 /**
  * Get all personas for a user
- * @param userToken 
+ * @param userToken
  * @returns - MsgResponse
  */
-export async function getPersonasOverview(userToken: string): Promise<MsgResponse> {
-
+export async function getPersonasOverview(
+  userToken: string
+): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/client/archetype/get_archetypes/overview`,
     {
@@ -62,18 +56,17 @@ export async function getPersonasOverview(userToken: string): Promise<MsgRespons
       },
     }
   );
-  return await processResponse(response, 'data');
-
+  return await processResponse(response, "data");
 }
-
 
 /**
  * Get all personas for a user
- * @param userToken 
+ * @param userToken
  * @returns - MsgResponse
  */
-export async function getPersonasCampaignView(userToken: string): Promise<MsgResponse> {
-
+export async function getPersonasCampaignView(
+  userToken: string
+): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/client/archetype/get_archetypes/campaign_view`,
     {
@@ -83,40 +76,36 @@ export async function getPersonasCampaignView(userToken: string): Promise<MsgRes
       },
     }
   );
-  return await processResponse(response, 'data');
-
+  return await processResponse(response, "data");
 }
-
 
 /**
  * Get persona activity for a user
- * @param userToken 
+ * @param userToken
  * @returns - MsgResponse
  */
-export async function getPersonasActivity(userToken: string): Promise<MsgResponse> {
-  
-    const response = await fetch(
-      `${API_URL}/client/overall/activity`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      }
-    );
-    return await processResponse(response, 'data');
-  
-  }
-
+export async function getPersonasActivity(
+  userToken: string
+): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/client/overall/activity`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
+  return await processResponse(response, "data");
+}
 
 /**
  * Get all uploads for a persona
- * @param userToken 
- * @param personaId 
+ * @param userToken
+ * @param personaId
  * @returns - MsgResponse
  */
-export async function getAllUploads(userToken: string, personaId: number): Promise<MsgResponse> {
-
+export async function getAllUploads(
+  userToken: string,
+  personaId: number
+): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/client/archetype/${personaId}/all_uploads`,
     {
@@ -126,28 +115,36 @@ export async function getAllUploads(userToken: string, personaId: number): Promi
       },
     }
   );
-  const msgResponse = await processResponse(response, 'uploads');
+  const msgResponse = await processResponse(response, "uploads");
 
-  const uploads = await Promise.all(msgResponse.data.map(async (upload: any) => {
-    const statsResult = await getUploadStats(userToken, upload.id);
-    return {
-      ...upload,
-      stats: statsResult.status === 'success' ? statsResult.data : {},
-    };
-  }));
+  const uploads = await Promise.all(
+    msgResponse.data.map(async (upload: any) => {
+      const statsResult = await getUploadStats(userToken, upload.id);
+      return {
+        ...upload,
+        stats: statsResult.status === "success" ? statsResult.data : {},
+      };
+    })
+  );
 
-  return { status: 'success', title: `Success`, message: `Gathered all uploads`, data: uploads };
-
+  return {
+    status: "success",
+    title: `Success`,
+    message: `Gathered all uploads`,
+    data: uploads,
+  };
 }
 
 /**
  * Get stats for a single upload
- * @param userToken 
- * @param uploadId 
+ * @param userToken
+ * @param uploadId
  * @returns - MsgResponse
  */
-export async function getUploadStats(userToken: string, uploadId: number): Promise<MsgResponse> {
-
+export async function getUploadStats(
+  userToken: string,
+  uploadId: number
+): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/client/prospect_upload/${uploadId}/stats`,
     {
@@ -157,19 +154,19 @@ export async function getUploadStats(userToken: string, uploadId: number): Promi
       },
     }
   );
-  return await processResponse(response, 'stats');
-
+  return await processResponse(response, "stats");
 }
 
-
 /**
- * Get details for a single upload
- * @param userToken 
- * @param uploadId 
+ * Get details for a single upload (OLD)
+ * @param userToken
+ * @param uploadId
  * @returns - MsgResponse
  */
-export async function getUploadDetails(userToken: string, uploadId: number): Promise<MsgResponse> {
-
+export async function getOLDUploadDetails(
+  userToken: string,
+  uploadId: number
+): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/client/prospect_upload/${uploadId}/details`,
     {
@@ -179,6 +176,28 @@ export async function getUploadDetails(userToken: string, uploadId: number): Pro
       },
     }
   );
-  return await processResponse(response, 'uploads');
+  return await processResponse(response, "uploads");
+}
 
+/**
+ * Get details for a single upload
+ * @param userToken
+ * @param uploadId
+ * @returns - MsgResponse
+ */
+export async function getUploadDetails(
+  userToken: string,
+  uploadId: number
+): Promise<MsgResponse> {
+  const response = await fetch(
+    // `${API_URL}/prospect/upload/history/${uploadId}/details`,
+    `http://127.0.0.1:5000/prospect/upload/history/${uploadId}/details`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  return await processResponse(response, "data");
 }

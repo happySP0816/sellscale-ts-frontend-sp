@@ -79,7 +79,7 @@ export async function generateSequence(
   client_id: number,
   archetype_id: number,
   sequence_type: string,
-  num_steps: number,
+  step_num: number,
   additional_prompting: string
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/personas/generate_sequence`, {
@@ -92,8 +92,35 @@ export async function generateSequence(
       client_id: client_id,
       archetype_id: archetype_id,
       sequence_type: sequence_type,
-      num_steps: num_steps,
+      step_num: step_num,
       additional_prompting: additional_prompting,
+    }),
+  });
+  return await processResponse(response, 'data');
+}
+
+export async function addSequence(
+  userToken: string,
+  client_id: number,
+  archetype_id: number,
+  sequence_type: string,
+  ctas: { text: string; assets: number[] }[],
+  subject_lines: { text: string; assets: number[] }[],
+  steps: { step_num: number; text: string; assets: number[] }[]
+): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/personas/add_sequence`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      client_id: client_id,
+      archetype_id: archetype_id,
+      sequence_type: sequence_type,
+      ctas: ctas,
+      subject_lines: subject_lines,
+      steps: steps,
     }),
   });
   return await processResponse(response, 'data');

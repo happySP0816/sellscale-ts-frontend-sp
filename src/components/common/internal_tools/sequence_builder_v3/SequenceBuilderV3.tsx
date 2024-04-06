@@ -21,14 +21,16 @@ import {
   Badge,
   HoverCard,
   ScrollArea,
+  Loader,
 } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
 import AssetLibraryRetool from '@pages/AssetLibraryRetool';
 import { useQuery } from '@tanstack/react-query';
-import { generateSequence } from '@utils/requests/generateSequence';
+import { addSequence, generateSequence } from '@utils/requests/generateSequence';
 import { getClientArchetypes } from '@utils/requests/getClientArchetypes';
 import { getClientSdrAccess } from '@utils/requests/getClientSdrAccess';
 import { getClients } from '@utils/requests/getClients';
-import _ from 'lodash';
+import _, { set } from 'lodash';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useRecoilValue } from 'recoil';
@@ -39,15 +41,44 @@ const EXAMPLE_COUNT = 1;
 export default function SequenceBuilderV3() {
   const userToken = useRecoilValue(userTokenState);
 
+  const [selectedData, setSelectedData] = useState<SelectedData>({
+    ctas: [],
+    subject_lines: [],
+    steps: [],
+  });
+
   const [loading, setLoading] = useState(false);
+  const [bigLoading, setBigLoading] = useState(false);
   const [clientId, setClientId] = useState<number | null>(null);
   const [archetypeId, setArchetypeId] = useState<number | null>(null);
   const [openedAssetLibrary, setOpenedAssetLibrary] = useState(false);
-  const [sequenceType, setSequenceType] = useState('');
+  const [sequenceType, setSequenceType] = useState('EMAIL');
   const [numSteps, setNumSteps] = useState(3);
   const [additionalPrompting, setAdditionalPrompting] = useState('');
 
-  const { data: clients } = useQuery({
+  const onAddSequence = async () => {
+    if (!clientId || !archetypeId || !sequenceType) return;
+
+    setBigLoading(true);
+    const result = await addSequence(
+      userToken,
+      clientId,
+      archetypeId,
+      sequenceType,
+      selectedData.ctas,
+      selectedData.subject_lines,
+      selectedData.steps
+    );
+    setBigLoading(false);
+
+    showNotification({
+      title: result.status === 'success' ? 'Success' : 'Error',
+      message: result.status === 'success' ? 'Added sequence to campaign' : 'Failed to add',
+      color: result.status === 'success' ? 'teal' : 'red',
+    });
+  };
+
+  const { data: clients, isFetching: isFetchingClients } = useQuery({
     queryKey: [`query-get-clients`],
     queryFn: async () => {
       const result = await getClients(userToken);
@@ -57,7 +88,7 @@ export default function SequenceBuilderV3() {
     },
   });
 
-  const { data: archetypes } = useQuery({
+  const { data: archetypes, isFetching: isFetchingCampaigns } = useQuery({
     queryKey: [`query-get-archetypes`, { clientId }],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
@@ -87,6 +118,7 @@ export default function SequenceBuilderV3() {
 
   return (
     <Box p='lg'>
+      <LoadingOverlay visible={bigLoading} />
       <Group align='start' grow noWrap>
         <Paper maw='30vw' style={{ position: 'relative' }}>
           <LoadingOverlay visible={loading} />
@@ -94,7 +126,14 @@ export default function SequenceBuilderV3() {
             <Title order={3}>Sequence Builder V3</Title>
             <Autocomplete
               disabled={clients === undefined}
-              label='Client'
+              label={
+                <Group position='apart'>
+                  <Text>Client</Text>
+                  {clients === undefined && isFetchingClients && (
+                    <Loader variant='dots' size='xs' />
+                  )}
+                </Group>
+              }
               placeholder='Clients'
               data={clients?.map((client) => ({ value: client.company })) ?? []}
               onChange={(value) => {
@@ -104,7 +143,14 @@ export default function SequenceBuilderV3() {
             />
             <Autocomplete
               disabled={archetypes === undefined}
-              label='Campaign'
+              label={
+                <Group position='apart'>
+                  <Text>Campaigns</Text>
+                  {archetypes === undefined && isFetchingCampaigns && (
+                    <Loader variant='dots' size='xs' />
+                  )}
+                </Group>
+              }
               placeholder='Campaigns'
               data={
                 archetypes?.map((archetype) => ({
@@ -169,23 +215,38 @@ export default function SequenceBuilderV3() {
 
                 setLoading(true);
 
-                for (let j = 0; j < EXAMPLE_COUNT; j++) {
-                  generateSequence(
-                    userToken,
-                    clientId,
-                    archetypeId,
-                    sequenceType,
-                    numSteps,
-                    additionalPrompting
-                  ).then((response) => {
-                    if (response.status === 'success') {
-                      const data = response.data as MessageResult[];
-                      setResults(data);
-                    }
+                for (let i = 0; i < EXAMPLE_COUNT; i++) {
+                  for (let j = 0; j < numSteps; j++) {
+                    generateSequence(
+                      userToken,
+                      clientId,
+                      archetypeId,
+                      sequenceType,
+                      j + 1,
+                      additionalPrompting
+                    )
+                      .then((response) => {
+                        if (response.status === 'success') {
+                          const data = response.data as MessageResult[];
+                          setResults((prev) => [...prev, ...data]);
+                        } else {
+                          showNotification({
+                            title: 'Error',
+                            message: response.message,
+                            color: 'red',
+                          });
+                          setLoading(false);
+                        }
 
-                    // Finish loading
-                    if (j === EXAMPLE_COUNT - 1) setLoading(false);
-                  });
+                        // Finish loading
+                        if (i === EXAMPLE_COUNT - 1 && j === numSteps - 1) {
+                          setLoading(false);
+                        }
+                      })
+                      .catch(() => {
+                        setLoading(false);
+                      });
+                  }
                 }
               }}
             >
@@ -197,10 +258,62 @@ export default function SequenceBuilderV3() {
           <Stack h='90vh' p='lg'>
             <Group position='apart' noWrap>
               <Title order={3}>Generated Sequence</Title>
-              <Button radius='lg'>Add Sequence</Button>
+              <Button
+                radius='lg'
+                onClick={async () => {
+                  await onAddSequence();
+                }}
+              >
+                Add Sequence
+              </Button>
             </Group>
-            <TitleGenerationSection results={results} />
-            <StepGenerationSection results={results} />
+            <TitleGenerationSection
+              results={results}
+              onClick={(text, assets, remove) => {
+                if (remove) {
+                  setSelectedData((prev) => ({
+                    ...prev,
+                    subject_lines: prev.subject_lines.filter((s) => s.text !== text),
+                  }));
+                } else {
+                  setSelectedData((prev) => ({
+                    ...prev,
+                    subject_lines: [
+                      ...prev.subject_lines,
+                      {
+                        text,
+                        assets,
+                      },
+                    ],
+                  }));
+                }
+              }}
+              selectedData={selectedData}
+            />
+            <StepGenerationSection
+              results={results}
+              onClick={(step_num, text, assets, remove) => {
+                if (remove) {
+                  setSelectedData((prev) => ({
+                    ...prev,
+                    steps: prev.steps.filter((s) => s.text !== text),
+                  }));
+                } else {
+                  setSelectedData((prev) => ({
+                    ...prev,
+                    steps: [
+                      ...prev.steps,
+                      {
+                        step_num,
+                        text,
+                        assets,
+                      },
+                    ],
+                  }));
+                }
+              }}
+              selectedData={selectedData}
+            />
           </Stack>
         </Box>
       </Group>
@@ -218,27 +331,45 @@ export default function SequenceBuilderV3() {
   );
 }
 
-function TitleGenerationSection(props: { results: MessageResult[] }) {
+function TitleGenerationSection(props: {
+  results: MessageResult[];
+  onClick: (text: string, assets: number[], remove: boolean) => void;
+  selectedData: SelectedData;
+}) {
   const subjects = props.results
-    .map((message) => message.result.map((m) => m.subject))
+    .map((message) => message.result.map((m) => ({ subject: m.subject, assets: message.assets })))
     .flat()
-    .filter((s) => s.trim());
-
-  const used = false;
+    .filter((s) => s.subject.trim());
 
   return (
     <Stack spacing={5}>
-      <Title order={5}>CTAs / Subject Lines ({subjects.length})</Title>
+      <Title order={5}>Subject Lines ({subjects.length})</Title>
       <Paper p='lg'>
         <ScrollArea h={200}>
           {subjects.map((subject, index) => (
             <Group key={index} py={5} noWrap>
               <Textarea w='100%' m='auto' readOnly autosize>
-                {subject}
+                {subject.subject}
               </Textarea>
               <Box>
-                <Button w={200} variant={used ? 'filled' : 'outline'}>
-                  {used ? 'Used' : 'Use'}
+                <Button
+                  w={200}
+                  variant={
+                    props.selectedData.subject_lines.find((s) => s.text === subject.subject)
+                      ? 'filled'
+                      : 'outline'
+                  }
+                  onClick={() => {
+                    props.onClick(
+                      subject.subject,
+                      subject.assets.map((a) => a.id),
+                      !!props.selectedData.subject_lines.find((s) => s.text === subject.subject)
+                    );
+                  }}
+                >
+                  {props.selectedData.subject_lines.find((s) => s.text === subject.subject)
+                    ? 'Selected'
+                    : 'Use'}
                 </Button>
               </Box>
             </Group>
@@ -256,7 +387,6 @@ interface MessageResult {
     angle_description: string;
     subject: string;
     message: string;
-    used?: boolean;
   }[];
   step_num: number;
 }
@@ -268,7 +398,17 @@ interface Asset {
   value: string;
 }
 
-function StepGenerationSection(props: { results: MessageResult[] }) {
+interface SelectedData {
+  ctas: { text: string; assets: number[] }[];
+  subject_lines: { text: string; assets: number[] }[];
+  steps: { step_num: number; text: string; assets: number[] }[];
+}
+
+function StepGenerationSection(props: {
+  results: MessageResult[];
+  onClick: (step_num: number, text: string, assets: number[], remove: boolean) => void;
+  selectedData: SelectedData;
+}) {
   const steps = _.groupBy(props.results, (r) => r.step_num);
 
   return (
@@ -293,15 +433,32 @@ function StepGenerationSection(props: { results: MessageResult[] }) {
                   {message.result.map((msg, index) => (
                     <Group key={index} spacing={10} align='start' noWrap>
                       <Stack p={10} w={400}>
-                        <Button w={200} variant={msg.used ? 'filled' : 'outline'}>
-                          {msg.used ? 'Used' : 'Use'}
+                        <Button
+                          w={200}
+                          variant={
+                            props.selectedData.steps.find((s) => s.text === msg.message)
+                              ? 'filled'
+                              : 'outline'
+                          }
+                          onClick={() => {
+                            props.onClick(
+                              message.step_num,
+                              msg.message,
+                              message.assets.map((a) => a.id),
+                              !!props.selectedData.steps.find((s) => s.text === msg.message)
+                            );
+                          }}
+                        >
+                          {props.selectedData.steps.find((s) => s.text === msg.message)
+                            ? 'Selected'
+                            : 'Use'}
                         </Button>
                         <Text fs='italic' fz='sm'>
                           {msg.angle}
                         </Text>
                         <Group>
                           {message.assets.map((asset, index) => (
-                            <HoverCard width={280} shadow='md'>
+                            <HoverCard width={280} shadow='md' openDelay={500}>
                               <HoverCard.Target>
                                 <Badge
                                   key={index}
@@ -320,7 +477,7 @@ function StepGenerationSection(props: { results: MessageResult[] }) {
                         </Group>
                       </Stack>
 
-                      <Paper withBorder px={10}>
+                      <Paper withBorder px={10} w={400}>
                         <Text fz='sm'>
                           <ReactMarkdown>{msg.message}</ReactMarkdown>
                         </Text>

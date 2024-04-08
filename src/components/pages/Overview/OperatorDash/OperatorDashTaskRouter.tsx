@@ -47,12 +47,12 @@ const TASK_ROUTER: any = {
   EMAIL_CAMPAIGN_REVIEW: {
     component: TaskHandlerReviewCampaign,
     instruction: "Review the campaign then mark as complete",
-    enabledCompleteButton: false,
+    enabledCompleteButton: true,
   },
   LINKEDIN_CAMPAIGN_REVIEW: {
     component: TaskHandlerReviewCampaign,
     instruction: "Review the campaign then mark as complete",
-    enabledCompleteButton: false,
+    enabledCompleteButton: true,
   },
   SEGMENT_CREATION: {
     component: TaskHandlerSegmentCreation,

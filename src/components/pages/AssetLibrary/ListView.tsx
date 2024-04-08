@@ -1,4 +1,18 @@
-import { ActionIcon, Badge, Collapse, Divider, Flex, Select, useMantineTheme, Switch, Text, Stack, Tooltip, Box, Textarea } from '@mantine/core';
+import {
+  ActionIcon,
+  Badge,
+  Collapse,
+  Divider,
+  Flex,
+  Select,
+  useMantineTheme,
+  Switch,
+  Text,
+  Stack,
+  Tooltip,
+  Box,
+  Textarea,
+} from '@mantine/core';
 import {
   IconArrowsDownUp,
   IconChevronDown,
@@ -45,7 +59,9 @@ export default function ListView(props: any) {
               Used Assets
             </Text>
             <Divider w={'100%'} />
-            <ActionIcon onClick={usedToggle}>{openedUsed ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon>
+            <ActionIcon onClick={usedToggle}>
+              {openedUsed ? <IconChevronUp /> : <IconChevronDown />}
+            </ActionIcon>
           </Flex>
           <Collapse in={openedUsed}>
             <DataGrid
@@ -96,21 +112,38 @@ export default function ListView(props: any) {
                     </Flex>
                   ),
                   cell: (cell) => {
+                    // @ts-ignore
                     const { num } = cell.row.original;
 
                     return (
-                      <Flex px={'sm'} h={'100%'} mb={'xs'} align={'center'} w={'100%'} sx={{ display: 'block' }}>
-                        <Flex align={!usedDetail ? 'center' : 'start'} justify='space-between' w={'380px'} gap={'xs'} mt={'sm'}>
+                      <Flex
+                        px={'sm'}
+                        h={'100%'}
+                        mb={'xs'}
+                        align={'center'}
+                        w={'100%'}
+                        sx={{ display: 'block' }}
+                      >
+                        <Flex
+                          align={!usedDetail ? 'center' : 'start'}
+                          justify='space-between'
+                          w={'380px'}
+                          gap={'xs'}
+                          mt={'sm'}
+                        >
                           <p
                             style={{
                               flex: 1,
                               whiteSpace: !usedDetail ? 'nowrap' : 'break-spaces',
-                              ...(!usedDetail ? { overflow: 'hidden', textOverflow: 'ellipsis' } : {}),
+                              ...(!usedDetail
+                                ? { overflow: 'hidden', textOverflow: 'ellipsis' }
+                                : {}),
                               fontSize: '13px',
                             }}
                           >
-                            Financial industry clients likely already have a secretes management solution, like Vault, which we want to get ahead of by saying
-                            if they're open to a re-evaluation to see what's on the market.
+                            Financial industry clients likely already have a secretes management
+                            solution, like Vault, which we want to get ahead of by saying if they're
+                            open to a re-evaluation to see what's on the market.
                           </p>
                           <Flex align={'center'} gap={'4px'} mt={usedDetail ? 10 : 0}>
                             <Tooltip
@@ -138,14 +171,25 @@ export default function ListView(props: any) {
                           </Flex>
                         </Flex>
                         {usedDetail && usedDetailId === num && (
-                          <Flex p={'sm'} direction={'column'} bg={'#fff5ff'} style={{ borderRadius: '8px', whiteSpace: 'break-spaces' }}>
+                          <Flex
+                            p={'sm'}
+                            direction={'column'}
+                            bg={'#fff5ff'}
+                            style={{ borderRadius: '8px', whiteSpace: 'break-spaces' }}
+                          >
                             <Flex align={'center'} justify={'space-between'}>
-                              <Text color='#ec58fb' size={'sm'} fw={700} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                              <Text
+                                color='#ec58fb'
+                                size={'sm'}
+                                fw={700}
+                                style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
+                              >
                                 <IconSparkles size={'1.4rem'} fill='pink' /> AI Summary
                               </Text>
                             </Flex>
                             <Text size={'xs'} mt={3}>
-                              This case study explores how lorem Ipsum dolor sit amet, consectetur adipiscing elit
+                              This case study explores how lorem Ipsum dolor sit amet, consectetur
+                              adipiscing elit
                             </Text>
                           </Flex>
                         )}
@@ -188,7 +232,14 @@ export default function ListView(props: any) {
                     // const {  } = cell.row.original;
 
                     return (
-                      <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
+                      <Flex
+                        align={'center'}
+                        justify={'center'}
+                        gap={'xs'}
+                        py={'lg'}
+                        w={'100%'}
+                        h={'100%'}
+                      >
                         <Flex justify={'center'} w={'100%'} align={'center'} gap={'md'}>
                           <Badge>Link</Badge>
                         </Flex>
@@ -211,7 +262,14 @@ export default function ListView(props: any) {
                     // const {  } = cell.row.original;
 
                     return (
-                      <Flex direction={'column'} align={'center'} justify={'center'} w={'100%'} h={'100%'} py={'sm'}>
+                      <Flex
+                        direction={'column'}
+                        align={'center'}
+                        justify={'center'}
+                        w={'100%'}
+                        h={'100%'}
+                        py={'sm'}
+                      >
                         <Badge color='green'>76% Success</Badge>
                       </Flex>
                     );
@@ -229,7 +287,15 @@ export default function ListView(props: any) {
                   minSize: 230,
                   cell: (cell) => {
                     return (
-                      <Flex direction={'column'} align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
+                      <Flex
+                        direction={'column'}
+                        align={'center'}
+                        justify={'center'}
+                        gap={'xs'}
+                        py={'lg'}
+                        w={'100%'}
+                        h={'100%'}
+                      >
                         <Badge color='green'>76% Success</Badge>
                       </Flex>
                     );
@@ -249,13 +315,29 @@ export default function ListView(props: any) {
                     const {} = cell.row.original;
 
                     return (
-                      <Flex direction={'column'} align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
+                      <Flex
+                        direction={'column'}
+                        align={'center'}
+                        justify={'center'}
+                        gap={'xs'}
+                        py={'lg'}
+                        w={'100%'}
+                        h={'100%'}
+                      >
                         <Flex gap={'xs'} align={'center'}>
                           <Switch size='xs' />
-                          <Badge color='yellow' radius={'xl'} sx={{ paddingTop: '6px', paddingInline: '2px' }}>
+                          <Badge
+                            color='yellow'
+                            radius={'xl'}
+                            sx={{ paddingTop: '6px', paddingInline: '2px' }}
+                          >
                             <IconPencil size={'1rem'} />
                           </Badge>
-                          <Badge color='red' radius={'xl'} sx={{ paddingTop: '6px', paddingInline: '2px' }}>
+                          <Badge
+                            color='red'
+                            radius={'xl'}
+                            sx={{ paddingTop: '6px', paddingInline: '2px' }}
+                          >
                             <IconTrash size={'1rem'} />
                           </Badge>
                         </Flex>
@@ -338,7 +420,9 @@ export default function ListView(props: any) {
                           variant='default'
                           color='gray.4'
                           h={36}
-                          disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                          disabled={
+                            table.getState().pagination.pageIndex === table.getPageCount() - 1
+                          }
                           onClick={() => {
                             table.setPageIndex(table.getState().pagination.pageIndex + 1);
                           }}
@@ -380,7 +464,9 @@ export default function ListView(props: any) {
               UnUsed Assets
             </Text>
             <Divider w={'100%'} />
-            <ActionIcon onClick={unusedToggle}>{openedUnUsed ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon>
+            <ActionIcon onClick={unusedToggle}>
+              {openedUnUsed ? <IconChevronUp /> : <IconChevronDown />}
+            </ActionIcon>
           </Flex>
           <Collapse in={openedUnUsed} mb={'md'}>
             <DataGrid
@@ -432,21 +518,39 @@ export default function ListView(props: any) {
                   ),
 
                   cell: (cell) => {
+                    // @ts-ignore
                     const { num } = cell.row.original;
 
                     return (
-                      <Flex px={'sm'} h={'100%'} mb={'xs'} justify={'center'} align={'center'} w={'100%'} sx={{ display: 'block' }}>
-                        <Flex align={!unusedDetail ? 'center' : 'start'} justify='space-between' w={'380px'} gap={'xs'} mt={'sm'}>
+                      <Flex
+                        px={'sm'}
+                        h={'100%'}
+                        mb={'xs'}
+                        justify={'center'}
+                        align={'center'}
+                        w={'100%'}
+                        sx={{ display: 'block' }}
+                      >
+                        <Flex
+                          align={!unusedDetail ? 'center' : 'start'}
+                          justify='space-between'
+                          w={'380px'}
+                          gap={'xs'}
+                          mt={'sm'}
+                        >
                           <p
                             style={{
                               flex: 1,
                               whiteSpace: !unusedDetail ? 'nowrap' : 'break-spaces',
-                              ...(!unusedDetail ? { overflow: 'hidden', textOverflow: 'ellipsis' } : {}),
+                              ...(!unusedDetail
+                                ? { overflow: 'hidden', textOverflow: 'ellipsis' }
+                                : {}),
                               fontSize: '13px',
                             }}
                           >
-                            Financial industry clients likely already have a secretes management solution, like Vault, which we want to get ahead of by saying
-                            if they're open to a re-evaluation to see what's on the market.
+                            Financial industry clients likely already have a secretes management
+                            solution, like Vault, which we want to get ahead of by saying if they're
+                            open to a re-evaluation to see what's on the market.
                           </p>
                           <Flex align={'center'} gap={'4px'} mt={unusedDetail ? 10 : 0}>
                             <Tooltip
@@ -474,14 +578,25 @@ export default function ListView(props: any) {
                           </Flex>
                         </Flex>
                         {unusedDetail && unusedDetailId === num && (
-                          <Flex p={'sm'} direction={'column'} bg={'#fff5ff'} style={{ borderRadius: '8px', whiteSpace: 'break-spaces' }}>
+                          <Flex
+                            p={'sm'}
+                            direction={'column'}
+                            bg={'#fff5ff'}
+                            style={{ borderRadius: '8px', whiteSpace: 'break-spaces' }}
+                          >
                             <Flex align={'center'} justify={'space-between'}>
-                              <Text color='#ec58fb' size={'sm'} fw={700} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                              <Text
+                                color='#ec58fb'
+                                size={'sm'}
+                                fw={700}
+                                style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
+                              >
                                 <IconSparkles size={'1.4rem'} fill='pink' /> AI Summary
                               </Text>
                             </Flex>
                             <Text size={'xs'} mt={3}>
-                              This case study explores how lorem Ipsum dolor sit amet, consectetur adipiscing elit testsdsdasdfasdasdfasdfasdfasdf'
+                              This case study explores how lorem Ipsum dolor sit amet, consectetur
+                              adipiscing elit testsdsdasdfasdasdfasdfasdfasdf'
                             </Text>
                           </Flex>
                         )}
@@ -524,7 +639,14 @@ export default function ListView(props: any) {
                     // const {  } = cell.row.original;
 
                     return (
-                      <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
+                      <Flex
+                        align={'center'}
+                        justify={'center'}
+                        gap={'xs'}
+                        py={'lg'}
+                        w={'100%'}
+                        h={'100%'}
+                      >
                         <Flex justify={'center'} w={'100%'} align={'center'} gap={'md'}>
                           <Badge>Link</Badge>
                         </Flex>
@@ -547,7 +669,14 @@ export default function ListView(props: any) {
                     // const {  } = cell.row.original;
 
                     return (
-                      <Flex direction={'column'} align={'center'} justify={'center'} w={'100%'} h={'100%'} py={'sm'}>
+                      <Flex
+                        direction={'column'}
+                        align={'center'}
+                        justify={'center'}
+                        w={'100%'}
+                        h={'100%'}
+                        py={'sm'}
+                      >
                         <Badge color='green'>76% Success</Badge>
                       </Flex>
                     );
@@ -565,7 +694,15 @@ export default function ListView(props: any) {
                   minSize: 230,
                   cell: (cell) => {
                     return (
-                      <Flex direction={'column'} align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
+                      <Flex
+                        direction={'column'}
+                        align={'center'}
+                        justify={'center'}
+                        gap={'xs'}
+                        py={'lg'}
+                        w={'100%'}
+                        h={'100%'}
+                      >
                         <Badge color='green'>76% Success</Badge>
                       </Flex>
                     );
@@ -585,13 +722,29 @@ export default function ListView(props: any) {
                     const {} = cell.row.original;
 
                     return (
-                      <Flex direction={'column'} align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
+                      <Flex
+                        direction={'column'}
+                        align={'center'}
+                        justify={'center'}
+                        gap={'xs'}
+                        py={'lg'}
+                        w={'100%'}
+                        h={'100%'}
+                      >
                         <Flex gap={'xs'} align={'center'}>
                           <Switch size='xs' />
-                          <Badge color='yellow' radius={'xl'} sx={{ paddingTop: '6px', paddingInline: '2px' }}>
+                          <Badge
+                            color='yellow'
+                            radius={'xl'}
+                            sx={{ paddingTop: '6px', paddingInline: '2px' }}
+                          >
                             <IconPencil size={'1rem'} />
                           </Badge>
-                          <Badge color='red' radius={'xl'} sx={{ paddingTop: '6px', paddingInline: '2px' }}>
+                          <Badge
+                            color='red'
+                            radius={'xl'}
+                            sx={{ paddingTop: '6px', paddingInline: '2px' }}
+                          >
                             <IconTrash size={'1rem'} />
                           </Badge>
                         </Flex>
@@ -674,7 +827,9 @@ export default function ListView(props: any) {
                           variant='default'
                           color='gray.4'
                           h={36}
-                          disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                          disabled={
+                            table.getState().pagination.pageIndex === table.getPageCount() - 1
+                          }
                           onClick={() => {
                             table.setPageIndex(table.getState().pagination.pageIndex + 1);
                           }}

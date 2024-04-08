@@ -190,8 +190,8 @@ export async function getUploadDetails(
   uploadId: number
 ): Promise<MsgResponse> {
   const response = await fetch(
-    // `${API_URL}/prospect/upload/history/${uploadId}/details`,
-    `http://127.0.0.1:5000/prospect/upload/history/${uploadId}/details`,
+    `${API_URL}/prospect/upload/history/${uploadId}/details`,
+    // `http://127.0.0.1:5000/prospect/upload/history/${uploadId}/details`,
     {
       method: "GET",
       headers: {

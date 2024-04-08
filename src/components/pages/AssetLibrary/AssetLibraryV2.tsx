@@ -1,31 +1,27 @@
-import { Badge, Button, Divider, Flex, Grid, Group, Input, Modal, Radio, Switch, Tabs, Text, TextInput, Textarea } from '@mantine/core';
-import {
-  IconChevronRight,
-  IconCircleCheck,
-  IconCircleX,
-  IconEdit,
-  IconInfoCircle,
-  IconLayoutBoard,
-  IconLink,
-  IconList,
-  IconPlus,
-  IconTrash,
-} from '@tabler/icons';
+import { Badge, Box, Button, Divider, Flex, Group, List, Modal, Radio, Stack, Switch, Text, TextInput, Textarea } from '@mantine/core';
+import { IconCloudUpload, IconEdit, IconLayoutBoard, IconList, IconPlus, IconTrash } from '@tabler/icons';
+import { IconArrowRight, IconBulb, IconToggleRight } from '@tabler/icons';
 import { useDisclosure } from '@mantine/hooks';
 import { IconSparkles } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import CardView from './CardView';
+import ListView from './ListView';
 
 export default function AssetLibraryV2() {
   const [opened, { open, close }] = useDisclosure(false);
   const [openedAsset, { open: openAsset, close: closeAsset }] = useDisclosure(false);
+
   const [viewType, setViewType] = useState('card');
+  const [tabs, setTabs] = useState('non_generative');
+  const [semiTabs, setSemiTabs] = useState('');
+
   const [ingestionType, setIngestionType] = useState('');
   const [assetType, setAssetType] = useState('');
   const [editSummary, setEditSummary] = useState(false);
   const [summary, setSummary] = useState('');
-  const [tabs, setTabs] = useState('all');
   const data = [
     {
+      num: 0,
       usage: true,
       ingestion_type: 'pdf',
       title: 'Behavioral Health ROI',
@@ -35,6 +31,7 @@ export default function AssetLibraryV2() {
       ai_reponse: true,
     },
     {
+      num: 1,
       usage: false,
       ingestion_type: 'text',
       title: 'NewtonX G2 Winnsdndndndd',
@@ -44,6 +41,7 @@ export default function AssetLibraryV2() {
       ai_reponse: false,
     },
     {
+      num: 2,
       usage: true,
       ingestion_type: 'pdf',
       title: 'Phrase: NewtonX teststsdasd',
@@ -53,6 +51,7 @@ export default function AssetLibraryV2() {
       ai_reponse: true,
     },
     {
+      num: 3,
       usage: false,
       ingestion_type: 'text',
       title: 'NewtonX G2 Winnsdndndndd',
@@ -62,6 +61,7 @@ export default function AssetLibraryV2() {
       ai_reponse: false,
     },
     {
+      num: 4,
       usage: false,
       ingestion_type: 'text',
       title: 'NewtonX G2 Winnsdndndndd',
@@ -71,6 +71,7 @@ export default function AssetLibraryV2() {
       ai_reponse: false,
     },
     {
+      num: 5,
       usage: false,
       ingestion_type: 'text',
       title: 'NewtonX G2 Winnsdndndndd',
@@ -80,6 +81,16 @@ export default function AssetLibraryV2() {
       ai_reponse: false,
     },
   ];
+
+  const [usedData, setUsedData] = useState<any>([]);
+  const [unusedData, setUnUsedData] = useState<any>([]);
+
+  useEffect(() => {
+    let usedData = data.filter((data) => data.usage === true);
+    setUsedData(usedData);
+    let unusedData = data.filter((data) => data.usage === false);
+    setUnUsedData(unusedData);
+  }, []);
 
   return (
     <Flex direction={'column'} px={'5%'} gap={'sm'} bg={'white'}>
@@ -113,132 +124,86 @@ export default function AssetLibraryV2() {
           </Button>
         </Flex>
       </Flex>
-      <Flex align={'center'} justify={'space-between'} w={'100%'} bg={'#f3f4f6'} p={'xs'} style={{ borderRadius: '8px' }}>
-        <Flex>
-          <Button onClick={() => setTabs('all')} color={'gray'} variant={tabs === 'all' ? 'white' : 'tranparent'}>
-            All
-          </Button>
-          <Button onClick={() => setTabs('cta')} color={'gray'} variant={tabs === 'cta' ? 'white' : 'tranparent'}>
-            CTAs
-          </Button>
-          <Button onClick={() => setTabs('offer')} color={'gray'} variant={tabs === 'offer' ? 'white' : 'tranparent'}>
-            Offers
-          </Button>
-          <Button onClick={() => setTabs('phrase')} color={'gray'} variant={tabs === 'phrase' ? 'white' : 'tranparent'}>
-            Phrases
-          </Button>
-          <Button onClick={() => setTabs('case_study')} color={'gray'} variant={tabs === 'case_study' ? 'white' : 'tranparent'}>
-            Case Studies
-          </Button>
-          <Button onClick={() => setTabs('research_point')} color={'gray'} variant={tabs === 'research_point' ? 'white' : 'tranparent'}>
-            Research Points
-          </Button>
-          <Button onClick={() => setTabs('email_subject_line')} color={'gray'} variant={tabs === 'email_subject_line' ? 'white' : 'tranparent'}>
-            Email Subject Lines
-          </Button>
-          <Button onClick={() => setTabs('linkedin')} color={'gray'} variant={tabs === 'linkedin' ? 'white' : 'tranparent'}>
-            Linkedin CTAs
-          </Button>
+      <Box>
+        <Flex justify={'space-between'} align={'center'}>
+          <Flex
+            align={'center'}
+            w={'fit-content'}
+            bg={'#f3f4f6'}
+            p={4}
+            style={{ borderRadius: '8px', borderBottomRightRadius: '0px', borderBottomLeftRadius: '0px' }}
+          >
+            <Button
+              onClick={() => {
+                setTabs('non_generative');
+                setSemiTabs('all');
+              }}
+              color={'gray'}
+              variant={tabs === 'non_generative' ? 'tranparent' : 'white'}
+            >
+              Non Generative
+            </Button>
+            <Button
+              onClick={() => {
+                setTabs('generative');
+                setSemiTabs('offers');
+              }}
+              color={'gray'}
+              variant={tabs === 'generative' ? 'tranparent' : 'white'}
+            >
+              Generative
+            </Button>
+          </Flex>
+          <Switch defaultChecked label='Show Used Assets Only' mr={'xs'} />
         </Flex>
-        <Switch defaultChecked label='Show Used Assets Only' />
-      </Flex>
-      <Grid>
-        {data?.map((item, index) => {
-          return (
-            <Grid.Col span={4} key={index}>
-              <Flex style={{ border: '1px solid #ced4da', borderRadius: '8px' }} p={'xl'} direction={'column'} gap={'sm'}>
-                <Flex align={'center'} justify={'space-between'}>
-                  <Badge
-                    leftSection={item?.usage ? <IconCircleCheck size={'1rem'} style={{ marginTop: '7px' }} /> : ''}
-                    variant='filled'
-                    size='lg'
-                    color={item?.usage ? 'blue' : 'gray'}
-                  >
-                    {item?.usage ? 'used in campaign' : 'not used'}
-                  </Badge>
-                  <Button radius={'xl'} size='xs' variant='light' rightIcon={<IconChevronRight size={'1rem'} />} onClick={openAsset}>
-                    View
-                  </Button>
-                </Flex>
-                <Flex gap={'5px'}>
-                  <Badge size='lg' color={item?.type === 'case study' ? 'pink' : item?.type === 'offer' ? 'orange' : 'green'}>
-                    {item?.type}
-                  </Badge>
-                  <Badge variant='outline' color='gray' size='lg'>
-                    ingestion type: {item?.ingestion_type}
-                  </Badge>
-                </Flex>
-                <Flex align={'center'} w={'fit-content'}>
-                  <Text fw={700} lineClamp={1} w={'210px'} size={'xl'}>
-                    {item?.title}
-                  </Text>
-                  {item?.usage && <IconLink size={'1.4rem'} color='#499df9' />}
-                </Flex>
-                <Text color='gray' mt={'-xs'} variant='transparent' size={'sm'} fw={500} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <IconInfoCircle size={'1rem'} />
-                  See why this is relevant
-                </Text>
-                <Group>
-                  <Text style={{ display: 'flex', gap: '8px', alignItems: 'center' }} fw={600} color='gray'>
-                    Open Rate:{' '}
-                    <Text fw={800} color={item?.open_rate > 50 ? 'green' : 'orange'}>
-                      {item?.open_rate}%
-                    </Text>
-                  </Text>
-                  <Divider orientation='vertical' />
-                  <Text style={{ display: 'flex', gap: '8px', alignItems: 'center' }} fw={600} color='gray'>
-                    Reply Rate:{' '}
-                    <Text fw={800} color={item?.reply_rate > 50 ? 'green' : 'orange'}>
-                      {item?.reply_rate}%
-                    </Text>
-                  </Text>
-                </Group>
-                <Flex
-                  p={'md'}
-                  direction={'column'}
-                  gap={'xs'}
-                  bg={item?.ai_reponse ? '#fff5ff' : '#f4f9ff'}
-                  mt={item?.ai_reponse ? '' : '55px'}
-                  style={{ borderRadius: '8px' }}
-                >
-                  {item?.ai_reponse && (
-                    <Flex align={'center'} justify={'space-between'}>
-                      <Text color='#ec58fb' size={'lg'} fw={700} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                        <IconSparkles size={'1.4rem'} fill='pink' /> AI Summary
-                      </Text>
-                      <IconEdit color='gray' size={'1.2rem'} />
-                    </Flex>
-                  )}
-                  <Flex align={'end'}>
-                    <Text lineClamp={2} size={'sm'} color='gray' fw={600}>
-                      {'This cas study explores how lorem Ipsum dolor sit amet, consectetur adipiscing elit testsdsdasdfasdasdfasdfasdfasdf'}
-                    </Text>
-                    {!item?.ai_reponse && (
-                      <Flex>
-                        <IconEdit color='gray' size={'1.2rem'} />
-                      </Flex>
-                    )}
-                  </Flex>
-                </Flex>
-                <Flex gap={'xl'}>
-                  <Button
-                    w={'100%'}
-                    size='md'
-                    color={item?.usage ? 'gray' : ''}
-                    variant='outline'
-                    leftIcon={item?.usage ? <IconCircleX size={'1.2rem'} /> : <IconCircleCheck size={'1.2rem'} />}
-                  >
-                    {item?.usage ? 'Stop Using' : 'Click to Use'}
-                  </Button>
-                  <Button size='md' w={'100%'} color='red' variant='outline' leftIcon={<IconTrash size={'1rem'} />}>
-                    Delete
-                  </Button>
-                </Flex>
-              </Flex>
-            </Grid.Col>
-          );
-        })}
-      </Grid>
+        {tabs === 'non_generative' ? (
+          <Flex align={'center'} justify={'space-between'} w={'100%'} bg={'#f3f4f6'} p={8} style={{ borderRadius: '8px', borderTopLeftRadius: '0px' }}>
+            <Flex>
+              <Button onClick={() => setSemiTabs('all')} color={'gray'} variant={semiTabs === 'all' ? 'white' : 'tranparent'}>
+                All
+              </Button>
+              <Button onClick={() => setSemiTabs('cta')} color={'gray'} variant={semiTabs === 'cta' ? 'white' : 'tranparent'}>
+                CTAs
+              </Button>
+              <Button onClick={() => setSemiTabs('email_templates')} color={'gray'} variant={semiTabs === 'email_templates' ? 'white' : 'tranparent'}>
+                Email Templates
+              </Button>
+              <Button onClick={() => setSemiTabs('linkedin_templates')} color={'gray'} variant={semiTabs === 'linkedin_templates' ? 'white' : 'tranparent'}>
+                Linkedin Templates
+              </Button>
+            </Flex>
+          </Flex>
+        ) : (
+          <Flex align={'center'} justify={'space-between'} w={'100%'} bg={'#f3f4f6'} p={8} style={{ borderRadius: '8px', borderTopLeftRadius: '0px' }}>
+            <Flex>
+              <Button onClick={() => setSemiTabs('offers')} color={'gray'} variant={semiTabs === 'offers' ? 'white' : 'tranparent'}>
+                Offers
+              </Button>
+              <Button onClick={() => setSemiTabs('phrases')} color={'gray'} variant={semiTabs === 'phrases' ? 'white' : 'tranparent'}>
+                Phrases
+              </Button>
+              <Button onClick={() => setSemiTabs('study')} color={'gray'} variant={semiTabs === 'study' ? 'white' : 'tranparent'}>
+                Case Studies
+              </Button>
+              <Button onClick={() => setSemiTabs('research')} color={'gray'} variant={semiTabs === 'research' ? 'white' : 'tranparent'}>
+                Research Points
+              </Button>
+              <Button onClick={() => setSemiTabs('email_subject_lines')} color={'gray'} variant={semiTabs === 'email_subject_lines' ? 'white' : 'tranparent'}>
+                Email Subject Lines
+              </Button>
+              <Button onClick={() => setSemiTabs('linkedin_cta')} color={'gray'} variant={semiTabs === 'linkedin_cta' ? 'white' : 'tranparent'}>
+                Linkedin CTAs
+              </Button>
+            </Flex>
+          </Flex>
+        )}
+        {/* {tabs === 'non_generative' ? <NonGenerative view={viewType} data={data} /> : <Generative view={viewType} data={data} />} */}
+        {viewType === 'card' ? (
+          <CardView type={tabs} view={viewType} semiTabs={semiTabs} useData={usedData} unUseData={unusedData} />
+        ) : (
+          <ListView type={tabs} view={viewType} semiTabs={semiTabs} useData={usedData} unUseData={unusedData} />
+        )}
+      </Box>
       <Modal
         opened={opened}
         onClose={() => {
@@ -284,7 +249,34 @@ export default function AssetLibraryV2() {
               </Group>
             </Radio.Group>
           </Flex>
-          {ingestionType && assetType && (
+          {assetType !== '' && ingestionType === 'Image' ? (
+            <Flex
+              style={{ border: '1px solid #e2edfc', borderRadius: '8px', borderStyle: 'dashed' }}
+              bg={'#f5f9fe'}
+              justify={'center'}
+              p={40}
+              align={'center'}
+              gap={'lg'}
+            >
+              <Flex>
+                <IconCloudUpload color='#228be6' size={'4rem'} />
+              </Flex>
+              <Box>
+                <Text size={'lg'} fw={600}>
+                  Drag & drop files or <span className='text-[#228be6] underline'>Browse</span>
+                </Text>
+                <Flex gap={'sm'} align={'center'}>
+                  <Text color='gray' fw={400} size={'sm'}>
+                    Supported formats: jpeg, png
+                  </Text>
+                  <Divider orientation='vertical' />
+                  <Text color='gray' fw={400} size={'sm'}>
+                    Max file size: 2MB
+                  </Text>
+                </Flex>
+              </Box>
+            </Flex>
+          ) : assetType !== '' && ingestionType === 'Text Dump' ? (
             <Flex direction={'column'}>
               <Textarea
                 minRows={3}
@@ -292,6 +284,8 @@ export default function AssetLibraryV2() {
                 placeholder='Copy/paste contents of a PDF, webpage, or sequence and the AI will summarize and Ingest it.'
               />
             </Flex>
+          ) : (
+            <></>
           )}
           <Flex justify={'space-between'} gap={'xl'} mt={'sm'}>
             <Button
@@ -398,6 +392,32 @@ export default function AssetLibraryV2() {
           </Flex>
         </Flex>
       </Modal>
+      <Flex sx={{ border: '1px solid #cfcfcf', borderStyle: 'dashed', borderRadius: '8px' }} bg={'#f3f4f6'} p={'lg'} mt={'lg'} mb={140}>
+        <List spacing='1px' size='sm' center>
+          <List.Item icon={<IconBulb size={'1.2rem'} color='#228be6' />}>
+            <Text fw={600} size={13}>
+              These are the assets that have been imported into the system for SellScale.
+            </Text>
+          </List.Item>
+          <List.Item icon={<IconArrowRight size={'1.2rem'} color='#228be6' />}>
+            <Text size={'xs'} color='gray' fw={500} style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              Click on <span style={{ color: '#228be6' }}>Add New Asset</span> to add a new asset to the library
+            </Text>
+          </List.Item>
+          <List.Item icon={<IconArrowRight size={'1.2rem'} color='#228be6' />}>
+            <Text size={'xs'} color='gray' fw={500} style={{ display: 'flex', gap: '4px', alignContent: 'center' }}>
+              To use assets in this campaign, click on the <span style={{ color: '#228be6   ' }}>Toggle</span>{' '}
+              <IconToggleRight color='#228be6' size={'1.1rem'} style={{ marginTop: '1px' }} /> button
+            </Text>
+          </List.Item>
+          <List.Item icon={<IconArrowRight size={'1.2rem'} color='#228be6' />}>
+            <Text size={'xs'} color='gray' fw={500} style={{ display: 'flex', gap: '4px', alignContent: 'center' }}>
+              To remove an asset from the library, click on the <span style={{ color: 'red' }}>Delete</span>
+              <IconTrash color='red' size={'0.9rem'} style={{ marginTop: '1px' }} /> button
+            </Text>
+          </List.Item>
+        </List>
+      </Flex>
     </Flex>
   );
 }

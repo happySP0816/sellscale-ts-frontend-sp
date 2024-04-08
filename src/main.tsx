@@ -69,7 +69,7 @@ import CompanyOverview from '@common/company/CompanyOverview';
 import OperatorDashTaskRouter from '@pages/Overview/OperatorDash/OperatorDashTaskRouter';
 import TaskEmailTemplate from '@common/resend_email/task_resend_email';
 import ExtractPdfPage from '@pages/ExtractPdfPage';
-import AssetLibraryV2 from '@pages/AssetLibraryV2';
+import AssetLibraryV2 from '@pages/AssetLibrary/AssetLibraryV2';
 import ClientCampaignView from '@pages/ClientCampaignView/ClientCampaignView';
 import { CampaignAGI } from '@pages/CampaignAGI/CampaignAGI';
 import InternalToolsPage from '@pages/InternalToolsPage';

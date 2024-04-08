@@ -832,7 +832,7 @@ export function PersonCampaignCard(props: {
                           <Text color='#817e7e' fw={600}>
                             Last Message From Prospect:
                           </Text>
-                          <Text color='#817e7e'>{item.li_last_message_timestamp}</Text>
+                          <Text color='#817e7e'>{item.last_message_timestamp}</Text>
                         </Flex>
                         <Box
                           bg={
@@ -852,7 +852,7 @@ export function PersonCampaignCard(props: {
                             borderRadius: '10px',
                           }}
                         >
-                          <Text fw={500}>{item?.li_last_message_from_prospect}</Text>
+                          <Text fw={500}>{item?.last_message_from_prospect}</Text>
                         </Box>
                       </Box>
                     </Flex>
@@ -906,8 +906,6 @@ export function PersonCampaignCard(props: {
       );
     }
   }, [value, campaignList]);
-
-  console.log('campaignList', campaignList);
 
   const unusedProspects =
     (props.project?.num_unused_email_prospects ?? 0) +
@@ -975,8 +973,6 @@ export function PersonCampaignCard(props: {
   if (linkedinCompletionPercentage > 0 && emailCompletionPercentage > 0) {
     completionsActiveSpan = 6;
   }
-
-  console.log(emailCompletionPercentage, linkedinCompletionPercentage, completionPercentage);
 
   return (
     <Paper ref={ref} id='child'>

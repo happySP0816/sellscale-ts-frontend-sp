@@ -1,24 +1,27 @@
-import { Badge, Box, Button, Divider, Flex, Group, List, Modal, Radio, Switch, Text, TextInput, Textarea } from '@mantine/core';
-import { IconEdit, IconLayoutBoard, IconList, IconPlus, IconTrash } from '@tabler/icons';
+import { Badge, Box, Button, Divider, Flex, Group, List, Modal, Radio, Stack, Switch, Text, TextInput, Textarea } from '@mantine/core';
+import { IconCloudUpload, IconEdit, IconLayoutBoard, IconList, IconPlus, IconTrash } from '@tabler/icons';
 import { IconArrowRight, IconBulb, IconToggleRight } from '@tabler/icons';
 import { useDisclosure } from '@mantine/hooks';
 import { IconSparkles } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
-import NonGenerative from './NonGenerative';
-import Generative from './Generative';
+import CardView from './CardView';
+import ListView from './ListView';
 
 export default function AssetLibraryV2() {
   const [opened, { open, close }] = useDisclosure(false);
   const [openedAsset, { open: openAsset, close: closeAsset }] = useDisclosure(false);
 
   const [viewType, setViewType] = useState('card');
+  const [tabs, setTabs] = useState('non_generative');
+  const [semiTabs, setSemiTabs] = useState('');
+
   const [ingestionType, setIngestionType] = useState('');
   const [assetType, setAssetType] = useState('');
   const [editSummary, setEditSummary] = useState(false);
   const [summary, setSummary] = useState('');
-  const [tabs, setTabs] = useState('non_generative');
   const data = [
     {
+      num: 0,
       usage: true,
       ingestion_type: 'pdf',
       title: 'Behavioral Health ROI',
@@ -28,6 +31,7 @@ export default function AssetLibraryV2() {
       ai_reponse: true,
     },
     {
+      num: 1,
       usage: false,
       ingestion_type: 'text',
       title: 'NewtonX G2 Winnsdndndndd',
@@ -37,6 +41,7 @@ export default function AssetLibraryV2() {
       ai_reponse: false,
     },
     {
+      num: 2,
       usage: true,
       ingestion_type: 'pdf',
       title: 'Phrase: NewtonX teststsdasd',
@@ -46,6 +51,7 @@ export default function AssetLibraryV2() {
       ai_reponse: true,
     },
     {
+      num: 3,
       usage: false,
       ingestion_type: 'text',
       title: 'NewtonX G2 Winnsdndndndd',
@@ -55,6 +61,7 @@ export default function AssetLibraryV2() {
       ai_reponse: false,
     },
     {
+      num: 4,
       usage: false,
       ingestion_type: 'text',
       title: 'NewtonX G2 Winnsdndndndd',
@@ -64,6 +71,7 @@ export default function AssetLibraryV2() {
       ai_reponse: false,
     },
     {
+      num: 5,
       usage: false,
       ingestion_type: 'text',
       title: 'NewtonX G2 Winnsdndndndd',
@@ -125,16 +133,76 @@ export default function AssetLibraryV2() {
             p={4}
             style={{ borderRadius: '8px', borderBottomRightRadius: '0px', borderBottomLeftRadius: '0px' }}
           >
-            <Button onClick={() => setTabs('non_generative')} color={'gray'} variant={tabs === 'non_generative' ? 'tranparent' : 'white'}>
+            <Button
+              onClick={() => {
+                setTabs('non_generative');
+                setSemiTabs('all');
+              }}
+              color={'gray'}
+              variant={tabs === 'non_generative' ? 'tranparent' : 'white'}
+            >
               Non Generative
             </Button>
-            <Button onClick={() => setTabs('generative')} color={'gray'} variant={tabs === 'generative' ? 'tranparent' : 'white'}>
+            <Button
+              onClick={() => {
+                setTabs('generative');
+                setSemiTabs('offers');
+              }}
+              color={'gray'}
+              variant={tabs === 'generative' ? 'tranparent' : 'white'}
+            >
               Generative
             </Button>
           </Flex>
           <Switch defaultChecked label='Show Used Assets Only' mr={'xs'} />
         </Flex>
-        {tabs === 'non_generative' ? <NonGenerative view={viewType} data={data} /> : <Generative view={viewType} />}
+        {tabs === 'non_generative' ? (
+          <Flex align={'center'} justify={'space-between'} w={'100%'} bg={'#f3f4f6'} p={8} style={{ borderRadius: '8px', borderTopLeftRadius: '0px' }}>
+            <Flex>
+              <Button onClick={() => setSemiTabs('all')} color={'gray'} variant={semiTabs === 'all' ? 'white' : 'tranparent'}>
+                All
+              </Button>
+              <Button onClick={() => setSemiTabs('cta')} color={'gray'} variant={semiTabs === 'cta' ? 'white' : 'tranparent'}>
+                CTAs
+              </Button>
+              <Button onClick={() => setSemiTabs('email_templates')} color={'gray'} variant={semiTabs === 'email_templates' ? 'white' : 'tranparent'}>
+                Email Templates
+              </Button>
+              <Button onClick={() => setSemiTabs('linkedin_templates')} color={'gray'} variant={semiTabs === 'linkedin_templates' ? 'white' : 'tranparent'}>
+                Linkedin Templates
+              </Button>
+            </Flex>
+          </Flex>
+        ) : (
+          <Flex align={'center'} justify={'space-between'} w={'100%'} bg={'#f3f4f6'} p={8} style={{ borderRadius: '8px', borderTopLeftRadius: '0px' }}>
+            <Flex>
+              <Button onClick={() => setSemiTabs('offers')} color={'gray'} variant={semiTabs === 'offers' ? 'white' : 'tranparent'}>
+                Offers
+              </Button>
+              <Button onClick={() => setSemiTabs('phrases')} color={'gray'} variant={semiTabs === 'phrases' ? 'white' : 'tranparent'}>
+                Phrases
+              </Button>
+              <Button onClick={() => setSemiTabs('study')} color={'gray'} variant={semiTabs === 'study' ? 'white' : 'tranparent'}>
+                Case Studies
+              </Button>
+              <Button onClick={() => setSemiTabs('research')} color={'gray'} variant={semiTabs === 'research' ? 'white' : 'tranparent'}>
+                Research Points
+              </Button>
+              <Button onClick={() => setSemiTabs('email_subject_lines')} color={'gray'} variant={semiTabs === 'email_subject_lines' ? 'white' : 'tranparent'}>
+                Email Subject Lines
+              </Button>
+              <Button onClick={() => setSemiTabs('linkedin_cta')} color={'gray'} variant={semiTabs === 'linkedin_cta' ? 'white' : 'tranparent'}>
+                Linkedin CTAs
+              </Button>
+            </Flex>
+          </Flex>
+        )}
+        {/* {tabs === 'non_generative' ? <NonGenerative view={viewType} data={data} /> : <Generative view={viewType} data={data} />} */}
+        {viewType === 'card' ? (
+          <CardView type={tabs} view={viewType} semiTabs={semiTabs} useData={usedData} unUseData={unusedData} />
+        ) : (
+          <ListView type={tabs} view={viewType} semiTabs={semiTabs} useData={usedData} unUseData={unusedData} />
+        )}
       </Box>
       <Modal
         opened={opened}
@@ -181,7 +249,34 @@ export default function AssetLibraryV2() {
               </Group>
             </Radio.Group>
           </Flex>
-          {ingestionType && assetType && (
+          {assetType !== '' && ingestionType === 'Image' ? (
+            <Flex
+              style={{ border: '1px solid #e2edfc', borderRadius: '8px', borderStyle: 'dashed' }}
+              bg={'#f5f9fe'}
+              justify={'center'}
+              p={40}
+              align={'center'}
+              gap={'lg'}
+            >
+              <Flex>
+                <IconCloudUpload color='#228be6' size={'4rem'} />
+              </Flex>
+              <Box>
+                <Text size={'lg'} fw={600}>
+                  Drag & drop files or <span className='text-[#228be6] underline'>Browse</span>
+                </Text>
+                <Flex gap={'sm'} align={'center'}>
+                  <Text color='gray' fw={400} size={'sm'}>
+                    Supported formats: jpeg, png
+                  </Text>
+                  <Divider orientation='vertical' />
+                  <Text color='gray' fw={400} size={'sm'}>
+                    Max file size: 2MB
+                  </Text>
+                </Flex>
+              </Box>
+            </Flex>
+          ) : assetType !== '' && ingestionType === 'Text Dump' ? (
             <Flex direction={'column'}>
               <Textarea
                 minRows={3}
@@ -189,6 +284,8 @@ export default function AssetLibraryV2() {
                 placeholder='Copy/paste contents of a PDF, webpage, or sequence and the AI will summarize and Ingest it.'
               />
             </Flex>
+          ) : (
+            <></>
           )}
           <Flex justify={'space-between'} gap={'xl'} mt={'sm'}>
             <Button

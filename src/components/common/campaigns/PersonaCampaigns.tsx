@@ -929,7 +929,7 @@ export function PersonCampaignCard(props: {
                             Last Message From Prospect:
                           </Text>
                           <Text color="#817e7e">
-                            {item.li_last_message_timestamp}
+                            {item.last_message_timestamp}
                           </Text>
                         </Flex>
                         <Box
@@ -951,7 +951,7 @@ export function PersonCampaignCard(props: {
                           }}
                         >
                           <Text fw={500}>
-                            {item?.li_last_message_from_prospect}
+                            {item?.last_message_from_prospect}
                           </Text>
                         </Box>
                       </Box>
@@ -1020,6 +1020,8 @@ export function PersonCampaignCard(props: {
       );
     }
   }, [value, campaignList]);
+
+  console.log('campaignList', campaignList);
 
   const unusedProspects =
     (props.project?.num_unused_email_prospects ?? 0) +

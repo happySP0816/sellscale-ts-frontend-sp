@@ -153,7 +153,7 @@ const RejectionAnalysis = () => {
               <Flex align={'center'} gap={3}>
                 <Text fw={600}>{element.campaign}</Text>
                 <a
-                  href={`/setup/linkedin?campaign_id=${element.campaignID}`}
+                  href={`/setup/linkedin/${element.campaignID}`}
                   target='_blank'
                   rel='noopener noreferrer'
                 >

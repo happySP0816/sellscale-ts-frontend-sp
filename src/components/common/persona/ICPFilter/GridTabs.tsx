@@ -94,7 +94,7 @@ const GridTabs = ({ selectedTab, setSelectedTab, icpDashboard, numProspects }: I
             <Button
               key={tab.value}
               variant='subtle'
-              size='sm'
+              size='xs'
               w={'100%'}
               onClick={() => setSelectedTab(tab)}
               style={{

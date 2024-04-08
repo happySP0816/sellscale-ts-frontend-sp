@@ -42,13 +42,18 @@ export default function CreatePersona(props: PropsType) {
 
   const createPersonaHandler = async () => {
     setCreatingPersona(true);
-    const result = await createPersona(userToken, props.createPersona.name, props.createPersona.ctas, {
-      fitReason: props.createPersona.fitReason,
-      icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
-      contactObjective: props.createPersona.contactObjective,
-      contractSize: props.createPersona.contractSize,
-      template_mode: props.createPersona.templateMode,
-    });
+    const result = await createPersona(
+      userToken,
+      props.createPersona.name,
+      props.createPersona.ctas,
+      {
+        fitReason: props.createPersona.fitReason,
+        icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
+        contactObjective: props.createPersona.contactObjective,
+        contractSize: props.createPersona.contractSize,
+        template_mode: props.createPersona.templateMode,
+      }
+    );
     if (result.status === 'error') {
       console.error('Failed to create persona & CTAs');
       return;

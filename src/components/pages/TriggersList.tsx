@@ -24,7 +24,17 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import { API_URL } from '@constants/data';
 import PageFrame from '@common/PageFrame';
-import {Icon24Hours, IconCheck, IconChevronsDown, IconEdit, IconEngine, IconPlus, IconRefresh, IconSquaresDiagonal, IconChevronDown} from '@tabler/icons';
+import {
+  Icon24Hours,
+  IconCheck,
+  IconChevronsDown,
+  IconEdit,
+  IconEngine,
+  IconPlus,
+  IconRefresh,
+  IconSquaresDiagonal,
+  IconChevronDown,
+} from '@tabler/icons';
 import { useDisclosure } from '@mantine/hooks';
 import moment from 'moment';
 import { DataSheetGrid, textColumn, keyColumn } from 'react-datasheet-grid';
@@ -293,7 +303,7 @@ const TriggersList = () => {
   const [userToken] = useRecoilState(userTokenState);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [shouldShowInactiveCampaign, setShouldShowInactiveCampaign] = useState(false)
+  const [shouldShowInactiveCampaign, setShouldShowInactiveCampaign] = useState(false);
   const currentProject = useRecoilValue(currentProjectState);
 
   const [currentOpenTrigger, setCurrentOpenTrigger] = useState(-1);
@@ -325,27 +335,29 @@ const TriggersList = () => {
 
     fetchTriggers();
   }, [userToken]);
-  const theme = useMantineTheme()
+  const theme = useMantineTheme();
   console.log(JSON.stringify(triggers));
   return (
     <PageFrame>
-      <Flex w="100%">
+      <Flex w='100%'>
         <Box>
-          <Title order={3} color='gray.6'>Continuous Campaigns</Title>
-          <Text color="gray">
-            SellScale will automatically find prospects from the active triggers
-            below and add them to your campaigns.
+          <Title order={3} color='gray.6'>
+            Continuous Campaigns
+          </Title>
+          <Text color='gray'>
+            SellScale will automatically find prospects from the active triggers below and add them
+            to your campaigns.
           </Text>
         </Box>
         <Button
-          ml="auto"
-          mt="lg"
+          ml='auto'
+          mt='lg'
           onClick={async () => {
             if (!currentProject) return;
             const response = await createTrigger(userToken, currentProject.id);
-            if (response.status === "success") {
+            if (response.status === 'success') {
               const triggerId = response.data.trigger_id;
-              navigate("/create-trigger?trigger_id=" + triggerId);
+              navigate('/create-trigger?trigger_id=' + triggerId);
             }
           }}
         >
@@ -355,43 +367,43 @@ const TriggersList = () => {
 
       {loading && (
         <Card
-          mt="md"
-          w="100%"
-          shadow="sm"
-          p="lg"
-          h={"80vh"}
+          mt='md'
+          w='100%'
+          shadow='sm'
+          p='lg'
+          h={'80vh'}
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
-          <Loader variant="dots" />
+          <Loader variant='dots' />
         </Card>
       )}
 
       {triggers.length === 0 && !loading && (
         <Card
-          mt="md"
-          w="100%"
-          shadow="sm"
-          p="lg"
-          h={"80vh"}
+          mt='md'
+          w='100%'
+          shadow='sm'
+          p='lg'
+          h={'80vh'}
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
-          <Text mt="md" color="gray">
+          <Text mt='md' color='gray'>
             You have no triggers yet. Create a new trigger to get started.
           </Text>
           <Button
-            mt="lg"
-            variant="outline"
-            onClick={() => navigate("/create-trigger")}
+            mt='lg'
+            variant='outline'
+            onClick={() => navigate('/create-trigger')}
             rightIcon={<IconPlus size={16} />}
           >
             Create New Trigger
@@ -401,275 +413,256 @@ const TriggersList = () => {
 
       {/* Header */}
       <Grid
-        mt="md"
-        w="100%"
-        sx={(theme) => ({ border: `1px solid ${theme.colors.gray[4]}`, backgroundColor: "white" })}
-        p="md"
-        align="center"
+        mt='md'
+        w='100%'
+        sx={(theme) => ({ border: `1px solid ${theme.colors.gray[4]}`, backgroundColor: 'white' })}
+        p='md'
+        align='center'
       >
         <Grid.Col span={5}>
           <Flex>
-            <Text color="gray" fw="bold">
+            <Text color='gray' fw='bold'>
               Trigger
             </Text>
           </Flex>
         </Grid.Col>
         <Grid.Col span={2}>
           <Flex>
-            <Text color="gray" fw="bold">
+            <Text color='gray' fw='bold'>
               Sourced
             </Text>
           </Flex>
         </Grid.Col>
         <Grid.Col span={3}>
           <Flex>
-            <Text color="gray" fw="bold">
+            <Text color='gray' fw='bold'>
               Campaign
             </Text>
           </Flex>
         </Grid.Col>
         <Grid.Col span={2}>
           <Flex>
-            <Text color="gray" fw="bold">
+            <Text color='gray' fw='bold'>
               Details
             </Text>
           </Flex>
         </Grid.Col>
       </Grid>
 
-      <Grid w="100%">
-        {triggers.filter((trigger: any) => {
-          if (shouldShowInactiveCampaign) {
-            return true
-          }
+      <Grid w='100%'>
+        {triggers
+          .filter((trigger: any) => {
+            if (shouldShowInactiveCampaign) {
+              return true;
+            }
 
-          return trigger.active;
-        }).map((trigger: any) => {
-          return (
-            <Box w="100%" key={trigger.id}>
-              <Card shadow="sm" p="lg" withBorder>
-                <Grid justify="space-between" align="center">
-                  <Grid.Col span={5}>
-                    <Flex align={"center"} gap={"sm"}>
-                      <Box>
-                        <Box pos={"relative"} w={32} h={32}>
-                          <svg
-                            width="32"
-                            height="32"
-                            viewBox="0 0 100 100"
-                            version="1.1"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <circle
-                              cx="50"
-                              cy="50"
-                              r="46"
-                              stroke={theme.colors.blue[4]}
-                              stroke-width="4"
-                              stroke-dasharray="0 10"
-                              stroke-linecap="round"
-                              fill="transparent"
+            return trigger.active;
+          })
+          .map((trigger: any) => {
+            return (
+              <Box w='100%' key={trigger.id}>
+                <Card shadow='sm' p='lg' withBorder>
+                  <Grid justify='space-between' align='center'>
+                    <Grid.Col span={5}>
+                      <Flex align={'center'} gap={'sm'}>
+                        <Box>
+                          <Box pos={'relative'} w={32} h={32}>
+                            <svg
+                              width='32'
+                              height='32'
+                              viewBox='0 0 100 100'
+                              version='1.1'
+                              xmlns='http://www.w3.org/2000/svg'
+                            >
+                              <circle
+                                cx='50'
+                                cy='50'
+                                r='46'
+                                stroke={theme.colors.blue[4]}
+                                stroke-width='4'
+                                stroke-dasharray='0 10'
+                                stroke-linecap='round'
+                                fill='transparent'
+                              />
+                            </svg>
+                            <Icon24Hours
+                              color={theme.colors.blue[4]}
+                              style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                              }}
+                              size={'0.8rem'}
                             />
-                          </svg>
-                          <Icon24Hours
-                            color={theme.colors.blue[4]}
-                            style={{
-                              position: "absolute",
-                              top: "50%",
-                              left: "50%",
-                              transform: "translate(-50%, -50%)",
-                            }}
-                            size={"0.8rem"}
-                          />
+                          </Box>
+                          <Box>
+                            <Text color='gray.4' fw={700} align='center' fz={'xs'}>
+                              Every
+                            </Text>
+                            <Text color='gray.8' fw={700} align='center' fz={'xs'}>
+                              24H
+                            </Text>
+                          </Box>
                         </Box>
                         <Box>
-                          <Text
-                            color="gray.4"
-                            fw={700}
-                            align="center"
-                            fz={"xs"}
+                          <Badge size='xs' color='blue'>
+                            {trigger.trigger_type.replaceAll('_', ' ')}
+                          </Badge>
+                          <Box
+                            sx={{
+                              cursor: 'pointer',
+                              '&:hover': {
+                                textDecoration: 'underline',
+                              },
+                            }}
+                            onClick={() => {
+                              navigate('/create-trigger?trigger_id=' + trigger.id);
+                            }}
                           >
-                            Every
+                            <Text fw='bold' size='lg'>
+                              {trigger.emoji} {trigger.name}
+                            </Text>
+                          </Box>
+                          <Text fz='xs' color='gray.6'>
+                            {trigger.description}
                           </Text>
-                          <Text
-                            color="gray.8"
-                            fw={700}
-                            align="center"
-                            fz={"xs"}
-                          >
-                            24H
+                          <Text mt='xs' color='gray' size='xs'>
+                            <b>Last run:</b> {moment(trigger.last_run).format('MMM Do YYYY')} |{' '}
+                            <b>Next run:</b> {moment(trigger.next_run).format('MMM Do YYYY')}
                           </Text>
                         </Box>
-                      </Box>
+                      </Flex>
+                    </Grid.Col>
+
+                    <Grid.Col span={2}>
                       <Box>
-                        <Badge size="xs" color="blue">
-                          {trigger.trigger_type.replaceAll("_", " ")}
-                        </Badge>
-                        <Box
-                          sx={{
-                            cursor: "pointer",
-                            "&:hover": {
-                              textDecoration: "underline",
-                            },
-                          }}
-                          onClick={() => {
-                            navigate(
-                              "/create-trigger?trigger_id=" + trigger.id
-                            );
-                          }}
-                        >
-                          <Text fw="bold" size="lg">
-                            {trigger.emoji} {trigger.name}
-                          </Text>
-                        </Box>
-                        <Text fz="xs" color="gray.6">
-                          {trigger.description}
-                        </Text>
-                        <Text mt="xs" color="gray" size="xs">
-                          <b>Last run:</b>{" "}
-                          {moment(trigger.last_run).format("MMM Do YYYY")} |{" "}
-                          <b>Next run:</b>{" "}
-                          {moment(trigger.next_run).format("MMM Do YYYY")}
-                        </Text>
+                        <Flex sx={{ textAlign: 'center' }}>
+                          <Tooltip label='Total number of prospects found by this trigger.'>
+                            <Box
+                              onClick={() => setCurrentOpenTrigger(trigger.id)}
+                              sx={{ cursor: 'pointer' }}
+                            >
+                              <Text fw='bold' align='center'>
+                                {trigger.num_prospects_scraped}
+                              </Text>
+                              <Text fz='xs' color='gray' align='center'>
+                                prospects
+                              </Text>
+                            </Box>
+                          </Tooltip>
+                          <Tooltip label='Total number of unique companies found by this trigger.'>
+                            <Box
+                              onClick={() => setCurrentOpenTrigger(trigger.id)}
+                              ml='md'
+                              sx={{ cursor: 'pointer' }}
+                            >
+                              <Text fw='bold' align='center'>
+                                {trigger.num_prospect_companies}
+                              </Text>
+                              <Text fz='xs' color='gray' align='center'>
+                                companies
+                              </Text>
+                            </Box>
+                          </Tooltip>
+                        </Flex>
                       </Box>
-                    </Flex>
-                  </Grid.Col>
+                    </Grid.Col>
 
-                  <Grid.Col span={2}>
-                    <Box>
-                      <Flex sx={{ textAlign: "center" }}>
-                        <Tooltip label="Total number of prospects found by this trigger.">
-                          <Box
-                            onClick={() => setCurrentOpenTrigger(trigger.id)}
-                            sx={{ cursor: "pointer" }}
-                          >
-                            <Text fw="bold" align="center">
-                              {trigger.num_prospects_scraped}
-                            </Text>
-                            <Text fz="xs" color="gray" align="center">
-                              prospects
-                            </Text>
-                          </Box>
-                        </Tooltip>
-                        <Tooltip label="Total number of unique companies found by this trigger.">
-                          <Box
-                            onClick={() => setCurrentOpenTrigger(trigger.id)}
-                            ml="md"
-                            sx={{ cursor: "pointer" }}
-                          >
-                            <Text fw="bold" align="center">
-                              {trigger.num_prospect_companies}
-                            </Text>
-                            <Text fz="xs" color="gray" align="center">
-                              companies
-                            </Text>
-                          </Box>
-                        </Tooltip>
-                      </Flex>
-                    </Box>
-                  </Grid.Col>
-
-                  <Grid.Col span={3}>
-                    <Button
-                      compact
-                      size="sm"
-                      leftIcon={<IconEdit size={16} />}
-                      onClick={() =>
-                        navigate(
-                          `/setup/linkedin?campaign_id=${trigger.client_archetype_id}`
-                        )
-                      }
-                    >
-                      Edit Campaign
-                    </Button>
-                  </Grid.Col>
-
-                  <Grid.Col span={2}>
-                    <Flex align={"center"} gap={"sm"}>
-                      <Flex direction={"column"} gap={"xs"} align={"center"}>
-                        <Badge color="blue">ACTIVE</Badge>
-                        <Switch
-                          defaultChecked={trigger.active}
-                          onClick={async () => {
-                            await updateTrigger(
-                              userToken,
-                              trigger.id,
-                              undefined,
-                              undefined,
-                              undefined,
-                              undefined,
-                              !trigger.active,
-                              undefined,
-                              undefined
-                            );
-                          }}
-                          color="blue"
-                        />
-                      </Flex>
-
-                      <ActionIcon
-                        variant="filled"
-                        color="blue"
-                        radius={"xl"}
-                        onClick={() => {
-                          if (currentOpenTrigger === trigger.id) {
-                            setCurrentOpenTrigger(-1);
-                          } else {
-                            setCurrentOpenTrigger(trigger.id);
-                          }
-                        }}
-                        size="sm"
+                    <Grid.Col span={3}>
+                      <Button
+                        compact
+                        size='sm'
+                        leftIcon={<IconEdit size={16} />}
+                        onClick={() => navigate(`/setup/linkedin/${trigger.client_archetype_id}`)}
                       >
-                        <IconChevronDown
-                          size={"0.8rem"}
-                          style={{
-                            transitionDuration: "400ms",
-                            transitionTimingFunction:
-                              "cubic-bezier(0.4, 0, 0.2, 1)",
-                            transform:
-                              currentOpenTrigger === trigger.id
-                                ? `rotate(${
-                                    currentOpenTrigger === trigger.id ? 180 : 0
-                                  }deg)`
-                                : "none",
-                          }}
-                        />
-                      </ActionIcon>
-                    </Flex>
-                  </Grid.Col>
-                </Grid>
+                        Edit Campaign
+                      </Button>
+                    </Grid.Col>
 
-                <Collapse in={currentOpenTrigger === trigger.id}>
-                  <Card withBorder mt="md" p="md">
-                    <RecentRuns trigger_id={trigger.id} userToken={userToken} />
-                  </Card>
-                </Collapse>
-              </Card>
-            </Box>
-          );
-        })}
+                    <Grid.Col span={2}>
+                      <Flex align={'center'} gap={'sm'}>
+                        <Flex direction={'column'} gap={'xs'} align={'center'}>
+                          <Badge color='blue'>ACTIVE</Badge>
+                          <Switch
+                            defaultChecked={trigger.active}
+                            onClick={async () => {
+                              await updateTrigger(
+                                userToken,
+                                trigger.id,
+                                undefined,
+                                undefined,
+                                undefined,
+                                undefined,
+                                !trigger.active,
+                                undefined,
+                                undefined
+                              );
+                            }}
+                            color='blue'
+                          />
+                        </Flex>
+
+                        <ActionIcon
+                          variant='filled'
+                          color='blue'
+                          radius={'xl'}
+                          onClick={() => {
+                            if (currentOpenTrigger === trigger.id) {
+                              setCurrentOpenTrigger(-1);
+                            } else {
+                              setCurrentOpenTrigger(trigger.id);
+                            }
+                          }}
+                          size='sm'
+                        >
+                          <IconChevronDown
+                            size={'0.8rem'}
+                            style={{
+                              transitionDuration: '400ms',
+                              transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                              transform:
+                                currentOpenTrigger === trigger.id
+                                  ? `rotate(${currentOpenTrigger === trigger.id ? 180 : 0}deg)`
+                                  : 'none',
+                            }}
+                          />
+                        </ActionIcon>
+                      </Flex>
+                    </Grid.Col>
+                  </Grid>
+
+                  <Collapse in={currentOpenTrigger === trigger.id}>
+                    <Card withBorder mt='md' p='md'>
+                      <RecentRuns trigger_id={trigger.id} userToken={userToken} />
+                    </Card>
+                  </Collapse>
+                </Card>
+              </Box>
+            );
+          })}
       </Grid>
 
       {triggers && triggers.length > 0 && (
         <Button
-          mt={"md"}
-          color="gray"
-          radius={"xl"}
+          mt={'md'}
+          color='gray'
+          radius={'xl'}
           rightIcon={
             <IconChevronDown
-              size={"0.8rem"}
+              size={'0.8rem'}
               style={{
-                transitionDuration: "400ms",
-                transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
+                transitionDuration: '400ms',
+                transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
                 transform: shouldShowInactiveCampaign
                   ? `rotate(${shouldShowInactiveCampaign ? 180 : 0}deg)`
-                  : "none",
+                  : 'none',
               }}
             />
           }
           onClick={() => setShouldShowInactiveCampaign((s) => !s)}
         >
-          {shouldShowInactiveCampaign ? "Hide" : "Show"}{" "}
+          {shouldShowInactiveCampaign ? 'Hide' : 'Show'}{' '}
           {triggers?.filter((t: any) => !t.active).length} Inactive Campaigns
         </Button>
       )}

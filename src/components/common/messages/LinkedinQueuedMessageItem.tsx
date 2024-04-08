@@ -171,7 +171,7 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
         >
           <Flex direction='column' rowGap={'xs'}>
             <Anchor
-              href={`https://app.sellscale.com/setup/linkedin?campaign_id=${props.prospect_id}`}
+              href={`https://app.sellscale.com/setup/linkedin/${props.prospect_id}`}
               target='_blank'
             >
               <Badge

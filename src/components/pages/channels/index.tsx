@@ -11,7 +11,11 @@ import {
   Text,
   Title,
   Badge,
-} from "@mantine/core";
+  Loader,
+  Group,
+  Stack,
+  Anchor,
+} from '@mantine/core';
 import {
   IconArrowLeft,
   IconBrain,
@@ -22,28 +26,26 @@ import {
   IconPencil,
   IconPlant,
   IconPlus,
-} from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import Hook from "./components/Hook";
-import ChannelTab from "./components/ChannelTab";
-import { useRecoilValue } from "recoil";
-import { userDataState } from "@atoms/userAtoms";
-import { ProjectSelect } from "@common/library/ProjectSelect";
-import { currentProjectState } from "@atoms/personaAtoms";
-import { useNavigate } from "react-router-dom";
-import { navigateToPage } from "@utils/documentChange";
+} from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
+import Hook from './components/Hook';
+import ChannelTab from './components/ChannelTab';
+import { useRecoilValue } from 'recoil';
+import { userDataState } from '@atoms/userAtoms';
+import { ProjectSelect } from '@common/library/ProjectSelect';
+import { useNavigate } from 'react-router-dom';
+import { navigateToPage } from '@utils/documentChange';
+import { PersonaOverview } from 'src';
 
 const ChannelsSetupSelector = (props: {
   selectedChannel: string;
   setSelectedChannel: (channel: string) => void;
   hideChannels: boolean;
+  campaign?: PersonaOverview;
 }) => {
-  const [selectedChildChannel, setSelectedChildChannel] = useState(
-    props.selectedChannel
-  );
+  const [selectedChildChannel, setSelectedChildChannel] = useState(props.selectedChannel);
   const [isEnabledLinkedin, setEnabledLinkedin] = useState(true);
 
-  const currentProject = useRecoilValue(currentProjectState);
   const navigate = useNavigate();
 
   const [isEnabledEmail, setEnabledEmail] = useState(false);
@@ -63,35 +65,35 @@ const ChannelsSetupSelector = (props: {
   }, [isEnabledEmail, isActiveEmail]);
 
   const brainFilled =
-    currentProject?.name &&
-    currentProject?.persona_contact_objective &&
-    currentProject?.persona_fit_reason &&
-    currentProject?.contract_size &&
-    currentProject?.cta_framework_company &&
-    currentProject?.cta_framework_persona &&
-    currentProject?.cta_framework_action &&
-    currentProject?.use_cases &&
-    currentProject?.filters &&
-    currentProject?.lookalike_profile_1 &&
-    currentProject?.lookalike_profile_2 &&
-    currentProject?.lookalike_profile_3 &&
-    currentProject?.lookalike_profile_4 &&
-    currentProject?.lookalike_profile_5;
+    props.campaign?.name &&
+    props.campaign?.persona_contact_objective &&
+    props.campaign?.persona_fit_reason &&
+    props.campaign?.contract_size &&
+    props.campaign?.cta_framework_company &&
+    props.campaign?.cta_framework_persona &&
+    props.campaign?.cta_framework_action &&
+    props.campaign?.use_cases &&
+    props.campaign?.filters &&
+    props.campaign?.lookalike_profile_1 &&
+    props.campaign?.lookalike_profile_2 &&
+    props.campaign?.lookalike_profile_3 &&
+    props.campaign?.lookalike_profile_4 &&
+    props.campaign?.lookalike_profile_5;
   let brainPercentFilled = 0;
   let brainAttributes = [
-    currentProject?.name,
-    currentProject?.persona_contact_objective,
-    currentProject?.persona_fit_reason,
-    currentProject?.contract_size,
-    currentProject?.cta_framework_company,
-    currentProject?.cta_framework_persona,
-    currentProject?.cta_framework_action,
-    currentProject?.use_cases,
-    currentProject?.filters,
-    currentProject?.lookalike_profile_1,
-    currentProject?.lookalike_profile_2,
-    currentProject?.lookalike_profile_3,
-    currentProject?.lookalike_profile_4,
+    props.campaign?.name,
+    props.campaign?.persona_contact_objective,
+    props.campaign?.persona_fit_reason,
+    props.campaign?.contract_size,
+    props.campaign?.cta_framework_company,
+    props.campaign?.cta_framework_persona,
+    props.campaign?.cta_framework_action,
+    props.campaign?.use_cases,
+    props.campaign?.filters,
+    props.campaign?.lookalike_profile_1,
+    props.campaign?.lookalike_profile_2,
+    props.campaign?.lookalike_profile_3,
+    props.campaign?.lookalike_profile_4,
   ];
   brainAttributes.forEach((attribute) => {
     if (attribute) {
@@ -101,93 +103,45 @@ const ChannelsSetupSelector = (props: {
   brainPercentFilled = Math.round((brainPercentFilled / 13) * 100);
 
   const needMoreProspects =
-    currentProject?.num_unused_li_prospects &&
-    currentProject?.num_unused_li_prospects < 200;
+    props.campaign?.num_unused_li_prospects && props.campaign?.num_unused_li_prospects < 200;
 
-  let avgIcpScoreLabel = "";
-  if (currentProject?.avg_icp_fit_score) {
-    if (currentProject?.avg_icp_fit_score < 1) {
-      avgIcpScoreLabel = "Very Low";
-    } else if (currentProject?.avg_icp_fit_score < 2) {
-      avgIcpScoreLabel = "Low";
-    } else if (currentProject?.avg_icp_fit_score < 3) {
-      avgIcpScoreLabel = "Medium";
-    } else if (currentProject?.avg_icp_fit_score < 4) {
-      avgIcpScoreLabel = "High";
-    } else if (currentProject?.avg_icp_fit_score < 5) {
-      avgIcpScoreLabel = "Very High";
+  let avgIcpScoreLabel = '';
+  if (props.campaign?.avg_icp_fit_score) {
+    if (props.campaign?.avg_icp_fit_score < 1) {
+      avgIcpScoreLabel = 'Very Low';
+    } else if (props.campaign?.avg_icp_fit_score < 2) {
+      avgIcpScoreLabel = 'Low';
+    } else if (props.campaign?.avg_icp_fit_score < 3) {
+      avgIcpScoreLabel = 'Medium';
+    } else if (props.campaign?.avg_icp_fit_score < 4) {
+      avgIcpScoreLabel = 'High';
+    } else if (props.campaign?.avg_icp_fit_score < 5) {
+      avgIcpScoreLabel = 'Very High';
     }
   }
   const avgIcpScoreIsBad =
-    currentProject?.avg_icp_fit_score && currentProject?.avg_icp_fit_score < 2;
+    props.campaign?.avg_icp_fit_score && props.campaign?.avg_icp_fit_score < 2;
 
-  let ChannelIcon = () => (
-    <IconBrandLinkedin style={{ width: 20, height: 20, marginTop: 9 }} />
-  );
-  if (selectedChildChannel === "email") {
-    ChannelIcon = () => (
-      <IconMail style={{ width: 20, height: 20, marginTop: 9 }} />
-    );
-  } else if (selectedChildChannel === "nurture") {
-    ChannelIcon = () => (
-      <IconPlant style={{ width: 20, height: 20, marginTop: 9 }} />
-    );
+  let ChannelIcon = () => <IconBrandLinkedin style={{ width: 20, height: 20, marginTop: 9 }} />;
+  if (selectedChildChannel === 'email') {
+    ChannelIcon = () => <IconMail style={{ width: 20, height: 20, marginTop: 9 }} />;
+  } else if (selectedChildChannel === 'nurture') {
+    ChannelIcon = () => <IconPlant style={{ width: 20, height: 20, marginTop: 9 }} />;
   }
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center" }}>
-      <Flex bg={"gray.0"} direction={"column"} pt={"2rem"} w={"100%"}>
-        <Box px={"xl"}>
-          <Flex align={"center"} gap={"0.5rem"} mb="xs">
-            <ActionIcon
-              variant="outline"
-              color="blue"
-              size={"sm"}
-              onClick={close}
-              sx={{ borderRadius: 999 }}
-              onClickCapture={() => {
-                navigateToPage(navigate, "/campaigns");
-              }}
-              mt="xs"
-            >
-              <IconArrowLeft size={"0.875rem"} />
-            </ActionIcon>
-            <Text fz={"1rem"} span color="gray.6" mt="8px">
-              Go back to Campaigns
-            </Text>
-          </Flex>
-        </Box>
-        <Divider my={"md"} />
-        <Box px={"xl"}>
-          {currentProject?.id && (
-            <Box w="100%" mb="md">
-              <Flex direction="row" justify={"space-between"} gap={"md"}>
-                <Box>
-                  <Tooltip
-                    label="Click to edit campaign name or objective"
-                    position={"bottom"}
-                  >
-                    <Button
-                      size="xs"
-                      mt="xs"
-                      color={"gray"}
-                      variant="subtle"
-                      sx={{
-                        position: "absolute",
-                        right: "8px",
-                        bottom: "8px",
-                      }}
-                      onClick={() => {
-                        navigateToPage(navigate, "/persona/settings");
-                      }}
-                    >
-                      <IconPencil size={"0.9rem"} />
-                    </Button>
-                  </Tooltip>
-                  <Flex>
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Flex bg={'gray.0'} direction={'column'} pt={10} w={'100%'}>
+        <Box px={'xl'}>
+          {
+            <Box w='100%' mb='md'>
+              <Flex direction='row' justify={'space-between'} gap={'md'}>
+                <Stack spacing={0}>
+                  <Group style={{ position: 'relative' }} align='end' spacing={5}>
                     <Title order={2} style={{ marginBottom: 0 }}>
-                      {currentProject?.emoji} {currentProject?.name}
+                      {props.campaign?.emoji} {props.campaign?.name ?? <i>Loading Campaign</i>}
                     </Title>
+                    {!props.campaign && <Loader variant='dots' size='sm' py={7} />}
                     {/* <Badge
                           size="xl"
                           mb="xs"
@@ -198,40 +152,80 @@ const ChannelsSetupSelector = (props: {
                         >
                           {props.selectedChannel}
                         </Badge> */}
-                  </Flex>
-                </Box>
+                    {props.campaign && (
+                      <Tooltip
+                        label='Click to edit campaign name or objective'
+                        position={'bottom'}
+                        openDelay={400}
+                      >
+                        <Button
+                          size='xs'
+                          compact
+                          color={'gray'}
+                          variant='subtle'
+                          sx={{
+                            position: 'absolute',
+                            right: -30,
+                            top: 0,
+                          }}
+                          onClick={() => {
+                            navigateToPage(navigate, '/persona/settings');
+                          }}
+                        >
+                          <IconPencil size={'0.9rem'} />
+                        </Button>
+                      </Tooltip>
+                    )}
+                  </Group>
+                  <Box>
+                    <Flex align={'center'} gap={'0.5rem'} mb='xs'>
+                      <Anchor
+                        fz={'0.8rem'}
+                        color='gray.6'
+                        mt={3}
+                        ml={5}
+                        onClickCapture={() => {
+                          navigateToPage(navigate, '/campaigns');
+                        }}
+                      >
+                        <IconArrowLeft size={'0.5rem'} /> Go back to campaigns
+                      </Anchor>
+                    </Flex>
+                  </Box>
+                </Stack>
 
                 <Button
-                  size="md"
-                  leftIcon={<IconPlus size="0.8rem" />}
-                  color={"blue"}
+                  size='md'
+                  disabled={!props.campaign}
+                  leftIcon={<IconPlus size='0.8rem' />}
+                  color={'blue'}
                   onClick={() => {
-                    navigateToPage(navigate, "/contacts/find");
+                    navigateToPage(navigate, '/contacts/find');
                   }}
                 >
                   Add Prospects
                 </Button>
               </Flex>
             </Box>
-          )}
+          }
 
           {!props.hideChannels && (
-            <Grid gutter={"0"} px={"2rem"}>
+            <Grid gutter={'0'} px={'2rem'}>
               <Grid.Col
                 span={3}
                 onClick={() => {
-                  props.setSelectedChannel("linkedin");
-                  setSelectedChildChannel("linkedin");
+                  props.setSelectedChannel('linkedin');
+                  setSelectedChildChannel('linkedin');
                 }}
               >
                 <ChannelTab
-                  type="linkedin"
-                  active={selectedChildChannel === "linkedin"}
+                  type='linkedin'
+                  active={selectedChildChannel === 'linkedin'}
                   enabled={isEnabledLinkedin}
                   onToggle={setEnabledLinkedin}
                 />
               </Grid.Col>
-              <Grid.Col span={"auto"}>
+              <Grid.Col span={'auto'}>
                 <Hook
                   linkedLeft={isEnabledLinkedin}
                   linkedRight={isActiveEmail && isEnabledEmail}
@@ -240,18 +234,18 @@ const ChannelsSetupSelector = (props: {
               <Grid.Col
                 span={3}
                 onClick={() => {
-                  props.setSelectedChannel("email");
-                  setSelectedChildChannel("email");
+                  props.setSelectedChannel('email');
+                  setSelectedChildChannel('email');
                 }}
               >
                 <ChannelTab
-                  type="email"
-                  active={selectedChildChannel === "email"}
+                  type='email'
+                  active={selectedChildChannel === 'email'}
                   enabled={isEnabledEmail}
                   onToggle={setEnabledEmail}
                 />
               </Grid.Col>
-              <Grid.Col span={"auto"}>
+              <Grid.Col span={'auto'}>
                 <Hook
                   linkedLeft={isActiveEmail && isEnabledEmail}
                   linkedRight={isActiveNurture && isEnabledNurture}
@@ -260,13 +254,13 @@ const ChannelsSetupSelector = (props: {
               <Grid.Col
                 span={3}
                 onClick={() => {
-                  props.setSelectedChannel("nurture");
-                  setSelectedChildChannel("nurture");
+                  props.setSelectedChannel('nurture');
+                  setSelectedChildChannel('nurture');
                 }}
               >
                 <ChannelTab
-                  type="nurture"
-                  active={selectedChildChannel === "nurture"}
+                  type='nurture'
+                  active={selectedChildChannel === 'nurture'}
                   enabled={isEnabledNurture}
                   onToggle={setEnabledNurture}
                 />

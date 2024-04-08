@@ -4,7 +4,14 @@ import './index.css';
 import App from './components/App';
 import reportWebVitals from './reportWebVitals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserRouter, createRoutesFromChildren, matchRoutes, RouterProvider, useLocation, useNavigationType } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  createRoutesFromChildren,
+  matchRoutes,
+  RouterProvider,
+  useLocation,
+  useNavigationType,
+} from 'react-router-dom';
 import ErrorPage from './components/pages/ErrorPage';
 import PersonaPage from './components/pages/PersonaPage';
 import MissingPage from './components/pages/MissingPage';
@@ -42,7 +49,7 @@ import EmailSimulatePage from '@pages/EmailSimulatePage';
 import PipelineSection from '@common/home/PipelineSection';
 import PersonaCampaigns from '@common/campaigns/PersonaCampaigns';
 import AdvancedPage from '@pages/AdvancedPage';
-import ChannelSetupPage from '@pages/ChannelSetupPage';
+import ChannelSetupPage from '@pages/CampaignChannelPage';
 import PulseTabSelector from '@common/persona/PulseTabSelector';
 import PersonaOnboarding from '@pages/PreOnboarding';
 import AnalyticPage from '@pages/AnalyticPage';
@@ -52,14 +59,12 @@ import TriggersPage from '@pages/TriggersPage';
 import TriggersList from '@pages/TriggersList';
 import EmailHome from '@common/resend_email/resend_email';
 import ProspectDetailPage from '@pages/ProspectDetail';
-import ComingSoonCard from '@common/library/ComingSoonCard';
 import AnalyticsPageNew from '@pages/AnalyticsPageNew';
 import AdjustPage from '@pages/AdjustAIPage';
 import SlackAuthPage from '@pages/SlackAuthPage';
 import EmailGrader from '@pages/EmailGrader/EmailGrader';
 import { CampaignDetail } from '@pages/CampaignDetail';
 import InboxRestructurePage from '@pages/InboxRestructurePage';
-import CampaignReview from '@pages/CampaignReview/CampaignReviewLinkedin';
 import CompanyOverview from '@common/company/CompanyOverview';
 import OperatorDashTaskRouter from '@pages/Overview/OperatorDash/OperatorDashTaskRouter';
 import TaskEmailTemplate from '@common/resend_email/task_resend_email';
@@ -78,7 +83,13 @@ if (import.meta.env.PROD) {
     dsn: 'https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376',
     integrations: [
       new BrowserTracing({
-        routingInstrumentation: Sentry.reactRouterV6Instrumentation(React.useEffect, useLocation, useNavigationType, createRoutesFromChildren, matchRoutes),
+        routingInstrumentation: Sentry.reactRouterV6Instrumentation(
+          React.useEffect,
+          useLocation,
+          useNavigationType,
+          createRoutesFromChildren,
+          matchRoutes
+        ),
       }),
     ],
 

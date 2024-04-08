@@ -69,7 +69,8 @@ const MessagingAnalytics = () => {
   const navigate = useNavigate();
 
   const [opened, { close, toggle }] = useDisclosure(false);
-  const [groupOpened, { open: openGroup, close: closeGroup, toggle: toggleGroup }] = useDisclosure(false);
+  const [groupOpened, { open: openGroup, close: closeGroup, toggle: toggleGroup }] =
+    useDisclosure(false);
   const theme = useMantineTheme();
   const [columnFilters, setColumnFilters] = useState<DataGridFiltersState>([]);
   const [selectedHealth, setSelectedHealth] = useState<'low' | 'all'>('low');
@@ -152,15 +153,24 @@ const MessagingAnalytics = () => {
 
           <Group>
             <Button variant='outline' color='gray'>
-              Group by Campaign: <Switch ml={'sm'} defaultChecked size='sm' onChange={() => setGroupby(!groupby)} />
+              Group by Campaign:{' '}
+              <Switch ml={'sm'} defaultChecked size='sm' onChange={() => setGroupby(!groupby)} />
             </Button>
-            <Button color={'red'} onClick={() => setSelectedHealth('low')} variant={selectedHealth === 'low' ? 'filled' : 'outline'}>
+            <Button
+              color={'red'}
+              onClick={() => setSelectedHealth('low')}
+              variant={selectedHealth === 'low' ? 'filled' : 'outline'}
+            >
               Head Attention
               <Badge ml={4} color='red'>
                 {(data ?? []).filter((i) => i.health === Health.LOW).length - 1}
               </Badge>
             </Button>
-            <Button variant={selectedHealth === 'all' ? 'filled' : 'outline'} color='dark' onClick={() => setSelectedHealth('all')}>
+            <Button
+              variant={selectedHealth === 'all' ? 'filled' : 'outline'}
+              color='dark'
+              onClick={() => setSelectedHealth('all')}
+            >
               All{' '}
               <Badge ml={4} color='dark'>
                 {(data ?? []).length - 1}
@@ -232,7 +242,8 @@ const MessagingAnalytics = () => {
                 enableSorting: false,
                 maxSize: 140,
                 cell: (cell) => {
-                  const { rate, totalRate, health, etl_num_times_used, etl_num_times_converted } = cell.row.original;
+                  const { rate, totalRate, health, etl_num_times_used, etl_num_times_converted } =
+                    cell.row.original;
 
                   let color = '';
 
@@ -251,8 +262,17 @@ const MessagingAnalytics = () => {
                       break;
                   }
                   return (
-                    <Flex justify={'center'} align={'center'} direction={'column'} gap={4} w={'100%'} h={'100%'}>
-                      <Badge color={color}>{Math.round((etl_num_times_converted / etl_num_times_used + 0.001) * 100)}%</Badge>
+                    <Flex
+                      justify={'center'}
+                      align={'center'}
+                      direction={'column'}
+                      gap={4}
+                      w={'100%'}
+                      h={'100%'}
+                    >
+                      <Badge color={color}>
+                        {Math.round((etl_num_times_converted / etl_num_times_used + 0.001) * 100)}%
+                      </Badge>
 
                       <Text c={'gray.6'} size={'xs'} fw={500}>
                         {etl_num_times_converted}/{etl_num_times_used}
@@ -282,7 +302,11 @@ const MessagingAnalytics = () => {
                             {campaign}
                           </Text>
 
-                          <Anchor href='/' size={'sm'} sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Anchor
+                            href='/'
+                            size={'sm'}
+                            sx={{ display: 'flex', alignItems: 'center' }}
+                          >
                             <IconExternalLink size={'0.8rem'} />
                           </Anchor>
                         </Flex>
@@ -331,7 +355,7 @@ const MessagingAnalytics = () => {
                         variant='light'
                         radius='lg'
                         onClick={() => {
-                          navigate(`/setup/linkedin?campaign_id=${cell.row.original.campaign_id}`);
+                          navigate(`/setup/linkedin/${cell.row.original.campaign_id}`);
                         }}
                       >
                         Change Wording / Framework
@@ -442,7 +466,9 @@ const MessagingAnalytics = () => {
                         variant='default'
                         color='gray.4'
                         h={36}
-                        disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                        disabled={
+                          table.getState().pagination.pageIndex === table.getPageCount() - 1
+                        }
                         onClick={() => {
                           table.setPageIndex(table.getState().pagination.pageIndex + 1);
                         }}
@@ -479,8 +505,20 @@ const MessagingAnalytics = () => {
             })}
           />
         ) : (
-          <Flex direction={'column'} style={{ border: '1px solid gray', borderRadius: '6px' }} mt={'md'}>
-            <Flex p={'lg'} bg={'#f9f9fd'} style={{ borderBottom: '1px solid #e8ebed', borderTopLeftRadius: '13px', borderTopRightRadius: '13px' }}>
+          <Flex
+            direction={'column'}
+            style={{ border: '1px solid gray', borderRadius: '6px' }}
+            mt={'md'}
+          >
+            <Flex
+              p={'lg'}
+              bg={'#f9f9fd'}
+              style={{
+                borderBottom: '1px solid #e8ebed',
+                borderTopLeftRadius: '13px',
+                borderTopRightRadius: '13px',
+              }}
+            >
               <Text w={'50%'}>Campaign Name</Text>
               <Text w={'20%'}>Steps</Text>
               <Text w={'17%'}>Status</Text>
@@ -495,10 +533,18 @@ const MessagingAnalytics = () => {
                       <Avatar size={'md'} radius={'xl'} />
                       <Box>
                         <Flex align={'center'} gap={4}>
-                          <Text fw={500} size={'sm'} color={groupOpened && campaign === groupid ? '#228be6' : ''}>
+                          <Text
+                            fw={500}
+                            size={'sm'}
+                            color={groupOpened && campaign === groupid ? '#228be6' : ''}
+                          >
                             {campaign}
                           </Text>
-                          <Anchor href='/' size={'sm'} sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Anchor
+                            href='/'
+                            size={'sm'}
+                            sx={{ display: 'flex', alignItems: 'center' }}
+                          >
                             <IconExternalLink size={'0.8rem'} color='#228be6' />
                           </Anchor>
                         </Flex>
@@ -506,7 +552,9 @@ const MessagingAnalytics = () => {
                     </Flex>
                     <Flex w={'20%'}>
                       {groupOpened && campaign === groupid ? (
-                        selectedHealth === 'low' && <Badge color='gray'>{data.length} Frameworks</Badge>
+                        selectedHealth === 'low' && (
+                          <Badge color='gray'>{data.length} Frameworks</Badge>
+                        )
                       ) : (
                         <Badge color='gray'>{data.length} Frameworks</Badge>
                       )}
@@ -515,7 +563,13 @@ const MessagingAnalytics = () => {
                       {data.find((item) => item.health.includes('LOW')) ? (
                         <Text
                           color='red'
-                          display={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? 'none' : 'flex') : 'flex'}
+                          display={
+                            groupOpened && campaign === groupid
+                              ? selectedHealth === 'all'
+                                ? 'none'
+                                : 'flex'
+                              : 'flex'
+                          }
                           style={{ alignItems: 'center', gap: '8px' }}
                           fw={500}
                         >
@@ -524,14 +578,32 @@ const MessagingAnalytics = () => {
                         </Text>
                       ) : (
                         <Text
-                          color={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? 'green' : 'white') : 'green'}
-                          display={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? 'none' : 'flex') : 'flex'}
+                          color={
+                            groupOpened && campaign === groupid
+                              ? selectedHealth === 'all'
+                                ? 'green'
+                                : 'white'
+                              : 'green'
+                          }
+                          display={
+                            groupOpened && campaign === groupid
+                              ? selectedHealth === 'all'
+                                ? 'none'
+                                : 'flex'
+                              : 'flex'
+                          }
                           style={{ alignItems: 'center', gap: '8px' }}
                           fw={500}
                         >
                           <IconDiscountCheck
                             size='1.2rem'
-                            color={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? '#08b45f' : 'white') : '#08b45f'}
+                            color={
+                              groupOpened && campaign === groupid
+                                ? selectedHealth === 'all'
+                                  ? '#08b45f'
+                                  : 'white'
+                                : '#08b45f'
+                            }
                           />
                           No Problems
                         </Text>
@@ -545,7 +617,13 @@ const MessagingAnalytics = () => {
                         //   backgroundColor: groupOpened && campaign === groupid ? (selectedHealth === 'all' ? '#3178ea' : '#fd807f') : '',
                         // }}
                         size='xs'
-                        rightIcon={groupOpened && campaign === groupid ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+                        rightIcon={
+                          groupOpened && campaign === groupid ? (
+                            <IconChevronUp size={16} />
+                          ) : (
+                            <IconChevronDown size={16} />
+                          )
+                        }
                         onClick={() => {
                           handleToggleGroup(campaign, groupid);
                         }}
@@ -644,7 +722,13 @@ const MessagingAnalytics = () => {
                               enableSorting: false,
                               maxSize: 140,
                               cell: (cell) => {
-                                const { rate, totalRate, health, etl_num_times_used, etl_num_times_converted } = cell.row.original;
+                                const {
+                                  rate,
+                                  totalRate,
+                                  health,
+                                  etl_num_times_used,
+                                  etl_num_times_converted,
+                                } = cell.row.original;
 
                                 let color = '';
 
@@ -663,8 +747,20 @@ const MessagingAnalytics = () => {
                                     break;
                                 }
                                 return (
-                                  <Flex justify={'center'} align={'center'} direction={'column'} gap={4} w={'100%'} h={'100%'}>
-                                    <Badge color={color}>{Math.round((etl_num_times_converted / etl_num_times_used + 0.001) * 100)}%</Badge>
+                                  <Flex
+                                    justify={'center'}
+                                    align={'center'}
+                                    direction={'column'}
+                                    gap={4}
+                                    w={'100%'}
+                                    h={'100%'}
+                                  >
+                                    <Badge color={color}>
+                                      {Math.round(
+                                        (etl_num_times_converted / etl_num_times_used + 0.001) * 100
+                                      )}
+                                      %
+                                    </Badge>
 
                                     <Text c={'gray.6'} size={'xs'} fw={500}>
                                       {etl_num_times_converted}/{etl_num_times_used}
@@ -689,7 +785,9 @@ const MessagingAnalytics = () => {
                                       variant='light'
                                       radius='lg'
                                       onClick={() => {
-                                        navigate(`/setup/linkedin?campaign_id=${cell.row.original.campaign_id}`);
+                                        navigate(
+                                          `/setup/linkedin/${cell.row.original.campaign_id}`
+                                        );
                                       }}
                                     >
                                       Change Wording / Framework
@@ -759,10 +857,12 @@ const MessagingAnalytics = () => {
                                     <Select
                                       maw={100}
                                       value={`${table.getState().pagination.pageIndex + 1}`}
-                                      data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                                        label: String(idx + 1),
-                                        value: String(idx + 1),
-                                      }))}
+                                      data={new Array(table.getPageCount())
+                                        .fill(0)
+                                        .map((i, idx) => ({
+                                          label: String(idx + 1),
+                                          value: String(idx + 1),
+                                        }))}
                                       onChange={(v) => {
                                         table.setPageIndex(Number(v) - 1);
                                       }}
@@ -791,7 +891,9 @@ const MessagingAnalytics = () => {
                                       h={36}
                                       disabled={table.getState().pagination.pageIndex === 0}
                                       onClick={() => {
-                                        table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                                        table.setPageIndex(
+                                          table.getState().pagination.pageIndex - 1
+                                        );
                                       }}
                                     >
                                       <IconChevronLeft stroke={theme.colors.gray[4]} />
@@ -800,9 +902,14 @@ const MessagingAnalytics = () => {
                                       variant='default'
                                       color='gray.4'
                                       h={36}
-                                      disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                                      disabled={
+                                        table.getState().pagination.pageIndex ===
+                                        table.getPageCount() - 1
+                                      }
                                       onClick={() => {
-                                        table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                                        table.setPageIndex(
+                                          table.getState().pagination.pageIndex + 1
+                                        );
                                       }}
                                     >
                                       <IconChevronRight stroke={theme.colors.gray[4]} />

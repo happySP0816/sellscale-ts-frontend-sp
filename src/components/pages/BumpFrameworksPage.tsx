@@ -77,14 +77,15 @@ import TextWithNewline from '@common/library/TextWithNewlines';
 import postToggleAutoBump from '@utils/requests/postToggleAutoBump';
 import PersonaDetailsCTAs from '@common/persona/details/PersonaDetailsCTAs';
 import VoicesSection from '@common/voice_builder/VoicesSection';
-import LinkedInSequenceSection, { PersonalizationSection } from '@common/sequence/LinkedInSequenceSection';
+import LinkedInSequenceSection, {
+  PersonalizationSection,
+} from '@common/sequence/LinkedInSequenceSection';
 import LinkedInConnectedCard from '@common/settings/LinkedInIntegrationCard';
 import { getFreshCurrentProject } from '@auth/core';
 import { API_URL } from '@constants/data';
 import { postBumpDeactivate } from '@utils/requests/postBumpDeactivate';
 import { patchBumpFramework } from '@utils/requests/patchBumpFramework';
 import _ from 'lodash';
-import ICPFilters from '@common/persona/ICPFilter/ICPFilters';
 
 type BumpFrameworkBuckets = {
   ACCEPTED: {

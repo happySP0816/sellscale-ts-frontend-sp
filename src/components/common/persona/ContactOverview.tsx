@@ -1,39 +1,11 @@
-import { Box, Button, Flex, Tabs, Text, Title, Tooltip } from '@mantine/core';
-import { PulseWrapper } from './PulseWrapper';
-import ICPFilters from './ICPFilter/ICPFilters';
-import { currentProjectState } from '@atoms/personaAtoms';
-import { getCurrentPersonaId, getFreshCurrentProject } from '@auth/core';
-import { useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { Box, Button, Flex, Tabs, Text } from '@mantine/core';
+import { useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { useLoaderData, useNavigate } from 'react-router-dom';
-import { PersonaOverview } from 'src';
-import { getPersonasOverview } from '@utils/requests/getPersonas';
-import { navigateToPage } from '@utils/documentChange';
-import UploadOverview from './UploadOverview';
-import {
-  IconBeta,
-  IconChartArcs,
-  IconChartAreaLine,
-  IconFilter,
-  IconGlobe,
-  IconList,
-  IconMap,
-  IconTable,
-  IconTarget,
-  IconWallpaper,
-  IconWashMachine,
-  IconWorld,
-} from '@tabler/icons';
-import ComingSoonCard from '@common/library/ComingSoonCard';
+import { IconChartArcs, IconList, IconMap, IconTarget, IconWallpaper } from '@tabler/icons';
 import GlobalContacts from './GlobalContacts';
 import DoNotContactList from '@common/settings/DoNotContactList';
-import PageFrame from '@common/PageFrame';
 import UploadOverviewV2 from './UploadOverviewV2';
-import TAMGraph from './TAMGraph';
-import ScrapingReport from './ScrapingReport';
 import TAMGraphV2 from './TAMGraphV2';
-import PulseTabSelector from './PulseTabSelector';
 import Territories from './Territories';
 import OngoingScrapes from './OngoingScrapes';
 import ProspectUploadHistory from '@common/settings/History/ProspectUploadHistory';
@@ -142,12 +114,21 @@ const ContactOverview = () => {
 
         <Tabs.Panel value='segments' className='h-0 grow'>
           <Box pl='md' pr='md' mt='xs' pb='4px' w='100%' display='flex'>
-            <Button ml='auto' onClick={() => (window.location.href = '/contacts/find?campaign_id=' + userData?.unassigned_persona_id)}>
+            <Button
+              ml='auto'
+              onClick={() =>
+                (window.location.href =
+                  '/contacts/find?campaign_id=' + userData?.unassigned_persona_id)
+              }
+            >
               Add Contacts
             </Button>
           </Box>
           <iframe
-            src={'https://sellscale.retool.com/embedded/public/93860ed4-1e1f-442a-a00e-c4ea46a2865b#authToken=' + userToken}
+            src={
+              'https://sellscale.retool.com/embedded/public/93860ed4-1e1f-442a-a00e-c4ea46a2865b#authToken=' +
+              userToken
+            }
             style={{
               width: '100%',
               height: '100%',

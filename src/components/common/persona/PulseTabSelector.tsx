@@ -1,17 +1,9 @@
-import { Tabs, Tooltip } from "@mantine/core";
-import { PulseWrapper } from "./PulseWrapper";
-import ICPFilters from "./ICPFilter/ICPFilters";
-import { currentProjectState } from "@atoms/personaAtoms";
-import { getCurrentPersonaId, getFreshCurrentProject } from "@auth/core";
-import { useEffect } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
+import { useEffect } from 'react';
+import { useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
 import { useLoaderData, useNavigate } from 'react-router-dom';
-import { PersonaOverview } from 'src';
-import { getPersonasOverview } from '@utils/requests/getPersonas';
-import { navigateToPage } from "@utils/documentChange";
-import UploadOverview from './UploadOverview';
-import { IconChartArcs, IconChartAreaLine, IconTable, IconTarget, IconWashMachine } from '@tabler/icons';
+import { navigateToPage } from '@utils/documentChange';
+import ICPFiltersDashboard from './ICPFilter/ICPFiltersDashboard';
 
 const PulseTabSelector = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -24,8 +16,8 @@ const PulseTabSelector = () => {
     prospectId: number;
   };
   useEffect(() => {
-    if(prospectId) {
-      navigateToPage(navigate, "/contacts", new URLSearchParams({ prospect_id: prospectId+'' }));
+    if (prospectId) {
+      navigateToPage(navigate, '/contacts', new URLSearchParams({ prospect_id: prospectId + '' }));
     }
   }, []);
   /*
@@ -60,7 +52,7 @@ const PulseTabSelector = () => {
   );
   */
 
-  return (<ICPFilters />);
+  return <ICPFiltersDashboard />;
 };
 
 export default PulseTabSelector;

@@ -110,7 +110,7 @@ export default function OngoingScrapes() {
                       <Anchor
                         onClick={() => {
                           // Set to the campaign page
-                          window.location.href = `/setup/linkedin?campaign_id=${archetype_id}`;
+                          window.location.href = `/setup/linkedin/${archetype_id}`;
                         }}
                       >
                         {archetype_name}

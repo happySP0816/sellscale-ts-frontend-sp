@@ -159,9 +159,9 @@ const HighPriority = (props: PropsType) => {
               
               // window.location.href = `campaigns/${props.notification?.data?.archetype_id}`
               if (props.notification?.data?.render_message_as_html) {
-                window.location.href = `setup/email?campaign_id=${props.notification?.data?.archetype_id}`
+                window.location.href = `setup/email/${props.notification?.data?.archetype_id}`
               } else {
-                window.location.href = `setup/linkedin?campaign_id=${props.notification?.data?.archetype_id}`
+                window.location.href = `setup/linkedin/${props.notification?.data?.archetype_id}`
               }
             }).catch((error) => {
               console.error('Error marking notification as complete', error);

@@ -33,7 +33,7 @@ const Linkedin = (props: PropsType) => {
           compact 
           rightIcon={<IconArrowRight />} 
           radius={"xl"}
-          onClick={() => window.location.href = `/setup/linkedin?campaign_id=${archetype_id}`}
+          onClick={() => window.location.href = `/setup/linkedin/${archetype_id}`}
         >
           GO TO SEQUENCE
         </Button>

@@ -538,10 +538,9 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
     <Box
       sx={(theme) => ({
         padding: theme.spacing.lg,
-        width: '100%',
       })}
     >
-      <Flex
+      {/* <Flex
         style={{
           justifyContent: 'space-between',
           borderBottom: '1px solid gray',
@@ -554,7 +553,6 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
           <ProjectSelect
             hideCloseButton
             maw={'300px'}
-            // w='100%'
             onClick={(persona?: PersonaOverview) => {
               navigateToPage(navigate, `/prioritize/${persona?.id}`);
             }}
@@ -581,7 +579,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
             {currentProject?.linkedin_active ? (
               <ActionIcon
                 onClick={() => {
-                  window.location.href = `/setup/linkedin?campaign_id=${currentProject?.id}`;
+                  window.location.href = `/setup/linkedin/currentProject?.id}`;
                 }}
               >
                 <IconBrandLinkedin color='white' fill='#228be8' size={24} />
@@ -592,7 +590,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
             {currentProject?.email_active ? (
               <ActionIcon
                 onClick={() => {
-                  window.location.href = `/setup/email?campaign_id=${currentProject?.id}`;
+                  window.location.href = `/setup/email/currentProject?.id}`;
                 }}
               >
                 <IconMail color='white' fill='#228be8' size={24} />
@@ -664,10 +662,10 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
             Add Prospects
           </Button>
         </Flex>
-      </Flex>
+      </Flex> */}
 
-      <Flex justify={'space-between'} mt={'sm'}>
-        <Stack w={'100%'}>
+      <Flex justify={'space-between'}>
+        <Stack>
           <Flex wrap={'wrap'} align={'center'} justify={'space-between'}>
             {invitedOnLinkedIn && getSelectedRowCount > 0 && (
               <WithdrawInvitesControl
@@ -676,7 +674,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                 onConfirm={withdrawInvites}
               />
             )}
-            <Flex w='100%' align={'center'} justify={'space-between'} mt={'sm'}>
+            <Flex align={'center'} justify={'space-between'} gap={20}>
               <Button
                 size='sm'
                 onClick={toggleSideBar}
@@ -687,7 +685,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                 {!sideBarVisible ? 'Show Filter' : 'Hide Filter'}
               </Button>
 
-              <Flex align={'center'} gap={'xs'}>
+              <Flex align={'center'} gap={20}>
                 <Box
                   style={{
                     backgroundColor: invitedOnLinkedIn ? 'rgba(231, 245, 255, 1)' : '',
@@ -845,16 +843,14 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                   </Box>
                 </Flex>
               )}
-              <Box
-                w={'100%'}
-                maw={sideBarVisible ? 'calc(100vw - 13vw - 360px)' : 'calc(100vw - 12vw)'}
-              >
+              <Box maw={sideBarVisible ? 'calc(100vw - 580px)' : 'calc(100vw - 200px)'}>
                 <GridTabs
                   selectedTab={selectedTab}
                   setSelectedTab={setSelectedTab}
                   icpDashboard={icpDashboard}
                   numProspects={icpProspects.length}
                 />
+
                 <DataGrid
                   data={displayProspects}
                   highlightOnHover
@@ -1230,7 +1226,6 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                       </Flex>
                     ),
                   }}
-                  w={'100%'}
                   onRowSelectionChange={(rows) => {
                     if (Object.keys(rows).length > 10) {
                       setSelectedRows(

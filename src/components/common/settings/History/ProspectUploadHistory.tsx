@@ -1,4 +1,7 @@
-import { prospectUploadDrawerIdState, prospectUploadDrawerOpenState } from "@atoms/uploadAtoms";
+import {
+  prospectUploadDrawerIdState,
+  prospectUploadDrawerOpenState,
+} from "@atoms/uploadAtoms";
 import PageFrame from "@common/PageFrame";
 import {
   ActionIcon,
@@ -45,12 +48,8 @@ interface UploadHistoryDataType {
 
 export default function ProspectUploadHistory() {
   const userToken = useRecoilValue(userTokenState);
-  const [opened, setOpened] = useRecoilState(
-    prospectUploadDrawerOpenState
-  );
-  const [uploadID, setUploadID] = useRecoilState(
-    prospectUploadDrawerIdState
-  );
+  const [opened, setOpened] = useRecoilState(prospectUploadDrawerOpenState);
+  const [uploadID, setUploadID] = useRecoilState(prospectUploadDrawerIdState);
   const [pageSize, setPageSize] = useState("25");
 
   const theme = useMantineTheme();
@@ -77,7 +76,7 @@ export default function ProspectUploadHistory() {
   };
 
   return (
-    <Flex bg={"white"} my={"xl"} maw='100%'>
+    <Flex bg={"white"} my={"xl"} maw="100%">
       <DataGrid
         data={uploadHistoryData}
         highlightOnHover
@@ -97,8 +96,8 @@ export default function ProspectUploadHistory() {
         columns={[
           {
             accessorKey: "any",
-            minSize: 400,
-            maxSize: 400,
+            minSize: 600,
+            maxSize: 600,
             header: () => (
               <Flex align={"center"} gap={"3px"}>
                 <IconLetterT color="gray" size={"0.9rem"} />
@@ -124,7 +123,7 @@ export default function ProspectUploadHistory() {
                     cell.row.original.client_archetype_id && (
                       <Flex>
                         <Text
-                          mr='3px'
+                          mr="3px"
                           sx={{
                             borderRadius: "16px",
                             height: "1.3rem",
@@ -135,7 +134,7 @@ export default function ProspectUploadHistory() {
                           size={"xs"}
                           fw={600}
                         >
-                          Associated Campaign: 
+                          Associated Campaign:
                         </Text>
                         <Text
                           sx={{
@@ -160,9 +159,9 @@ export default function ProspectUploadHistory() {
                     )}
                   {cell.row.original.client_segment_name &&
                     cell.row.original.client_segment_id && (
-                      <Flex direction={'row'}>
+                      <Flex direction={"row"}>
                         <Text
-                          mr='3px'
+                          mr="3px"
                           sx={{
                             borderRadius: "16px",
                             height: "1.3rem",
@@ -173,7 +172,7 @@ export default function ProspectUploadHistory() {
                           size={"xs"}
                           fw={600}
                         >
-                          Associated Segment: 
+                          Associated Segment:
                         </Text>
                         <Text
                           sx={{
@@ -202,8 +201,8 @@ export default function ProspectUploadHistory() {
           },
           {
             accessorKey: "source",
-            minSize: 150,
-            maxSize: 150,
+            minSize: 200,
+            maxSize: 200,
             header: () => (
               <Flex align={"center"} gap={"3px"}>
                 <IconLetterT color="gray" size={"0.9rem"} />
@@ -213,7 +212,7 @@ export default function ProspectUploadHistory() {
 
             cell: (cell) => {
               const { upload_source } = cell.row.original;
-              
+
               // Turn the upload_source into Letter Case
               let upload_source_formatted = upload_source.replace(/_/g, " ");
 
@@ -228,7 +227,7 @@ export default function ProspectUploadHistory() {
                   {/* <Text lineClamp={1}>{upload_source}</Text> */}
                   {/* <Badge size='lg' color={valueToColor(theme, upload_source)}> */}
                   <Badge
-                    size="sm"
+                    size="md"
                     variant="filled"
                     color={
                       upload_source === "CSV"
@@ -256,12 +255,15 @@ export default function ProspectUploadHistory() {
                 <Text color="gray">Progress</Text>
               </Flex>
             ),
-            maxSize: 280,
-            minSize: 280,
+            maxSize: 450,
+            minSize: 450,
             enableResizing: true,
             cell: (cell) => {
-              const { upload_size, uploads_completed, upload_source } =
-                cell.row.original;
+              const {
+                upload_size,
+                uploads_completed,
+                upload_source,
+              } = cell.row.original;
 
               return (
                 <Flex
@@ -339,8 +341,8 @@ export default function ProspectUploadHistory() {
           },
           {
             accessorKey: "Status",
-            minSize: 150,
-            maxSize: 150,
+            minSize: 350,
+            maxSize: 350,
             header: () => (
               <Flex align={"center"} gap={"3px"}>
                 <IconLoader color="gray" size={"0.9rem"} />
@@ -350,11 +352,11 @@ export default function ProspectUploadHistory() {
             cell: (cell) => {
               const { status } = cell.row.original;
 
-              let status_formatted
+              let status_formatted;
               if (status === "UPLOAD_COMPLETE") {
-                status_formatted = "Complete"
+                status_formatted = "Complete";
               } else {
-                status_formatted = "In Progress"
+                status_formatted = "In Progress";
               }
 
               return (
@@ -365,7 +367,10 @@ export default function ProspectUploadHistory() {
                   align={"center"}
                   justify={"center"}
                 >
-                  <Badge size="sm" color={status === "UPLOAD_COMPLETE" ? "green" : ""}>
+                  <Badge
+                    size="lg"
+                    color={status === "UPLOAD_COMPLETE" ? "green" : ""}
+                  >
                     {status_formatted}
                   </Badge>
                 </Flex>

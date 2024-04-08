@@ -907,6 +907,8 @@ export function PersonCampaignCard(props: {
     }
   }, [value, campaignList]);
 
+  console.log('campaignList', campaignList);
+
   const unusedProspects =
     (props.project?.num_unused_email_prospects ?? 0) +
     (props.project?.num_unused_li_prospects ?? 0);

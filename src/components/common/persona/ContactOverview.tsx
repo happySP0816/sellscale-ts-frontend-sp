@@ -6,6 +6,7 @@ import {
   IconList,
   IconMap,
   IconTarget,
+  IconUser,
   IconWallpaper,
 } from "@tabler/icons";
 import GlobalContacts from "./GlobalContacts";
@@ -15,6 +16,7 @@ import TAMGraphV2 from "./TAMGraphV2";
 import Territories from "./Territories";
 import OngoingScrapes from "./OngoingScrapes";
 import ProspectUploadHistory from "@common/settings/History/ProspectUploadHistory";
+import Personas from "./Personas";
 
 const ContactOverview = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -87,6 +89,14 @@ const ContactOverview = () => {
             Ongoing Scrapes
           </Tabs.Tab>
 
+          <Tabs.Tab value="personas" ml="auto">
+            <IconUser
+              size="0.8rem"
+              style={{ marginRight: "8px", marginTop: "4px" }}
+            />
+            ⚙️
+          </Tabs.Tab>
+
           {/* <Tabs.Tab value='TAM_graph' style={{ marginRight: '8px' }}>
           TAM Graph
         </Tabs.Tab> */}
@@ -106,6 +116,10 @@ const ContactOverview = () => {
         {/* <Tabs.Panel value="global_contacts">
           <GlobalContacts />
         </Tabs.Panel> */}
+
+        <Tabs.Panel value="personas">
+          <Personas />
+        </Tabs.Panel>
 
         <Tabs.Panel
           value="territories"

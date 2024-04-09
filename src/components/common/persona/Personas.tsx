@@ -1,48 +1,4 @@
-const mockPersonas: PersonaData[] = [
-  {
-    name: "NewtonX Baseline",
-    contacts: 1766890,
-    filters: 3,
-    assets: 51,
-    voiceLabel: "UI/UX",
-    description: "Your description here.",
-  },
-  {
-    name: "In-house researcher",
-    contacts: 1766890,
-    filters: 10,
-    assets: 10,
-    voiceLabel: "UI/UX",
-    description: "Your description here.",
-  },
-  {
-    name: "UI/UX",
-    contacts: 1766890,
-    filters: 10,
-    assets: 10,
-    voiceLabel: "UI/UX",
-    description: "Your description here.",
-  },
-  {
-    name: "Private equity",
-    contacts: 1766890,
-    filters: 10,
-    assets: 0,
-    voiceLabel: "UI/UX",
-    description: "Your description here.",
-  },
-  {
-    name: "Consulting",
-    contacts: 1766890,
-    filters: 10,
-    assets: 0,
-    voiceLabel: "UI/UX",
-    description: "Your description here.",
-  },
-  // ... Add more personas here as per the mock data in the screenshot
-];
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Paper,
   Title,
@@ -53,38 +9,88 @@ import {
   Modal,
   TextInput,
   Textarea,
+  Loader,
 } from "@mantine/core";
-import {
-  IconPlus,
-  IconEdit,
-  IconSettings,
-  IconSearch,
-  IconMicrophone,
-} from "@tabler/icons";
+import { IconPlus, IconEdit, IconSearch, IconMicrophone } from "@tabler/icons";
+import { API_URL } from "@constants/data";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
 
 interface PersonaData {
   name: string;
+  description: string;
   contacts: number;
   filters: number;
-  assets: number;
   voiceLabel: string;
-  description?: string;
+  saved_apollo_query_id: number;
+  id: number;
+  assets: any;
 }
 
 const Personas = () => {
+  const [personas, setPersonas] = useState([]);
+  const [isLoading, setLoading] = useState(false); // Add this line
+
   const [isModalOpen, setModalOpen] = useState(false);
   const [newPersonaName, setNewPersonaName] = useState("");
   const [newPersonaDescription, setNewPersonaDescription] = useState("");
 
-  const handleAddPersona = () => setModalOpen(true);
-  const handleCloseModal = () => setModalOpen(false);
-  const handleCreatePersona = () => {
-    // Logic to create new persona goes here
-    console.log(newPersonaName, newPersonaDescription);
-    handleCloseModal();
+  const [isFullscreenModalOpen, setFullscreenModalOpen] = useState(false);
+  const [iframeUrl, setIframeUrl] = useState("");
+
+  const userToken = useRecoilValue(userTokenState);
+
+  // Function to fetch personas
+  const fetchPersonas = async () => {
+    setLoading(true); // Start loading
+    const response = await fetch(`${API_URL}/personas/personas`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`, // Assuming you have a userToken state or prop
+      },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setPersonas(data.personas);
+    } else {
+      // Handle server errors or unauthorized access
+      console.error("Failed to fetch personas");
+    }
+    setLoading(false); // End loading
   };
 
-  const rows = mockPersonas.map((persona, index) => (
+  useEffect(() => {
+    fetchPersonas();
+  }, []); // Empty dependency array means this effect runs once on mount
+
+  const handleCreatePersona = async () => {
+    const response = await fetch(`${API_URL}/personas/persona`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`, // Ensure you have the userToken
+      },
+      body: JSON.stringify({
+        name: newPersonaName,
+        description: newPersonaDescription,
+      }),
+    });
+
+    if (response.ok) {
+      // Persona created successfully, now fetch the updated list
+      fetchPersonas();
+      handleCloseModal();
+    } else {
+      // Handle creation errors
+      console.error("Failed to create new persona");
+    }
+  };
+
+  const handleAddPersona = () => setModalOpen(true);
+  const handleCloseModal = () => setModalOpen(false);
+
+  const rows = personas.map((persona: PersonaData, index) => (
     <tr key={index}>
       <td style={{ paddingTop: 24, paddingBottom: 24 }}>
         <Text weight={500}>{persona.name}</Text>
@@ -93,30 +99,57 @@ const Personas = () => {
         </Text>
       </td>
       <td style={{ paddingTop: 24, paddingBottom: 24 }}>
-        <Text>{persona.contacts.toLocaleString()} prospects</Text>
-        <Group spacing="xs">
+        {persona.saved_apollo_query_id ? (
+          <>
+            <Text>{persona.contacts?.toLocaleString()} prospects</Text>
+            <Group spacing="xs">
+              <Button
+                leftIcon={<IconSearch size={14} />}
+                variant="outline"
+                size="xs"
+              >
+                View Filters
+              </Button>
+              <Button
+                leftIcon={<IconEdit size={14} />}
+                variant="outline"
+                size="xs"
+              >
+                Edit
+              </Button>
+            </Group>
+          </>
+        ) : (
           <Button
-            leftIcon={<IconSearch size={14} />}
-            variant="outline"
+            leftIcon={<IconSearch size="0.8rem" />}
             size="xs"
+            color="grape"
+            onClick={() => {
+              setIframeUrl(
+                "https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=" +
+                  userToken +
+                  "&persona_id=" +
+                  persona.id
+              );
+              setFullscreenModalOpen(true);
+            }}
           >
-            View Filters
+            Set filters
           </Button>
-          <Button leftIcon={<IconEdit size={14} />} variant="outline" size="xs">
-            Edit
-          </Button>
-        </Group>
+        )}
       </td>
       <td style={{ paddingTop: 24, paddingBottom: 24 }}>
-        <Text>{persona.assets} assets</Text>
-        <Button
-          variant="filled"
-          size="xs"
-          color="teal"
-          style={{ marginTop: 5 }}
-        >
-          Edit assets
-        </Button>
+        <>
+          <Text>{persona.assets.length} assets</Text>
+          <Button
+            variant="filled"
+            size="xs"
+            color="teal"
+            style={{ marginTop: 5 }}
+          >
+            Edit assets
+          </Button>
+        </>
       </td>
       <td style={{ paddingTop: 24, paddingBottom: 24 }}>
         <Button
@@ -124,7 +157,7 @@ const Personas = () => {
           variant="filled"
           size="xs"
         >
-          Using {persona.voiceLabel} Voice
+          Using No Voice
         </Button>
       </td>
     </tr>
@@ -132,6 +165,26 @@ const Personas = () => {
 
   return (
     <Paper style={{ padding: "32px" }}>
+      <Modal
+        opened={isFullscreenModalOpen}
+        onClose={() => {
+          setFullscreenModalOpen(false);
+          fetchPersonas();
+        }}
+        size="full"
+        padding={0}
+        w={window.innerWidth}
+        h={window.innerHeight}
+        withinPortal
+        zIndex={1000}
+      >
+        <iframe
+          src={iframeUrl}
+          width={window.innerWidth - 400}
+          height={window.innerHeight}
+          style={{ border: "none" }}
+        ></iframe>
+      </Modal>
       <Group
         position="apart"
         style={{ marginBottom: 20, alignItems: "center" }}
@@ -180,17 +233,25 @@ const Personas = () => {
         </Button>
       </Modal>
 
-      <Table striped highlightOnHover>
-        <thead>
-          <tr>
-            <th>Persona Name</th>
-            <th>Pre-Filters</th>
-            <th>AI Brain</th>
-            <th>Voice</th>
-          </tr>
-        </thead>
-        <tbody>{rows}</tbody>
-      </Table>
+      {isLoading ? (
+        <div
+          style={{ display: "flex", justifyContent: "center", padding: "50px" }}
+        >
+          <Loader /> {/* Use the Loader component from Mantine */}
+        </div>
+      ) : (
+        <Table striped highlightOnHover>
+          <thead>
+            <tr>
+              <th>Persona Name</th>
+              <th>Pre-Filters</th>
+              <th>AI Brain</th>
+              <th>Voice</th>
+            </tr>
+          </thead>
+          <tbody>{rows}</tbody>
+        </Table>
+      )}
     </Paper>
   );
 };

@@ -540,7 +540,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
         padding: theme.spacing.lg,
       })}
     >
-      {/* <Flex
+      <Flex
         style={{
           justifyContent: 'space-between',
           borderBottom: '1px solid gray',
@@ -662,7 +662,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
             Add Prospects
           </Button>
         </Flex>
-      </Flex> */}
+      </Flex>
 
       <Flex justify={'space-between'}>
         <Stack>

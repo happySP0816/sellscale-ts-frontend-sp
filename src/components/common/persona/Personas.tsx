@@ -131,7 +131,7 @@ const Personas = () => {
   ));
 
   return (
-    <Paper padding="md" style={{ padding: "32px" }}>
+    <Paper style={{ padding: "32px" }}>
       <Group
         position="apart"
         style={{ marginBottom: 20, alignItems: "center" }}

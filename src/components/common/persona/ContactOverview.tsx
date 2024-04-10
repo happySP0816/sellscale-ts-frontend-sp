@@ -89,12 +89,12 @@ const ContactOverview = () => {
             Ongoing Scrapes
           </Tabs.Tab>
 
-          <Tabs.Tab value="personas" ml="auto">
+          <Tabs.Tab value="personas">
             <IconUser
               size="0.8rem"
               style={{ marginRight: "8px", marginTop: "4px" }}
             />
-            ⚙️
+            Personas
           </Tabs.Tab>
 
           {/* <Tabs.Tab value='TAM_graph' style={{ marginRight: '8px' }}>

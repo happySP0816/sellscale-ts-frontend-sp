@@ -15,12 +15,20 @@ import {
   Card,
   Stack,
   Box,
+  Flex,
 } from "@mantine/core";
-import { IconPlus, IconEdit, IconSearch, IconMicrophone } from "@tabler/icons";
+import {
+  IconPlus,
+  IconEdit,
+  IconSearch,
+  IconMicrophone,
+  IconWand,
+} from "@tabler/icons";
 import { API_URL } from "@constants/data";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { set } from "lodash";
+import { IconMagnetic } from "@tabler/icons-react";
 
 interface PersonaData {
   name: string;
@@ -32,6 +40,8 @@ interface PersonaData {
   id: number;
   assets: any;
   saved_apollo_query: any;
+  stack_ranked_message_generation_configuration_id: number;
+  stack_ranked_message_generation_configuration: any;
 }
 
 const Personas = () => {
@@ -50,6 +60,10 @@ const Personas = () => {
   const [assets, setAssets]: any = useState([]);
   const [usedAssets, setUsedAssets] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [voices, setVoices] = useState([]);
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [currentUsedVoice, setCurrentUsedVoice]: any = useState(null);
 
   const filteredAssets = assets.filter((asset: any) =>
     asset.asset_key.toLowerCase().includes(searchQuery.toLowerCase())
@@ -75,6 +89,9 @@ const Personas = () => {
         (persona: PersonaData) => persona.id === openedPersonaId
       );
       setUsedAssets(currentOpenedPersona?.assets);
+      setCurrentUsedVoice(
+        currentOpenedPersona?.stack_ranked_message_generation_configuration_id
+      );
     } else {
       // Handle server errors or unauthorized access
       console.error("Failed to fetch personas");
@@ -112,6 +129,29 @@ const Personas = () => {
     }
   };
 
+  const fetchAllVoices = async () => {
+    const response = await fetch(
+      `${API_URL}/message_generation/stack_ranked_configuration/get_all_for_client`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`, // Ensure you have the userToken
+        },
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      setVoices(data.data); // Update the voices state with the fetched data
+      setShowVoiceModal(true); // Show the modal
+      return data.data;
+    } else {
+      // Handle errors
+      console.error("Failed to fetch voices");
+    }
+  };
+
   const getAllAssets = async () => {
     const response = await fetch(`${API_URL}/client/all_assets_in_client`, {
       method: "GET",
@@ -130,6 +170,32 @@ const Personas = () => {
     } else {
       // Handle errors
       console.error("Failed to fetch assets");
+    }
+  };
+
+  const updateVoice = async (voiceId: number, personaId: number) => {
+    const response = await fetch(
+      `${API_URL}/personas/persona/link_message_generation_config`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`, // Ensure you have the userToken
+        },
+        body: JSON.stringify({
+          persona_id: personaId,
+          stack_ranked_message_generation_configuration_id: voiceId,
+        }),
+      }
+    );
+
+    if (response.ok) {
+      // Voice updated successfully
+      console.log("Voice updated successfully");
+      fetchPersonas();
+    } else {
+      // Handle errors
+      console.error("Failed to update voice");
     }
   };
 
@@ -246,7 +312,14 @@ const Personas = () => {
           )}
           <Button
             mt="xs"
-            variant="filled"
+            variant={persona.assets.length > 0 ? "outline" : "filled"}
+            leftIcon={
+              persona.assets.length > 0 ? (
+                <IconEdit size={14} />
+              ) : (
+                <IconWand size={14} />
+              )
+            }
             size="xs"
             compact
             color="teal"
@@ -261,13 +334,39 @@ const Personas = () => {
         </>
       </td>
       <td style={{ paddingTop: 12, paddingBottom: 12 }}>
+        <Text>
+          {persona.stack_ranked_message_generation_configuration?.name.substring(
+            0,
+            25
+          )}{" "}
+          {persona.stack_ranked_message_generation_configuration?.name.length >
+          25
+            ? "..."
+            : ""}
+        </Text>
         <Button
           leftIcon={<IconMicrophone size={14} />}
-          variant="filled"
+          variant={
+            persona.stack_ranked_message_generation_configuration_id
+              ? "outline"
+              : "filled"
+          }
           size="xs"
           compact
+          mt="xs"
+          onClick={async () => {
+            const voices = await fetchAllVoices();
+            console.log(voices);
+            setOpenedPersonaId(persona.id);
+            setCurrentUsedVoice(
+              persona.stack_ranked_message_generation_configuration_id
+            );
+          }}
         >
-          Add Voice
+          {persona.stack_ranked_message_generation_configuration_id
+            ? "Edit"
+            : "Add"}{" "}
+          Voice
         </Button>
       </td>
     </tr>
@@ -350,6 +449,38 @@ const Personas = () => {
         ))}
         {filteredAssets.length === 0 && <Text size="sm">No assets found.</Text>}
       </Modal>
+      <Modal
+        opened={showVoiceModal}
+        onClose={() => setShowVoiceModal(false)}
+        size="lg"
+        title="Select a Voice"
+      >
+        {voices.map((voice: any, index: any) => (
+          <Card key={index} shadow="sm" p="lg" m="sm">
+            <Flex>
+              <Box w="85%">
+                <Text weight={500}>{voice.name}</Text>
+                {voice.completion_1 && (
+                  <Text size="sm" mt="md">
+                    {voice.completion_1}
+                  </Text>
+                )}
+              </Box>
+              <Button
+                color={voice.id === currentUsedVoice ? "gray" : "teal"}
+                variant={voice.id === currentUsedVoice ? "filled" : "outline"}
+                onClick={() => {
+                  updateVoice(voice.id, openedPersonaId);
+                }}
+                w="15%"
+              >
+                {voice.id === currentUsedVoice ? "Used" : "Use"}
+              </Button>
+            </Flex>
+          </Card>
+        ))}
+      </Modal>
+
       <Group
         position="apart"
         style={{ marginBottom: 20, alignItems: "center" }}

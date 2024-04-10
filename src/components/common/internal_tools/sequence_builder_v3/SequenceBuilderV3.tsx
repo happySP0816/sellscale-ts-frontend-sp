@@ -23,6 +23,7 @@ import {
   ScrollArea,
   Loader,
 } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import AssetLibraryRetool from '@pages/AssetLibraryRetool';
 import { useQuery } from '@tanstack/react-query';
@@ -260,7 +261,18 @@ export default function SequenceBuilderV3() {
               <Button
                 radius='lg'
                 onClick={async () => {
-                  await onAddSequence();
+                  modals.openConfirmModal({
+                    title: 'Override Sequence',
+                    children: (
+                      <Text size='sm'>
+                        Are you sure you want to override the current sequence with the selected
+                        options?
+                      </Text>
+                    ),
+                    labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                    onCancel: () => {},
+                    onConfirm: async () => await onAddSequence(),
+                  });
                 }}
               >
                 Add Sequence

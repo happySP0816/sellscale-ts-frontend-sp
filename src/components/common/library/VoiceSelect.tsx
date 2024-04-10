@@ -18,6 +18,7 @@ import {
   Menu,
   Switch,
   Tooltip,
+  ActionIcon,
 } from "@mantine/core";
 import { valueToColor } from "@utils/general";
 import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
@@ -48,6 +49,9 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { useQuery } from "@tanstack/react-query";
 import { openContextModal } from "@mantine/modals";
 import VoiceBuilderModal from "@modals/VoiceBuilderModal";
+import { IconCheck, IconX } from "@tabler/icons";
+import postEditStackRankedConfigurationName from "@utils/requests/postEditStackRankedConfigurationName";
+import { showNotification } from "@mantine/notifications";
 
 export default function VoiceSelect(props: {
   personaId: number;
@@ -86,10 +90,14 @@ export default function VoiceSelect(props: {
       ) ?? []) as any[];
       props.onFinishLoading && props.onFinishLoading(voices);
       if (props.autoSelect) {
-        const voice = voices.find((v) => v.active && v.archetype_id && !v.always_enable)
-        const baselineVoice = voices.find((v) => v.active && !v.archetype_id && v.always_enable)
-        console.log(voices)
-        console.log(baselineVoice)
+        const voice = voices.find(
+          (v) => v.active && v.archetype_id && !v.always_enable
+        );
+        const baselineVoice = voices.find(
+          (v) => v.active && !v.archetype_id && v.always_enable
+        );
+        console.log(voices);
+        console.log(baselineVoice);
         if (voice) {
           setSelectedVoice(voice);
           props.onChange(voice);
@@ -122,6 +130,23 @@ export default function VoiceSelect(props: {
     );
   };
 
+  const triggerEditVoiceName = async (voiceId: number, name: string) => {
+    const result = await postEditStackRankedConfigurationName(
+      userToken,
+      voiceId,
+      name
+    );
+    if (result.status === "success") {
+      refetch();
+      showNotification({
+        title: "Success",
+        message: "Voice name updated successfully.",
+      });
+    }
+
+    return result.status === "success";
+  };
+
   return (
     <>
       <ModalSelector
@@ -130,10 +155,10 @@ export default function VoiceSelect(props: {
             <>
               <Text>
                 {selectedVoice
-                  ? `Using ${_.truncate(
-                      userData.sdr_name.trim().split(" ")[0]
-                    )}'s Voice`
-                  : baselineVoice ? `Using Baseline Voice` : `Train Voice`}
+                  ? `${selectedVoice.name}`
+                  : baselineVoice
+                  ? `Using Baseline Voice`
+                  : `Train Voice`}
               </Text>
             </>
           ),
@@ -145,7 +170,9 @@ export default function VoiceSelect(props: {
             if (selectedVoice) {
               openContextModal({
                 modal: "voiceEditor",
-                title: <Title order={3}>Voice Editor: {selectedVoice.name}</Title>,
+                title: (
+                  <Title order={3}>Voice Editor: {selectedVoice.name}</Title>
+                ),
                 innerProps: {
                   persona_id: selectedVoice?.archetype_id,
                   voiceId: selectedVoice?.id,
@@ -175,6 +202,15 @@ export default function VoiceSelect(props: {
         loading={isFetching}
         activeItemId={selectedVoice?.id}
         items={voices.map((voice) => {
+          const [editing_name, setEditingName] = useState(false);
+          const [edited_name, setEditedName] = useState(voice.name);
+
+          const triggerEditVoiceNameWrapper = async () => {
+            const success = await triggerEditVoiceName(voice.id, edited_name);
+            if (success) {
+              setEditingName(false);
+            }
+          }
           return {
             id: voice.id,
             name: voice.full_name,
@@ -192,9 +228,74 @@ export default function VoiceSelect(props: {
                 <td>
                   <Group spacing="sm">
                     <div>
-                      <Text fz="sm" fw={500}>
-                        {`${voice.name} (#${voice.id})`}
-                      </Text>
+                      <Flex direction="row" align="center">
+                        {editing_name ? (
+                          <Flex>
+                            <TextInput
+                              size="xs"
+                              defaultValue={voice.name}
+                              w="200px"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                              onChange={(e) => {
+                                setEditedName(e.currentTarget.value);
+                              }}
+                            />
+                            <ActionIcon
+                              size="sm"
+                              ml="4px"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                triggerEditVoiceNameWrapper();
+                              }}
+                            >
+                              <IconCheck
+                                size="1rem"
+                                color={
+                                  theme.colors.teal[theme.fn.primaryShade()]
+                                }
+                                stroke={3}
+                              />
+                            </ActionIcon>
+                            <ActionIcon
+                              size="sm"
+                              ml="4px"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingName(false);
+                                setEditedName(voice.name);
+                              }}
+                            >
+                              <IconX
+                                size="1rem"
+                                color={
+                                  theme.colors.red[theme.fn.primaryShade()]
+                                }
+                                stroke={3}
+                              />
+                            </ActionIcon>
+                          </Flex>
+                        ) : (
+                          <>
+                            <Text fz="sm" fw={500}>
+                              {voice.name}
+                            </Text>
+                            <ActionIcon
+                              variant="subtle"
+                              size="sm"
+                              ml="2px"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingName(true);
+                              }}
+                            >
+                              <IconPencil size={12} />
+                            </ActionIcon>
+                          </>
+                        )}
+                      </Flex>
+
                       <Text fz="xs" c="dimmed">
                         {new Date(voice.created_at).toLocaleDateString(
                           "en-US",
@@ -211,18 +312,27 @@ export default function VoiceSelect(props: {
                 <Box>
                   <Badge
                     color={
-                      voice.always_enable ? "blue" : icpFitToColor(voice.icp_fit)
+                      voice.always_enable
+                        ? "blue"
+                        : icpFitToColor(voice.icp_fit)
                     }
                     sx={{
                       display: voice.always_enable ? "inline-block" : "none",
                     }}
-                    size='sm'
-                    mt='4px'
+                    size="sm"
+                    mt="4px"
                   >
                     {voice.always_enable ? "Baseline Voice" : ""}
                   </Badge>
                 </Box>
-                <Tooltip label={voice.always_enable ? "Since this is a baseline voice, it cannot be disabled." : "This voice is only active for this persona."} withinPortal>
+                <Tooltip
+                  label={
+                    voice.always_enable
+                      ? "Since this is a baseline voice, it cannot be disabled."
+                      : "This voice is only active for this persona."
+                  }
+                  withinPortal
+                >
                   <Switch
                     onLabel="ON"
                     offLabel="OFF"

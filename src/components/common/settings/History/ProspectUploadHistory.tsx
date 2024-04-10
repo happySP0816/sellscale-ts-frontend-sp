@@ -96,8 +96,8 @@ export default function ProspectUploadHistory() {
         columns={[
           {
             accessorKey: "any",
-            minSize: 450,
-            maxSize: 450,
+            minSize: 400,
+            maxSize: 400,
             header: () => (
               <Flex align={"center"} gap={"3px"}>
                 <IconLetterT color="gray" size={"0.9rem"} />
@@ -255,8 +255,8 @@ export default function ProspectUploadHistory() {
                 <Text color="gray">Progress</Text>
               </Flex>
             ),
-            maxSize: 350,
-            minSize: 350,
+            maxSize: 300,
+            minSize: 300,
             enableResizing: true,
             cell: (cell) => {
               const {
@@ -341,8 +341,8 @@ export default function ProspectUploadHistory() {
           },
           {
             accessorKey: "Status",
-            minSize: 350,
-            maxSize: 350,
+            minSize: 200,
+            maxSize: 200,
             header: () => (
               <Flex align={"center"} gap={"3px"}>
                 <IconLoader color="gray" size={"0.9rem"} />

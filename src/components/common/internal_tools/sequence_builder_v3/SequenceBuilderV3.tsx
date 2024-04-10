@@ -42,7 +42,6 @@ export default function SequenceBuilderV3() {
   const userToken = useRecoilValue(userTokenState);
 
   const [selectedData, setSelectedData] = useState<SelectedData>({
-    ctas: [],
     subject_lines: [],
     steps: [],
   });
@@ -65,7 +64,6 @@ export default function SequenceBuilderV3() {
       clientId,
       archetypeId,
       sequenceType,
-      selectedData.ctas,
       selectedData.subject_lines,
       selectedData.steps
     );
@@ -187,6 +185,7 @@ export default function SequenceBuilderV3() {
                 miw={200}
                 value={sequenceType}
                 onChange={(value) => {
+                  setResults([]);
                   setSequenceType(value ?? '');
                 }}
               />
@@ -267,30 +266,34 @@ export default function SequenceBuilderV3() {
                 Add Sequence
               </Button>
             </Group>
-            <TitleGenerationSection
-              results={results}
-              onClick={(text, assets, remove) => {
-                if (remove) {
-                  setSelectedData((prev) => ({
-                    ...prev,
-                    subject_lines: prev.subject_lines.filter((s) => s.text !== text),
-                  }));
-                } else {
-                  setSelectedData((prev) => ({
-                    ...prev,
-                    subject_lines: [
-                      ...prev.subject_lines,
-                      {
-                        text,
-                        assets,
-                      },
-                    ],
-                  }));
-                }
-              }}
-              selectedData={selectedData}
-            />
+            {sequenceType !== 'LINKEDIN-TEMPLATE' && (
+              <TitleGenerationSection
+                isCTAs={sequenceType === 'LINKEDIN-CTA'}
+                results={results}
+                onClick={(text, assets, remove) => {
+                  if (remove) {
+                    setSelectedData((prev) => ({
+                      ...prev,
+                      subject_lines: prev.subject_lines.filter((s) => s.text !== text),
+                    }));
+                  } else {
+                    setSelectedData((prev) => ({
+                      ...prev,
+                      subject_lines: [
+                        ...prev.subject_lines,
+                        {
+                          text,
+                          assets,
+                        },
+                      ],
+                    }));
+                  }
+                }}
+                selectedData={selectedData}
+              />
+            )}
             <StepGenerationSection
+              isCTAs={sequenceType === 'LINKEDIN-CTA'}
               results={results}
               onClick={(step_num, text, assets, remove) => {
                 if (remove) {
@@ -332,18 +335,26 @@ export default function SequenceBuilderV3() {
 }
 
 function TitleGenerationSection(props: {
+  isCTAs: boolean;
   results: MessageResult[];
   onClick: (text: string, assets: number[], remove: boolean) => void;
   selectedData: SelectedData;
 }) {
   const subjects = props.results
-    .map((message) => message.result.map((m) => ({ subject: m.subject, assets: message.assets })))
+    .map((message) =>
+      message.result.map((m) => ({
+        subject: props.isCTAs ? m.message : m.subject,
+        assets: message.assets,
+      }))
+    )
     .flat()
     .filter((s) => s.subject.trim());
 
   return (
     <Stack spacing={5}>
-      <Title order={5}>Subject Lines ({subjects.length})</Title>
+      <Title order={5}>
+        {props.isCTAs ? 'CTAs' : 'Subject Lines'} ({subjects.length})
+      </Title>
       <Paper p='lg'>
         <ScrollArea h={200}>
           {subjects.map((subject, index) => (
@@ -399,12 +410,12 @@ interface Asset {
 }
 
 interface SelectedData {
-  ctas: { text: string; assets: number[] }[];
   subject_lines: { text: string; assets: number[] }[];
   steps: { step_num: number; text: string; assets: number[] }[];
 }
 
 function StepGenerationSection(props: {
+  isCTAs: boolean;
   results: MessageResult[];
   onClick: (step_num: number, text: string, assets: number[], remove: boolean) => void;
   selectedData: SelectedData;
@@ -413,15 +424,17 @@ function StepGenerationSection(props: {
 
   return (
     <Paper p='lg'>
-      <Tabs variant='pills' defaultValue='step-1'>
+      <Tabs variant='pills' defaultValue={props.isCTAs ? 'step-2' : 'step-1'}>
         <Tabs.List>
-          {Object.keys(steps).map((step_num, index) => (
-            <Tabs.Tab key={index} value={`step-${step_num}`}>
-              Step {step_num}
-              {/* {steps[step_num].filter((m) => !m.result.find((mm) => mm.used)).length} /{' '}
+          {Object.keys(steps)
+            .filter((step_num) => (props.isCTAs ? step_num !== '1' : true))
+            .map((step_num, index) => (
+              <Tabs.Tab key={index} value={`step-${step_num}`}>
+                Step {step_num}
+                {/* {steps[step_num].filter((m) => !m.result.find((mm) => mm.used)).length} /{' '}
               {steps[step_num].length}) */}
-            </Tabs.Tab>
-          ))}
+              </Tabs.Tab>
+            ))}
         </Tabs.List>
         <Divider my={5} />
 

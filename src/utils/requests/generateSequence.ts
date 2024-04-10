@@ -104,7 +104,6 @@ export async function addSequence(
   client_id: number,
   archetype_id: number,
   sequence_type: string,
-  ctas: { text: string; assets: number[] }[],
   subject_lines: { text: string; assets: number[] }[],
   steps: { step_num: number; text: string; assets: number[] }[]
 ): Promise<MsgResponse> {
@@ -118,7 +117,6 @@ export async function addSequence(
       client_id: client_id,
       archetype_id: archetype_id,
       sequence_type: sequence_type,
-      ctas: ctas,
       subject_lines: subject_lines,
       steps: steps,
     }),

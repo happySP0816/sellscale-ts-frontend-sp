@@ -701,7 +701,7 @@ function Filters(props: {
                 setData={setExcludedCompanyLocationsKeywords}
               />
             </ItemCollapse>
-            <ItemCollapse title="Employee Count" numberOfItem={0}>
+            <ItemCollapse title="Employee Count" numberOfItem={company_size_start && company_size_end ? 1 : 0}>
               <Flex direction="column" maw={"30vw"}>
                 <Box
                   style={{

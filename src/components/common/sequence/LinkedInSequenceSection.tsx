@@ -99,7 +99,7 @@ import { patchBumpFramework } from '@utils/requests/patchBumpFramework';
 import { updateBlocklist, updateInitialBlocklist } from '@utils/requests/updatePersonaBlocklist';
 import { useDebouncedCallback } from '@utils/useDebouncedCallback';
 import _, { set } from 'lodash';
-import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { BumpFramework, ResearchPointType } from 'src';
 import TextWithNewline from '@common/library/TextWithNewlines';
@@ -200,17 +200,15 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
 
   let blocker = useBlocker(isDataChanged);
 
-  const bf0 = bumpFrameworks.find(
-    (bf) => bf.overall_status === 'ACCEPTED' && bf.active && bf.default
-  );
+  const bf0 = bumpFrameworks.find((bf) => bf.overall_status === 'ACCEPTED' && bf.active);
   const bf1 = bumpFrameworks.find(
-    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1 && bf.active && bf.default
+    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1 && bf.active
   );
   const bf2 = bumpFrameworks.find(
-    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2 && bf.active && bf.default
+    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2 && bf.active
   );
   const bf3 = bumpFrameworks.find(
-    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3 && bf.active && bf.default
+    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3 && bf.active
   );
   const bf0Delay = useRef(bf0?.bump_delay_days ?? 2);
   const bf1Delay = useRef(bf1?.bump_delay_days ?? 2);
@@ -468,7 +466,7 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                               bf0.bump_length,
                               bf0.bumped_count,
                               bf0Delay.current,
-                              bf0.default,
+                              bf0.active,
                               bf0.use_account_research,
                               bf0.transformer_blocklist
                             );
@@ -2087,8 +2085,8 @@ function FrameworkSectionShell(props: {
 }) {
   const frameworks = props.frameworks.sort((a, b) => {
     // Sort by default then by id
-    if (a.default && !b.default) return -1;
-    if (!a.default && b.default) return 1;
+    if (a.active && !b.active) return -1;
+    if (!a.active && b.active) return 1;
     if (a.id < b.id) return -1;
     if (a.id > b.id) return 1;
     return 0;
@@ -2223,6 +2221,18 @@ function FrameworkSection(props: {
   const [templateShowAll, setTemplateShowAll] = useState(false);
 
   const [savingSettings, setSavingSettings] = useState(false);
+
+  const bfs = useMemo(() => {
+    return (templateShowAll ? props.frameworks : props.frameworks.filter((a) => a.active))
+      .filter((v) => v && v.bumped_count == props.bumpCount)
+      .filter((v) => v.overall_status === 'ACCEPTED' || v.overall_status === 'BUMPED')
+      .sort((a, b) => {
+        if (a.active) return -1;
+        if (b.active) return 1;
+        return 0;
+      });
+  }, [templateShowAll, props.framework]);
+
   useEffect(() => {
     props.setIsDataChanged(changed);
   }, [changed]);
@@ -2447,7 +2457,7 @@ function FrameworkSection(props: {
               </Card.Section>
             </Card>
             <Stack pt={20} spacing={15}>
-              <Box sx={{ position: 'relative' }}>
+              <Box styles={{ position: 'relative' }}>
                 <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
                 {noProspectsFound ? (
                   <Box
@@ -2675,131 +2685,150 @@ function FrameworkSection(props: {
                 )}
 
                 <Stack spacing={10}>
-                  {(templateShowAll
-                    ? props.frameworks.sort((a, b) => {
-                        if (a.default) return 1;
-                        if (b.default) return -1;
-                        return 0;
-                      })
-                    : [
-                        props.frameworks
-                          .filter((a) => a.default)
-                          .find((v) => v?.id === props.framework?.id)!,
-                      ]
-                  )
-                    .filter((v) => v && v.bumped_count == props.bumpCount)
-                    .filter((v) => v.overall_status === 'ACCEPTED' || v.overall_status === 'BUMPED')
-                    .sort((a, b) => {
-                      if (a.default) return -1;
-                      if (b.default) return 1;
-                      return 0;
-                    })
-                    .map((bf, index) => (
-                      <Paper
-                        key={index}
-                        p='md'
-                        mih={80}
-                        sx={{
-                          position: 'relative',
-                          cursor: 'pointer',
-                          border:
-                            bf.id === props.framework.id
-                              ? 'solid 1px #339af0 !important'
-                              : undefined,
-                          backgroundColor:
-                            bf.id === props.framework.id ? '#339af008 !important' : undefined,
-                          flexDirection: 'row',
-                          display: 'flex',
-                        }}
-                        withBorder
-                      >
-                        <Flex mr='md' direction={'column'}>
-                          <Box
-                            miw='100px'
-                            mah={80}
-                            sx={{
-                              border: 'solid 1px #339af022',
-                              backgroundColor: '#339af022',
-                              padding: '8px',
-                              borderRadius: '4px',
-                              textAlign: 'center',
-                              cursor: 'pointer',
-                            }}
-                            mt='xl'
-                            onClick={() => {
-                              openContextModal({
-                                modal: 'frameworkReplies',
-                                title: 'Past Example Replies',
-                                innerProps: {
-                                  bumpId: bf.id,
-                                },
-                              });
-                            }}
+                  {bfs.map((bf, index) => (
+                    <Paper
+                      key={index}
+                      p='md'
+                      mih={80}
+                      sx={{
+                        position: 'relative',
+                        cursor: 'pointer',
+                        border:
+                          bf.id === props.framework.id ? 'solid 1px #339af0 !important' : undefined,
+                        backgroundColor:
+                          bf.id === props.framework.id ? '#339af008 !important' : undefined,
+                        flexDirection: 'row',
+                        display: 'flex',
+                      }}
+                      withBorder
+                    >
+                      <Flex mr='md' direction={'column'}>
+                        <Box
+                          miw='100px'
+                          mah={80}
+                          sx={{
+                            border: 'solid 1px #339af022',
+                            backgroundColor: '#339af022',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                          }}
+                          mt='xl'
+                          onClick={() => {
+                            openContextModal({
+                              modal: 'frameworkReplies',
+                              title: 'Past Example Replies',
+                              innerProps: {
+                                bumpId: bf.id,
+                              },
+                            });
+                          }}
+                        >
+                          <Text fw='bold' fz='md' color='blue' mt='xs'>
+                            {bf.etl_num_times_used != null &&
+                              bf.etl_num_times_converted != null &&
+                              Math.round(
+                                (bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) *
+                                  100
+                              )}
+                            % reply
+                          </Text>
+                          <Text size='8px' color='blue' fz={'xs'} fw='500'>
+                            ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
+                          </Text>
+                        </Box>
+                        <Button
+                          onClick={() => {
+                            openContextModal({
+                              modal: 'frameworkReplies',
+                              title: 'Past Example Usages',
+                              innerProps: {
+                                bumpId: bf.id,
+                              },
+                            });
+                          }}
+                          size='xs'
+                          mt={3}
+                        >
+                          View Replies
+                        </Button>
+                      </Flex>
+                      <Box mr={40} w='100%'>
+                        <Flex>
+                          <Text
+                            size='sm'
+                            fw='600'
+                            mb='xs'
+                            sx={{ textTransform: 'uppercase' }}
+                            color='gray'
+                            variant='outline'
                           >
-                            <Text fw='bold' fz='md' color='blue' mt='xs'>
-                              {bf.etl_num_times_used != null &&
-                                bf.etl_num_times_converted != null &&
-                                Math.round(
-                                  (bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) *
-                                    100
-                                )}
-                              % reply
-                            </Text>
-                            <Text size='8px' color='blue' fz={'xs'} fw='500'>
-                              ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
-                            </Text>
-                          </Box>
-                          <Button
-                            onClick={() => {
-                              openContextModal({
-                                modal: 'frameworkReplies',
-                                title: 'Past Example Usages',
-                                innerProps: {
-                                  bumpId: bf.id,
-                                },
-                              });
-                            }}
-                            size='xs'
-                            mt={3}
-                          >
-                            View Replies
-                          </Button>
-                        </Flex>
-                        <Box mr={40} w='100%'>
-                          <Flex>
-                            <Text
-                              size='sm'
-                              fw='600'
-                              mb='xs'
-                              sx={{ textTransform: 'uppercase' }}
-                              color='gray'
-                              variant='outline'
-                            >
-                              {bf.title}
-                            </Text>
-                            {/* Hovercard for transformers */}
+                            {bf.title}
+                          </Text>
+                          {/* Hovercard for transformers */}
 
+                          <HoverCard width={280} shadow='md'>
+                            <HoverCard.Target>
+                              <Badge
+                                leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
+                                color='lime'
+                                variant={
+                                  bf.active_transformers && bf.active_transformers.length > 0
+                                    ? 'filled'
+                                    : 'outline'
+                                }
+                                ml='xs'
+                                size='xs'
+                                onClick={() => {
+                                  toggle();
+                                }}
+                              >
+                                {bf.active_transformers && bf.active_transformers.length > 0
+                                  ? bf.active_transformers.length + ' Research Points'
+                                  : '0 Research Points'}
+                              </Badge>
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown
+                              style={{
+                                backgroundColor: 'rgb(34, 37, 41)',
+                                padding: 0,
+                              }}
+                            >
+                              <Paper
+                                style={{
+                                  backgroundColor: 'rgb(34, 37, 41)',
+                                  color: 'white',
+                                  padding: 10,
+                                }}
+                              >
+                                <TextWithNewline style={{ fontSize: '12px' }}>
+                                  {bf.active_transformers.length > 0
+                                    ? '<b>Active Research Points:</b>\n- ' +
+                                      bf.active_transformers
+                                        .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
+                                        .join('\n- ')
+                                    : 'Click to activate more research points'}
+                                </TextWithNewline>
+                              </Paper>
+                            </HoverCard.Dropdown>
+                          </HoverCard>
+
+                          <AIBrainPill />
+
+                          <BumpFrameworkAssets bump_framework_id={bf.id} />
+
+                          {bf.human_feedback && (
                             <HoverCard width={280} shadow='md'>
                               <HoverCard.Target>
                                 <Badge
-                                  leftSection={
-                                    <IconSearch size='0.8rem' style={{ marginTop: 4 }} />
-                                  }
-                                  color='lime'
-                                  variant={
-                                    bf.active_transformers && bf.active_transformers.length > 0
-                                      ? 'filled'
-                                      : 'outline'
-                                  }
+                                  leftSection={<IconBulb size='0.8rem' />}
+                                  color='grape'
+                                  variant='filled'
                                   ml='xs'
                                   size='xs'
-                                  onClick={() => {
-                                    toggle();
-                                  }}
                                 >
-                                  {bf.active_transformers && bf.active_transformers.length > 0
-                                    ? bf.active_transformers.length + ' Research Points'
-                                    : '0 Research Points'}
+                                  Fine Tuned
                                 </Badge>
                               </HoverCard.Target>
                               <HoverCard.Dropdown
@@ -2816,57 +2845,15 @@ function FrameworkSection(props: {
                                   }}
                                 >
                                   <TextWithNewline style={{ fontSize: '12px' }}>
-                                    {bf.active_transformers.length > 0
-                                      ? '<b>Active Research Points:</b>\n- ' +
-                                        bf.active_transformers
-                                          .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                          .join('\n- ')
-                                      : 'Click to activate more research points'}
+                                    {'<b>Additional Instructions:</b>\n' + bf.human_feedback}
                                   </TextWithNewline>
                                 </Paper>
                               </HoverCard.Dropdown>
                             </HoverCard>
-
-                            <AIBrainPill />
-
-                            <BumpFrameworkAssets bump_framework_id={bf.id} />
-
-                            {bf.human_feedback && (
-                              <HoverCard width={280} shadow='md'>
-                                <HoverCard.Target>
-                                  <Badge
-                                    leftSection={<IconBulb size='0.8rem' />}
-                                    color='grape'
-                                    variant='filled'
-                                    ml='xs'
-                                    size='xs'
-                                  >
-                                    Fine Tuned
-                                  </Badge>
-                                </HoverCard.Target>
-                                <HoverCard.Dropdown
-                                  style={{
-                                    backgroundColor: 'rgb(34, 37, 41)',
-                                    padding: 0,
-                                  }}
-                                >
-                                  <Paper
-                                    style={{
-                                      backgroundColor: 'rgb(34, 37, 41)',
-                                      color: 'white',
-                                      padding: 10,
-                                    }}
-                                  >
-                                    <TextWithNewline style={{ fontSize: '12px' }}>
-                                      {'<b>Additional Instructions:</b>\n' + bf.human_feedback}
-                                    </TextWithNewline>
-                                  </Paper>
-                                </HoverCard.Dropdown>
-                              </HoverCard>
-                            )}
-                          </Flex>
-                          <Card withBorder w='100%' sx={{}}>
-                            {/* {editing ? (
+                          )}
+                        </Flex>
+                        <Card withBorder w='100%' sx={{}}>
+                          {/* {editing ? (
                               <FocusTrap active={true}>
                                 <Textarea
                                   placeholder='Instructions'
@@ -2888,124 +2875,124 @@ function FrameworkSection(props: {
                                 />
                               </FocusTrap>
                             ) : ( */}
-                            <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
-                              <div
-                                // onClick={() => {
-                                //   setEditing(true);
-                                // }}
-                                dangerouslySetInnerHTML={{
-                                  __html: DOMPurify.sanitize(
-                                    bf.description
-                                      .replaceAll(
-                                        '[[',
-                                        "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                          theme.colors['blue'][5] +
-                                          "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
-                                      )
-                                      .replaceAll(']]', '</span>')
-                                      .replaceAll(
-                                        '\n',
-                                        `<br style="display: block; content: ' '; margin: 10px 0 "/>`
-                                      ) as string
-                                  ),
-                                }}
-                              />
-                            </Text>
-                          </Card>
-                        </Box>
-                        <Box sx={{ justifyContent: 'right' }} ml='auto'>
-                          <Switch
-                            sx={{ cursor: 'pointer' }}
-                            checked={bf.default}
-                            onChange={(checked) => {
-                              setLoading(true);
-                              const result = patchBumpFramework(
-                                userToken,
-                                bf.id,
-                                bf.overall_status,
-                                bf.title,
-                                bf.description,
-                                bf.bump_length,
-                                bf.bumped_count,
-                                bf.bump_delay_days,
-                                !bf.default,
-                                bf.use_account_research,
-                                bf.transformer_blocklist
-                              )
-                                .then(() => {
-                                  showNotification({
-                                    title: 'Success',
-                                    message: 'Bump Framework enabled',
-                                    color: 'green',
-                                  });
-                                })
-                                .finally(() => {
-                                  (async () => {
-                                    await queryClient.refetchQueries({
-                                      queryKey: [`query-get-bump-frameworks`],
-                                    });
-                                    setLoading(false);
-                                  })();
-                                  setChanged(false);
+                          <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                            <div
+                              // onClick={() => {
+                              //   setEditing(true);
+                              // }}
+                              dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(
+                                  bf.description
+                                    .replaceAll(
+                                      '[[',
+                                      "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
+                                        theme.colors['blue'][5] +
+                                        "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                                    )
+                                    .replaceAll(']]', '</span>')
+                                    .replaceAll(
+                                      '\n',
+                                      `<br style="display: block; content: ' '; margin: 10px 0 "/>`
+                                    ) as string
+                                ),
+                              }}
+                            />
+                          </Text>
+                        </Card>
+                      </Box>
+                      <Box sx={{ justifyContent: 'right' }} ml='auto'>
+                        <Switch
+                          sx={{ cursor: 'pointer' }}
+                          checked={bf.active}
+                          onChange={(checked) => {
+                            setLoading(true);
+                            const result = patchBumpFramework(
+                              userToken,
+                              bf.id,
+                              bf.overall_status,
+                              bf.title,
+                              bf.description,
+                              bf.bump_length,
+                              bf.bumped_count,
+                              bf.bump_delay_days,
+                              !bf.active,
+                              bf.use_account_research,
+                              bf.transformer_blocklist
+                            )
+                              .then(() => {
+                                showNotification({
+                                  title: 'Success',
+                                  message: 'Bump Framework enabled',
+                                  color: 'green',
                                 });
-                            }}
-                          />
-                          <Button
-                            mt='xs'
-                            variant='subtle'
-                            radius='xl'
-                            size='sm'
-                            compact
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              // setEditing(true);
-                              openContextModal({
-                                modal: 'liBfTemplate',
-                                title: 'Edit Template',
-                                innerProps: {
-                                  mode: 'EDIT',
-                                  editProps: {
-                                    bf: bf,
-                                    templateId: bf.id,
-                                    title: bf.title,
-                                    message: bf.description,
-                                    active: bf.default,
-                                    humanFeedback: bf.human_feedback,
-                                    blockList: bf.transformer_blocklist,
-                                    onChange: props.onFrameworkChange,
-                                  },
-                                  // message: bf.description,
-                                  // handleSubmit: async (message: string) => {
-                                  //   form.setFieldValue('promptInstructions', message);
-                                  //   // setChanged(true);
-                                  //   // setEditing(false);
-                                  //   const result = await patchBumpFramework(
-                                  //     userToken,
-                                  //     bf.id,
-                                  //     bf.overall_status,
-                                  //     bf.title,
-                                  //     message,
-                                  //     bf.bump_length,
-                                  //     bf.bumped_count,
-                                  //     bf.bump_delay_days,
-                                  //     bf.default,
-                                  //     bf.use_account_research,
-                                  //     bf.transformer_blocklist
-                                  //   );
-                                  //   await queryClient.refetchQueries({
-                                  //     queryKey: [`query-get-bump-frameworks`],
-                                  //   });
-                                  // },
-                                },
+                              })
+                              .finally(() => {
+                                (async () => {
+                                  await queryClient.refetchQueries({
+                                    queryKey: [`query-get-bump-frameworks`],
+                                  });
+                                  setLoading(false);
+                                })();
+                                setChanged(false);
                               });
-                            }}
-                          >
-                            Edit
-                          </Button>
-                        </Box>
-                      </Paper>
-                    ))}
+                          }}
+                        />
+                        <Button
+                          mt='xs'
+                          variant='subtle'
+                          radius='xl'
+                          size='sm'
+                          compact
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            // setEditing(true);
+                            openContextModal({
+                              modal: 'liBfTemplate',
+                              title: 'Edit Template',
+                              innerProps: {
+                                mode: 'EDIT',
+                                editProps: {
+                                  bf: bf,
+                                  templateId: bf.id,
+                                  title: bf.title,
+                                  message: bf.description,
+                                  active: bf.active,
+                                  humanFeedback: bf.human_feedback,
+                                  blockList: bf.transformer_blocklist,
+                                  onChange: props.onFrameworkChange,
+                                },
+                                // message: bf.description,
+                                // handleSubmit: async (message: string) => {
+                                //   form.setFieldValue('promptInstructions', message);
+                                //   // setChanged(true);
+                                //   // setEditing(false);
+                                //   const result = await patchBumpFramework(
+                                //     userToken,
+                                //     bf.id,
+                                //     bf.overall_status,
+                                //     bf.title,
+                                //     message,
+                                //     bf.bump_length,
+                                //     bf.bumped_count,
+                                //     bf.bump_delay_days,
+                                //     bf.active,
+                                //     bf.use_account_research,
+                                //     bf.transformer_blocklist
+                                //   );
+                                //   await queryClient.refetchQueries({
+                                //     queryKey: [`query-get-bump-frameworks`],
+                                //   });
+                                // },
+                              },
+                            });
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      </Box>
+                    </Paper>
+                  ))}
                 </Stack>
               </form>
 
@@ -3056,12 +3043,12 @@ function FrameworkSection(props: {
                   <IconChevronDown
                     size='1rem'
                     style={{
-                      transform: templateShowAll ? '' : 'rotate(180deg)',
+                      transform: templateShowAll ? 'rotate(180deg)' : '',
                     }}
                   />
                 }
               >
-                Show {templateShowAll ? 'All Templates' : 'Active Templates Only'}
+                Show {templateShowAll ? 'Active Templates Only' : 'All Templates'}
               </Button>
             )}
           </>

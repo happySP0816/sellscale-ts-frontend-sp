@@ -1,6 +1,6 @@
-declare module 'react-render-html';
+declare module "react-render-html";
 export interface MsgResponse {
-  status: 'success' | 'error';
+  status: "success" | "error";
   title: string;
   message: string;
   data?: any;
@@ -33,10 +33,10 @@ export interface ActivityLog {
 export interface SyncData {
   id: number;
   client_id: number;
-  sync_type?: 'leads_only' | 'account_and_leads';
+  sync_type?: "leads_only" | "account_and_leads";
   status_mapping?: Record<string, any>; // TODO
   event_handlers?: {
-    on_demo_set?: 'create_lead' | 'do_nothing';
+    on_demo_set?: "create_lead" | "do_nothing";
   };
 }
 
@@ -60,13 +60,13 @@ export interface Campaign {
   num_demos: number;
   demos: list;
   status:
-    | 'PENDING'
-    | 'NEEDS_REVIEW'
-    | 'IN_PROGRESS'
-    | 'INITIAL_EDIT_COMPLETE'
-    | 'READY_TO_SEND'
-    | 'COMPLETE'
-    | 'CANCELLED';
+    | "PENDING"
+    | "NEEDS_REVIEW"
+    | "IN_PROGRESS"
+    | "INITIAL_EDIT_COMPLETE"
+    | "READY_TO_SEND"
+    | "COMPLETE"
+    | "CANCELLED";
 }
 
 export interface Sequence {
@@ -203,6 +203,9 @@ export interface ProspectShallow {
   icp_fit_score_override: number | null;
   contract_size: number;
   meta_data?: Record<string, any>;
+  merge_contact_id?: string;
+  merge_account_id?: string;
+  merge_opportunity_id?: string;
 }
 
 export interface ProspectICP {
@@ -466,7 +469,7 @@ export interface ProspectEmail extends Record<string, unknown> {
   from: string;
 }
 
-export type Channel = 'EMAIL' | 'LINKEDIN' | 'SELLSCALE' | 'SMARTLEAD';
+export type Channel = "EMAIL" | "LINKEDIN" | "SELLSCALE" | "SMARTLEAD";
 
 export type BumpFramework = {
   id: number;
@@ -668,7 +671,7 @@ interface EmailTemplate {
   name: string;
   description: string | null;
   template: string;
-  template_type: 'SUBJECT_LINE' | 'BODY';
+  template_type: "SUBJECT_LINE" | "BODY";
   active: boolean;
   transformer_blocklist: string[] | null;
   tone: string | null;
@@ -713,18 +716,20 @@ interface Trigger {
 
 ///////////////////////////////////////////////////////////////////
 
-type TriggerBlockType = 'SOURCE' | 'FILTER' | 'ACTION';
+type TriggerBlockType = "SOURCE" | "FILTER" | "ACTION";
 interface TriggerBlock {
   type: TriggerBlockType;
 }
 
-type TriggerSourceType = 'GOOGLE_COMPANY_NEWS' | 'EXTRACT_PROSPECTS_FROM_COMPANIES';
+type TriggerSourceType =
+  | "GOOGLE_COMPANY_NEWS"
+  | "EXTRACT_PROSPECTS_FROM_COMPANIES";
 type TriggerSourceData = {
   prospect_titles?: string[];
   company_query?: string;
 };
 interface TriggerSourceBlock extends TriggerBlock {
-  type: 'SOURCE';
+  type: "SOURCE";
   source: TriggerSourceType;
   data: TriggerSourceData;
 }
@@ -738,24 +743,24 @@ type TriggerFilterCriteria = {
   company_query?: string;
 };
 interface TriggerFilterBlock extends TriggerBlock {
-  type: 'FILTER';
+  type: "FILTER";
   criteria: TriggerFilterCriteria;
 }
 
-type TriggerActionType = 'SEND_SLACK_MESSAGE' | 'UPLOAD_PROSPECTS';
+type TriggerActionType = "SEND_SLACK_MESSAGE" | "UPLOAD_PROSPECTS";
 type TriggerActionData = {
   slack_message?: Record<string, any>[] | string;
   slack_webhook_urls?: string[];
 };
 interface TriggerActionBlock extends TriggerBlock {
-  type: 'ACTION';
+  type: "ACTION";
   action: TriggerActionType;
   data: TriggerActionData;
 }
 
 ///////////////////////////////////////////////////////////////////
 
-type TriggerInputType = 'TEXT' | 'NUMBER' | 'JSON' | 'BOOLEAN';
+type TriggerInputType = "TEXT" | "NUMBER" | "JSON" | "BOOLEAN";
 type TriggerInput = {
   type: TriggerInputType;
   keyLink: string;
@@ -767,7 +772,11 @@ type TriggerInput = {
 interface TriggerDisplayFramework {
   uuid?: string;
   type: TriggerBlockType;
-  subType?: TriggerSourceType | TriggerActionType | 'FILTER_PROSPECTS' | 'FILTER_COMPANIES';
+  subType?:
+    | TriggerSourceType
+    | TriggerActionType
+    | "FILTER_PROSPECTS"
+    | "FILTER_COMPANIES";
   label: string;
   description: string;
   emoji: string;

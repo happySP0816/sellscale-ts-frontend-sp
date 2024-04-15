@@ -1,16 +1,4 @@
-import {
-  Box,
-  Button,
-  Card,
-  Divider,
-  Flex,
-  Image,
-  Paper,
-  Select,
-  Switch,
-  Text,
-  Title,
-} from '@mantine/core';
+import { Box, Button, Card, Divider, Flex, Image, Paper, Select, Switch, Text, Title } from '@mantine/core';
 import { IconCircleCheck, IconNetwork, IconPlugConnected } from '@tabler/icons';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -23,6 +11,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getOperationAvailableCRM, getSyncCRM, updateSyncCRM } from '@utils/requests/mergeCRM';
 import { SyncData } from 'src';
 import _ from 'lodash';
+import CRMUserMapping from '../CRMConnection/CRMMapping';
+import StageMapping from '../CRMConnection/StageMapping';
+import AccountCreation from '../CRMConnection/AccountCreation';
 
 type MergeIntegrationType = {
   id: string;
@@ -150,8 +141,7 @@ const CRMConnectionPage: React.FC = () => {
 
       for (const op of operations) {
         const contactRes = await getOperationAvailableCRM(userToken, op);
-        results[op] =
-          contactRes.status === 'success' ? (contactRes.data.available as boolean) : false;
+        results[op] = contactRes.status === 'success' ? (contactRes.data.available as boolean) : false;
       }
 
       return results;
@@ -161,8 +151,7 @@ const CRMConnectionPage: React.FC = () => {
   const [crmSetup, setCRMSetup] = useState([
     {
       title: 'Leads vs Account + Contacts',
-      content:
-        "Depending on how your Sales Org structures your CRM, you can choose to sync SellScale prospects as 'leads' or 'account+contact' combination.",
+      content: "Depending on how your Sales Org structures your CRM, you can choose to sync SellScale prospects as 'leads' or 'account+contact' combination.",
       activate: true,
     },
   ]);
@@ -221,8 +210,7 @@ const CRMConnectionPage: React.FC = () => {
   const [eventHandlers, setEventHandlers] = useState([
     {
       title: 'On Demo Set',
-      content:
-        'Whenever a prospect moves to "Demo Set" status, choose an automated action to take place in your CRM.',
+      content: 'Whenever a prospect moves to "Demo Set" status, choose an automated action to take place in your CRM.',
       required_operations: ['CRMContact_CREATE', 'CRMContact_FETCH'],
       key: 'on_demo_set',
       options: [
@@ -240,9 +228,7 @@ const CRMConnectionPage: React.FC = () => {
 
   const hasAvailability = (required_operations: string[]) => {
     if (!availableOperations) return false;
-    const enabledOperations = Object.keys(availableOperations).filter(
-      (op) => availableOperations[op]
-    );
+    const enabledOperations = Object.keys(availableOperations).filter((op) => availableOperations[op]);
     return required_operations.every((op) => enabledOperations.includes(op));
   };
 
@@ -262,9 +248,7 @@ const CRMConnectionPage: React.FC = () => {
               <Text fw={600}>
                 {integration ? (
                   <span>
-                    {integration.integration} CRM{' '}
-                    <span style={{ fontWeight: 400 }}>connected to</span>{' '}
-                    {integration?.end_user_organization_name}
+                    {integration.integration} CRM <span style={{ fontWeight: 400 }}>connected to</span> {integration?.end_user_organization_name}
                   </span>
                 ) : (
                   'Connect to your CRM to SellScale'
@@ -301,9 +285,8 @@ const CRMConnectionPage: React.FC = () => {
         </Flex>
         <Divider my='md' />
         <Text color='gray' size={'xs'} mt={'md'}>
-          Add SellScale to your CRM via integration to automatically transfer contact, lead, and
-          account information between SellScale and your CRM. This is the recommended option as it
-          allows you to get real time alerts and visibility into company and people activities.
+          Add SellScale to your CRM via integration to automatically transfer contact, lead, and account information between SellScale and your CRM. This is the
+          recommended option as it allows you to get real time alerts and visibility into company and people activities.
         </Text>
       </Paper>
 
@@ -358,11 +341,7 @@ const CRMConnectionPage: React.FC = () => {
                         <Text mt='6px' mr='sm' fz='sm' color='gray'>
                           Sync type:
                         </Text>
-                        <Select
-                          data={['Sync Leads', 'Sync Account+Leads']}
-                          value={'Sync Leads'}
-                          defaultValue={'Sync Leads'}
-                        />
+                        <Select data={['Sync Leads', 'Sync Account+Leads']} value={'Sync Leads'} defaultValue={'Sync Leads'} />
                       </Flex>
                     </Flex>
                   </label>
@@ -490,8 +469,7 @@ const CRMConnectionPage: React.FC = () => {
                     </Flex>
                   );
                 })}
-              {eventHandlers.filter((item) => hasAvailability(item.required_operations)).length ===
-                0 && (
+              {eventHandlers.filter((item) => hasAvailability(item.required_operations)).length === 0 && (
                 <Text color='gray' fs='italic' size='sm'>
                   No available event handlers
                 </Text>
@@ -512,22 +490,17 @@ const CRMConnectionPage: React.FC = () => {
           />
           <Card withBorder>
             <Flex>
-              <Text mt='4px'>
-                Add a test `Account` named "SellScale Test" to your CRM to verify the connection.
-              </Text>
-              <Button
-                ml='auto'
-                variant='outline'
-                color='blue'
-                loading={creatingTestContact}
-                onClick={() => createTestAccount()}
-              >
+              <Text mt='4px'>Add a test `Account` named "SellScale Test" to your CRM to verify the connection.</Text>
+              <Button ml='auto' variant='outline' color='blue' loading={creatingTestContact} onClick={() => createTestAccount()}>
                 Add Test Account
               </Button>
             </Flex>
           </Card>
         </Paper>
       )}
+      <CRMUserMapping />
+      <StageMapping />
+      <AccountCreation />
     </Card>
   );
 };

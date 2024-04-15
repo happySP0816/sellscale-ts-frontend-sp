@@ -119,6 +119,7 @@ export async function addSequence(
       sequence_type: sequence_type,
       subject_lines: subject_lines,
       steps: steps,
+      override: false,
     }),
   });
   return await processResponse(response, 'data');

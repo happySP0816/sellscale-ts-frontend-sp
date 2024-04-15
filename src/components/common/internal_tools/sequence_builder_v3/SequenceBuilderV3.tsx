@@ -371,7 +371,25 @@ function TitleGenerationSection(props: {
         <ScrollArea h={200}>
           {subjects.map((subject, index) => (
             <Group key={index} py={5} noWrap>
-              <Textarea w='100%' m='auto' readOnly autosize>
+              <Textarea
+                w='100%'
+                m='auto'
+                autosize
+                onChange={(e) => {
+                  props.onClick(
+                    subject.subject,
+                    subject.assets.map((a) => a.id),
+                    true
+                  );
+                  setTimeout(() => {
+                    props.onClick(
+                      e.currentTarget.value,
+                      subject.assets.map((a) => a.id),
+                      false
+                    );
+                  }, 1);
+                }}
+              >
                 {subject.subject}
               </Textarea>
               <Box>
@@ -504,7 +522,29 @@ function StepGenerationSection(props: {
 
                       <Paper withBorder px={10} w={400}>
                         <Text fz='sm'>
-                          <ReactMarkdown>{msg.message}</ReactMarkdown>
+                          <Textarea
+                            w='100%'
+                            m='auto'
+                            autosize
+                            onChange={(e) => {
+                              props.onClick(
+                                message.step_num,
+                                msg.message,
+                                message.assets.map((a) => a.id),
+                                true
+                              );
+                              setTimeout(() => {
+                                props.onClick(
+                                  message.step_num,
+                                  e.currentTarget.value,
+                                  message.assets.map((a) => a.id),
+                                  false
+                                );
+                              }, 1);
+                            }}
+                          >
+                            {msg.message}
+                          </Textarea>
                         </Text>
                       </Paper>
                     </Group>

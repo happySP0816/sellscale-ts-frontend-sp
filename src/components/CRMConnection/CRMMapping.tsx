@@ -17,6 +17,12 @@ export default function CRMUserMapping() {
     "Emilia Z.",
     "Gibso L.",
   ]);
+  const [crmUsers, setCrmUsers] = useState([
+    "Johnny Samol",
+    "Sarah P. Dwane",
+    "Emilia M. PhD Zhukov",
+    "Gibson L.",
+  ]);
   return (
     <Paper withBorder mt="md" p="lg" radius="md" bg={"#fcfcfd"}>
       <Flex align={"center"} justify={"space-between"}>
@@ -40,6 +46,7 @@ export default function CRMUserMapping() {
                 label={index === 0 && <Text color="gray">SellScale User</Text>}
                 placeholder="Pick value"
                 data={users}
+                value={item}
               />
               <Flex>
                 <IconArrowsExchange
@@ -51,7 +58,8 @@ export default function CRMUserMapping() {
                 w={"100%"}
                 label={index === 0 && <Text color="gray">CRM User</Text>}
                 placeholder="Pick value"
-                data={users}
+                data={crmUsers}
+                value={crmUsers[index]}
               />
             </Flex>
           );

@@ -43,6 +43,7 @@ import {
   IconChevronUp,
   IconClick,
   IconCode,
+  IconCone,
   IconEye,
   IconGlobe,
   IconInfoCircle,
@@ -84,6 +85,7 @@ import ComingSoonCard from "@common/library/ComingSoonCard";
 import OperatorDashboard, { Task } from "./Overview/OperatorDash/OperatorDash";
 import WhiteLogo from "../../../public/favicon.svg";
 import Utilization from "./Utilization/Utilization";
+import PipelineOverview from "./Overview/OperatorDash/PipelineOverview";
 
 const options = {
   scales: {
@@ -1948,37 +1950,40 @@ export default function OverviewPage() {
             {/* <Button color={activeTab === 'operation_overview' ? 'blue' : 'gray'} variant='subtle' onClick={() => setActiveTab('operation_overview')}>
               ⚙️
             </Button> */}
+            {userData?.id == 171 && (
+              <Button
+                variant={
+                  activeTab === "operation_overview" ? "filled" : "outline"
+                }
+                color={activeTab === "operation_overview" ? "" : "gray"}
+                sx={{
+                  backgroundColor:
+                    activeTab === "operation_overview"
+                      ? "rgb(72 72 72)"
+                      : "white",
+                  color: activeTab === "operation_overview" ? "white" : "",
+                  "&:hover": {
+                    backgroundColor:
+                      activeTab === "operation_overview"
+                        ? "rgb(72 72 72)"
+                        : "none",
+                  },
+                }}
+                onClick={() => setActiveTab("operation_overview")}
+                leftIcon={
+                  <IconCone
+                    fill={
+                      activeTab === "operation_overview" ? "" : "rgb(72 72 72)"
+                    }
+                    size={"1rem"}
+                  />
+                }
+              >
+                Pipeline
+              </Button>
+            )}
           </Button.Group>
         </Flex>
-
-        <Flex gap={"sm"} align={"center"} mt={"xl"}>
-          <img src={WhiteLogo} className="w-[20px] h-[20px]" />
-          <Text fw={600} size={"xl"}>
-            Hey {userData.sdr_name}, looking for something?
-          </Text>
-        </Flex>
-
-        <TextInput
-          mt="md"
-          size="lg"
-          rightSection={
-            <ActionIcon
-              w={"50px"}
-              h={"50px"}
-              bg={"#dd69f4"}
-              onClick={() => {
-                window.location.href = "/campaign-agi?request=" + request;
-              }}
-            >
-              <IconArrowRight size={"1.5rem"} color="white" />
-            </ActionIcon>
-          }
-          placeholder="Contact product managers in Chicago at Series B startups"
-          radius={"md"}
-          onChange={(e) => {
-            setRequest(e.currentTarget.value);
-          }}
-        />
 
         <Tabs.Panel value="overview">
           <Box mb="xs" mt={"md"}>
@@ -1993,6 +1998,34 @@ export default function OverviewPage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="operator_dash">
+          <Flex gap={"sm"} align={"center"} mt={"xl"}>
+            <img src={WhiteLogo} className="w-[20px] h-[20px]" />
+            <Text fw={600} size={"xl"}>
+              Hey {userData.sdr_name}, looking for something?
+            </Text>
+          </Flex>
+
+          <TextInput
+            mt="md"
+            size="lg"
+            rightSection={
+              <ActionIcon
+                w={"50px"}
+                h={"50px"}
+                bg={"#dd69f4"}
+                onClick={() => {
+                  window.location.href = "/campaign-agi?request=" + request;
+                }}
+              >
+                <IconArrowRight size={"1.5rem"} color="white" />
+              </ActionIcon>
+            }
+            placeholder="Contact product managers in Chicago at Series B startups"
+            radius={"md"}
+            onChange={(e) => {
+              setRequest(e.currentTarget.value);
+            }}
+          />
           <OperatorDashboard
             onOperatorDashboardEntriesChange={(task: Task[]) => {
               setNumOperatorDashItems(task.length);
@@ -2003,9 +2036,15 @@ export default function OverviewPage() {
         <Tabs.Panel value="utilization">
           <Utilization />
         </Tabs.Panel>
-
         <Tabs.Panel value="operation_overview">
-          <OperatorOverview />
+          <PipelineOverview
+            onContactsClicked={() =>
+              (window.location.href = "/contacts/overview")
+            }
+            onUtilizationClicked={() => setActiveTab("utilization")}
+            onOpportunitiesClicked={() => (window.location.href = "/campaigns")}
+            onPipelineClicked={() => setActiveTab("overview")}
+          />
         </Tabs.Panel>
       </Tabs>
     </Box>

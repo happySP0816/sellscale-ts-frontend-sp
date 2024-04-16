@@ -38,6 +38,10 @@ interface UploadHistoryDataType {
   upload_name: string;
   upload_size: number;
   uploads_completed: number;
+  uploads_not_started: number;
+  uploads_in_progress: number;
+  uploads_failed: number;
+  uploads_other: number;
   upload_source: "CSV" | "CONTACT_DB" | "LINKEDIN_LINK" | "TRIGGERS" | "UNKOWN";
   client_archetype_id: number;
   client_archetype_name: string;
@@ -259,11 +263,8 @@ export default function ProspectUploadHistory() {
             minSize: 300,
             enableResizing: true,
             cell: (cell) => {
-              const {
-                upload_size,
-                uploads_completed,
-                upload_source,
-              } = cell.row.original;
+              const { upload_size, uploads_completed, uploads_in_progress, uploads_failed, uploads_other, uploads_not_started } =
+                cell.row.original;
 
               return (
                 <Flex
@@ -292,17 +293,60 @@ export default function ProspectUploadHistory() {
                           ? "green"
                           : ""
                       }
+                      sections={[
+                        {
+                          value: Math.round(
+                            (uploads_completed / upload_size) * 100
+                          ),
+                          color: "green",
+                          // label: "Complete",
+                          tooltip: "Complete",
+                        },
+                        {
+                          value: Math.round(
+                            (uploads_in_progress / upload_size) * 100
+                          ),
+                          color: "yellow",
+                          // label: "In Progress",
+                          tooltip: "In Progress",
+                        },
+                        {
+                          value: Math.round(
+                            (uploads_failed / upload_size) * 100
+                          ),
+                          color: "red",
+                          // label: "Failed",
+                          tooltip: "Failed",
+                        },
+                        {
+                          value: Math.round(
+                            (uploads_other / upload_size) * 100
+                          ),
+                          color: "gray",
+                          // label: "Other",
+                          tooltip: "Other",
+                        },
+                        {
+                          value: Math.round(
+                            (uploads_not_started / upload_size) * 100
+                          ),
+                          color: "gray",
+                          // label: "Not Started",
+                          tooltip: "Not Started",
+                        }
+                      
+                      ]}
                     />
                     <Text
                       color={
-                        Math.round((uploads_completed / upload_size) * 100) >=
+                        Math.round(((uploads_completed + uploads_in_progress + uploads_failed + uploads_other) / upload_size) * 100) >=
                         100
                           ? "green"
                           : "#228be6"
                       }
                       fw={600}
                     >
-                      {Math.round((uploads_completed / upload_size) * 100)}%
+                      {Math.round(((uploads_completed + uploads_in_progress + uploads_failed + uploads_other) / upload_size) * 100)}%
                     </Text>
                   </Flex>
                   <Flex

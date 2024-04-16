@@ -346,64 +346,6 @@ export const WarmUp: React.FC = () => {
         ) : (
           <Flex></Flex>
         )}
-
-        {/* <Grid.Col xs={12} sm={4}>
-        <Text fw={"500"} fz={"1rem"} color="gray.6" mb={"0.5rem"}>
-          Deliverability:
-        </Text>
-        <Button
-          variant="outline"
-          size="xs"
-          color="green"
-          radius="xl"
-          leftIcon={<IconMoodSmile size="1rem" />}
-          mb={"0.5rem"}
-        >
-          Superb!
-        </Button>
-        <Text fw={"500"} fz={"1rem"} color="gray.6" mb={"0.5rem"}>
-          Over{" "}
-          <Text span color="gray.8">
-            90%
-          </Text>{" "}
-          received
-        </Text>
-
-        <Text fw={"500"} fz={"1rem"} color="gray.7" mt={"2rem"} mb={"1rem"}>
-          Summary:
-        </Text>
-        <Flex direction={"column"} gap={"0.5rem"}>
-          <Flex align={"center"} gap={"0.25rem"}>
-            <IconSend size="1rem" color="#868E96" />
-            <Text fw={"500"} fz={"1rem"} color="gray.6">
-              Warmup Sent:{" "}
-              <Text span color="gray.8">
-                25
-              </Text>
-            </Text>
-          </Flex>
-
-          <Flex align={"center"} gap={"0.25rem"}>
-            <IconChecks size="1rem" color="#868E96" />
-            <Text fw={"500"} fz={"1rem"} color="gray.6">
-              Landed in Inbox:{" "}
-              <Text span color="gray.8">
-                15
-              </Text>
-            </Text>
-          </Flex>
-
-          <Flex align={"center"} gap={"0.25rem"}>
-            <IconMessageCheck size="1rem" color="#868E96" />
-            <Text fw={"500"} fz={"1rem"} color="gray.6">
-              Warmup received:{" "}
-              <Text span color="gray.8">
-                5
-              </Text>
-            </Text>
-          </Flex>
-        </Flex>
-      </Grid.Col> */}
       </Flex>
 
       <WarmupScheduleModal

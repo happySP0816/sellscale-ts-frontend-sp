@@ -276,10 +276,10 @@ export default function SequenceBuilderV3() {
                 radius='lg'
                 onClick={async () => {
                   modals.openConfirmModal({
-                    title: 'Override Sequence',
+                    title: 'Add to Sequence',
                     children: (
                       <Text size='sm'>
-                        Are you sure you want to override the current sequence with the selected
+                        Are you sure you want to add to the current sequence with the selected
                         options?
                       </Text>
                     ),

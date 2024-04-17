@@ -139,7 +139,7 @@ export default function SegmentV2() {
   const columns = [
     {
       accessorKey: 'persona_name',
-      minSize: 400,
+      minSize: 420,
       header: () => (
         <Flex align={'center'} gap={'3px'}>
           <IconLetterT color='gray' size={'0.9rem'} />
@@ -217,7 +217,7 @@ export default function SegmentV2() {
     },
     {
       accessorKey: 'campaigns',
-      minSize: 180,
+      // minSize: 180,
       header: () => (
         <Flex align={'center'} gap={'3px'}>
           <IconTargetArrow color='gray' size={'0.9rem'} />
@@ -238,6 +238,9 @@ export default function SegmentV2() {
               tt={'initial'}
               fw={600}
               sx={{ fontSize: '12px' }}
+              onClick={() => {
+                if (!campaign) alert('Clicked Assign to Campaign');
+              }}
             >
               {campaign ? `${campaign} Campaigns` : 'Assign to Campagin'}
             </Badge>
@@ -279,6 +282,7 @@ export default function SegmentV2() {
     },
     {
       accessorKey: 'ai_brain',
+      minSize: 180,
       header: () => (
         <Flex align={'center'} gap={'3px'}>
           <IconBolt color='gray' size={'0.9rem'} />
@@ -305,7 +309,7 @@ export default function SegmentV2() {
                 </Flex>
               </Box>
             ) : (
-              <Button leftIcon={<IconWand size={'0.9rem'} />} size='xs' radius='md'>
+              <Button leftIcon={<IconWand size={'0.9rem'} />} size='xs' radius='md' onClick={() => alert('Clicked Add Assets')}>
                 Add Assets
               </Button>
             )}
@@ -326,7 +330,7 @@ export default function SegmentV2() {
 
         return (
           <Flex w={'100%'} h={'100%'} px={'sm'} py={'md'} align={'center'} justify={'start'} bg={isChild ? '#F7F8FA' : 'white'}>
-            <Button color='grape' radius='md' leftIcon={<IconMicrophone size={'0.9rem'} />} size='xs'>
+            <Button color='grape' radius='md' leftIcon={<IconMicrophone size={'0.9rem'} />} size='xs' onClick={() => alert('Cliked Add Voice')}>
               Add Voice
             </Button>
           </Flex>
@@ -564,7 +568,7 @@ export default function SegmentV2() {
           <Button fullWidth size='md' radius={'md'} variant='outline' color='gray' onClick={close}>
             Cancel
           </Button>
-          <Button fullWidth size='md' radius={'md'}>
+          <Button fullWidth size='md' radius={'md'} onClick={() => alert('Clicked Update Pre-filters button')}>
             Update Pre-filters
           </Button>
         </Flex>

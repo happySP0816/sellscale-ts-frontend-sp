@@ -32,7 +32,7 @@ import { getClientArchetypes } from '@utils/requests/getClientArchetypes';
 import { getClientSdrAccess } from '@utils/requests/getClientSdrAccess';
 import { getClients } from '@utils/requests/getClients';
 import _, { set } from 'lodash';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useRecoilValue } from 'recoil';
 import { Archetype, Client } from 'src';
@@ -55,6 +55,8 @@ export default function SequenceBuilderV3() {
   const [sequenceType, setSequenceType] = useState('EMAIL');
   const [numSteps, setNumSteps] = useState(3);
   const [additionalPrompting, setAdditionalPrompting] = useState('');
+
+  const totalGenerated = useRef(0);
 
   const onAddSequence = async () => {
     if (!clientId || !archetypeId || !sequenceType) return;
@@ -238,12 +240,24 @@ export default function SequenceBuilderV3() {
                           setLoading(false);
                         }
 
-                        // Finish loading
-                        if (i === EXAMPLE_COUNT - 1 && j === numSteps - 1) {
+                        totalGenerated.current += 1;
+
+                        if (totalGenerated.current === EXAMPLE_COUNT * numSteps) {
+                          showNotification({
+                            title: 'Success',
+                            message: 'Successfully generated sequence',
+                            color: 'teal',
+                          });
                           setLoading(false);
+                          totalGenerated.current = 0;
                         }
                       })
-                      .catch(() => {
+                      .catch((e) => {
+                        showNotification({
+                          title: 'Error',
+                          message: `Failed to generate sequence: ${e}`,
+                          color: 'red',
+                        });
                         setLoading(false);
                       });
                   }

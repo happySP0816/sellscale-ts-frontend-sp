@@ -552,7 +552,7 @@ const CRMConnectionPage: React.FC = () => {
             </Flex>
           </Card>
           <CRMUserMapping />
-          <StageMapping />
+          {/* <StageMapping /> */}
           <AccountCreation />
         </Paper>
       )}

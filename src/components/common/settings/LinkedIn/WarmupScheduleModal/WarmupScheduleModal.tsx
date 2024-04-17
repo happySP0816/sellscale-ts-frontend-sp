@@ -221,7 +221,8 @@ const WarmupScheduleModal: FC<Props> = (props) => {
                 }
 
                 const endingDate = new Date(endDate);
-                const nextMonday = moment().day(1).add(7, "days").toDate();
+                const thisMonday = moment().day(1).toDate();
+                // const nextMonday = moment().day(1).add(7, "days").toDate();
 
                 return (
                   <Flex align={"center"} gap={"xs"}>
@@ -235,7 +236,7 @@ const WarmupScheduleModal: FC<Props> = (props) => {
                           : "black"
                       }
                       onClick={() => {
-                        if (endingDate < nextMonday) {
+                        if (endingDate < thisMonday) {
                           return;
                         }
                         setCurrentEditVolumeIndex(cell.row.index);
@@ -254,10 +255,10 @@ const WarmupScheduleModal: FC<Props> = (props) => {
                         Messages
                       </Text>
                     </Text>
-                    {endingDate >= nextMonday && (
+                    {endingDate >= thisMonday && (
                       <Tooltip
                         label={
-                          endingDate < nextMonday
+                          endingDate < thisMonday
                             ? "Cannot edit past volume"
                             : "Edit Volume"
                         }
@@ -267,7 +268,7 @@ const WarmupScheduleModal: FC<Props> = (props) => {
                             color="gray"
                             size="sm"
                             variant="subtle"
-                            disabled={endingDate < nextMonday}
+                            disabled={endingDate < thisMonday}
                             onClick={() =>
                               setCurrentEditVolumeIndex(cell.row.index)
                             }
@@ -292,7 +293,8 @@ const WarmupScheduleModal: FC<Props> = (props) => {
                   end_date: string;
                 }>("date").end_date;
                 const endingDate = new Date(endDate);
-                const nextMonday = moment().day(1).add(7, "days").toDate();
+                const thisMonday = moment().day(1).toDate();
+                // const nextMonday = moment().day(1).add(7, "days").toDate();
 
                 if (cell.row.index === currentEditNotesIndex) {
                   return (
@@ -345,7 +347,7 @@ const WarmupScheduleModal: FC<Props> = (props) => {
                             : "black"
                         }
                         onClick={() => {
-                          if (endingDate < nextMonday) {
+                          if (endingDate < thisMonday) {
                             return;
                           }
                           setCurrentEditNotesIndex(cell.row.index);
@@ -356,7 +358,7 @@ const WarmupScheduleModal: FC<Props> = (props) => {
                     ) : (
                       <></>
                     )}
-                    {endingDate >= nextMonday &&
+                    {endingDate >= thisMonday &&
                       !(
                         props.data.linkedinSpecialNotes[cell.row.index] !=
                         form.values.linkedinSpecialNotes[cell.row.index]
@@ -367,7 +369,7 @@ const WarmupScheduleModal: FC<Props> = (props) => {
                               color="gray"
                               size="sm"
                               variant="subtle"
-                              disabled={endingDate < nextMonday}
+                              disabled={endingDate < thisMonday}
                               onClick={() =>
                                 setCurrentEditNotesIndex(cell.row.index)
                               }

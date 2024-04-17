@@ -4,14 +4,7 @@ import './index.css';
 import App from './components/App';
 import reportWebVitals from './reportWebVitals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  createBrowserRouter,
-  createRoutesFromChildren,
-  matchRoutes,
-  RouterProvider,
-  useLocation,
-  useNavigationType,
-} from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromChildren, matchRoutes, RouterProvider, useLocation, useNavigationType } from 'react-router-dom';
 import ErrorPage from './components/pages/ErrorPage';
 import PersonaPage from './components/pages/PersonaPage';
 import MissingPage from './components/pages/MissingPage';
@@ -74,6 +67,7 @@ import ClientCampaignView from '@pages/ClientCampaignView/ClientCampaignView';
 import { CampaignAGI } from '@pages/CampaignAGI/CampaignAGI';
 import InternalToolsPage from '@pages/InternalToolsPage';
 import Utilization from '@pages/Utilization/Utilization';
+import SegmentV2 from '@pages/SegmentV2/SegmentV2';
 
 const queryClient = new QueryClient();
 
@@ -83,13 +77,7 @@ if (import.meta.env.PROD) {
     dsn: 'https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376',
     integrations: [
       new BrowserTracing({
-        routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-          React.useEffect,
-          useLocation,
-          useNavigationType,
-          createRoutesFromChildren,
-          matchRoutes
-        ),
+        routingInstrumentation: Sentry.reactRouterV6Instrumentation(React.useEffect, useLocation, useNavigationType, createRoutesFromChildren, matchRoutes),
       }),
     ],
 
@@ -525,6 +513,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: '/utilizationv2',
         element: <Utilization />,
+      },
+      {
+        path: '/segmentsv2',
+        element: <SegmentV2 />,
       },
     ],
   },

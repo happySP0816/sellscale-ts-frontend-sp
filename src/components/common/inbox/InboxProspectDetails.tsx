@@ -100,6 +100,8 @@ import {
 import { patchProspectAIEnabled } from "@utils/requests/patchProspectAIEnabled";
 import { patchProspect } from "@utils/requests/patchProspect";
 import { setDemoSetProspect } from "@utils/requests/setDemoSetProspect";
+import { API_URL } from "@constants/data";
+import moment from "moment";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -399,10 +401,72 @@ export default function ProjectDetails(props: {
   }
 
   const [CRMOpend, { open: CRMOpen, close: CRMClose }] = useDisclosure(false);
-  const [account, setAccount] = useState(false);
-  const [contactName, setContactName] = useState(false);
-  const [opportunityName, setOpportunityName] = useState(false);
+  const [account, setAccount] = useState(true);
+  const [contactName, setContactName] = useState(true);
+  const [opportunityName, setOpportunityName] = useState(true);
+
   const [syncHubspot, setSyncHubspot] = useState(false);
+  const [loadingSyncButton, setLoadingSyncButton] = useState(false);
+
+  useEffect(() => {
+    setSyncHubspot(
+      (prospect?.merge_account_id?.length || 0) +
+        (prospect?.merge_contact_id?.length || 0) +
+        (prospect?.merge_opportunity_id?.length || 0) >
+        0
+        ? true
+        : false
+    );
+  }, [prospect]);
+
+  const createOpportunity = () => {
+    setLoadingSyncButton(true);
+
+    fetch(`${API_URL}/merge_crm/create_opportunity`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + userToken,
+      },
+      body: JSON.stringify({
+        prospect_id: openedProspectId,
+      }),
+    })
+      .then((response) => {
+        if (response.status !== 200) {
+          showNotification({
+            title: "Error",
+            message: "Error creating opportunity in Hubspot",
+            color: "red",
+            autoClose: 3000,
+          });
+          return null;
+        }
+        return response.json();
+      })
+      .then((data) => {
+        showNotification({
+          title: "Success",
+          message: "Opportunity created in Hubspot",
+          color: "green",
+          autoClose: 3000,
+        });
+        CRMClose();
+        setSyncHubspot(true);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        showNotification({
+          title: "Error",
+          message: "Error creating opportunity in Hubspot",
+          color: "red",
+          autoClose: 3000,
+        });
+      })
+      .finally(() => {
+        setLoadingSyncButton(false);
+      });
+  };
 
   return (
     <Flex
@@ -1148,7 +1212,7 @@ export default function ProjectDetails(props: {
 
           <Divider mt={"sm"} />
 
-          {showCRM && (
+          {showCRM && prospect?.full_name && (
             <Box style={{ flexBasis: "15%" }} p={10} px={"md"} mb={"sm"}>
               <Text fw={600}>CRM:</Text>
               <Paper
@@ -1165,29 +1229,29 @@ export default function ProjectDetails(props: {
                 <Flex align={"center"} justify={"space-between"} w={"100%"}>
                   <Flex align={"center"} gap={"sm"}>
                     <IconAffiliate rotate={"90%"} color="orange" />
-                    <Text>Sync {"David"} to Hubspot</Text>
+                    <Text>
+                      {syncHubspot
+                        ? prospect?.full_name + " synced to Hubspot"
+                        : "Sync " + prospect?.full_name + " to Hubspot"}
+                    </Text>
                   </Flex>
                   {syncHubspot && (
                     <IconCircleCheck color="white" fill="#228be6" />
                   )}
                 </Flex>
               </Paper>
+
+              <Text color="gray" size="xs" mt="xs">
+                {prospect?.merge_account_id ? "✅ Account · " : "☑️ Account · "}
+                {prospect?.merge_contact_id ? "✅ Contact · " : "☑️ Contact · "}
+                {prospect?.merge_opportunity_id
+                  ? "✅ Opportunity "
+                  : "☑️ Opportunity "}
+              </Text>
               {syncHubspot && (
                 <Flex align={"center"} justify={"space-between"} mt={"3px"}>
                   <Text color="gray" fw={500} size={"sm"}>
-                    Synced: April 11, 2024
-                  </Text>
-                  <Text
-                    color="red"
-                    fw={500}
-                    underline
-                    sx={{ cursor: "pointer" }}
-                    onClick={() => {
-                      console.log("unsync=======");
-                      setSyncHubspot(false);
-                    }}
-                  >
-                    Unsync
+                    Last Synced: {moment().format("MMM DD, YYYY")}
                   </Text>
                 </Flex>
               )}
@@ -1199,72 +1263,57 @@ export default function ProjectDetails(props: {
                   <Flex align={"center"} gap={"sm"}>
                     <IconAffiliate size={"1.4rem"} color="orange" />
                     <Text size={30} fw={600}>
-                      Synced to Hubspot
+                      Sync to Hubspot
                     </Text>
                   </Flex>
                 }
               >
+                <Text>
+                  Automatically create a new Account, Contact, and Opportunity
+                  in Hubspot for {data?.details.full_name}.
+                </Text>
+                <Divider mt="md" mb="md" />
                 <Flex direction={"column"} gap={"sm"}>
                   <Flex direction={"column"} gap={"md"}>
                     <Checkbox
                       label="Create Account"
+                      disabled
                       checked={account}
                       onChange={() => setAccount(!account)}
                     />
-                    {account && (
-                      <TextInput
-                        placeholder="Enter Name"
-                        size="md"
-                        ml={"30px"}
-                        w={"260px"}
-                      />
-                    )}
                   </Flex>
                   <Flex direction={"column"} gap={"md"}>
                     <Checkbox
                       label="Create Contact"
+                      disabled
                       checked={contactName}
                       onChange={() => setContactName(!contactName)}
                     />
-                    {contactName && (
-                      <TextInput
-                        placeholder="Enter Contact Name"
-                        size="md"
-                        ml={"30px"}
-                        w={"260px"}
-                      />
-                    )}
                   </Flex>
                   <Flex direction={"column"} gap={"md"}>
                     <Checkbox
                       label="Create Opportunity"
+                      disabled
                       checked={opportunityName}
                       onChange={() => setOpportunityName(!opportunityName)}
                     />
-                    {opportunityName && (
-                      <TextInput
-                        placeholder="Enter Opportunity Name"
-                        size="md"
-                        ml={"30px"}
-                        w={"260px"}
-                      />
-                    )}
                   </Flex>
                   <Flex align={"center"} gap={"sm"} mt={"xl"}>
                     <Button
                       variant="outline"
                       size="md"
                       fullWidth
+                      color="red"
                       onClick={CRMClose}
                     >
-                      Go Back
+                      Cancel
                     </Button>
                     <Button
+                      loading={loadingSyncButton}
                       size="md"
                       fullWidth
                       onClick={() => {
-                        CRMClose();
-                        setSyncHubspot(true);
+                        createOpportunity();
                       }}
                     >
                       Sync

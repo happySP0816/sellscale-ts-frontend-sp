@@ -67,13 +67,13 @@ const ContactOverview = () => {
             />
             Global Contacts
           </Tabs.Tab> */}
-          <Tabs.Tab value="do_not_contact">
+          {/* <Tabs.Tab value="do_not_contact">
             <IconTarget
               size="0.8rem"
               style={{ marginRight: "8px", marginTop: "4px" }}
             />
             Do Not Contact
-          </Tabs.Tab>
+          </Tabs.Tab> */}
           <Tabs.Tab value="territories">
             <IconMap
               size="0.8rem"
@@ -145,9 +145,9 @@ const ContactOverview = () => {
           <ProspectUploadHistory />
         </Tabs.Panel>
 
-        <Tabs.Panel value="do_not_contact">
+        {/* <Tabs.Panel value="do_not_contact">
           <DoNotContactList />
-        </Tabs.Panel>
+        </Tabs.Panel> */}
         {/* <Tabs.Panel value='TAM_graph' className='h-0 grow'>
         <TAMGraph />
       </Tabs.Panel> */}

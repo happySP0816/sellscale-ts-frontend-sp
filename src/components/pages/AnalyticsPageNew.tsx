@@ -20,7 +20,7 @@ const AnalyticsPageNew = () => {
   return (
     <PageFrame>
       <Tabs
-        defaultValue="chatbot"
+        defaultValue="assets"
         px="xs"
         styles={(theme) => ({
           tab: {
@@ -56,7 +56,7 @@ const AnalyticsPageNew = () => {
           {/* <Tabs.Tab value='ai-activity-logs'>AI Activity Logs </Tabs.Tab> */}
           <Tabs.Tab value="assets">Assets </Tabs.Tab>
         </Tabs.List>
-        <Tabs.Panel value="assets" pt="xs">
+        <Tabs.Panel value="chatbot" pt="xs">
           <iframe
             src={
               "https://sellscale.retool.com/embedded/public/2fe5bcbd-17cd-4432-9a3e-6d8908703034#authToken=" +

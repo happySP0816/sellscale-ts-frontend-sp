@@ -7,7 +7,6 @@ import {
   Box,
   Button,
   Flex,
-  Modal,
   NumberInput,
   Paper,
   Progress,
@@ -17,7 +16,9 @@ import {
   Container,
   LoadingOverlay,
   Menu,
+  Modal,
   TextInput,
+  Title,
 } from "@mantine/core";
 
 import {
@@ -62,6 +63,7 @@ export default function SegmentV2() {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
+  const [modalOpened, setModalOpened] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
@@ -235,6 +237,30 @@ export default function SegmentV2() {
               w="100%"
             >
               <Flex align={"center"} gap={"sm"} className="segment" w="100%">
+                <Menu shadow="md" withinPortal position="right">
+                  <Menu.Target>
+                    <ActionIcon>
+                      <IconMenuDeep />
+                    </ActionIcon>
+                  </Menu.Target>
+
+                  <Menu.Dropdown>
+                    <Menu.Label>Prospects</Menu.Label>
+                    <Menu.Item>Add Prospects</Menu.Item>
+                    <Menu.Item>View Prospects</Menu.Item>
+
+                    <Menu.Divider />
+                    <Menu.Label>Split</Menu.Label>
+                    <Menu.Item>Manually Split Segment</Menu.Item>
+                    <Menu.Item>Auto Split Segment</Menu.Item>
+
+                    <Menu.Divider />
+                    <Menu.Label color="red">Danger zone</Menu.Label>
+                    <Menu.Item color="red">Transfer to Teammate</Menu.Item>
+                    <Menu.Item color="red">Clear Prospects</Menu.Item>
+                    <Menu.Item color="red">Delete Segment</Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
                 <Box w="100%" sx={{ flexDirection: "row", display: "flex" }}>
                   <Box
                     w="36px"
@@ -252,7 +278,7 @@ export default function SegmentV2() {
                       {client_archetype?.emoji ? client_archetype.emoji : ""}
                     </Text>
                   </Box>
-                  <Box w="92%">
+                  <Box>
                     <Flex align={"center"} gap={"sm"}>
                       <Text size={"sm"} fw={500}>
                         {person_name}
@@ -287,34 +313,6 @@ export default function SegmentV2() {
                         {progress}% Contacted
                       </Text>
                     </Flex>
-                  </Box>
-                  <Box w="5%">
-                    <Menu shadow="md" withinPortal>
-                      <Menu.Target>
-                        <ActionIcon>
-                          <IconMenuDeep />
-                        </ActionIcon>
-                      </Menu.Target>
-
-                      <Menu.Dropdown>
-                        <Menu.Divider />
-                        <Menu.Label>Prospects</Menu.Label>
-                        <Menu.Item>View Prospects</Menu.Item>
-
-                        <Menu.Divider />
-
-                        <Menu.Label>Split</Menu.Label>
-                        <Menu.Item>Manually Split Segment</Menu.Item>
-                        <Menu.Item>Auto Split Segment</Menu.Item>
-
-                        <Menu.Divider />
-                        <Menu.Label>Danger zone</Menu.Label>
-                        <Menu.Item>Transfer to Teammate</Menu.Item>
-
-                        <Menu.Item>Clear Prospects</Menu.Item>
-                        <Menu.Item color="red">Delete Segment</Menu.Item>
-                      </Menu.Dropdown>
-                    </Menu>
                   </Box>
                 </Box>
               </Flex>
@@ -459,6 +457,7 @@ export default function SegmentV2() {
       return {
         id: segment.id,
         person_name: segment.segment_title,
+        segment_title: segment.segment_title,
         progress: Math.floor(Math.random() * 100), // Fake random progress
         campaign: Math.floor(Math.random() * 100), // Fake random campaign ID or null
         contacts: Math.floor(Math.random() * 2000000), // Fake random contacts number
@@ -515,12 +514,63 @@ export default function SegmentV2() {
 
   return (
     <Paper>
+      {/* Create Segment Modal */}
+      <Modal
+        onClose={() => setModalOpened(false)}
+        opened={modalOpened}
+        size="sm"
+      >
+        <Title order={4}>Create Segment</Title>
+        <Text size={"sm"} color="gray" fw={500} mt={"sm"} mb={"md"}>
+          Create a new segment to organize your contacts and campaigns
+        </Text>
+        <TextInput
+          label="Segment Name"
+          placeholder="Enter Segment Name"
+          required
+          mb={"sm"}
+        />
+        <Select
+          label="(Optional) Parent Segment"
+          placeholder="Select Parent Segment"
+          withinPortal
+          data={data
+            .filter((segment: any) => !segment.parent_segment_id)
+            .map((segment: any) => ({
+              label: segment.segment_title,
+              value: segment.id,
+            }))}
+          mb={"sm"}
+        />
+        <Flex gap={"md"} mt="xl">
+          <Button
+            fullWidth
+            size="xs"
+            radius={"md"}
+            variant="outline"
+            color="gray"
+          >
+            Cancel
+          </Button>
+          <Button
+            fullWidth
+            size="xs"
+            radius={"md"}
+            onClick={() => alert("Clicked Create Segment button")}
+          >
+            Create New Segment
+          </Button>
+        </Flex>
+      </Modal>
+
       <Flex direction={"column"} w={"90%"} mx={"auto"} pt={"lg"}>
         <Flex align={"center"} justify={"space-between"}>
           <Text size={"lg"} fw={600}>
             Segments
           </Text>
-          <Button leftIcon={<IconPlus />}>Create Segment</Button>
+          <Button onClick={() => setModalOpened(true)} leftIcon={<IconPlus />}>
+            Create Segment
+          </Button>
         </Flex>
         <Text color="gray" fw={500} size={"sm"} mb={"xl"}>
           View and manage your segments to organize your contacts and campaigns

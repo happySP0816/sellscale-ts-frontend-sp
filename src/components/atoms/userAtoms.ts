@@ -1,4 +1,5 @@
 import { atom } from "recoil";
+import { ClientSDR } from "src";
 
 const userTokenState = atom({
   key: "user-token",
@@ -7,8 +8,10 @@ const userTokenState = atom({
 
 const userDataState = atom({
   key: "user-data",
-  default: JSON.parse(localStorage.getItem("user-data") ?? '{}') || {},
+  default: JSON.parse(localStorage.getItem("user-data") ?? '{}') as ClientSDR | null,
 });
+
+
 
 export {
   userTokenState,

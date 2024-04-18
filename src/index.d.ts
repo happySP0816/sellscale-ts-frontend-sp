@@ -104,6 +104,68 @@ export interface Client {
   value_prop_key_points: string;
 }
 
+export interface ClientSDR {
+  id: number;
+  active: boolean;
+  auto_archive_convos: boolean;
+  auto_bump: boolean;
+  auto_calendar_sync: boolean;
+  auto_generate_messages: boolean;
+  auto_send_email_campaign: boolean;
+  auto_send_linkedin_campaign: boolean;
+  avg_contract_size: number;
+  blacklisted_words: string[];
+  browser_extension_ui_overlay: boolean;
+  calendly_connected: boolean;
+  client: Client;
+  client_name: string;
+  conversion_demo_pct: number;
+  conversion_open_pct: number;
+  conversion_percentages: Record<string, number>;
+  conversion_reply_pct: number;
+  conversion_sent_pct: number;
+  default_transformer_blocklist: string[];
+  disable_ai_on_message_send: boolean;
+  disable_ai_on_prospect_respond: boolean;
+  do_not_contact_company_names: string[];
+  do_not_contact_keywords: string[];
+  email_fetching_credits: number;
+  email_link_tracking_enabled: boolean;
+  email_open_tracking_enabled: boolean;
+  id: number;
+  img_expire: string;
+  img_url: string;
+  individual_id: number;
+  last_li_conversation_scrape_date: string;
+  li_connected: boolean;
+  li_cover_img_url: string;
+  li_health: number;
+  li_health_cover_image: boolean;
+  li_health_good_title: boolean;
+  li_health_premium: boolean;
+  li_health_profile_photo: boolean;
+  li_voyager_connected: boolean;
+  linkedin_url: string;
+  merge_user_id: string;
+  message_generation_captivate_mode: boolean;
+  meta_data: Record<string, any>;
+  ml_credits: number;
+  nylas_connected: boolean;
+  onboarded: boolean;
+  pipeline_notifications_webhook_url: string;
+  scheduling_link: string;
+  sdr_email: string;
+  sdr_name: string;
+  sdr_title: string;
+  sla_schedules: Record<string, any>[];
+  slack_user_id: string;
+  timezone: string;
+  unassigned_persona_id: number;
+  warmup_linkedin_complete: boolean;
+  weekly_email_outbound_target: number;
+  weekly_li_outbound_target: number;
+}
+
 export interface Prospect {
   approved_outreach_message_id: number | null;
   approved_prospect_email_id: number | null;

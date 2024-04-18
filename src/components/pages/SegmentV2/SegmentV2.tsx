@@ -19,6 +19,7 @@ import {
   Modal,
   TextInput,
   Title,
+  Checkbox,
 } from "@mantine/core";
 
 import {
@@ -65,6 +66,7 @@ export default function SegmentV2() {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
+  const [showAllSegments, setShowAllSegments] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -143,6 +145,8 @@ export default function SegmentV2() {
           num_contacted = 0;
         }
 
+        const isMySegment = client_sdr.id !== userData.id;
+
         return (
           <div
             className={`${isChild ? "bg-[#F7F8FA] pl-8 h-full" : ""} relative`}
@@ -181,15 +185,20 @@ export default function SegmentV2() {
               w="100%"
             >
               <Flex align={"center"} gap={"sm"} className="segment" w="100%">
-                <Menu shadow="md" withinPortal position="right">
+                <Menu
+                  shadow="md"
+                  withinPortal
+                  position="right"
+                  disabled={isMySegment}
+                >
                   <Menu.Target>
-                    <ActionIcon>
+                    <ActionIcon disabled={isMySegment}>
                       <IconMenuDeep />
                     </ActionIcon>
                   </Menu.Target>
 
                   <Menu.Dropdown>
-                    <Menu.Label>Prospects</Menu.Label>
+                    <Menu.Label display={isMySegment}>Prospects</Menu.Label>
                     <Menu.Item>Add Prospects</Menu.Item>
                     <Menu.Item>View Prospects</Menu.Item>
 
@@ -293,7 +302,9 @@ export default function SegmentV2() {
       ),
       cell: (cell: any) => {
         const { isChild } = cell.row.original;
-        const { contacts, filters } = cell.row.original;
+        const { contacts, filters, client_sdr } = cell.row.original;
+
+        const notMyCampaign = client_sdr.id !== userData.id;
 
         return (
           <Flex
@@ -317,6 +328,7 @@ export default function SegmentV2() {
                   radius="md"
                   compact
                   onClick={() => alert("Clicked View Contacts button")}
+                  disabled={notMyCampaign}
                 >
                   View
                 </Button>
@@ -332,6 +344,7 @@ export default function SegmentV2() {
                   radius="md"
                   compact
                   onClick={open}
+                  disabled={notMyCampaign}
                 >
                   Edit
                 </Button>
@@ -353,6 +366,7 @@ export default function SegmentV2() {
       cell: (cell: any) => {
         const { isChild } = cell.row.original;
         const { campaign, client_archetype, client_sdr } = cell.row.original;
+        const notMyCampaign = client_sdr.id !== userData.id;
         return (
           <Box
             w={"100%"}
@@ -375,6 +389,7 @@ export default function SegmentV2() {
               }
               fw={600}
               sx={{ fontSize: "12px" }}
+              disabled={notMyCampaign}
               onClick={() => {
                 alert("Clicked Connect to Campaign button");
               }}
@@ -482,13 +497,17 @@ export default function SegmentV2() {
     if (showLoader) {
       setLoading(true);
     }
-    fetch(`${API_URL}/segment/all`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userToken}`,
-      },
-    })
+    fetch(
+      `${API_URL}/segment/all` +
+        (showAllSegments ? "?include_all_in_client=true" : ""),
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    )
       .then((response) => response.json())
       .then((data) => {
         const segments = data.segments;
@@ -518,7 +537,7 @@ export default function SegmentV2() {
 
   useEffect(() => {
     getAllSegments(true);
-  }, [false]);
+  }, [false, showAllSegments]);
 
   return (
     <Paper>
@@ -594,13 +613,20 @@ export default function SegmentV2() {
               onChange={(e) => setSearchQuery(e.target.value)}
               mb="xs"
             />
+            <Checkbox
+              mt="4px"
+              ml="auto"
+              label="Show all client segments"
+              color="blue"
+              mr="md"
+              onChange={(e) => setShowAllSegments(e.target.checked)}
+            />
             <Button
               variant="outline"
               color="gray"
               size="xs"
               radius={"md"}
               onClick={() => getAllSegments(true)}
-              ml={"auto"}
               leftIcon={<IconRefresh size={"0.9rem"} />}
             >
               Refresh

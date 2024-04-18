@@ -125,14 +125,23 @@ export default function SegmentV2() {
       ),
       cell: (cell: any) => {
         const { isChild, isLastChild } = cell.row.original;
-        const {
+        let {
           id,
           person_name,
           sub_segments,
           progress,
           client_archetype,
+          num_prospected,
+          num_contacted,
           client_sdr,
         } = cell.row.original;
+
+        if (!num_prospected) {
+          num_prospected = 0;
+        }
+        if (!num_contacted) {
+          num_contacted = 0;
+        }
 
         return (
           <div
@@ -253,9 +262,17 @@ export default function SegmentV2() {
                       )}
                     </Flex>
                     <Flex align={"center"} gap={"sm"} mt={3}>
-                      <Progress value={progress} w={140} />
+                      <Progress
+                        value={Math.round(
+                          (num_contacted / (num_prospected + 0.0001)) * 100
+                        )}
+                        w={140}
+                      />
                       <Text color="#3B85EF" fw={600}>
-                        {progress}% Contacted
+                        {Math.round(
+                          (num_contacted / (num_prospected + 0.0001)) * 100
+                        )}
+                        % ({num_contacted} / {num_prospected})
                       </Text>
                     </Flex>
                   </Box>
@@ -411,6 +428,8 @@ export default function SegmentV2() {
         sub_segments: [], // This needs to be populated based on more complex logic or additional data
         client_archetype: segment.client_archetype,
         client_sdr: segment.client_sdr,
+        num_prospected: segment.num_prospected,
+        num_contacted: segment.num_contacted,
       };
     });
   }

@@ -30,8 +30,6 @@ export default function RealtimeResponseEngine() {
     await syncLocalStorage(userToken, setUserData);
   };
 
-  console.log(userData);
-
   const data = [
     {
       emoji: '👍🏽',

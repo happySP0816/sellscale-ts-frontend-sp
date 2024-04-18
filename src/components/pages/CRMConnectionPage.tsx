@@ -46,27 +46,29 @@ type MergeIntegrationType = {
 
 const CRMConnectionPage: React.FC = () => {
   const userToken = useRecoilValue(userTokenState);
+  const [connecting, setConnecting] = useState<boolean>(false);
   const [linkToken, setLinkToken] = useState<string>("");
-  const [integration, setIntegrations] = useState<MergeIntegrationType>();
-  const [creatingTestContact, setCreatingTestContact] = useState<boolean>(
-    false
-  );
+  const [integration, setIntegration] = useState<MergeIntegrationType>();
+  const [creatingTestContact, setCreatingTestContact] =
+    useState<boolean>(false);
 
+  // (Integration 1/3) Get the link token
   const getLinkToken = async () => {
-    const response = await fetch(`${API_URL}/merge_crm/link`, {
-      method: "POST",
+    const response = await fetch(`${API_URL}/merge_crm/link_token`, {
+      method: "GET",
       headers: {
         Authorization: "Bearer " + userToken,
       },
     });
     const data = await response.json();
-    setLinkToken(data.link_token);
+    setLinkToken(data.data.link_token);
 
     return data.link_token;
   };
 
-  const connectLink = async (public_token: string) => {
-    const response = await fetch(`${API_URL}/merge_crm/connect_link`, {
+  // (Integration 3/3) Get the account token
+  const postAccountToken = async (public_token: string) => {
+    const response = await fetch(`${API_URL}/merge_crm/account_token`, {
       method: "POST",
       headers: {
         Authorization: "Bearer " + userToken,
@@ -81,8 +83,8 @@ const CRMConnectionPage: React.FC = () => {
     return data;
   };
 
-  const deleteLink = async () => {
-    const response = await fetch(`${API_URL}/merge_crm/link`, {
+  const deleteIntegration = async () => {
+    const response = await fetch(`${API_URL}/merge_crm/integration`, {
       method: "DELETE",
       headers: {
         Authorization: "Bearer " + userToken,
@@ -94,14 +96,14 @@ const CRMConnectionPage: React.FC = () => {
   };
 
   const getIntegrations = async () => {
-    const response = await fetch(`${API_URL}/merge_crm/integrations`, {
+    const response = await fetch(`${API_URL}/merge_crm/integration`, {
       method: "GET",
       headers: {
         Authorization: "Bearer " + userToken,
       },
     });
     const data = await response.json();
-    setIntegrations(data.integrations);
+    setIntegration(data.integration);
   };
 
   const createTestAccount = async () => {
@@ -124,17 +126,18 @@ const CRMConnectionPage: React.FC = () => {
   };
 
   useEffect(() => {
-    getLinkToken();
     getIntegrations();
   }, [userToken]);
 
   const onSuccess = useCallback((public_token: string) => {
-    connectLink(public_token).then((data) => {
+    setConnecting(false);
+    postAccountToken(public_token).then((data) => {
       // fetch integrations
       getIntegrations();
     });
   }, []);
 
+  // (Integration 2/3) Open the Merge Modal to connect to CRM 
   const { open, isReady } = useMergeLink({
     linkToken: linkToken,
     onSuccess,
@@ -269,7 +272,7 @@ const CRMConnectionPage: React.FC = () => {
         </Text>
       </Flex>
       <Paper withBorder m="xs" p="lg" radius="md" bg={"#fcfcfd"}>
-        <Flex align={"center"} justify={"space-between"}>
+        <Flex align={"center"} justify={"space-between"} w='100%'>
           <Flex align={"center"} gap={"sm"}>
             <IconNetwork />
             <Box>
@@ -288,30 +291,32 @@ const CRMConnectionPage: React.FC = () => {
                 Connected by: {integration?.end_user_email_address}
               </Text>
             </Box>
-            <Button
-              ml="lg"
-              className={integration ? "" : "bg-black"}
-              variant={integration ? "outline" : "filled"}
-              color={integration ? "red" : "black"}
-              disabled={!isReady}
-              component="a"
-              target="_blank"
-              rel="noopener noreferrer"
-              loading={false}
-              onClick={() => {
-                if (integration) {
-                  deleteLink().then((data) => {
-                    getIntegrations();
-                    getLinkToken();
-                  });
-                } else {
-                  open();
-                }
-              }}
-            >
-              {integration ? "Disconnect" : "Connect"}
-            </Button>
           </Flex>
+          <Button
+            ml="lg"
+            className={integration ? "" : "bg-black"}
+            variant={integration ? "outline" : "filled"}
+            color={integration ? "red" : "black"}
+            disabled={!isReady}
+            component="a"
+            target="_blank"
+            rel="noopener noreferrer"
+            loading={connecting}
+            onClick={() => {
+              if (integration) {
+                deleteIntegration().then((data) => {
+                  getIntegrations();
+                });
+              } else {
+                setConnecting(true);
+                getLinkToken().then(() => {
+                  open()
+                });
+              }
+            }}
+          >
+            {integration ? "Disconnect" : "Connect"}
+          </Button>
         </Flex>
         <Divider my="md" />
         <Text color="gray" size={"xs"} mt={"md"}>

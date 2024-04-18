@@ -84,8 +84,6 @@ const [showExamplePayload, setShowExamplePayload] = useState(false);
     return <Loader />;
   }
 
-  console.log(webhookUrls);
-
   return (
     <Card>
       <Title order={1} mb="md">Webhook Connections</Title>

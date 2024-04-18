@@ -81,7 +81,6 @@ import OperatorDashboard, { Task } from './Overview/OperatorDash/OperatorDash';
 import WhiteLogo from '../../../public/favicon.svg';
 import Utilization from './Utilization/Utilization';
 import PipelineOverview from './Overview/OperatorDash/PipelineOverview';
-import PipelineDash from './Pipeline/PipelineOverview';
 
 const options = {
   scales: {
@@ -1409,22 +1408,6 @@ export default function OverviewPage() {
             >
               Stats
             </Button>
-            <Button
-              variant={activeTab === 'pipeline' ? 'filled' : 'outline'}
-              color={activeTab === 'pipeline' ? '' : 'gray'}
-              sx={{
-                backgroundColor: activeTab === 'pipeline' ? 'rgb(72 72 72)' : 'white',
-                color: activeTab === 'pipeline' ? 'white' : '',
-                '&:hover': {
-                  backgroundColor: activeTab === 'pipeline' ? 'rgb(72 72 72)' : 'none',
-                },
-              }}
-              onClick={() => setActiveTab('pipeline')}
-              leftIcon={<IconSparkles fill={activeTab === 'pipeline' ? '' : 'rgb(72 72 72)'} size={'1rem'} />}
-              radius={'md'}
-            >
-              Pipeline
-            </Button>
             {/* <Button color={activeTab === 'operation_overview' ? 'blue' : 'gray'} variant='subtle' onClick={() => setActiveTab('operation_overview')}>
               ⚙️
             </Button> */}
@@ -1495,9 +1478,6 @@ export default function OverviewPage() {
 
         <Tabs.Panel value='utilization'>
           <Utilization />
-        </Tabs.Panel>
-        <Tabs.Panel value='pipeline'>
-          <PipelineDash />
         </Tabs.Panel>
         <Tabs.Panel value='operation_overview'>
           <PipelineOverview

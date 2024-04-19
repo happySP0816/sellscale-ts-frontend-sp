@@ -13,7 +13,7 @@ export default function SegmentV2Overview(props: any) {
   const totalSegments =
     data.length +
     data
-      .map((x) => x.sub_segments.length)
+      .map((x: any) => x.sub_segments.length)
       .reduce((acc: number, item: any) => acc + item, 0);
   let contacts = data.reduce(
     (acc: number, item: any) => acc + item.contacts,

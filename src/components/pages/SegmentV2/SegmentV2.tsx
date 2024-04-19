@@ -198,7 +198,7 @@ export default function SegmentV2() {
                   </Menu.Target>
 
                   <Menu.Dropdown>
-                    <Menu.Label display={isMySegment}>Prospects</Menu.Label>
+                    <Menu.Label display={isMySegment ? "block" : "none"}>Prospects</Menu.Label>
                     <Menu.Item>Add Prospects</Menu.Item>
                     <Menu.Item>View Prospects</Menu.Item>
 

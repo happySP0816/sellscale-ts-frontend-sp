@@ -8,7 +8,7 @@ const userTokenState = atom({
 
 const userDataState = atom({
   key: "user-data",
-  default: JSON.parse(localStorage.getItem("user-data") ?? '{}') as ClientSDR | null,
+  default: JSON.parse(localStorage.getItem("user-data") ?? '{}') || {},
 });
 
 

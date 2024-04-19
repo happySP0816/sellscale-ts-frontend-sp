@@ -61,6 +61,9 @@ import ComposeGenericEmailModal from '@modals/ComposeGenericEmailModal';
 import { CreateEmailReplyFrameworkContextModal } from '@modals/CreateEmailReplyFrameworkModal';
 import MakeReminderCardModal from '@modals/MakeReminderCardModal';
 import SellscaleChat from './chat/sellscaleChat';
+import AutoSpitModal from '@modals/SegmentV2/AutoSpitModal';
+import SplitSegmentModal from '@modals/SegmentV2/SplitSegmentModal';
+import SegmentEditPrefilterModal from '@modals/SegmentV2/SegmentEditPrefilterModal';
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -76,14 +79,7 @@ export default function App() {
   // Site light or dark mode
   const isSystemDarkMode = false; // window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   const savedSiteTheme = localStorage.getItem('site-theme');
-  const currentColorScheme: ColorScheme =
-    savedSiteTheme != null
-      ? savedSiteTheme === 'dark'
-        ? 'dark'
-        : 'light'
-      : isSystemDarkMode
-      ? 'dark'
-      : 'light';
+  const currentColorScheme: ColorScheme = savedSiteTheme != null ? (savedSiteTheme === 'dark' ? 'dark' : 'light') : isSystemDarkMode ? 'dark' : 'light';
 
   const [colorScheme, setColorScheme] = useState<ColorScheme>(currentColorScheme);
   const toggleColorScheme = (value?: ColorScheme) => {
@@ -230,6 +226,9 @@ export default function App() {
               frameworkReplies: FrameworkReplies,
               multiChannel: MultiChannelModal,
               editTrigger: EditTriggerModal,
+              autosplitsegment: AutoSpitModal,
+              splitSegment: SplitSegmentModal,
+              segmentprefilter: SegmentEditPrefilterModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

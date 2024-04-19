@@ -8,18 +8,13 @@ import {
 import { IconBriefcase2 } from "@tabler/icons-react";
 
 export default function SegmentV2Overview(props: any) {
-  const { data } = props;
+  const { data, totalProspected, totalContacted } = props;
 
   const totalSegments =
     data.length +
     data
       .map((x: any) => x.sub_segments.length)
       .reduce((acc: number, item: any) => acc + item, 0);
-  let contacts = data.reduce(
-    (acc: number, item: any) => acc + item.contacts,
-    0
-  );
-  let contacted = 0;
 
   return (
     <Flex align={"center"} gap={"lg"} mb={"lg"}>
@@ -71,7 +66,7 @@ export default function SegmentV2Overview(props: any) {
         </Flex>
         <Flex align={"center"} gap={"sm"}>
           <Text size={30} fw={500}>
-            {contacts}
+            {totalContacted}
           </Text>
           <Badge
             color="green"
@@ -101,7 +96,7 @@ export default function SegmentV2Overview(props: any) {
         </Flex>
         <Flex align={"center"} gap={"sm"}>
           <Text size={30} fw={500}>
-            {contacted}
+            {totalProspected}
           </Text>
           <Badge
             color="green"

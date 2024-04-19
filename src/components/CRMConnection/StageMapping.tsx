@@ -32,7 +32,7 @@ export default function StageMapping() {
   let sellscaleStages = [
     { value: "SENT_OUTREACH", label: "Sent Outreach" },
     { value: "ACTIVE_CONVO", label: "Active Convo (All)" },
-    { value: "DEMO_SET", label: "Demo Set" },
+    { value: "DEMO", label: "Demo Set" },
   ];
   const [crmStages, setCRMStages] = useState<CRMStage[]>([]);
   const [existingStageMapping, setExistingStageMapping] = useState<{ [key: string]: string | null }>({});

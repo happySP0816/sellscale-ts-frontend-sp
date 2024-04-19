@@ -15,8 +15,7 @@ import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { ClientSDR } from "src";
 
-// import { API_URL } from "@constants/data";
-const API_URL = "http://127.0.0.1:5000";
+import { API_URL } from "@constants/data";
 
 type CRMUserType = {
   name: string;

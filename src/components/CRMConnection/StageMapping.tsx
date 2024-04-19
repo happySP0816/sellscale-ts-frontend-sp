@@ -13,8 +13,7 @@ import { IconArrowsExchange } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 
-// import { API_URL } from "@constants/data";
-const API_URL = "http://127.0.0.1:5000"
+import { API_URL } from "@constants/data";
 
 type CRMStage = {
   created_at: string;

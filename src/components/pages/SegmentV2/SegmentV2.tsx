@@ -66,6 +66,8 @@ export default function SegmentV2() {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
+  const [totalProspected, setTotalProspected] = useState(0);
+  const [totalContacted, setTotalContacted] = useState(0);
   const [showAllSegments, setShowAllSegments] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -511,6 +513,16 @@ export default function SegmentV2() {
       .then((response) => response.json())
       .then((data) => {
         const segments = data.segments;
+        const totalProspected = segments.reduce(
+          (acc: number, segment: any) => acc + (segment.num_prospected || 0),
+          0
+        );
+        const totalContacted = segments.reduce(
+          (acc: number, segment: any) => acc + (segment.num_contacted || 0),
+          0
+        );
+        setTotalProspected(totalProspected);
+        setTotalContacted(totalContacted);
         const parentSegments = segments.filter(
           (segment: any) => !segment.parent_segment_id
         );
@@ -602,7 +614,11 @@ export default function SegmentV2() {
         <Text color="gray" fw={500} size={"sm"} mb={"xl"}>
           View and manage your segments to organize your contacts and campaigns
         </Text>
-        <SegmentV2Overview data={data} />
+        <SegmentV2Overview
+          data={data}
+          totalProspected={totalProspected}
+          totalContacted={totalContacted}
+        />
         <Box>
           <Flex>
             <TextInput

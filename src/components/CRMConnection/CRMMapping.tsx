@@ -45,7 +45,6 @@ export default function CRMUserMapping() {
       },
     });
     const data = await response.json();
-    console.log(data);
 
     if (data.status === "success") {
       setCRMUsers(data.data.users);

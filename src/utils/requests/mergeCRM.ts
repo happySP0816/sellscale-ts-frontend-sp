@@ -12,26 +12,6 @@ export async function getSyncCRM(userToken: string): Promise<MsgResponse> {
   return await processResponse(response, 'data');
 }
 
-export async function updateSyncCRM(
-  userToken: string,
-  sync_type?: string,
-  status_mapping?: Record<string, any>,
-  event_handlers?: Record<string, any>
-): Promise<MsgResponse> {
-  const response = await fetch(`${API_URL}/merge_crm/update_crm_sync`, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${userToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      sync_type,
-      status_mapping,
-      event_handlers,
-    }),
-  });
-  return await processResponse(response, 'data');
-}
 
 export async function getOperationAvailableCRM(
   userToken: string,

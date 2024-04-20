@@ -1,17 +1,18 @@
 import { Button, Flex, Select, Text, TextInput } from "@mantine/core";
 import { ContextModalProps, closeAllModals } from "@mantine/modals";
+import { useEffect, useState } from "react";
 
 export default function SplitSegmentModal({
   context,
   id,
   innerProps,
 }: ContextModalProps<{
-  default_parent_segment_id: any;
   parentSegments: Array<{ segment_id: number; segment_title: string }>;
-  onParentSegmentChange: (segment_id: number) => void;
-  onChildSegmentNameChange: (segment_title: string) => void;
-  onSplit: () => void;
+  onSplit: (segment_id: any, segment_title: any) => void;
 }>) {
+  const [parentSegmentId, setParentSegmentId] = useState(null);
+  const [childSegmentName, setChildSegmentName] = useState(null);
+
   return (
     <>
       <Flex direction={"column"} gap={"lg"}>
@@ -27,13 +28,12 @@ export default function SplitSegmentModal({
               SPLIT FROM SEGMENT:
             </Text>
           }
-          defaultValue={innerProps.default_parent_segment_id}
           placeholder="Select Segment"
           data={innerProps.parentSegments.map((segment: any) => ({
             value: segment.segment_id,
             label: segment.segment_title,
           }))}
-          onChange={(value: any) => innerProps.onParentSegmentChange(value)}
+          onChange={(value: any) => setParentSegmentId(value)}
         />
         <TextInput
           label={
@@ -42,8 +42,8 @@ export default function SplitSegmentModal({
             </Text>
           }
           placeholder="Enter child segment name"
-          onChange={(event) =>
-            innerProps.onChildSegmentNameChange(event.currentTarget.value)
+          onChange={(event: any) =>
+            setChildSegmentName(event.currentTarget.value)
           }
         />
       </Flex>
@@ -61,7 +61,8 @@ export default function SplitSegmentModal({
           fullWidth
           radius="md"
           onClick={() => {
-            innerProps.onSplit && innerProps.onSplit();
+            innerProps.onSplit &&
+              innerProps.onSplit(parentSegmentId, childSegmentName);
             closeAllModals();
           }}
         >

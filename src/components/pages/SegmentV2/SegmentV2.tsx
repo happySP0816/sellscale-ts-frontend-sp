@@ -253,19 +253,12 @@ export default function SegmentV2() {
                           },
                         }),
                         innerProps: {
-                          default_parent_segment_id: id,
                           parentSegments: data.map((segment: any) => ({
                             segment_id: segment.id,
                             segment_title: segment.segment_title,
                           })),
-                          onParentSegmentChange: (segment_id: any) => {
-                            setCreateSegmentParentId(segment_id);
-                          },
-                          onChildSegmentNameChange: (segment_title: any) => {
-                            setCreateSegmentName(segment_title);
-                          },
-                          onSplit: () => {
-                            createSegment(true);
+                          onSplit: (segment_id: any, segment_title: any) => {
+                            createSegment(true, segment_id, segment_title);
                           },
                         },
                       })
@@ -377,7 +370,7 @@ export default function SegmentV2() {
                           }
                         >
                           {expandedRows.includes(id) ? "Hide" : "Show"}{" "}
-                          Sub-Segments
+                          {sub_segments.length} Sub-Segments
                         </Badge>
                       )}
                     </Flex>
@@ -597,7 +590,11 @@ export default function SegmentV2() {
       });
   };
 
-  const createSegment = async (showLoader: boolean) => {
+  const createSegment = async (
+    showLoader: boolean,
+    segmentId?: string,
+    segmentName?: string
+  ) => {
     if (showLoader) {
       setLoading(true);
     }
@@ -608,18 +605,18 @@ export default function SegmentV2() {
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
-        segment_title: createSegmentName,
+        segment_title: segmentName ? segmentName : createSegmentName,
         filters: {},
-        parent_segment_id: createSegmentParentId,
+        parent_segment_id: segmentId ? segmentId : createSegmentParentId,
       }),
     })
       .then((response) => response.json())
       .then((data) => {})
       .finally(() => {
         setLoading(false);
-        getAllSegments(true);
         setCreateSegmentName("");
         setCreateSegmentParentId(null);
+        getAllSegments(true);
       });
   };
 

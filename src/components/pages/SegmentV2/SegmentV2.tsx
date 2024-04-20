@@ -252,7 +252,22 @@ export default function SegmentV2() {
                             margin: 0,
                           },
                         }),
-                        innerProps: {},
+                        innerProps: {
+                          default_parent_segment_id: id,
+                          parentSegments: data.map((segment: any) => ({
+                            segment_id: segment.id,
+                            segment_title: segment.segment_title,
+                          })),
+                          onParentSegmentChange: (segment_id: any) => {
+                            setCreateSegmentParentId(segment_id);
+                          },
+                          onChildSegmentNameChange: (segment_title: any) => {
+                            setCreateSegmentName(segment_title);
+                          },
+                          onSplit: () => {
+                            createSegment(true);
+                          },
+                        },
                       })
                     }
                   >

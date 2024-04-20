@@ -370,7 +370,9 @@ function TitleGenerationSection(props: {
     .map((message) =>
       message.result.map((m) => ({
         subject: props.isCTAs ? m.message : m.subject,
-        assets: message.assets,
+        assets: m.asset_ids
+          .map((id) => message.assets.find((a) => a.id == id))
+          .filter((a) => a) as Asset[],
       }))
     )
     .flat()
@@ -442,6 +444,7 @@ interface MessageResult {
     angle_description: string;
     subject: string;
     message: string;
+    asset_ids: number[];
   }[];
   step_num: number;
 }
@@ -501,7 +504,7 @@ function StepGenerationSection(props: {
                             props.onClick(
                               message.step_num,
                               msg.message,
-                              message.assets.map((a) => a.id),
+                              msg.asset_ids,
                               !!props.selectedData.steps.find((s) => s.text === msg.message)
                             );
                           }}
@@ -514,23 +517,25 @@ function StepGenerationSection(props: {
                           {msg.angle}
                         </Text>
                         <Group>
-                          {message.assets.map((asset, index) => (
-                            <HoverCard width={280} shadow='md' openDelay={500}>
-                              <HoverCard.Target>
-                                <Badge
-                                  key={index}
-                                  color='blue'
-                                  variant='light'
-                                  styles={{ root: { textTransform: 'initial' } }}
-                                >
-                                  {asset.tag} - {asset.title}
-                                </Badge>
-                              </HoverCard.Target>
-                              <HoverCard.Dropdown>
-                                <Text size='sm'>{asset.value}</Text>
-                              </HoverCard.Dropdown>
-                            </HoverCard>
-                          ))}
+                          {msg.asset_ids
+                            .map((id) => message.assets.find((a) => a.id == id))
+                            .map((asset, index) => (
+                              <HoverCard width={280} shadow='md' openDelay={500}>
+                                <HoverCard.Target>
+                                  <Badge
+                                    key={index}
+                                    color='blue'
+                                    variant='light'
+                                    styles={{ root: { textTransform: 'initial' } }}
+                                  >
+                                    {asset?.tag} - {asset?.title}
+                                  </Badge>
+                                </HoverCard.Target>
+                                <HoverCard.Dropdown>
+                                  <Text size='sm'>{asset?.value}</Text>
+                                </HoverCard.Dropdown>
+                              </HoverCard>
+                            ))}
                         </Group>
                       </Stack>
 
@@ -541,17 +546,12 @@ function StepGenerationSection(props: {
                             m='auto'
                             autosize
                             onChange={(e) => {
-                              props.onClick(
-                                message.step_num,
-                                msg.message,
-                                message.assets.map((a) => a.id),
-                                true
-                              );
+                              props.onClick(message.step_num, msg.message, msg.asset_ids, true);
                               setTimeout(() => {
                                 props.onClick(
                                   message.step_num,
                                   e.currentTarget.value,
-                                  message.assets.map((a) => a.id),
+                                  msg.asset_ids,
                                   false
                                 );
                               }, 1);

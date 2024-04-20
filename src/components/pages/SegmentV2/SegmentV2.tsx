@@ -52,6 +52,7 @@ import { API_URL } from "@constants/data";
 import { IconUsersMinus, IconUsersPlus } from "@tabler/icons-react";
 import SegmentV2Overview from "./SegmentV2Overview";
 import { openContextModal } from "@mantine/modals";
+import PersonaSelect from "@common/persona/PersonaSplitSelect";
 
 export default function SegmentV2() {
   const theme = useMantineTheme();
@@ -67,6 +68,11 @@ export default function SegmentV2() {
   const [loading, setLoading] = useState(false);
   const [isFullscreenModalOpen, setFullscreenModalOpen] = useState(false);
   const [iframeUrl, setIframeUrl] = useState("");
+  const [showConnectCampaignModal, setShowConnectCampaignModal] = useState(
+    false
+  );
+  const [selectedCampaignId, setSelectedCampaignId] = useState(null);
+  const [selectedSegmentId, setSelectedSegmentId] = useState(null);
 
   const [arrow, setArrow] = useState(false);
   const [data, setData] = useState([]);
@@ -399,8 +405,6 @@ export default function SegmentV2() {
           apollo_query,
         } = cell.row.original;
 
-        console.log(apollo_query);
-
         const notMyCampaign = client_sdr.id !== userData.id;
 
         return (
@@ -480,7 +484,12 @@ export default function SegmentV2() {
       ),
       cell: (cell: any) => {
         const { isChild } = cell.row.original;
-        const { campaign, client_archetype, client_sdr } = cell.row.original;
+        const {
+          campaign,
+          client_archetype,
+          client_sdr,
+          id,
+        } = cell.row.original;
         const notMyCampaign = client_sdr.id !== userData.id;
         return (
           <Box
@@ -506,7 +515,8 @@ export default function SegmentV2() {
               sx={{ fontSize: "12px" }}
               disabled={notMyCampaign}
               onClick={() => {
-                alert("Clicked Connect to Campaign button");
+                setShowConnectCampaignModal(true);
+                setSelectedSegmentId(id);
               }}
             >
               {client_archetype?.archetype
@@ -530,7 +540,6 @@ export default function SegmentV2() {
   function transformData(segments: any[]) {
     return segments.map((segment, index) => {
       // Assume progress, campaign, contacts, filters, assets are derived somehow
-      console.log(segment.client_sdr);
       return {
         id: segment.id,
         person_name: segment.segment_title,
@@ -549,6 +558,29 @@ export default function SegmentV2() {
       };
     });
   }
+
+  const connectCampaignToSegment = async (showLoader: boolean) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/${selectedSegmentId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        client_archetype_id: selectedCampaignId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        getAllSegments(true);
+        setShowConnectCampaignModal(false);
+      });
+  };
 
   const createSegment = async (showLoader: boolean) => {
     if (showLoader) {
@@ -678,6 +710,42 @@ export default function SegmentV2() {
 
   return (
     <Paper>
+      {/* Connect to Campaign Modal */}
+      <Modal
+        opened={showConnectCampaignModal}
+        onClose={() => {
+          setShowConnectCampaignModal(false);
+          getAllSegments(true);
+        }}
+        size="sm"
+        padding="md"
+        title="Connect to Campaign"
+      >
+        <PersonaSelect
+          onChange={(v: any) => {
+            if (!v || v.length === 0) {
+              return;
+            }
+            setSelectedCampaignId(v[0]["archetype_id"]);
+          }}
+          disabled={false}
+          label="Select Campaign"
+          description="Select a campaign to connect to this segment"
+        />
+        <Button
+          fullWidth
+          size="xs"
+          radius={"md"}
+          mt={"md"}
+          disabled={!selectedCampaignId || !selectedSegmentId}
+          onClick={() => {
+            connectCampaignToSegment(true);
+          }}
+        >
+          Connect to Campaign
+        </Button>
+      </Modal>
+
       {/* Set Pre Filters Modal */}
       <Modal
         opened={isFullscreenModalOpen}

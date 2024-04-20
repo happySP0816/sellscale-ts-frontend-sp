@@ -57,6 +57,8 @@ export default function SegmentV2() {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
+  const [createSegmentName, setCreateSegmentName] = useState("");
+  const [createSegmentParentId, setCreateSegmentParentId] = useState(null);
   const [totalProspected, setTotalProspected] = useState(0);
   const [totalContacted, setTotalContacted] = useState(0);
   const [showAllSegments, setShowAllSegments] = useState(false);
@@ -178,6 +180,139 @@ export default function SegmentV2() {
               } `}
               w="100%"
             >
+              <Menu
+                shadow="md"
+                withinPortal
+                position="right"
+                disabled={isMySegment}
+                styles={{
+                  itemLabel: {
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  },
+                }}
+              >
+                <Menu.Target>
+                  <ActionIcon disabled={isMySegment}>
+                    <IconDotsVertical size={"1.2rem"} />
+                  </ActionIcon>
+                </Menu.Target>
+
+                <Menu.Dropdown>
+                  <Menu.Label display={isMySegment ? "block" : "none"}>
+                    Prospects
+                  </Menu.Label>
+                  <Menu.Item>
+                    <IconUsersPlus size={"0.9rem"} />
+                    Add Prospects
+                  </Menu.Item>
+                  <Menu.Item>
+                    <IconUsers size={"0.9rem"} />
+                    View Prospects
+                  </Menu.Item>
+
+                  <Menu.Divider />
+                  <Menu.Label>Split</Menu.Label>
+                  <Menu.Item
+                    onClick={() =>
+                      openContextModal({
+                        modal: "splitSegment",
+                        title: (
+                          <Group position="apart">
+                            <div>
+                              <Title
+                                order={3}
+                                sx={{
+                                  display: "flex",
+                                  gap: "8px",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <IconButterfly
+                                  color="#228be6"
+                                  style={{ marginTop: "-5px" }}
+                                />
+                                Split Segment
+                              </Title>
+                            </div>
+                          </Group>
+                        ),
+                        styles: (theme) => ({
+                          title: {
+                            width: "100%",
+                          },
+                          header: {
+                            margin: 0,
+                          },
+                        }),
+                        innerProps: {},
+                      })
+                    }
+                  >
+                    <IconButterfly size={"0.9rem"} />
+                    Manually Split Segment
+                  </Menu.Item>
+                  <Menu.Item
+                    onClick={() =>
+                      openContextModal({
+                        modal: "autosplitsegment",
+                        title: (
+                          <Group position="apart">
+                            <div>
+                              <Title
+                                order={2}
+                                sx={{
+                                  display: "flex",
+                                  gap: "8px",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <IconWand color="#228be6" />
+                                Auto Split Segment
+                              </Title>
+                            </div>
+                          </Group>
+                        ),
+                        styles: (theme) => ({
+                          title: {
+                            width: "100%",
+                          },
+                          header: {
+                            margin: 0,
+                          },
+                        }),
+                        innerProps: {},
+                      })
+                    }
+                  >
+                    <IconWand size={"0.9rem"} />
+                    Auto Split Segment
+                  </Menu.Item>
+
+                  <Menu.Divider />
+                  <Menu.Label color="red">Danger zone</Menu.Label>
+                  <Menu.Item color="red">
+                    <IconUsersMinus size={"0.9rem"} />
+                    Transfer to Teammate
+                  </Menu.Item>
+                  <Menu.Item
+                    color="red"
+                    onClick={() => clearSegmentProspecst(true, id)}
+                  >
+                    <IconBackspace size={"0.9rem"} />
+                    Clear Prospects
+                  </Menu.Item>
+                  <Menu.Item
+                    color="red"
+                    onClick={() => deleteSegment(true, id)}
+                    style={{ display: "flex", alignItems: "center" }}
+                  >
+                    <IconTrash size={"0.9rem"} />
+                    Delete Segment
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
               <Flex align={"center"} gap={"sm"} className="segment" w="100%">
                 <Box w="100%" sx={{ flexDirection: "row", display: "flex" }}>
                   <Box
@@ -241,139 +376,6 @@ export default function SegmentV2() {
                     </Flex>
                   </Box>
                 </Box>
-                <Menu
-                  shadow="md"
-                  withinPortal
-                  position="right"
-                  disabled={isMySegment}
-                  styles={{
-                    itemLabel: {
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    },
-                  }}
-                >
-                  <Menu.Target>
-                    <ActionIcon disabled={isMySegment}>
-                      <IconDotsVertical size={"1.2rem"} />
-                    </ActionIcon>
-                  </Menu.Target>
-
-                  <Menu.Dropdown>
-                    <Menu.Label display={isMySegment ? "block" : "none"}>
-                      Prospects
-                    </Menu.Label>
-                    <Menu.Item>
-                      <IconUsersPlus size={"0.9rem"} />
-                      Add Prospects
-                    </Menu.Item>
-                    <Menu.Item>
-                      <IconUsers size={"0.9rem"} />
-                      View Prospects
-                    </Menu.Item>
-
-                    <Menu.Divider />
-                    <Menu.Label>Split</Menu.Label>
-                    <Menu.Item
-                      onClick={() =>
-                        openContextModal({
-                          modal: "splitSegment",
-                          title: (
-                            <Group position="apart">
-                              <div>
-                                <Title
-                                  order={3}
-                                  sx={{
-                                    display: "flex",
-                                    gap: "8px",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <IconButterfly
-                                    color="#228be6"
-                                    style={{ marginTop: "-5px" }}
-                                  />
-                                  Split Segment
-                                </Title>
-                              </div>
-                            </Group>
-                          ),
-                          styles: (theme) => ({
-                            title: {
-                              width: "100%",
-                            },
-                            header: {
-                              margin: 0,
-                            },
-                          }),
-                          innerProps: {},
-                        })
-                      }
-                    >
-                      <IconButterfly size={"0.9rem"} />
-                      Manually Split Segment
-                    </Menu.Item>
-                    <Menu.Item
-                      onClick={() =>
-                        openContextModal({
-                          modal: "autosplitsegment",
-                          title: (
-                            <Group position="apart">
-                              <div>
-                                <Title
-                                  order={2}
-                                  sx={{
-                                    display: "flex",
-                                    gap: "8px",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <IconWand color="#228be6" />
-                                  Auto Split Segment
-                                </Title>
-                              </div>
-                            </Group>
-                          ),
-                          styles: (theme) => ({
-                            title: {
-                              width: "100%",
-                            },
-                            header: {
-                              margin: 0,
-                            },
-                          }),
-                          innerProps: {},
-                        })
-                      }
-                    >
-                      <IconWand size={"0.9rem"} />
-                      Auto Split Segment
-                    </Menu.Item>
-
-                    <Menu.Divider />
-                    <Menu.Label color="red">Danger zone</Menu.Label>
-                    <Menu.Item color="red">
-                      <IconUsersMinus size={"0.9rem"} />
-                      Transfer to Teammate
-                    </Menu.Item>
-                    <Menu.Item
-                      color="red"
-                      onClick={() => clearSegmentProspecst(true, id)}
-                    >
-                      <IconBackspace size={"0.9rem"} />
-                      Clear Prospects
-                    </Menu.Item>
-                    <Menu.Item
-                      color="red"
-                      onClick={() => deleteSegment(true, id)}
-                      style={{ display: "flex", alignItems: "center" }}
-                    >
-                      <IconTrash size={"0.9rem"} />
-                      Delete Segment
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
               </Flex>
             </Flex>
           </div>
@@ -548,6 +550,32 @@ export default function SegmentV2() {
     });
   }
 
+  const createSegment = async (showLoader: boolean) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_title: createSegmentName,
+        filters: {},
+        parent_segment_id: createSegmentParentId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        getAllSegments(true);
+        setCreateSegmentName("");
+        setCreateSegmentParentId(null);
+      });
+  };
+
   const deleteSegment = async (showLoader: boolean, segmentId: string) => {
     if (showLoader) {
       setLoading(true);
@@ -687,6 +715,7 @@ export default function SegmentV2() {
           placeholder="Enter Segment Name"
           required
           mb={"sm"}
+          onChange={(e) => setCreateSegmentName(e.target.value)}
         />
         <Select
           label="(Optional) Parent Segment"
@@ -699,6 +728,8 @@ export default function SegmentV2() {
               value: segment.id,
             }))}
           mb={"sm"}
+          onChange={(v: any) => setCreateSegmentParentId(v)}
+          clearable
         />
         <Flex gap={"md"} mt="xl">
           <Button
@@ -714,7 +745,10 @@ export default function SegmentV2() {
             fullWidth
             size="xs"
             radius={"md"}
-            onClick={() => alert("Clicked Create Segment button")}
+            onClick={() => {
+              createSegment(true);
+              setModalOpened(false);
+            }}
           >
             Create New Segment
           </Button>

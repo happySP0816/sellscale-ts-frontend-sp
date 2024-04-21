@@ -38,7 +38,7 @@ export default function ClearSegmentModal({ innerProps }: ContextModalProps<Dele
   return (
     <>
       <Text color='gray' fw={500} size={'sm'} sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-        Are you sure you want to clear <span style={{ fontWeight: 500 }}>{'115 prospects'}</span>from this segment?
+        Are you sure you want to clear <span style={{ fontWeight: 700 }}>{'115 prospects'}</span>from this segment?
       </Text>
       <Flex gap={'md'} mt={'lg'}>
         <Button fullWidth size='md' radius={'md'} variant='outline' color='gray' onClick={() => closeAllModals()}>

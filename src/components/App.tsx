@@ -66,6 +66,7 @@ import SplitSegmentModal from '@modals/SegmentV2/SplitSegmentModal';
 import SegmentEditPrefilterModal from '@modals/SegmentV2/SegmentEditPrefilterModal';
 import ClearSegmentModal from '@modals/SegmentV2/ClearSegmentModal';
 import DeleteSegmentModal from '@modals/SegmentV2/DeleteSegmentModal';
+import DuplicateCampaignModal from '@modals/DuplicateCampaignModal';
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -81,7 +82,14 @@ export default function App() {
   // Site light or dark mode
   const isSystemDarkMode = false; // window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   const savedSiteTheme = localStorage.getItem('site-theme');
-  const currentColorScheme: ColorScheme = savedSiteTheme != null ? (savedSiteTheme === 'dark' ? 'dark' : 'light') : isSystemDarkMode ? 'dark' : 'light';
+  const currentColorScheme: ColorScheme =
+    savedSiteTheme != null
+      ? savedSiteTheme === 'dark'
+        ? 'dark'
+        : 'light'
+      : isSystemDarkMode
+      ? 'dark'
+      : 'light';
 
   const [colorScheme, setColorScheme] = useState<ColorScheme>(currentColorScheme);
   const toggleColorScheme = (value?: ColorScheme) => {
@@ -233,6 +241,7 @@ export default function App() {
               segmentprefilter: SegmentEditPrefilterModal,
               clearsegment: ClearSegmentModal,
               deletesegment: DeleteSegmentModal,
+              duplicateCampaign: DuplicateCampaignModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

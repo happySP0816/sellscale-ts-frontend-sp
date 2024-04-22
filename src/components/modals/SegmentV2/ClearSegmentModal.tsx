@@ -19,7 +19,7 @@ export default function ClearSegmentModal({ innerProps }: ContextModalProps<Dele
   const clearSegment = () => {
     setLoading(true);
     innerProps.getAllSegments(true);
-    setLoading(false);
+    // setLoading(false);
     closeAllModals();
   };
 

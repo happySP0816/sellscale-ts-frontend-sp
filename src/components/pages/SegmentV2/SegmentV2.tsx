@@ -315,7 +315,48 @@ export default function SegmentV2() {
                     <IconBackspace size={'0.9rem'} />
                     Clear Prospects
                   </Menu.Item>
-                  <Menu.Item color='red' onClick={() => deleteSegment(true, id)} style={{ display: 'flex', alignItems: 'center' }}>
+                  <Menu.Item
+                    color='red'
+                    style={{ display: 'flex', alignItems: 'center' }}
+                    onClick={() => {
+                      openContextModal({
+                        modal: 'deletesegment',
+                        title: (
+                          <Group position='apart'>
+                            <div>
+                              <Title
+                                order={2}
+                                sx={{
+                                  display: 'flex',
+                                  gap: '8px',
+                                  alignItems: 'center',
+                                }}
+                              >
+                                <IconTrash color='red' />
+                                Delete Segment
+                              </Title>
+                            </div>
+                          </Group>
+                        ),
+                        styles: (theme) => ({
+                          root: {
+                            maxWidth: '40%',
+                          },
+                          title: {
+                            width: '100%',
+                          },
+                          header: {
+                            margin: 0,
+                          },
+                        }),
+                        innerProps: {
+                          showLoader: true,
+                          segmentId: id,
+                          getAllSegments: getAllSegments,
+                        },
+                      });
+                    }}
+                  >
                     <IconTrash size={'0.9rem'} />
                     Delete Segment
                   </Menu.Item>
@@ -570,26 +611,8 @@ export default function SegmentV2() {
       });
   };
 
-  const deleteSegment = async (showLoader: boolean, segmentId: string) => {
-    if (showLoader) {
-      setLoading(true);
-    }
-    fetch(`${API_URL}/segment/${segmentId}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {})
-      .finally(() => {
-        setLoading(false);
-        getAllSegments(true);
-      });
-  };
-
   const getAllSegments = async (showLoader: boolean) => {
+    console.log('dddddddddddddddddd');
     if (showLoader) {
       setLoading(true);
     }

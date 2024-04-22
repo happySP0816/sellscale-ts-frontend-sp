@@ -93,7 +93,6 @@ export default function StageMapping() {
             Stage Mapping
           </Text>
         </Flex>
-        <Button variant="outline">Save</Button>
       </Flex>
       <Divider />
       <Flex direction={"column"} gap={"sm"} mt={"md"}>

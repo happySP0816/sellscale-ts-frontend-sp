@@ -22,7 +22,8 @@ import { showNotification } from "@mantine/notifications";
 import _ from "lodash";
 import CRMUserMapping from "../CRMConnection/CRMMapping";
 import StageMapping from "../CRMConnection/StageMapping";
-import AccountCreation from "../CRMConnection/AccountCreation";
+import SyncTriggers from "../CRMConnection/SyncTriggers";
+
 
 type MergeIntegrationType = {
   id: string;
@@ -309,7 +310,8 @@ const CRMConnectionPage: React.FC = () => {
           </Card>
           <CRMUserMapping />
           <StageMapping />
-          <AccountCreation />
+          <SyncTriggers />
+          
         </Paper>
       )}
     </Card>

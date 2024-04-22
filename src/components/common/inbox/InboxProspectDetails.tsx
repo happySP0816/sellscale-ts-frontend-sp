@@ -102,6 +102,7 @@ import { patchProspect } from "@utils/requests/patchProspect";
 import { setDemoSetProspect } from "@utils/requests/setDemoSetProspect";
 import { API_URL } from "@constants/data";
 import moment from "moment";
+import ProspectDetailsCRMSync from "@common/prospectDetails/ProspectDetailsCRMSync";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -153,19 +154,16 @@ export default function ProjectDetails(props: {
   );
   const openedOutboundChannel = useRecoilValue(currentConvoChannelState);
 
-  const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(
-    demosDrawerOpenState
-  );
+  const [demosDrawerOpened, setDemosDrawerOpened] =
+    useRecoilState(demosDrawerOpenState);
   const [drawerProspectId, setDrawerProspectId] = useRecoilState(
     demosDrawerProspectIdState
   );
 
-  const [openedNotInterestedPopover, setOpenedNotInterestedPopover] = useState(
-    false
-  );
-  const [openedNotQualifiedPopover, setOpenedNotQualifiedPopover] = useState(
-    false
-  );
+  const [openedNotInterestedPopover, setOpenedNotInterestedPopover] =
+    useState(false);
+  const [openedNotQualifiedPopover, setOpenedNotQualifiedPopover] =
+    useState(false);
   const [loadingNotInterested, setLoadingNotInterested] = useState(false);
   const [loadingNotQualified, setLoadingNotQualified] = useState(false);
 
@@ -213,10 +211,8 @@ export default function ProjectDetails(props: {
 
   let statusValue = data?.details?.linkedin_status || "ACCEPTED";
 
-  const [
-    deactivateAiEngagementStatus,
-    setDeactivateAiEngagementStatus,
-  ] = useState(!prospect?.deactivate_ai_engagement);
+  const [deactivateAiEngagementStatus, setDeactivateAiEngagementStatus] =
+    useState(!prospect?.deactivate_ai_engagement);
   if (
     props.emailStatuses ||
     openedOutboundChannel === "EMAIL" ||
@@ -361,23 +357,6 @@ export default function ProjectDetails(props: {
         disqualification_reason
       );
     }
-    // queryClient.invalidateQueries({
-    //   queryKey: ['query-dash-get-prospects'],
-    // });
-    // if (changeProspect || changeProspect === undefined) {
-    //   if (!props.noProspectResetting) {
-    //     setOpenedProspectId(-1);
-    //   }
-    // }
-
-    // Refetch and set to the next prospect
-    // queryClient.refetchQueries({
-    //   queryKey: ['query-prospects-list'],
-    // });
-    // if (changeProspect || changeProspect === undefined) {
-    //   setOpenedProspectId(-2);
-    // }
-    // refetch();
 
     refetchState();
   };
@@ -399,74 +378,6 @@ export default function ProjectDetails(props: {
       </Flex>
     );
   }
-
-  const [CRMOpend, { open: CRMOpen, close: CRMClose }] = useDisclosure(false);
-  const [account, setAccount] = useState(true);
-  const [contactName, setContactName] = useState(true);
-  const [opportunityName, setOpportunityName] = useState(true);
-
-  const [syncHubspot, setSyncHubspot] = useState(false);
-  const [loadingSyncButton, setLoadingSyncButton] = useState(false);
-
-  useEffect(() => {
-    setSyncHubspot(
-      (prospect?.merge_account_id?.length || 0) +
-        (prospect?.merge_contact_id?.length || 0) +
-        (prospect?.merge_opportunity_id?.length || 0) >
-        0
-        ? true
-        : false
-    );
-  }, [prospect]);
-
-  const createOpportunity = () => {
-    setLoadingSyncButton(true);
-
-    fetch(`${API_URL}/merge_crm/create_opportunity`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + userToken,
-      },
-      body: JSON.stringify({
-        prospect_id: openedProspectId,
-      }),
-    })
-      .then((response) => {
-        if (response.status !== 200) {
-          showNotification({
-            title: "Error",
-            message: "Error creating opportunity in Hubspot",
-            color: "red",
-            autoClose: 3000,
-          });
-          return null;
-        }
-        return response.json();
-      })
-      .then((data) => {
-        showNotification({
-          title: "Success",
-          message: "Opportunity created in Hubspot",
-          color: "green",
-          autoClose: 3000,
-        });
-        CRMClose();
-        setSyncHubspot(true);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        showNotification({
-          title: "Error",
-          message: "Error creating opportunity in Hubspot",
-          color: "red",
-          autoClose: 3000,
-        });
-      })
-      .finally(() => {
-        setLoadingSyncButton(false);
-      });
-  };
 
   return (
     <Flex
@@ -1213,115 +1124,10 @@ export default function ProjectDetails(props: {
           <Divider mt={"sm"} />
 
           {showCRM && prospect?.full_name && (
-            <Box style={{ flexBasis: "15%" }} p={10} px={"md"} mb={"sm"}>
-              <Text fw={600}>CRM:</Text>
-              <Paper
-                mt={"4px"}
-                p="xs"
-                radius="md"
-                sx={{
-                  cursor: "pointer",
-                  border: `1px solid ${!syncHubspot ? "#ced4da" : "#228be6"} `,
-                }}
-                bg={!syncHubspot ? "" : "#f5f9fe"}
-                onClick={CRMOpen}
-              >
-                <Flex align={"center"} justify={"space-between"} w={"100%"}>
-                  <Flex align={"center"} gap={"sm"}>
-                    <IconAffiliate rotate={"90%"} color="orange" />
-                    <Text>
-                      {syncHubspot
-                        ? prospect?.full_name + " synced to Hubspot"
-                        : "Sync " + prospect?.full_name + " to Hubspot"}
-                    </Text>
-                  </Flex>
-                  {syncHubspot && (
-                    <IconCircleCheck color="white" fill="#228be6" />
-                  )}
-                </Flex>
-              </Paper>
-
-              <Text color="gray" size="xs" mt="xs">
-                {prospect?.merge_account_id ? "✅ Account · " : "☑️ Account · "}
-                {prospect?.merge_contact_id ? "✅ Contact · " : "☑️ Contact · "}
-                {prospect?.merge_opportunity_id
-                  ? "✅ Opportunity "
-                  : "☑️ Opportunity "}
-              </Text>
-              {syncHubspot && (
-                <Flex align={"center"} justify={"space-between"} mt={"3px"}>
-                  <Text color="gray" fw={500} size={"sm"}>
-                    Last Synced: {moment().format("MMM DD, YYYY")}
-                  </Text>
-                </Flex>
-              )}
-              <Modal
-                opened={CRMOpend}
-                size={"lg"}
-                onClose={CRMClose}
-                title={
-                  <Flex align={"center"} gap={"sm"}>
-                    <IconAffiliate size={"1.4rem"} color="orange" />
-                    <Text size={30} fw={600}>
-                      Sync to Hubspot
-                    </Text>
-                  </Flex>
-                }
-              >
-                <Text>
-                  Automatically create a new Account, Contact, and Opportunity
-                  in Hubspot for {data?.details.full_name}.
-                </Text>
-                <Divider mt="md" mb="md" />
-                <Flex direction={"column"} gap={"sm"}>
-                  <Flex direction={"column"} gap={"md"}>
-                    <Checkbox
-                      label="Create Account"
-                      disabled
-                      checked={account}
-                      onChange={() => setAccount(!account)}
-                    />
-                  </Flex>
-                  <Flex direction={"column"} gap={"md"}>
-                    <Checkbox
-                      label="Create Contact"
-                      disabled
-                      checked={contactName}
-                      onChange={() => setContactName(!contactName)}
-                    />
-                  </Flex>
-                  <Flex direction={"column"} gap={"md"}>
-                    <Checkbox
-                      label="Create Opportunity"
-                      disabled
-                      checked={opportunityName}
-                      onChange={() => setOpportunityName(!opportunityName)}
-                    />
-                  </Flex>
-                  <Flex align={"center"} gap={"sm"} mt={"xl"}>
-                    <Button
-                      variant="outline"
-                      size="md"
-                      fullWidth
-                      color="red"
-                      onClick={CRMClose}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      loading={loadingSyncButton}
-                      size="md"
-                      fullWidth
-                      onClick={() => {
-                        createOpportunity();
-                      }}
-                    >
-                      Sync
-                    </Button>
-                  </Flex>
-                </Flex>
-              </Modal>
-            </Box>
+            <ProspectDetailsCRMSync
+              prospect={prospect}
+              openedProspectId={openedProspectId}
+            />
           )}
 
           <div style={{ flexBasis: "55%" }}>

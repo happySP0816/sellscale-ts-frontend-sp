@@ -209,7 +209,11 @@ export default function SegmentV2() {
                   <Menu.Label display={isMySegment ? "block" : "none"}>
                     Prospects
                   </Menu.Label>
-                  <Menu.Item>
+                  <Menu.Item
+                    onClick={() => {
+                      window.location.href = `/contacts/find`;
+                    }}
+                  >
                     <IconUsersPlus size={"0.9rem"} />
                     Add Prospects
                   </Menu.Item>

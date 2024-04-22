@@ -9,7 +9,6 @@ import {
   NumberInput,
   Paper,
   Progress,
-  Select,
   Text,
   useMantineTheme,
   Menu,
@@ -18,6 +17,7 @@ import {
   Title,
   Checkbox,
   Group,
+  Select,
 } from "@mantine/core";
 
 import {
@@ -74,6 +74,15 @@ export default function SegmentV2() {
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
+  const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(
+    false
+  );
+  const [sdrs, setAllSDRs] = useState([] as any[]);
+  const [selectedSdrId, setSelectedSdrId] = useState(null);
+  const [showEditSegmentNameModal, setShowEditSegmentNameModal] = useState(
+    false
+  );
+  const [editSegmentName, setEditSegmentName] = useState("");
 
   const [arrow, setArrow] = useState(false);
   const [data, setData] = useState([]);
@@ -316,7 +325,13 @@ export default function SegmentV2() {
 
                   <Menu.Divider />
                   <Menu.Label color="red">Danger zone</Menu.Label>
-                  <Menu.Item color="red">
+                  <Menu.Item
+                    color="red"
+                    onClick={() => {
+                      setSelectedSegmentId(id);
+                      setShowTransferSegmentModal(true);
+                    }}
+                  >
                     <IconUsersMinus size={"0.9rem"} />
                     Transfer to Teammate
                   </Menu.Item>
@@ -429,9 +444,20 @@ export default function SegmentV2() {
                   </Box>
                   <Box>
                     <Flex align={"center"} gap={"sm"}>
-                      <Text size={"sm"} fw={500}>
-                        {person_name}
-                      </Text>
+                      <Flex>
+                        <Text size={"sm"} fw={500}>
+                          {person_name}
+                        </Text>
+                        <ActionIcon
+                          onClick={() => {
+                            setEditSegmentName(person_name);
+                            setShowEditSegmentNameModal(true);
+                            setSelectedSegmentId(id);
+                          }}
+                        >
+                          <IconEdit size={"0.8rem"} />
+                        </ActionIcon>
+                      </Flex>
                       {sub_segments && sub_segments.length > 0 && (
                         <Badge
                           tt={"initial"}
@@ -649,6 +675,53 @@ export default function SegmentV2() {
     });
   }
 
+  const patchEditSegmentName = async (showLoader: boolean) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/${selectedSegmentId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_title: editSegmentName,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        setShowEditSegmentNameModal(false);
+        getAllSegments(true);
+      });
+  };
+
+  const transferSegment = async (showLoader: boolean) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/transfer_segment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_id: selectedSegmentId,
+        new_client_sdr_id: selectedSdrId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        getAllSegments(true);
+        setShowTransferSegmentModal(false);
+      });
+  };
+
   const connectCampaignToSegment = async (showLoader: boolean) => {
     if (showLoader) {
       setLoading(true);
@@ -702,8 +775,21 @@ export default function SegmentV2() {
       });
   };
 
+  const getAllSDRs = async () => {
+    fetch(`${API_URL}/client/sdrs`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setAllSDRs(data.data);
+      });
+  };
+
   const getAllSegments = async (showLoader: boolean) => {
-    console.log("dddddddddddddddddd");
     if (showLoader) {
       setLoading(true);
     }
@@ -781,11 +867,86 @@ export default function SegmentV2() {
   };
 
   useEffect(() => {
+    getAllSDRs();
     getAllSegments(true);
   }, [false, showAllSegments]);
 
   return (
     <Paper>
+      {/* Edit Segment Name Modal */}
+      <Modal
+        opened={showEditSegmentNameModal}
+        onClose={() => {
+          setShowEditSegmentNameModal(false);
+          getAllSegments(true);
+        }}
+        size="sm"
+        padding="md"
+        title="Edit Segment Name"
+      >
+        <TextInput
+          label="Segment Name"
+          placeholder="Enter Segment Name"
+          required
+          mb={"sm"}
+          defaultValue={editSegmentName}
+          onChange={(e) => setEditSegmentName(e.target.value)}
+        />
+        <Button
+          fullWidth
+          size="xs"
+          radius={"md"}
+          mt={"md"}
+          disabled={!editSegmentName}
+          onClick={() => {
+            patchEditSegmentName(true);
+          }}
+        >
+          Edit Segment Name
+        </Button>
+      </Modal>
+      {/* Transfer Segments Modal */}
+      <Modal
+        opened={showTransferSegmentModal}
+        onClose={() => {
+          setShowTransferSegmentModal(false);
+          getAllSegments(true);
+        }}
+        size="sm"
+        padding="md"
+        title="Transfer to Teammate"
+      >
+        <Text color="gray" size="sm">
+          Transfer all unused prospects from this segment to a teammate. After,
+          the specified teammate will be able to view and manage the segment.
+        </Text>
+        <Select
+          withinPortal
+          label="Select Teammate"
+          mt={"md"}
+          data={sdrs?.map((x) => {
+            console.log(x);
+            return {
+              label: x.sdr_name,
+              value: x.id,
+            };
+          })}
+          onChange={(v: any) => setSelectedSdrId(v)}
+        ></Select>
+        <Button
+          fullWidth
+          size="xs"
+          radius={"md"}
+          mt={"md"}
+          disabled={!selectedSdrId || !selectedSegmentId}
+          onClick={() => {
+            transferSegment(true);
+          }}
+        >
+          Transfer to Teammate
+        </Button>
+      </Modal>
+
       {/* View Prospects Modal */}
       <Modal
         opened={showViewProspectsModal}

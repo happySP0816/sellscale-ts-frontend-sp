@@ -64,6 +64,7 @@ import SellscaleChat from './chat/sellscaleChat';
 import AutoSpitModal from '@modals/SegmentV2/AutoSpitModal';
 import SplitSegmentModal from '@modals/SegmentV2/SplitSegmentModal';
 import SegmentEditPrefilterModal from '@modals/SegmentV2/SegmentEditPrefilterModal';
+import ClearSegmentModal from '@modals/SegmentV2/ClearSegmentModal';
 import DeleteSegmentModal from '@modals/SegmentV2/DeleteSegmentModal';
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
@@ -230,6 +231,7 @@ export default function App() {
               autosplitsegment: AutoSpitModal,
               splitSegment: SplitSegmentModal,
               segmentprefilter: SegmentEditPrefilterModal,
+              clearsegment: ClearSegmentModal,
               deletesegment: DeleteSegmentModal,
             }}
             modalProps={{

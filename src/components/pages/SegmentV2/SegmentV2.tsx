@@ -312,7 +312,42 @@ export default function SegmentV2() {
                   </Menu.Item>
                   <Menu.Item
                     color="red"
-                    onClick={() => clearSegmentProspecst(true, id)}
+                    onClick={() =>
+                      openContextModal({
+                        modal: "clearsegment",
+                        title: (
+                          <Group position="apart">
+                            <div>
+                              <Title
+                                order={2}
+                                sx={{
+                                  display: "flex",
+                                  gap: "8px",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <IconTrash color="red" />
+                                Clear Segment
+                              </Title>
+                            </div>
+                          </Group>
+                        ),
+                        styles: (theme) => ({
+                          title: {
+                            width: "100%",
+                          },
+                          header: {
+                            margin: 0,
+                          },
+                        }),
+                        innerProps: {
+                          showLoader: true,
+                          segmentId: id,
+                          num_prospected: num_prospected,
+                          clearSegmentProspects: clearSegmentProspects,
+                        },
+                      })
+                    }
                   >
                     <IconBackspace size={"0.9rem"} />
                     Clear Prospects
@@ -657,31 +692,6 @@ export default function SegmentV2() {
       });
   };
 
-  const clearSegmentProspecst = async (
-    showLoader: boolean,
-    segmentId: string
-  ) => {
-    if (showLoader) {
-      setLoading(true);
-    }
-    fetch(`${API_URL}/segment/wipe_segment`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userToken}`,
-      },
-      body: JSON.stringify({
-        segment_id: segmentId,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {})
-      .finally(() => {
-        setLoading(false);
-        getAllSegments(true);
-      });
-  };
-
   const getAllSegments = async (showLoader: boolean) => {
     console.log("dddddddddddddddddd");
     if (showLoader) {
@@ -732,6 +742,31 @@ export default function SegmentV2() {
       })
       .finally(() => {
         setLoading(false);
+      });
+  };
+
+  const clearSegmentProspects = async (
+    showLoader: boolean,
+    segmentId: string
+  ) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/wipe_segment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_id: segmentId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        getAllSegments(true);
       });
   };
 

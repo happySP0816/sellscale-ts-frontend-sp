@@ -306,6 +306,8 @@ export default function SegmentV2() {
                         innerProps: {
                           showLoader: true,
                           segmentId: id,
+                          getAllSegments: getAllSegments,
+                          num_prospected: num_prospected,
                         },
                       })
                     }
@@ -620,6 +622,28 @@ export default function SegmentV2() {
       })
       .finally(() => {
         setLoading(false);
+      });
+  };
+
+  const clearSegmentProspecst = async (showLoader: boolean, segmentId: string) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/wipe_segment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_id: segmentId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        getAllSegments(true);
       });
   };
 

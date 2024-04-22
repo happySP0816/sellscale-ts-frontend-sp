@@ -8,37 +8,25 @@ import { useRecoilValue } from 'recoil';
 interface DeleteSegment extends Record<string, unknown> {
   showLoader: boolean;
   segmentId: string;
+  getAllSegments: (showLoading: boolean) => void;
+  num_prospected: number;
 }
 
 export default function ClearSegmentModal({ innerProps }: ContextModalProps<DeleteSegment>) {
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState(false);
 
-  const clearSegmentProspecst = async (showLoader: boolean, segmentId: string) => {
-    if (showLoader) {
-      setLoading(true);
-    }
-    fetch(`${API_URL}/segment/wipe_segment`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userToken}`,
-      },
-      body: JSON.stringify({
-        segment_id: segmentId,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {})
-      .finally(() => {
-        setLoading(false);
-      });
+  const clearSegment = () => {
+    setLoading(true);
+    innerProps.getAllSegments(true);
+    setLoading(false);
+    closeAllModals();
   };
 
   return (
     <>
       <Text color='gray' fw={500} size={'sm'} sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-        Are you sure you want to clear <span style={{ fontWeight: 700 }}>{'115 prospects'}</span>from this segment?
+        Are you sure you want to clear <span style={{ fontWeight: 700 }}>{innerProps.num_prospected} prospects</span>from this segment?
       </Text>
       <Flex gap={'md'} mt={'lg'}>
         <Button fullWidth size='md' radius={'md'} variant='outline' color='gray' onClick={() => closeAllModals()}>
@@ -48,9 +36,11 @@ export default function ClearSegmentModal({ innerProps }: ContextModalProps<Dele
           fullWidth
           size='md'
           color='red'
+          loading={loading}
           radius={'md'}
           onClick={() => {
-            clearSegmentProspecst(innerProps.showLoader, innerProps.segmentId);
+            // clearSegmentProspecst(innerProps.showLoader, innerProps.segmentId);
+            clearSegment();
           }}
         >
           Clear Segment

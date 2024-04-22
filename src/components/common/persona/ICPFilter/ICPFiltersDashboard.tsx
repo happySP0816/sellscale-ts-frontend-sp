@@ -414,9 +414,9 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
 
     filteredProspects = filteredProspects.filter((prospect) => {
       return (
-        prospect.full_name.includes(globalSearch) ||
-        prospect.title.includes(globalSearch) ||
-        prospect.company.includes(globalSearch)
+        prospect.full_name?.includes(globalSearch) ||
+        prospect.title?.includes(globalSearch) ||
+        prospect.company?.includes(globalSearch)
       );
     });
 

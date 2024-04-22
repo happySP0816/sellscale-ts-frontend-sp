@@ -73,6 +73,7 @@ export default function SegmentV2() {
   );
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
+  const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
 
   const [arrow, setArrow] = useState(false);
   const [data, setData] = useState([]);
@@ -217,7 +218,12 @@ export default function SegmentV2() {
                     <IconUsersPlus size={"0.9rem"} />
                     Add Prospects
                   </Menu.Item>
-                  <Menu.Item>
+                  <Menu.Item
+                    onClick={() => {
+                      setShowViewProspectsModal(true);
+                      setSelectedSegmentId(id);
+                    }}
+                  >
                     <IconUsers size={"0.9rem"} />
                     View Prospects
                   </Menu.Item>
@@ -780,6 +786,25 @@ export default function SegmentV2() {
 
   return (
     <Paper>
+      {/* View Prospects Modal */}
+      <Modal
+        opened={showViewProspectsModal}
+        onClose={() => {
+          setShowViewProspectsModal(false);
+          getAllSegments(true);
+        }}
+        size="1200px"
+        h={"500px"}
+        padding="md"
+        title="View Prospects"
+      >
+        <iframe
+          src={`https://sellscale.retool.com/embedded/public/639c4389-18d5-42a5-ad68-e84fd643b5ee#authToken=${userToken}&segmentId=${selectedSegmentId}`}
+          width="100%"
+          height="700px"
+          style={{ border: "none" }}
+        ></iframe>
+      </Modal>
       {/* Connect to Campaign Modal */}
       <Modal
         opened={showConnectCampaignModal}

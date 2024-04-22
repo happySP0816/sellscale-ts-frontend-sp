@@ -17,6 +17,7 @@ import Territories from "./Territories";
 import OngoingScrapes from "./OngoingScrapes";
 import ProspectUploadHistory from "@common/settings/History/ProspectUploadHistory";
 import Personas from "./Personas";
+import SegmentV2 from "@pages/SegmentV2/SegmentV2";
 
 const ContactOverview = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -27,7 +28,7 @@ const ContactOverview = () => {
       <Text fw={600} size={"30px"}>
         Contacts
       </Text>
-      <Tabs defaultValue="history" className="min-h-full flex flex-col">
+      <Tabs defaultValue="segments" className="min-h-full flex flex-col">
         <Tabs.List>
           {/* <Tabs.Tab value='overview'>
           <IconTable size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
@@ -45,20 +46,19 @@ const ContactOverview = () => {
           <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Prospect Scoring
         </Tabs.Tab> */}
-
-          <Tabs.Tab value="history">
-            <IconChartArcs
-              size="0.8rem"
-              style={{ marginRight: "8px", marginTop: "4px" }}
-            />
-            History
-          </Tabs.Tab>
           <Tabs.Tab value="segments">
             <IconChartArcs
               size="0.8rem"
               style={{ marginRight: "8px", marginTop: "4px" }}
             />
             Segments
+          </Tabs.Tab>{" "}
+          <Tabs.Tab value="history">
+            <IconChartArcs
+              size="0.8rem"
+              style={{ marginRight: "8px", marginTop: "4px" }}
+            />
+            History
           </Tabs.Tab>
           {/* <Tabs.Tab value="global_contacts">
             <IconList
@@ -74,13 +74,13 @@ const ContactOverview = () => {
             />
             Do Not Contact
           </Tabs.Tab> */}
-          <Tabs.Tab value="territories">
+          {/* <Tabs.Tab value="territories">
             <IconMap
               size="0.8rem"
               style={{ marginRight: "8px", marginTop: "4px" }}
             />
             Territories
-          </Tabs.Tab>
+          </Tabs.Tab> */}
           <Tabs.Tab value="ongoing_scrapes">
             <IconWallpaper
               size="0.8rem"
@@ -88,19 +88,16 @@ const ContactOverview = () => {
             />
             Ongoing Scrapes
           </Tabs.Tab>
-
-          <Tabs.Tab value="personas">
+          {/* <Tabs.Tab value="personas">
             <IconUser
               size="0.8rem"
               style={{ marginRight: "8px", marginTop: "4px" }}
             />
             Personas
-          </Tabs.Tab>
-
+          </Tabs.Tab> */}
           {/* <Tabs.Tab value='TAM_graph' style={{ marginRight: '8px' }}>
           TAM Graph
         </Tabs.Tab> */}
-
           {/* <Tabs.Tab value='overviewV2'>
           <IconBeta size='0.8rem' style={{ marginRight: '8px' }} />
           Overview (Beta)
@@ -159,7 +156,9 @@ const ContactOverview = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="segments" className="h-0 grow">
-          <Box pl="md" pr="md" mt="xs" pb="4px" w="100%" display="flex">
+          <SegmentV2 />
+          {/* OLD SEGMENTS PAGE - START */}
+          {/* <Box pl="md" pr="md" mt="xs" pb="4px" w="100%" display="flex">
             <Button
               ml="auto"
               onClick={() =>
@@ -182,7 +181,8 @@ const ContactOverview = () => {
               border: "none",
               borderRadius: "8px",
             }}
-          />
+          /> */}
+          {/* OLD SEGMENTS PAGE - END */}
         </Tabs.Panel>
       </Tabs>
     </Flex>

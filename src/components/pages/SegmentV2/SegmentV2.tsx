@@ -9,7 +9,6 @@ import {
   NumberInput,
   Paper,
   Progress,
-  Select,
   Text,
   useMantineTheme,
   Menu,
@@ -18,6 +17,7 @@ import {
   Title,
   Checkbox,
   Group,
+  Select,
 } from "@mantine/core";
 
 import {
@@ -74,6 +74,11 @@ export default function SegmentV2() {
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
+  const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(
+    false
+  );
+  const [sdrs, setAllSDRs] = useState([] as any[]);
+  const [selectedSdrId, setSelectedSdrId] = useState(null);
 
   const [arrow, setArrow] = useState(false);
   const [data, setData] = useState([]);
@@ -316,7 +321,13 @@ export default function SegmentV2() {
 
                   <Menu.Divider />
                   <Menu.Label color="red">Danger zone</Menu.Label>
-                  <Menu.Item color="red">
+                  <Menu.Item
+                    color="red"
+                    onClick={() => {
+                      setSelectedSegmentId(id);
+                      setShowTransferSegmentModal(true);
+                    }}
+                  >
                     <IconUsersMinus size={"0.9rem"} />
                     Transfer to Teammate
                   </Menu.Item>
@@ -649,6 +660,30 @@ export default function SegmentV2() {
     });
   }
 
+  const transferSegment = async (showLoader: boolean) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/transfer_segment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_id: selectedSegmentId,
+        new_client_sdr_id: selectedSdrId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        getAllSegments(true);
+        setShowTransferSegmentModal(false);
+      });
+  };
+
   const connectCampaignToSegment = async (showLoader: boolean) => {
     if (showLoader) {
       setLoading(true);
@@ -702,8 +737,21 @@ export default function SegmentV2() {
       });
   };
 
+  const getAllSDRs = async () => {
+    fetch(`${API_URL}/client/sdrs`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setAllSDRs(data.data);
+      });
+  };
+
   const getAllSegments = async (showLoader: boolean) => {
-    console.log("dddddddddddddddddd");
     if (showLoader) {
       setLoading(true);
     }
@@ -781,11 +829,54 @@ export default function SegmentV2() {
   };
 
   useEffect(() => {
+    getAllSDRs();
     getAllSegments(true);
   }, [false, showAllSegments]);
 
   return (
     <Paper>
+      {/* Transfer Segments Modal */}
+      <Modal
+        opened={showTransferSegmentModal}
+        onClose={() => {
+          setShowTransferSegmentModal(false);
+          getAllSegments(true);
+        }}
+        size="sm"
+        padding="md"
+        title="Transfer to Teammate"
+      >
+        <Text color="gray" size="sm">
+          Transfer all unused prospects from this segment to a teammate. After,
+          the specified teammate will be able to view and manage the segment.
+        </Text>
+        <Select
+          withinPortal
+          label="Select Teammate"
+          mt={"md"}
+          data={sdrs?.map((x) => {
+            console.log(x);
+            return {
+              label: x.sdr_name,
+              value: x.id,
+            };
+          })}
+          onChange={(v: any) => setSelectedSdrId(v)}
+        ></Select>
+        <Button
+          fullWidth
+          size="xs"
+          radius={"md"}
+          mt={"md"}
+          disabled={!selectedSdrId || !selectedSegmentId}
+          onClick={() => {
+            transferSegment(true);
+          }}
+        >
+          Transfer to Teammate
+        </Button>
+      </Modal>
+
       {/* View Prospects Modal */}
       <Modal
         opened={showViewProspectsModal}

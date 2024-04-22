@@ -79,6 +79,10 @@ export default function SegmentV2() {
   );
   const [sdrs, setAllSDRs] = useState([] as any[]);
   const [selectedSdrId, setSelectedSdrId] = useState(null);
+  const [showEditSegmentNameModal, setShowEditSegmentNameModal] = useState(
+    false
+  );
+  const [editSegmentName, setEditSegmentName] = useState("");
 
   const [arrow, setArrow] = useState(false);
   const [data, setData] = useState([]);
@@ -440,9 +444,20 @@ export default function SegmentV2() {
                   </Box>
                   <Box>
                     <Flex align={"center"} gap={"sm"}>
-                      <Text size={"sm"} fw={500}>
-                        {person_name}
-                      </Text>
+                      <Flex>
+                        <Text size={"sm"} fw={500}>
+                          {person_name}
+                        </Text>
+                        <ActionIcon
+                          onClick={() => {
+                            setEditSegmentName(person_name);
+                            setShowEditSegmentNameModal(true);
+                            setSelectedSegmentId(id);
+                          }}
+                        >
+                          <IconEdit size={"0.8rem"} />
+                        </ActionIcon>
+                      </Flex>
                       {sub_segments && sub_segments.length > 0 && (
                         <Badge
                           tt={"initial"}
@@ -660,6 +675,29 @@ export default function SegmentV2() {
     });
   }
 
+  const patchEditSegmentName = async (showLoader: boolean) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/${selectedSegmentId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_title: editSegmentName,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        setShowEditSegmentNameModal(false);
+        getAllSegments(true);
+      });
+  };
+
   const transferSegment = async (showLoader: boolean) => {
     if (showLoader) {
       setLoading(true);
@@ -835,6 +873,38 @@ export default function SegmentV2() {
 
   return (
     <Paper>
+      {/* Edit Segment Name Modal */}
+      <Modal
+        opened={showEditSegmentNameModal}
+        onClose={() => {
+          setShowEditSegmentNameModal(false);
+          getAllSegments(true);
+        }}
+        size="sm"
+        padding="md"
+        title="Edit Segment Name"
+      >
+        <TextInput
+          label="Segment Name"
+          placeholder="Enter Segment Name"
+          required
+          mb={"sm"}
+          defaultValue={editSegmentName}
+          onChange={(e) => setEditSegmentName(e.target.value)}
+        />
+        <Button
+          fullWidth
+          size="xs"
+          radius={"md"}
+          mt={"md"}
+          disabled={!editSegmentName}
+          onClick={() => {
+            patchEditSegmentName(true);
+          }}
+        >
+          Edit Segment Name
+        </Button>
+      </Modal>
       {/* Transfer Segments Modal */}
       <Modal
         opened={showTransferSegmentModal}

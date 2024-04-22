@@ -30,6 +30,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconChevronUp,
+  IconCopy,
   IconDisc,
   IconDotsVertical,
   IconEdit,
@@ -39,6 +40,7 @@ import {
   IconPlus,
   IconRefresh,
   IconSearch,
+  IconSwitch,
   IconTargetArrow,
   IconTrash,
   IconUsers,
@@ -235,6 +237,18 @@ export default function SegmentV2() {
                   >
                     <IconUsers size={"0.9rem"} />
                     View Prospects
+                  </Menu.Item>
+
+                  <Menu.Divider />
+                  <Menu.Label>Change</Menu.Label>
+
+                  <Menu.Item>
+                    <IconCopy size={"0.9rem"} />
+                    Duplicate Segment
+                  </Menu.Item>
+                  <Menu.Item>
+                    <IconSwitch size={"0.9rem"} />
+                    Move Segment
                   </Menu.Item>
 
                   <Menu.Divider />
@@ -1085,6 +1099,16 @@ export default function SegmentV2() {
           <Text size={"lg"} fw={600}>
             Segments
           </Text>
+          <Button
+            ml="auto"
+            mr="xs"
+            onClick={() =>
+              (window.location.href =
+                "/contacts/find?campaign_id=" + userData?.unassigned_persona_id)
+            }
+          >
+            Add Contacts
+          </Button>
           <Button onClick={() => setModalOpened(true)} leftIcon={<IconPlus />}>
             Create Segment
           </Button>

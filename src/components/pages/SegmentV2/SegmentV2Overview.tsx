@@ -38,14 +38,14 @@ export default function SegmentV2Overview(props: any) {
           <Text size={30} fw={500}>
             {totalSegments}
           </Text>
-          <Badge
+          {/* <Badge
             color="green"
             leftSection={
               <IconArrowUp size={"0.9rem"} style={{ marginTop: "4px" }} />
             }
           >
             8.5%
-          </Badge>
+          </Badge> */}
         </Flex>
       </Card>
       <Card padding="lg" radius="md" withBorder w={"100%"}>
@@ -68,14 +68,14 @@ export default function SegmentV2Overview(props: any) {
           <Text size={30} fw={500}>
             {totalContacted}
           </Text>
-          <Badge
+          {/* <Badge
             color="green"
             leftSection={
               <IconArrowUp size={"0.9rem"} style={{ marginTop: "4px" }} />
             }
           >
             8.5%
-          </Badge>
+          </Badge> */}
         </Flex>
       </Card>
       <Card padding="lg" radius="md" withBorder w={"100%"}>
@@ -98,14 +98,14 @@ export default function SegmentV2Overview(props: any) {
           <Text size={30} fw={500}>
             {totalProspected}
           </Text>
-          <Badge
+          {/* <Badge
             color="green"
             leftSection={
               <IconArrowUp size={"0.9rem"} style={{ marginTop: "4px" }} />
             }
           >
             8.5%
-          </Badge>
+          </Badge> */}
         </Flex>
       </Card>
     </Flex>

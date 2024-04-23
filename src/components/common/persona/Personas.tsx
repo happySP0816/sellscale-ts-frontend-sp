@@ -256,7 +256,7 @@ const Personas = () => {
           {persona.description}
         </Text>
       </td>
-      <td style={{ paddingTop: 12, paddingBottom: 12 }}>
+      {/* <td style={{ paddingTop: 12, paddingBottom: 12 }}>
         {persona.saved_apollo_query_id ? (
           <>
             <Text>
@@ -304,7 +304,7 @@ const Personas = () => {
             Set filters
           </Button>
         )}
-      </td>
+      </td> */}
       <td style={{ paddingTop: 12, paddingBottom: 12 }}>
         <>
           {persona.assets.length > 0 && (
@@ -333,7 +333,7 @@ const Personas = () => {
           </Button>
         </>
       </td>
-      <td style={{ paddingTop: 12, paddingBottom: 12 }}>
+      {/* <td style={{ paddingTop: 12, paddingBottom: 12 }}>
         <Text>
           {persona.stack_ranked_message_generation_configuration?.name.substring(
             0,
@@ -368,7 +368,7 @@ const Personas = () => {
             : "Add"}{" "}
           Voice
         </Button>
-      </td>
+      </td> */}
     </tr>
   ));
 
@@ -540,9 +540,9 @@ const Personas = () => {
           <thead>
             <tr>
               <th style={{ width: "40%" }}>Persona Name</th>
-              <th style={{ width: "20%" }}>Pre-Filters</th>
+              {/* <th style={{ width: "20%" }}>Pre-Filters</th> */}
               <th style={{ width: "20%" }}>AI Brain</th>
-              <th style={{ width: "20%" }}>Voice</th>
+              {/* <th style={{ width: "20%" }}>Voice</th> */}
             </tr>
           </thead>
           <tbody>{rows}</tbody>

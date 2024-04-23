@@ -6,12 +6,14 @@ import RejectionAnalysis from "@common/persona/RejectionAnalysis";
 import ScrapingReport from "@common/persona/ScrapingReport";
 import TAMGraphV2 from "@common/persona/TAMGraphV2";
 import SettingUsage from "@common/settings/SettingUsage";
-import { Tabs, rem } from "@mantine/core";
+import { Alert, Box, Image, Tabs, rem } from "@mantine/core";
 import MessagingAnalytics from "../AnalyticsPage/MessagingAnalytics";
 import AiActivityLogs from "../AnalyticsPage/AiActivityLogs";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
+import Personas from "@common/persona/Personas";
+import SequencePreviewMock from "./sequence_preview_mock.png";
 
 const AnalyticsPageNew = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -47,14 +49,18 @@ const AnalyticsPageNew = () => {
       >
         <Tabs.List>
           {/* <Tabs.Tab value='chatbot'>Chatbot</Tabs.Tab> */}
-          <Tabs.Tab value="usage">Usage</Tabs.Tab>
-          <Tabs.Tab value="tam">TAM</Tabs.Tab>
-          <Tabs.Tab value="scraping">Scraping</Tabs.Tab>
+          {/* <Tabs.Tab value="usage">Usage</Tabs.Tab> */}
+          <Tabs.Tab value="personas">Personas </Tabs.Tab>
+          <Tabs.Tab value="assets">Assets </Tabs.Tab>
+          <Tabs.Tab value="sequences">Sequences </Tabs.Tab>
+          <Tabs.Tab value="tam" ml="auto">
+            TAM
+          </Tabs.Tab>
           <Tabs.Tab value="rejection_analysis">Rejection Analysis</Tabs.Tab>
-          <Tabs.Tab value="demo-feedback">Demo Feedback</Tabs.Tab>
+          {/* <Tabs.Tab value="scraping">Scraping</Tabs.Tab> */}
+          {/* <Tabs.Tab value="demo-feedback">Demo Feedback</Tabs.Tab> */}
           {/* <Tabs.Tab value='message-analytics'>Messaging Analytics </Tabs.Tab> */}
           {/* <Tabs.Tab value='ai-activity-logs'>AI Activity Logs </Tabs.Tab> */}
-          <Tabs.Tab value="assets">Assets </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="chatbot" pt="xs">
           <iframe
@@ -88,6 +94,18 @@ const AnalyticsPageNew = () => {
         </Tabs.Panel>
         <Tabs.Panel value="ai-activity-logs" pt="xs">
           <AiActivityLogs />
+        </Tabs.Panel>
+        <Tabs.Panel value="personas" pt="xs">
+          <Personas />
+        </Tabs.Panel>
+        <Tabs.Panel value="sequences" pt="xs">
+          <Alert color="yellow" mt="sm">
+            <b>Coming soon! ⚠️</b> This is a mockup of the upcoming Sequence
+            library.
+          </Alert>
+          <Box mt="xs">
+            <Image src={SequencePreviewMock} w="800px" />
+          </Box>
         </Tabs.Panel>
         <Tabs.Panel value="assets" pt="xs">
           <iframe

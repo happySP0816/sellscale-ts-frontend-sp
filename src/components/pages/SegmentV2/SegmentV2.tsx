@@ -18,6 +18,7 @@ import {
   Checkbox,
   Group,
   Select,
+  Divider,
 } from "@mantine/core";
 
 import {
@@ -37,11 +38,14 @@ import {
   IconEye,
   IconFilter,
   IconLetterT,
+  IconPencil,
   IconPlus,
   IconRefresh,
+  IconRobot,
   IconSearch,
   IconSwitch,
   IconTargetArrow,
+  IconTemplate,
   IconTrash,
   IconUsers,
   IconWand,
@@ -55,6 +59,7 @@ import { IconUsersMinus, IconUsersPlus } from "@tabler/icons-react";
 import SegmentV2Overview from "./SegmentV2Overview";
 import { openContextModal } from "@mantine/modals";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
+import { showNotification } from "@mantine/notifications";
 
 export default function SegmentV2() {
   const theme = useMantineTheme();
@@ -85,6 +90,14 @@ export default function SegmentV2() {
     false
   );
   const [editSegmentName, setEditSegmentName] = useState("");
+
+  // methods = FROM_SCRATCH, FROM_TEMPLATE, FROM_AI
+  const [createCampaignMethods, setCreateCampaignMethods] = useState(
+    "FROM_SCRATCH"
+  );
+  const [connectCampaignView, setConnectCampaignView] = useState(
+    "SELECT_METHOD"
+  );
 
   const [arrow, setArrow] = useState(false);
   const [data, setData] = useState([]);
@@ -987,34 +1000,85 @@ export default function SegmentV2() {
         onClose={() => {
           setShowConnectCampaignModal(false);
           getAllSegments(true);
+          setConnectCampaignView("SELECT_METHOD");
         }}
         size="sm"
         padding="md"
         title="Connect to Campaign"
       >
-        <PersonaSelect
-          onChange={(v: any) => {
-            if (!v || v.length === 0) {
-              return;
-            }
-            setSelectedCampaignId(v[0]["archetype_id"]);
-          }}
-          disabled={false}
-          label="Select Campaign"
-          description="Select a campaign to connect to this segment"
-        />
-        <Button
-          fullWidth
-          size="xs"
-          radius={"md"}
-          mt={"md"}
-          disabled={!selectedCampaignId || !selectedSegmentId}
-          onClick={() => {
-            connectCampaignToSegment(true);
-          }}
-        >
-          Connect to Campaign
-        </Button>
+        {connectCampaignView === "SELECT_METHOD" ? (
+          <>
+            <Title>Select method</Title>
+            <Text color="gray" size="sm">
+              Choose how you want to connect this segment to a campaign
+            </Text>
+            <Divider mt="xs" />
+            <Button
+              color="violet"
+              mt="md"
+              onClick={() => {
+                setConnectCampaignView("SELECT_CAMPAIGN");
+              }}
+            >
+              <IconPencil size={"0.9rem"} style={{ marginRight: "4px" }} />
+              Create from Scratch
+            </Button>
+            <Button
+              mt="md"
+              color="teal"
+              onClick={() => {
+                showNotification({
+                  title: "Coming Soon",
+                  message: "This feature is coming soon!",
+                  color: "red",
+                });
+              }}
+            >
+              <IconRobot size={"0.9rem"} style={{ marginRight: "4px" }} />
+              Request SellScale
+            </Button>
+            <Button
+              mt="md"
+              color="orange"
+              onClick={() => {
+                showNotification({
+                  title: "Coming Soon",
+                  message: "This feature is coming soon!",
+                  color: "red",
+                });
+              }}
+            >
+              <IconTemplate size={"0.9rem"} style={{ marginRight: "4px" }} />
+              Duplicate Template
+            </Button>
+          </>
+        ) : (
+          <>
+            <PersonaSelect
+              onChange={(v: any) => {
+                if (!v || v.length === 0) {
+                  return;
+                }
+                setSelectedCampaignId(v[0]["archetype_id"]);
+              }}
+              disabled={false}
+              label="Select Campaign"
+              description="Select a campaign to connect to this segment"
+            />
+            <Button
+              fullWidth
+              size="xs"
+              radius={"md"}
+              mt={"md"}
+              disabled={!selectedCampaignId || !selectedSegmentId}
+              onClick={() => {
+                connectCampaignToSegment(true);
+              }}
+            >
+              Connect to Campaign
+            </Button>
+          </>
+        )}
       </Modal>
 
       {/* Set Pre Filters Modal */}

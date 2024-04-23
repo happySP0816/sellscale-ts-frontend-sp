@@ -1,8 +1,8 @@
-import React from 'react';
-import { useRecoilValue } from 'recoil';
-import { userDataState } from '@atoms/userAtoms';
-import CampaignReview from '@pages/CampaignReview/CampaignReviewLinkedin';
-import CampaignChannelPage from '@pages/CampaignChannelPage';
+import React from "react";
+import { useRecoilValue } from "recoil";
+import { userDataState } from "@atoms/userAtoms";
+import CampaignReview from "@pages/CampaignReview/CampaignReviewLinkedin";
+import CampaignChannelPage from "@pages/CampaignChannelPage";
 
 interface TaskHandlerReviewCampaignData {
   data: {
@@ -13,15 +13,18 @@ interface TaskHandlerReviewCampaignData {
   taskType?: string;
 }
 
-export const TaskHandlerReviewCampaign = (props: TaskHandlerReviewCampaignData) => {
-  const isEmail = props.taskType == 'EMAIL_CAMPAIGN_REVIEW';
+export const TaskHandlerReviewCampaign = (
+  props: TaskHandlerReviewCampaignData
+) => {
+  const hideEmail = props.taskType == "LINKEDIN_CAMPAIGN_REVIEW";
+  const hideLinkedIn = props.taskType == "EMAIL_CAMPAIGN_REVIEW";
 
   return (
     <CampaignChannelPage
-      cType={isEmail ? 'email' : 'linkedin'}
+      cType={hideEmail ? "email" : "linkedin"}
       campaignId={props.data.campaign_id}
-      hideEmail={!isEmail}
-      hideLinkedIn={isEmail}
+      hideEmail={hideEmail}
+      hideLinkedIn={hideLinkedIn}
       hideAssets
       hideHeader
     />

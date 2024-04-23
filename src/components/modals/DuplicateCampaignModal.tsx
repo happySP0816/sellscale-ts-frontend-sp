@@ -16,6 +16,7 @@ import { showNotification } from '@mantine/notifications';
 import { useQuery } from '@tanstack/react-query';
 import { clonePersona } from '@utils/requests/clonePersona';
 import { getClientArchetypes } from '@utils/requests/getClientArchetypes';
+import getPersonas from '@utils/requests/getPersonas';
 import { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { Archetype } from 'src';
@@ -23,7 +24,6 @@ import { Archetype } from 'src';
 export default function DuplicateCampaignModal({ context, id, innerProps }: ContextModalProps<{}>) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
-  const userData = useRecoilValue(userDataState);
 
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState('');
@@ -32,12 +32,11 @@ export default function DuplicateCampaignModal({ context, id, innerProps }: Cont
   const { data: archetypes, isFetching } = useQuery({
     queryKey: [`query-get-archetypes-for-dupe`],
     queryFn: async () => {
-      const result = await getClientArchetypes(userToken, userData?.client?.id);
+      const result = await getPersonas(userToken);
       return result.status === 'success'
         ? (result.data as Archetype[]).sort((a, b) => a.archetype.localeCompare(b.archetype))
         : [];
     },
-    enabled: !!userData?.client?.id,
   });
 
   const onDuplicateCampaign = async () => {

@@ -850,3 +850,15 @@ interface TriggerDisplayFramework {
 ///////////////////////////////////////////////////////////////////
 //                                                               //
 ///////////////////////////////////////////////////////////////////
+
+
+export type CRMStage = {
+  created_at: string;
+  field_mappings: Record<string, any>;
+  id: string;
+  modified_at: string;
+  name: string;
+  remote_data: any;
+  remote_id: string;
+  remote_was_deleted: boolean;
+}

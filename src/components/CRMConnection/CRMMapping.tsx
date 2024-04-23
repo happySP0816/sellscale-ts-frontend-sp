@@ -61,7 +61,7 @@ export default function CRMUserMapping() {
       <Flex align={"center"} justify={"space-between"}>
         <Flex direction={"column"} mb={"md"}>
           <Text fw={600} size={20}>
-            CRM User Mapping
+            User Mapping
           </Text>
         </Flex>
       </Flex>

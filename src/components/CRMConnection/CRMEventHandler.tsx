@@ -53,17 +53,16 @@ export default function CRMEventHandler() {
     }
   };
 
-  const patchEventHandler = async (stageMapping: { [key: string]: string }) => {
+  const patchEventHandler = async (eventMapping: { [key: string]: string }) => {
     const response = await fetch(`${API_URL}/merge_crm/sync/event`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${userToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ trigger: stageMapping }),
+      body: JSON.stringify({ event_mapping: eventMapping }),
     });
     const data = await response.json();
-    console.log("data", data);
 
     if (data.status === "success") {
       showNotification({
@@ -72,7 +71,7 @@ export default function CRMEventHandler() {
         color: "green",
       });
       syncLocalStorage(userToken, setUserData);
-      setExistingEvents(stageMapping);
+      setExistingEvents(eventMapping);
       getCRMStages();
     } else {
       showNotification({
@@ -155,9 +154,13 @@ export default function CRMEventHandler() {
             }
             onClick={() => {
               if (!sellscaleStage) {
+                setSellscaleStage(null);
+                setCrmStage(null);
                 patchEventHandler({});
                 return
               }
+              setSellscaleStage(sellscaleStage);
+              setCrmStage(crmStage);
               patchEventHandler({ [sellscaleStage as string]: crmStage as string });
             }}
           >

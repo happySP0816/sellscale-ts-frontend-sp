@@ -394,6 +394,8 @@ export interface Archetype {
   is_unassigned_contact_archetype: boolean;
   ctas: CTA[];
   contract_size: number;
+  emoji: string;
+  client_sdr_name?: string;
 }
 
 export interface PersonaOverview {

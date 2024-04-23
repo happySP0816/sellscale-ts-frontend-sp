@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Badge,
   Modal,
@@ -12,22 +12,22 @@ import {
   Card,
   Divider,
   Title,
-} from '@mantine/core';
-import { useRecoilValue } from 'recoil';
-import { currentProjectState } from '@atoms/personaAtoms';
-import { userTokenState } from '@atoms/userAtoms';
-import { API_URL } from '@constants/data';
+} from "@mantine/core";
+import { useRecoilValue } from "recoil";
+import { currentProjectState } from "@atoms/personaAtoms";
+import { userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
 
 const CtaAssets: React.FC<{ cta_id: number }> = ({ cta_id }) => {
   const [opened, setOpened] = useState(false);
   const [assets, setAssets] = useState([]);
-  const [selectedAsset, setSelectedAsset] = useState('');
+  const [selectedAsset, setSelectedAsset] = useState("");
   const [attachedAssets, setAttachedAssets] = useState([]);
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
 
   useEffect(() => {
-    console.log('cta_id', cta_id);
+    console.log("cta_id", cta_id);
     fetchAssets();
     fetchAttachedAssets();
   }, [cta_id]); // Re-run these functions if cta_id changes
@@ -35,10 +35,10 @@ const CtaAssets: React.FC<{ cta_id: number }> = ({ cta_id }) => {
   const fetchAssets = () => {
     const archetype_id = currentProject?.id;
     fetch(`${API_URL}/client/all_assets/${archetype_id}`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + userToken,
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + userToken,
       },
     })
       .then((response) => response.json())
@@ -50,17 +50,17 @@ const CtaAssets: React.FC<{ cta_id: number }> = ({ cta_id }) => {
         setSelectedAsset(transformedData[0]?.value);
         setAssets(transformedData);
       })
-      .catch((error) => console.error('Failed to fetch assets', error));
+      .catch((error) => console.error("Failed to fetch assets", error));
   };
 
   const fetchAttachedAssets = () => {
     fetch(
       `${API_URL}/message_generation/cta/get_all_asset_mapping?generated_message_cta_id=${cta_id}`,
       {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + userToken,
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + userToken,
         },
       }
     )
@@ -68,15 +68,17 @@ const CtaAssets: React.FC<{ cta_id: number }> = ({ cta_id }) => {
       .then((data) => {
         setAttachedAssets(data.mappings);
       })
-      .catch((error) => console.error('Failed to fetch attached assets', error));
+      .catch((error) =>
+        console.error("Failed to fetch attached assets", error)
+      );
   };
 
   const addAsset = () => {
     fetch(`${API_URL}/message_generation/cta/create_asset_mapping`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + userToken,
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + userToken,
       },
       body: JSON.stringify({
         generated_message_cta_id: cta_id,
@@ -87,18 +89,18 @@ const CtaAssets: React.FC<{ cta_id: number }> = ({ cta_id }) => {
         if (response.ok) {
           fetchAttachedAssets(); // Refresh the list of attached assets
         } else {
-          alert('Failed to add asset.');
+          alert("Failed to add asset.");
         }
       })
-      .catch((error) => console.error('Failed to add asset', error));
+      .catch((error) => console.error("Failed to add asset", error));
   };
 
   const removeAsset = (assetMappingId: number) => {
     fetch(`${API_URL}/message_generation/cta/delete_asset_mapping`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + userToken,
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + userToken,
       },
       body: JSON.stringify({
         cta_to_asset_mapping_id: assetMappingId,
@@ -108,10 +110,10 @@ const CtaAssets: React.FC<{ cta_id: number }> = ({ cta_id }) => {
         if (response.ok) {
           fetchAttachedAssets(); // Refresh the list of attached assets
         } else {
-          alert('Failed to remove asset.');
+          alert("Failed to remove asset.");
         }
       })
-      .catch((error) => console.error('Failed to remove asset', error));
+      .catch((error) => console.error("Failed to remove asset", error));
   };
 
   console.log(attachedAssets);
@@ -119,49 +121,57 @@ const CtaAssets: React.FC<{ cta_id: number }> = ({ cta_id }) => {
   return (
     <>
       <Badge
-        color='blue'
-        ml='xs'
-        variant='outline'
-        size='xs'
-        style={{ cursor: 'pointer' }}
+        color="blue"
+        ml="xs"
+        variant="outline"
+        size="xs"
+        style={{ cursor: "pointer" }}
         onClick={() => setOpened(true)}
       >
-        {attachedAssets.length} used assets
+        {attachedAssets?.length} used assets
       </Badge>
-      <Modal opened={opened} onClose={() => setOpened(false)} title='Select an asset'>
+      <Modal
+        opened={opened}
+        onClose={() => setOpened(false)}
+        title="Select an asset"
+      >
         <Select
           withinPortal
           data={assets}
-          placeholder='Select an asset'
-          onChange={(value: string | null) => setSelectedAsset(value || '')}
-          nothingFound='No options'
+          placeholder="Select an asset"
+          onChange={(value: string | null) => setSelectedAsset(value || "")}
+          nothingFound="No options"
         />
-        <Button onClick={addAsset} mt='xs'>
+        <Button onClick={addAsset} mt="xs">
           Add Asset to Step
         </Button>
 
-        <Divider mt='md' mb='xs' />
+        <Divider mt="md" mb="xs" />
 
-        <Title order={4} mb='xs'>
+        <Title order={4} mb="xs">
           Attached Assets
         </Title>
 
-        {attachedAssets.length === 0 && (
-          <Text color='gray' mt='xs'>
+        {attachedAssets?.length === 0 && (
+          <Text color="gray" mt="xs">
             No assets attached to this step.
           </Text>
         )}
 
-        <Group spacing='xs' mt='xs'>
-          {attachedAssets.map((asset: any) => (
-            <Card key={asset.mapping_id} withBorder w='100%'>
+        <Group spacing="xs" mt="xs">
+          {attachedAssets?.map((asset: any) => (
+            <Card key={asset.mapping_id} withBorder w="100%">
               <Flex>
-                <CloseButton mr='xs' mt='xs' onClick={() => removeAsset(asset.mapping_id)} />
+                <CloseButton
+                  mr="xs"
+                  mt="xs"
+                  onClick={() => removeAsset(asset.mapping_id)}
+                />
                 <Box>
                   <Text>{asset.asset_key}</Text>
-                  <Text fz='xs' color='gray'>
+                  <Text fz="xs" color="gray">
                     {asset.asset_value.substring(0, 50)}
-                    {asset.asset_value.length > 50 ? '...' : ''}
+                    {asset.asset_value.length > 50 ? "..." : ""}
                   </Text>
                 </Box>
               </Flex>

@@ -176,9 +176,9 @@ const CRMConnectionPage: React.FC = () => {
                   "Connect to your CRM to SellScale"
                 )}
               </Text>
-              <Text color="gray" size="sm">
-                Connected by: {integration?.end_user_email_address}
-              </Text>
+              {/* <Text color="gray" size="sm">
+                Integration POC: {integration?.end_user_email_address}
+              </Text> */}
             </Box>
           </Flex>
           <Button

@@ -31,7 +31,7 @@ export default function CRMEventHandler() {
     { value: "DEMO", label: "Demo Set" },
   ];
   const [crmStages, setCRMStages] = useState<CRMStage[]>([]);
-  const [existingTriggers, setExistingTriggers] = useState<{
+  const [existingEvents, setExistingEvents] = useState<{
     [key: string]: string | null;
   }>({});
   const [sellscaleStage, setSellscaleStage] = useState<string | null>();
@@ -48,14 +48,14 @@ export default function CRMEventHandler() {
 
     if (data.status === "success") {
       setCRMStages(data.data.stages);
-      setExistingTriggers(data.data.triggers);
+      setExistingEvents(data.data.triggers);
       setSellscaleStage(Object.keys(data.data.triggers)[0] as string || null);
       setCrmStage(Object.values(data.data.triggers)[0] as string || null);
     }
   };
 
-  const patchSyncTrigger = async (stageMapping: { [key: string]: string }) => {
-    const response = await fetch(`${API_URL}/merge_crm/sync/trigger`, {
+  const patchEventHandler = async (stageMapping: { [key: string]: string }) => {
+    const response = await fetch(`${API_URL}/merge_crm/sync/event`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${userToken}`,
@@ -69,16 +69,16 @@ export default function CRMEventHandler() {
     if (data.status === "success") {
       showNotification({
         title: "Success",
-        message: "Sync triggers updated",
+        message: "Automatic sync condition has been saved",
         color: "green",
       });
       syncLocalStorage(userToken, setUserData);
-      setExistingTriggers(stageMapping);
+      setExistingEvents(stageMapping);
       getCRMStages();
     } else {
       showNotification({
         title: "Error",
-        message: "Failed to update sync triggers",
+        message: "Failed to update",
         color: "red",
       });
     }
@@ -147,19 +147,19 @@ export default function CRMEventHandler() {
             disabled={
               sellscaleStage
                 ? crmStage
-                  ? JSON.stringify(existingTriggers) ===
+                  ? JSON.stringify(existingEvents) ===
                     JSON.stringify({ [sellscaleStage]: crmStage })
                   : true
                 : crmStage !== null &&
-                  (JSON.stringify(existingTriggers) === JSON.stringify({}) ||
-                    existingTriggers === null)
+                  (JSON.stringify(existingEvents) === JSON.stringify({}) ||
+                    existingEvents === null)
             }
             onClick={() => {
               if (!sellscaleStage) {
-                patchSyncTrigger({});
+                patchEventHandler({});
                 return
               }
-              patchSyncTrigger({ [sellscaleStage as string]: crmStage as string });
+              patchEventHandler({ [sellscaleStage as string]: crmStage as string });
             }}
           >
             Save

@@ -1,6 +1,6 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { syncLocalStorage } from "@auth/core";
-// import { API_URL } from "@constants/data";
+import { API_URL } from "@constants/data";
 import {
   Button,
   Box,
@@ -19,7 +19,6 @@ import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { CRMStage } from "src";
 
-const API_URL = "http://127.0.0.1:5000";
 
 export default function CRMEventHandler() {
   const userToken = useRecoilValue(userTokenState);

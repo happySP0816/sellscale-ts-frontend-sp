@@ -90,6 +90,8 @@ export default function SegmentV2() {
     false
   );
   const [editSegmentName, setEditSegmentName] = useState("");
+  const [showBatchModal, setShowBatchModal] = useState(false);
+  const [createBatchNumber, setCreateBatchNumber] = useState(2);
 
   // methods = FROM_SCRATCH, FROM_TEMPLATE, FROM_AI
   const [createCampaignMethods, setCreateCampaignMethods] = useState(
@@ -255,9 +257,22 @@ export default function SegmentV2() {
                   <Menu.Divider />
                   <Menu.Label>Change</Menu.Label>
 
-                  <Menu.Item>
+                  <Menu.Item
+                    onClick={() => {
+                      duplicateSegment(id, true);
+                    }}
+                  >
                     <IconCopy size={"0.9rem"} />
                     Duplicate Segment
+                  </Menu.Item>
+                  <Menu.Item
+                    onClick={() => {
+                      setSelectedSegmentId(id);
+                      setShowBatchModal(true);
+                    }}
+                  >
+                    <IconCopy size={"0.9rem"} />
+                    Create Batches
                   </Menu.Item>
                   <Menu.Item>
                     <IconSwitch size={"0.9rem"} />
@@ -725,6 +740,30 @@ export default function SegmentV2() {
       });
   };
 
+  const createNSubsegments = async (showLoader: boolean) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/create_n_subsegments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_id: selectedSegmentId,
+        num_batches: createBatchNumber,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        setShowBatchModal(false);
+        getAllSegments(true);
+      });
+  };
+
   const transferSegment = async (showLoader: boolean) => {
     if (showLoader) {
       setLoading(true);
@@ -868,6 +907,28 @@ export default function SegmentV2() {
       });
   };
 
+  const duplicateSegment = async (segmentId: number, showLoader: boolean) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/duplicate_segment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_id: segmentId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        getAllSegments(true);
+      });
+  };
+
   const clearSegmentProspects = async (
     showLoader: boolean,
     segmentId: string
@@ -952,7 +1013,6 @@ export default function SegmentV2() {
           label="Select Teammate"
           mt={"md"}
           data={sdrs?.map((x) => {
-            console.log(x);
             return {
               label: x.sdr_name,
               value: x.id,
@@ -1154,6 +1214,51 @@ export default function SegmentV2() {
             }}
           >
             Create New Segment
+          </Button>
+        </Flex>
+      </Modal>
+
+      {/* Create Batch Modal */}
+      <Modal
+        onClose={() => setShowBatchModal(false)}
+        opened={showBatchModal}
+        size="sm"
+      >
+        <Title order={4}>Create Batches</Title>
+        <Text size={"sm"} color="gray" fw={500} mt={"sm"} mb={"md"}>
+          Equally split the unused prospects in the segment into N batches as
+          child segments.
+        </Text>
+        <NumberInput
+          label="Number of Batches (min: 2, max: 10)"
+          placeholder="Enter Number of Batches"
+          required
+          mb={"sm"}
+          max={10}
+          defaultValue={createBatchNumber}
+          onChange={(value: number) => setCreateBatchNumber(value)}
+        />
+        <Flex gap={"md"} mt="xl">
+          <Button
+            fullWidth
+            size="xs"
+            radius={"md"}
+            variant="outline"
+            color="gray"
+            onClick={() => setShowBatchModal(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            fullWidth
+            size="xs"
+            radius={"md"}
+            onClick={() => {
+              createNSubsegments(true);
+              setShowBatchModal(false);
+            }}
+          >
+            Create New Batch
           </Button>
         </Flex>
       </Modal>

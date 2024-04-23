@@ -354,7 +354,9 @@ export default function PersonaCampaigns() {
                     openContextModal({
                       modal: 'duplicateCampaign',
                       title: <Title order={3}>Duplicate Campaign</Title>,
-                      innerProps: {},
+                      innerProps: {
+                        fetchAllCampaigns: fetchCampaignPersonas,
+                      },
                     });
                   }}
                 >

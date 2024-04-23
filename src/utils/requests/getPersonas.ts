@@ -22,6 +22,26 @@ export default async function getPersonas(
 }
 
 /**
+ * Get all personas for a user
+ * @param userToken
+ * @returns - MsgResponse
+ */
+export async function getPersonasForEntireClient(
+  userToken: string
+): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/client/archetype/get_archetypes_for_entire_client`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  return await processResponse(response, "archetypes");
+}
+
+/**
  * Get persona from an SDR
  * @param userToken
  * @returns - MsgResponse

@@ -1,4 +1,4 @@
-import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import {
   Button,
   Text,
@@ -10,31 +10,48 @@ import {
   Group,
   TextInput,
   Select,
-} from '@mantine/core';
-import { ContextModalProps } from '@mantine/modals';
-import { showNotification } from '@mantine/notifications';
-import { useQuery } from '@tanstack/react-query';
-import { clonePersona } from '@utils/requests/clonePersona';
-import { getClientArchetypes } from '@utils/requests/getClientArchetypes';
-import getPersonas from '@utils/requests/getPersonas';
-import { useState } from 'react';
-import { useRecoilValue } from 'recoil';
-import { Archetype } from 'src';
+  SelectProps,
+  LoadingOverlay,
+} from "@mantine/core";
+import { ContextModalProps } from "@mantine/modals";
+import { showNotification } from "@mantine/notifications";
+import {
+  IconAlignJustified,
+  IconAlignLeft,
+  IconAlignRight,
+} from "@tabler/icons";
+import { useQuery } from "@tanstack/react-query";
+import { clonePersona } from "@utils/requests/clonePersona";
+import { getClientArchetypes } from "@utils/requests/getClientArchetypes";
+import getPersonas, {
+  getPersonasForEntireClient,
+} from "@utils/requests/getPersonas";
+import { useState } from "react";
+import { useRecoilValue } from "recoil";
+import { Archetype } from "src";
 
-export default function DuplicateCampaignModal({ context, id, innerProps }: ContextModalProps<{}>) {
+export default function DuplicateCampaignModal({
+  context,
+  id,
+  innerProps,
+}: ContextModalProps<{
+  fetchAllCampaigns: () => void;
+}>) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
 
   const [loading, setLoading] = useState(false);
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [archetypeId, setArchetypeId] = useState<number>();
 
   const { data: archetypes, isFetching } = useQuery({
     queryKey: [`query-get-archetypes-for-dupe`],
     queryFn: async () => {
-      const result = await getPersonas(userToken);
-      return result.status === 'success'
-        ? (result.data as Archetype[]).sort((a, b) => a.archetype.localeCompare(b.archetype))
+      const result = await getPersonasForEntireClient(userToken);
+      return result.status === "success"
+        ? (result.data as Archetype[]).sort((a, b) =>
+            a.archetype.localeCompare(b.archetype)
+          )
         : [];
     },
   });
@@ -49,9 +66,9 @@ export default function DuplicateCampaignModal({ context, id, innerProps }: Cont
       archetype.id,
       {
         personaName: name.trim() || archetype.archetype,
-        personaFitReason: '',
+        personaFitReason: "",
         personaICPMatchingInstructions: archetype.icp_matching_prompt,
-        personaContactObjective: '',
+        personaContactObjective: "",
       },
       {
         ctas: true,
@@ -65,60 +82,59 @@ export default function DuplicateCampaignModal({ context, id, innerProps }: Cont
     );
     setLoading(false);
 
-    if (response.status === 'success') {
+    if (response.status === "success") {
       showNotification({
-        title: 'Campaign Created',
-        message: 'Successfully duplicated campaign',
+        title: "Campaign Created",
+        message: "Successfully duplicated campaign",
         color: theme.colors.green[6],
       });
       context.closeAll();
+      innerProps.fetchAllCampaigns();
     }
   };
 
   return (
     <Paper
       p={0}
-      h={'20vh'}
+      h={"20vh"}
       style={{
-        position: 'relative',
+        position: "relative",
       }}
     >
-      <Stack spacing={10} justify='space-between' h='100%'>
-        <Group noWrap grow>
-          <TextInput
-            label='Name'
-            placeholder='Campaign Name'
-            value={name}
-            onChange={(e) => setName(e.currentTarget.value)}
-          />
-          <Select
-            searchable
-            withinPortal
-            label='Campaign to Duplicate'
-            placeholder='Select Campaign'
-            data={
-              archetypes
-                ?.filter((a) => !a.is_unassigned_contact_archetype)
-                .map((a) => ({
-                  value: `${a.id}`,
-                  label: a.archetype,
-                })) ?? []
-            }
-            onChange={(value) => {
-              if (!value) return;
-              setArchetypeId(parseInt(value));
-            }}
-          />
-        </Group>
-        <Button
-          loading={isFetching || loading}
-          disabled={!archetypeId}
-          fullWidth
-          onClick={onDuplicateCampaign}
-        >
-          Duplicate Campaign
-        </Button>
-      </Stack>
+      <TextInput
+        label="Name"
+        placeholder="Campaign Name"
+        value={name}
+        onChange={(e) => setName(e.currentTarget.value)}
+      />
+      <Select
+        mt="md"
+        searchable
+        withinPortal
+        label="Campaign to Duplicate"
+        placeholder="Select Campaign"
+        data={
+          archetypes
+            ?.filter((a) => !a.is_unassigned_contact_archetype)
+            .map((a) => ({
+              value: `${a.id}`,
+              label: a.client_sdr_name + " - " + a.emoji + " " + a.archetype,
+            })) ?? []
+        }
+        onChange={(value) => {
+          if (!value) return;
+          setArchetypeId(parseInt(value));
+        }}
+      />
+      <Button
+        mt="md"
+        loading={isFetching || loading}
+        disabled={!archetypeId}
+        fullWidth
+        onClick={onDuplicateCampaign}
+      >
+        Duplicate Campaign
+      </Button>
     </Paper>
   );
 }

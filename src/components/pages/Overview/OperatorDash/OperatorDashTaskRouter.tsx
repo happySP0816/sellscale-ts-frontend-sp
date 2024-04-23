@@ -54,6 +54,11 @@ const TASK_ROUTER: any = {
     instruction: "Review the campaign then mark as complete",
     enabledCompleteButton: true,
   },
+  BOTH_CAMPAIGN_REVIEW: {
+    component: TaskHandlerReviewCampaign,
+    instruction: "Review the campaign then mark as complete",
+    enabledCompleteButton: true,
+  },
   SEGMENT_CREATION: {
     component: TaskHandlerSegmentCreation,
     instruction:

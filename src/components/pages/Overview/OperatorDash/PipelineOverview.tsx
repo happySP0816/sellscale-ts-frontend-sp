@@ -224,7 +224,13 @@ export default function PipelineOverview(props: PropsType) {
             </Flex>
             <Flex align={"end"} gap={"xs"}>
               <Text size={26} fw={600}>
-                {pipelineData.opportunities_created}
+                {pipelineData.opportunities_created ? (
+                  pipelineData.opportunities_created.toLocaleString()
+                ) : (
+                  <Text size={26} fw={600}>
+                    n/a
+                  </Text>
+                )}
               </Text>
               <Text fw={500} color="gray" mb={5}>
                 opportunities
@@ -273,7 +279,13 @@ export default function PipelineOverview(props: PropsType) {
             </Flex>
             <Flex align={"end"} gap={"xs"}>
               <Text size={26} fw={600}>
-                ${pipelineData.pipeline_generated?.toLocaleString()}
+                {pipelineData.pipeline_generated?.toLocaleString() ? (
+                  "$" + pipelineData.pipeline_generated?.toLocaleString()
+                ) : (
+                  <Text size={26} fw={600}>
+                    n/a
+                  </Text>
+                )}
               </Text>
               <Text fw={500} color="gray" mb={5}>
                 generated

@@ -2,6 +2,7 @@ import { ActionIcon, Avatar, Box, Button, Card, Collapse, Divider, Flex, NumberI
 import { useDisclosure } from '@mantine/hooks';
 import {
   IconBrandLinkedin,
+  IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
   IconChevronUp,
@@ -283,7 +284,7 @@ export function SequenceLibrary(props: any) {
 export function SequencePreview(props: any) {
   const [opened, setOpened] = useState(false);
   const [selectStep, setSelectStep] = useState<number | null>(null);
-  console.log('================', props.data);
+
   const handleToggle = (key: number) => {
     if (selectStep === key) {
       setOpened(!opened);
@@ -334,7 +335,7 @@ export function SequencePreview(props: any) {
                         handleToggle(index);
                       }}
                     >
-                      <IconChevronUp size={'0.9rem'} />
+                      {selectStep === index && opened ? <IconChevronUp size={'0.9rem'} /> : <IconChevronDown size={'0.9rem'} />}
                     </ActionIcon>
                   </Flex>
                 </Flex>
@@ -408,10 +409,10 @@ export default function Sequence() {
               Create Sequence
             </Button>
           </Flex>
-          <Text color='gray' size={'sm'} fw={500}>
+          <Text color='gray' size={'sm'} fw={500} mt={'sm'}>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean viverra risus sit amet neque mattis efficitur.
           </Text>
-          <Flex gap={'xl'} w={'100%'}>
+          <Flex gap={'xl'} w={'100%'} mt={'sm'}>
             <SequenceLibrary setData={setData} data={data} />
             <SequencePreview setData={setData} data={data} />
           </Flex>

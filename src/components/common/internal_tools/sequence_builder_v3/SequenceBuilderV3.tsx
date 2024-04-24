@@ -1,4 +1,4 @@
-import { userTokenState } from '@atoms/userAtoms';
+import { userTokenState } from "@atoms/userAtoms";
 import {
   Box,
   Button,
@@ -22,20 +22,23 @@ import {
   HoverCard,
   ScrollArea,
   Loader,
-} from '@mantine/core';
-import { modals } from '@mantine/modals';
-import { showNotification } from '@mantine/notifications';
-import AssetLibraryRetool from '@pages/AssetLibraryRetool';
-import { useQuery } from '@tanstack/react-query';
-import { addSequence, generateSequence } from '@utils/requests/generateSequence';
-import { getClientArchetypes } from '@utils/requests/getClientArchetypes';
-import { getClientSdrAccess } from '@utils/requests/getClientSdrAccess';
-import { getClients } from '@utils/requests/getClients';
-import _, { set } from 'lodash';
-import { useRef, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { useRecoilValue } from 'recoil';
-import { Archetype, Client } from 'src';
+} from "@mantine/core";
+import { modals } from "@mantine/modals";
+import { showNotification } from "@mantine/notifications";
+import AssetLibraryRetool from "@pages/AssetLibraryRetool";
+import { useQuery } from "@tanstack/react-query";
+import {
+  addSequence,
+  generateSequence,
+} from "@utils/requests/generateSequence";
+import { getClientArchetypes } from "@utils/requests/getClientArchetypes";
+import { getClientSdrAccess } from "@utils/requests/getClientSdrAccess";
+import { getClients } from "@utils/requests/getClients";
+import _, { set } from "lodash";
+import { useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { useRecoilValue } from "recoil";
+import { Archetype, Client } from "src";
 
 const EXAMPLE_COUNT = 1;
 
@@ -52,9 +55,9 @@ export default function SequenceBuilderV3() {
   const [clientId, setClientId] = useState<number | null>(null);
   const [archetypeId, setArchetypeId] = useState<number | null>(null);
   const [openedAssetLibrary, setOpenedAssetLibrary] = useState(false);
-  const [sequenceType, setSequenceType] = useState('EMAIL');
+  const [sequenceType, setSequenceType] = useState("EMAIL");
   const [numSteps, setNumSteps] = useState(3);
-  const [additionalPrompting, setAdditionalPrompting] = useState('');
+  const [additionalPrompting, setAdditionalPrompting] = useState("");
 
   const totalGenerated = useRef(0);
 
@@ -73,9 +76,12 @@ export default function SequenceBuilderV3() {
     setBigLoading(false);
 
     showNotification({
-      title: result.status === 'success' ? 'Success' : 'Error',
-      message: result.status === 'success' ? 'Added sequence to campaign' : 'Failed to add',
-      color: result.status === 'success' ? 'teal' : 'red',
+      title: result.status === "success" ? "Success" : "Error",
+      message:
+        result.status === "success"
+          ? "Added sequence to campaign"
+          : "Failed to add",
+      color: result.status === "success" ? "teal" : "red",
     });
   };
 
@@ -83,8 +89,10 @@ export default function SequenceBuilderV3() {
     queryKey: [`query-get-clients`],
     queryFn: async () => {
       const result = await getClients(userToken);
-      return result.status === 'success'
-        ? (result.data as Client[]).sort((a, b) => a.company.localeCompare(b.company))
+      return result.status === "success"
+        ? (result.data as Client[]).sort((a, b) =>
+            a.company.localeCompare(b.company)
+          )
         : [];
     },
   });
@@ -96,8 +104,10 @@ export default function SequenceBuilderV3() {
       // eslint-disable-next-line
       const [_key, { clientId }] = queryKey;
       const result = await getClientArchetypes(userToken, clientId);
-      return result.status === 'success'
-        ? (result.data as Archetype[]).sort((a, b) => a.archetype.localeCompare(b.archetype))
+      return result.status === "success"
+        ? (result.data as Archetype[]).sort((a, b) =>
+            a.archetype.localeCompare(b.archetype)
+          )
         : [];
     },
     enabled: !!clientId,
@@ -110,7 +120,7 @@ export default function SequenceBuilderV3() {
       // eslint-disable-next-line
       const [_key, { clientId }] = queryKey;
       const result = await getClientSdrAccess(userToken, clientId);
-      return result.status === 'success' ? result.data.token : null;
+      return result.status === "success" ? result.data.token : null;
     },
     enabled: !!clientId,
   });
@@ -118,24 +128,24 @@ export default function SequenceBuilderV3() {
   const [results, setResults] = useState<MessageResult[]>([]);
 
   return (
-    <Box p='lg'>
+    <Box p="lg">
       <LoadingOverlay visible={bigLoading} />
-      <Group align='start' grow noWrap>
-        <Paper maw='30vw' style={{ position: 'relative' }}>
+      <Group align="start" grow noWrap>
+        <Paper maw="30vw" style={{ position: "relative" }}>
           <LoadingOverlay visible={loading} />
-          <Stack h='90vh' p='lg'>
+          <Stack h="90vh" p="lg">
             <Title order={3}>Sequence Builder V3</Title>
             <Autocomplete
               disabled={clients === undefined}
               label={
-                <Group position='apart'>
+                <Group position="apart">
                   <Text>Client</Text>
                   {clients === undefined && isFetchingClients && (
-                    <Loader variant='dots' size='xs' />
+                    <Loader variant="dots" size="xs" />
                   )}
                 </Group>
               }
-              placeholder='Clients'
+              placeholder="Clients"
               data={clients?.map((client) => ({ value: client.company })) ?? []}
               onChange={(value) => {
                 const client = clients?.find((c) => c.company === value);
@@ -145,27 +155,29 @@ export default function SequenceBuilderV3() {
             <Autocomplete
               disabled={archetypes === undefined}
               label={
-                <Group position='apart'>
+                <Group position="apart">
                   <Text>Campaigns</Text>
                   {archetypes === undefined && isFetchingCampaigns && (
-                    <Loader variant='dots' size='xs' />
+                    <Loader variant="dots" size="xs" />
                   )}
                 </Group>
               }
-              placeholder='Campaigns'
+              placeholder="Campaigns"
               data={
                 archetypes?.map((archetype) => ({
                   value: archetype.archetype,
                 })) ?? []
               }
               onChange={(value) => {
-                const archetype = archetypes?.find((c) => c.archetype === value);
+                const archetype = archetypes?.find(
+                  (c) => c.archetype === value
+                );
                 setArchetypeId(archetype?.id ?? null);
               }}
             />
             <Button
               my={5}
-              variant='outline'
+              variant="outline"
               fullWidth
               onClick={() => {
                 setOpenedAssetLibrary(true);
@@ -178,23 +190,23 @@ export default function SequenceBuilderV3() {
 
             <Group grow noWrap>
               <Select
-                label='Sequence Type'
-                placeholder='Type'
+                label="Sequence Type"
+                placeholder="Type"
                 data={[
-                  { value: 'LINKEDIN-CTA', label: 'LinkedIn (CTAs)' },
-                  { value: 'LINKEDIN-TEMPLATE', label: 'LinkedIn (Templates)' },
-                  { value: 'EMAIL', label: 'Email' },
+                  { value: "LINKEDIN-CTA", label: "LinkedIn (CTAs)" },
+                  { value: "LINKEDIN-TEMPLATE", label: "LinkedIn (Templates)" },
+                  { value: "EMAIL", label: "Email" },
                 ]}
                 miw={200}
                 value={sequenceType}
                 onChange={(value) => {
                   setResults([]);
-                  setSequenceType(value ?? '');
+                  setSequenceType(value ?? "");
                 }}
               />
               <NumberInput
-                placeholder='X Steps'
-                label='# Steps'
+                placeholder="X Steps"
+                label="# Steps"
                 hideControls
                 value={numSteps}
                 onChange={(value) => setNumSteps(value || 0)}
@@ -202,18 +214,19 @@ export default function SequenceBuilderV3() {
             </Group>
 
             <Textarea
-              label='Additional Prompting'
-              placeholder='Extra prompt instructions'
+              label="Additional Prompting"
+              placeholder="Extra prompt instructions"
               value={additionalPrompting}
               onChange={(e) => setAdditionalPrompting(e.currentTarget.value)}
             />
 
             <Button
               my={5}
-              variant='filled'
+              variant="filled"
               fullWidth
               onClick={async () => {
-                if (!clientId || !archetypeId || !sequenceType || !numSteps) return;
+                if (!clientId || !archetypeId || !sequenceType || !numSteps)
+                  return;
 
                 setLoading(true);
 
@@ -228,25 +241,28 @@ export default function SequenceBuilderV3() {
                       additionalPrompting
                     )
                       .then((response) => {
-                        if (response.status === 'success') {
+                        if (response.status === "success") {
                           const data = response.data as MessageResult[];
                           setResults((prev) => [...prev, ...data]);
                         } else {
                           showNotification({
-                            title: 'Error',
+                            title: "Error",
                             message: response.message,
-                            color: 'red',
+                            color: "red",
                           });
                           setLoading(false);
                         }
 
                         totalGenerated.current += 1;
 
-                        if (totalGenerated.current === EXAMPLE_COUNT * numSteps) {
+                        if (
+                          totalGenerated.current ===
+                          EXAMPLE_COUNT * numSteps
+                        ) {
                           showNotification({
-                            title: 'Success',
-                            message: 'Successfully generated sequence',
-                            color: 'teal',
+                            title: "Success",
+                            message: "Successfully generated sequence",
+                            color: "teal",
                           });
                           setLoading(false);
                           totalGenerated.current = 0;
@@ -254,9 +270,9 @@ export default function SequenceBuilderV3() {
                       })
                       .catch((e) => {
                         showNotification({
-                          title: 'Error',
+                          title: "Error",
                           message: `Failed to generate sequence: ${e}`,
-                          color: 'red',
+                          color: "red",
                         });
                         setLoading(false);
                       });
@@ -268,22 +284,22 @@ export default function SequenceBuilderV3() {
             </Button>
           </Stack>
         </Paper>
-        <Box maw='60vw'>
-          <Stack h='90vh' p='lg'>
-            <Group position='apart' noWrap>
+        <Box maw="60vw">
+          <Stack h="90vh" p="lg">
+            <Group position="apart" noWrap>
               <Title order={3}>Generated Sequence</Title>
               <Button
-                radius='lg'
+                radius="lg"
                 onClick={async () => {
                   modals.openConfirmModal({
-                    title: 'Add to Sequence',
+                    title: "Add to Sequence",
                     children: (
-                      <Text size='sm'>
-                        Are you sure you want to add to the current sequence with the selected
-                        options?
+                      <Text size="sm">
+                        Are you sure you want to add to the current sequence
+                        with the selected options?
                       </Text>
                     ),
-                    labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                    labels: { confirm: "Confirm", cancel: "Cancel" },
                     onCancel: () => {},
                     onConfirm: async () => await onAddSequence(),
                   });
@@ -292,54 +308,56 @@ export default function SequenceBuilderV3() {
                 Add Sequence
               </Button>
             </Group>
-            {sequenceType !== 'LINKEDIN-TEMPLATE' && (
+            {sequenceType !== "LINKEDIN-TEMPLATE" && (
               <TitleGenerationSection
-                isCTAs={sequenceType === 'LINKEDIN-CTA'}
+                isCTAs={sequenceType === "LINKEDIN-CTA"}
                 results={results}
-                onClick={(text, assets, remove) => {
+                onClick={(text, assets, remove, uuid) => {
                   if (remove) {
                     setSelectedData((prev) => ({
                       ...prev,
-                      subject_lines: prev.subject_lines.filter((s) => s.text !== text),
-                    }));
-                  } else {
-                    setSelectedData((prev) => ({
-                      ...prev,
-                      subject_lines: [
-                        ...prev.subject_lines,
-                        {
-                          text,
-                          assets,
-                        },
-                      ],
+                      subject_lines: prev.subject_lines.filter(
+                        (s: any) => s.uuid !== uuid
+                      ),
                     }));
                   }
+                  setSelectedData((prev) => ({
+                    ...prev,
+                    subject_lines: [
+                      ...prev.subject_lines,
+                      {
+                        text,
+                        assets,
+                        uuid,
+                      },
+                    ],
+                  }));
                 }}
                 selectedData={selectedData}
               />
             )}
             <StepGenerationSection
-              isCTAs={sequenceType === 'LINKEDIN-CTA'}
+              isCTAs={sequenceType === "LINKEDIN-CTA"}
               results={results}
-              onClick={(step_num, text, assets, remove) => {
+              onClick={(step_num, text, assets, remove, uuid) => {
                 if (remove) {
                   setSelectedData((prev) => ({
                     ...prev,
-                    steps: prev.steps.filter((s) => s.text !== text),
-                  }));
-                } else {
-                  setSelectedData((prev) => ({
-                    ...prev,
-                    steps: [
-                      ...prev.steps,
-                      {
-                        step_num,
-                        text,
-                        assets,
-                      },
-                    ],
+                    steps: prev.steps.filter((s: any) => s.uuid !== uuid),
                   }));
                 }
+                setSelectedData((prev) => ({
+                  ...prev,
+                  steps: [
+                    ...prev.steps,
+                    {
+                      step_num,
+                      text,
+                      assets,
+                      uuid,
+                    },
+                  ],
+                }));
               }}
               selectedData={selectedData}
             />
@@ -351,10 +369,13 @@ export default function SequenceBuilderV3() {
         onClose={() => {
           setOpenedAssetLibrary(false);
         }}
-        title='Asset Library'
-        size='lg'
+        title="Asset Library"
+        size="lg"
       >
-        <AssetLibraryRetool authToken={sdrAccessToken} projectId={archetypeId ?? undefined} />
+        <AssetLibraryRetool
+          authToken={sdrAccessToken}
+          projectId={archetypeId ?? undefined}
+        />
       </Modal>
     </Box>
   );
@@ -363,7 +384,12 @@ export default function SequenceBuilderV3() {
 function TitleGenerationSection(props: {
   isCTAs: boolean;
   results: MessageResult[];
-  onClick: (text: string, assets: number[], remove: boolean) => void;
+  onClick: (
+    text: string,
+    assets: number[],
+    remove: boolean,
+    uuid: string
+  ) => void;
   selectedData: SelectedData;
 }) {
   const subjects = props.results
@@ -373,6 +399,7 @@ function TitleGenerationSection(props: {
         assets: m.asset_ids
           .map((id) => message.assets.find((a) => a.id == id))
           .filter((a) => a) as Asset[],
+        uuid: m.uuid,
       }))
     )
     .flat()
@@ -381,52 +408,59 @@ function TitleGenerationSection(props: {
   return (
     <Stack spacing={5}>
       <Title order={5}>
-        {props.isCTAs ? 'CTAs' : 'Subject Lines'} ({subjects.length})
+        {props.isCTAs ? "CTAs" : "Subject Lines"} ({subjects.length})
       </Title>
-      <Paper p='lg'>
+      <Paper p="lg">
         <ScrollArea h={200}>
           {subjects.map((subject, index) => (
             <Group key={index} py={5} noWrap>
-              <Textarea
-                w='100%'
-                m='auto'
-                autosize
-                onChange={(e) => {
-                  props.onClick(
-                    subject.subject,
-                    subject.assets.map((a) => a.id),
-                    true
-                  );
-                  setTimeout(() => {
+              <Box w="100%">
+                <Textarea
+                  w="100%"
+                  m="auto"
+                  autosize
+                  onChange={(e) => {
                     props.onClick(
                       e.currentTarget.value,
                       subject.assets.map((a) => a.id),
-                      false
+                      true,
+                      subject.uuid
                     );
-                  }, 1);
-                }}
-              >
-                {subject.subject}
-              </Textarea>
+                  }}
+                >
+                  {subject.subject}
+                </Textarea>
+                {/* uuid */}
+                <Text color="gray" size="xs">
+                  {subject.uuid}
+                </Text>
+              </Box>
               <Box>
                 <Button
                   w={200}
                   variant={
-                    props.selectedData.subject_lines.find((s) => s.text === subject.subject)
-                      ? 'filled'
-                      : 'outline'
+                    props.selectedData.subject_lines.find(
+                      (s: any) => s.uuid === subject.uuid
+                    )
+                      ? "filled"
+                      : "outline"
                   }
                   onClick={() => {
                     props.onClick(
                       subject.subject,
                       subject.assets.map((a) => a.id),
-                      !!props.selectedData.subject_lines.find((s) => s.text === subject.subject)
+                      !!props.selectedData.subject_lines.find(
+                        (s: any) => s.uuid === subject.uuid
+                      ),
+                      subject.uuid
                     );
                   }}
                 >
-                  {props.selectedData.subject_lines.find((s) => s.text === subject.subject)
-                    ? 'Selected'
-                    : 'Use'}
+                  {props.selectedData.subject_lines.find(
+                    (s: any) => s.uuid === subject.uuid
+                  )
+                    ? "Selected"
+                    : "Use"}
                 </Button>
               </Box>
             </Group>
@@ -445,6 +479,7 @@ interface MessageResult {
     subject: string;
     message: string;
     asset_ids: number[];
+    uuid: string;
   }[];
   step_num: number;
 }
@@ -464,17 +499,23 @@ interface SelectedData {
 function StepGenerationSection(props: {
   isCTAs: boolean;
   results: MessageResult[];
-  onClick: (step_num: number, text: string, assets: number[], remove: boolean) => void;
+  onClick: (
+    step_num: number,
+    text: string,
+    assets: number[],
+    remove: boolean,
+    uuid: string
+  ) => void;
   selectedData: SelectedData;
 }) {
   const steps = _.groupBy(props.results, (r) => r.step_num);
 
   return (
-    <Paper p='lg'>
-      <Tabs variant='pills' defaultValue={props.isCTAs ? 'step-2' : 'step-1'}>
+    <Paper p="lg">
+      <Tabs variant="pills" defaultValue={props.isCTAs ? "step-2" : "step-1"}>
         <Tabs.List>
           {Object.keys(steps)
-            .filter((step_num) => (props.isCTAs ? step_num !== '1' : true))
+            .filter((step_num) => (props.isCTAs ? step_num !== "1" : true))
             .map((step_num, index) => (
               <Tabs.Tab key={index} value={`step-${step_num}`}>
                 Step {step_num}
@@ -491,48 +532,64 @@ function StepGenerationSection(props: {
               {steps[step_num].map((message, index) => (
                 <Stack key={index}>
                   {message.result.map((msg, index) => (
-                    <Group key={index} spacing={10} align='start' noWrap>
+                    <Group key={index} spacing={10} align="start" noWrap>
                       <Stack p={10} w={400}>
                         <Button
                           w={200}
                           variant={
-                            props.selectedData.steps.find((s) => s.text === msg.message)
-                              ? 'filled'
-                              : 'outline'
+                            props.selectedData.steps.find(
+                              (s: any) => s.uuid === msg.uuid
+                            )
+                              ? "filled"
+                              : "outline"
                           }
                           onClick={() => {
                             props.onClick(
                               message.step_num,
                               msg.message,
                               msg.asset_ids,
-                              !!props.selectedData.steps.find((s) => s.text === msg.message)
+                              !!props.selectedData.steps.find(
+                                (s: any) => s.uuid === msg.uuid
+                              ),
+                              msg.uuid
                             );
                           }}
                         >
-                          {props.selectedData.steps.find((s) => s.text === msg.message)
-                            ? 'Selected'
-                            : 'Use'}
+                          {props.selectedData.steps.find(
+                            (s: any) => s.uuid === msg.uuid
+                          )
+                            ? "Selected"
+                            : "Use"}
                         </Button>
-                        <Text fs='italic' fz='sm'>
+                        <Text fs="italic" fz="sm">
                           {msg.angle}
+                        </Text>
+                        <Text color="gray" size="xs">
+                          {msg.uuid}
                         </Text>
                         <Group>
                           {msg.asset_ids
                             .map((id) => message.assets.find((a) => a.id == id))
                             .map((asset, index) => (
-                              <HoverCard width={280} shadow='md' openDelay={500}>
+                              <HoverCard
+                                width={280}
+                                shadow="md"
+                                openDelay={500}
+                              >
                                 <HoverCard.Target>
                                   <Badge
                                     key={index}
-                                    color='blue'
-                                    variant='light'
-                                    styles={{ root: { textTransform: 'initial' } }}
+                                    color="blue"
+                                    variant="light"
+                                    styles={{
+                                      root: { textTransform: "initial" },
+                                    }}
                                   >
                                     {asset?.tag} - {asset?.title}
                                   </Badge>
                                 </HoverCard.Target>
                                 <HoverCard.Dropdown>
-                                  <Text size='sm'>{asset?.value}</Text>
+                                  <Text size="sm">{asset?.value}</Text>
                                 </HoverCard.Dropdown>
                               </HoverCard>
                             ))}
@@ -540,21 +597,19 @@ function StepGenerationSection(props: {
                       </Stack>
 
                       <Paper withBorder px={10} w={400}>
-                        <Text fz='sm'>
+                        <Text fz="sm">
                           <Textarea
-                            w='100%'
-                            m='auto'
+                            w="100%"
+                            m="auto"
                             autosize
                             onChange={(e) => {
-                              props.onClick(message.step_num, msg.message, msg.asset_ids, true);
-                              setTimeout(() => {
-                                props.onClick(
-                                  message.step_num,
-                                  e.currentTarget.value,
-                                  msg.asset_ids,
-                                  false
-                                );
-                              }, 1);
+                              props.onClick(
+                                message.step_num,
+                                e.currentTarget.value,
+                                msg.asset_ids,
+                                true,
+                                msg.uuid
+                              );
                             }}
                           >
                             {msg.message}

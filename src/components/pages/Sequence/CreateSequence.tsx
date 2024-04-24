@@ -135,7 +135,12 @@ export function SequenceBuilder(props: any) {
   };
 
   const handleStep = (value: number | string) => {
-    const data = Array.from({ length: value }, () => ({
+    const numericValue = typeof value === 'number' ? value : parseInt(value, 10);
+    if (isNaN(numericValue)) {
+      return;
+    }
+
+    const data = Array.from({ length: numericValue }, () => ({
       title: '',
       message: '',
       avatar: '',

@@ -369,8 +369,8 @@ export default function SequenceBuilderV3() {
         onClose={() => {
           setOpenedAssetLibrary(false);
         }}
-        title="Asset Library"
-        size="lg"
+        title={<Title order={3}>Asset Library</Title>}
+        size='70dvw'
       >
         <AssetLibraryRetool
           authToken={sdrAccessToken}

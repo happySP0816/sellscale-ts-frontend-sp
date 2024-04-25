@@ -73,6 +73,7 @@ export default function SegmentV2() {
   const [createSegmentParentId, setCreateSegmentParentId] = useState(null);
   const [totalProspected, setTotalProspected] = useState(0);
   const [totalContacted, setTotalContacted] = useState(0);
+  const [totalInFilters, setTotalInFilters] = useState(0);
   const [showAllSegments, setShowAllSegments] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -917,8 +918,14 @@ export default function SegmentV2() {
           (acc: number, segment: any) => acc + (segment.num_contacted || 0),
           0
         );
+        const totalProspectsInPreFilters = segments.reduce(
+          (acc: number, segment: any) =>
+            acc + (segment.apollo_query?.num_results || 0),
+          0
+        );
         setTotalProspected(totalProspected);
         setTotalContacted(totalContacted);
+        setTotalInFilters(totalProspectsInPreFilters);
         const parentSegments = segments.filter(
           (segment: any) => !segment.parent_segment_id
         );
@@ -1374,6 +1381,7 @@ export default function SegmentV2() {
           data={data}
           totalProspected={totalProspected}
           totalContacted={totalContacted}
+          totalInFilters={totalInFilters}
         />
         <Box>
           <Flex>

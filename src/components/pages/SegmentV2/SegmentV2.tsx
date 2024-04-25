@@ -55,7 +55,11 @@ import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
-import { IconUsersMinus, IconUsersPlus } from "@tabler/icons-react";
+import {
+  IconArrowsSplit2,
+  IconUsersMinus,
+  IconUsersPlus,
+} from "@tabler/icons-react";
 import SegmentV2Overview from "./SegmentV2Overview";
 import { openContextModal } from "@mantine/modals";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
@@ -92,6 +96,8 @@ export default function SegmentV2() {
   const [editSegmentName, setEditSegmentName] = useState("");
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [createBatchNumber, setCreateBatchNumber] = useState(2);
+  const [moveSegmentParentId, setMoveSegmentParentId] = useState(null);
+  const [showMoveSegmentModal, setShowMoveSegmentModal] = useState(false);
 
   // methods = FROM_SCRATCH, FROM_TEMPLATE, FROM_AI
   const [createCampaignMethods, setCreateCampaignMethods] = useState(
@@ -271,10 +277,15 @@ export default function SegmentV2() {
                       setShowBatchModal(true);
                     }}
                   >
-                    <IconCopy size={"0.9rem"} />
+                    <IconArrowsSplit2 size={"0.9rem"} />
                     Create Batches
                   </Menu.Item>
-                  <Menu.Item>
+                  <Menu.Item
+                    onClick={() => {
+                      setShowMoveSegmentModal(true);
+                      setSelectedSegmentId(id);
+                    }}
+                  >
                     <IconSwitch size={"0.9rem"} />
                     Move Segment
                   </Menu.Item>
@@ -811,6 +822,31 @@ export default function SegmentV2() {
       });
   };
 
+  const moveSegment = async (showLoader: boolean) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/move_segment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_id: selectedSegmentId,
+        new_parent_segment_id: moveSegmentParentId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        getAllSegments(true);
+        setShowMoveSegmentModal(false);
+        setMoveSegmentParentId(null);
+      });
+  };
+
   const createSegment = async (
     showLoader: boolean,
     segmentId?: string,
@@ -961,6 +997,55 @@ export default function SegmentV2() {
 
   return (
     <Paper>
+      {/* Move Segment Modal */}
+      <Modal
+        opened={showMoveSegmentModal}
+        onClose={() => {
+          setShowMoveSegmentModal(false);
+          getAllSegments(true);
+        }}
+        size="sm"
+        padding="md"
+        title="Move Segment"
+      >
+        <Select
+          withinPortal
+          label="Move under new parent segment"
+          placeholder="Select Parent Segment"
+          data={data
+            .filter((segment: any) => !segment.parent_segment_id)
+            .map((segment: any) => ({
+              label: "|___" + segment.segment_title,
+              value: segment.id,
+            }))
+            .concat([
+              {
+                label: "No Parent Segment",
+                value: null,
+              },
+            ])
+            .reverse()}
+          mb={"sm"}
+          onChange={(v: any) => {
+            setMoveSegmentParentId(v);
+          }}
+          defaultValue={null}
+          clearable
+        />
+        <Button
+          fullWidth
+          size="xs"
+          radius={"md"}
+          mt={"md"}
+          disabled={!selectedSegmentId}
+          onClick={() => {
+            moveSegment(true);
+          }}
+        >
+          Move Segment
+        </Button>
+      </Modal>
+
       {/* Edit Segment Name Modal */}
       <Modal
         opened={showEditSegmentNameModal}

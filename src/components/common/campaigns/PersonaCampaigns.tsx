@@ -111,6 +111,7 @@ import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import ClientCampaignView from "@pages/ClientCampaignView/ClientCampaignView";
 import { ListItem } from "@mantine/core/lib/List/ListItem/ListItem";
 import Utilization from "@pages/Utilization/Utilization";
+import AccountBased from "@pages/AccountBased";
 
 export type CampaignPersona = {
   id: number;
@@ -422,12 +423,11 @@ export default function PersonaCampaigns() {
             <Tabs.Tab value="triggers" icon={<IconTarget size="0.8rem" />}>
               Triggers
             </Tabs.Tab>
-            <Tabs.Tab
-              value="utilization"
-              icon={<IconChargingPile size="0.8rem" />}
-            >
-              Utilization
-            </Tabs.Tab>
+            {/* <Tabs.Tab value='utilization' icon={<IconChargingPile size='0.8rem' />}>
+              Champion Change
+            <Tabs.Tab value='account-based' icon={<IconBrandLinkedin size='0.8rem' />} ml='auto'>
+              Account Based
+            </Tabs.Tab>*/}
             <Tabs.Tab
               value="linkedin"
               icon={<IconBrandLinkedin size="0.8rem" />}
@@ -440,8 +440,14 @@ export default function PersonaCampaigns() {
             </Tabs.Tab>
           </Tabs.List>
 
-          <Tabs.Panel value="utilization" pt="xs">
-            <Utilization />
+          <Tabs.Panel value="website-intent" pt="xs">
+            <>This is website intent page</>
+          </Tabs.Panel>
+          <Tabs.Panel value="champion-change" pt="xs">
+            <>This is Champion change page </>
+          </Tabs.Panel>
+          <Tabs.Panel value="account-based" pt="xs">
+            <AccountBased />
           </Tabs.Panel>
 
           <Tabs.Panel value="triggers" pt="xs">
@@ -1277,27 +1283,24 @@ export function PersonCampaignCard(props: {
                 opened={statuspopoverOpened}
               >
                 <Popover.Target>
-                  <Stack pb={2}>
-                    <Badge
-                      size="xs"
-                      m={0}
-                      color={props.persona.active ? "blue" : "gray"}
-                      onMouseEnter={statusopenPopover}
-                      onMouseLeave={statusclosePopover}
-                    >
-                      {props.persona.active ? "Active" : "Inactive"}
-                    </Badge>
-                    {!!props.persona.smartlead_campaign_id && (
-                      <Tooltip
-                        label="Synced with Email Sequencer"
-                        withArrow
-                        m={0}
+                  <Stack pb={5}>
+                    <Center>
+                      <Badge
+                        size="xs"
+                        color={props.persona.active ? "blue" : "gray"}
+                        onMouseEnter={statusopenPopover}
+                        onMouseLeave={statusclosePopover}
                       >
-                        <Badge size="xs" color={"violet"}>
-                          {"🔗"}
-                        </Badge>
-                      </Tooltip>
-                    )}
+                        {props.persona.active ? "Active" : "Inactive"}
+                      </Badge>
+                      {!!props.persona.smartlead_campaign_id && (
+                        <Tooltip label="Synced with SmartLead" withArrow>
+                          <Badge size="xs" color={"violet"}>
+                            {"Synced"}
+                          </Badge>
+                        </Tooltip>
+                      )}
+                    </Center>
                   </Stack>
                 </Popover.Target>
                 <Popover.Dropdown sx={{ borderRadius: "8px" }} p={"xl"}>
@@ -1455,18 +1458,6 @@ export function PersonCampaignCard(props: {
                   </Flex>
 
                   <Flex>
-                    {props.persona.sdr_id == userData?.id && (
-                      <ActionIcon
-                        onClick={() => {
-                          if (props.project == undefined) return;
-                          setOpenedProspectId(-1);
-                          setCurrentProject(props.project);
-                          window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
-                        }}
-                      >
-                        <IconPencil size="0.9rem" color="gray" />
-                      </ActionIcon>
-                    )}
                     <Tooltip
                       label={
                         props.persona.name +

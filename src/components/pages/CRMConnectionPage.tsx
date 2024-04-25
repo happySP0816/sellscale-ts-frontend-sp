@@ -27,7 +27,6 @@ import { showNotification } from "@mantine/notifications";
 import _ from "lodash";
 import CRMUserMapping from "../CRMConnection/CRMMapping";
 import StageMapping from "../CRMConnection/StageMapping";
-import CRMEventHandler from "../CRMConnection/CRMEventHandler";
 import { ClientSyncCRM, MergeIntegrationType } from "src";
 import CRMSyncableModels from "../CRMConnection/CRMSyncableModels";
 
@@ -234,7 +233,6 @@ const CRMConnectionPage: React.FC = () => {
 
           <CRMUserMapping />
           <StageMapping />
-          <CRMEventHandler />
         </Paper>
       )}
     </Card>

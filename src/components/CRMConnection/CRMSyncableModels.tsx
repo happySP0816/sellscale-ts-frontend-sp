@@ -15,6 +15,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { ClientSyncCRM, MergeIntegrationType } from "src";
 
 import { API_URL } from "@constants/data";
+import CRMEventHandler from "./CRMEventHandler";
 // const API_URL = "http://127.0.0.1:5000";
 
 type CRMModel = {
@@ -217,13 +218,16 @@ export default function CRMSyncableModels(props: {
             })
         }
       </Flex>
-      <Divider />
       <Flex direction="column">
-        <Text color="gray" size={"xs"} mt={"sm"}>
+        <Text color="gray" size={"xs"} mb={"sm"}>
           Note: Contacts + Accounts + Opportunities are created together when
           syncing.
         </Text>
       </Flex>
+      <Divider />
+
+      {/* Only show CRMEventHandler AFTER they have selected Model(s) to sync */}
+      {(leadToggled || caoToggled) && <CRMEventHandler crmSync={crmSync}/>}
     </Paper>
   );
 }

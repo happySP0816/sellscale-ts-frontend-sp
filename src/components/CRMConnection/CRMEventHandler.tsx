@@ -17,9 +17,9 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { CRMStage } from "src";
+import { CRMStage, ClientSyncCRM } from "src";
 
-export default function CRMEventHandler() {
+export default function CRMEventHandler(props: { crmSync: ClientSyncCRM }) {
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
 
@@ -130,7 +130,7 @@ export default function CRMEventHandler() {
   //////////////// End Average Opportunity Value
 
   return (
-    <Paper withBorder mt="md" p="lg" radius="md" bg={"#fcfcfd"}>
+    <Paper withBorder mt="md" p="lg" radius="md">
       <Flex mb={"md"} align="center">
         <Box w="80%">
           <Text fw={600} size={20}>
@@ -145,14 +145,10 @@ export default function CRMEventHandler() {
           <Button
             variant="outline"
             disabled={
-              sellscaleStage
-                ? crmStage
-                  ? JSON.stringify(existingEvents) ===
-                    JSON.stringify({ [sellscaleStage]: crmStage })
-                  : true
-                : crmStage !== null &&
-                  (JSON.stringify(existingEvents) === JSON.stringify({}) ||
-                    existingEvents === null)
+              !!(
+                JSON.stringify(existingEvents) === JSON.stringify({[sellscaleStage as string]: crmStage}) || 
+                (sellscaleStage && props.crmSync.opportunity_sync && !crmStage)
+              )
             }
             onClick={() => {
               if (!sellscaleStage) {
@@ -162,7 +158,15 @@ export default function CRMEventHandler() {
                 return;
               }
               setSellscaleStage(sellscaleStage);
-              setCrmStage(crmStage);
+              setCrmStage(crmStage);              
+              if (!crmStage) {
+                setCrmStage("LEAD_ONLY");
+                patchEventHandler({
+                  [sellscaleStage as string]: "LEAD_ONLY",
+                })
+                return
+              }
+
               patchEventHandler({
                 [sellscaleStage as string]: crmStage as string,
               });
@@ -185,62 +189,39 @@ export default function CRMEventHandler() {
             setSellscaleStage(value);
           }}
           value={sellscaleStage}
-          allowDeselect={!crmStage}
+          allowDeselect={!crmStage || crmStage === "LEAD_ONLY"}
         />
       </Flex>
       <Flex direction={"column"} gap={"sm"} mt={"md"}>
-        {/* <Text color="gray" fw={500} size={"sm"}>
-          Create a:
-        </Text>
-        <Checkbox
-          checked
-          disabled
-          label={
-            <Text sx={{ display: "flex", gap: "4px" }} fw={500}>
-              Opportunity / Account / Contact
-              <span style={{ color: "gray" }}>(Recommended)</span>
-            </Text>
-          }
-        />
-        <Checkbox
-          disabled
-          label={
-            <Text sx={{ display: "flex", gap: "4px" }} fw={500}>
-              Lead<span style={{ color: "gray" }}></span> (⚠️ Coming soon)
-            </Text>
-          }
-        /> */}
-        {sellscaleStage && (
-          <Flex align={"center"} gap={"sm"} ml={"32px"}>
-            <Text fw={500} size={"sm"} color="grey">
-              Create opportunity in status:
-            </Text>
-            <Select
-              data={
-                crmStages.map((stage) => ({
-                  value: stage.id,
-                  label: stage.name,
-                })) || []
-              }
-              onChange={(value) => {
-                setCrmStage(value);
-              }}
-              value={crmStage}
-              allowDeselect
-            />
-          </Flex>
-        )}
-        {/* <Flex align={"center"} gap={"sm"} ml={"32px"}>
-          <Text fw={500} size={"sm"} color="grey">
-            Set Lead Source field called
-          </Text>
-          <Select
-            data={["custom_1", "location", "lead_source", "hubs_101"]}
-            value={"lead_source"}
-          />
-          to the value of
-          <TextInput placeholder="Lead Source" defaultValue={"SellScale"} />
-        </Flex> */}
+        {sellscaleStage &&
+          (props.crmSync.opportunity_sync ? (
+            <Flex align={"center"} gap={"sm"} ml={"32px"}>
+              <Text fw={500} size={"sm"} color="grey">
+                Create opportunity in status:
+              </Text>
+              <Select
+                data={
+                  crmStages.map((stage) => ({
+                    value: stage.id,
+                    label: stage.name,
+                  })) || []
+                }
+                onChange={(value) => {
+                  setCrmStage(value);
+                }}
+                value={crmStage}
+                allowDeselect
+              />
+            </Flex>
+          ) : (
+            props.crmSync.lead_sync && (
+              <Flex align={"center"} gap={"sm"} ml={"32px"}>
+                <Text fw={500} size={"sm"} color="grey" mb="sm">
+                  Create Lead
+                </Text>
+              </Flex>
+            )
+          ))}
       </Flex>
       <Divider mt="sm" mb="md" />
       <Flex direction="row" justify="space-between" align="center">

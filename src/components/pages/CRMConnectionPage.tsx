@@ -10,12 +10,17 @@ import {
   Switch,
   Text,
   Title,
+  useMantineTheme,
 } from "@mantine/core";
-import { IconCircleCheck, IconNetwork, IconPlugConnected } from "@tabler/icons";
+import {
+  IconAffiliate,
+  IconCircleCheck,
+  IconCloud,
+  IconNetwork,
+} from "@tabler/icons";
 import React, { useCallback, useEffect, useState } from "react";
 
 import { useMergeLink } from "@mergeapi/react-merge-link";
-import { API_URL } from "@constants/data";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
@@ -23,26 +28,25 @@ import _ from "lodash";
 import CRMUserMapping from "../CRMConnection/CRMMapping";
 import StageMapping from "../CRMConnection/StageMapping";
 import CRMEventHandler from "../CRMConnection/CRMEventHandler";
+import { ClientSyncCRM, MergeIntegrationType } from "src";
+import CRMSyncableModels from "../CRMConnection/CRMSyncableModels";
+
+import { API_URL } from "@constants/data";
+// const API_URL = "http://127.0.0.1:5000";
 
 
-type MergeIntegrationType = {
-  id: string;
-  integration: string;
-  integration_slug: string;
-  category: string;
-  end_user_origin_id: string;
-  end_user_organization_name: string;
-  end_user_email_address: string;
-  status: string;
-  webhook_listener_url: string;
-  is_duplicate: boolean;
-};
+let IntegrationToIconMap = new Map([
+  ["Hubspot", <IconAffiliate color="orange" />],
+  ["Salesforce", <IconCloud color="rgb(71, 155, 213)" />],
+]);
 
 const CRMConnectionPage: React.FC = () => {
   const userToken = useRecoilValue(userTokenState);
   const [connecting, setConnecting] = useState<boolean>(false);
   const [linkToken, setLinkToken] = useState<string>("");
   const [integration, setIntegration] = useState<MergeIntegrationType>();
+  const [supportedModels, setSupportedModels] = useState<string[]>([]);
+  const [crmSync, setCRMSync] = useState<ClientSyncCRM>();
   const [creatingTestContact, setCreatingTestContact] =
     useState<boolean>(false);
 
@@ -97,7 +101,9 @@ const CRMConnectionPage: React.FC = () => {
       },
     });
     const data = await response.json();
-    setIntegration(data.integration);
+    setIntegration(data.data.integration);
+    setSupportedModels(data.data.supported_models);
+    setCRMSync(data.data.crm_sync)
   };
 
   const createTestAccount = async () => {
@@ -131,7 +137,7 @@ const CRMConnectionPage: React.FC = () => {
     });
   }, []);
 
-  // (Integration 2/3) Open the Merge Modal to connect to CRM 
+  // (Integration 2/3) Open the Merge Modal to connect to CRM
   const { open, isReady } = useMergeLink({
     linkToken: linkToken,
     onSuccess,
@@ -139,15 +145,6 @@ const CRMConnectionPage: React.FC = () => {
     // apiBaseURL: "https://api-eu.merge.dev" /* OR your specified single tenant API base URL */
     // },
   });
-
-  const [crmSetup, setCRMSetup] = useState([
-    {
-      title: "Leads vs Account + Contacts",
-      content:
-        "Depending on how your Sales Org structures your CRM, you can choose to sync SellScale prospects as 'leads' or 'account+contact' combination.",
-      activate: true,
-    },
-  ]);
 
   return (
     <Card ml="md">
@@ -161,19 +158,23 @@ const CRMConnectionPage: React.FC = () => {
         </Text>
       </Flex>
       <Paper withBorder m="xs" p="lg" radius="md" bg={"#fcfcfd"}>
-        <Flex align={"center"} justify={"space-between"} w='100%'>
+        <Flex align={"center"} justify={"space-between"} w="100%">
           <Flex align={"center"} gap={"sm"}>
-            <IconNetwork />
+            {integration &&
+            IntegrationToIconMap.get(integration.integration) ? (
+              IntegrationToIconMap.get(integration.integration)
+            ) : (
+              <IconNetwork />
+            )}
             <Box>
               <Text fw={600}>
                 {integration ? (
                   <span>
+                    {integration?.end_user_organization_name}'s{" "}
                     {integration.integration} CRM{" "}
-                    <span style={{ fontWeight: 400 }}>connected to</span>{" "}
-                    {integration?.end_user_organization_name}
                   </span>
                 ) : (
-                  "Connect to your CRM to SellScale"
+                  "Connect your CRM to SellScale"
                 )}
               </Text>
               {/* <Text color="gray" size="sm">
@@ -199,7 +200,7 @@ const CRMConnectionPage: React.FC = () => {
               } else {
                 setConnecting(true);
                 getLinkToken().then(() => {
-                  open()
+                  open();
                 });
               }
             }}
@@ -210,108 +211,30 @@ const CRMConnectionPage: React.FC = () => {
         <Divider my="md" />
         <Text color="gray" size={"xs"} mt={"md"}>
           Add SellScale to your CRM via integration to automatically transfer
-          contact, lead, and account information between SellScale and your CRM.
-          This is the recommended option as it allows you to get real time
-          alerts and visibility into company and people activities.
+          lead, contact, opportunity, and account information between SellScale
+          and your CRM. This is the recommended option as it allows you to get
+          real time alerts and visibility into company and people activities.
         </Text>
       </Paper>
 
-      {integration && (
+      {integration && crmSync && (
         <Paper withBorder m="xs" p="lg" radius="md" bg={"#fcfcfd"}>
           <Text size="22px" fw="500">
             CRM Connection Settings
           </Text>
           <Divider mt="md" />
 
-          <Divider
-            labelPosition="left"
-            label={
-              <Text fw={500} size={"lg"}>
-                {" "}
-                CRM Setup
-              </Text>
-            }
-            mb={"sm"}
-            mt={"lg"}
-          />
-          <Flex direction={"column"} gap={"sm"}>
-            {crmSetup.map((item, index) => {
-              return (
-                <Flex direction={"column"} key={index}>
-                  <label
-                    htmlFor={item?.title}
-                    style={{
-                      borderRadius: "8px",
-                      width: "100%",
-                    }}
-                  >
-                    <Flex
-                      align={"center"}
-                      justify={"space-between"}
-                      style={{
-                        borderRadius: "6px",
-                        background: item?.activate ? "" : "#f6f6f7",
-                        border: item?.activate ? "1px solid #dee2e6" : "",
-                      }}
-                      p={"xs"}
-                    >
-                      <Flex direction={"column"} maw={"60%"}>
-                        <Text fw={600} mt={2} size={"sm"} color="gray">
-                          {item?.title}
-                        </Text>
-                        <Text color="gray" size={"xs"}>
-                          {item?.content}
-                        </Text>
-                      </Flex>
-                      <Flex>
-                        <Text mt="6px" mr="sm" fz="sm" color="gray">
-                          Sync type:
-                        </Text>
-                        <Select
-                          data={["Sync Leads", "Sync Account+Leads"]}
-                          value={"Sync Leads"}
-                          defaultValue={"Sync Leads"}
-                        />
-                      </Flex>
-                    </Flex>
-                  </label>
-                </Flex>
-              );
-            })}
+          <Flex my="md">
+            <CRMSyncableModels
+              integration={integration}
+              supportedModels={supportedModels}
+              crmSync={crmSync}
+            />
           </Flex>
 
-          <Divider
-            labelPosition="left"
-            label={
-              <Text fw={500} size={"lg"}>
-                {" "}
-                Test Connection
-              </Text>
-            }
-            mb={"sm"}
-            mt={"lg"}
-          />
-          <Card withBorder>
-            <Flex>
-              <Text mt="4px">
-                Add a test `Account` named "SellScale Test" to your CRM to
-                verify the connection.
-              </Text>
-              <Button
-                ml="auto"
-                variant="outline"
-                color="blue"
-                loading={creatingTestContact}
-                onClick={() => createTestAccount()}
-              >
-                Add Test Account
-              </Button>
-            </Flex>
-          </Card>
           <CRMUserMapping />
           <StageMapping />
           <CRMEventHandler />
-          
         </Paper>
       )}
     </Card>

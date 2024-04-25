@@ -862,3 +862,29 @@ export type CRMStage = {
   remote_id: string;
   remote_was_deleted: boolean;
 }
+
+export type MergeIntegrationType = {
+  id: string;
+  integration: string;
+  integration_slug: string;
+  category: string;
+  end_user_origin_id: string;
+  end_user_organization_name: string;
+  end_user_email_address: string;
+  status: string;
+  webhook_listener_url: string;
+  is_duplicate: boolean;
+};
+
+export type ClientSyncCRM = {
+  id: number;
+  client_id: number;
+  initiating_client_sdr_id: number;
+  crm_type: string;
+  status_mapping: Record<string, string>;
+  event_handlers: Record<string, string>;
+  lead_sync: boolean;
+  contact_sync: boolean;
+  account_sync: boolean;
+  opportunity_sync: boolean;
+}

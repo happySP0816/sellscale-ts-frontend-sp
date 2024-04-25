@@ -19,7 +19,6 @@ import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { CRMStage } from "src";
 
-
 export default function CRMEventHandler() {
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
@@ -48,12 +47,14 @@ export default function CRMEventHandler() {
     if (data.status === "success") {
       setCRMStages(data.data.stages);
       setExistingEvents(data.data.triggers);
-      setSellscaleStage(Object.keys(data.data.triggers)[0] as string || null);
-      setCrmStage(Object.values(data.data.triggers)[0] as string || null);
+      setSellscaleStage((Object.keys(data.data.triggers)[0] as string) || null);
+      setCrmStage((Object.values(data.data.triggers)[0] as string) || null);
     }
   };
 
+  const [loading, setLoading] = useState<boolean>(false);
   const patchEventHandler = async (eventMapping: { [key: string]: string }) => {
+    setLoading(true);
     const response = await fetch(`${API_URL}/merge_crm/sync/event`, {
       method: "PATCH",
       headers: {
@@ -80,6 +81,7 @@ export default function CRMEventHandler() {
         color: "red",
       });
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -135,8 +137,8 @@ export default function CRMEventHandler() {
             Automated Syncing
           </Text>
           <Text color="gray" size={"sm"} mt="2px">
-            Automatically sync accounts, contacts, or opportunities based on
-            SellScale events.
+            Automatically sync SellScale prospects into the respective Models in
+            your CRM, based off of SellScale events.
           </Text>
         </Box>
         <Box w="20%" sx={{ textAlign: "right" }}>
@@ -157,12 +159,15 @@ export default function CRMEventHandler() {
                 setSellscaleStage(null);
                 setCrmStage(null);
                 patchEventHandler({});
-                return
+                return;
               }
               setSellscaleStage(sellscaleStage);
               setCrmStage(crmStage);
-              patchEventHandler({ [sellscaleStage as string]: crmStage as string });
+              patchEventHandler({
+                [sellscaleStage as string]: crmStage as string,
+              });
             }}
+            loading={loading}
           >
             Save
           </Button>

@@ -31,11 +31,10 @@ import { ClientSyncCRM, MergeIntegrationType } from "src";
 import CRMSyncableModels from "../CRMConnection/CRMSyncableModels";
 
 import { API_URL } from "@constants/data";
-// const API_URL = "http://127.0.0.1:5000";
 
 
-let IntegrationToIconMap = new Map([
-  ["Hubspot", <IconAffiliate color="orange" />],
+export const IntegrationToIconMap = new Map([
+  ["HubSpot", <IconAffiliate color="orange" rotate="90%" />],
   ["Salesforce", <IconCloud color="rgb(71, 155, 213)" />],
 ]);
 

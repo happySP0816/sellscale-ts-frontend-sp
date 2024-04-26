@@ -164,6 +164,7 @@ export interface ClientSDR {
   warmup_linkedin_complete: boolean;
   weekly_email_outbound_target: number;
   weekly_li_outbound_target: number;
+  client_sync_crm: ClientSyncCRM;
 }
 
 export interface Prospect {
@@ -268,6 +269,7 @@ export interface ProspectShallow {
   merge_contact_id?: string;
   merge_account_id?: string;
   merge_opportunity_id?: string;
+  merge_lead_id?: string;
 }
 
 export interface ProspectICP {

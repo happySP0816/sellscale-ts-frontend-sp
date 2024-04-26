@@ -1194,7 +1194,7 @@ export default function SegmentV2() {
               }}
             >
               <IconPencil size={"0.9rem"} style={{ marginRight: "4px" }} />
-              Create from Scratch
+              Attach to Existing Campaign
             </Button>
             <Button
               mt="md"

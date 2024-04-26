@@ -68,7 +68,6 @@ export default function ProspectDetailsCRMSync(props: {
           autoClose: 3000,
         });
         CRMClose();
-        setsynced(true);
       })
       .catch((error) => {
         console.error("Error:", error);

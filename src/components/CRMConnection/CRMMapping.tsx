@@ -47,7 +47,10 @@ export default function CRMUserMapping() {
     const data = await response.json();
 
     if (data.status === "success") {
-      setCRMUsers(data.data.users);
+      const nonNullUsers = data.data.users.filter(
+        (user: CRMUserType) => user.name !== null
+      );
+      setCRMUsers(nonNullUsers);
       setSDRs(data.data.sdrs);
     }
   };

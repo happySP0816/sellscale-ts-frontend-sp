@@ -99,6 +99,7 @@ export default function SegmentV2() {
   const [createBatchNumber, setCreateBatchNumber] = useState(2);
   const [moveSegmentParentId, setMoveSegmentParentId] = useState(null);
   const [showMoveSegmentModal, setShowMoveSegmentModal] = useState(false);
+  const [showUnassignedSegments, setShowUnassignedSegments] = useState(false);
 
   // methods = FROM_SCRATCH, FROM_TEMPLATE, FROM_AI
   const [createCampaignMethods, setCreateCampaignMethods] = useState(
@@ -1004,6 +1005,26 @@ export default function SegmentV2() {
 
   return (
     <Paper>
+      {/* Show Unassigned Segments Modal */}
+      <Modal
+        opened={showUnassignedSegments}
+        onClose={() => {
+          setShowUnassignedSegments(false);
+          getAllSegments(true);
+        }}
+        size="1000px"
+        h={"500px"}
+        padding="md"
+        title="Unassigned Segments"
+      >
+        <iframe
+          // Unassigned Contacts Retool Editor: https://sellscale.retool.com/editor/2d7d839a-034d-11ef-b670-47ca220bbc00/Segments%20v2%20Modules/Segments%20-%20View%20Unassigned%20Contacts#authToken=81EpYvSxFIcRucTnBPjpcnC6xymDqlb2
+          src={`https://sellscale.retool.com/embedded/public/d2fcac97-380c-4e30-a3e4-ad393e058f6a#authToken=${userToken}`}
+          width="100%"
+          height="700px"
+          style={{ border: "none" }}
+        ></iframe>
+      </Modal>
       {/* Move Segment Modal */}
       <Modal
         opened={showMoveSegmentModal}
@@ -1393,6 +1414,14 @@ export default function SegmentV2() {
               onChange={(e) => setSearchQuery(e.target.value)}
               mb="xs"
             />
+            <Button
+              ml="auto"
+              size="xs"
+              mr="xs"
+              onClick={() => setShowUnassignedSegments(true)}
+            >
+              View Unassigned Prospects
+            </Button>
             <Checkbox
               mt="4px"
               ml="auto"

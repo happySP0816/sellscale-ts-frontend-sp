@@ -327,7 +327,7 @@ export default function SequenceBuilderV3() {
             <StepGenerationSection
               isCTAs={sequenceType === 'LINKEDIN-CTA'}
               results={results}
-              onClick={(step_num, text, assets, remove, uuid) => {
+              onClick={(step_num, text, assets, remove, uuid, angle) => {
                 if (remove) {
                   setSelectedData((prev) => ({
                     ...prev,
@@ -343,6 +343,7 @@ export default function SequenceBuilderV3() {
                       text,
                       assets,
                       uuid,
+                      angle,
                     },
                   ],
                 }));
@@ -475,7 +476,7 @@ interface Asset {
 
 interface SelectedData {
   subject_lines: { text: string; assets: number[] }[];
-  steps: { step_num: number; text: string; assets: number[] }[];
+  steps: { step_num: number; text: string; assets: number[]; angle: string }[];
 }
 
 function StepGenerationSection(props: {
@@ -486,7 +487,8 @@ function StepGenerationSection(props: {
     text: string,
     assets: number[],
     remove: boolean,
-    uuid: string
+    uuid: string,
+    angle: string
   ) => void;
   selectedData: SelectedData;
 }) {
@@ -529,7 +531,8 @@ function StepGenerationSection(props: {
                               msg.message,
                               msg.asset_ids,
                               !!props.selectedData.steps.find((s: any) => s.uuid === msg.uuid),
-                              msg.uuid
+                              msg.uuid,
+                              msg.angle
                             );
                           }}
                         >
@@ -580,7 +583,8 @@ function StepGenerationSection(props: {
                                 e.currentTarget.value,
                                 msg.asset_ids,
                                 true,
-                                msg.uuid
+                                msg.uuid,
+                                msg.angle
                               );
                             }}
                           >

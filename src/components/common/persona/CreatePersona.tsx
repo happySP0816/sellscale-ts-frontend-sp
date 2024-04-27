@@ -1,17 +1,17 @@
-import React from 'react';
-import createPersona from '@utils/requests/createPersona';
-import { Button, Card, Flex, Text, Title } from '@mantine/core';
-import { useRecoilState } from 'recoil';
-import { userTokenState } from '@atoms/userAtoms';
-import { currentProjectState } from '@atoms/personaAtoms';
-import { showNotification } from '@mantine/notifications';
-import { useNavigate } from 'react-router-dom';
-import { navigateToPage } from '@utils/documentChange';
-import { createLiTemplate } from '@utils/requests/linkedinTemplates';
-import { WindowScrollController } from '@fullcalendar/core/internal';
-import { useQuery } from '@tanstack/react-query';
-import getResearchPointTypes from '@utils/requests/getResearchPointTypes';
-import { ResearchPointType } from 'src';
+import React from "react";
+import createPersona from "@utils/requests/createPersona";
+import { Button, Card, Flex, Text, Title } from "@mantine/core";
+import { useRecoilState } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import { currentProjectState } from "@atoms/personaAtoms";
+import { showNotification } from "@mantine/notifications";
+import { useNavigate } from "react-router-dom";
+import { navigateToPage } from "@utils/documentChange";
+import { createLiTemplate } from "@utils/requests/linkedinTemplates";
+import { WindowScrollController } from "@fullcalendar/core/internal";
+import { useQuery } from "@tanstack/react-query";
+import getResearchPointTypes from "@utils/requests/getResearchPointTypes";
+import { ResearchPointType } from "src";
 
 type PropsType = {
   createPersona: {
@@ -28,14 +28,18 @@ type PropsType = {
 export default function CreatePersona(props: PropsType) {
   const [creatingPersona, setCreatingPersona] = React.useState(false);
   const [userToken] = useRecoilState(userTokenState);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const navigate = useNavigate();
 
   const { data: researchPointTypes } = useQuery({
     queryKey: [`query-get-research-point-types`],
     queryFn: async () => {
       const response = await getResearchPointTypes(userToken);
-      return response.status === 'success' ? (response.data as ResearchPointType[]) : [];
+      return response.status === "success"
+        ? (response.data as ResearchPointType[])
+        : [];
     },
     refetchOnWindowFocus: false,
   });
@@ -54,15 +58,16 @@ export default function CreatePersona(props: PropsType) {
         template_mode: props.createPersona.templateMode,
       }
     );
-    if (result.status === 'error') {
-      console.error('Failed to create persona & CTAs');
+    if (result.status === "error") {
+      console.error("Failed to create persona & CTAs");
       return;
     }
     setCreatingPersona(false);
     showNotification({
-      title: 'Persona created!',
-      message: 'You can now create a segment to import new contacts into... redirecting now...',
-      color: 'teal',
+      title: "Persona created!",
+      message:
+        "You can now create a segment to import new contacts into... redirecting now...",
+      color: "teal",
     });
 
     // Create default template
@@ -70,18 +75,17 @@ export default function CreatePersona(props: PropsType) {
       await createLiTemplate(
         userToken,
         result.data,
-        'Great to connect!',
+        "Great to connect!",
         `Hi [first name]! [personalization related to them]. It’s great to connect.`,
         true,
         // researchPointTypes?.map((rpt) => rpt.name) || [], WE SHOULD LET THE BACKEND USE THE DEFAULT RESEARCH POINTS
         [],
-        ''
+        ""
       );
     }
 
     setTimeout(() => {
-      // window.location.href = `/contacts/find?campaign_id=${result.data}`;
-      window.location.href = '/contacts/overview';
+      window.location.href = "/contacts/overview";
     }, 3000);
 
     setCurrentProject(result.data);
@@ -90,14 +94,14 @@ export default function CreatePersona(props: PropsType) {
 
   return (
     <Card>
-      <Flex align={'center'} justify={'space-between'} gap={'lg'}>
+      <Flex align={"center"} justify={"space-between"} gap={"lg"}>
         <Button
           // disabled={!props.createPersona?.name || !props.createPersona.contactObjective}
           // onClick={() => createPersonaHandler()}
           // loading={creatingPersona}
           fullWidth
-          variant='outline'
-          color='gray'
+          variant="outline"
+          color="gray"
         >
           Cancel
         </Button>
@@ -107,7 +111,7 @@ export default function CreatePersona(props: PropsType) {
           loading={creatingPersona}
           fullWidth
         >
-          Request Campaign
+          Create Campaign
         </Button>
       </Flex>
     </Card>

@@ -360,7 +360,7 @@ export default function PersonaCampaigns() {
                       order={3}
                       sx={{ display: "flex", alignItems: "center", gap: "5px" }}
                     >
-                      <IconTargetArrow color="#228be6" /> Request Campaign
+                      <IconTargetArrow color="#228be6" /> Create Campaign
                     </Title>
                   ),
                   innerProps: { mode: "CREATE-ONLY" },
@@ -1455,6 +1455,18 @@ export function PersonCampaignCard(props: {
                   </Flex>
 
                   <Flex>
+                    {props.persona.sdr_id == userData?.id && (
+                      <ActionIcon
+                        onClick={() => {
+                          if (props.project == undefined) return;
+                          setOpenedProspectId(-1);
+                          setCurrentProject(props.project);
+                          window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
+                        }}
+                      >
+                        <IconPencil size="0.9rem" color="gray" />
+                      </ActionIcon>
+                    )}
                     <Tooltip
                       label={
                         props.persona.name +
@@ -1485,30 +1497,6 @@ export function PersonCampaignCard(props: {
                         {props.persona.name}
                       </Text>
                     </Tooltip>
-                    {props.persona.sdr_id == userData?.id && (
-                      <Box
-                        ml="xs"
-                        onClick={() => {
-                          if (props.project == undefined) return;
-                          setOpenedProspectId(-1);
-                          setCurrentProject(props.project);
-                          window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
-                        }}
-                      >
-                        <IconPencil size="0.9rem" color="gray" />
-                      </Box>
-                    )}
-                    {
-                      <Anchor
-                        href={`/campaigns/${props.persona.id}`}
-                        sx={{
-                          fontSize: "10px",
-                          marginLeft: "8px",
-                        }}
-                      >
-                        🔎
-                      </Anchor>
-                    }
                   </Flex>
                 </Box>
               </Flex>

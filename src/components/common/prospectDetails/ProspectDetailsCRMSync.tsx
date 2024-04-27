@@ -13,7 +13,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import { IntegrationToIconMap } from "@pages/CRMConnectionPage";
-import { IconAffiliate, IconCircleCheck } from "@tabler/icons";
+import { IconAffiliate, IconCircleCheck, IconNetwork } from "@tabler/icons";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -123,7 +123,11 @@ export default function ProspectDetailsCRMSync(props: {
       >
         <Flex align={"center"} justify={"space-between"} w={"100%"}>
           <Flex align={"center"} gap={"sm"}>
-            {IntegrationToIconMap.get(props.crmSync.crm_type)}
+            {IntegrationToIconMap.get(props.crmSync.crm_type) ? (
+              IntegrationToIconMap.get(props.crmSync.crm_type)
+            ) : (
+              <IconNetwork />
+            )}
             <Text>
               {synced
                 ? `${props.prospect?.full_name} synced to ${props.crmSync.crm_type}`
@@ -166,7 +170,11 @@ export default function ProspectDetailsCRMSync(props: {
         onClose={CRMClose}
         title={
           <Flex align={"center"} gap={"sm"}>
-            {IntegrationToIconMap.get(props.crmSync.crm_type)}
+            {IntegrationToIconMap.get(props.crmSync.crm_type) ? (
+              IntegrationToIconMap.get(props.crmSync.crm_type)
+            ) : (
+              <IconNetwork />
+            )}
             <Text size={30} fw={600}>
               Sync to {props.crmSync.crm_type}
             </Text>

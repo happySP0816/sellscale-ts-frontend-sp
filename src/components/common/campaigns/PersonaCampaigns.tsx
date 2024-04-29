@@ -13,6 +13,8 @@ import {
   IconPointerCancel,
 } from "@tabler/icons-react";
 
+import posthog from "posthog-js";
+
 import {
   Tooltip,
   Stack,
@@ -111,6 +113,7 @@ import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import ClientCampaignView from "@pages/ClientCampaignView/ClientCampaignView";
 import { ListItem } from "@mantine/core/lib/List/ListItem/ListItem";
 import Utilization from "@pages/Utilization/Utilization";
+import AccountBased from "@pages/AccountBased";
 
 export type CampaignPersona = {
   id: number;
@@ -191,6 +194,7 @@ export default function PersonaCampaigns() {
   const [showInactivePersonas, setShowInactivePersonas] = useState<boolean>(
     false
   );
+  const [showAdvancedTabs, setShowAdvancedTabs] = useState<boolean>(false);
 
   let [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
 
@@ -267,6 +271,11 @@ export default function PersonaCampaigns() {
 
   useEffect(() => {
     fetchCampaignPersonas();
+    posthog.onFeatureFlags(function () {
+      if (posthog.isFeatureEnabled("view_intent_tabs")) {
+        setShowAdvancedTabs(true);
+      }
+    });
   }, []);
 
   // sort personas by persona.active then persona.created_at in desc order
@@ -360,7 +369,7 @@ export default function PersonaCampaigns() {
                       order={3}
                       sx={{ display: "flex", alignItems: "center", gap: "5px" }}
                     >
-                      <IconTargetArrow color="#228be6" /> Create Campaign
+                      <IconTargetArrow color="#228be6" /> Request Campaign
                     </Title>
                   ),
                   innerProps: { mode: "CREATE-ONLY" },
@@ -410,38 +419,77 @@ export default function PersonaCampaigns() {
       <Stack>
         <Tabs defaultValue="overview">
           <Tabs.List mb="md">
-            <Tabs.Tab value="overview" icon={<IconClipboard size="0.8rem" />}>
+            <Tabs.Tab
+              value="overview"
+              icon={<IconClipboard size="0.8rem" />}
+              fz="xs"
+            >
               {userData?.sdr_name.split(" ")[0]}'s Campaigns
             </Tabs.Tab>
             <Tabs.Tab
               value="all-campaigns"
               icon={<IconClipboard size="0.8rem" />}
+              fz="xs"
             >
               {userData?.client?.company}'s Campaigns
             </Tabs.Tab>
-            <Tabs.Tab value="triggers" icon={<IconTarget size="0.8rem" />}>
-              Triggers
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="utilization"
-              icon={<IconChargingPile size="0.8rem" />}
-            >
-              Utilization
-            </Tabs.Tab>
+            {showAdvancedTabs && (
+              <>
+                <Tabs.Tab
+                  value="triggers"
+                  icon={<IconTarget size="0.8rem" />}
+                  fz="xs"
+                >
+                  Triggers
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="website-intent"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
+                  Website Intent
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="champion-change"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
+                  Champion Change
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="account-based"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
+                  Account Based
+                </Tabs.Tab>
+              </>
+            )}
             <Tabs.Tab
               value="linkedin"
               icon={<IconBrandLinkedin size="0.8rem" />}
               ml="auto"
+              fz="xs"
             >
               Queued LinkedIns
             </Tabs.Tab>
-            <Tabs.Tab value="email" icon={<IconMail size="0.8rem" />}>
+            <Tabs.Tab value="email" icon={<IconMail size="0.8rem" />} fz="xs">
               Queued Emails
             </Tabs.Tab>
           </Tabs.List>
 
-          <Tabs.Panel value="utilization" pt="xs">
+          {/* <Tabs.Panel value='utilization' pt='xs'>
             <Utilization />
+          </Tabs.Panel> */}
+
+          <Tabs.Panel value="website-intent" pt="xs">
+            <>This is website intent page</>
+          </Tabs.Panel>
+          <Tabs.Panel value="champion-change" pt="xs">
+            <>This is Champion change page </>
+          </Tabs.Panel>
+          <Tabs.Panel value="account-based" pt="xs">
+            <AccountBased />
           </Tabs.Panel>
 
           <Tabs.Panel value="triggers" pt="xs">
@@ -1277,27 +1325,24 @@ export function PersonCampaignCard(props: {
                 opened={statuspopoverOpened}
               >
                 <Popover.Target>
-                  <Stack pb={2}>
-                    <Badge
-                      size="xs"
-                      m={0}
-                      color={props.persona.active ? "blue" : "gray"}
-                      onMouseEnter={statusopenPopover}
-                      onMouseLeave={statusclosePopover}
-                    >
-                      {props.persona.active ? "Active" : "Inactive"}
-                    </Badge>
-                    {!!props.persona.smartlead_campaign_id && (
-                      <Tooltip
-                        label="Synced with Email Sequencer"
-                        withArrow
-                        m={0}
+                  <Stack pb={5}>
+                    <Center>
+                      <Badge
+                        size="xs"
+                        color={props.persona.active ? "blue" : "gray"}
+                        onMouseEnter={statusopenPopover}
+                        onMouseLeave={statusclosePopover}
                       >
-                        <Badge size="xs" color={"violet"}>
-                          {"🔗"}
-                        </Badge>
-                      </Tooltip>
-                    )}
+                        {props.persona.active ? "Active" : "Inactive"}
+                      </Badge>
+                      {!!props.persona.smartlead_campaign_id && (
+                        <Tooltip label="Synced with SmartLead" withArrow>
+                          <Badge size="xs" color={"violet"}>
+                            {"Synced"}
+                          </Badge>
+                        </Tooltip>
+                      )}
+                    </Center>
                   </Stack>
                 </Popover.Target>
                 <Popover.Dropdown sx={{ borderRadius: "8px" }} p={"xl"}>
@@ -1455,18 +1500,6 @@ export function PersonCampaignCard(props: {
                   </Flex>
 
                   <Flex>
-                    {props.persona.sdr_id == userData?.id && (
-                      <ActionIcon
-                        onClick={() => {
-                          if (props.project == undefined) return;
-                          setOpenedProspectId(-1);
-                          setCurrentProject(props.project);
-                          window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
-                        }}
-                      >
-                        <IconPencil size="0.9rem" color="gray" />
-                      </ActionIcon>
-                    )}
                     <Tooltip
                       label={
                         props.persona.name +
@@ -1497,6 +1530,30 @@ export function PersonCampaignCard(props: {
                         {props.persona.name}
                       </Text>
                     </Tooltip>
+                    {props.persona.sdr_id == userData?.id && (
+                      <Box
+                        ml="xs"
+                        onClick={() => {
+                          if (props.project == undefined) return;
+                          setOpenedProspectId(-1);
+                          setCurrentProject(props.project);
+                          window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
+                        }}
+                      >
+                        <IconPencil size="0.9rem" color="gray" />
+                      </Box>
+                    )}
+                    {
+                      <Anchor
+                        href={`/campaigns/${props.persona.id}`}
+                        sx={{
+                          fontSize: "10px",
+                          marginLeft: "8px",
+                        }}
+                      >
+                        🔎
+                      </Anchor>
+                    }
                   </Flex>
                 </Box>
               </Flex>

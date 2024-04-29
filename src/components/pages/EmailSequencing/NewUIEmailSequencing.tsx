@@ -406,6 +406,8 @@ const NewUIEmailSequencing: FC<{
     }
   }, [templateBuckets]);
 
+  console.log('here - 0')
+
   return (
     <Flex gap="1rem">
       {lgScreenOrLess ? (

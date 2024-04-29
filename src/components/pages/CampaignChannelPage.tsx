@@ -79,6 +79,7 @@ export default function CampaignChannelPage(props: {
       }
       return currentCampaign;
     },
+    refetchOnWindowFocus: false,
   });
   const isEnabledLinkedin = !!campaign?.linkedin_active;
   const isEnabledEmail = !!campaign?.email_active;
@@ -215,6 +216,8 @@ export default function CampaignChannelPage(props: {
       setAssets(result.data);
     }
   };
+
+  console.log('here - (-1)');
 
   const HEADER_HEIGHT = props.hideHeader ? 0 : 75;
   const PANEL_HEIGHT = `calc(100vh - ${HEADER_HEIGHT + 80}px)`;

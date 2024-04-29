@@ -3,6 +3,7 @@ import { useRecoilValue } from "recoil";
 import { userDataState } from "@atoms/userAtoms";
 import CampaignReview from "@pages/CampaignReview/CampaignReviewLinkedin";
 import CampaignChannelPage from "@pages/CampaignChannelPage";
+import { Card } from "@mantine/core";
 
 interface TaskHandlerReviewCampaignData {
   data: {
@@ -20,23 +21,15 @@ export const TaskHandlerReviewCampaign = (
   const hideLinkedIn = props.taskType == "EMAIL_CAMPAIGN_REVIEW";
 
   return (
-    <CampaignChannelPage
-      cType={hideEmail ? "email" : "linkedin"}
-      campaignId={props.data.campaign_id}
-      hideEmail={hideEmail}
-      hideLinkedIn={hideLinkedIn}
-      hideAssets
-      hideHeader
-    />
+    <>
+      <CampaignChannelPage
+        cType={hideEmail ? "email" : "linkedin"}
+        campaignId={props.data.campaign_id}
+        hideEmail={hideEmail}
+        hideLinkedIn={hideLinkedIn}
+        hideAssets
+        hideHeader
+      />
+    </>
   );
-
-  // if (props.taskType == 'EMAIL_CAMPAIGN_REVIEW') {
-  //     return (
-  //         <CampaignReview onTaskComplete={props.onTaskComplete} campaignId={props.data.campaign_id} campaignType='EMAIL' campaignNotes={props.data.campaign_notes} />
-  //     );
-  // }
-
-  // return (
-  //     <CampaignReview onTaskComplete={props.onTaskComplete} campaignId={props.data.campaign_id} campaignType='LINKEDIN' campaignNotes={props.data.campaign_notes}/>
-  // );
 };

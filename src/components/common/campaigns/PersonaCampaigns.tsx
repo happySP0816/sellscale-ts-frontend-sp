@@ -13,6 +13,8 @@ import {
   IconPointerCancel,
 } from "@tabler/icons-react";
 
+import posthog from "posthog-js";
+
 import {
   Tooltip,
   Stack,
@@ -192,6 +194,7 @@ export default function PersonaCampaigns() {
   const [showInactivePersonas, setShowInactivePersonas] = useState<boolean>(
     false
   );
+  const [showAdvancedTabs, setShowAdvancedTabs] = useState<boolean>(false);
 
   let [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
 
@@ -268,6 +271,11 @@ export default function PersonaCampaigns() {
 
   useEffect(() => {
     fetchCampaignPersonas();
+    posthog.onFeatureFlags(function () {
+      if (posthog.isFeatureEnabled("view_intent_tabs")) {
+        setShowAdvancedTabs(true);
+      }
+    });
   }, []);
 
   // sort personas by persona.active then persona.created_at in desc order
@@ -361,7 +369,7 @@ export default function PersonaCampaigns() {
                       order={3}
                       sx={{ display: "flex", alignItems: "center", gap: "5px" }}
                     >
-                      <IconTargetArrow color="#228be6" /> Create Campaign
+                      <IconTargetArrow color="#228be6" /> Request Campaign
                     </Title>
                   ),
                   innerProps: { mode: "CREATE-ONLY" },
@@ -411,34 +419,68 @@ export default function PersonaCampaigns() {
       <Stack>
         <Tabs defaultValue="overview">
           <Tabs.List mb="md">
-            <Tabs.Tab value="overview" icon={<IconClipboard size="0.8rem" />}>
+            <Tabs.Tab
+              value="overview"
+              icon={<IconClipboard size="0.8rem" />}
+              fz="xs"
+            >
               {userData?.sdr_name.split(" ")[0]}'s Campaigns
             </Tabs.Tab>
             <Tabs.Tab
               value="all-campaigns"
               icon={<IconClipboard size="0.8rem" />}
+              fz="xs"
             >
               {userData?.client?.company}'s Campaigns
             </Tabs.Tab>
-            <Tabs.Tab value="triggers" icon={<IconTarget size="0.8rem" />}>
-              Triggers
-            </Tabs.Tab>
-            {/* <Tabs.Tab value='utilization' icon={<IconChargingPile size='0.8rem' />}>
-              Champion Change
-            <Tabs.Tab value='account-based' icon={<IconBrandLinkedin size='0.8rem' />} ml='auto'>
-              Account Based
-            </Tabs.Tab>*/}
+            {showAdvancedTabs && (
+              <>
+                <Tabs.Tab
+                  value="triggers"
+                  icon={<IconTarget size="0.8rem" />}
+                  fz="xs"
+                >
+                  Triggers
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="website-intent"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
+                  Website Intent
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="champion-change"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
+                  Champion Change
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="account-based"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
+                  Account Based
+                </Tabs.Tab>
+              </>
+            )}
             <Tabs.Tab
               value="linkedin"
               icon={<IconBrandLinkedin size="0.8rem" />}
               ml="auto"
+              fz="xs"
             >
               Queued LinkedIns
             </Tabs.Tab>
-            <Tabs.Tab value="email" icon={<IconMail size="0.8rem" />}>
+            <Tabs.Tab value="email" icon={<IconMail size="0.8rem" />} fz="xs">
               Queued Emails
             </Tabs.Tab>
           </Tabs.List>
+
+          {/* <Tabs.Panel value='utilization' pt='xs'>
+            <Utilization />
+          </Tabs.Panel> */}
 
           <Tabs.Panel value="website-intent" pt="xs">
             <>This is website intent page</>
@@ -1488,6 +1530,30 @@ export function PersonCampaignCard(props: {
                         {props.persona.name}
                       </Text>
                     </Tooltip>
+                    {props.persona.sdr_id == userData?.id && (
+                      <Box
+                        ml="xs"
+                        onClick={() => {
+                          if (props.project == undefined) return;
+                          setOpenedProspectId(-1);
+                          setCurrentProject(props.project);
+                          window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
+                        }}
+                      >
+                        <IconPencil size="0.9rem" color="gray" />
+                      </Box>
+                    )}
+                    {
+                      <Anchor
+                        href={`/campaigns/${props.persona.id}`}
+                        sx={{
+                          fontSize: "10px",
+                          marginLeft: "8px",
+                        }}
+                      >
+                        🔎
+                      </Anchor>
+                    }
                   </Flex>
                 </Box>
               </Flex>

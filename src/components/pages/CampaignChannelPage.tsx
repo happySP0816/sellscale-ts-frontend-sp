@@ -217,8 +217,6 @@ export default function CampaignChannelPage(props: {
     }
   };
 
-  console.log('here - (-1)');
-
   const HEADER_HEIGHT = props.hideHeader ? 0 : 75;
   const PANEL_HEIGHT = `calc(100vh - ${HEADER_HEIGHT + 80}px)`;
   return (

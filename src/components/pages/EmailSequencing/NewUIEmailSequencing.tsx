@@ -1,4 +1,4 @@
-import { SCREEN_SIZES } from "@constants/data";
+import { SCREEN_SIZES } from '@constants/data';
 import {
   Flex,
   Box,
@@ -11,24 +11,18 @@ import {
   Drawer,
   Divider,
   Tooltip,
-} from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import EmailSequenceStepModal from "@modals/EmailSequenceStepModal";
-import { IconPlus } from "@tabler/icons";
-import { createEmailSequenceStep } from "@utils/requests/emailSequencing";
-import React, {
-  FC,
-  MutableRefObject,
-  ReactNode,
-  useEffect,
-  useState,
-} from "react";
-import DetailEmailSequencing from "./DetailEmailSequencing";
-import EmailSequenceStepCard from "./EmailSequenceStepCard";
-import { EmailSequenceStep, MsgResponse, SubjectLineTemplate } from "src";
-import EmailTemplateLibraryModal from "@modals/EmailTemplateLibraryModal";
-import { currentProjectState } from "@atoms/personaAtoms";
-import { useRecoilValue } from "recoil";
+} from '@mantine/core';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import EmailSequenceStepModal from '@modals/EmailSequenceStepModal';
+import { IconPlus } from '@tabler/icons';
+import { createEmailSequenceStep } from '@utils/requests/emailSequencing';
+import React, { FC, MutableRefObject, ReactNode, useEffect, useRef, useState } from 'react';
+import DetailEmailSequencing from './DetailEmailSequencing';
+import EmailSequenceStepCard from './EmailSequenceStepCard';
+import { EmailSequenceStep, MsgResponse, SubjectLineTemplate } from 'src';
+import EmailTemplateLibraryModal from '@modals/EmailTemplateLibraryModal';
+import { currentProjectState } from '@atoms/personaAtoms';
+import { useRecoilValue } from 'recoil';
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
     total: number;
@@ -81,9 +75,7 @@ const Sidebar: React.FC<{
   openSequenceStep,
 }) => {
   const [trashCanInBumps, setTrashCanInBumps] = useState(false);
-  const [addStepStatus, setAddStepStatus] = useState<"ACCEPTED" | "BUMPED">(
-    "BUMPED"
-  );
+  const [addStepStatus, setAddStepStatus] = useState<'ACCEPTED' | 'BUMPED'>('BUMPED');
   const [addStepBumpCount, setAddStepBumpCount] = useState<number | null>(1);
 
   const currentProject = useRecoilValue(currentProjectState);
@@ -101,7 +93,7 @@ const Sidebar: React.FC<{
     }
     if (!sawDefault) {
       // If we didn't see a default template, then we can add a step here
-      setAddStepStatus("ACCEPTED");
+      setAddStepStatus('ACCEPTED');
       setAddStepBumpCount(null);
       setTrashCanInBumps(false);
       return;
@@ -121,13 +113,13 @@ const Sidebar: React.FC<{
       }
       if (!sawDefault) {
         // If we didn't see a default template, then we can add a step here
-        setAddStepStatus("BUMPED");
+        setAddStepStatus('BUMPED');
         setAddStepBumpCount(parseInt(bumpCount));
         return;
       }
     }
 
-    setAddStepStatus("BUMPED");
+    setAddStepStatus('BUMPED');
     setAddStepBumpCount(Object.keys(templateBuckets?.BUMPED).length + 1);
     setTrashCanInBumps(true);
   };
@@ -137,15 +129,15 @@ const Sidebar: React.FC<{
   }, [templateBuckets]);
 
   return (
-    <Flex direction="column" mt="md" w="100%">
+    <Flex direction='column' mt='md' w='100%'>
       <EmailSequenceStepCard
-        title="First Email"
-        content="Cold outreach sent to the prospect"
-        active={activeTab == "PROSPECTED"}
-        templateTitle="Initial Email"
+        title='First Email'
+        content='Cold outreach sent to the prospect'
+        active={activeTab == 'PROSPECTED'}
+        templateTitle='Initial Email'
         onClick={() => {
           setTemplates(templateBuckets?.PROSPECTED.templates);
-          setActiveTab("PROSPECTED");
+          setActiveTab('PROSPECTED');
         }}
         sequenceBucket={templateBuckets?.PROSPECTED}
         includeFooter
@@ -160,23 +152,23 @@ const Sidebar: React.FC<{
       /> */}
 
       {!loading ? (
-        <Flex direction="column" gap={"0.5rem"} maw="100%" mt="xl">
+        <Flex direction='column' gap={'0.5rem'} maw='100%' mt='xl'>
           {/* Accepted */}
           <EmailSequenceStepCard
-            active={activeTab == "ACCEPTED"}
+            active={activeTab == 'ACCEPTED'}
             sequenceBucket={templateBuckets?.ACCEPTED}
-            title={"Second Email"}
-            templateTitle={"Prospects who have not received any followup."}
+            title={'Second Email'}
+            templateTitle={'Prospects who have not received any followup.'}
             dataChannels={dataChannels}
             onClick={() => {
               setTemplates(templateBuckets?.ACCEPTED.templates);
-              setActiveTab("ACCEPTED");
+              setActiveTab('ACCEPTED');
             }}
             includeFooter
             deletable={!trashCanInBumps}
             afterDelete={() => {
               setTemplates(templateBuckets?.PROSPECTED.templates);
-              setActiveTab("PROSPECTED");
+              setActiveTab('PROSPECTED');
             }}
             refetch={refetch}
           />
@@ -201,21 +193,21 @@ const Sidebar: React.FC<{
             }
 
             const bumpToFollowupMap: Record<string, string> = {
-              "1": "Third",
-              "2": "Fourth",
-              "3": "Fifth",
-              "4": "Sixth",
-              "5": "Seventh",
-              "6": "Eighth",
-              "7": "Ninth",
-              "8": "Tenth",
+              '1': 'Third',
+              '2': 'Fourth',
+              '3': 'Fifth',
+              '4': 'Sixth',
+              '5': 'Seventh',
+              '6': 'Eighth',
+              '7': 'Ninth',
+              '8': 'Tenth',
             };
             const followupString = bumpToFollowupMap[bumpCount];
             if (followupString == undefined) {
               return;
             }
 
-            if (bumpCount === "0" || !sequenceBucket) {
+            if (bumpCount === '0' || !sequenceBucket) {
               return;
             }
 
@@ -238,13 +230,13 @@ const Sidebar: React.FC<{
             // console.log('showTrashCan', index, numberSteps, showTrashCan)
 
             return (
-              <Flex mt="md" w="100%">
+              <Flex mt='md' w='100%'>
                 <EmailSequenceStepCard
                   onClick={() => {
-                    setActiveTab("BUMPED-" + bumpCount);
+                    setActiveTab('BUMPED-' + bumpCount);
                     setTemplates(sequenceBucket.templates);
                   }}
-                  active={activeTab === "BUMPED-" + bumpCount}
+                  active={activeTab === 'BUMPED-' + bumpCount}
                   sequenceBucket={sequenceBucket}
                   title={`${followupString} Email`}
                   templateTitle={`Prospects who have not responded to ${bumpCount} followups.`}
@@ -257,13 +249,11 @@ const Sidebar: React.FC<{
                     const bumpCountInt = parseInt(bumpCount);
                     if (bumpCountInt === 1) {
                       setTemplates(templateBuckets?.ACCEPTED.templates);
-                      setActiveTab("ACCEPTED");
+                      setActiveTab('ACCEPTED');
                       return;
                     }
-                    setTemplates(
-                      templateBuckets?.BUMPED[bumpCountInt - 1].templates
-                    );
-                    setActiveTab("BUMPED-" + (bumpCountInt - 1));
+                    setTemplates(templateBuckets?.BUMPED[bumpCountInt - 1].templates);
+                    setActiveTab('BUMPED-' + (bumpCountInt - 1));
                   }}
                   refetch={refetch}
                 />
@@ -272,22 +262,22 @@ const Sidebar: React.FC<{
           })}
 
           {/* Add another to sequence */}
-          <Flex justify="center">
+          <Flex justify='center'>
             <Tooltip
               label={
                 currentProject?.smartlead_campaign_id
-                  ? "Synced campaigns cannot add steps"
-                  : "Add another step to the sequence"
+                  ? 'Synced campaigns cannot add steps'
+                  : 'Add another step to the sequence'
               }
               withinPortal
               withArrow
             >
-              <Flex w="100%">
+              <Flex w='100%'>
                 <Button
-                  radius="md"
-                  mt="md"
-                  size="lg"
-                  w="100%"
+                  radius='md'
+                  mt='md'
+                  size='lg'
+                  w='100%'
                   onClick={() => {
                     calculateTrashAndStep();
                     console.log(addStepStatus, addStepBumpCount);
@@ -307,20 +297,14 @@ const Sidebar: React.FC<{
               modalOpened={addNewSequenceStepOpened}
               openModal={openSequenceStep}
               closeModal={closeSequenceStep}
-              type={"CREATE"}
+              type={'CREATE'}
               backFunction={refetch}
               status={addStepStatus}
               showStatus={false}
               archetypeID={archetypeID}
               bumpedCount={addStepBumpCount}
               isDefault={true}
-              onFinish={async (
-                title,
-                sequence,
-                isDefault,
-                status,
-                substatus
-              ) => {
+              onFinish={async (title, sequence, isDefault, status, substatus) => {
                 const result = await createEmailSequenceStep(
                   userToken,
                   archetypeID,
@@ -331,18 +315,18 @@ const Sidebar: React.FC<{
                   true,
                   substatus
                 );
-                return result.status === "success";
+                return result.status === 'success';
               }}
             />
             {Object.keys(templateBuckets?.BUMPED).length > 10 && (
-              <Text color="red" mt="md" mb="md">
+              <Text color='red' mt='md' mb='md'>
                 You have reached the maximum number of sequence steps.
               </Text>
             )}
           </Flex>
         </Flex>
       ) : (
-        <Flex justify="center">
+        <Flex justify='center'>
           <Loader />
         </Flex>
       )}
@@ -377,27 +361,27 @@ const NewUIEmailSequencing: FC<{
 }) => {
   const [opened, { open, close, toggle }] = useDisclosure(false);
 
-  const lgScreenOrLess = useMediaQuery(
-    `(max-width: ${SCREEN_SIZES.LG})`,
-    false,
-    {
-      getInitialValueInEffect: true,
-    }
-  );
+  const lgScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.LG})`, false, {
+    getInitialValueInEffect: true,
+  });
 
-  const [selectedTemplates, setSelectedTemplates] = React.useState<
-    EmailSequenceStep[]
-  >(templateBuckets?.PROSPECTED.templates);
-  const [activeTab, setActiveTab] = React.useState("PROSPECTED");
+  const [selectedTemplates, setSelectedTemplates] = React.useState<EmailSequenceStep[]>(
+    templateBuckets?.PROSPECTED.templates
+  );
+  const [activeTab, setActiveTab] = React.useState('PROSPECTED');
+
+  const PAGE_HEIGHT = 550;
+  const viewport = useRef<HTMLDivElement>(null);
+  const scrollToTop = () => viewport.current!.scrollTo({ top: 0 });
 
   React.useEffect(() => {
     // Reupdate the selected templates
-    if (activeTab === "PROSPECTED") {
+    if (activeTab === 'PROSPECTED') {
       setSelectedTemplates(templateBuckets?.PROSPECTED.templates);
-    } else if (activeTab === "ACCEPTED") {
+    } else if (activeTab === 'ACCEPTED') {
       setSelectedTemplates(templateBuckets?.ACCEPTED.templates);
-    } else if (activeTab.includes("BUMPED-")) {
-      const bumpCount = activeTab.split("-")[1];
+    } else if (activeTab.includes('BUMPED-')) {
+      const bumpCount = activeTab.split('-')[1];
       const bumpCountInt = parseInt(bumpCount);
       const sequenceBucket = templateBuckets?.BUMPED[bumpCountInt];
       if (sequenceBucket) {
@@ -406,25 +390,21 @@ const NewUIEmailSequencing: FC<{
     }
   }, [templateBuckets]);
 
-  console.log('here - 0')
-
   return (
-    <Flex gap="1rem">
+    <Flex gap='1rem'>
       {lgScreenOrLess ? (
         <Drawer
           opened={opened}
           onClose={close}
           withCloseButton={false}
-          w={"35vw"}
-          h={"100vh"}
+          w={'35vw'}
+          h={'100vh'}
           overlayProps={{ blur: 4 }}
         >
           <Sidebar
             userToken={userToken}
             archetypeID={archetypeID as number}
-            setTemplates={(templates: EmailSequenceStep[]) =>
-              setSelectedTemplates(templates)
-            }
+            setTemplates={(templates: EmailSequenceStep[]) => setSelectedTemplates(templates)}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             refetch={async () => {
@@ -439,38 +419,41 @@ const NewUIEmailSequencing: FC<{
           />
         </Drawer>
       ) : (
-        <Box w={"30%"}>
-          <Sidebar
-            userToken={userToken}
-            archetypeID={archetypeID as number}
-            setTemplates={(templates: EmailSequenceStep[]) =>
-              setSelectedTemplates(templates)
-            }
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            refetch={async () => {
-              await refetch();
-            }}
-            addNewSequenceStepOpened={addNewSequenceStepOpened}
-            closeSequenceStep={closeSequenceStep}
-            dataChannels={dataChannels}
-            loading={loading}
-            openSequenceStep={openSequenceStep}
-            templateBuckets={templateBuckets}
-          />
+        <Box w={'30%'}>
+          <ScrollArea viewportRef={viewport} h={PAGE_HEIGHT}>
+            <Sidebar
+              userToken={userToken}
+              archetypeID={archetypeID as number}
+              setTemplates={(templates: EmailSequenceStep[]) => setSelectedTemplates(templates)}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              refetch={async () => {
+                await refetch();
+              }}
+              addNewSequenceStepOpened={addNewSequenceStepOpened}
+              closeSequenceStep={closeSequenceStep}
+              dataChannels={dataChannels}
+              loading={loading}
+              openSequenceStep={openSequenceStep}
+              templateBuckets={templateBuckets}
+            />
+          </ScrollArea>
         </Box>
       )}
 
-      <Box w={lgScreenOrLess ? "100%" : "70%"}>
-        <DetailEmailSequencing
-          toggleDrawer={toggle}
-          currentTab={activeTab}
-          templates={selectedTemplates}
-          subjectLines={subjectLines}
-          refetch={async () => {
-            await refetch();
-          }}
-        />
+      <Box w={lgScreenOrLess ? '100%' : '70%'}>
+        <ScrollArea viewportRef={viewport} h={PAGE_HEIGHT}>
+          <DetailEmailSequencing
+            toggleDrawer={toggle}
+            currentTab={activeTab}
+            templates={selectedTemplates}
+            subjectLines={subjectLines}
+            refetch={async () => {
+              await refetch();
+            }}
+            scrollToTop={scrollToTop}
+          />
+        </ScrollArea>
       </Box>
     </Flex>
   );

@@ -1013,7 +1013,7 @@ export default function SegmentV2() {
           getAllSegments(true);
         }}
         size="1000px"
-        h={"500px"}
+        // h={"500px"}
         padding="md"
         title="Unassigned Segments"
       >
@@ -1155,7 +1155,7 @@ export default function SegmentV2() {
           getAllSegments(true);
         }}
         size="1200px"
-        h={"500px"}
+        // h={"500px"}
         padding="md"
         title="View Prospects"
       >
@@ -1264,7 +1264,7 @@ export default function SegmentV2() {
         size="full"
         padding={0}
         w={window.innerWidth}
-        h={window.innerHeight}
+        // h={window.innerHeight}
         withinPortal
         zIndex={1000}
       >

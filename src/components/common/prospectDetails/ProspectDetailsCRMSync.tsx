@@ -9,6 +9,7 @@ import {
   Modal,
   Paper,
   Text,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
@@ -105,8 +106,6 @@ export default function ProspectDetailsCRMSync(props: {
     );
   }, [props.prospect]);
 
-  console.log("hi", props);
-
   return (
     <Box style={{ flexBasis: "15%" }} p={10} px={"md"} mb={"sm"}>
       <Text fw={600}>CRM:</Text>
@@ -138,21 +137,76 @@ export default function ProspectDetailsCRMSync(props: {
         </Flex>
       </Paper>
 
-      <Text color="gray" size="xs" mt="xs">
+      <Text size="xs" mt="xs">
         {props.crmSync.lead_sync &&
-          (props.prospect?.merge_lead_id ? "✅ Lead" : "☑️ Lead")}
-        {props.crmSync.contact_sync &&
-          (props.prospect?.merge_contact_id
-            ? " · ✅ Contact"
-            : " · ☑️ Contact")}
-        {props.crmSync.account_sync &&
-          (props.prospect?.merge_account_id
-            ? " · ✅ Account"
-            : " · ☑️ Account")}
-        {props.crmSync.opportunity_sync &&
-          (props.prospect?.merge_opportunity_id
-            ? " · ✅ Opportunity "
-            : " · ☑️ Opportunity ")}
+          (props.prospect?.merge_lead_id ? (
+            <Tooltip withinPortal withArrow label="Leads will be created">
+              <span style={{ marginRight: "8px" }}>✅ Lead</span>
+            </Tooltip>
+          ) : (
+            <Tooltip withinPortal withArrow label="Leads will not be created">
+              <span style={{ marginRight: "8px" }}>☑️ Lead</span>
+            </Tooltip>
+          ))}
+
+        <Tooltip
+          withinPortal
+          withArrow
+          label={
+            props.crmSync.contact_sync
+              ? "Contacts will be created"
+              : "Contacts will not be created, but we will sync them to SellScale if they are created in your CRM."
+          }
+        >
+          <span
+            style={{
+              opacity: props.crmSync.contact_sync ? "1" : "0.5",
+              marginRight: "8px",
+            }}
+          >
+            {props.prospect?.merge_contact_id ? "✅ Contact" : "☑️ Contact"}
+          </span>
+        </Tooltip>
+
+        <Tooltip
+          withinPortal
+          withArrow
+          label={
+            props.crmSync.account_sync
+              ? "Accounts will be created"
+              : "Accounts will not be created, but we will sync them to SellScale if they are created in your CRM."
+          }
+        >
+          <span
+            style={{
+              opacity: props.crmSync.account_sync ? "1" : "0.5",
+              marginRight: "8px",
+            }}
+          >
+            {props.prospect?.merge_account_id ? "✅ Account" : "☑️ Account"}
+          </span>
+        </Tooltip>
+
+        <Tooltip
+          withinPortal
+          withArrow
+          label={
+            props.crmSync.opportunity_sync
+              ? "Opportunities will be created"
+              : "Opportunities will not be created but we will sync them to SellScale if they are created in your CRM."
+          }
+        >
+          <span
+            style={{
+              opacity: props.crmSync.opportunity_sync ? "1" : "0.5",
+              marginRight: "8px",
+            }}
+          >
+            {props.prospect?.merge_opportunity_id
+              ? "✅ Opportunity"
+              : "☑️ Opportunity"}
+          </span>
+        </Tooltip>
       </Text>
       {synced && (
         <Flex align={"center"} justify={"space-between"} mt={"3px"}>
@@ -188,38 +242,16 @@ export default function ProspectDetailsCRMSync(props: {
         </Text>
         <Divider mt="md" mb="md" />
         <Flex direction={"column"} gap={"sm"}>
-          {
-            props.crmSync.lead_sync && (
-              <Checkbox
-                label="Create Lead"
-                checked
-              />
-            )
-          }
-          {
-            props.crmSync.account_sync && (
-              <Checkbox
-                label="Create Account"
-                checked
-              />
-            )
-          }
-          {
-            props.crmSync.contact_sync && (
-              <Checkbox
-                label="Create Contact"
-                checked
-              />
-            )
-          }
-          {
-            props.crmSync.opportunity_sync && (
-              <Checkbox
-                label="Create Opportunity"
-                checked
-              />
-            )
-          }
+          {props.crmSync.lead_sync && <Checkbox label="Create Lead" checked />}
+          {props.crmSync.account_sync && (
+            <Checkbox label="Create Account" checked />
+          )}
+          {props.crmSync.contact_sync && (
+            <Checkbox label="Create Contact" checked />
+          )}
+          {props.crmSync.opportunity_sync && (
+            <Checkbox label="Create Opportunity" checked />
+          )}
           <Flex align={"center"} gap={"sm"} mt={"xl"}>
             <Button
               variant="outline"

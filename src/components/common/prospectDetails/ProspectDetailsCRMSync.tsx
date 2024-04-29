@@ -12,15 +12,17 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
-import { IconAffiliate, IconCircleCheck } from "@tabler/icons";
+import { IntegrationToIconMap } from "@pages/CRMConnectionPage";
+import { IconAffiliate, IconCircleCheck, IconNetwork } from "@tabler/icons";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { ProspectShallow } from "src";
+import { ClientSyncCRM, ProspectShallow } from "src";
 
 export default function ProspectDetailsCRMSync(props: {
   prospect: ProspectShallow;
   openedProspectId: number;
+  crmSync: ClientSyncCRM;
 }) {
   const userToken = useRecoilValue(userTokenState);
 
@@ -28,7 +30,8 @@ export default function ProspectDetailsCRMSync(props: {
   const [contactName, setContactName] = useState(true);
   const [opportunityName, setOpportunityName] = useState(true);
 
-  const [syncHubspot, setSyncHubspot] = useState(false);
+  const [synced, setsynced] = useState(false);
+  const [syncableModels, setSyncableModels] = useState<string[]>([]); // ["lead", "contact", "account", "opportunity"
   const [CRMOpened, { open: CRMOpen, close: CRMClose }] = useDisclosure(false);
   const [loadingSyncButton, setLoadingSyncButton] = useState(false);
 
@@ -65,7 +68,6 @@ export default function ProspectDetailsCRMSync(props: {
           autoClose: 3000,
         });
         CRMClose();
-        setSyncHubspot(true);
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -82,15 +84,28 @@ export default function ProspectDetailsCRMSync(props: {
   };
 
   useEffect(() => {
-    setSyncHubspot(
-      (props.prospect?.merge_account_id?.length || 0) +
-        (props.prospect?.merge_contact_id?.length || 0) +
-        (props.prospect?.merge_opportunity_id?.length || 0) >
-        0
-        ? true
-        : false
+    const lead_synced = (props.crmSync.lead_sync &&
+      props.prospect?.merge_lead_id) as boolean;
+    const contact_synced = (props.crmSync.contact_sync &&
+      props.prospect?.merge_contact_id) as boolean;
+    const account_synced = (props.crmSync.account_sync &&
+      props.prospect?.merge_account_id) as boolean;
+    const opportunity_synced = (props.crmSync.opportunity_sync &&
+      props.prospect?.merge_opportunity_id) as boolean;
+    setsynced(
+      lead_synced || contact_synced || account_synced || opportunity_synced
+    );
+    setSyncableModels(
+      [
+        props.crmSync.lead_sync ? "lead" : "",
+        props.crmSync.contact_sync ? "contact" : "",
+        props.crmSync.account_sync ? "account" : "",
+        props.crmSync.opportunity_sync ? "opportunity" : "",
+      ].filter((model) => model !== "")
     );
   }, [props.prospect]);
+
+  console.log("hi", props);
 
   return (
     <Box style={{ flexBasis: "15%" }} p={10} px={"md"} mb={"sm"}>
@@ -101,32 +116,45 @@ export default function ProspectDetailsCRMSync(props: {
         radius="md"
         sx={{
           cursor: "pointer",
-          border: `1px solid ${!syncHubspot ? "#ced4da" : "#228be6"} `,
+          border: `1px solid ${!synced ? "#ced4da" : "#228be6"} `,
         }}
-        bg={!syncHubspot ? "" : "#f5f9fe"}
+        bg={!synced ? "" : "#f5f9fe"}
         onClick={CRMOpen}
       >
         <Flex align={"center"} justify={"space-between"} w={"100%"}>
           <Flex align={"center"} gap={"sm"}>
-            <IconAffiliate rotate={"90%"} color="orange" />
+            {IntegrationToIconMap.get(props.crmSync.crm_type) ? (
+              IntegrationToIconMap.get(props.crmSync.crm_type)
+            ) : (
+              <IconNetwork />
+            )}
             <Text>
-              {syncHubspot
-                ? props.prospect?.full_name + " synced to Hubspot"
-                : "Sync " + props.prospect?.full_name + " to Hubspot"}
+              {synced
+                ? `${props.prospect?.full_name} synced to ${props.crmSync.crm_type}`
+                : `Sync ${props.prospect?.full_name} to ${props.crmSync.crm_type}`}
             </Text>
           </Flex>
-          {syncHubspot && <IconCircleCheck color="white" fill="#228be6" />}
+          {synced && <IconCircleCheck color="white" fill="#228be6" />}
         </Flex>
       </Paper>
 
       <Text color="gray" size="xs" mt="xs">
-        {props.prospect?.merge_account_id ? "✅ Account · " : "☑️ Account · "}
-        {props.prospect?.merge_contact_id ? "✅ Contact · " : "☑️ Contact · "}
-        {props.prospect?.merge_opportunity_id
-          ? "✅ Opportunity "
-          : "☑️ Opportunity "}
+        {props.crmSync.lead_sync &&
+          (props.prospect?.merge_lead_id ? "✅ Lead" : "☑️ Lead")}
+        {props.crmSync.contact_sync &&
+          (props.prospect?.merge_contact_id
+            ? " · ✅ Contact"
+            : " · ☑️ Contact")}
+        {props.crmSync.account_sync &&
+          (props.prospect?.merge_account_id
+            ? " · ✅ Account"
+            : " · ☑️ Account")}
+        {props.crmSync.opportunity_sync &&
+          (props.prospect?.merge_opportunity_id
+            ? " · ✅ Opportunity "
+            : " · ☑️ Opportunity ")}
       </Text>
-      {syncHubspot && (
+      {synced && (
         <Flex align={"center"} justify={"space-between"} mt={"3px"}>
           <Text color="gray" fw={500} size={"sm"}>
             Last Synced: {moment().format("MMM DD, YYYY")}
@@ -142,43 +170,56 @@ export default function ProspectDetailsCRMSync(props: {
         onClose={CRMClose}
         title={
           <Flex align={"center"} gap={"sm"}>
-            <IconAffiliate size={"1.4rem"} color="orange" />
+            {IntegrationToIconMap.get(props.crmSync.crm_type) ? (
+              IntegrationToIconMap.get(props.crmSync.crm_type)
+            ) : (
+              <IconNetwork />
+            )}
             <Text size={30} fw={600}>
-              Sync to Hubspot
+              Sync to {props.crmSync.crm_type}
             </Text>
           </Flex>
         }
       >
         <Text>
-          Automatically create a new Account, Contact, and Opportunity in
-          Hubspot for {props.prospect.full_name}.
+          {`Automatically create a ${syncableModels.join(", ")} in ${
+            props.crmSync.crm_type
+          } for ${props.prospect.full_name}.`}
         </Text>
         <Divider mt="md" mb="md" />
         <Flex direction={"column"} gap={"sm"}>
-          <Flex direction={"column"} gap={"md"}>
-            <Checkbox
-              label="Create Account"
-              disabled
-              checked={account}
-              onChange={() => setAccount(!account)}
-            />
-          </Flex>
-          <Flex direction={"column"} gap={"md"}>
-            <Checkbox
-              label="Create Contact"
-              disabled
-              checked={contactName}
-              onChange={() => setContactName(!contactName)}
-            />
-          </Flex>
-          <Flex direction={"column"} gap={"md"}>
-            <Checkbox
-              label="Create Opportunity"
-              disabled
-              checked={opportunityName}
-              onChange={() => setOpportunityName(!opportunityName)}
-            />
-          </Flex>
+          {
+            props.crmSync.lead_sync && (
+              <Checkbox
+                label="Create Lead"
+                checked
+              />
+            )
+          }
+          {
+            props.crmSync.account_sync && (
+              <Checkbox
+                label="Create Account"
+                checked
+              />
+            )
+          }
+          {
+            props.crmSync.contact_sync && (
+              <Checkbox
+                label="Create Contact"
+                checked
+              />
+            )
+          }
+          {
+            props.crmSync.opportunity_sync && (
+              <Checkbox
+                label="Create Opportunity"
+                checked
+              />
+            )
+          }
           <Flex align={"center"} gap={"sm"} mt={"xl"}>
             <Button
               variant="outline"

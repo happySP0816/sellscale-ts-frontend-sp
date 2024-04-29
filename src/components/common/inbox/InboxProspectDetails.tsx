@@ -171,7 +171,7 @@ export default function ProjectDetails(props: {
   const [demoSetType, setDemoSetType] = useState("DIRECT");
   const [handoffText, setHandoffText] = useState("");
 
-  const [showCRM, setShowCRM] = useState(userData?.id === 171);
+  let showCRM = userData?.client_sync_crm !== null;
 
   const { data, isFetching } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
@@ -1127,6 +1127,7 @@ export default function ProjectDetails(props: {
             <ProspectDetailsCRMSync
               prospect={prospect}
               openedProspectId={openedProspectId}
+              crmSync={userData?.client_sync_crm}
             />
           )}
 

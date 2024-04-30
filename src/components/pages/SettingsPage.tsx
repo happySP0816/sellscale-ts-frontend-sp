@@ -52,9 +52,9 @@ import SettingUsage from "@common/settings/SettingUsage";
 import exchangeSlackAuthCode from "@utils/requests/exchangeSlackAuthCode";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import CRMConnectionPage from "./CRMConnectionPage";
-import ContactRecycling from '@common/settings/ContactRecycling';
-import WebhookConnectionPage from './WebhookConnectionPage';
-import AccountSettings from './AccountSettings';
+import ContactRecycling from "@common/settings/ContactRecycling";
+import WebhookConnectionPage from "./WebhookConnectionPage";
+import AccountSettings from "./AccountSettings";
 
 export default function SettingsPage() {
   setPageTitle("Settings");
@@ -101,8 +101,8 @@ export default function SettingsPage() {
         value={currentTab}
         orientation="vertical"
         onTabChange={(i: any) => {
-          setCurrentTab(i)
-          navigate(`/settings/${i}`)
+          setCurrentTab(i);
+          navigate(`/settings/${i}`);
         }}
         styles={(theme) => ({
           tabRightSection: {
@@ -153,9 +153,7 @@ export default function SettingsPage() {
         <Tabs.List h={"fit-content"}>
           <Title
             color={
-              ["brain", "messages", "filters"].includes(
-                currentTab
-              )
+              ["brain", "messages", "filters"].includes(currentTab)
                 ? "blue"
                 : "gray"
             }
@@ -169,24 +167,21 @@ export default function SettingsPage() {
             SellScale Brain
           </Tabs.Tab>
 
-          <Tabs.Tab
-            value="messages"
-            icon={<IconMessage2Bolt size="0.8rem" />}
-          >
+          <Tabs.Tab value="messages" icon={<IconMessage2Bolt size="0.8rem" />}>
             Message Automation
           </Tabs.Tab>
-          <Tabs.Tab
-            value="filters"
-            icon={<IconTrashFilled size="0.8rem" />}
-          >
+          <Tabs.Tab value="filters" icon={<IconTrashFilled size="0.8rem" />}>
             Do Not Contact Filters
           </Tabs.Tab>
-          <Tabs.Tab value='contactRecycling' icon={<IconRefresh size='0.8rem' />}>
+          <Tabs.Tab
+            value="contactRecycling"
+            icon={<IconRefresh size="0.8rem" />}
+          >
             Contact Recycling
           </Tabs.Tab>
 
-          <Divider />
-          <Title
+          {/* <Divider /> */}
+          {/* <Title
             color={
               ["pipeline", "conversion"].includes(currentTab) ? "blue" : "gray"
             }
@@ -195,29 +190,21 @@ export default function SettingsPage() {
             mb="xs"
           >
             ANALYTICS
-          </Title>
-            <Tabs.Tab value="usage" icon={<IconSausage size="0.8rem" />}>
-              Usage
-            </Tabs.Tab>
-            <Tabs.Tab
+          </Title> */}
+          {/* <Tabs.Tab
               value="pipeline"
               icon={<IconAdjustmentsFilled size="0.8rem" />}
             >
               Pipeline
-            </Tabs.Tab>
-            <Tabs.Tab value="conversion" icon={<IconTrophy size="0.8rem" />}>
-              Conversion
-            </Tabs.Tab>
+            </Tabs.Tab> */}
+          {/* <Tabs.Tab value="conversion" icon={<IconTrophy size="0.8rem" />}>
+            Conversion
+          </Tabs.Tab> */}
 
           <Divider />
           <Title
             color={
-              [
-                "linkedin",
-                "email",
-                "slack",
-                "scheduling",
-              ].includes(currentTab)
+              ["linkedin", "email", "slack", "scheduling"].includes(currentTab)
                 ? "blue"
                 : "gray"
             }
@@ -227,10 +214,7 @@ export default function SettingsPage() {
           >
             INTEGRATIONS
           </Title>
-          <Tabs.Tab
-            value="linkedin"
-            icon={<IconBrandLinkedin size="0.8rem" />}
-          >
+          <Tabs.Tab value="linkedin" icon={<IconBrandLinkedin size="0.8rem" />}>
             LinkedIn Connection
           </Tabs.Tab>
           <Tabs.Tab value="email" icon={<IconInbox size="0.8rem" />}>
@@ -239,10 +223,7 @@ export default function SettingsPage() {
           <Tabs.Tab value="slack" icon={<IconBrandSlack size="0.8rem" />}>
             Slack Connection
           </Tabs.Tab>
-          <Tabs.Tab
-            value="scheduling"
-            icon={<IconCalendar size="0.8rem" />}
-          >
+          <Tabs.Tab value="scheduling" icon={<IconCalendar size="0.8rem" />}>
             Calendar Connection
           </Tabs.Tab>
           <Tabs.Tab value="crm" icon={<IconCloud size="0.8rem" />}>
@@ -255,28 +236,23 @@ export default function SettingsPage() {
           <Divider />
 
           <Title
-            color={
-              [
-                "account",
-              ].includes(currentTab)
-                ? "blue"
-                : "gray"
-            }
+            color={["account"].includes(currentTab) ? "blue" : "gray"}
             order={5}
             mt="lg"
             mb="xs"
           >
             ACCOUNT
           </Title>
-          <Tabs.Tab
-            value="account"
-            icon={<IconHexagonalPrism size="0.8rem" />}
-          >
+
+          <Tabs.Tab value="usage" icon={<IconSausage size="0.8rem" />}>
+            Usage
+          </Tabs.Tab>
+          <Tabs.Tab value="account" icon={<IconHexagonalPrism size="0.8rem" />}>
             Account Settings
           </Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value='account' pl='xs'>
+        <Tabs.Panel value="account" pl="xs">
           <AccountSettings />
         </Tabs.Panel>
 
@@ -302,11 +278,15 @@ export default function SettingsPage() {
           </Group>
         </Tabs.Panel>
 
-        <Tabs.Panel value='doNotContact' pl='xs'>
-          <Group noWrap>{currentTab === 'doNotContact' && <DoNotContactFiltersPage />}</Group>
+        <Tabs.Panel value="doNotContact" pl="xs">
+          <Group noWrap>
+            {currentTab === "doNotContact" && <DoNotContactFiltersPage />}
+          </Group>
         </Tabs.Panel>
-        <Tabs.Panel value='contactRecycling' pl='xs'>
-          <Group noWrap>{currentTab === 'contactRecycling' && <ContactRecycling />}</Group>
+        <Tabs.Panel value="contactRecycling" pl="xs">
+          <Group noWrap>
+            {currentTab === "contactRecycling" && <ContactRecycling />}
+          </Group>
         </Tabs.Panel>
 
         <Tabs.Panel value="webhooks" pl="xs">
@@ -344,7 +324,6 @@ export default function SettingsPage() {
         <Tabs.Panel value="usage" pl="xs">
           <SettingUsage />
         </Tabs.Panel>
-        
       </Tabs>
     </Box>
   );

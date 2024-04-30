@@ -1,6 +1,7 @@
 import PageFrame from '@common/PageFrame';
 import { ActionIcon, Badge, Box, Flex, Image, Select, Text, useMantineTheme } from '@mantine/core';
 import {
+  IconAffiliate,
   IconCalendar,
   IconChecks,
   IconChevronLeft,
@@ -197,7 +198,7 @@ export default function AccountBased() {
                     </Box>
                   </Flex>
                   <ActionIcon>
-                    <IconLetterT color='orange' />
+                    <IconAffiliate color='orange' />
                   </ActionIcon>
                 </Flex>
               );

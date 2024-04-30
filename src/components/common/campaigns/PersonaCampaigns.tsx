@@ -497,7 +497,7 @@ export default function PersonaCampaigns() {
           </Tabs.Panel>
 
           <Tabs.Panel value="all-campaigns" pt="xs">
-            {campaignsSectionHeader}
+            {/* {campaignsSectionHeader} */}
             <AllCampaign campaigns={allProjects} />
           </Tabs.Panel>
 

@@ -16,27 +16,8 @@ import { IconMessageCheck } from '@tabler/icons-react';
 import { DataGrid } from 'mantine-data-grid';
 import { useState } from 'react';
 import { Sparklines, SparklinesCurve } from 'react-sparklines';
-import { ActionIcon, Badge, Box, Flex, Image, Select, Text, useMantineTheme } from '@mantine/core';
-import {
-  IconAffiliate,
-  IconCalendar,
-  IconChecks,
-  IconChevronLeft,
-  IconChevronRight,
-  IconExternalLink,
-  IconLetterT,
-  IconLoader,
-  IconSend,
-  IconToggleRight,
-} from '@tabler/icons';
-import { IconMessageCheck } from '@tabler/icons-react';
-import { DataGrid } from 'mantine-data-grid';
-import { useState } from 'react';
-import { Sparklines, SparklinesCurve } from 'react-sparklines';
 
 export default function AccountBased() {
-  const theme = useMantineTheme();
-  const [acPageSize, setAcPageSize] = useState('25');
   const theme = useMantineTheme();
   const [acPageSize, setAcPageSize] = useState('25');
   const data = [

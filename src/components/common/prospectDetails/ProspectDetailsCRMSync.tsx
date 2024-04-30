@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import {
   Box,
@@ -26,6 +26,7 @@ export default function ProspectDetailsCRMSync(props: {
   crmSync: ClientSyncCRM;
 }) {
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
 
   const [account, setAccount] = useState(true);
   const [contactName, setContactName] = useState(true);
@@ -216,7 +217,7 @@ export default function ProspectDetailsCRMSync(props: {
         </Flex>
       )}
       <Text color="gray" fw={500} size={"sm"}>
-        Opportunity Value: {`$${props.prospect?.contract_size}` || "N/A"}
+        Opportunity Value: {" "} {`$${props.prospect?.contract_size || userData.contract_size || " Not Set"}`}
       </Text>
       <Modal
         opened={CRMOpened}

@@ -1500,6 +1500,20 @@ export function PersonCampaignCard(props: {
                   </Flex>
 
                   <Flex>
+                    {props.persona.sdr_id == userData?.id && (
+                      <ActionIcon
+                        ml="0"
+                        mr="xs"
+                        onClick={() => {
+                          if (props.project == undefined) return;
+                          setOpenedProspectId(-1);
+                          setCurrentProject(props.project);
+                          window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
+                        }}
+                      >
+                        <IconPencil size="0.9rem" color="gray" />
+                      </ActionIcon>
+                    )}
                     <Tooltip
                       label={
                         props.persona.name +
@@ -1512,9 +1526,10 @@ export function PersonCampaignCard(props: {
                       withArrow
                     >
                       <Text
+                        mt={4}
                         fz={"sm"}
                         c={"gray.7"}
-                        fw={700}
+                        fw={600}
                         onClick={() => {
                           if (props.persona.sdr_id != userData?.id) return;
 
@@ -1530,20 +1545,8 @@ export function PersonCampaignCard(props: {
                         {props.persona.name}
                       </Text>
                     </Tooltip>
-                    {props.persona.sdr_id == userData?.id && (
-                      <Box
-                        ml="xs"
-                        onClick={() => {
-                          if (props.project == undefined) return;
-                          setOpenedProspectId(-1);
-                          setCurrentProject(props.project);
-                          window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
-                        }}
-                      >
-                        <IconPencil size="0.9rem" color="gray" />
-                      </Box>
-                    )}
-                    {
+
+                    {/* {
                       <Anchor
                         href={`/campaigns/${props.persona.id}`}
                         sx={{
@@ -1553,7 +1556,7 @@ export function PersonCampaignCard(props: {
                       >
                         🔎
                       </Anchor>
-                    }
+                    } */}
                   </Flex>
                 </Box>
               </Flex>

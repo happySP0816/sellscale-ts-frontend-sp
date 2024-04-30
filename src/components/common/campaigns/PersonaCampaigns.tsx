@@ -1222,13 +1222,12 @@ export function PersonCampaignCard(props: {
               mt={5}
               w={"100%"}
               gap={"5px"}
-              align={"center"}
-              justify={"center"}
             >
               <Popover
                 width={340 * numberOfRings}
-                position="bottom"
+                position="right"
                 withArrow
+                withinPortal
                 shadow="md"
                 opened={popoverOpened}
                 styles={{
@@ -1325,25 +1324,23 @@ export function PersonCampaignCard(props: {
                 opened={statuspopoverOpened}
               >
                 <Popover.Target>
-                  <Stack pb={5}>
-                    <Center>
-                      <Badge
-                        size="xs"
-                        color={props.persona.active ? "blue" : "gray"}
-                        onMouseEnter={statusopenPopover}
-                        onMouseLeave={statusclosePopover}
-                      >
-                        {props.persona.active ? "Active" : "Inactive"}
-                      </Badge>
-                      {!!props.persona.smartlead_campaign_id && (
-                        <Tooltip label="Synced with SmartLead" withArrow>
-                          <Badge size="xs" color={"violet"}>
-                            {"Synced"}
-                          </Badge>
-                        </Tooltip>
-                      )}
-                    </Center>
-                  </Stack>
+                  <Box mt="xs">
+                    <Badge
+                      size="xs"
+                      color={props.persona.active ? "blue" : "gray"}
+                      onMouseEnter={statusopenPopover}
+                      onMouseLeave={statusclosePopover}
+                    >
+                      {props.persona.active ? "Active" : "Inactive"}
+                    </Badge>
+                    {!!props.persona.smartlead_campaign_id && (
+                      <Tooltip label="Synced with Email Sequence" withArrow>
+                        <Badge size="xs" color={"violet"} ml="4px">
+                          {"🔗"}
+                        </Badge>
+                      </Tooltip>
+                    )}
+                  </Box>
                 </Popover.Target>
                 <Popover.Dropdown sx={{ borderRadius: "8px" }} p={"xl"}>
                   <Flex gap={"sm"} align={"center"}>

@@ -25,6 +25,7 @@ export default function AccountBased() {
       company_url: 'apple.com',
       companyName: 'Apple',
       engagement: [5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12, 5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12],
+      status: 'high',
       last_activity_date: 'Mar 7, 2024 8:43 PM',
       sent: 450,
       open: 58,
@@ -34,7 +35,8 @@ export default function AccountBased() {
     {
       company_url: 'microsoft.com',
       companyName: 'Microsoft',
-      engagement: [5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12, 5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12],
+      engagement: [500, 450, 300, 204, 240, 190, 167, 170, 140, 137, 130, 120, 80, 57, 30, 36, 20, 10, 4],
+      status: 'low',
       last_activity_date: 'Mar 7, 2024 8:43 PM',
       sent: 500,
       open: 303,
@@ -45,6 +47,7 @@ export default function AccountBased() {
       company_url: 'google.com',
       companyName: 'Google',
       engagement: [5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12, 5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12],
+      status: 'high',
       last_activity_date: 'Mar 7, 2024 8:43 PM',
       sent: 450,
       open: 58,
@@ -54,7 +57,8 @@ export default function AccountBased() {
     {
       company_url: 'amazon.com',
       companyName: 'Amazon',
-      engagement: [5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12, 5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12],
+      status: 'medium',
+      engagement: [5, 10, 15, 30, 40, 49, 50, 70, 73, 90, 103, 120, 100, 105, 110, 90, 86, 75, 70, 65, 45, 20, 12, 2],
       last_activity_date: 'Mar 7, 2024 8:43 PM',
       sent: 500,
       open: 303,
@@ -64,7 +68,8 @@ export default function AccountBased() {
     {
       company_url: 'netflix.com',
       companyName: 'Netflix',
-      engagement: [5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12, 5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12],
+      engagement: [500, 450, 300, 204, 240, 190, 167, 170, 140, 137, 130, 120, 80, 57, 30, 36, 20, 10, 4],
+      status: 'low',
       last_activity_date: 'Mar 7, 2024 8:43 PM',
       sent: 450,
       open: 58,
@@ -189,7 +194,7 @@ export default function AccountBased() {
                   <Flex gap={'xs'} align={'center'}>
                     <Image src={`https://logo.clearbit.com/${company_url}`} width={30} height={30} />
                     <Box>
-                      <Text fw={700} size={'xs'}>
+                      <Text fw={600} size={'xs'}>
                         {companyName}
                       </Text>
                       <Text fw={500} color='gray' size={'xs'}>
@@ -198,7 +203,7 @@ export default function AccountBased() {
                     </Box>
                   </Flex>
                   <ActionIcon>
-                    <IconAffiliate color='orange' />
+                    <IconAffiliate color='orange' size={'1.2rem'} />
                   </ActionIcon>
                 </Flex>
               );
@@ -213,15 +218,17 @@ export default function AccountBased() {
               </Flex>
             ),
             cell: (cell) => {
-              const { engagement } = cell.row.original;
+              const { engagement, status } = cell.row.original;
 
               return (
                 <Flex gap={'sm'} w={'100%'} h={'100%'} px={'sm'} align={'center'}>
                   <Sparklines data={engagement} width={100} height={30} margin={3}>
-                    <SparklinesCurve color='green' />
+                    <SparklinesCurve color={status === 'high' ? 'green' : status === 'medium' ? 'orange' : 'red'} />
                   </Sparklines>
                   <Flex>
-                    <Badge color={engagement ? 'green' : 'red'}>High</Badge>
+                    <Badge color={status === 'high' ? 'green' : status === 'medium' ? 'orange' : 'red'} size='sm'>
+                      {status}
+                    </Badge>
                   </Flex>
                 </Flex>
               );
@@ -241,7 +248,7 @@ export default function AccountBased() {
 
               return (
                 <Flex w={'100%'} px={'sm'} h={'100%'} align={'center'}>
-                  <Text fw={500} color='gray'>
+                  <Text fw={500} color='gray' size={'xs'}>
                     {last_activity_date}
                   </Text>
                 </Flex>
@@ -263,10 +270,18 @@ export default function AccountBased() {
 
               return (
                 <Flex align={'center'} justify={'center'} gap={4} py={'lg'} w={'100%'} h={'100%'} bg={'#f9fbfe'}>
-                  <Text color='#228be6' fw={700}>
+                  <Text color='#228be6' fw={600}>
                     {sent}
                   </Text>
-                  <Badge variant='light' color={theme.colors.blue[1]}>
+                  <Badge
+                    variant='light'
+                    color={theme.colors.blue[1]}
+                    styles={{
+                      root: {
+                        fontWeight: 600,
+                      },
+                    }}
+                  >
                     {sent}%
                   </Badge>
                 </Flex>
@@ -278,7 +293,7 @@ export default function AccountBased() {
             header: () => (
               <Flex align={'center'} gap={'3px'}>
                 <IconChecks color='#db66f3' size={'0.9rem'} />
-                <Text color='gray'>Sent</Text>
+                <Text color='gray'>Open</Text>
               </Flex>
             ),
             maxSize: 110,
@@ -288,10 +303,19 @@ export default function AccountBased() {
 
               return (
                 <Flex align={'center'} justify={'center'} gap={4} w={'100%'} py={'lg'} h={'100%'} bg={'#fdf9fe'}>
-                  <Text color={'#db66f3'} fw={700}>
+                  <Text color={'#db66f3'} fw={600}>
                     {open}
                   </Text>
-                  <Badge variant='light' bg='rgba(219,102,243, 0.1)' style={{ color: '#db66f3' }}>
+                  <Badge
+                    variant='light'
+                    bg='rgba(219,102,243, 0.1)'
+                    style={{ color: '#db66f3' }}
+                    styles={{
+                      root: {
+                        fontWeight: 600,
+                      },
+                    }}
+                  >
                     {open}%
                   </Badge>
                 </Flex>
@@ -313,10 +337,19 @@ export default function AccountBased() {
 
               return (
                 <Flex align={'center'} justify={'center'} gap={4} py={'lg'} w={'100%'} h={'100%'} bg={'#fffbf8'}>
-                  <Text color={'#f0ab78'} fw={700}>
+                  <Text color={'#f0ab78'} fw={600}>
                     {reply}
                   </Text>
-                  <Badge variant='light' bg='rgba(240, 171, 120, 0.1)' style={{ color: '#f0ab78' }}>
+                  <Badge
+                    variant='light'
+                    bg='rgba(240, 171, 120, 0.1)'
+                    style={{ color: '#f0ab78' }}
+                    styles={{
+                      root: {
+                        fontWeight: 600,
+                      },
+                    }}
+                  >
                     {reply}%
                   </Badge>
                 </Flex>
@@ -338,10 +371,19 @@ export default function AccountBased() {
 
               return (
                 <Flex align={'center'} justify={'center'} gap={4} py={'lg'} w={'100%'} h={'100%'} bg={'#f8fbf9'}>
-                  <Text color={'#73d0a5'} fw={700}>
+                  <Text color={'#73d0a5'} fw={600}>
                     {demo}
                   </Text>
-                  <Badge variant='light' bg='rbga(115, 208, 165, 0.1)' style={{ color: '#73d0a5' }}>
+                  <Badge
+                    variant='light'
+                    bg='rbga(115, 208, 165, 0.1)'
+                    style={{ color: '#73d0a5' }}
+                    styles={{
+                      root: {
+                        fontWeight: 600,
+                      },
+                    }}
+                  >
                     {demo}%
                   </Badge>
                 </Flex>
@@ -363,10 +405,19 @@ export default function AccountBased() {
 
               return (
                 <Flex align={'center'} justify={'center'} gap={4} py={'lg'} w={'100%'} h={'100%'} bg={'#f8fbf9'}>
-                  <Text color={'#73d0a5'} fw={700}>
+                  <Text color={'#73d0a5'} fw={600}>
                     {demo}
                   </Text>
-                  <Badge variant='light' bg='rbga(115, 208, 165, 0.1)' style={{ color: '#73d0a5' }}>
+                  <Badge
+                    variant='light'
+                    bg='rbga(115, 208, 165, 0.1)'
+                    style={{ color: '#73d0a5' }}
+                    styles={{
+                      root: {
+                        fontWeight: 600,
+                      },
+                    }}
+                  >
                     {demo}%
                   </Badge>
                 </Flex>
@@ -386,7 +437,16 @@ export default function AccountBased() {
             cell: (cell) => {
               return (
                 <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
-                  <Badge tt={'initial'} variant='filled' rightSection={<IconExternalLink size={'0.9rem'} style={{ marginTop: '5px' }} />}>
+                  <Badge
+                    tt={'initial'}
+                    variant='filled'
+                    rightSection={<IconExternalLink size={'0.9rem'} style={{ marginTop: '5px' }} />}
+                    styles={{
+                      root: {
+                        fontWeight: 400,
+                      },
+                    }}
+                  >
                     View Details
                   </Badge>
                 </Flex>

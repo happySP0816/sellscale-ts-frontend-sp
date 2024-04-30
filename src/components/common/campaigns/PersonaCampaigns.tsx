@@ -114,6 +114,7 @@ import ClientCampaignView from "@pages/ClientCampaignView/ClientCampaignView";
 import { ListItem } from "@mantine/core/lib/List/ListItem/ListItem";
 import Utilization from "@pages/Utilization/Utilization";
 import AccountBased from "@pages/AccountBased";
+import WebsiteIntent from "./websiteIntent/WebsiteIntent";
 
 export type CampaignPersona = {
   id: number;
@@ -483,7 +484,7 @@ export default function PersonaCampaigns() {
           </Tabs.Panel> */}
 
           <Tabs.Panel value="website-intent" pt="xs">
-            <>This is website intent page</>
+            <WebsiteIntent />
           </Tabs.Panel>
           <Tabs.Panel value="champion-change" pt="xs">
             <>This is Champion change page </>
@@ -497,7 +498,6 @@ export default function PersonaCampaigns() {
           </Tabs.Panel>
 
           <Tabs.Panel value="all-campaigns" pt="xs">
-            {/* {campaignsSectionHeader} */}
             <AllCampaign campaigns={allProjects} />
           </Tabs.Panel>
 

@@ -29,6 +29,7 @@ export default function SegmentAutodownload(props: PropsType) {
   const [segment, setSegment] = React.useState({} as any);
   const [fetchingSegment, setFetchingSegment] = React.useState(false);
   const [hardcodedScrapePage, setHardcodedScrapePage] = React.useState(1);
+  const [runningScrapeLoading, setRunningScrapeLoading] = React.useState(false);
 
   const getSegment = (segmentId: number) => {
     setFetchingSegment(true);
@@ -72,6 +73,7 @@ export default function SegmentAutodownload(props: PropsType) {
   };
 
   const runScrapes = () => {
+    setRunningScrapeLoading(true);
     fetch(`${API_URL}/segment/run_scrapes`, {
       method: "POST",
       headers: {
@@ -82,15 +84,18 @@ export default function SegmentAutodownload(props: PropsType) {
         segment_id: props.segmentId,
         num_scrapes: numScrapesToRun,
       }),
-    }).then(() => props.segmentId && getSegment(props.segmentId));
+    })
+      .then(() => props.segmentId && getSegment(props.segmentId))
+      .finally(() => setRunningScrapeLoading(false));
   };
 
   useEffect(() => {
     if (props.segmentId) getSegment(props.segmentId);
   }, [props.segmentId]);
 
-  const currentPage = segment?.current_scrape_page || 0;
-  const totalPages = Math.ceil(segment?.apollo_query?.num_results / 100) - 1;
+  const totalPages = Math.ceil(segment?.apollo_query?.num_results / 100);
+  const currentPage = Math.min(segment?.current_scrape_page || 0, totalPages);
+
   const percentComplete = Math.round((currentPage / totalPages) * 100);
 
   return (
@@ -136,7 +141,12 @@ export default function SegmentAutodownload(props: PropsType) {
           <b>Current Progress: {percentComplete}%</b> ({currentPage} /{" "}
           {totalPages} pages scraped)
         </Text>
-        <Progress value={percentComplete} color="blue" size="xl" animate />
+        <Progress
+          value={percentComplete}
+          color="blue"
+          size="xl"
+          animate={currentPage !== totalPages}
+        />
 
         <Flex mt="md">
           <Text size="sm" mt="6px">
@@ -175,6 +185,7 @@ export default function SegmentAutodownload(props: PropsType) {
             />
             <Button
               ml="xs"
+              loading={runningScrapeLoading}
               size="sm"
               color="teal"
               variant="outline"
@@ -188,7 +199,7 @@ export default function SegmentAutodownload(props: PropsType) {
 
       <Button
         mt="md"
-        color="teal"
+        color="grape"
         variant="outline"
         size="xs"
         w="100%"

@@ -175,13 +175,15 @@ export default function PersonaCampaigns() {
   );
   let allProjects = personas;
 
-  const [campaignAnalyticData, setCampaignAnalyticData] =
-    useState<CampaignAnalyticsData>({
-      sentOutreach: 0,
-      accepted: 0,
-      activeConvos: 0,
-      demos: 0,
-    });
+  const [
+    campaignAnalyticData,
+    setCampaignAnalyticData,
+  ] = useState<CampaignAnalyticsData>({
+    sentOutreach: 0,
+    accepted: 0,
+    activeConvos: 0,
+    demos: 0,
+  });
   const [aiActivityData, setAiActivityData] = useState<TodayActivityData>({
     totalActivity: 0,
     newOutreach: 0,
@@ -190,8 +192,9 @@ export default function PersonaCampaigns() {
   });
   const [currentEmailSla, setCurrentEmailSla] = useState<number>(0);
   const [currentLinkedInSLA, setCurrentLinkedInSLA] = useState<number>(0);
-  const [showInactivePersonas, setShowInactivePersonas] =
-    useState<boolean>(false);
+  const [showInactivePersonas, setShowInactivePersonas] = useState<boolean>(
+    false
+  );
   const [showAdvancedTabs, setShowAdvancedTabs] = useState<boolean>(false);
 
   let [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
@@ -431,38 +434,38 @@ export default function PersonaCampaigns() {
             >
               {userData?.client?.company}'s Campaigns
             </Tabs.Tab>
-            {/* {showAdvancedTabs && ( */}
-            <>
-              <Tabs.Tab
-                value="triggers"
-                icon={<IconTarget size="0.8rem" />}
-                fz="xs"
-              >
-                Triggers
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="website-intent"
-                icon={<IconBrandLinkedin size="0.8rem" />}
-                fz="xs"
-              >
-                Website Intent
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="champion-change"
-                icon={<IconBrandLinkedin size="0.8rem" />}
-                fz="xs"
-              >
-                Champion Change
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="account-based"
-                icon={<IconBrandLinkedin size="0.8rem" />}
-                fz="xs"
-              >
-                Account Based
-              </Tabs.Tab>
-            </>
-            {/* )} */}
+            {showAdvancedTabs && (
+              <>
+                <Tabs.Tab
+                  value="triggers"
+                  icon={<IconTarget size="0.8rem" />}
+                  fz="xs"
+                >
+                  Triggers
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="website-intent"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
+                  Website Intent
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="champion-change"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
+                  Champion Change
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="account-based"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
+                  Account Based
+                </Tabs.Tab>
+              </>
+            )}
             <Tabs.Tab
               value="linkedin"
               icon={<IconBrandLinkedin size="0.8rem" />}
@@ -660,8 +663,9 @@ export function PersonCampaignCard(props: {
   onPersonaActiveStatusUpdate?: (id: number, active: boolean) => void;
 }) {
   const navigate = useNavigate();
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const [openedProspectId, setOpenedProspectId] = useRecoilState(
     openedProspectIdState
   );
@@ -731,16 +735,20 @@ export function PersonCampaignCard(props: {
       date: props.persona.created_at,
     },
   ];
-  const [popoverOpened, { close: closePopover, open: openPopover }] =
-    useDisclosure(false);
+  const [
+    popoverOpened,
+    { close: closePopover, open: openPopover },
+  ] = useDisclosure(false);
 
   const [
     statuspopoverOpened,
     { close: statusclosePopover, open: statusopenPopover },
   ] = useDisclosure(false);
 
-  const [channelOpened, { open: channelOpen, close: channelClose }] =
-    useDisclosure(false);
+  const [
+    channelOpened,
+    { open: channelOpen, close: channelClose },
+  ] = useDisclosure(false);
 
   const ChannelModal = () => {
     return (

@@ -91,13 +91,7 @@ export default function SegmentV2(props: PropsType) {
   );
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
-  const [selectedSegmentName, setSelectedSegmentName] = useState("");
-  const [selectedSegmentProspects, setSelectedSegmentProspects] = useState(0);
-  const [
-    isAutoScrapeEnabledForSelectedSegment,
-    setIsAutoScrapeEnabledForSelectedSegment,
-  ] = useState(false);
-  const [currentPageForSegment, setCurrentPageForSegment] = useState(0);
+
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
   const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(
     false
@@ -636,28 +630,36 @@ export default function SegmentV2(props: PropsType) {
                     </Button>
                     {showAutoDownloadFeature && (
                       <Button
-                        variant="outline"
+                        w="100%"
+                        variant={
+                          cell.row.original.autoscrape_enabled
+                            ? "filled"
+                            : "outline"
+                        }
                         compact
                         size="xs"
                         color="teal"
                         onClick={() => {
                           setSelectedSegmentId(cell.row.original.id);
                           setOpenAutoDownloadModal(true);
-                          setSelectedSegmentName(
-                            cell.row.original.segment_title
-                          );
-                          setSelectedSegmentProspects(
-                            cell.row.original.apollo_query.num_results
-                          );
-                          setIsAutoScrapeEnabledForSelectedSegment(
-                            cell.row.original.autoscrape_enabled
-                          );
-                          setCurrentPageForSegment(
-                            cell.row.original.current_scrape_page
-                          );
                         }}
                       >
-                        Enabled Auto-Download
+                        {cell.row.original.autoscrape_enabled
+                          ? `Auto-Download Enabled - ${Math.min(
+                              cell.row.original.current_scrape_page,
+                              Math.ceil(apollo_query.num_results / 100)
+                            )} / ${Math.ceil(
+                              apollo_query.num_results / 100
+                            )} scraped (${Math.round(
+                              (Math.min(
+                                cell.row.original.current_scrape_page,
+                                Math.ceil(apollo_query.num_results / 100)
+                              ) /
+                                Math.ceil(apollo_query.num_results / 100)) *
+                                100
+                            )}%
+                            )`
+                          : "Enable Auto-Download"}
                       </Button>
                     )}
                   </>
@@ -767,6 +769,8 @@ export default function SegmentV2(props: PropsType) {
         num_prospected: segment.num_prospected,
         num_contacted: segment.num_contacted,
         apollo_query: segment.apollo_query,
+        autoscrape_enabled: segment.autoscrape_enabled,
+        current_scrape_page: segment.current_scrape_page,
       };
     });
   }

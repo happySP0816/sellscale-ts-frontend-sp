@@ -18,17 +18,20 @@ import OngoingScrapes from "./OngoingScrapes";
 import ProspectUploadHistory from "@common/settings/History/ProspectUploadHistory";
 import Personas from "./Personas";
 import SegmentV2 from "@pages/SegmentV2/SegmentV2";
+import { useState } from "react";
 
 const ContactOverview = () => {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
+
+  const [tabValue, setTabValue] = useState("segments");
 
   return (
     <Box py={"md"} px={"xl"}>
       <Text fw={600} size={"30px"}>
         Contacts
       </Text>
-      <Tabs defaultValue="segments">
+      <Tabs value={tabValue} onTabChange={(e: any) => setTabValue(e)}>
         <Tabs.List>
           <Tabs.Tab value="segments">
             <IconChartArcs
@@ -78,7 +81,11 @@ const ContactOverview = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="segments">
-          <SegmentV2 />
+          <SegmentV2
+            onDownloadHistoryClick={() => {
+              setTabValue("history");
+            }}
+          />
         </Tabs.Panel>
       </Tabs>
     </Box>

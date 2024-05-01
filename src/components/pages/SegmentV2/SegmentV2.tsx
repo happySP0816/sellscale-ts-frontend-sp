@@ -20,6 +20,7 @@ import {
   Select,
   Divider,
 } from "@mantine/core";
+import posthog from "posthog-js";
 
 import {
   IconArrowRight,
@@ -64,8 +65,13 @@ import SegmentV2Overview from "./SegmentV2Overview";
 import { openContextModal } from "@mantine/modals";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
 import { showNotification } from "@mantine/notifications";
+import SegmentAutodownload from "./SegmentAutodownload";
 
-export default function SegmentV2() {
+type PropsType = {
+  onDownloadHistoryClick?: () => void;
+};
+
+export default function SegmentV2(props: PropsType) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
@@ -85,6 +91,8 @@ export default function SegmentV2() {
   );
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
+  const [selectedSegmentName, setSelectedSegmentName] = useState("");
+  const [selectedSegmentProspects, setSelectedSegmentProspects] = useState(0);
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
   const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(
     false
@@ -100,6 +108,8 @@ export default function SegmentV2() {
   const [moveSegmentParentId, setMoveSegmentParentId] = useState(null);
   const [showMoveSegmentModal, setShowMoveSegmentModal] = useState(false);
   const [showUnassignedSegments, setShowUnassignedSegments] = useState(false);
+  const [showAutoDownloadModal, setOpenAutoDownloadModal] = useState(false);
+  const [showAutoDownloadFeature, setShowAutoDownloadFeature] = useState(false);
 
   // methods = FROM_SCRATCH, FROM_TEMPLATE, FROM_AI
   const [createCampaignMethods, setCreateCampaignMethods] = useState(
@@ -619,6 +629,26 @@ export default function SegmentV2() {
                     >
                       View & Edit Filters
                     </Button>
+                    {showAutoDownloadFeature && (
+                      <Button
+                        variant="outline"
+                        compact
+                        size="xs"
+                        color="teal"
+                        onClick={() => {
+                          setSelectedSegmentId(cell.row.original.id);
+                          setOpenAutoDownloadModal(true);
+                          setSelectedSegmentName(
+                            cell.row.original.segment_title
+                          );
+                          setSelectedSegmentProspects(
+                            cell.row.original.apollo_query.num_results
+                          );
+                        }}
+                      >
+                        Enabled Auto-Download
+                      </Button>
+                    )}
                   </>
                 ) : (
                   <Button
@@ -1001,10 +1031,33 @@ export default function SegmentV2() {
   useEffect(() => {
     getAllSDRs();
     getAllSegments(true);
+
+    if (posthog.isFeatureEnabled("segments-auto-downloads")) {
+      setShowAutoDownloadFeature(true);
+    }
   }, [false, showAllSegments]);
 
   return (
     <Paper>
+      {/* Show Auto Download Modal */}
+      <Modal
+        opened={showAutoDownloadModal}
+        onClose={() => {
+          setOpenAutoDownloadModal(false);
+        }}
+        size="450px"
+        padding="md"
+      >
+        <SegmentAutodownload
+          segmentId={selectedSegmentId}
+          segmentName={selectedSegmentName}
+          segmentNumProspects={selectedSegmentProspects}
+          onDownloadHistoryClick={() => {
+            props.onDownloadHistoryClick && props.onDownloadHistoryClick();
+            setOpenAutoDownloadModal(false);
+          }}
+        />
+      </Modal>
       {/* Show Unassigned Segments Modal */}
       <Modal
         opened={showUnassignedSegments}

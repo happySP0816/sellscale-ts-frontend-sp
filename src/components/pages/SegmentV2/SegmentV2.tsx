@@ -1267,8 +1267,9 @@ export default function SegmentV2(props: PropsType) {
               color="teal"
               onClick={() => {
                 showNotification({
-                  title: "Coming Soon",
-                  message: "This feature is coming soon!",
+                  title: "Contact SellScale Team",
+                  message:
+                    "Message SellScale on Slack to request a new campaign via direct message.",
                   color: "red",
                 });
               }}
@@ -1279,6 +1280,7 @@ export default function SegmentV2(props: PropsType) {
             <Button
               mt="md"
               color="orange"
+              disabled
               onClick={() => {
                 showNotification({
                   title: "Coming Soon",

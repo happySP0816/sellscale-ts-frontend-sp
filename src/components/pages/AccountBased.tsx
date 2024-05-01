@@ -26,6 +26,7 @@ import {
 import { IconMessageCheck } from "@tabler/icons-react";
 import axios from "axios";
 import { DataGrid } from "mantine-data-grid";
+import moment from "moment";
 import { useEffect, useState } from "react";
 import { Sparklines, SparklinesCurve } from "react-sparklines";
 import { useRecoilValue } from "recoil";
@@ -192,7 +193,11 @@ export default function AccountBased() {
             ),
             minSize: 400,
             cell: (cell) => {
-              const { company_url, company } = cell.row.original;
+              let { company_url, company } = cell.row.original;
+              company_url = company_url
+                ?.replace("http://", "")
+                .replace("https://", "")
+                .split("/")[0];
 
               return (
                 <Flex
@@ -214,7 +219,8 @@ export default function AccountBased() {
                         {company}
                       </Text>
                       <Text fw={500} color="gray" size={"xs"}>
-                        {company_url}
+                        {company_url?.substring(0, 40)}
+                        {company_url?.length > 40 ? "..." : ""}
                       </Text>
                     </Box>
                   </Flex>
@@ -235,7 +241,26 @@ export default function AccountBased() {
               </Flex>
             ),
             cell: (cell) => {
-              const { sparkline_data, status } = cell.row.original;
+              let { sparkline_data, status } = cell.row.original;
+
+              let new_sparkline_data = [];
+              let random_entropy = [0.1, -0.1, 0.05, -0.05];
+              for (let i = 0; i < sparkline_data.length; i++) {
+                // if sparkline_data is > 1 length
+                if (sparkline_data.length <= 1) {
+                  new_sparkline_data.push(sparkline_data[i]);
+                  new_sparkline_data.push(sparkline_data[i]);
+                  new_sparkline_data.push(sparkline_data[i]);
+                } else {
+                  for (let j = 0; j < 5; j++) {
+                    new_sparkline_data.push(
+                      sparkline_data[i] +
+                        random_entropy[Math.floor(Math.random() * 4)]
+                    );
+                  }
+                }
+              }
+              sparkline_data = new_sparkline_data;
 
               return (
                 <Flex
@@ -294,7 +319,7 @@ export default function AccountBased() {
               return (
                 <Flex w={"100%"} px={"sm"} h={"100%"} align={"center"}>
                   <Text fw={500} color="gray" size={"xs"}>
-                    {latest_reply}
+                    {moment(latest_reply).format("MMM DD, YYYY hh:mm A")}
                   </Text>
                 </Flex>
               );
@@ -570,8 +595,8 @@ export default function AccountBased() {
                 style={{ width: "150px" }}
                 data={[
                   { label: "Show 25 rows", value: "25" },
-                  { label: "Show 10 rows", value: "10" },
-                  { label: "Show 5 rows", value: "5" },
+                  // { label: "Show 10 rows", value: "10" },
+                  // { label: "Show 5 rows", value: "5" },
                 ]}
                 value={acPageSize}
                 onChange={(v) => {

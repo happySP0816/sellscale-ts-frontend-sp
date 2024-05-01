@@ -1,5 +1,16 @@
-import PageFrame from '@common/PageFrame';
-import { ActionIcon, Badge, Box, Flex, Image, Select, Text, useMantineTheme } from '@mantine/core';
+import { userDataState, userTokenState } from "@atoms/userAtoms";
+import PageFrame from "@common/PageFrame";
+import { API_URL } from "@constants/data";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Flex,
+  Image,
+  Select,
+  Text,
+  useMantineTheme,
+} from "@mantine/core";
 import {
   IconAffiliate,
   IconCalendar,
@@ -11,72 +22,65 @@ import {
   IconLoader,
   IconSend,
   IconToggleRight,
-} from '@tabler/icons';
-import { IconMessageCheck } from '@tabler/icons-react';
-import { DataGrid } from 'mantine-data-grid';
-import { useState } from 'react';
-import { Sparklines, SparklinesCurve } from 'react-sparklines';
+} from "@tabler/icons";
+import { IconMessageCheck } from "@tabler/icons-react";
+import axios from "axios";
+import { DataGrid } from "mantine-data-grid";
+import moment from "moment";
+import { useEffect, useState } from "react";
+import { Sparklines, SparklinesCurve } from "react-sparklines";
+import { useRecoilValue } from "recoil";
+
+interface AccountBasedDataType {
+  company: string;
+  company_id: number;
+  company_url: string;
+  latest_reply: string;
+  num_accepted: number;
+  num_demo: number;
+  num_positive_reply: number;
+  num_replied: number;
+  num_sent: number;
+  sparkline_data: [];
+  status: string;
+}
 
 export default function AccountBased() {
   const theme = useMantineTheme();
-  const [acPageSize, setAcPageSize] = useState('25');
-  const data = [
-    {
-      company_url: 'apple.com',
-      companyName: 'Apple',
-      engagement: [5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12, 5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12],
-      status: 'high',
-      last_activity_date: 'Mar 7, 2024 8:43 PM',
-      sent: 450,
-      open: 58,
-      reply: 13,
-      demo: 3,
-    },
-    {
-      company_url: 'microsoft.com',
-      companyName: 'Microsoft',
-      engagement: [500, 450, 300, 204, 240, 190, 167, 170, 140, 137, 130, 120, 80, 57, 30, 36, 20, 10, 4],
-      status: 'low',
-      last_activity_date: 'Mar 7, 2024 8:43 PM',
-      sent: 500,
-      open: 303,
-      reply: 13,
-      demo: 3,
-    },
-    {
-      company_url: 'google.com',
-      companyName: 'Google',
-      engagement: [5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12, 5, 10, 5, 20, 8, 15, 20, 30, 4, 10, 25, 12],
-      status: 'high',
-      last_activity_date: 'Mar 7, 2024 8:43 PM',
-      sent: 450,
-      open: 58,
-      reply: 13,
-      demo: 3,
-    },
-    {
-      company_url: 'amazon.com',
-      companyName: 'Amazon',
-      status: 'medium',
-      engagement: [5, 10, 15, 30, 40, 49, 50, 70, 73, 90, 103, 120, 100, 105, 110, 90, 86, 75, 70, 65, 45, 20, 12, 2],
-      last_activity_date: 'Mar 7, 2024 8:43 PM',
-      sent: 500,
-      open: 303,
-      reply: 13,
-      demo: 3,
-    },
-    {
-      company_url: 'netflix.com',
-      companyName: 'Netflix',
-      engagement: [500, 450, 300, 204, 240, 190, 167, 170, 140, 137, 130, 120, 80, 57, 30, 36, 20, 10, 4],
-      status: 'low',
-      last_activity_date: 'Mar 7, 2024 8:43 PM',
-      sent: 450,
-      open: 58,
-      reply: 13,
-      demo: 3,
-    },
-  ];
+  const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
+  const [acPageSize, setAcPageSize] = useState("25");
+  const [pageIndex, setPageIndex] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [accountBasedData, setAccountBasedData] = useState<
+    AccountBasedDataType[]
+  >([]);
+
+  useEffect(() => {
+    const fetchAccountBasedData = async () => {
+      setLoading(true);
+      const response = await axios.post(
+        `${API_URL}/campaigns/account_based`,
+        {
+          client_id: userData.id,
+          offset: pageIndex * Number(acPageSize),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      setAccountBasedData(response.data.data.results);
+      setTotalCount(response.data.data.count);
+      setLoading(false);
+    };
+    fetchAccountBasedData();
+  }, [pageIndex]);
+
   // const data = [
   //   {
   //     avatar: '',
@@ -162,72 +166,137 @@ export default function AccountBased() {
         })}
       </Flex> */}
       <DataGrid
-        data={data}
+        data={accountBasedData}
         highlightOnHover
         withPagination
         withSorting
         withColumnBorders
         withBorder
+        loading={loading}
         sx={{
-          cursor: 'pointer',
-          '& .mantine-10xyzsm>tbody>tr>td': {
-            padding: '0px',
+          cursor: "pointer",
+          "& .mantine-10xyzsm>tbody>tr>td": {
+            padding: "0px",
           },
-          '& tr': {
-            background: 'white',
+          "& tr": {
+            background: "white",
           },
         }}
         columns={[
           {
-            accessorKey: 'company',
+            accessorKey: "company",
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconLetterT color='gray' size={'0.9rem'} />
-                <Text color='gray'>Company</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconLetterT color="gray" size={"0.9rem"} />
+                <Text color="gray">Company</Text>
               </Flex>
             ),
-            maxSize: 190,
+            minSize: 400,
             cell: (cell) => {
-              const { company_url, companyName } = cell.row.original;
+              let { company_url, company } = cell.row.original;
+              company_url = company_url
+                ?.replace("http://", "")
+                .replace("https://", "")
+                .split("/")[0];
 
               return (
-                <Flex gap={'xs'} w={'100%'} h={'100%'} px={'sm'} align={'center'} justify={'space-between'}>
-                  <Flex gap={'xs'} align={'center'}>
-                    <Image src={`https://logo.clearbit.com/${company_url}`} width={30} height={30} />
+                <Flex
+                  gap={"xs"}
+                  w={"100%"}
+                  h={"100%"}
+                  px={"sm"}
+                  align={"center"}
+                  justify={"space-between"}
+                >
+                  <Flex gap={"xs"} align={"center"}>
+                    <Image
+                      src={`https://logo.clearbit.com/${company_url}`}
+                      width={30}
+                      height={30}
+                    />
                     <Box>
-                      <Text fw={600} size={'xs'}>
-                        {companyName}
+                      <Text fw={600} size={"xs"}>
+                        {company}
                       </Text>
-                      <Text fw={500} color='gray' size={'xs'}>
-                        {company_url}
+                      <Text fw={500} color="gray" size={"xs"}>
+                        {company_url?.substring(0, 40)}
+                        {company_url?.length > 40 ? "..." : ""}
                       </Text>
                     </Box>
                   </Flex>
                   <ActionIcon>
-                    <IconAffiliate color='orange' size={'1.2rem'} />
+                    <IconAffiliate color="orange" size={"1.2rem"} />
                   </ActionIcon>
                 </Flex>
               );
             },
           },
           {
-            accessorKey: 'engagment',
+            accessorKey: "engagment",
+            minSize: 200,
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconLoader color='gray' size={'0.9rem'} />
-                <Text color='gray'>Engagement</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconLoader color="gray" size={"0.9rem"} />
+                <Text color="gray">Engagement</Text>
               </Flex>
             ),
             cell: (cell) => {
-              const { engagement, status } = cell.row.original;
+              let { sparkline_data, status } = cell.row.original;
+
+              let new_sparkline_data = [];
+              let random_entropy = [0.1, -0.1, 0.05, -0.05];
+              for (let i = 0; i < sparkline_data.length; i++) {
+                // if sparkline_data is > 1 length
+                if (sparkline_data.length <= 1) {
+                  new_sparkline_data.push(sparkline_data[i]);
+                  new_sparkline_data.push(sparkline_data[i]);
+                  new_sparkline_data.push(sparkline_data[i]);
+                } else {
+                  for (let j = 0; j < 5; j++) {
+                    new_sparkline_data.push(
+                      sparkline_data[i] +
+                        random_entropy[Math.floor(Math.random() * 4)]
+                    );
+                  }
+                }
+              }
+              sparkline_data = new_sparkline_data;
 
               return (
-                <Flex gap={'sm'} w={'100%'} h={'100%'} px={'sm'} align={'center'}>
-                  <Sparklines data={engagement} width={100} height={30} margin={3}>
-                    <SparklinesCurve color={status === 'high' ? 'green' : status === 'medium' ? 'orange' : 'red'} />
+                <Flex
+                  gap={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                  px={"sm"}
+                  align={"center"}
+                >
+                  <Sparklines
+                    data={sparkline_data}
+                    width={100}
+                    height={30}
+                    margin={3}
+                  >
+                    <SparklinesCurve
+                      color={
+                        status.toLowerCase() === "high"
+                          ? "green"
+                          : status.toLowerCase() === "mid"
+                          ? "orange"
+                          : "red"
+                      }
+                    />
                   </Sparklines>
                   <Flex>
-                    <Badge color={status === 'high' ? 'green' : status === 'medium' ? 'orange' : 'red'} size='sm'>
+                    <Badge
+                      color={
+                        status.toLowerCase() === "high"
+                          ? "green"
+                          : status.toLowerCase() === "mid"
+                          ? "orange"
+                          : "red"
+                      }
+                      size="sm"
+                    >
                       {status}
                     </Badge>
                   </Flex>
@@ -236,46 +305,54 @@ export default function AccountBased() {
             },
           },
           {
-            accessorKey: 'last_activity',
-            maxSize: 170,
+            accessorKey: "last_activity",
+            minSize: 210,
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconCalendar color='gray' size={'0.9rem'} />
-                <Text color='gray'>Last Activity</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconCalendar color="gray" size={"0.9rem"} />
+                <Text color="gray">Last Activity</Text>
               </Flex>
             ),
             cell: (cell) => {
-              const { last_activity_date } = cell.row.original;
+              const { latest_reply } = cell.row.original;
 
               return (
-                <Flex w={'100%'} px={'sm'} h={'100%'} align={'center'}>
-                  <Text fw={500} color='gray' size={'xs'}>
-                    {last_activity_date}
+                <Flex w={"100%"} px={"sm"} h={"100%"} align={"center"}>
+                  <Text fw={500} color="gray" size={"xs"}>
+                    {moment(latest_reply).format("MMM DD, YYYY hh:mm A")}
                   </Text>
                 </Flex>
               );
             },
           },
           {
-            accessorKey: 'sent',
+            accessorKey: "sent",
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconSend color='#228be6' size={'0.9rem'} />
-                <Text color='gray'>Sent</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconSend color="#228be6" size={"0.9rem"} />
+                <Text color="gray">Sent</Text>
               </Flex>
             ),
             maxSize: 110,
             enableResizing: true,
             cell: (cell) => {
-              const { sent } = cell.row.original;
+              const { num_sent } = cell.row.original;
 
               return (
-                <Flex align={'center'} justify={'center'} gap={4} py={'lg'} w={'100%'} h={'100%'} bg={'#f9fbfe'}>
-                  <Text color='#228be6' fw={600}>
-                    {sent}
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  gap={4}
+                  py={"lg"}
+                  w={"100%"}
+                  h={"100%"}
+                  bg={"#f9fbfe"}
+                >
+                  <Text color="#228be6" fw={600}>
+                    {num_sent}
                   </Text>
                   <Badge
-                    variant='light'
+                    variant="light"
                     color={theme.colors.blue[1]}
                     styles={{
                       root: {
@@ -283,165 +360,209 @@ export default function AccountBased() {
                       },
                     }}
                   >
-                    {sent}%
+                    {num_sent}%
                   </Badge>
                 </Flex>
               );
             },
           },
           {
-            accessorKey: 'open',
+            accessorKey: "open",
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconChecks color='#db66f3' size={'0.9rem'} />
-                <Text color='gray'>Open</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconChecks color="#db66f3" size={"0.9rem"} />
+                <Text color="gray">Open</Text>
               </Flex>
             ),
             maxSize: 110,
             enableResizing: true,
             cell: (cell) => {
-              const { open } = cell.row.original;
+              const { num_accepted } = cell.row.original;
 
               return (
-                <Flex align={'center'} justify={'center'} gap={4} w={'100%'} py={'lg'} h={'100%'} bg={'#fdf9fe'}>
-                  <Text color={'#db66f3'} fw={600}>
-                    {open}
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  gap={4}
+                  w={"100%"}
+                  py={"lg"}
+                  h={"100%"}
+                  bg={"#fdf9fe"}
+                >
+                  <Text color={"#db66f3"} fw={600}>
+                    {num_accepted}
                   </Text>
                   <Badge
-                    variant='light'
-                    bg='rgba(219,102,243, 0.1)'
-                    style={{ color: '#db66f3' }}
+                    variant="light"
+                    bg="rgba(219,102,243, 0.1)"
+                    style={{ color: "#db66f3" }}
                     styles={{
                       root: {
                         fontWeight: 600,
                       },
                     }}
                   >
-                    {open}%
+                    {num_accepted}%
                   </Badge>
                 </Flex>
               );
             },
           },
           {
-            accessorKey: 'reply',
+            accessorKey: "reply",
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconMessageCheck color='#f0ab78' size={'0.9rem'} />
-                <Text color='gray'>Reply</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconMessageCheck color="#f0ab78" size={"0.9rem"} />
+                <Text color="gray">Reply</Text>
               </Flex>
             ),
             maxSize: 110,
             enableResizing: true,
             cell: (cell) => {
-              const { reply } = cell.row.original;
+              const { num_replied } = cell.row.original;
 
               return (
-                <Flex align={'center'} justify={'center'} gap={4} py={'lg'} w={'100%'} h={'100%'} bg={'#fffbf8'}>
-                  <Text color={'#f0ab78'} fw={600}>
-                    {reply}
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  gap={4}
+                  py={"lg"}
+                  w={"100%"}
+                  h={"100%"}
+                  bg={"#fffbf8"}
+                >
+                  <Text color={"#f0ab78"} fw={600}>
+                    {num_replied}
                   </Text>
                   <Badge
-                    variant='light'
-                    bg='rgba(240, 171, 120, 0.1)'
-                    style={{ color: '#f0ab78' }}
+                    variant="light"
+                    bg="rgba(240, 171, 120, 0.1)"
+                    style={{ color: "#f0ab78" }}
                     styles={{
                       root: {
                         fontWeight: 600,
                       },
                     }}
                   >
-                    {reply}%
+                    {num_replied}%
                   </Badge>
                 </Flex>
               );
             },
           },
           {
-            accessorKey: 'demo',
+            accessorKey: "demo",
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconCalendar color='#73d0a5' size={'0.9rem'} />
-                <Text color='gray'>Demo</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconCalendar color="#73d0a5" size={"0.9rem"} />
+                <Text color="gray">Demo</Text>
               </Flex>
             ),
             maxSize: 110,
             enableResizing: true,
             cell: (cell) => {
-              const { demo } = cell.row.original;
+              const { num_positive_reply } = cell.row.original;
 
               return (
-                <Flex align={'center'} justify={'center'} gap={4} py={'lg'} w={'100%'} h={'100%'} bg={'#f8fbf9'}>
-                  <Text color={'#73d0a5'} fw={600}>
-                    {demo}
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  gap={4}
+                  py={"lg"}
+                  w={"100%"}
+                  h={"100%"}
+                  bg={"#f8fbf9"}
+                >
+                  <Text color={"#73d0a5"} fw={600}>
+                    {num_positive_reply}
                   </Text>
                   <Badge
-                    variant='light'
-                    bg='rbga(115, 208, 165, 0.1)'
-                    style={{ color: '#73d0a5' }}
+                    variant="light"
+                    bg="rbga(115, 208, 165, 0.1)"
+                    style={{ color: "#73d0a5" }}
                     styles={{
                       root: {
                         fontWeight: 600,
                       },
                     }}
                   >
-                    {demo}%
+                    {num_positive_reply}%
                   </Badge>
                 </Flex>
               );
             },
           },
           {
-            accessorKey: 'demo',
+            accessorKey: "demo",
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconCalendar color='#73d0a5' size={'0.9rem'} />
-                <Text color='gray'>Demo</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconCalendar color="#73d0a5" size={"0.9rem"} />
+                <Text color="gray">Demo</Text>
               </Flex>
             ),
             maxSize: 110,
             enableResizing: true,
             cell: (cell) => {
-              const { demo } = cell.row.original;
+              const { num_demo } = cell.row.original;
 
               return (
-                <Flex align={'center'} justify={'center'} gap={4} py={'lg'} w={'100%'} h={'100%'} bg={'#f8fbf9'}>
-                  <Text color={'#73d0a5'} fw={600}>
-                    {demo}
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  gap={4}
+                  py={"lg"}
+                  w={"100%"}
+                  h={"100%"}
+                  bg={"#f8fbf9"}
+                >
+                  <Text color={"#73d0a5"} fw={600}>
+                    {num_demo}
                   </Text>
                   <Badge
-                    variant='light'
-                    bg='rbga(115, 208, 165, 0.1)'
-                    style={{ color: '#73d0a5' }}
+                    variant="light"
+                    bg="rbga(115, 208, 165, 0.1)"
+                    style={{ color: "#73d0a5" }}
                     styles={{
                       root: {
                         fontWeight: 600,
                       },
                     }}
                   >
-                    {demo}%
+                    {num_demo}%
                   </Badge>
                 </Flex>
               );
             },
           },
           {
-            accessorKey: 'action',
+            accessorKey: "action",
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconToggleRight color='gray' size={'0.9rem'} />
-                <Text color='gray'>Action</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconToggleRight color="gray" size={"0.9rem"} />
+                <Text color="gray">Action</Text>
               </Flex>
             ),
             maxSize: 130,
             enableResizing: true,
             cell: (cell) => {
               return (
-                <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  gap={"xs"}
+                  py={"lg"}
+                  w={"100%"}
+                  h={"100%"}
+                >
                   <Badge
-                    tt={'initial'}
-                    variant='filled'
-                    rightSection={<IconExternalLink size={'0.9rem'} style={{ marginTop: '5px' }} />}
+                    tt={"initial"}
+                    variant="filled"
+                    rightSection={
+                      <IconExternalLink
+                        size={"0.9rem"}
+                        style={{ marginTop: "5px" }}
+                      />
+                    }
                     styles={{
                       root: {
                         fontWeight: 400,
@@ -461,38 +582,48 @@ export default function AccountBased() {
         components={{
           pagination: ({ table }) => (
             <Flex
-              justify={'space-between'}
-              align={'center'}
-              px={'sm'}
-              py={'1.25rem'}
+              justify={"space-between"}
+              align={"center"}
+              px={"sm"}
+              py={"1.25rem"}
               sx={(theme) => ({
                 border: `1px solid ${theme.colors.gray[4]}`,
                 borderTopWidth: 0,
               })}
             >
               <Select
-                style={{ width: '150px' }}
+                style={{ width: "150px" }}
                 data={[
-                  { label: 'Show 25 rows', value: '25' },
-                  { label: 'Show 10 rows', value: '10' },
-                  { label: 'Show 5 rows', value: '5' },
+                  { label: "Show 25 rows", value: "25" },
+                  // { label: "Show 10 rows", value: "10" },
+                  // { label: "Show 5 rows", value: "5" },
                 ]}
                 value={acPageSize}
                 onChange={(v) => {
-                  setAcPageSize(v ?? '25');
+                  setAcPageSize(v ?? "25");
                 }}
               />
-              <Flex align={'center'} gap={'sm'}>
-                <Flex align={'center'}>
+              <Flex align={"center"} gap={"sm"}>
+                <Flex align={"center"}>
                   <Select
                     maw={100}
-                    value={`${table.getState().pagination.pageIndex + 1}`}
-                    data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                      label: String(idx + 1),
-                      value: String(idx + 1),
-                    }))}
+                    // value={`${table.getState().pagination.pageIndex + 1}`}
+                    value={`${pageIndex}`}
+                    // data={new Array(table.getPageCount())
+                    //   .fill(0)
+                    //   .map((i, idx) => ({
+                    //     label: String(idx + 1),
+                    //     value: String(idx + 1),
+                    //   }))}
+                    data={new Array(Math.ceil(totalCount / Number(acPageSize)))
+                      .fill(0)
+                      .map((i, idx) => ({
+                        label: String(idx),
+                        value: String(idx),
+                      }))}
                     onChange={(v) => {
-                      table.setPageIndex(Number(v) - 1);
+                      // table.setPageIndex(Number(v) - 1);
+                      setPageIndex(Number(v));
                     }}
                   />
                   <Flex
@@ -500,37 +631,46 @@ export default function AccountBased() {
                       borderTop: `1px solid ${theme.colors.gray[4]}`,
                       borderRight: `1px solid ${theme.colors.gray[4]}`,
                       borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                      marginLeft: '-2px',
-                      paddingLeft: '1rem',
-                      paddingRight: '1rem',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '0.25rem',
+                      marginLeft: "-2px",
+                      paddingLeft: "1rem",
+                      paddingRight: "1rem",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "0.25rem",
                     })}
                     h={36}
                   >
-                    <Text color='gray.5' fw={500} fz={14}>
-                      of {table.getPageCount()} pages
+                    <Text color="gray.5" fw={500} fz={14}>
+                      of {Math.ceil(totalCount / Number(acPageSize))} pages
                     </Text>
                   </Flex>
                   <ActionIcon
-                    variant='default'
-                    color='gray.4'
+                    variant="default"
+                    color="gray.4"
                     h={36}
-                    disabled={table.getState().pagination.pageIndex === 0}
+                    disabled={Math.ceil(totalCount / Number(acPageSize)) === 0}
                     onClick={() => {
-                      table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                      // table.setPageIndex(
+                      //   table.getState().pagination.pageIndex - 1
+                      // );
+                      setPageIndex((prev) => prev - 1);
                     }}
                   >
                     <IconChevronLeft stroke={theme.colors.gray[4]} />
                   </ActionIcon>
                   <ActionIcon
-                    variant='default'
-                    color='gray.4'
+                    variant="default"
+                    color="gray.4"
                     h={36}
-                    disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                    disabled={
+                      table.getState().pagination.pageIndex ===
+                      table.getPageCount() - 1
+                    }
                     onClick={() => {
-                      table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                      // table.setPageIndex(
+                      //   table.getState().pagination.pageIndex + 1
+                      // );
+                      setPageIndex((prev) => prev + 1);
                     }}
                   >
                     <IconChevronRight stroke={theme.colors.gray[4]} />
@@ -540,14 +680,14 @@ export default function AccountBased() {
             </Flex>
           ),
         }}
-        w={'100%'}
+        w={"100%"}
         pageSizes={[acPageSize]}
         styles={(theme) => ({
           thead: {
-            height: '44px',
+            height: "44px",
             backgroundColor: theme.colors.gray[0],
-            '::after': {
-              backgroundColor: 'transparent',
+            "::after": {
+              backgroundColor: "transparent",
             },
           },
 
@@ -560,7 +700,7 @@ export default function AccountBased() {
           },
 
           dataCellContent: {
-            width: '100%',
+            width: "100%",
           },
         })}
       />

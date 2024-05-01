@@ -216,9 +216,16 @@ export default function ProspectDetailsCRMSync(props: {
           </Text>
         </Flex>
       )}
-      <Text color="gray" fw={500} size={"sm"}>
-        Opportunity Value: {" "} {`$${props.prospect?.contract_size || userData.contract_size || " Not Set"}`}
-      </Text>
+      {synced && (
+        <Text color="gray" fw={500} size={"sm"}>
+          Opportunity Value:{" "}
+          {`$${
+            props.prospect?.contract_size ||
+            userData.contract_size ||
+            " Not Set"
+          }`}
+        </Text>
+      )}
       <Modal
         opened={CRMOpened}
         size={"lg"}

@@ -241,7 +241,7 @@ export default function AccountBased() {
               </Flex>
             ),
             cell: (cell) => {
-              let { sparkline_data, status } = cell.row.original;
+              let { sparkline_data, status }: any = cell.row.original;
 
               let new_sparkline_data = [];
               let random_entropy = [0.1, -0.1, 0.05, -0.05];

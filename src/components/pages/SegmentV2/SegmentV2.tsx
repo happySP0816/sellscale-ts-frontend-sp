@@ -93,6 +93,11 @@ export default function SegmentV2(props: PropsType) {
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
   const [selectedSegmentName, setSelectedSegmentName] = useState("");
   const [selectedSegmentProspects, setSelectedSegmentProspects] = useState(0);
+  const [
+    isAutoScrapeEnabledForSelectedSegment,
+    setIsAutoScrapeEnabledForSelectedSegment,
+  ] = useState(false);
+  const [currentPageForSegment, setCurrentPageForSegment] = useState(0);
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
   const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(
     false
@@ -644,6 +649,12 @@ export default function SegmentV2(props: PropsType) {
                           setSelectedSegmentProspects(
                             cell.row.original.apollo_query.num_results
                           );
+                          setIsAutoScrapeEnabledForSelectedSegment(
+                            cell.row.original.autoscrape_enabled
+                          );
+                          setCurrentPageForSegment(
+                            cell.row.original.current_scrape_page
+                          );
                         }}
                       >
                         Enabled Auto-Download
@@ -1050,8 +1061,6 @@ export default function SegmentV2(props: PropsType) {
       >
         <SegmentAutodownload
           segmentId={selectedSegmentId}
-          segmentName={selectedSegmentName}
-          segmentNumProspects={selectedSegmentProspects}
           onDownloadHistoryClick={() => {
             props.onDownloadHistoryClick && props.onDownloadHistoryClick();
             setOpenAutoDownloadModal(false);

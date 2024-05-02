@@ -16,6 +16,7 @@ import {
   Stack,
   Box,
   Flex,
+  Image,
 } from "@mantine/core";
 import {
   IconPlus,
@@ -23,12 +24,15 @@ import {
   IconSearch,
   IconMicrophone,
   IconWand,
+  IconBooks,
 } from "@tabler/icons";
 import { API_URL } from "@constants/data";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { set } from "lodash";
 import { IconMagnetic } from "@tabler/icons-react";
+import { modals } from "@mantine/modals";
+import AssetIngestor from "@common/assets/AssetIngester";
 
 interface PersonaData {
   name: string;
@@ -42,6 +46,10 @@ interface PersonaData {
   saved_apollo_query: any;
   stack_ranked_message_generation_configuration_id: number;
   stack_ranked_message_generation_configuration: any;
+  client_sdr: {
+    sdr_name: string;
+    img_url: string;
+  };
 }
 
 const Personas = () => {
@@ -58,7 +66,7 @@ const Personas = () => {
 
   const [showAssetModal, setShowAssetModal] = useState(false);
   const [assets, setAssets]: any = useState([]);
-  const [usedAssets, setUsedAssets] = useState([]);
+  const [usedAssets, setUsedAssets]: any = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
   const [voices, setVoices] = useState([]);
@@ -255,6 +263,12 @@ const Personas = () => {
         <Text color="dimmed" size="xs">
           {persona.description}
         </Text>
+
+        <Flex mt="xs">
+          <Text size="10px" color="gray">
+            Created by: {persona.client_sdr?.sdr_name}
+          </Text>
+        </Flex>
       </td>
       {/* <td style={{ paddingTop: 12, paddingBottom: 12 }}>
         {persona.saved_apollo_query_id ? (
@@ -329,9 +343,29 @@ const Personas = () => {
               setOpenedPersonaId(persona.id);
             }}
           >
-            {persona.assets.length > 0 ? "Edit" : "Add"} Assets
+            {persona.assets.length > 0 ? "Edit" : "Attach"} Assets
           </Button>
         </>
+      </td>
+      <td>
+        <Button
+          leftIcon={<IconBooks size={14} />}
+          variant="outline"
+          size="xs"
+          compact
+          mt="xs"
+          color="grape"
+          onClick={() => {
+            modals.openConfirmModal({
+              size: "70dvw",
+              title: <Title order={3}>Asset Ingestor</Title>,
+              children: <AssetIngestor personaId={persona.id} />,
+              labels: { confirm: "Finish", cancel: "Close" },
+            });
+          }}
+        >
+          Ingest Assets
+        </Button>
       </td>
       {/* <td style={{ paddingTop: 12, paddingBottom: 12 }}>
         <Text>
@@ -408,45 +442,56 @@ const Personas = () => {
           mb="md"
           onChange={(event) => setSearchQuery(event.currentTarget.value)}
         />
-        {filteredAssets.map((asset: any, index: any) => (
-          <Card key={index} mb="md" shadow="sm">
-            <Group
-              position="apart"
-              sx={{ flexDirection: "row", display: "flex" }}
-            >
-              <Box w="80%">
-                <Stack>
-                  <Group>
-                    <Text weight={500} size="sm">
-                      {asset.asset_key}
+        {/* sort by if usedAssets.includes(asset.id) */}
+        {filteredAssets
+          .sort((a: any, b: any) => {
+            if (usedAssets.includes(a.id)) return -1;
+            if (usedAssets.includes(b.id)) return 1;
+            return 0;
+          })
+          .map((asset: any, index: any) => (
+            <Card key={index} mb="md" shadow="sm">
+              <Group
+                position="apart"
+                sx={{ flexDirection: "row", display: "flex" }}
+              >
+                <Box w="80%">
+                  <Stack>
+                    <Group>
+                      <Text weight={500} size="sm">
+                        {asset.asset_key}
+                      </Text>
+                      {asset.asset_tags.map((tag: any, tagIndex: any) => (
+                        <Badge size="xs" key={tagIndex} color="blue">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </Group>
+                    <Text color="dimmed" size="10px">
+                      {asset.asset_value}
                     </Text>
-                    {asset.asset_tags.map((tag: any, tagIndex: any) => (
-                      <Badge size="xs" key={tagIndex} color="blue">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </Group>
-                  <Text color="dimmed" size="10px">
-                    {asset.asset_value}
-                  </Text>
-                </Stack>
-              </Box>
-              <Box w="15%">
-                <Switch
-                  checked={usedAssets.filter((x) => x === asset.id).length > 0}
-                  onChange={() => {
-                    if (usedAssets.filter((x) => x === asset.id).length > 0) {
-                      unlinkAsset(asset.id, openedPersonaId);
-                    } else {
-                      linkAsset(asset.id, openedPersonaId);
+                  </Stack>
+                </Box>
+                <Box w="15%">
+                  <Switch
+                    checked={
+                      usedAssets?.filter((x: any) => x === asset.id).length > 0
                     }
-                  }}
-                  size="md"
-                />
-              </Box>
-            </Group>
-          </Card>
-        ))}
+                    onChange={() => {
+                      if (
+                        usedAssets.filter((x: any) => x === asset.id).length > 0
+                      ) {
+                        unlinkAsset(asset.id, openedPersonaId);
+                      } else {
+                        linkAsset(asset.id, openedPersonaId);
+                      }
+                    }}
+                    size="md"
+                  />
+                </Box>
+              </Group>
+            </Card>
+          ))}
         {filteredAssets.length === 0 && <Text size="sm">No assets found.</Text>}
       </Modal>
       <Modal
@@ -486,19 +531,21 @@ const Personas = () => {
         style={{ marginBottom: 20, alignItems: "center" }}
       >
         <div>
-          <Title order={2}>Personas</Title>
+          <Title order={2}>Intakes</Title>
           <Text color="dimmed" size="sm">
-            Personas help you define filters, assets, and voice easily for
-            future campaigns.
+            Intakes help you define filters, assets, and voice easily for future
+            campaigns.
           </Text>
         </div>
+
         <Button
+          ml="xs"
           leftIcon={<IconPlus size={14} />}
           variant="filled"
-          size="md"
+          size="sm"
           onClick={handleAddPersona}
         >
-          Add persona
+          New Intake
         </Button>
       </Group>
 
@@ -542,6 +589,7 @@ const Personas = () => {
               <th style={{ width: "40%" }}>Persona Name</th>
               {/* <th style={{ width: "20%" }}>Pre-Filters</th> */}
               <th style={{ width: "20%" }}>AI Brain</th>
+              <th style={{ width: "20%" }}>Ingest</th>
               {/* <th style={{ width: "20%" }}>Voice</th> */}
             </tr>
           </thead>

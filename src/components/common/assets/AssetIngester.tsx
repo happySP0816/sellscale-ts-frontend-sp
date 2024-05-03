@@ -9,7 +9,7 @@ export default function AssetIngestor(props: { personaId?: number }) {
         title="Asset Ingestor"
         src={`https://sellscale.retool.com/embedded/public/d925cdf6-7a91-4f34-b417-d888dbf611a5#client_id=${userData?.client?.id}&personaId=${props.personaId}`}
         width="100%"
-        height="600px"
+        height="650px"
         style={{
           outline: "none",
           border: "none",

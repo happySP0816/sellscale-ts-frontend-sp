@@ -115,6 +115,7 @@ import { ListItem } from "@mantine/core/lib/List/ListItem/ListItem";
 import Utilization from "@pages/Utilization/Utilization";
 import AccountBased from "@pages/AccountBased";
 import WebsiteIntent from "./websiteIntent/WebsiteIntent";
+import ChampionChange from "./champion/Championchange";
 
 export type CampaignPersona = {
   id: number;
@@ -487,7 +488,7 @@ export default function PersonaCampaigns() {
             <WebsiteIntent />
           </Tabs.Panel>
           <Tabs.Panel value="champion-change" pt="xs">
-            <>This is Champion change page </>
+            <ChampionChange />
           </Tabs.Panel>
           <Tabs.Panel value="account-based" pt="xs">
             <AccountBased />

@@ -361,6 +361,7 @@ const Personas = () => {
               title: <Title order={3}>Asset Ingestor</Title>,
               children: <AssetIngestor personaId={persona.id} />,
               labels: { confirm: "Finish", cancel: "Close" },
+              onClose: () => fetchPersonas(),
             });
           }}
         >
@@ -533,7 +534,7 @@ const Personas = () => {
         <div>
           <Title order={2}>Intakes</Title>
           <Text color="dimmed" size="sm">
-            Intakes help you define filters, assets, and voice easily for future
+            Intakes help you specify assets that the AI can use to generate
             campaigns.
           </Text>
         </div>
@@ -555,7 +556,7 @@ const Personas = () => {
         title="Add New Persona"
       >
         <TextInput
-          label="Persona Name"
+          label="Intake Name"
           placeholder="Enter persona name"
           value={newPersonaName}
           onChange={(event) => setNewPersonaName(event.currentTarget.value)}

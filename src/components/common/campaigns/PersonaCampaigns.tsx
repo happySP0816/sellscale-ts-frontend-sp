@@ -1327,11 +1327,24 @@ export function PersonCampaignCard(props: {
                   <Box mt="xs">
                     <Badge
                       size="xs"
-                      color={props.persona.active ? "blue" : "gray"}
+                      color={
+                        (props.persona.active &&
+                        props.persona.total_prospects > 0
+                          ? "blue"
+                          : props.persona.active
+                          ? "yellow"
+                          : "red") || "yellow"
+                      }
                       onMouseEnter={statusopenPopover}
                       onMouseLeave={statusclosePopover}
                     >
-                      {props.persona.active ? "Active" : "Inactive"}
+                      {/* If props.persona.active and num_prospects > 0 then 'Active' else if props.persona.active then "Setup" else "Inactive" */}
+                      {(props.persona.active &&
+                      props.persona.total_prospects > 0
+                        ? "Active"
+                        : props.persona.active
+                        ? "Setup"
+                        : "Inactive") || "Inactive"}
                     </Badge>
                     {!!props.persona.smartlead_campaign_id && (
                       <Tooltip label="Synced with Email Sequence" withArrow>

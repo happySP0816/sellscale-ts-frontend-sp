@@ -5,6 +5,7 @@ import {
   Card,
   Divider,
   Flex,
+  MultiSelect,
   Paper,
   Switch,
   Text,
@@ -34,7 +35,7 @@ export default function CRMSyncableModels(props: {
   const [userData, setUserData] = useRecoilState(userDataState);
 
   const [crmSync, setCRMSync] = useState<ClientSyncCRM>(props.crmSync);
-
+  
   if (!props.integration) {
     return <></>;
   }
@@ -212,7 +213,19 @@ export default function CRMSyncableModels(props: {
                         }}
                       />
                     </Flex>
+                    
                   </Flex>
+                  {(model.type === 'contact' || model.type === 'account') && <Flex mt={'xs'} align="left" gap="sm">
+                    <Text mt={4} color="gray" size={"xs"}>De-duplicate new {model.entity}s by: </Text>
+                    <MultiSelect
+                      data={[{ value: 'contact.email', label: 'contact.email' }, { value: 'account.name', label: 'account.name' }]}
+                      value={model.type === 'contact' ? ['contact.email'] : ['account.name']}
+                      placeholder="Select criteria"
+                      defaultValue={['email']}
+                      disabled
+                      size="xs"
+                    />
+                   </Flex>}
                 </Card>
               );
             })

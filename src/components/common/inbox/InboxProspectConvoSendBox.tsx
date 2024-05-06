@@ -355,6 +355,14 @@ export default forwardRef(function InboxProspectConvoSendBox(
           color: "red",
         });
       } else {
+        //clear the input values
+        setCcEmails([]);
+        setBccEmails([]);
+        setCcInputValue("");
+        setBccInputValue("");
+        setMessageDraft("");
+        //close the email composer dialog
+        props.minimizedSendBox();
         if (scheduleDay) {
           showNotification({
             title: "Success",

@@ -1,5 +1,6 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import {
+  Accordion,
   Box,
   Button,
   Card,
@@ -24,6 +25,7 @@ type CRMModel = {
   type: string;
   description: string;
   toggleColor: string;
+  accordionObject?: any;
 };
 
 export default function CRMSyncableModels(props: {
@@ -35,7 +37,7 @@ export default function CRMSyncableModels(props: {
   const [userData, setUserData] = useRecoilState(userDataState);
 
   const [crmSync, setCRMSync] = useState<ClientSyncCRM>(props.crmSync);
-  
+
   if (!props.integration) {
     return <></>;
   }
@@ -100,6 +102,36 @@ export default function CRMSyncableModels(props: {
             type: "lead",
             description: "A potential customer that you want to track.",
             toggleColor: "blue",
+            accordionObject: (
+              <>
+                <Flex mt={"6px"}>
+                  <Text mt={4} color="gray" size={"xs"} mr="sm">
+                    De-duplicate new Leads by:
+                  </Text>
+                  <MultiSelect
+                    data={[{ value: "contact.email", label: "contact.email" }]}
+                    value={["contact.email"]}
+                    placeholder="Select criteria"
+                    defaultValue={["contact.email"]}
+                    disabled
+                    size="xs"
+                  />
+                </Flex>
+                <Flex mt={"6px"}>
+                  <Text mt={4} color="gray" size={"xs"} mr="sm">
+                    Set LeadSource as:
+                  </Text>
+                  <MultiSelect
+                    data={[{ value: "SellScale", label: "SellScale" }]}
+                    value={["SellScale"]}
+                    placeholder="Select criteria"
+                    defaultValue={["SellScale"]}
+                    disabled
+                    size="xs"
+                  />
+                </Flex>
+              </>
+            ),
           },
         ];
       });
@@ -115,6 +147,23 @@ export default function CRMSyncableModels(props: {
             type: "contact",
             description: "A person who you do business with.",
             toggleColor: "orange",
+            accordionObject: (
+              <>
+                <Flex mt="6px">
+                  <Text mt={4} color="gray" size={"xs"} mr="sm">
+                    De-duplicate new Contacts by:
+                  </Text>
+                  <MultiSelect
+                    data={[{ value: "contact.email", label: "contact.email" }]}
+                    value={["contact.email"]}
+                    placeholder="Select criteria"
+                    defaultValue={["contact.email"]}
+                    disabled
+                    size="xs"
+                  />
+                </Flex>
+              </>
+            ),
           },
         ];
       });
@@ -131,6 +180,23 @@ export default function CRMSyncableModels(props: {
             description:
               "An organization or company that you do business with.",
             toggleColor: "orange",
+            accordionObject: (
+              <>
+                <Flex mt="6px">
+                  <Text mt={4} color="gray" size={"xs"} mr="sm">
+                    De-duplicate new Accounts by:
+                  </Text>
+                  <MultiSelect
+                    data={[{ value: "account.name", label: "account.name" }]}
+                    value={["account.name"]}
+                    placeholder="Select criteria"
+                    defaultValue={["account.name"]}
+                    disabled
+                    size="xs"
+                  />
+                </Flex>
+              </>
+            ),
           },
         ];
       });
@@ -213,19 +279,72 @@ export default function CRMSyncableModels(props: {
                         }}
                       />
                     </Flex>
-                    
                   </Flex>
-                  {(model.type === 'contact' || model.type === 'account') && <Flex mt={'xs'} align="left" gap="sm">
-                    <Text mt={4} color="gray" size={"xs"}>De-duplicate new {model.entity}s by: </Text>
-                    <MultiSelect
-                      data={[{ value: 'contact.email', label: 'contact.email' }, { value: 'account.name', label: 'account.name' }]}
-                      value={model.type === 'contact' ? ['contact.email'] : ['account.name']}
-                      placeholder="Select criteria"
-                      defaultValue={['email']}
-                      disabled
-                      size="xs"
-                    />
-                   </Flex>}
+                  {/* {(model.type === "contact" || model.type === "account") && (
+                    <Flex mt={"xs"} align="left" gap="sm">
+                      <Text mt={4} color="gray" size={"xs"}>
+                        De-duplicate new {model.entity}s by:{" "}
+                      </Text>
+                      <MultiSelect
+                        data={[
+                          { value: "contact.email", label: "contact.email" },
+                          { value: "account.name", label: "account.name" },
+                        ]}
+                        value={
+                          model.type === "contact"
+                            ? ["contact.email"]
+                            : ["account.name"]
+                        }
+                        placeholder="Select criteria"
+                        defaultValue={["email"]}
+                        disabled
+                        size="xs"
+                      />
+                    </Flex>
+                  )} */}
+                  {model.accordionObject && (
+                    <Accordion
+                      styles={{
+                        chevron: {
+                          margin: "0px",
+                        },
+                        control: {
+                          maxWidth: "120px",
+                          margin: "0px",
+                          padding: "0px;",
+                          maxHeight: "20px",
+                          color: "#000",
+                          alignItems: "center",
+                          fontSize: "12px",
+                          "&:hover": {
+                            backgroundColor: "transparent", // No hover
+                          },
+                        },
+                        label: {
+                          color: "#000",
+                        },
+                        item: {
+                          borderLeft: "1px solid black",
+                          borderBottom: "none",
+                          padding: "0px 0px 0px 10px",
+                          margin: "0px",
+                          alignItems: "center",
+                          fontSize: "6px",
+                        },
+                        content: {
+                          padding: "0px",
+                        },
+                      }}
+                      mt="xs"
+                    >
+                      <Accordion.Item key={index} value={model.type}>
+                        <Accordion.Control>Customization</Accordion.Control>
+                        <Accordion.Panel>
+                          {model.accordionObject}
+                        </Accordion.Panel>
+                      </Accordion.Item>
+                    </Accordion>
+                  )}
                 </Card>
               );
             })
@@ -240,7 +359,7 @@ export default function CRMSyncableModels(props: {
       <Divider />
 
       {/* Only show CRMEventHandler AFTER they have selected Model(s) to sync */}
-      {(leadToggled || caoToggled) && <CRMEventHandler crmSync={crmSync}/>}
+      {(leadToggled || caoToggled) && <CRMEventHandler crmSync={crmSync} />}
     </Paper>
   );
 }

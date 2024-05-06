@@ -81,7 +81,10 @@ export default function StageMapping() {
       <Flex align={"center"} justify={"space-between"}>
         <Flex direction={"column"} mb={"md"}>
           <Text fw={600} size={20}>
-            Stage Mapping
+            Manual Syncing - Pipeline Stage Mapping
+          </Text>
+          <Text color="gray" size={"sm"} mt="2px">
+            When manually syncing contacts into your CRM from SellScale, these will be the default stages Prospects are placed in.
           </Text>
         </Flex>
       </Flex>

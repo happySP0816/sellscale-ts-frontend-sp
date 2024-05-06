@@ -32,7 +32,6 @@ import CRMSyncableModels from "../CRMConnection/CRMSyncableModels";
 
 import { API_URL } from "@constants/data";
 
-
 export const IntegrationToIconMap = new Map([
   ["HubSpot", <IconAffiliate color="orange" rotate="90%" />],
   ["Salesforce", <IconCloud color="rgb(71, 155, 213)" />],
@@ -101,26 +100,7 @@ const CRMConnectionPage: React.FC = () => {
     const data = await response.json();
     setIntegration(data.data.integration);
     setSupportedModels(data.data.supported_models);
-    setCRMSync(data.data.crm_sync)
-  };
-
-  const createTestAccount = async () => {
-    setCreatingTestContact(true);
-    const response = await fetch(`${API_URL}/merge_crm/test_account`, {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + userToken,
-      },
-    });
-    setCreatingTestContact(false);
-
-    showNotification({
-      title: "Test Account Created in CRM!",
-      message: 'Open up your CRM and find the Account named "SellScale Test"',
-      color: "blue",
-      icon: <IconCircleCheck />,
-      autoClose: 5000,
-    });
+    setCRMSync(data.data.crm_sync);
   };
 
   useEffect(() => {
@@ -231,7 +211,7 @@ const CRMConnectionPage: React.FC = () => {
           </Flex>
 
           <CRMUserMapping />
-          <StageMapping />
+          {crmSync.opportunity_sync && <StageMapping />}
         </Paper>
       )}
     </Card>

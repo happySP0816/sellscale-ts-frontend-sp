@@ -146,7 +146,8 @@ export default function CRMEventHandler(props: { crmSync: ClientSyncCRM }) {
             variant="outline"
             disabled={
               !!(
-                JSON.stringify(existingEvents) === JSON.stringify({[sellscaleStage as string]: crmStage}) || 
+                JSON.stringify(existingEvents) ===
+                  JSON.stringify({ [sellscaleStage as string]: crmStage }) ||
                 (sellscaleStage && props.crmSync.opportunity_sync && !crmStage)
               )
             }
@@ -158,13 +159,13 @@ export default function CRMEventHandler(props: { crmSync: ClientSyncCRM }) {
                 return;
               }
               setSellscaleStage(sellscaleStage);
-              setCrmStage(crmStage);              
+              setCrmStage(crmStage);
               if (!crmStage) {
                 setCrmStage("LEAD_ONLY");
                 patchEventHandler({
                   [sellscaleStage as string]: "LEAD_ONLY",
-                })
-                return
+                });
+                return;
               }
 
               patchEventHandler({
@@ -223,29 +224,33 @@ export default function CRMEventHandler(props: { crmSync: ClientSyncCRM }) {
             )
           ))}
       </Flex>
-      <Divider mt="sm" mb="md" />
-      <Flex direction="row" justify="space-between" align="center">
-        <Flex w="48%" direction="column">
-          <Text>Average Opportunity Value</Text>
-          <Text color="gray" size={"sm"} lh={"1.1rem"}>
-            Prospects synced into your CRM will show this opportunity value
-          </Text>
-        </Flex>
+      {props.crmSync.opportunity_sync && (
+        <>
+          <Divider mt="sm" mb="md" />
+          <Flex direction="row" justify="space-between" align="center">
+            <Flex w="48%" direction="column">
+              <Text>Average Opportunity Value</Text>
+              <Text color="gray" size={"sm"} lh={"1.1rem"}>
+                Prospects synced into your CRM will show this opportunity value
+              </Text>
+            </Flex>
 
-        <NumberInput
-          w={"50%"}
-          value={contractSize}
-          parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-          formatter={(value) =>
-            !Number.isNaN(parseFloat(value))
-              ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
-              : "$ "
-          }
-          onChange={(value) => {
-            setContractSize(value || 0);
-          }}
-        />
-      </Flex>
+            <NumberInput
+              w={"50%"}
+              value={contractSize}
+              parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+              formatter={(value) =>
+                !Number.isNaN(parseFloat(value))
+                  ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
+                  : "$ "
+              }
+              onChange={(value) => {
+                setContractSize(value || 0);
+              }}
+            />
+          </Flex>
+        </>
+      )}
     </Paper>
   );
 }

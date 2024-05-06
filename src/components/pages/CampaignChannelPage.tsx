@@ -90,7 +90,7 @@ export default function CampaignChannelPage(props: {
         setCurrentProject(currentCampaign);
         triggerGetAssets(currentCampaign);
       }
-      return currentCampaign;
+      return currentCampaign ?? null;
     },
     refetchOnWindowFocus: false,
   });
@@ -248,7 +248,7 @@ export default function CampaignChannelPage(props: {
             setSelectedChannel={setSelectedChannel}
             selectedChannel={selectedChannel}
             hideChannels={true}
-            campaign={campaign}
+            campaign={campaign ?? undefined}
           />
         </Box>
       )}

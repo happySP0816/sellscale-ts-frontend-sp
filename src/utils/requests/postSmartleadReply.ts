@@ -14,7 +14,8 @@ export default async function postSmartleadReply(
   prospectID: number,
   emailBody: string,
   scheduledSendDate?: Date,
-  cc_emails?: string[]
+  cc_emails?: string[],
+  bcc_emails?: string[],
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/smartlead/prospect/conversation`, {
     method: 'POST',
@@ -27,6 +28,7 @@ export default async function postSmartleadReply(
       email_body: emailBody,
       scheduled_send_date: scheduledSendDate,
       cc_emails: cc_emails,
+      bcc_emails: bcc_emails,
     }),
   });
   return await processResponse(response);

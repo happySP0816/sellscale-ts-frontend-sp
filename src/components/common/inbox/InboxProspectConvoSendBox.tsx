@@ -16,6 +16,7 @@ import {
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { openConfirmModal } from "@mantine/modals";
 import {
+  Badge,
   Paper,
   Flex,
   Textarea,
@@ -228,6 +229,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const [emailReplyFrameworks, setEmailReplyFrameworks] = useState<
     EmailReplyFramework[]
   >([]);
+  const isValidEmail = (email: string) => {
+    return /\S+@\S+\.\S+/.test(email);
+  }
   const [replyLabel, setReplyLabel] = useState(props.currentSubstatus);
   // We use this to store the value of the text area
   const [messageDraft, _setMessageDraft] = useState("");
@@ -247,6 +251,13 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const [msgLoading, setMsgLoading] = useState(props.msgLoading || false);
 
   const [ccEmails, setCcEmails] = useState<string[]>([]);
+  const [bccEmails, setBccEmails] = useState<string[]>([]);
+
+  const [ccInputValue, setCcInputValue] = useState('');
+  const [bccInputValue, setBccInputValue] = useState('');
+
+  const [showCc, setShowCc] = useState<boolean>(false);
+  const [showBcc, setShowBcc] = useState<boolean>(false);
 
   const sendMessage = async () => {
     setMsgLoading(true);
@@ -334,7 +345,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
         prospectid,
         messageDraftEmail.current,
         scheduleDay,
-        ccEmails
+        ccEmails,
+        bccEmails
       );
       if (response.status !== "success") {
         showNotification({
@@ -706,6 +718,35 @@ export default forwardRef(function InboxProspectConvoSendBox(
               <IconExternalLink size="0.65rem" />
             </Text>
           </Flex>
+          <Flex>
+          {openedOutboundChannel !== "LINKEDIN" && (
+            <Button 
+              variant="transparent" 
+              style={{ color: "white" }} 
+              onClick={() => setShowCc(!showCc)}
+            >
+              CC
+              {ccEmails.length > 0 && (
+                <Badge color="blue" variant="filled" style={{ marginLeft: '8px' }}>
+                  {ccEmails.length}
+                </Badge>
+              )}
+            </Button>
+          )}
+          {openedOutboundChannel !== "LINKEDIN" && (
+            <Button 
+              variant="transparent" 
+              style={{ color: "white" }} 
+              onClick={() => setShowBcc(!showBcc)}
+            >
+              BCC
+              {bccEmails.length > 0 && (
+                <Badge color="blue" variant="filled" style={{ marginLeft: '8px' }}>
+                  {bccEmails.length}
+                </Badge>
+              )}
+            </Button>
+          )}
           {true && ( // TODO: Added chat box expanding
             <div style={{ paddingRight: 5 }}>
               <ActionIcon
@@ -718,7 +759,88 @@ export default forwardRef(function InboxProspectConvoSendBox(
               </ActionIcon>
             </div>
           )}
+          </Flex>
         </Group>
+        {showCc && (
+          <div style={{ position: 'relative', marginBottom: '10px' }}>
+            <span style={{
+              position: 'absolute',
+              left: '4px',
+              top: '4px',
+              borderRadius: '4px',
+              zIndex: 10,
+              color: 'white',
+              backgroundColor: '#1a252f',
+              padding: '1px 3px',
+            }}>
+              CC:
+            </span>
+            <MultiSelect
+              data={ccEmails}
+              value={ccEmails}
+              onChange={setCcEmails}
+              creatable
+              getCreateLabel={(query) => `+ Add ${query}`}
+              searchable
+              searchValue={ccInputValue} // Controlled input value
+              onSearchChange={setCcInputValue} // Update input value on change
+              styles={{
+                rightSection: { display: 'none' },  // Hide the dropdown arrow
+                input: { paddingLeft: '60px' }, // Adjust padding to prevent text overlap
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  const inputValue = event.currentTarget.value;
+                  if (isValidEmail(inputValue)) {
+                    setCcEmails((current) => [...current, inputValue]);
+                    setCcInputValue(''); // Clear the controlled input value
+                    event.preventDefault();
+                  }
+                }
+              }}
+    />
+          </div>
+        )}
+        {showBcc && (
+          <div style={{ position: 'relative', marginBottom: '10px' }}>
+            <span style={{
+              position: 'absolute',
+              left: '4px',
+              top: '5px',
+              borderRadius: '4px',
+              zIndex: 10,
+              color: 'white',
+              backgroundColor: '#1a252f',
+              padding: '1px 3px',
+            }}>
+              BCC:
+            </span>
+            <MultiSelect
+              data={bccEmails}
+              value={bccEmails}
+              onChange={setBccEmails}
+              creatable
+              getCreateLabel={(query) => `+ Add ${query}`}
+              searchable
+              searchValue={bccInputValue} // Controlled input value
+              onSearchChange={setBccInputValue} // Update input value on change
+              styles={{
+                rightSection: { display: 'none' },  // Hide the dropdown arrow
+                input: { paddingLeft: '60px' }, // Adjust padding to prevent text overlap
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  const inputValue = event.currentTarget.value;
+                  if (isValidEmail(inputValue)) {
+                    setBccEmails((current) => [...current, inputValue]);
+                    setBccInputValue(''); // Clear the controlled input value
+                    event.preventDefault();
+                  }
+                }
+              }}
+            />
+          </div>
+        )}
       </div>
       <div
         style={{
@@ -1112,42 +1234,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
           </Flex>
 
           <Flex mt="xs" align="center" direction="row" justify={"end"}>
-            {openedOutboundChannel !== "LINKEDIN" && (
-              <Box px={15}>
-                <Popover width={250} position="bottom" withArrow shadow="md">
-                  <Popover.Target>
-                    <Indicator
-                      inline
-                      label={ccEmails.length}
-                      size={16}
-                      disabled={ccEmails.length == 0}
-                    >
-                      <ActionIcon
-                        variant="filled"
-                        color="blue"
-                        radius="xl"
-                        aria-label="CC Emails"
-                      >
-                        <IconTags size="1.2rem" stroke={1.5} />
-                      </ActionIcon>
-                    </Indicator>
-                  </Popover.Target>
-                  <Popover.Dropdown>
-                    <MultiSelect
-                      withinPortal
-                      data={userData?.meta_data?.handoff_emails ?? []}
-                      searchable
-                      value={ccEmails}
-                      onChange={(value) => {
-                        setCcEmails(value);
-                      }}
-                      placeholder="Add Email to CC"
-                    />
-                  </Popover.Dropdown>
-                </Popover>
-              </Box>
-            )}
-
             <Popover
               position="bottom"
               withArrow

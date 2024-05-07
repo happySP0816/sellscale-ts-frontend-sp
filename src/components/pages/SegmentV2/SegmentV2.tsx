@@ -1209,6 +1209,7 @@ export default function SegmentV2(props: PropsType) {
               mt='md'
               color='teal'
               onClick={() => {
+                setShowConnectCampaignModal(false);
                 setRequestCampaignModal(true);
               }}
             >

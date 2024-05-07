@@ -1,7 +1,24 @@
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import PageFrame from '@common/PageFrame';
 import { API_URL } from '@constants/data';
-import { ActionIcon, Badge, Box, Button, Flex, Group, Image, InputBase, Modal, Radio, Select, Text, TextInput, Title, useMantineTheme } from '@mantine/core';
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  Group,
+  Image,
+  InputBase,
+  Modal,
+  Radio,
+  Select,
+  Text,
+  TextInput,
+  Title,
+  useMantineTheme,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { DatePickerInput } from '@mantine/dates';
 import {
@@ -56,29 +73,13 @@ export default function AccountBased() {
   const [filterData, setFilterData] = useState<AccountBasedDataType[]>([]);
 
   const [dateRange, setDateRange] = useState<string[]>(['', '']);
-  const [metrics, setMetrics] = useState<string>('');
-  const [engagement, setEngagement] = useState<string>('');
+  const [metrics, setMetrics] = useState<string[]>([]);
+  const [engagement, setEngagement] = useState<string[]>([]);
 
-  const handleFilter = () => {
-    let newData = accountBasedData.slice();
-    if (engagement !== '') {
-      newData = newData.filter((item) => item.status.toLowerCase() === engagement.toLowerCase());
-    }
-    if (dateRange[0] !== '' && dateRange[1] !== '') {
-      const startDate = moment(dateRange[0], 'MMM DD, YYYY');
-      const endDate = moment(dateRange[1], 'MMM DD, YYYY');
+  const [filterStatus, setFilterStatus] = useState(false);
 
-      newData = newData.filter((item) => {
-        const itemDate = moment(item.latest_reply);
-        return itemDate.isBetween(startDate, endDate, undefined, '[]');
-      });
-    }
-    if (metrics !== '') {
-      console.log('metrics filter');
-    }
-
-    setFilterData(newData);
-  };
+  const metricsOptions = ['Sent', 'Open', 'Reply', 'Positive Reply', 'Demo Set'];
+  const engagementOptions = ['High', 'Medium', 'Low'];
 
   const handleConvertDate = (value: any) => {
     if (Array.isArray(value) && value.length === 2) {
@@ -87,20 +88,32 @@ export default function AccountBased() {
     }
   };
 
-  const handleRemoveFilter = (type: string) => {
-    if (type === 'engagement') {
-      setEngagement('');
-    }
-    if (type === 'dateRange') {
-      setDateRange(['', '']);
-    }
-    if (type === 'metrics') {
-      setMetrics('');
-    }
-    setTimeout(() => {
-      handleFilter();
-    }, 0);
-  };
+  useEffect(() => {
+    const handleFilter = () => {
+      let newData = accountBasedData.slice();
+      if (engagement.length > 0) {
+        newData = newData.filter((item) => engagement.includes(item.status.toLowerCase()));
+      }
+      if (dateRange[0] !== '' && dateRange[1] !== '') {
+        const startDate = moment(dateRange[0], 'MMM DD, YYYY');
+        const endDate = moment(dateRange[1], 'MMM DD, YYYY');
+
+        newData = newData.filter((item) => {
+          const itemDate = moment(item.latest_reply);
+          return itemDate.isBetween(startDate, endDate, undefined, '[]');
+        });
+      }
+      if (metrics.length > 0) {
+        newData = newData.filter((item) => metrics.includes(item.status.toLowerCase()));
+      }
+
+      setFilterData(newData);
+    };
+
+    if (filterStatus) handleFilter();
+  }, [engagement, metrics, dateRange[0], dateRange[1]]);
+
+  console.log('=======', filterStatus);
 
   useEffect(() => {
     const fetchAccountBasedData = async () => {
@@ -125,53 +138,107 @@ export default function AccountBased() {
     };
     fetchAccountBasedData();
   }, [pageIndex]);
-
   return (
     <PageFrame>
       <Flex justify={'space-between'} align={'center'}>
         <Title order={3}>Account Based</Title>
         <Flex gap={'sm'} align={'center'}>
           <TextInput placeholder='Search by Company name' rightSection={<IconSearch size={'0.9rem'} color='gray' />} w={250} />
-          <Button variant='outline' leftIcon={<IconFilter size={'0.9rem'} color='#228be6' />} onClick={open}>
+          <Button
+            variant='outline'
+            leftIcon={<IconFilter size={'0.9rem'} color='#228be6' />}
+            onClick={() => {
+              open();
+              setFilterStatus(false);
+            }}
+          >
             Filters
           </Button>
           <Button leftIcon={<IconPlus size={'0.9rem'} />}>New Account-Based Campaign</Button>
         </Flex>
       </Flex>
-      <Flex mt={'md'} gap={'xs'}>
-        {engagement !== '' && (
-          <Badge
-            size='md'
-            rightSection={
-              <IconX
-                size={'0.8rem'}
-                className='mt-[6px] hover:cursor-pointer'
-                onClick={() => {
-                  handleRemoveFilter('engagement');
-                }}
-              />
-            }
-            sx={{ textTransform: 'initial' }}
-          >
-            Engagement: {engagement}
-          </Badge>
+      <Flex justify={filterStatus ? 'space-between' : 'end'} gap={30} align={'center'} mt={'md'}>
+        {filterStatus && (
+          <Flex gap={'xs'} wrap={'wrap'}>
+            {engagement &&
+              engagement.map((item, index) => {
+                return (
+                  <Flex>
+                    <Badge
+                      size='md'
+                      key={index}
+                      rightSection={
+                        <IconX
+                          size={'0.8rem'}
+                          className='mt-[6px] hover:cursor-pointer'
+                          onClick={() => {
+                            setEngagement((prevValues) => prevValues.filter((val) => val !== item.toLowerCase()));
+                          }}
+                        />
+                      }
+                      sx={{ textTransform: 'initial' }}
+                    >
+                      Engagement: {item}
+                    </Badge>
+                  </Flex>
+                );
+              })}
+            {metrics &&
+              metrics.map((item, index) => {
+                return (
+                  <Flex>
+                    <Badge
+                      size='md'
+                      key={index}
+                      rightSection={
+                        <IconX
+                          size={'0.8rem'}
+                          className='mt-[6px] hover:cursor-pointer'
+                          onClick={() => {
+                            setMetrics((prevValues) => prevValues.filter((val) => val !== item.toLowerCase()));
+                          }}
+                        />
+                      }
+                      sx={{ textTransform: 'initial' }}
+                    >
+                      Metrics: {item}
+                    </Badge>
+                  </Flex>
+                );
+              })}
+            {dateRange[0] !== '' && dateRange[1] !== '' && (
+              <Flex>
+                <Badge
+                  size='md'
+                  rightSection={
+                    <IconX
+                      size={'0.8rem'}
+                      className='mt-[6px] hover:cursor-pointer'
+                      onClick={() => {
+                        setDateRange(['', '']);
+                      }}
+                    />
+                  }
+                  sx={{ textTransform: 'initial' }}
+                >
+                  DateRange: {dateRange[0]} - {dateRange[1]}
+                </Badge>
+              </Flex>
+            )}
+          </Flex>
         )}
-        {dateRange[0] !== '' && dateRange[1] !== '' && (
-          <Badge
-            size='md'
-            rightSection={
-              <IconX
-                size={'0.8rem'}
-                className='mt-[6px] hover:cursor-pointer'
-                onClick={() => {
-                  handleRemoveFilter('dateRange');
-                }}
-              />
-            }
-            sx={{ textTransform: 'initial' }}
+        {(engagement.length > 0 || metrics.length > 0 || dateRange[0] !== '' || dateRange[1] !== '') && (
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => {
+              setEngagement([]);
+              setDateRange(['', '']);
+              setMetrics([]);
+            }}
           >
-            DateRange: {dateRange[0]} - {dateRange[1]}
-          </Badge>
+            Clear Filters
+          </Button>
         )}
       </Flex>
 
@@ -617,47 +684,10 @@ export default function AccountBased() {
             </ActionIcon>
           </Flex>
           <Flex gap={'md'} align={'center'}>
-            <Flex w={'100%'}>
-              <Radio.Group
-                w={'100%'}
-                label={
-                  <Text color='#212529' fw={500} size={'1rem'}>
-                    Filter by Engagament:
-                  </Text>
-                }
-                onChange={(value) => setEngagement(value)}
-              >
-                <Group
-                  sx={{
-                    border: '1px solid #ced4da',
-                    borderRadius: '6px',
-                    paddingInline: '24px',
-                    paddingBlock: '10px',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    gap: '40px',
-                  }}
-                >
-                  <Radio value='high' label='High' />
-                  <Radio value='mid' label='Medium' />
-                  <Radio value='low' label='Low' />
-                </Group>
-              </Radio.Group>
-            </Flex>
-            <Flex w={'100%'}>
-              <DatePickerInput size='md' type='range' label='Filter by Date Range:' w={'100%'} onChange={handleConvertDate} />
-            </Flex>
-          </Flex>
-          <Flex w={'100%'}>
-            <Radio.Group
-              w={'100%'}
-              label={
-                <Text color='#212529' fw={500} size={'1rem'}>
-                  Filter by Metrics:
-                </Text>
-              }
-              onChange={(value) => setMetrics(value)}
-            >
+            <Flex w={'100%'} direction={'column'}>
+              <Text size={'1rem'} fw={500}>
+                Filter by Engagement:
+              </Text>
               <Group
                 sx={{
                   border: '1px solid #ced4da',
@@ -669,13 +699,66 @@ export default function AccountBased() {
                   gap: '40px',
                 }}
               >
-                <Radio value='sent' label='Sent' />
-                <Radio value='open' label='Open' />
-                <Radio value='reply' label='Reply' />
-                <Radio value='positive_reply' label='Positive Reply' />
-                <Radio value='demo' label='Demo Set' />
+                {engagementOptions.map((item, index) => {
+                  return (
+                    <Checkbox
+                      label={item}
+                      value={item === 'Medium' ? 'mid' : item.toLowerCase()}
+                      variant='outline'
+                      radius='xl'
+                      key={index}
+                      defaultChecked={item === 'Medium' ? engagement.includes('mid') : engagement.includes(item.toLowerCase())}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setEngagement((prevValues) => [...prevValues, e.target.value]);
+                        } else {
+                          setEngagement((prevValues) => prevValues.filter((val) => val !== e.target.value));
+                        }
+                      }}
+                    />
+                  );
+                })}
               </Group>
-            </Radio.Group>
+            </Flex>
+            <Flex w={'100%'}>
+              <DatePickerInput size='md' type='range' label='Filter by last engagement date:' w={'100%'} onChange={handleConvertDate} />
+            </Flex>
+          </Flex>
+          <Flex w={'100%'} direction={'column'}>
+            <Text size={'1rem'} fw={500}>
+              Filter by Metrics:
+            </Text>
+            <Group
+              sx={{
+                border: '1px solid #ced4da',
+                borderRadius: '6px',
+                paddingInline: '24px',
+                paddingBlock: '10px',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '40px',
+              }}
+            >
+              {metricsOptions.map((item, index) => {
+                return (
+                  <Checkbox
+                    label={item}
+                    value={item.toLowerCase()}
+                    variant='outline'
+                    radius='xl'
+                    key={index}
+                    defaultChecked={metrics.includes(item.toLowerCase())}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setMetrics((prevValues) => [...prevValues, e.target.value]);
+                      } else {
+                        setMetrics((prevValues) => prevValues.filter((val) => val !== e.target.value));
+                      }
+                    }}
+                  />
+                );
+              })}
+            </Group>
           </Flex>
           <Flex gap={'sm'} mt={'lg'} w={'100%'}>
             <Button variant='outline' color='gray' size='lg' w={'100%'} onClick={close}>
@@ -685,8 +768,8 @@ export default function AccountBased() {
               size='lg'
               w={'100%'}
               onClick={() => {
-                handleFilter();
                 close();
+                setFilterStatus(true);
               }}
             >
               Apply Filters

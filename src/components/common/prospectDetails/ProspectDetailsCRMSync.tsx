@@ -20,8 +20,8 @@ import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { ClientSyncCRM, CRMStage, ProspectShallow } from "src";
 
-// import { API_URL } from "@constants/data";
-const API_URL = "http://127.0.0.1:5000";
+import { API_URL } from "@constants/data";
+// const API_URL = "http://127.0.0.1:5000";
 
 export default function ProspectDetailsCRMSync(props: {
   prospect: ProspectShallow;

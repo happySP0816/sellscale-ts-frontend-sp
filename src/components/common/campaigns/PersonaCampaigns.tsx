@@ -1544,6 +1544,10 @@ export function PersonCampaignCard(props: {
                         onClick={() => {
                           if (props.persona.sdr_id != userData?.id) return;
 
+                          if (props.project) {
+                            setCurrentProject(props.project);
+                          }
+
                           if (
                             props.persona.email_sent > props.persona.li_sent
                           ) {

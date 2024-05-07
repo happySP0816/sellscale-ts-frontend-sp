@@ -9,7 +9,7 @@ export async function addCampaignAiRequest(
   linkedin: boolean,
   email: boolean
 ): Promise<MsgResponse> {
-  const response = await fetch(`${API_URL}/campaign/create_campaign_ai_request`, {
+  const response = await fetch(`${API_URL}/campaigns/create_campaign_ai_request`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${userToken}`,

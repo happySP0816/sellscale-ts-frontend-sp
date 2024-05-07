@@ -1,12 +1,18 @@
+import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { useState } from 'react';
 import {
   ActionIcon,
   Badge,
   Box,
+  Button,
   Card,
   Flex,
   Progress,
   RingProgress,
+  LoadingOverlay,
   Text,
+  Tooltip,
+  TextInput,
   useMantineTheme,
 } from "@mantine/core";
 import {
@@ -14,15 +20,67 @@ import {
   IconDotsVertical,
   IconGlobe,
   IconMap,
+  IconCash,
+  IconCheck,
+  IconPencil,
+  IconBuildingBank,
   IconMessage,
   IconUsers,
 } from "@tabler/icons";
 import { IconBriefcase2 } from "@tabler/icons-react";
+import { syncLocalStorage } from "@auth/core";
+import { API_URL } from "@constants/data";
+import { useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 
 export default function SegmentV2Overview(props: any) {
-  const { data, totalProspected, totalContacted, totalInFilters } = props;
+  const { data, totalProspected, totalContacted, totalInFilters, totalUniqueCompanies } = props;
   const theme = useMantineTheme();
 
+  const userData = useRecoilValue(userDataState);
+
+  const [editModeACV, setEditModeACV] = useState(false);
+  const [editableACV, setEditableACV] = useState(userData.client.contract_size);
+  //if they edited the acv after saving, we need to update the acv
+  //can be null or number
+  const [editedACV, setEditedACV] = useState(null as number | null);
+  const [isSavingACV, setIsSavingACV] = useState(false); // State to manage loading state
+  const userToken = useRecoilValue(userTokenState);
+
+  const handleEditACVClick = () => {
+    setEditModeACV(true);
+  };
+
+  const handleSaveACVClick = () => {
+    const savedValue = editableACV === 0 ? 0 : Number(editableACV);
+    setIsSavingACV(true); // Start loading
+    fetch(`${API_URL}/client/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        contract_size: savedValue,
+      }),
+    }).then((response) => {
+      setIsSavingACV(false); // Stop loading
+      if (response.ok) {
+        syncLocalStorage(userToken, userData => {
+          userData.client.contract_size = savedValue;
+          setEditedACV(savedValue);
+          return userData;
+        });
+        setEditModeACV(false);
+        setEditableACV(savedValue.toString()); // Update the display to show the saved value
+      } else {
+        console.error('Failed to update contract size');
+      }
+    }).catch((error) => {
+      setIsSavingACV(false); // Stop loading on error
+      console.error('Error updating contract size:', error);
+    });
+  };
   const totalSegments =
     data.length +
     data
@@ -50,11 +108,11 @@ export default function SegmentV2Overview(props: any) {
                 Estimated TAM Value
               </Text>
             </Flex>
-
-            <Flex align={"center"} gap={"xs"}>
+            <Flex 
+            align={"center"} gap={"xs"}>
               <Text fw={500} fz={"25px"}>
-                {/* # people x 10000 */}$
-                {(totalInFilters * 10000).toLocaleString()}
+                {/* # numAccounts x acv */}$
+                {(totalUniqueCompanies * (editedACV || userData.client.contract_size)).toLocaleString()}
               </Text>
             </Flex>
           </Flex>
@@ -91,75 +149,73 @@ export default function SegmentV2Overview(props: any) {
           </Box>
         </Flex>
       </Card>
-      {/* Number segments */}
-      <Card padding="lg" radius="md" withBorder w={"15%"}>
-        <Flex align={"center"} justify={"space-between"}>
-          <Flex align={"center"} gap={"sm"}>
-            <IconBriefcase2
-              color="#d444f1"
-              size={"1.1rem"}
-              style={{ marginTop: "-1px" }}
-            />
-            <Text fw={500} color="gray" fz="xs">
-              # Segments
-            </Text>
-          </Flex>
-        </Flex>
+
+      {/* ACV */}
+      <Card sx={{ cursor: 'pointer' }} padding="lg" radius="md" withBorder w={"15%"}>
+      <LoadingOverlay visible={isSavingACV} /> 
+      <Flex align={"center"} justify={"space-between"}>
         <Flex align={"center"} gap={"sm"}>
-          <Text size={30} fw={500}>
-            {totalSegments}
+          <IconCash
+            color={theme.colors.green[3]}
+            size={"1.1rem"}
+            style={{ marginTop: "-1px" }}
+          />
+          <Text fw={500} color="gray" fz="xs">
+            ACV
           </Text>
         </Flex>
-      </Card>
+      </Flex>
+      <Flex align={"center"} gap={"sm"}>
+        {!editModeACV ? (
+          <Text size={30} fw={500}>
+            ${parseInt(editableACV).toLocaleString()}
+          </Text>
+        ) : (
+          <TextInput
+            value={editableACV}
+            onChange={(event) => setEditableACV(Number(event.currentTarget.value))}
+            type="number"
+            style={{ width: '100%' }}
+          />
+        )}
+        <Tooltip
+          label={!editModeACV ? 'Edit ACV' : 'Save Changes'}
+          position={'bottom'}
+          openDelay={400}
+        >
+          <Button
+            size='xs'
+            compact
+            color={'gray'}
+            onClick={!editModeACV ? handleEditACVClick : handleSaveACVClick}
+          >
+            {!editModeACV ? <IconPencil size={'0.9rem'} /> : <IconCheck size={'0.9rem'} />}
+          </Button>
+        </Tooltip>
+      </Flex>
+    </Card>
 
-      {/* Number in filters */}
+      {/* Accounts */}
       <Card padding="lg" radius="md" withBorder w={"15%"}>
         <Flex align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"sm"}>
-            <IconMap
+            <IconBuildingBank
               color={theme.colors.orange[3]}
               size={"1.1rem"}
               style={{ marginTop: "-1px" }}
             />
             <Text fw={500} color="gray" fz="xs">
-              # People
+              Accounts
             </Text>
           </Flex>
         </Flex>
         <Flex align={"center"} gap={"sm"}>
           <Text size={30} fw={500}>
-            {totalInFilters.toLocaleString()}
+            {totalUniqueCompanies}
           </Text>
         </Flex>
       </Card>
-      {/* Number imported */}
-      <Card padding="lg" radius="md" withBorder w={"15%"}>
-        <Flex align={"center"} justify={"space-between"}>
-          <Flex align={"center"} gap={"sm"}>
-            <IconMessage
-              color="#40c057"
-              size={"1.1rem"}
-              style={{ marginTop: "-1px" }}
-            />
-            <Text fw={500} color="gray" fz="xs">
-              # Imported
-            </Text>
-          </Flex>
-        </Flex>
-        <Flex align={"center"} gap={"sm"}>
-          <Text size={30} fw={500}>
-            {totalProspected}
-          </Text>
-          {/* <Badge
-            color="green"
-            leftSection={
-              <IconArrowUp size={"0.9rem"} style={{ marginTop: "4px" }} />
-            }
-          >
-            8.5%
-          </Badge> */}
-        </Flex>
-      </Card>
+
 
       {/* Number contacted */}
       <Card padding="lg" radius="md" withBorder w={"15%"}>
@@ -171,13 +227,33 @@ export default function SegmentV2Overview(props: any) {
               style={{ marginTop: "-1px" }}
             />
             <Text fw={500} color="gray" fz="xs">
-              # Contacted
+              Contacts
             </Text>
           </Flex>
         </Flex>
         <Flex align={"center"} gap={"sm"}>
           <Text size={30} fw={500}>
-            {totalContacted}
+            {totalProspected}
+          </Text>
+        </Flex>
+      </Card>
+      {/* Number segments */}
+      <Card padding="lg" radius="md" withBorder w={"15%"}>
+        <Flex align={"center"} justify={"space-between"}>
+          <Flex align={"center"} gap={"sm"}>
+            <IconBriefcase2
+              color="#d444f1"
+              size={"1.1rem"}
+              style={{ marginTop: "-1px" }}
+            />
+            <Text fw={500} color="gray" fz="xs">
+              Segments
+            </Text>
+          </Flex>
+        </Flex>
+        <Flex align={"center"} gap={"sm"}>
+          <Text size={30} fw={500}>
+            {totalSegments}
           </Text>
         </Flex>
       </Card>

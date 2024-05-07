@@ -79,6 +79,7 @@ export default function SegmentV2(props: PropsType) {
   const [createSegmentParentId, setCreateSegmentParentId] = useState(null);
   const [totalProspected, setTotalProspected] = useState(0);
   const [totalContacted, setTotalContacted] = useState(0);
+  const [totalUniqueCompanies, setTotalUniqueCompanies] = useState(0);
   const [totalInFilters, setTotalInFilters] = useState(0);
   const [showAllSegments, setShowAllSegments] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
@@ -890,6 +891,10 @@ export default function SegmentV2(props: PropsType) {
           (acc: number, segment: any) => acc + (segment.num_prospected || 0),
           0
         );
+        const totalUniqueCompanies = segments.reduce(
+          (acc: number, segment: any) => acc + (segment.unique_companies || 0),
+          0
+        );
         const totalContacted = segments.reduce(
           (acc: number, segment: any) => acc + (segment.num_contacted || 0),
           0
@@ -900,6 +905,7 @@ export default function SegmentV2(props: PropsType) {
         );
         setTotalProspected(totalProspected);
         setTotalContacted(totalContacted);
+        setTotalUniqueCompanies(totalUniqueCompanies);
         setTotalInFilters(totalProspectsInPreFilters);
         const parentSegments = segments.filter((segment: any) => !segment.parent_segment_id);
         let parentSegmentsTransformed = transformData(parentSegments);
@@ -1395,6 +1401,7 @@ export default function SegmentV2(props: PropsType) {
           totalProspected={totalProspected}
           totalContacted={totalContacted}
           totalInFilters={totalInFilters}
+          totalUniqueCompanies={totalUniqueCompanies}
         />
         <Box>
           <Flex>

@@ -63,6 +63,7 @@ export default function ProspectDetailsCRMSync(props: {
         return response.json();
       })
       .then((data) => {
+        if (!data) return;
         showNotification({
           title: "Success",
           message: `Models synced to ${props.crmSync.crm_type}`,

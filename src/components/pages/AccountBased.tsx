@@ -43,12 +43,6 @@ interface AccountBasedDataType {
   status: string;
 }
 
-interface FilterOptions {
-  Metrics: string;
-  DateRange: string[];
-  Engagement: string;
-}
-
 export default function AccountBased() {
   const theme = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
@@ -59,37 +53,53 @@ export default function AccountBased() {
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [accountBasedData, setAccountBasedData] = useState<AccountBasedDataType[]>([]);
-
-  let filterData: AccountBasedDataType[] = [];
+  const [filterData, setFilterData] = useState<AccountBasedDataType[]>([]);
 
   const [dateRange, setDateRange] = useState<string[]>(['', '']);
   const [metrics, setMetrics] = useState<string>('');
-  const [engagment, setEngagement] = useState<string>('');
-
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    Metrics: '',
-    DateRange: ['', ''],
-    Engagement: '',
-  });
+  const [engagement, setEngagement] = useState<string>('');
 
   const handleFilter = () => {
-    if (!dateRange[0] && !dateRange[1] && engagment === '' && metrics === '') {
-      return;
-    } else {
-      setFilterOptions({ Metrics: metrics, DateRange: dateRange, Engagement: engagment });
-      close();
-      if (filterOptions.Engagement !== '') {
-        filterData = accountBasedData.filter((item) => item.status.toLocaleLowerCase() === filterOptions.Engagement.toLocaleLowerCase());
-        console.log('=========', filterData);
-      }
+    let newData = accountBasedData.slice();
+    if (engagement !== '') {
+      newData = newData.filter((item) => item.status.toLowerCase() === engagement.toLowerCase());
     }
+    if (dateRange[0] !== '' && dateRange[1] !== '') {
+      const startDate = moment(dateRange[0], 'MMM DD, YYYY');
+      const endDate = moment(dateRange[1], 'MMM DD, YYYY');
+
+      newData = newData.filter((item) => {
+        const itemDate = moment(item.latest_reply);
+        return itemDate.isBetween(startDate, endDate, undefined, '[]');
+      });
+    }
+    if (metrics !== '') {
+      console.log('metrics filter');
+    }
+
+    setFilterData(newData);
   };
 
   const handleConvertDate = (value: any) => {
     if (Array.isArray(value) && value.length === 2) {
-      const formattedDates = value.map((item) => moment(item).format('MMM D'));
+      const formattedDates = value.map((item) => moment(item).format('MMM D, Y'));
       setDateRange(formattedDates);
     }
+  };
+
+  const handleRemoveFilter = (type: string) => {
+    if (type === 'engagement') {
+      setEngagement('');
+    }
+    if (type === 'dateRange') {
+      setDateRange(['', '']);
+    }
+    if (type === 'metrics') {
+      setMetrics('');
+    }
+    setTimeout(() => {
+      handleFilter();
+    }, 0);
   };
 
   useEffect(() => {
@@ -108,54 +118,62 @@ export default function AccountBased() {
           },
         }
       );
-
       setAccountBasedData(response.data.data.results);
-      filterData = response.data.data.results;
+      setFilterData(response.data.data.results);
       setTotalCount(response.data.data.count);
       setLoading(false);
     };
     fetchAccountBasedData();
   }, [pageIndex]);
 
-  const handleBadgeClick = (key: keyof FilterOptions) => {
-    const { [key]: _, ...newFilterOptions } = filterOptions;
-    setFilterOptions(newFilterOptions);
-  };
-  console.log('dddddddd', filterData);
-
   return (
     <PageFrame>
       <Flex justify={'space-between'} align={'center'}>
         <Title order={3}>Account Based</Title>
         <Flex gap={'sm'} align={'center'}>
-          <TextInput placeholder='Search by Company name' rightSection={<IconSearch size={'0.9rem'} />} />
-          <Button variant='outline' leftIcon={<IconFilter size={'0.9rem'} color='gray' />} onClick={open}>
+          <TextInput placeholder='Search by Company name' rightSection={<IconSearch size={'0.9rem'} color='gray' />} w={250} />
+          <Button variant='outline' leftIcon={<IconFilter size={'0.9rem'} color='#228be6' />} onClick={open}>
             Filters
           </Button>
           <Button leftIcon={<IconPlus size={'0.9rem'} />}>New Account-Based Campaign</Button>
         </Flex>
       </Flex>
-      {(filterOptions.DateRange || filterOptions.Engagement || filterOptions.Metrics) && (
-        <Flex mt={'md'} gap={'xs'}>
-          {Object.entries(filterOptions).map(([key, value], index) => {
-            const displayValue = Array.isArray(value) ? value.join(' - ') : value;
-            return (
-              displayValue && (
-                <Badge
-                  size='md'
-                  rightSection={
-                    <IconX size={'0.8rem'} className='mt-[6px] hover:cursor-pointer' onClick={() => handleBadgeClick(key as keyof FilterOptions)} />
-                  }
-                  key={index}
-                  sx={{ textTransform: 'initial' }}
-                >
-                  {key}: {displayValue}
-                </Badge>
-              )
-            );
-          })}
-        </Flex>
-      )}
+      <Flex mt={'md'} gap={'xs'}>
+        {engagement !== '' && (
+          <Badge
+            size='md'
+            rightSection={
+              <IconX
+                size={'0.8rem'}
+                className='mt-[6px] hover:cursor-pointer'
+                onClick={() => {
+                  handleRemoveFilter('engagement');
+                }}
+              />
+            }
+            sx={{ textTransform: 'initial' }}
+          >
+            Engagement: {engagement}
+          </Badge>
+        )}
+        {dateRange[0] !== '' && dateRange[1] !== '' && (
+          <Badge
+            size='md'
+            rightSection={
+              <IconX
+                size={'0.8rem'}
+                className='mt-[6px] hover:cursor-pointer'
+                onClick={() => {
+                  handleRemoveFilter('dateRange');
+                }}
+              />
+            }
+            sx={{ textTransform: 'initial' }}
+          >
+            DateRange: {dateRange[0]} - {dateRange[1]}
+          </Badge>
+        )}
+      </Flex>
 
       <DataGrid
         data={filterData}
@@ -600,11 +618,19 @@ export default function AccountBased() {
           </Flex>
           <Flex gap={'md'} align={'center'}>
             <Flex w={'100%'}>
-              <Radio.Group w={'100%'} label='Filter by Engagament:' onChange={(value) => setEngagement(value)}>
+              <Radio.Group
+                w={'100%'}
+                label={
+                  <Text color='#212529' fw={500} size={'1rem'}>
+                    Filter by Engagament:
+                  </Text>
+                }
+                onChange={(value) => setEngagement(value)}
+              >
                 <Group
                   sx={{
-                    border: '1px solid gray',
-                    borderRadius: '8px',
+                    border: '1px solid #ced4da',
+                    borderRadius: '6px',
                     paddingInline: '24px',
                     paddingBlock: '10px',
                     display: 'flex',
@@ -613,7 +639,7 @@ export default function AccountBased() {
                   }}
                 >
                   <Radio value='high' label='High' />
-                  <Radio value='medium' label='Medium' />
+                  <Radio value='mid' label='Medium' />
                   <Radio value='low' label='Low' />
                 </Group>
               </Radio.Group>
@@ -623,11 +649,19 @@ export default function AccountBased() {
             </Flex>
           </Flex>
           <Flex w={'100%'}>
-            <Radio.Group w={'100%'} label='Filter by Metrics:' onChange={(value) => setMetrics(value)}>
+            <Radio.Group
+              w={'100%'}
+              label={
+                <Text color='#212529' fw={500} size={'1rem'}>
+                  Filter by Metrics:
+                </Text>
+              }
+              onChange={(value) => setMetrics(value)}
+            >
               <Group
                 sx={{
-                  border: '1px solid gray',
-                  borderRadius: '8px',
+                  border: '1px solid #ced4da',
+                  borderRadius: '6px',
                   paddingInline: '24px',
                   paddingBlock: '10px',
                   display: 'flex',
@@ -647,7 +681,14 @@ export default function AccountBased() {
             <Button variant='outline' color='gray' size='lg' w={'100%'} onClick={close}>
               Go Back
             </Button>
-            <Button size='lg' w={'100%'} onClick={handleFilter}>
+            <Button
+              size='lg'
+              w={'100%'}
+              onClick={() => {
+                handleFilter();
+                close();
+              }}
+            >
               Apply Filters
             </Button>
           </Flex>

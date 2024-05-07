@@ -1,5 +1,5 @@
 import { currentProjectState } from "@atoms/personaAtoms";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import CTAGenerator from "@common/sequence/CTAGenerator";
 import {
   Box,
@@ -44,8 +44,10 @@ import { Archetype, Client } from "src";
 
 const EXAMPLE_COUNT = 1;
 
-export default function SequenceBuilderV3() {
+export default function SequenceBuilderV3ClientFacing() {
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
+  const client_id = userData?.client?.id;
 
   const [selectedData, setSelectedData] = useState<SelectedData>({
     subject_lines: [],
@@ -54,7 +56,7 @@ export default function SequenceBuilderV3() {
 
   const [loading, setLoading] = useState(false);
   const [bigLoading, setBigLoading] = useState(false);
-  const [clientId, setClientId] = useState<number | null>(null);
+  const [clientId, setClientId] = useState<number | null>(client_id);
   const [archetypeId, setArchetypeId] = useState<number | null>(null);
   const [_currentProject, setCurrentProject] = useRecoilState(
     currentProjectState
@@ -141,7 +143,7 @@ export default function SequenceBuilderV3() {
           <LoadingOverlay visible={loading} />
           <Stack h="90vh" p="lg">
             <Title order={3}>Sequence Builder V3</Title>
-            <Autocomplete
+            {/* <Autocomplete
               disabled={clients === undefined}
               label={
                 <Group position="apart">
@@ -157,7 +159,7 @@ export default function SequenceBuilderV3() {
                 const client = clients?.find((c) => c.company === value);
                 setClientId(client?.id ?? null);
               }}
-            />
+            /> */}
             <Autocomplete
               disabled={archetypes === undefined}
               label={

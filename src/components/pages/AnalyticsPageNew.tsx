@@ -27,6 +27,8 @@ import { modals } from "@mantine/modals";
 import AssetIngestor from "@common/assets/AssetIngester";
 import Sequence from "./Sequence/Sequence";
 import { IconBooks } from "@tabler/icons";
+import SequenceBuilderV3 from "@common/internal_tools/sequence_builder_v3/SequenceBuilderV3";
+import SequenceBuilderV3ClientFacing from "@common/internal_tools/sequence_builder_v3/SequenceBuilderV3ClientFacing";
 
 const AnalyticsPageNew = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -112,13 +114,7 @@ const AnalyticsPageNew = () => {
           <Personas />
         </Tabs.Panel>
         <Tabs.Panel value="sequences" pt="xs">
-          <Alert color="yellow" mt="sm">
-            <b>Coming soon! ⚠️</b> This is a mockup of the upcoming Sequence
-            library.
-          </Alert>
-          <Box mt="xs">
-            <Image src={SequencePreviewMock} w="800px" />
-          </Box>
+          <SequenceBuilderV3ClientFacing />
         </Tabs.Panel>
         <Tabs.Panel value="assets" pt="xs">
           <Group position="right" pr={40}>

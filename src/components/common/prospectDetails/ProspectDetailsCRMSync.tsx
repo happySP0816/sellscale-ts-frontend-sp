@@ -1,5 +1,4 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { API_URL } from "@constants/data";
 import {
   Box,
   Button,
@@ -8,6 +7,7 @@ import {
   Flex,
   Modal,
   Paper,
+  Select,
   Text,
   Tooltip,
 } from "@mantine/core";
@@ -18,7 +18,10 @@ import { IconAffiliate, IconCircleCheck, IconNetwork } from "@tabler/icons";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { ClientSyncCRM, ProspectShallow } from "src";
+import { ClientSyncCRM, CRMStage, ProspectShallow } from "src";
+
+// import { API_URL } from "@constants/data";
+const API_URL = "http://127.0.0.1:5000";
 
 export default function ProspectDetailsCRMSync(props: {
   prospect: ProspectShallow;
@@ -28,19 +31,15 @@ export default function ProspectDetailsCRMSync(props: {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
 
-  const [account, setAccount] = useState(true);
-  const [contactName, setContactName] = useState(true);
-  const [opportunityName, setOpportunityName] = useState(true);
-
   const [synced, setsynced] = useState(false);
   const [syncableModels, setSyncableModels] = useState<string[]>([]); // ["lead", "contact", "account", "opportunity"
   const [CRMOpened, { open: CRMOpen, close: CRMClose }] = useDisclosure(false);
   const [loadingSyncButton, setLoadingSyncButton] = useState(false);
 
-  const createOpportunity = () => {
+  const uploadProspect = () => {
     setLoadingSyncButton(true);
 
-    fetch(`${API_URL}/merge_crm/opportunity/create`, {
+    fetch(`${API_URL}/merge_crm/upload/prospect`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -48,13 +47,14 @@ export default function ProspectDetailsCRMSync(props: {
       },
       body: JSON.stringify({
         prospect_id: props.openedProspectId,
+        stage_id_override: selectedStage,
       }),
     })
       .then((response) => {
         if (response.status !== 200) {
           showNotification({
             title: "Error",
-            message: "Error creating opportunity in Hubspot",
+            message: `Error syncing models to ${props.crmSync.crm_type}`,
             color: "red",
             autoClose: 3000,
           });
@@ -65,7 +65,7 @@ export default function ProspectDetailsCRMSync(props: {
       .then((data) => {
         showNotification({
           title: "Success",
-          message: "Opportunity created in Hubspot",
+          message: `Models synced to ${props.crmSync.crm_type}`,
           color: "green",
           autoClose: 3000,
         });
@@ -75,7 +75,7 @@ export default function ProspectDetailsCRMSync(props: {
         console.error("Error:", error);
         showNotification({
           title: "Error",
-          message: "Error creating opportunity in Hubspot",
+          message: `Error syncing models to ${props.crmSync.crm_type}`,
           color: "red",
           autoClose: 3000,
         });
@@ -105,7 +105,39 @@ export default function ProspectDetailsCRMSync(props: {
         props.crmSync.opportunity_sync ? "opportunity" : "",
       ].filter((model) => model !== "")
     );
+
+    setSelectedStage(
+      existingStageMapping[props.prospect.overall_status] || null
+    );
   }, [props.prospect]);
+
+  
+  const [crmStages, setCRMStages] = useState<CRMStage[]>([]);
+  const [existingStageMapping, setExistingStageMapping] = useState<{
+    [key: string]: string | null;
+  }>({});
+  const [selectedStage, setSelectedStage] = useState<string | null>("");
+  const getCRMStages = async () => {
+    const response = await fetch(`${API_URL}/merge_crm/stages`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    const data = await response.json();
+
+    if (data.status === "success") {
+      setCRMStages(data.data.stages);
+      setExistingStageMapping(data.data.mapping);
+      setSelectedStage(
+        data.data.mapping[props.prospect.overall_status] || null
+      )
+    }
+  };
+
+  useEffect(() => {
+    getCRMStages();
+  }, []);
 
   return (
     <Box style={{ flexBasis: "15%" }} p={10} px={"md"} mb={"sm"}>
@@ -258,7 +290,34 @@ export default function ProspectDetailsCRMSync(props: {
             <Checkbox label="Create Contact" checked />
           )}
           {props.crmSync.opportunity_sync && (
-            <Checkbox label="Create Opportunity" checked />
+            <>
+              <Checkbox label="Create Opportunity" checked />
+              <Divider />
+              <Flex>
+                <Select
+                  label="Opportunity Stage"
+                  description="Select which stage in your pipeline this opportunity should be placed in."
+                  placeholder="Pick value"
+                  w={'100%'}
+                  data={
+                    (crmStages &&
+                      crmStages.map((crmStage) => {
+                        return { value: crmStage.id, label: crmStage.name };
+                      })) ||
+                    []
+                  }
+                  value={
+                    (selectedStage || (existingStageMapping &&
+                      existingStageMapping[props.prospect.overall_status])) ||
+                    ""
+                  }
+                  onChange={(value) => {
+                    setSelectedStage(value);
+                  }}
+                  searchable
+                />
+              </Flex>
+            </>
           )}
           <Flex align={"center"} gap={"sm"} mt={"xl"}>
             <Button
@@ -275,8 +334,12 @@ export default function ProspectDetailsCRMSync(props: {
               size="md"
               fullWidth
               onClick={() => {
-                createOpportunity();
+                uploadProspect();
               }}
+              disabled={
+                props.crmSync.opportunity_sync &&
+                selectedStage === null
+              }
             >
               Sync
             </Button>

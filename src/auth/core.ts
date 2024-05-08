@@ -31,10 +31,13 @@ export async function authorize(
   document.cookie = `token=${token}; SameSite=None; Secure`;
 }
 
-export function logout(noCheck = false, redirect = true) {
+export function logout(noCheck = false, redirect = true, clearAdmin = true) {
   const logoutProcess = () => {
     localStorage.removeItem('user-token');
     localStorage.removeItem('user-data');
+    if (clearAdmin) {
+      localStorage.removeItem('admin-data');
+    }
     document.cookie = `token=; SameSite=None; Secure`;
     if (window.location.href.includes('login')) {
       return;
@@ -133,7 +136,7 @@ export async function impersonateSDR(
     return;
   }
 
-  logout(true, false);
+  logout(true, false, false);
 
   await authorize(impersonate.auth_token, setUserToken, setUserData);
 

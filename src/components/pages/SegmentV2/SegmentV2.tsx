@@ -70,7 +70,7 @@ import { showNotification } from '@mantine/notifications';
 import SegmentAutodownload from './SegmentAutodownload';
 import { RequestCampaignModal } from '@modals/SegmentV2/RequestCampaignModal';
 import { addCampaignAiRequest } from '@utils/requests/aiRequests';
-import { createSegmentTag, getAllSegmentTags, addTagToSegment, removeTagFromSegment } from '@utils/requests/segmentTagTemplates';
+import { createSegmentTag, getAllSegmentTags, addTagToSegment, removeTagFromSegment, deleteTag } from '@utils/requests/segmentTagTemplates';
 import { deterministicMantineColor } from '@utils/requests/utils';
 
 type PropsType = {
@@ -678,8 +678,6 @@ export default function SegmentV2(props: PropsType) {
         const [segmentTags, setSegmentTags] = useState(cell.row.original.segment_tags);
         const [popoverOpened, setPopoverOpened] = useState(false);
 
-        const {client_sdr} = cell.row.original;
-
         return (
           <Popover 
             opened={popoverOpened}
@@ -752,23 +750,32 @@ export default function SegmentV2(props: PropsType) {
                         onClick={(e) => {
                           e.stopPropagation();
                           openConfirmModal({
-                            title: 'Confirm Deletion',
+                            title: 'Confirm Global Tag Deletion',
                             children: (
-                              <Text size="sm">Are you sure you want to delete this tag?</Text>
+                              <Text size="sm">Are you sure you want to permanently delete this tag? It will get removed from all locations.</Text>
                             ),
                             labels: { confirm: 'Delete Tag', cancel: 'Cancel' },
                             confirmProps: { color: 'red' },
-                            onCancel: () => console.log('Cancel'),
+                            onCancel: () => {setPopoverOpened(true)},
                             onConfirm: () => {
-                              removeTagFromSegment(userToken, cell.row.original.id, tag.id).then(() => {
+                              deleteTag(userToken, tag.id).then(() => {
                                 setSegmentTags(prev => prev.filter((t: { id: number }) => t.id !== tag.id));
                                 cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
+                                getAllSegments(true);
+                                //prevent the popover from closing
+                                setPopoverOpened(true);
                               });
                             }
                           })
                         }}
+                        sx={(theme) => ({
+                          '&:hover': {
+                            backgroundColor: theme.colors.dark[9],
+                            borderRadius: '50%'
+                          }
+                        })}
                       >
-                        <IconX size={14} />
+                        <IconX color='white' size={14} />
                       </ActionIcon>
                       </Button>
 

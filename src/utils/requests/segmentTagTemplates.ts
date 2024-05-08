@@ -29,6 +29,17 @@ export async function getSegmentTag(userToken: string, tag_id: number) {
   return await processResponse(response);
 }
 
+export async function deleteTag(userToken: string, tag_id: number) {
+  const response = await fetch(`${API_URL}/segment/tags/${tag_id}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
+
+  return await processResponse(response);
+}
+
 export async function getAllSegmentTags(userToken: string) {
   const response = await fetch(`${API_URL}/segment/tags`, {
     method: 'GET',

@@ -21,6 +21,8 @@ import {
   Divider,
   Stack,
   Input,
+  Popover,
+  Loader,
 } from '@mantine/core';
 import posthog from 'posthog-js';
 
@@ -47,11 +49,13 @@ import {
   IconRobot,
   IconSearch,
   IconSwitch,
+  IconTag,
   IconTargetArrow,
   IconTemplate,
   IconTrash,
   IconUsers,
   IconWand,
+  IconX,
 } from '@tabler/icons';
 import { DataGrid } from 'mantine-data-grid';
 import { useEffect, useState } from 'react';
@@ -60,12 +64,14 @@ import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { API_URL } from '@constants/data';
 import { IconArrowsSplit2, IconUsersMinus, IconUsersPlus } from '@tabler/icons-react';
 import SegmentV2Overview from './SegmentV2Overview';
-import { openContextModal } from '@mantine/modals';
+import { openConfirmModal, openContextModal } from '@mantine/modals';
 import PersonaSelect from '@common/persona/PersonaSplitSelect';
 import { showNotification } from '@mantine/notifications';
 import SegmentAutodownload from './SegmentAutodownload';
 import { RequestCampaignModal } from '@modals/SegmentV2/RequestCampaignModal';
 import { addCampaignAiRequest } from '@utils/requests/aiRequests';
+import { createSegmentTag, getAllSegmentTags, addTagToSegment, removeTagFromSegment, deleteTag } from '@utils/requests/segmentTagTemplates';
+import { deterministicMantineColor } from '@utils/requests/utils';
 
 type PropsType = {
   onDownloadHistoryClick?: () => void;
@@ -95,6 +101,9 @@ export default function SegmentV2(props: PropsType) {
   const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(false);
   const [sdrs, setAllSDRs] = useState([] as any[]);
   const [selectedSdrId, setSelectedSdrId] = useState(null);
+  const [segmentTagCategories, setSegmentTagCategories] = useState<Array<{ id: number; name: string; }>>([]);
+  const [tagMenuOpen, setTagMenuOpen] = useState(false);
+  const [tagMenuLoading, setTagMenuLoading] = useState(false);
   const [showEditSegmentNameModal, setShowEditSegmentNameModal] = useState(false);
   const [editSegmentName, setEditSegmentName] = useState('');
   const [showBatchModal, setShowBatchModal] = useState(false);
@@ -638,6 +647,188 @@ export default function SegmentV2(props: PropsType) {
       },
     },
     {
+      accessorKey: 'tags',
+      header: () => (
+        <Flex align='center' justify='space-between'>
+          <Flex align='center'>
+            <IconTag size={16} stroke={1.5} color='gray' style={{ marginRight: '4px' }} />
+            <Text color='gray'>Tags</Text>
+          </Flex>
+          <Flex align='center'>
+            <Menu 
+            withinPortal
+            opened={tagMenuOpen}
+            onOpen={async () => {
+              setTagMenuOpen(true);
+              setTagMenuLoading(true);
+              try {
+                const res = await getAllSegmentTags(userToken);
+                setSegmentTagCategories(res.data);
+              } catch (error) {
+                console.error('Failed to fetch tags:', error);
+              }
+              setTagMenuLoading(false);
+            }} onClose={() => { setTagMenuLoading(false); setTagMenuOpen(false); }}>
+              <Menu.Target>
+                <Button size='xs' variant='subtle'>
+                  Filter by Tag
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>Available Tags</Menu.Label>
+                {segmentTagCategories.map((tag, index) => (
+                  <Menu.Item key={index} onClick={() => { getAllSegments(true, tag.id); }}>
+                    <Badge color={deterministicMantineColor(tag.name)}>{tag.name}</Badge>
+                  </Menu.Item>
+                ))}
+              </Menu.Dropdown>
+            </Menu>
+          </Flex>
+        </Flex>
+      ),
+      cell: (cell: any) => {
+        const [availableSegmentTags, setAvailableSegmentTags] = useState<Array<{ id: number; name: string; }>>([]);
+        const [addTagClicked, setAddTagClicked] = useState(false);
+        const [segmentTagsLoading, setSegmentTagsLoading] = useState(false);
+        const [segmentTags, setSegmentTags] = useState(cell.row.original.segment_tags);
+        const [popoverOpened, setPopoverOpened] = useState(false);
+
+        return (
+          <Popover 
+            opened={popoverOpened}
+            width={400} 
+            position="bottom" 
+            withArrow 
+            shadow="md"
+            onClose={() => setPopoverOpened(false)}
+            onOpen={() => {
+              setSegmentTagsLoading(true);
+              getAllSegmentTags(userToken).then((res) => {
+                setAvailableSegmentTags(res.data);
+                setSegmentTagsLoading(false);
+              });
+            }}
+          >
+            <Popover.Target>
+              <Box 
+                style={{ display: 'flex', justifyContent: 'left', flexWrap: 'wrap', cursor: 'pointer', width: '100%' }}
+                onClick={() => {
+                  setPopoverOpened(true);
+                }}
+              >
+                {segmentTags.length > 0 ? segmentTags.map((tag: { name: string }, index: number) => (
+                  <Badge radius="xl" size='md' color={deterministicMantineColor(tag.name)} style={{ margin: '5px' }}>
+                    {tag.name}
+                  </Badge>
+                )) : (
+                  <Button radius="xl" size='xs' color={'blue'} compact style={{ color: 'white', margin: '5px' }} onClick={() => setPopoverOpened(true)}>
+                    <IconPlus size={18} />
+                  </Button>
+                )}
+              </Box>
+            </Popover.Target>
+            <Popover.Dropdown>
+              {segmentTagsLoading ? <Loader /> : (
+              <Box style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap'}}>
+                {/* Available / New Tags */}
+                {availableSegmentTags?.map((tag: { name: string, id: number }, index: number) => {
+                  const isTagInSegment = segmentTags.some((existingTag: { name: string; }) => existingTag.name === tag.name);
+                  return (
+                    <Group spacing="xs" style={{ margin: '2px' }}>
+                      <Badge 
+                        radius="xl" 
+                        size='md' 
+                        color={deterministicMantineColor(tag.name)}
+                        style={{ 
+                          cursor: 'pointer',
+                          backgroundColor: isTagInSegment ? 'transparent' : '',
+                          color: isTagInSegment ? 'darkgrey' : ''
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isTagInSegment) {
+                            addTagToSegment(userToken, cell.row.original.id, tag.id).then(() => {
+                              setSegmentTags((prev: any) => [...prev, tag]);
+                              cell.row.original.segment_tags.push(tag);
+                            });
+                          } else {
+                            removeTagFromSegment(userToken, cell.row.original.id, tag.id).then(() => {
+                              setSegmentTags((prev: any[]) => prev.filter((t: { id: number }) => t.id !== tag.id));
+                              cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
+                            });
+                          }
+                        }}
+                      >
+                        {tag.name} &nbsp;
+                      </Badge>
+                      <div style={{ marginLeft: '-35px' }}>
+                        <ActionIcon 
+                            color="red" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openConfirmModal({
+                                title: 'Confirm Global Tag Deletion',
+                                children: (
+                                  <Text size="sm">Are you sure you want to permanently delete this tag? It will get removed from all locations.</Text>
+                                ),
+                                labels: { confirm: 'Delete Tag', cancel: 'Cancel' },
+                                confirmProps: { color: 'red' },
+                                onCancel: () => {setPopoverOpened(true)},
+                                onConfirm: () => {
+                                  deleteTag(userToken, tag.id).then(() => {
+                                    setSegmentTags((prev: any[]) => prev.filter((t: { id: number }) => t.id !== tag.id));
+                                    cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
+                                    getAllSegments(true);
+                                    //prevent the popover from closing
+                                    setPopoverOpened(true);
+                                  });
+                                }
+                              })
+                            }}
+                            sx={(theme) => ({
+                              '&:hover': {
+                                backgroundColor: theme.colors.red[2],
+                                borderRadius: '50%'
+                              }
+                            })}
+                          >
+                            <IconX color='darkgrey' size={14} />
+                          </ActionIcon>
+                      </div>
+                    </Group>
+                  );
+                })}
+                {addTagClicked ? (
+                  <TextInput
+                    placeholder="Type here..."
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const newTagName = e.currentTarget.value.trim();
+                        if (newTagName !== '' && !availableSegmentTags?.some(tag => tag.name === newTagName)) {
+                          createSegmentTag(userToken, cell.row.original.id, newTagName, '#000000').then((newTag) => {
+                            setAvailableSegmentTags((prev: any[]) => Array.isArray(prev) ? [...prev, newTag.data] : [newTag.data]);
+                            setSegmentTags((prev: any[]) => Array.isArray(prev) ? [...prev, newTag.data] : [newTag.data]);
+                            setAddTagClicked(false);
+                            e.currentTarget.value = ''; // Clear input after sending
+                          });
+                        }
+                      }
+                      e.stopPropagation();
+                    }}
+                    style={{ width: '50%', margin: '5px' }}
+                  />
+                ) : (
+                  <Button onClick={(e) => { e.stopPropagation(); setAddTagClicked(true); }} size='xs' style={{ backgroundColor: '#4682B4', color: 'white' }}><IconPlus size={18} /></Button>
+                )}
+              </Box>
+              )}
+            </Popover.Dropdown>
+          </Popover>
+        );
+      },
+    },
+    {
       accessorKey: 'campaigns',
       // minSize: 180,
       header: () => (
@@ -708,6 +899,7 @@ export default function SegmentV2(props: PropsType) {
         num_prospected: segment.num_prospected,
         num_contacted: segment.num_contacted,
         apollo_query: segment.apollo_query,
+        segment_tags: segment.attached_segments,
         autoscrape_enabled: segment.autoscrape_enabled,
         current_scrape_page: segment.current_scrape_page,
       };
@@ -873,11 +1065,11 @@ export default function SegmentV2(props: PropsType) {
       });
   };
 
-  const getAllSegments = async (showLoader: boolean) => {
+  const getAllSegments = async (showLoader: boolean, tagFilter?: Number) => {
     if (showLoader) {
       setLoading(true);
     }
-    fetch(`${API_URL}/segment/all` + (showAllSegments ? '?include_all_in_client=true' : ''), {
+    fetch(`${API_URL}/segment/all` + (showAllSegments ? '?include_all_in_client=true' : '') + (tagFilter !== -1 ? `${showAllSegments ? '&' : '?'}tag_filter=${tagFilter}` : ''), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -1598,3 +1790,4 @@ export default function SegmentV2(props: PropsType) {
     </Paper>
   );
 }
+

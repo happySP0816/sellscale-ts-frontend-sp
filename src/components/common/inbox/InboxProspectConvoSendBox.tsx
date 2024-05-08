@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from "moment";
 import {
   openedProspectIdState,
   openedBumpFameworksState,
@@ -12,9 +12,9 @@ import {
   selectedEmailThread,
   bumpFrameworkSelectedSubstatusState,
   selectedEmailReplyFrameworkState,
-} from '@atoms/inboxAtoms';
-import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { openConfirmModal } from '@mantine/modals';
+} from "@atoms/inboxAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { openConfirmModal } from "@mantine/modals";
 import {
   Badge,
   Paper,
@@ -32,9 +32,9 @@ import {
   Popover,
   Indicator,
   MultiSelect,
-} from '@mantine/core';
-import { getHotkeyHandler } from '@mantine/hooks';
-import { hideNotification, showNotification } from '@mantine/notifications';
+} from "@mantine/core";
+import { getHotkeyHandler } from "@mantine/hooks";
+import { hideNotification, showNotification } from "@mantine/notifications";
 import {
   IconExternalLink,
   IconWriting,
@@ -53,31 +53,31 @@ import {
   IconTags,
   IconEdit,
   IconAdjustmentsHorizontal,
-} from '@tabler/icons';
-import { IconClock24, IconMessage2Cog, IconSettingsFilled, IconWand, IconMessageDots, IconSparkles } from '@tabler/icons-react';
-import { useQueryClient } from '@tanstack/react-query';
-import { deleteAutoBumpMessage } from '@utils/requests/autoBumpMessage';
-import { sendLinkedInMessage } from '@utils/requests/sendMessage';
-import _, { debounce, get, set } from 'lodash';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { BumpFramework, EmailReplyFramework, EmailSequenceStep, EmailThread, LinkedInMessage, Prospect } from 'src';
-import { generateAIEmailReply, generateAIFollowup } from './InboxProspectConvoBumpFramework';
-import AutoBumpFrameworkInfo from '@common/prospectDetails/AutoBumpFrameworkInfo';
-import { ratio as fuzzratio } from 'fuzzball';
-import { sendEmail } from '@utils/requests/sendEmail';
-import RichTextArea from '@common/library/RichTextArea';
-import TextAreaWithAI from '@common/library/TextAreaWithAI';
-import { JSONContent } from '@tiptap/react';
-import DOMPurify from 'dompurify';
-import { postGenerateFollowupEmail } from '@utils/requests/emailMessageGeneration';
-import { API_URL } from '@constants/data';
-import { Calendar, DateTimePicker, TimeInput } from '@mantine/dates';
-import { updateChannelStatus } from '@common/prospectDetails/ProspectDetailsChangeStatus';
-import postSmartleadReply from '@utils/requests/postSmartleadReply';
-import { convertToTitleCase } from '@utils/stringFormatting';
-import { postGenerateEmailReplyUsingFramework } from '@utils/requests/emailReplies';
-import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
+} from "@tabler/icons";
+import { IconClock24, IconMessage2Cog, IconSettingsFilled, IconWand, IconMessageDots, IconSparkles } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { deleteAutoBumpMessage } from "@utils/requests/autoBumpMessage";
+import { sendLinkedInMessage } from "@utils/requests/sendMessage";
+import _, { debounce, get, set } from "lodash";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { BumpFramework, EmailReplyFramework, EmailSequenceStep, EmailThread, LinkedInMessage, Prospect } from "src";
+import { generateAIEmailReply, generateAIFollowup } from "./InboxProspectConvoBumpFramework";
+import AutoBumpFrameworkInfo from "@common/prospectDetails/AutoBumpFrameworkInfo";
+import { ratio as fuzzratio } from "fuzzball";
+import { sendEmail } from "@utils/requests/sendEmail";
+import RichTextArea from "@common/library/RichTextArea";
+import TextAreaWithAI from "@common/library/TextAreaWithAI";
+import { JSONContent } from "@tiptap/react";
+import DOMPurify from "dompurify";
+import { postGenerateFollowupEmail } from "@utils/requests/emailMessageGeneration";
+import { API_URL } from "@constants/data";
+import { Calendar, DateTimePicker, TimeInput } from "@mantine/dates";
+import { updateChannelStatus } from "@common/prospectDetails/ProspectDetailsChangeStatus";
+import postSmartleadReply from "@utils/requests/postSmartleadReply";
+import { convertToTitleCase } from "@utils/stringFormatting";
+import { postGenerateEmailReplyUsingFramework } from "@utils/requests/emailReplies";
+import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -169,7 +169,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const userData = useRecoilValue(userDataState);
   const [scheduleDay, setScheduleDay] = useState<Date | undefined>(undefined);
   const [showSchedulePopup, setShowSchedulePopup] = useState(false);
-  const [snoozeDay, setSnoozeDay] = useState(moment(new Date()).add(4, 'days').toDate());
+  const [snoozeDay, setSnoozeDay] = useState(moment(new Date()).add(4, "days").toDate());
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const openedOutboundChannel = useRecoilValue(currentConvoChannelState);
   const [fetchingProspectId, setFetchingProspectId] = useRecoilState(fetchingProspectIdState);
@@ -191,7 +191,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
   };
   const [replyLabel, setReplyLabel] = useState(props.currentSubstatus);
   // We use this to store the value of the text area
-  const [messageDraft, _setMessageDraft] = useState('');
+  const [messageDraft, _setMessageDraft] = useState("");
   // We use this to store the raw value of the rich text editor
   const messageDraftRichRaw = useRef<JSONContent | string>();
 
@@ -201,17 +201,17 @@ export default forwardRef(function InboxProspectConvoSendBox(
     _setMessageDraft(value);
   };
   // For email we have to use this ref instead, otherwise the textbox does a weird refocusing.
-  const messageDraftEmail = useRef('');
+  const messageDraftEmail = useRef("");
 
-  const [aiMessage, setAiMessage] = useState('');
+  const [aiMessage, setAiMessage] = useState("");
   const [aiGenerated, setAiGenerated] = useState(false);
   const [msgLoading, setMsgLoading] = useState(props.msgLoading || false);
 
   const [ccEmails, setCcEmails] = useState<string[]>([]);
   const [bccEmails, setBccEmails] = useState<string[]>([]);
 
-  const [ccInputValue, setCcInputValue] = useState('');
-  const [bccInputValue, setBccInputValue] = useState('');
+  const [ccInputValue, setCcInputValue] = useState("");
+  const [bccInputValue, setBccInputValue] = useState("");
 
   const [showCc, setShowCc] = useState<boolean>(false);
   const [showBcc, setShowBcc] = useState<boolean>(false);
@@ -225,14 +225,14 @@ export default forwardRef(function InboxProspectConvoSendBox(
     // Hack to update the prospect list to temp show they're in purgatory
     setTempHiddenProspects(tempHiddenProspects.concat([props.prospectId]));
 
-    if (openedOutboundChannel === 'LINKEDIN') {
+    if (openedOutboundChannel === "LINKEDIN") {
       const msg = messageDraft;
-      setMessageDraft('');
+      setMessageDraft("");
       showNotification({
-        id: 'send-linkedin-message',
-        title: scheduleDay ? 'Scheduling message...' : 'Sending message ...',
-        message: '',
-        color: 'green',
+        id: "send-linkedin-message",
+        title: scheduleDay ? "Scheduling message..." : "Sending message ...",
+        message: "",
+        color: "green",
         autoClose: 3000,
       });
       setTimeout(() => setFetchingProspectId(-1), 15000);
@@ -259,7 +259,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       if (true) {
         let yourMessage = _.cloneDeep(currentConvoLiMessages || [])
           .reverse()
-          .find((msg) => msg.connection_degree === 'You');
+          .find((msg) => msg.connection_degree === "You");
         if (yourMessage) {
           yourMessage.message = msg;
           yourMessage.date = new Date().toUTCString();
@@ -270,57 +270,57 @@ export default forwardRef(function InboxProspectConvoSendBox(
             queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
           });
           queryClient.refetchQueries({
-            queryKey: ['query-prospects-list'],
+            queryKey: ["query-prospects-list"],
           });
         }
         showNotification({
-          id: 'send-linkedin-message',
-          title: scheduleDay ? 'Message Scheduled' : 'Message Sent',
-          message: '',
-          color: 'green',
+          id: "send-linkedin-message",
+          title: scheduleDay ? "Message Scheduled" : "Message Sent",
+          message: "",
+          color: "green",
         });
       } else {
         showNotification({
-          id: 'send-linkedin-message-error',
-          title: 'Error',
-          message: 'Failed to send message. Please try again later.',
-          color: 'red',
+          id: "send-linkedin-message-error",
+          title: "Error",
+          message: "Failed to send message. Please try again later.",
+          color: "red",
           autoClose: false,
         });
       }
-    } else if (openedOutboundChannel === 'SMARTLEAD') {
+    } else if (openedOutboundChannel === "SMARTLEAD") {
       const prospectid = props.prospectId;
       const response = await postSmartleadReply(userToken, prospectid, messageDraftEmail.current, scheduleDay, ccEmails, bccEmails);
-      if (response.status !== 'success') {
+      if (response.status !== "success") {
         showNotification({
-          title: 'Error',
-          message: 'Failed to send email',
-          color: 'red',
+          title: "Error",
+          message: "Failed to send email",
+          color: "red",
         });
       } else {
         //clear the input values
         setCcEmails([]);
         setBccEmails([]);
-        setCcInputValue('');
-        setBccInputValue('');
-        setMessageDraft('');
+        setCcInputValue("");
+        setBccInputValue("");
+        setMessageDraft("");
         //close the email composer dialog
         props.minimizedSendBox();
         if (scheduleDay) {
           showNotification({
-            title: 'Success',
-            message: 'Email scheduled to send.',
-            color: 'green',
+            title: "Success",
+            message: "Email scheduled to send.",
+            color: "green",
           });
         } else {
           showNotification({
-            title: 'Success',
-            message: 'Email sent. It may take a few minutes to appear in your inbox.',
-            color: 'green',
+            title: "Success",
+            message: "Email sent. It may take a few minutes to appear in your inbox.",
+            color: "green",
           });
         }
 
-        setMessageDraft('');
+        setMessageDraft("");
       }
       if (props?.triggerGetSmartleadProspectConvo) {
         props?.triggerGetSmartleadProspectConvo();
@@ -329,10 +329,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
     } else {
       if (currentConvoEmailMessages === undefined || currentConvoEmailMessages.length === 0) {
         showNotification({
-          id: 'send-email-message-error',
-          title: 'Error',
-          message: 'Please select an email thread',
-          color: 'red',
+          id: "send-email-message-error",
+          title: "Error",
+          message: "Please select an email thread",
+          color: "red",
           autoClose: false,
         });
         setMsgLoading(false);
@@ -341,10 +341,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
       const msg = messageDraftEmail.current;
       if (msg.length === 0) {
         showNotification({
-          id: 'send-email-message-error',
-          title: 'Error',
-          message: 'Please enter a message',
-          color: 'red',
+          id: "send-email-message-error",
+          title: "Error",
+          message: "Please enter a message",
+          color: "red",
           autoClose: false,
         });
         setMsgLoading(false);
@@ -354,7 +354,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       // Get the last message
       const replyToMessageID = currentConvoEmailMessages[currentConvoEmailMessages.length - 1].nylas_message_id;
       const result = await sendEmail(userToken, props.prospectId, `Re: ${currentConvoEmailThread?.subject}`, msg, aiGenerated, replyToMessageID);
-      if (result.status === 'success') {
+      if (result.status === "success") {
         let yourMessage = _.cloneDeep(currentConvoEmailMessages || [])
           .reverse()
           .find((msg) => msg.from_sdr);
@@ -368,15 +368,15 @@ export default forwardRef(function InboxProspectConvoSendBox(
             queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
           });
         }
-        messageDraftEmail.current = '';
-        messageDraftRichRaw.current = '';
-        setMessageDraft('');
+        messageDraftEmail.current = "";
+        messageDraftRichRaw.current = "";
+        setMessageDraft("");
       } else {
         showNotification({
-          id: 'send-email-message-error',
-          title: 'Error',
-          message: 'Failed to send message. Please try again later.',
-          color: 'red',
+          id: "send-email-message-error",
+          title: "Error",
+          message: "Failed to send message. Please try again later.",
+          color: "red",
           autoClose: false,
         });
       }
@@ -404,7 +404,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   useEffect(() => {
     (async () => {
-      const result = await getBumpFrameworks(userToken, ['ACTIVE_CONVO'], [], [], undefined, undefined, undefined, undefined, props.archetypeId);
+      const result = await getBumpFrameworks(userToken, ["ACTIVE_CONVO"], [], [], undefined, undefined, undefined, undefined, props.archetypeId);
 
       let bumpFrameworkArray = [] as BumpFramework[];
       for (const bumpFramework of result.data.bump_frameworks as BumpFramework[]) {
@@ -422,11 +422,11 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   const smartGenerate = async (additional_instructions: string) => {
     setMsgLoading(true);
-    if (openedOutboundChannel === 'LINKEDIN') {
+    if (openedOutboundChannel === "LINKEDIN") {
       const result = fetch(`${API_URL}/li_conversation/prospect/generate_smart_response`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
         },
         body: JSON.stringify({
@@ -436,27 +436,27 @@ export default forwardRef(function InboxProspectConvoSendBox(
       })
         .then((res) => res.json())
         .then((j) => {
-          const message = j['message'];
+          const message = j["message"];
 
           setMessageDraft(message);
           setAiMessage(message);
-          setBumpFramework(j['bump_framework']);
+          setBumpFramework(j["bump_framework"]);
           setAiGenerated(true);
 
           showNotification({
-            id: 'generate-linkedin-message',
-            title: 'Generated message',
-            message: '',
-            color: 'green',
+            id: "generate-linkedin-message",
+            title: "Generated message",
+            message: "",
+            color: "green",
             autoClose: 3000,
           });
         })
         .catch((e) => {
           showNotification({
-            id: 'generate-linkedin-message-error',
-            title: 'Error',
-            message: 'Failed to generate message',
-            color: 'red',
+            id: "generate-linkedin-message-error",
+            title: "Error",
+            message: "Failed to generate message",
+            color: "red",
             autoClose: 3000,
           });
         })
@@ -474,17 +474,17 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   const replyLabels = useMemo(() => {
     const labels = [
-      'ACTIVE_CONVO_QUESTION',
-      'ACTIVE_CONVO_QUAL_NEEDED',
-      'ACTIVE_CONVO_OBJECTION',
-      'ACTIVE_CONVO_SCHEDULING',
-      'ACTIVE_CONVO_NEXT_STEPS',
-      'ACTIVE_CONVO_REVIVAL',
-      'ACTIVE_CONVO_CIRCLE_BACK',
-      'ACTIVE_CONVO_REFERRAL',
-      'ACTIVE_CONVO_QUEUED_FOR_SNOOZE',
-      'ACTIVE_CONVO_CONTINUE_SEQUENCE',
-      'ACTIVE_CONVO_BREAKUP',
+      "ACTIVE_CONVO_QUESTION",
+      "ACTIVE_CONVO_QUAL_NEEDED",
+      "ACTIVE_CONVO_OBJECTION",
+      "ACTIVE_CONVO_SCHEDULING",
+      "ACTIVE_CONVO_NEXT_STEPS",
+      "ACTIVE_CONVO_REVIVAL",
+      "ACTIVE_CONVO_CIRCLE_BACK",
+      "ACTIVE_CONVO_REFERRAL",
+      "ACTIVE_CONVO_QUEUED_FOR_SNOOZE",
+      "ACTIVE_CONVO_CONTINUE_SEQUENCE",
+      "ACTIVE_CONVO_BREAKUP",
     ];
 
     return Array.from(labels);
@@ -492,57 +492,57 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   const labelEmoji = (label: string) => {
     switch (label) {
-      case 'ACTIVE_CONVO_QUESTION':
-        return '❓';
-      case 'ACTIVE_CONVO_QUAL_NEEDED':
-        return '👍';
-      case 'ACTIVE_CONVO_OBJECTION':
-        return '👆';
-      case 'ACTIVE_CONVO_SCHEDULING':
-        return '📆';
-      case 'ACTIVE_CONVO_NEXT_STEPS':
-        return '➡️';
-      case 'ACTIVE_CONVO_REVIVAL':
-        return '🏥';
-      case 'ACTIVE_CONVO_CIRCLE_BACK':
-        return '🔄';
-      case 'ACTIVE_CONVO_REFERRAL':
-        return '👥';
-      case 'ACTIVE_CONVO_QUEUED_FOR_SNOOZE':
-        return '💤';
-      case 'ACTIVE_CONVO_CONTINUE_SEQUENCE':
-        return '';
+      case "ACTIVE_CONVO_QUESTION":
+        return "❓";
+      case "ACTIVE_CONVO_QUAL_NEEDED":
+        return "👍";
+      case "ACTIVE_CONVO_OBJECTION":
+        return "👆";
+      case "ACTIVE_CONVO_SCHEDULING":
+        return "📆";
+      case "ACTIVE_CONVO_NEXT_STEPS":
+        return "➡️";
+      case "ACTIVE_CONVO_REVIVAL":
+        return "🏥";
+      case "ACTIVE_CONVO_CIRCLE_BACK":
+        return "🔄";
+      case "ACTIVE_CONVO_REFERRAL":
+        return "👥";
+      case "ACTIVE_CONVO_QUEUED_FOR_SNOOZE":
+        return "💤";
+      case "ACTIVE_CONVO_CONTINUE_SEQUENCE":
+        return "";
       default:
-        return '';
+        return "";
     }
   };
 
   const filteredFrameworkData =
-    openedOutboundChannel === 'LINKEDIN'
+    openedOutboundChannel === "LINKEDIN"
       ? bumpFrameworks.length > 0
         ? bumpFrameworks
             .sort((a: BumpFramework, b: BumpFramework) => {
               return a.title.localeCompare(b.title);
             })
             .filter((i) => {
-              if (!replyLabel && replyLabel !== 'ACTIVE_CONVO_CONTINUE_SEQUENCE') {
+              if (!replyLabel && replyLabel !== "ACTIVE_CONVO_CONTINUE_SEQUENCE") {
                 return i;
               }
 
-              if (replyLabel === 'ACTIVE_CONVO_CONTINUE_SEQUENCE') {
-                return i.overall_status === 'ACCEPTED' || i.overall_status === 'BUMPED';
+              if (replyLabel === "ACTIVE_CONVO_CONTINUE_SEQUENCE") {
+                return i.overall_status === "ACCEPTED" || i.overall_status === "BUMPED";
               }
 
               return i.substatus === replyLabel;
             })
             .map((bf: BumpFramework) => {
               let title = bf.title;
-              if (bf.overall_status === 'ACCEPTED' || bf.overall_status === 'BUMPED') {
-                title = '(step #' + (bf.bumped_count ? bf.bumped_count + 1 : 1) + ') ' + bf.title;
+              if (bf.overall_status === "ACCEPTED" || bf.overall_status === "BUMPED") {
+                title = "(step #" + (bf.bumped_count ? bf.bumped_count + 1 : 1) + ") " + bf.title;
               }
 
               return {
-                value: bf.id + '',
+                value: bf.id + "",
                 label: title,
               };
             })
@@ -560,7 +560,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           })
           .map((step: EmailReplyFramework) => {
             return {
-              value: step.id + '',
+              value: step.id + "",
               // label: (step.default ? "🟢 " : "⚪️ ") + step.title,
               label: step.title,
             };
@@ -569,14 +569,14 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   return (
     <Paper
-      shadow='sm'
+      shadow="sm"
       withBorder
       radius={theme.radius.md}
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        flexWrap: 'nowrap',
-        position: 'relative',
+        display: "flex",
+        flexDirection: "column",
+        flexWrap: "nowrap",
+        position: "relative",
       }}
       pb={8}
       mah={500}
@@ -584,34 +584,34 @@ export default forwardRef(function InboxProspectConvoSendBox(
       <LoadingOverlay visible={msgLoading} />
       <div
         style={{
-          flexBasis: '15%',
-          backgroundColor: '#25262b',
+          flexBasis: "15%",
+          backgroundColor: "#25262b",
           borderTopLeftRadius: theme.radius.md,
           borderTopRightRadius: theme.radius.md,
         }}
       >
-        <Group spacing={0} position='apart'>
-          <Flex wrap='nowrap' align='center'>
-            <Text color='white' fz={14} fw={500} pl={15} pt={5}>
-              {openedOutboundChannel === 'LINKEDIN' ? 'Message via LinkedIn' : 'Reply via Email'}
+        <Group spacing={0} position="apart">
+          <Flex wrap="nowrap" align="center">
+            <Text color="white" fz={14} fw={500} pl={15} pt={5}>
+              {openedOutboundChannel === "LINKEDIN" ? "Message via LinkedIn" : "Reply via Email"}
             </Text>
             <Text
               pl={10}
               pt={5}
-              size='xs'
-              fs='italic'
-              color='gray.3'
-              component='a'
-              target='_blank'
-              rel='noopener noreferrer'
-              href={openedOutboundChannel === 'LINKEDIN' ? `https://www.linkedin.com/in/${props.linkedin_public_id}` : `mailto:${props.email}`}
+              size="xs"
+              fs="italic"
+              color="gray.3"
+              component="a"
+              target="_blank"
+              rel="noopener noreferrer"
+              href={openedOutboundChannel === "LINKEDIN" ? `https://www.linkedin.com/in/${props.linkedin_public_id}` : `mailto:${props.email}`}
             >
-              {openedOutboundChannel === 'LINKEDIN'
+              {openedOutboundChannel === "LINKEDIN"
                 ? `linkedin.com/in/${_.truncate(props.linkedin_public_id, {
                     length: 20,
                   })}`
-                : props.email}{' '}
-              <IconExternalLink size='0.65rem' />
+                : props.email}{" "}
+              <IconExternalLink size="0.65rem" />
             </Text>
           </Flex>
           <Flex>
@@ -645,8 +645,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
           )} */}
             {true && ( // TODO: Added chat box expanding
               <div style={{ paddingRight: 5 }}>
-                <ActionIcon color='gray.0' size='lg' variant='transparent' onClick={props.minimizedSendBox}>
-                  <IconChevronDown size='1rem' />
+                <ActionIcon color="gray.0" size="lg" variant="transparent" onClick={props.minimizedSendBox}>
+                  <IconChevronDown size="1rem" />
                 </ActionIcon>
               </div>
             )}
@@ -655,77 +655,77 @@ export default forwardRef(function InboxProspectConvoSendBox(
       </div>
       <div
         style={{
-          flexBasis: '85%',
-          position: 'relative',
+          flexBasis: "85%",
+          position: "relative",
           paddingLeft: 10,
           paddingRight: 10,
         }}
       >
-        <Flex align={'center'} justify={'space-between'} my={'sm'}>
-          <Flex align={'center'} gap={'xs'}>
-            <IconSparkles size={'0.9rem'} />
-            <Text fw={500} size={'sm'} color='gray'>
+        <Flex align={"center"} justify={"space-between"} my={"sm"}>
+          <Flex align={"center"} gap={"xs"}>
+            <IconSparkles size={"0.9rem"} />
+            <Text fw={500} size={"sm"} color="gray">
               AI Response:
             </Text>
-            <Flex mah={35} miw={220} style={{ border: '1px solid #ced4da', borderRadius: '6px' }} align={'center'}>
-              <Flex w={'100%'} my={7} ml={10}>
-                <div className=' px-2 py-[3px] rounded-md text-[14px]'>K8s in Depth</div>
+            <Flex mah={35} miw={220} style={{ border: "1px solid #ced4da", borderRadius: "6px" }} align={"center"}>
+              <Flex w={"100%"} my={7} ml={10}>
+                <div className=" px-2 py-[3px] rounded-md text-[14px]">K8s in Depth</div>
               </Flex>
-              <Flex h={'100%'} px={4} sx={{ borderLeft: '1px solid #ced4da' }}>
-                <ActionIcon className='m-auto '>
-                  <IconAdjustmentsHorizontal color='gray' />
+              <Flex h={"100%"} px={4} sx={{ borderLeft: "1px solid #ced4da" }}>
+                <ActionIcon className="m-auto ">
+                  <IconAdjustmentsHorizontal color="gray" />
                 </ActionIcon>
               </Flex>
             </Flex>
           </Flex>
-          <Button variant='outline' leftIcon={<IconEdit size={'0.9rem'} />}>
+          <Button variant="outline" leftIcon={<IconEdit size={"0.9rem"} />}>
             Generate
           </Button>
         </Flex>
-        <Flex justify={'space-between'} gap={'md'} align={'center'}>
-          <Flex w={'100%'} h={36} style={{ border: '1px solid #ced4da', borderRadius: '5px' }} align={'center'}>
+        <Flex justify={"space-between"} gap={"md"} align={"center"}>
+          <Flex w={"100%"} h={36} style={{ border: "1px solid #ced4da", borderRadius: "5px" }} align={"center"}>
             <span
               style={{
-                borderRadius: '4px',
-                color: '#7A8595',
-                padding: '1px 16px',
-                fontSize: '14px',
+                borderRadius: "4px",
+                color: "#7A8595",
+                padding: "1px 16px",
+                fontSize: "14px",
               }}
             >
               From:
             </span>
-            <Flex w={'100%'} my={7} mx={4}>
-              <div className='bg-[#ECEEF1] px-2 py-[3px] rounded-md text-[14px]'>{props.email}</div>
+            <Flex w={"100%"} my={7} mx={4}>
+              <div className="bg-[#ECEEF1] px-2 py-[3px] rounded-md text-[14px]">{props.email}</div>
             </Flex>
-            <Flex h={'100%'} px={4} sx={{ borderLeft: '1px solid #ced4da' }}>
-              <ActionIcon className='m-auto '>
-                <IconAdjustmentsHorizontal color='gray' />
+            <Flex h={"100%"} px={4} sx={{ borderLeft: "1px solid #ced4da" }}>
+              <ActionIcon className="m-auto ">
+                <IconAdjustmentsHorizontal color="gray" />
               </ActionIcon>
             </Flex>
           </Flex>
           <Button.Group>
             <Button
-              variant='default'
-              bg={showCc ? '#F7F8FA' : ''}
+              variant="default"
+              bg={showCc ? "#F7F8FA" : ""}
               onClick={() => setShowCc(!showCc)}
-              className={`${showCc ? 'text-[#7A8595] !important' : ''}`}
+              className={`${showCc ? "text-[#7A8595] !important" : ""}`}
             >
               CC
               {ccEmails.length > 0 && (
-                <Badge color='blue' variant='filled' style={{ marginLeft: '8px' }}>
+                <Badge color="blue" variant="filled" style={{ marginLeft: "8px" }}>
                   {ccEmails.length}
                 </Badge>
               )}
             </Button>
             <Button
-              variant='default'
-              bg={showBcc ? '#F7F8FA' : ''}
+              variant="default"
+              bg={showBcc ? "#F7F8FA" : ""}
               onClick={() => setShowBcc(!showBcc)}
-              className={`${showBcc ? 'text-[#7A8595] !important' : ''}`}
+              className={`${showBcc ? "text-[#7A8595] !important" : ""}`}
             >
               BCC
               {bccEmails.length > 0 && (
-                <Badge color='blue' variant='filled' style={{ marginLeft: '8px' }}>
+                <Badge color="blue" variant="filled" style={{ marginLeft: "8px" }}>
                   {bccEmails.length}
                 </Badge>
               )}
@@ -733,20 +733,20 @@ export default forwardRef(function InboxProspectConvoSendBox(
           </Button.Group>
         </Flex>
 
-        <Flex direction={'column'} mt={'xs'}>
+        <Flex direction={"column"} mt={"xs"}>
           {showCc && (
-            <div style={{ position: 'relative', marginBottom: '10px' }}>
+            <div style={{ position: "relative", marginBottom: "10px" }}>
               <span
                 style={{
-                  position: 'absolute',
-                  left: '14px',
-                  top: '7px',
-                  borderRadius: '4px',
+                  position: "absolute",
+                  left: "14px",
+                  top: "7px",
+                  borderRadius: "4px",
                   zIndex: 10,
-                  fontSize: '14px',
-                  color: '#7A8595',
+                  fontSize: "14px",
+                  color: "#7A8595",
                   // backgroundColor: '#1a252f',
-                  padding: '1px 3px',
+                  padding: "1px 3px",
                 }}
               >
                 CC:
@@ -761,18 +761,18 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 searchValue={ccInputValue} // Controlled input value
                 onSearchChange={setCcInputValue} // Update input value on change
                 styles={{
-                  rightSection: { display: 'none' }, // Hide the dropdown arrow
-                  input: { paddingLeft: '60px' }, // Adjust padding to prevent text overlap
+                  rightSection: { display: "none" }, // Hide the dropdown arrow
+                  input: { paddingLeft: "60px" }, // Adjust padding to prevent text overlap
                   values: {
-                    marginLeft: '10px',
+                    marginLeft: "10px",
                   },
                 }}
                 onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
+                  if (event.key === "Enter") {
                     const inputValue = event.currentTarget.value;
                     if (isValidEmail(inputValue)) {
                       setCcEmails((current) => [...current, inputValue]);
-                      setCcInputValue(''); // Clear the controlled input value
+                      setCcInputValue(""); // Clear the controlled input value
                       event.preventDefault();
                     }
                   }
@@ -781,18 +781,18 @@ export default forwardRef(function InboxProspectConvoSendBox(
             </div>
           )}
           {showBcc && (
-            <div style={{ position: 'relative', marginBottom: '10px' }}>
+            <div style={{ position: "relative", marginBottom: "10px" }}>
               <span
                 style={{
-                  position: 'absolute',
-                  left: '14px',
-                  top: '7px',
-                  marginRight: '10px',
-                  borderRadius: '4px',
+                  position: "absolute",
+                  left: "14px",
+                  top: "7px",
+                  marginRight: "10px",
+                  borderRadius: "4px",
                   zIndex: 10,
-                  color: '#7A8595',
+                  color: "#7A8595",
                   // backgroundColor: '#1a252f',
-                  padding: '1px 3px',
+                  padding: "1px 3px",
                 }}
               >
                 BCC:
@@ -807,18 +807,18 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 searchValue={bccInputValue} // Controlled input value
                 onSearchChange={setBccInputValue} // Update input value on change
                 styles={{
-                  rightSection: { display: 'none' }, // Hide the dropdown arrow
-                  input: { paddingLeft: '60px' }, // Adjust padding to prevent text overlap
+                  rightSection: { display: "none" }, // Hide the dropdown arrow
+                  input: { paddingLeft: "60px" }, // Adjust padding to prevent text overlap
                   values: {
-                    marginLeft: '10px',
+                    marginLeft: "10px",
                   },
                 }}
                 onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
+                  if (event.key === "Enter") {
                     const inputValue = event.currentTarget.value;
                     if (isValidEmail(inputValue)) {
                       setBccEmails((current) => [...current, inputValue]);
-                      setBccInputValue(''); // Clear the controlled input value
+                      setBccInputValue(""); // Clear the controlled input value
                       event.preventDefault();
                     }
                   }
@@ -828,24 +828,24 @@ export default forwardRef(function InboxProspectConvoSendBox(
           )}
         </Flex>
 
-        <Flex justify={'space-between'} mt={10} gap={'xs'}>
-          <Flex align={'center'} gap={'xs'} w='35%'>
-            <Text fw={700} fz={'10px'} color='gray.6' w='35%'>
+        <Flex justify={"space-between"} mt={10} gap={"xs"}>
+          <Flex align={"center"} gap={"xs"} w="35%">
+            <Text fw={700} fz={"10px"} color="gray.6" w="35%">
               Reply Label
             </Text>
             <Select
-              w='65%'
-              size='xs'
+              w="65%"
+              size="xs"
               onChange={(val) => {
-                setReplyLabel(val || '');
+                setReplyLabel(val || "");
                 setBumpFramework(bumpFrameworks.find((bf) => bf.substatus === val) || bumpFrameworks[0]);
 
-                updateChannelStatus(openedProspectId, userToken, 'LINKEDIN', val || '', false, true).then((res) => {
+                updateChannelStatus(openedProspectId, userToken, "LINKEDIN", val || "", false, true).then((res) => {
                   showNotification({
-                    id: 'update-channel-status',
-                    title: 'Status updated',
-                    message: '',
-                    color: 'green',
+                    id: "update-channel-status",
+                    title: "Status updated",
+                    message: "",
+                    color: "green",
                     autoClose: 3000,
                   });
 
@@ -860,31 +860,31 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 .filter((label) => label)
                 .map((label) => ({
                   value: label,
-                  label: labelEmoji(label) + ' ' + convertToTitleCase(label?.replaceAll('ACTIVE_CONVO_', '').replaceAll('_', ' ').toLowerCase()),
+                  label: labelEmoji(label) + " " + convertToTitleCase(label?.replaceAll("ACTIVE_CONVO_", "").replaceAll("_", " ").toLowerCase()),
                 }))}
             />
           </Flex>
-          <Flex gap={'xs'} align={'center'} w='70%' justify={'space-between'}>
+          <Flex gap={"xs"} align={"center"} w="70%" justify={"space-between"}>
             {/* only show for linkedin */}
-            <Text fw={700} fz={'10px'} color='gray.6' w='25%'>
+            <Text fw={700} fz={"10px"} color="gray.6" w="25%">
               AI Response
             </Text>
-            <Flex align={'center'} pos={'relative'} w='75%'>
+            <Flex align={"center"} pos={"relative"} w="75%">
               <Select
                 rightSection={
                   <Tooltip
                     label={selectedBumpFramework ? `Manage '${selectedBumpFramework.title}'` : `Configure Msg Gen`}
                     withArrow
-                    disabled={openedOutboundChannel != 'LINKEDIN'}
+                    disabled={openedOutboundChannel != "LINKEDIN"}
                   >
                     <Button
-                      variant='outline'
-                      color='gray.8'
-                      size='xs'
-                      w={'100%'}
+                      variant="outline"
+                      color="gray.8"
+                      size="xs"
+                      w={"100%"}
                       radius={0}
                       sx={(theme) => ({
-                        border: 'none',
+                        border: "none",
                         borderLeft: `1px solid ${theme.colors.gray[4]}`,
                         paddingLeft: 4,
                         paddingRight: 4,
@@ -892,17 +892,17 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       onClick={() => {
                         setOpenBumpFrameworks(true);
                       }}
-                      disabled={openedOutboundChannel != 'LINKEDIN'}
+                      disabled={openedOutboundChannel != "LINKEDIN"}
                     >
-                      {selectedBumpFramework ? <IconSettingsFilled size='0.8rem' /> : <IconSettings size='0.8rem' />}
+                      {selectedBumpFramework ? <IconSettingsFilled size="0.8rem" /> : <IconSettings size="0.8rem" />}
                     </Button>
                   </Tooltip>
                 }
                 withinPortal
-                placeholder={filteredFrameworkData.length > 0 ? 'Select Framework' : 'No Frameworks'}
-                size='xs'
+                placeholder={filteredFrameworkData.length > 0 ? "Select Framework" : "No Frameworks"}
+                size="xs"
                 disabled={filteredFrameworkData.length === 0}
-                defaultValue={filteredFrameworkData.length > 0 ? filteredFrameworkData[0] + '' : undefined}
+                defaultValue={filteredFrameworkData.length > 0 ? filteredFrameworkData[0] + "" : undefined}
                 data={filteredFrameworkData}
                 // styles={{
                 //   input: {
@@ -913,7 +913,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 //   dropdown: { minWidth: 250 },
                 // }}
                 onChange={(value) => {
-                  if (openedOutboundChannel === 'LINKEDIN') {
+                  if (openedOutboundChannel === "LINKEDIN") {
                     const selected = bumpFrameworks.find((bf) => bf.id === parseInt(value as string));
                     if (selected) {
                       setBumpFramework(selected);
@@ -924,42 +924,42 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
                     const substatus = bumpFrameworks.length > 0 ? bumpFrameworks[0].substatus : undefined;
                     setSetOpenBumpFrameworksSubstatus(substatus);
-                  } else if (openedOutboundChannel === 'EMAIL' || openedOutboundChannel === 'SMARTLEAD') {
+                  } else if (openedOutboundChannel === "EMAIL" || openedOutboundChannel === "SMARTLEAD") {
                     const selected = emailReplyFrameworks.find((step) => step.id === parseInt(value as string));
                     if (selected) {
                       setEmailReplyFramework(selected);
                     }
                   }
                 }}
-                value={openedOutboundChannel === 'LINKEDIN' ? selectedBumpFramework?.id + '' : selectedEmailReplyFramework?.id + ''}
+                value={openedOutboundChannel === "LINKEDIN" ? selectedBumpFramework?.id + "" : selectedEmailReplyFramework?.id + ""}
               />
             </Flex>
 
             <Button
-              leftIcon={<IconPencil size='1rem' />}
-              variant='outline'
-              color='gray.6'
+              leftIcon={<IconPencil size="1rem" />}
+              variant="outline"
+              color="gray.6"
               sx={{
-                '&[data-disabled]': {
-                  backgroundColor: 'white',
-                  border: '1px solid black',
-                  pointerEvents: 'all',
+                "&[data-disabled]": {
+                  backgroundColor: "white",
+                  border: "1px solid black",
+                  pointerEvents: "all",
                 },
               }}
-              size='xs'
+              size="xs"
               disabled={
-                (openedOutboundChannel === 'LINKEDIN' && (bumpFrameworks === undefined || bumpFrameworks?.length === 0)) ||
-                (openedOutboundChannel != 'LINKEDIN' && (emailReplyFrameworks === undefined || emailReplyFrameworks?.length === 0))
+                (openedOutboundChannel === "LINKEDIN" && (bumpFrameworks === undefined || bumpFrameworks?.length === 0)) ||
+                (openedOutboundChannel != "LINKEDIN" && (emailReplyFrameworks === undefined || emailReplyFrameworks?.length === 0))
               }
               onClick={async () => {
                 setMsgLoading(true);
-                if (openedOutboundChannel === 'LINKEDIN') {
+                if (openedOutboundChannel === "LINKEDIN") {
                   // If the substatus is breakup, then we want to generate slightly different message:
                   const result = await generateAIFollowup(userToken, props.prospectId, selectedBumpFramework);
                   setMessageDraft(result.msg);
                   setAiMessage(result.msg);
                   setAiGenerated(result.aiGenerated);
-                } else if (openedOutboundChannel === 'EMAIL' || openedOutboundChannel === 'SMARTLEAD') {
+                } else if (openedOutboundChannel === "EMAIL" || openedOutboundChannel === "SMARTLEAD") {
                   // if (!currentConvoEmailThread) {
                   //   showNotification({
                   //     id: "send-email-message-error",
@@ -973,10 +973,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   // }
                   if (!selectedEmailReplyFramework) {
                     showNotification({
-                      id: 'send-email-message-error',
-                      title: 'Error',
-                      message: 'Please select an email reply framework',
-                      color: 'red',
+                      id: "send-email-message-error",
+                      title: "Error",
+                      message: "Please select an email reply framework",
+                      color: "red",
                       autoClose: false,
                     });
                     setMsgLoading(false);
@@ -989,10 +989,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   const email_body = result.data.message;
                   if (!email_body) {
                     showNotification({
-                      id: 'generate-email-message-error',
-                      title: 'Error',
-                      message: 'Failed to generate message. Please try again.',
-                      color: 'red',
+                      id: "generate-email-message-error",
+                      title: "Error",
+                      message: "Failed to generate message. Please try again.",
+                      color: "red",
                       autoClose: false,
                     });
                     setMsgLoading(false);
@@ -1007,24 +1007,24 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 setMsgLoading(false);
               }}
             >
-              Generate {openedOutboundChannel === 'LINKEDIN' ? '' : 'Email'}
+              Generate {openedOutboundChannel === "LINKEDIN" ? "" : "Email"}
             </Button>
           </Flex>
         </Flex>
 
-        <Box pos={'relative'}>
-          {openedOutboundChannel === 'LINKEDIN' ? (
+        <Box pos={"relative"}>
+          {openedOutboundChannel === "LINKEDIN" ? (
             <Textarea
               minRows={5}
               maxRows={8}
-              mt='xs'
-              color='gray'
-              placeholder='Your message...'
+              mt="xs"
+              color="gray"
+              placeholder="Your message..."
               value={messageDraft}
               onChange={(event) => _setMessageDraft(event.currentTarget.value)}
               onKeyDown={getHotkeyHandler([
                 [
-                  'mod+Enter',
+                  "mod+Enter",
                   () => {
                     sendMessage();
                   },
@@ -1032,7 +1032,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
               ])}
             />
           ) : (
-            <Box mt='xs'>
+            <Box mt="xs">
               <RichTextArea
                 onChange={(value, rawValue) => {
                   messageDraftRichRaw.current = rawValue;
@@ -1047,9 +1047,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
           {aiGenerated && (
             <AutoBumpFrameworkInfo
               useBumpFramework={selectedBumpFramework !== undefined}
-              bump_title={selectedBumpFramework?.title || 'None'}
-              bump_description={selectedBumpFramework?.description || 'No framework'}
-              bump_length={selectedBumpFramework?.bump_length || 'No length'}
+              bump_title={selectedBumpFramework?.title || "None"}
+              bump_description={selectedBumpFramework?.description || "No framework"}
+              bump_length={selectedBumpFramework?.bump_length || "No length"}
               account_research_points={selectedBumpFramework?.account_research || []}
               bump_number_sent={selectedBumpFramework?.etl_num_times_used}
               bump_number_converted={selectedBumpFramework?.etl_num_times_converted}
@@ -1057,64 +1057,64 @@ export default forwardRef(function InboxProspectConvoSendBox(
           )}
         </Box>
 
-        <Flex align='center' direction='row' justify={'space-between'} wrap='wrap'>
-          <Flex mt='xs' align='center'>
-            {openedOutboundChannel === 'LINKEDIN' && (
-              <Tooltip withArrow position='bottom' label='Smart Generate with AI'>
+        <Flex align="center" direction="row" justify={"space-between"} wrap="wrap">
+          <Flex mt="xs" align="center">
+            {openedOutboundChannel === "LINKEDIN" && (
+              <Tooltip withArrow position="bottom" label="Smart Generate with AI">
                 <Button
-                  leftIcon={<IconWand size='0.8rem' />}
-                  color='grape'
-                  size='xs'
-                  sx={{ borderRadius: '4px 0px 0px 4px' }}
+                  leftIcon={<IconWand size="0.8rem" />}
+                  color="grape"
+                  size="xs"
+                  sx={{ borderRadius: "4px 0px 0px 4px" }}
                   onClick={() => {
                     showNotification({
-                      id: 'generate-linkedin-message',
-                      title: 'Generating message ...',
-                      message: '',
-                      color: 'blue',
+                      id: "generate-linkedin-message",
+                      title: "Generating message ...",
+                      message: "",
+                      color: "blue",
                       autoClose: 3000,
                     });
-                    smartGenerate('');
+                    smartGenerate("");
                   }}
                 >
                   Smart Generate
                 </Button>
               </Tooltip>
             )}
-            <Tooltip label='Co-pilot a response by providing feedback' withArrow position='bottom'>
+            <Tooltip label="Co-pilot a response by providing feedback" withArrow position="bottom">
               <Button
-                variant='outline'
-                color='grape'
-                size='xs'
+                variant="outline"
+                color="grape"
+                size="xs"
                 sx={{
-                  width: 'auto',
-                  borderLeft: 'none',
-                  borderRadius: '0px 4px 4px 0px',
+                  width: "auto",
+                  borderLeft: "none",
+                  borderRadius: "0px 4px 4px 0px",
                 }}
                 onClick={() => {
-                  let tempInputValue = '';
+                  let tempInputValue = "";
                   openConfirmModal({
-                    title: 'Co-pilot a response',
+                    title: "Co-pilot a response",
                     children: (
                       <Textarea
-                        description='Give feedback on how to respond and a draft will be created'
-                        placeholder='Describe how you want to form the generated text'
+                        description="Give feedback on how to respond and a draft will be created"
+                        placeholder="Describe how you want to form the generated text"
                         onChange={(event) => {
                           tempInputValue = event.currentTarget.value;
                         }}
                       />
                     ),
                     labels: {
-                      confirm: 'Generate with feedback',
-                      cancel: 'Cancel',
+                      confirm: "Generate with feedback",
+                      cancel: "Cancel",
                     },
                     onCancel: () => {},
                     onConfirm: () => {
                       showNotification({
-                        id: 'generate-linkedin-message',
-                        title: 'Generating message ...',
-                        message: '',
-                        color: 'blue',
+                        id: "generate-linkedin-message",
+                        title: "Generating message ...",
+                        message: "",
+                        color: "blue",
                         autoClose: 3000,
                       });
                       smartGenerate(tempInputValue);
@@ -1122,35 +1122,35 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   });
                 }}
               >
-                <IconMessageDots size='1rem' />
+                <IconMessageDots size="1rem" />
               </Button>
             </Tooltip>
           </Flex>
 
-          <Flex mt='xs' align='center' direction='row' justify={'end'}>
-            <Popover position='bottom' withArrow shadow='md' trapFocus opened={showCalendarPopup}>
+          <Flex mt="xs" align="center" direction="row" justify={"end"}>
+            <Popover position="bottom" withArrow shadow="md" trapFocus opened={showCalendarPopup}>
               <Popover.Target>
-                <Tooltip label='Set a custom snooze day' withArrow withinPortal>
+                <Tooltip label="Set a custom snooze day" withArrow withinPortal>
                   <Flex>
                     <Button
                       onClick={() => setShowCalendarPopup((v) => !v)}
-                      size='xs'
+                      size="xs"
                       sx={{
                         borderTopRightRadius: 0,
                         borderBottomRightRadius: 0,
                       }}
                     >
-                      <IconZzz size={'1rem'} />
+                      <IconZzz size={"1rem"} />
                     </Button>
                   </Flex>
                 </Tooltip>
               </Popover.Target>
               <Popover.Dropdown>
                 <Calendar
-                  placeholder={'Select a date'}
-                  minDate={moment(new Date()).add(1, 'days').toDate()}
+                  placeholder={"Select a date"}
+                  minDate={moment(new Date()).add(1, "days").toDate()}
                   getDayProps={(date) => ({
-                    selected: moment(snoozeDay).isSame(date, 'day'),
+                    selected: moment(snoozeDay).isSame(date, "day"),
                     onClick: () => {
                       setShowCalendarPopup(false);
                       setSnoozeDay(date);
@@ -1161,7 +1161,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
             </Popover>
 
             <Button
-              size='xs'
+              size="xs"
               sx={{
                 borderTopRightRadius: 0,
                 borderBottomRightRadius: 0,
@@ -1174,20 +1174,20 @@ export default forwardRef(function InboxProspectConvoSendBox(
               styles={(theme) => ({
                 rightIcon: {
                   borderLeft: `1px solid ${theme.white}`,
-                  marginLeft: '0.5rem',
-                  paddingLeft: '0.25rem',
+                  marginLeft: "0.5rem",
+                  paddingLeft: "0.25rem",
                 },
               })}
             >
-              {scheduleDay ? 'Schedule for [' + moment(scheduleDay).format('MMM Do h:mmA') + '] ' : 'Send'} and Snooze for{' '}
-              {moment(snoozeDay).diff(new Date(), 'days') + 1} days
+              {scheduleDay ? "Schedule for [" + moment(scheduleDay).format("MMM Do h:mmA") + "] " : "Send"} and Snooze for{" "}
+              {moment(snoozeDay).diff(new Date(), "days") + 1} days
             </Button>
-            <Popover position='bottom' withArrow shadow='md' trapFocus opened={showSchedulePopup}>
+            <Popover position="bottom" withArrow shadow="md" trapFocus opened={showSchedulePopup}>
               <Popover.Target>
-                <Tooltip label='Schedule a send time into the future' withArrow withinPortal>
+                <Tooltip label="Schedule a send time into the future" withArrow withinPortal>
                   <Flex>
-                    <Button onClick={() => setShowSchedulePopup((v) => !v)} size='xs' sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}>
-                      <IconClock24 size={'1rem'} />
+                    <Button onClick={() => setShowSchedulePopup((v) => !v)} size="xs" sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}>
+                      <IconClock24 size={"1rem"} />
                     </Button>
                   </Flex>
                 </Tooltip>
@@ -1195,47 +1195,47 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
               <Popover.Dropdown>
                 <Calendar
-                  placeholder={'Select a date'}
-                  minDate={moment(new Date()).add(1, 'days').toDate()}
+                  placeholder={"Select a date"}
+                  minDate={moment(new Date()).add(1, "days").toDate()}
                   getDayProps={(date) => ({
-                    selected: moment(scheduleDay).isSame(date, 'day'),
+                    selected: moment(scheduleDay).isSame(date, "day"),
                     onClick: () => {
                       // Preserve the time
                       const hour = moment(scheduleDay).hour();
                       const minute = moment(scheduleDay).minute();
-                      const newDate = moment(date).set('hour', hour).set('minute', minute).toDate();
+                      const newDate = moment(date).set("hour", hour).set("minute", minute).toDate();
                       setScheduleDay(newDate);
                     },
                   })}
                 />
-                <Flex mt='xs' direction='row' justify={'space-between'} align='flex-end'>
+                <Flex mt="xs" direction="row" justify={"space-between"} align="flex-end">
                   <TimeInput
-                    w='100%'
-                    label='Custom Time'
-                    size='sm'
-                    value={moment(scheduleDay).format('HH:mm')}
+                    w="100%"
+                    label="Custom Time"
+                    size="sm"
+                    value={moment(scheduleDay).format("HH:mm")}
                     onChange={(event) => {
                       const value = event.currentTarget.value; // Format is HH:MM
-                      const hour = parseInt(value.split(':')[0]);
-                      const minute = parseInt(value.split(':')[1]);
-                      const newDate = moment(scheduleDay).set('hour', hour).set('minute', minute).toDate();
+                      const hour = parseInt(value.split(":")[0]);
+                      const minute = parseInt(value.split(":")[1]);
+                      const newDate = moment(scheduleDay).set("hour", hour).set("minute", minute).toDate();
                       setScheduleDay(newDate);
                     }}
                   />
-                  <Tooltip label='Schedule for now' withArrow withinPortal>
+                  <Tooltip label="Schedule for now" withArrow withinPortal>
                     <Flex>
                       <Button
-                        size='xs'
-                        mb='xs'
-                        ml='sm'
-                        variant='transparent'
-                        color='red'
+                        size="xs"
+                        mb="xs"
+                        ml="sm"
+                        variant="transparent"
+                        color="red"
                         onClick={() => {
                           setShowSchedulePopup(false);
                           setScheduleDay(undefined);
                         }}
                       >
-                        <IconX size='1rem' />
+                        <IconX size="1rem" />
                       </Button>
                     </Flex>
                   </Tooltip>

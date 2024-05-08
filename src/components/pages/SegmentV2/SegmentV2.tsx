@@ -676,7 +676,7 @@ export default function SegmentV2(props: PropsType) {
               </Menu.Target>
               <Menu.Dropdown>
                 <Menu.Label>Available Tags</Menu.Label>
-                {segmentTagCategories.map((tag, index) => (
+                {segmentTagCategories?.map((tag, index) => (
                   <Menu.Item key={index} onClick={() => { getAllSegments(true, tag.id); }}>
                     <Badge color={deterministicMantineColor(tag.name)}>{tag.name}</Badge>
                   </Menu.Item>
@@ -716,7 +716,7 @@ export default function SegmentV2(props: PropsType) {
                   setPopoverOpened(true);
                 }}
               >
-                {segmentTags.length > 0 ? segmentTags.map((tag: { name: string }, index: number) => (
+                {segmentTags.length > 0 ? segmentTags?.map((tag: { name: string }, index: number) => (
                   <Badge radius="xl" size='md' color={deterministicMantineColor(tag.name)} style={{ margin: '5px' }}>
                     {tag.name}
                   </Badge>

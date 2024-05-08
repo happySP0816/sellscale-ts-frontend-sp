@@ -76,10 +76,14 @@ export default function AccountBased() {
   const [metrics, setMetrics] = useState<string[]>([]);
   const [engagement, setEngagement] = useState<string[]>([]);
 
-  const [filterStatus, setFilterStatus] = useState(false);
-
   const metricsOptions = ['Sent', 'Open', 'Reply', 'Positive Reply', 'Demo Set'];
   const engagementOptions = ['High', 'Medium', 'Low'];
+
+  const [filterOptions, setFilterOptions] = useState({
+    metrics: [''],
+    engagement: [''],
+    dateRange: ['', ''],
+  });
 
   const handleConvertDate = (value: any) => {
     if (Array.isArray(value) && value.length === 2) {
@@ -110,10 +114,8 @@ export default function AccountBased() {
       setFilterData(newData);
     };
 
-    if (filterStatus) handleFilter();
-  }, [engagement, metrics, dateRange[0], dateRange[1]]);
-
-  console.log('=======', filterStatus);
+    handleFilter();
+  }, [filterOptions.engagement, filterOptions.metrics, filterOptions.dateRange[0], filterOptions.dateRange[1]]);
 
   useEffect(() => {
     const fetchAccountBasedData = async () => {
@@ -149,7 +151,6 @@ export default function AccountBased() {
             leftIcon={<IconFilter size={'0.9rem'} color='#228be6' />}
             onClick={() => {
               open();
-              setFilterStatus(false);
             }}
           >
             Filters
@@ -157,77 +158,90 @@ export default function AccountBased() {
           <Button leftIcon={<IconPlus size={'0.9rem'} />}>New Account-Based Campaign</Button>
         </Flex>
       </Flex>
-      <Flex justify={filterStatus ? 'space-between' : 'end'} gap={30} align={'center'} mt={'md'}>
-        {filterStatus && (
-          <Flex gap={'xs'} wrap={'wrap'}>
-            {engagement &&
-              engagement.map((item, index) => {
-                return (
-                  <Flex>
-                    <Badge
-                      size='md'
-                      key={index}
-                      rightSection={
-                        <IconX
-                          size={'0.8rem'}
-                          className='mt-[6px] hover:cursor-pointer'
-                          onClick={() => {
-                            setEngagement((prevValues) => prevValues.filter((val) => val !== item.toLowerCase()));
-                          }}
-                        />
-                      }
-                      sx={{ textTransform: 'initial' }}
-                    >
-                      Engagement: {item}
-                    </Badge>
-                  </Flex>
-                );
-              })}
-            {metrics &&
-              metrics.map((item, index) => {
-                return (
-                  <Flex>
-                    <Badge
-                      size='md'
-                      key={index}
-                      rightSection={
-                        <IconX
-                          size={'0.8rem'}
-                          className='mt-[6px] hover:cursor-pointer'
-                          onClick={() => {
-                            setMetrics((prevValues) => prevValues.filter((val) => val !== item.toLowerCase()));
-                          }}
-                        />
-                      }
-                      sx={{ textTransform: 'initial' }}
-                    >
-                      Metrics: {item}
-                    </Badge>
-                  </Flex>
-                );
-              })}
-            {dateRange[0] !== '' && dateRange[1] !== '' && (
-              <Flex>
-                <Badge
-                  size='md'
-                  rightSection={
-                    <IconX
-                      size={'0.8rem'}
-                      className='mt-[6px] hover:cursor-pointer'
-                      onClick={() => {
-                        setDateRange(['', '']);
-                      }}
-                    />
-                  }
-                  sx={{ textTransform: 'initial' }}
-                >
-                  DateRange: {dateRange[0]} - {dateRange[1]}
-                </Badge>
-              </Flex>
-            )}
-          </Flex>
-        )}
-        {(engagement.length > 0 || metrics.length > 0 || dateRange[0] !== '' || dateRange[1] !== '') && (
+      <Flex justify={'space-between'} gap={30} align={'center'} mt={'md'}>
+        <Flex gap={'xs'} wrap={'wrap'}>
+          {filterOptions.engagement &&
+            filterOptions.engagement.map((item, index) => {
+              return (
+                <Flex>
+                  <Badge
+                    size='md'
+                    key={index}
+                    rightSection={
+                      <IconX
+                        size={'0.8rem'}
+                        className='mt-[6px] hover:cursor-pointer'
+                        onClick={() => {
+                          setFilterOptions((prev) => ({
+                            ...prev,
+                            engagement: prev.engagement.filter((val) => val !== item),
+                          }));
+                          setEngagement((prevValues) => prevValues.filter((val) => val !== item.toLowerCase()));
+                        }}
+                      />
+                    }
+                    sx={{ textTransform: 'initial' }}
+                  >
+                    Engagement: {item}
+                  </Badge>
+                </Flex>
+              );
+            })}
+          {filterOptions.metrics &&
+            filterOptions.metrics.map((item, index) => {
+              return (
+                <Flex>
+                  <Badge
+                    size='md'
+                    key={index}
+                    rightSection={
+                      <IconX
+                        size={'0.8rem'}
+                        className='mt-[6px] hover:cursor-pointer'
+                        onClick={() => {
+                          setFilterOptions((prev) => ({
+                            ...prev,
+                            metrics: prev.metrics.filter((val) => val !== item),
+                          }));
+                          setMetrics((prevValues) => prevValues.filter((val) => val !== item.toLowerCase()));
+                        }}
+                      />
+                    }
+                    sx={{ textTransform: 'initial' }}
+                  >
+                    Metrics: {item}
+                  </Badge>
+                </Flex>
+              );
+            })}
+          {filterOptions.dateRange[0] !== '' && filterOptions.dateRange[1] !== '' && (
+            <Flex>
+              <Badge
+                size='md'
+                rightSection={
+                  <IconX
+                    size={'0.8rem'}
+                    className='mt-[6px] hover:cursor-pointer'
+                    onClick={() => {
+                      setFilterOptions((prev) => ({
+                        ...prev,
+                        dateRange: ['', ''],
+                      }));
+                      setDateRange(['', '']);
+                    }}
+                  />
+                }
+                sx={{ textTransform: 'initial' }}
+              >
+                DateRange: {dateRange[0]} - {dateRange[1]}
+              </Badge>
+            </Flex>
+          )}
+        </Flex>
+        {(filterOptions.engagement.length > 0 ||
+          filterOptions.metrics.length > 0 ||
+          filterOptions.dateRange[0] !== '' ||
+          filterOptions.dateRange[1] !== '') && (
           <Button
             variant='outline'
             size='sm'
@@ -769,7 +783,11 @@ export default function AccountBased() {
               w={'100%'}
               onClick={() => {
                 close();
-                setFilterStatus(true);
+                setFilterOptions({
+                  metrics: metrics,
+                  engagement: engagement,
+                  dateRange: dateRange,
+                });
               }}
             >
               Apply Filters

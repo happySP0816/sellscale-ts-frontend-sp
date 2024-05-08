@@ -16,6 +16,7 @@ import { useRecoilValue } from "recoil";
 import { ClientSDR } from "src";
 
 import { API_URL } from "@constants/data";
+// const API_URL = "http://127.0.0.1:5000"
 
 type CRMUserType = {
   name: string;
@@ -51,7 +52,11 @@ export default function CRMUserMapping() {
         (user: CRMUserType) => user.name !== null
       );
       setCRMUsers(nonNullUsers);
-      setSDRs(data.data.sdrs);
+
+      const sortedSDRs = data.data.sdrs.sort((a: ClientSDR, b: ClientSDR) =>
+        a.sdr_name.localeCompare(b.sdr_name)
+      );
+      setSDRs(sortedSDRs);
     }
   };
 
@@ -83,6 +88,7 @@ export default function CRMUserMapping() {
                   },
                   body: JSON.stringify({
                     merge_user_id: userCRMId as string,
+                    client_sdr_id: sdr.id,
                   }),
                 }
               );

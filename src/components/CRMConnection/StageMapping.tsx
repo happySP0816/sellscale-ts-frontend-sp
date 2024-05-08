@@ -134,7 +134,7 @@ export default function StageMapping() {
                     data={
                       (crmStages &&
                         crmStages.map((crmStage) => {
-                          return { value: crmStage.id, label: crmStage.name };
+                          return { value: crmStage.id, label: crmStage.name || crmStage.remote_id || "ERROR" };
                         })) || []
                     }
                     value={

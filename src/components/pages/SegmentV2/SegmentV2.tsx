@@ -731,7 +731,7 @@ export default function SegmentV2(props: PropsType) {
               {segmentTagsLoading ? <Loader /> : (
               <Box style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap'}}>
                 {/* Available / New Tags */}
-                {availableSegmentTags.map((tag: { name: string, id: number }, index: number) => {
+                {availableSegmentTags?.map((tag: { name: string, id: number }, index: number) => {
                   const isTagInSegment = segmentTags.some((existingTag: { name: string; }) => existingTag.name === tag.name);
                   return (
                     <Group spacing="xs" style={{ margin: '2px' }}>
@@ -805,10 +805,10 @@ export default function SegmentV2(props: PropsType) {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         const newTagName = e.currentTarget.value.trim();
-                        if (newTagName !== '' && !availableSegmentTags.some(tag => tag.name === newTagName)) {
+                        if (newTagName !== '' && !availableSegmentTags?.some(tag => tag.name === newTagName)) {
                           createSegmentTag(userToken, cell.row.original.id, newTagName, '#000000').then((newTag) => {
-                            setAvailableSegmentTags((prev: any[]) => [...prev, newTag.data]);
-                            setSegmentTags((prev: any[]) => [...prev, newTag.data]);
+                            setAvailableSegmentTags((prev: any[]) => Array.isArray(prev) ? [...prev, newTag.data] : [newTag.data]);
+                            setSegmentTags((prev: any[]) => Array.isArray(prev) ? [...prev, newTag.data] : [newTag.data]);
                             setAddTagClicked(false);
                             e.currentTarget.value = ''; // Clear input after sending
                           });

@@ -21,6 +21,8 @@ import {
   Divider,
   Stack,
   Input,
+  Popover,
+  Loader,
 } from '@mantine/core';
 import posthog from 'posthog-js';
 
@@ -47,11 +49,13 @@ import {
   IconRobot,
   IconSearch,
   IconSwitch,
+  IconTag,
   IconTargetArrow,
   IconTemplate,
   IconTrash,
   IconUsers,
   IconWand,
+  IconX,
 } from '@tabler/icons';
 import { DataGrid } from 'mantine-data-grid';
 import { useEffect, useState } from 'react';
@@ -60,12 +64,14 @@ import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { API_URL } from '@constants/data';
 import { IconArrowsSplit2, IconUsersMinus, IconUsersPlus } from '@tabler/icons-react';
 import SegmentV2Overview from './SegmentV2Overview';
-import { openContextModal } from '@mantine/modals';
+import { openConfirmModal, openContextModal } from '@mantine/modals';
 import PersonaSelect from '@common/persona/PersonaSplitSelect';
 import { showNotification } from '@mantine/notifications';
 import SegmentAutodownload from './SegmentAutodownload';
 import { RequestCampaignModal } from '@modals/SegmentV2/RequestCampaignModal';
 import { addCampaignAiRequest } from '@utils/requests/aiRequests';
+import { createSegmentTag, getAllSegmentTags, addTagToSegment, removeTagFromSegment } from '@utils/requests/segmentTagTemplates';
+import { deterministicMantineColor } from '@utils/requests/utils';
 
 type PropsType = {
   onDownloadHistoryClick?: () => void;
@@ -638,6 +644,168 @@ export default function SegmentV2(props: PropsType) {
       },
     },
     {
+      accessorKey: 'tags',
+      header: () => (
+        <Flex align='center' justify='space-between'>
+          <Flex align='center'>
+            <IconTag size={16} stroke={1.5} color='gray' style={{ marginRight: '4px' }} />
+            <Text color='gray'>Tags</Text>
+          </Flex>
+          <Flex align='center'>
+            <Menu>
+              <Menu.Target>
+                <Button size='xs' variant='subtle'>
+                  Filter by Tag
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>Available Tags</Menu.Label>
+                <Menu.Item>Startups</Menu.Item>
+                <Menu.Item>Tech</Menu.Item>
+                <Menu.Item>Finance</Menu.Item>
+                <Menu.Item>Healthcare</Menu.Item>
+                <Menu.Item>Education</Menu.Item>
+                <Menu.Item>Retail</Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </Flex>
+        </Flex>
+      ),
+      cell: (cell: any) => {
+        const [availableSegmentTags, setAvailableSegmentTags] = useState([]);
+        const [addTagClicked, setAddTagClicked] = useState(false);
+        const [segmentTagsLoading, setSegmentTagsLoading] = useState(false);
+        const [segmentTags, setSegmentTags] = useState(cell.row.original.segment_tags);
+        const [popoverOpened, setPopoverOpened] = useState(false);
+
+        const {client_sdr} = cell.row.original;
+
+        return (
+          <Popover 
+            opened={popoverOpened}
+            width={400} 
+            position="bottom" 
+            withArrow 
+            shadow="md"
+            onClose={() => setPopoverOpened(false)}
+            onOpen={() => {
+              setSegmentTagsLoading(true);
+              getAllSegmentTags(userToken).then((res) => {
+                setAvailableSegmentTags(res.data);
+                setSegmentTagsLoading(false);
+              });
+            }}
+          >
+            <Popover.Target>
+              <Box 
+                style={{ display: 'flex', justifyContent: 'left', flexWrap: 'wrap', cursor: 'pointer', width: '100%' }}
+                onClick={() => {
+                  setPopoverOpened(true);
+                }}
+              >
+                {segmentTags.length > 0 ? segmentTags.map((tag: { name: string }, index: number) => (
+                  <Button radius="xl" size='xs' color={deterministicMantineColor(tag.name)} compact style={{ color: 'white', margin: '5px' }}>
+                    {tag.name}
+                  </Button>
+                )) : (
+                  <Button radius="xl" size='xs' color={'blue'} compact style={{ color: 'white', margin: '5px' }} onClick={() => setPopoverOpened(true)}>
+                    <IconPlus size={18} />
+                  </Button>
+                )}
+              </Box>
+            </Popover.Target>
+            <Popover.Dropdown>
+              {segmentTagsLoading ? <Loader /> : (
+              <Box style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap'}}>
+                {/* Available / New Tags */}
+                {availableSegmentTags.map((tag: { name: string, id: number }, index: number) => {
+                  const isTagInSegment = segmentTags.some((existingTag: { name: string; }) => existingTag.name === tag.name);
+                  return (
+                    <Group spacing="xs" style={{ margin: '2px' }}>
+                      <Button 
+                        radius="xl" 
+                        size='xs' 
+                        color={deterministicMantineColor(tag.name)}
+                        compact 
+                        style={{ 
+                          color: 'white', 
+                          opacity: isTagInSegment ? 0.5 : 1
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isTagInSegment) {
+                            addTagToSegment(userToken, cell.row.original.id, tag.id).then(() => {
+                              setSegmentTags(prev => [...prev, tag]);
+                              cell.row.original.segment_tags.push(tag);
+                            });
+                          } else {
+                            removeTagFromSegment(userToken, cell.row.original.id, tag.id).then(() => {
+                              setSegmentTags(prev => prev.filter((t: { id: number }) => t.id !== tag.id));
+                              cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
+                            });
+                          }
+                        }}
+                      >
+                        {tag.name}
+                        <ActionIcon 
+                        color="red" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openConfirmModal({
+                            title: 'Confirm Deletion',
+                            children: (
+                              <Text size="sm">Are you sure you want to delete this tag?</Text>
+                            ),
+                            labels: { confirm: 'Delete Tag', cancel: 'Cancel' },
+                            confirmProps: { color: 'red' },
+                            onCancel: () => console.log('Cancel'),
+                            onConfirm: () => {
+                              removeTagFromSegment(userToken, cell.row.original.id, tag.id).then(() => {
+                                setSegmentTags(prev => prev.filter((t: { id: number }) => t.id !== tag.id));
+                                cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
+                              });
+                            }
+                          })
+                        }}
+                      >
+                        <IconX size={14} />
+                      </ActionIcon>
+                      </Button>
+
+                    </Group>
+                  );
+                })}
+                {addTagClicked ? (
+                  <TextInput
+                    placeholder="Type here..."
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const newTagName = e.currentTarget.value.trim();
+                        if (newTagName !== '' && !availableSegmentTags.some(tag => tag.name === newTagName)) {
+                          createSegmentTag(userToken, cell.row.original.id, newTagName, '#000000').then((newTag) => {
+                            setAvailableSegmentTags(prev => [...prev, newTag.data]);
+                            setSegmentTags(prev => [...prev, newTag.data]);
+                            setAddTagClicked(false);
+                            e.currentTarget.value = ''; // Clear input after sending
+                          });
+                        }
+                      }
+                      e.stopPropagation();
+                    }}
+                    style={{ width: '50%', margin: '5px' }}
+                  />
+                ) : (
+                  <Button onClick={(e) => { e.stopPropagation(); setAddTagClicked(true); }} size='xs' style={{ backgroundColor: '#4682B4', color: 'white' }}><IconPlus size={18} /></Button>
+                )}
+              </Box>
+              )}
+            </Popover.Dropdown>
+          </Popover>
+        );
+      },
+    },
+    {
       accessorKey: 'campaigns',
       // minSize: 180,
       header: () => (
@@ -708,6 +876,7 @@ export default function SegmentV2(props: PropsType) {
         num_prospected: segment.num_prospected,
         num_contacted: segment.num_contacted,
         apollo_query: segment.apollo_query,
+        segment_tags: segment.attached_segments,
         autoscrape_enabled: segment.autoscrape_enabled,
         current_scrape_page: segment.current_scrape_page,
       };

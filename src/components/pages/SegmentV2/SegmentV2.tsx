@@ -89,7 +89,7 @@ export default function SegmentV2(props: PropsType) {
   const [iframeUrl, setIframeUrl] = useState('');
   const [showConnectCampaignModal, setShowConnectCampaignModal] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
-  const [selectedSegmentId, setSelectedSegmentId] = useState(null);
+  const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
 
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
   const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(false);
@@ -1178,7 +1178,14 @@ export default function SegmentV2(props: PropsType) {
             color: 'green',
           });
 
-          await addCampaignAiRequest(userToken, title, description, liEnabled, emailEnabled);
+          await addCampaignAiRequest(
+            userToken,
+            title,
+            description,
+            liEnabled,
+            emailEnabled,
+            selectedSegmentId ?? undefined
+          );
         }}
       />
 

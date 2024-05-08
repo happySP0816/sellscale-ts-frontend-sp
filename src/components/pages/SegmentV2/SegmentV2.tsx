@@ -101,6 +101,9 @@ export default function SegmentV2(props: PropsType) {
   const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(false);
   const [sdrs, setAllSDRs] = useState([] as any[]);
   const [selectedSdrId, setSelectedSdrId] = useState(null);
+  const [segmentTagCategories, setSegmentTagCategories] = useState([]);
+  const [tagMenuOpen, setTagMenuOpen] = useState(false);
+  const [tagMenuLoading, setTagMenuLoading] = useState(false);
   const [showEditSegmentNameModal, setShowEditSegmentNameModal] = useState(false);
   const [editSegmentName, setEditSegmentName] = useState('');
   const [showBatchModal, setShowBatchModal] = useState(false);
@@ -652,7 +655,20 @@ export default function SegmentV2(props: PropsType) {
             <Text color='gray'>Tags</Text>
           </Flex>
           <Flex align='center'>
-            <Menu>
+            <Menu 
+            withinPortal
+            opened={tagMenuOpen}
+            onOpen={async () => {
+              setTagMenuOpen(true);
+              setTagMenuLoading(true);
+              try {
+                const res = await getAllSegmentTags(userToken);
+                setSegmentTagCategories(res.data);
+              } catch (error) {
+                console.error('Failed to fetch tags:', error);
+              }
+              setTagMenuLoading(false);
+            }} onClose={() => { setTagMenuLoading(false); setTagMenuOpen(false); }}>
               <Menu.Target>
                 <Button size='xs' variant='subtle'>
                   Filter by Tag
@@ -660,12 +676,11 @@ export default function SegmentV2(props: PropsType) {
               </Menu.Target>
               <Menu.Dropdown>
                 <Menu.Label>Available Tags</Menu.Label>
-                <Menu.Item>Startups</Menu.Item>
-                <Menu.Item>Tech</Menu.Item>
-                <Menu.Item>Finance</Menu.Item>
-                <Menu.Item>Healthcare</Menu.Item>
-                <Menu.Item>Education</Menu.Item>
-                <Menu.Item>Retail</Menu.Item>
+                {segmentTagCategories.map((tag, index) => (
+                  <Menu.Item key={index} onClick={() => { getAllSegments(true, tag.id); }}>
+                    <Badge color={deterministicMantineColor(tag.name)}>{tag.name}</Badge>
+                  </Menu.Item>
+                ))}
               </Menu.Dropdown>
             </Menu>
           </Flex>
@@ -702,9 +717,9 @@ export default function SegmentV2(props: PropsType) {
                 }}
               >
                 {segmentTags.length > 0 ? segmentTags.map((tag: { name: string }, index: number) => (
-                  <Button radius="xl" size='xs' color={deterministicMantineColor(tag.name)} compact style={{ color: 'white', margin: '5px' }}>
+                  <Badge radius="xl" size='md' color={deterministicMantineColor(tag.name)} style={{ margin: '5px' }}>
                     {tag.name}
-                  </Button>
+                  </Badge>
                 )) : (
                   <Button radius="xl" size='xs' color={'blue'} compact style={{ color: 'white', margin: '5px' }} onClick={() => setPopoverOpened(true)}>
                     <IconPlus size={18} />
@@ -720,14 +735,14 @@ export default function SegmentV2(props: PropsType) {
                   const isTagInSegment = segmentTags.some((existingTag: { name: string; }) => existingTag.name === tag.name);
                   return (
                     <Group spacing="xs" style={{ margin: '2px' }}>
-                      <Button 
+                      <Badge 
                         radius="xl" 
-                        size='xs' 
+                        size='md' 
                         color={deterministicMantineColor(tag.name)}
-                        compact 
                         style={{ 
-                          color: 'white', 
-                          opacity: isTagInSegment ? 0.5 : 1
+                          cursor: 'pointer',
+                          backgroundColor: isTagInSegment ? 'transparent' : '',
+                          color: isTagInSegment ? 'darkgrey' : ''
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -744,41 +759,42 @@ export default function SegmentV2(props: PropsType) {
                           }
                         }}
                       >
-                        {tag.name}
+                        {tag.name} &nbsp;
+                      </Badge>
+                      <div style={{ marginLeft: '-35px' }}>
                         <ActionIcon 
-                        color="red" 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openConfirmModal({
-                            title: 'Confirm Global Tag Deletion',
-                            children: (
-                              <Text size="sm">Are you sure you want to permanently delete this tag? It will get removed from all locations.</Text>
-                            ),
-                            labels: { confirm: 'Delete Tag', cancel: 'Cancel' },
-                            confirmProps: { color: 'red' },
-                            onCancel: () => {setPopoverOpened(true)},
-                            onConfirm: () => {
-                              deleteTag(userToken, tag.id).then(() => {
-                                setSegmentTags(prev => prev.filter((t: { id: number }) => t.id !== tag.id));
-                                cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
-                                getAllSegments(true);
-                                //prevent the popover from closing
-                                setPopoverOpened(true);
-                              });
-                            }
-                          })
-                        }}
-                        sx={(theme) => ({
-                          '&:hover': {
-                            backgroundColor: theme.colors.dark[9],
-                            borderRadius: '50%'
-                          }
-                        })}
-                      >
-                        <IconX color='white' size={14} />
-                      </ActionIcon>
-                      </Button>
-
+                            color="red" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openConfirmModal({
+                                title: 'Confirm Global Tag Deletion',
+                                children: (
+                                  <Text size="sm">Are you sure you want to permanently delete this tag? It will get removed from all locations.</Text>
+                                ),
+                                labels: { confirm: 'Delete Tag', cancel: 'Cancel' },
+                                confirmProps: { color: 'red' },
+                                onCancel: () => {setPopoverOpened(true)},
+                                onConfirm: () => {
+                                  deleteTag(userToken, tag.id).then(() => {
+                                    setSegmentTags(prev => prev.filter((t: { id: number }) => t.id !== tag.id));
+                                    cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
+                                    getAllSegments(true);
+                                    //prevent the popover from closing
+                                    setPopoverOpened(true);
+                                  });
+                                }
+                              })
+                            }}
+                            sx={(theme) => ({
+                              '&:hover': {
+                                backgroundColor: theme.colors.red[2],
+                                borderRadius: '50%'
+                              }
+                            })}
+                          >
+                            <IconX color='darkgrey' size={14} />
+                          </ActionIcon>
+                      </div>
                     </Group>
                   );
                 })}
@@ -1049,11 +1065,11 @@ export default function SegmentV2(props: PropsType) {
       });
   };
 
-  const getAllSegments = async (showLoader: boolean) => {
+  const getAllSegments = async (showLoader: boolean, tagFilter?: Number) => {
     if (showLoader) {
       setLoading(true);
     }
-    fetch(`${API_URL}/segment/all` + (showAllSegments ? '?include_all_in_client=true' : ''), {
+    fetch(`${API_URL}/segment/all` + (showAllSegments ? '?include_all_in_client=true' : '') + (tagFilter !== -1 ? `${showAllSegments ? '&' : '?'}tag_filter=${tagFilter}` : ''), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -1767,3 +1783,7 @@ export default function SegmentV2(props: PropsType) {
     </Paper>
   );
 }
+function setSegmentTagsLoading(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+

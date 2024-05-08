@@ -567,9 +567,9 @@ export default function BumpFrameworksPage(props: {
   });
 
   const triggerToggleAutoBump = async () => {
-    let status = userData.auto_bump;
+    let status = '';
     let old_status;
-    if (status == true) {
+    if (userData.auto_bump) {
       status = 'Disabled';
       old_status = 'Enabled';
     } else {
@@ -583,7 +583,7 @@ export default function BumpFrameworksPage(props: {
       setUserData({ ...userData, auto_bump: !userData.auto_bump });
       showNotification({
         title: `AutoBump ${status}`,
-        message: `AutoBump has been ${status.toLower()}. You can ${old_status.toLowerCase()} it at any time.`,
+        message: `AutoBump has been ${status.toLowerCase()}. You can ${old_status.toLowerCase()} it at any time.`,
         color: 'green',
         icon: <IconCheck size='1rem' />,
       });
@@ -851,9 +851,9 @@ export default function BumpFrameworksPage(props: {
                       }}
                       checked={userData.auto_bump}
                       onChange={(e) => {
-                        let status = userData.auto_bump;
+                        let status = '';
                         let old_status;
-                        if (status == true) {
+                        if (userData.auto_bump) {
                           status = 'Disable';
                           old_status = 'enable';
                         } else {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -9,19 +9,13 @@ import {
   Divider,
   TextInput,
   Flex,
-} from "@mantine/core";
-import {
-  IconFile,
-  IconPencil,
-  IconPlayerPause,
-  IconPlayerPlay,
-  IconX,
-} from "@tabler/icons";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { API_URL } from "@constants/data";
-import { showNotification } from "@mantine/notifications";
-import { getUserInfo, logout } from "@auth/core";
+} from '@mantine/core';
+import { IconFile, IconPencil, IconPlayerPause, IconPlayerPlay, IconX } from '@tabler/icons';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { API_URL } from '@constants/data';
+import { showNotification } from '@mantine/notifications';
+import { getUserInfo, logout } from '@auth/core';
 
 const AccountSettings: React.FC = () => {
   const [userData, setUserData] = useRecoilState(userDataState);
@@ -38,41 +32,43 @@ const AccountSettings: React.FC = () => {
 
   // PATCH /client/sdr - update sdr info
   const handleSave = async () => {
-      setEdit(true);
+    setEdit(true);
 
-      setLoading(true);
-      const response = await fetch(`${API_URL}/client/sdr`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(editAccount),
-      });
+    setLoading(true);
+    const response = await fetch(`${API_URL}/client/sdr`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(editAccount),
+    });
 
-      const json = await response.json();
+    const json = await response.json();
 
-      setLoading(false);
+    setLoading(false);
 
-      showNotification({
-        title: "Account Info Updated",
-        message: "Your account info has been updated successfully",
-      });
-  }
+    showNotification({
+      title: 'Account Info Updated',
+      message: 'Your account info has been updated successfully',
+    });
+  };
 
   const fetchUserInfo = async () => {
     const info = await getUserInfo(userToken);
-    setUserData(info);
-    setSdrActive(info.active);
+    if (info) {
+      setUserData(info);
+      setSdrActive(info.active);
+    }
   };
 
   const handleActivate = async (userToken: string) => {
     setLoading(true);
     const response = await fetch(`${API_URL}/client/sdr/activate_seat`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -89,10 +85,10 @@ const AccountSettings: React.FC = () => {
   const handleDeactivate = async (userToken: string) => {
     setLoading(true);
     const response = await fetch(`${API_URL}/client/sdr/deactivate_seat`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -109,38 +105,38 @@ const AccountSettings: React.FC = () => {
 
   return (
     <>
-      <Card shadow="sm" p="lg" radius="md" withBorder>
+      <Card shadow='sm' p='lg' radius='md' withBorder>
         <Title order={3}>Account Settings</Title>
-        <Flex direction="column" gap={"sm"} mt={"md"}>
+        <Flex direction='column' gap={'sm'} mt={'md'}>
           <TextInput
-            label="Your Full Name"
+            label='Your Full Name'
             value={editAccount.name}
-            placeholder="your full name"
+            placeholder='your full name'
             onChange={(e) => {
               setEditAccount({ ...editAccount, name: e.target.value });
               setEdit(false);
             }}
           />
           <TextInput
-            label="Your Public Title"
+            label='Your Public Title'
             value={editAccount.title}
-            placeholder="your public title"
+            placeholder='your public title'
             onChange={(e) => {
               setEditAccount({ ...editAccount, title: e.target.value });
               setEdit(false);
             }}
           />
           <TextInput
-            label="Email"
+            label='Email'
             value={editAccount.email}
-            placeholder="Your email"
+            placeholder='Your email'
             onChange={(e) => {
               setEditAccount({ ...editAccount, email: e.target.value });
               setEdit(false);
             }}
           />
-          <Flex gap={"md"} align={"center"} mt={"md"}>
-            <Button w={"fit-content"} onClick={handleSave} disabled={edit}>
+          <Flex gap={'md'} align={'center'} mt={'md'}>
+            <Button w={'fit-content'} onClick={handleSave} disabled={edit}>
               Save Account Info
             </Button>
             {!edit && (
@@ -153,8 +149,8 @@ const AccountSettings: React.FC = () => {
                     email: userData.sdr_email,
                   });
                 }}
-                color="red"
-                variant="outline"
+                color='red'
+                variant='outline'
               >
                 Cancel Edit
               </Button>
@@ -162,18 +158,18 @@ const AccountSettings: React.FC = () => {
           </Flex>
         </Flex>
       </Card>
-      <Card shadow="sm" p="lg" radius="md" withBorder mt={"md"}>
+      <Card shadow='sm' p='lg' radius='md' withBorder mt={'md'}>
         <Box>
           <LoadingOverlay visible={loading} />
           <Title order={4}>Danger Zone: Toggle Seat</Title>
-          <Text color="dimmed" size="sm" mt="sm">
-            Deactivate the SDR seat to prevent any future AI activity.
-            Reactivate it when you’re ready to resume AI activity.
+          <Text color='dimmed' size='sm' mt='sm'>
+            Deactivate the SDR seat to prevent any future AI activity. Reactivate it when you’re
+            ready to resume AI activity.
           </Text>
-          <Box mt="md">
+          <Box mt='md'>
             {sdrActive ? (
               <Button
-                color="red"
+                color='red'
                 onClick={() => handleDeactivate(userToken)}
                 disabled={loading}
                 leftIcon={<IconPlayerPause size={18} />}
@@ -182,7 +178,7 @@ const AccountSettings: React.FC = () => {
               </Button>
             ) : (
               <Button
-                color="green"
+                color='green'
                 onClick={() => handleActivate(userToken)}
                 disabled={loading}
                 leftIcon={<IconPlayerPlay size={18} />}

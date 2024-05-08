@@ -1,5 +1,5 @@
-import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { syncLocalStorage } from "@auth/core";
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { syncLocalStorage } from '@auth/core';
 import {
   Box,
   Modal,
@@ -16,26 +16,20 @@ import {
   Badge,
   ActionIcon,
   rem,
-} from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import { openConfirmModal } from "@mantine/modals";
-import { showNotification } from "@mantine/notifications";
-import displayNotification from "@utils/notificationFlow";
-import {
-  IconAlertTriangle,
-  IconCheck,
-  IconExternalLink,
-  IconPlus,
-  IconX,
-} from "@tabler/icons";
-import patchSDRBlacklist from "@utils/requests/postPatchBlacklist";
-import postToggleAutoBump from "@utils/requests/postToggleAutoBump";
-import { updateClientSDR } from "@utils/requests/updateClientSDR";
-import { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import RealtimeResponseEngine from "./RealtimeResponseEngine";
-import { PersonalizationSection } from "@common/sequence/LinkedInSequenceSection";
-import { updateSDRDefaultBlocklist } from "@utils/requests/postSDRTransformerBlocklist";
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { openConfirmModal } from '@mantine/modals';
+import { showNotification } from '@mantine/notifications';
+import displayNotification from '@utils/notificationFlow';
+import { IconAlertTriangle, IconCheck, IconExternalLink, IconPlus, IconX } from '@tabler/icons';
+import patchSDRBlacklist from '@utils/requests/postPatchBlacklist';
+import postToggleAutoBump from '@utils/requests/postToggleAutoBump';
+import { updateClientSDR } from '@utils/requests/updateClientSDR';
+import { useEffect, useState } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import RealtimeResponseEngine from './RealtimeResponseEngine';
+import { PersonalizationSection } from '@common/sequence/LinkedInSequenceSection';
+import { updateSDRDefaultBlocklist } from '@utils/requests/postSDRTransformerBlocklist';
 
 export default function MessageAutomation() {
   const userToken = useRecoilValue(userTokenState);
@@ -45,22 +39,15 @@ export default function MessageAutomation() {
   const [prospectRespondOption, setProspectRespondOption] = useState(
     userData.disable_ai_on_prospect_respond
   );
-  const [messageSendOption, setMessageSendOption] = useState(
-    userData.disable_ai_on_message_send
-  );
+  const [messageSendOption, setMessageSendOption] = useState(userData.disable_ai_on_message_send);
   const [opened, { open, close }] = useDisclosure(false);
 
-  const [blacklistWords, setBlacklistWords] = useState(
-    userData.blacklisted_words || []
-  ); // ['howdy', 'hello', 'hi']
-  const [newBlacklistWord, setNewBlacklistWord] = useState("");
+  const [blacklistWords, setBlacklistWords] = useState(userData.blacklisted_words || []); // ['howdy', 'hello', 'hi']
+  const [newBlacklistWord, setNewBlacklistWord] = useState('');
   const [saveDisabled, setSaveDisabled] = useState(true);
 
   useEffect(() => {
-    setSaveDisabled(
-      JSON.stringify(blacklistWords) ===
-        JSON.stringify(userData.blacklisted_words)
-    );
+    setSaveDisabled(JSON.stringify(blacklistWords) === JSON.stringify(userData.blacklisted_words));
   }, [blacklistWords]);
 
   useEffect(() => {
@@ -72,39 +59,39 @@ export default function MessageAutomation() {
         prospectRespondOption,
         messageSendOption
       );
-      if (response.status === "success") {
+      if (response.status === 'success') {
         await syncLocalStorage(userToken, setUserData);
       }
     })();
   }, [prospectRespondOption, messageSendOption]);
 
   const triggerToggleAutoBump = async () => {
-    let status = userData.auto_bump;
+    let status = '';
     let old_status;
-    if (status == true) {
-      status = "Disabled";
-      old_status = "Enabled";
+    if (userData.auto_bump === true) {
+      status = 'Disabled';
+      old_status = 'Enabled';
     } else {
-      status = "Enabled";
-      old_status = "Disabled";
+      status = 'Enabled';
+      old_status = 'Disabled';
     }
 
     const result = await postToggleAutoBump(userToken);
 
-    if (result.status === "success") {
+    if (result.status === 'success') {
       setUserData({ ...userData, auto_bump: !userData.auto_bump });
       showNotification({
         title: `AutoBump ${status}`,
-        message: `AutoBump has been ${status.toLower()}. You can ${old_status.toLowerCase()} it at any time.`,
-        color: "green",
-        icon: <IconCheck size="1rem" />,
+        message: `AutoBump has been ${status.toLowerCase()}. You can ${old_status.toLowerCase()} it at any time.`,
+        color: 'green',
+        icon: <IconCheck size='1rem' />,
       });
     } else {
       showNotification({
-        title: "Error",
-        message: "Something went wrong. Please try again later.",
-        color: "red",
-        icon: <IconAlertTriangle size="1rem" />,
+        title: 'Error',
+        message: 'Something went wrong. Please try again later.',
+        color: 'red',
+        icon: <IconAlertTriangle size='1rem' />,
       });
     }
   };
@@ -113,22 +100,22 @@ export default function MessageAutomation() {
     setLoading(true);
 
     const response = await patchSDRBlacklist(userToken, blacklistWords);
-    if (response.status === "success") {
+    if (response.status === 'success') {
       setUserData({ ...userData, blacklisted_words: blacklistWords });
       showNotification({
-        title: "Success",
-        message: "Blacklist words updated successfully.",
-        color: "green",
-        icon: <IconCheck size="1rem" />,
+        title: 'Success',
+        message: 'Blacklist words updated successfully.',
+        color: 'green',
+        icon: <IconCheck size='1rem' />,
       });
       setUserData({ ...userData, blacklisted_words: blacklistWords });
       setSaveDisabled(true);
     } else {
       showNotification({
-        title: "Error",
-        message: "Blacklist words could not be saved. Please try again later.",
-        color: "red",
-        icon: <IconAlertTriangle size="1rem" />,
+        title: 'Error',
+        message: 'Blacklist words could not be saved. Please try again later.',
+        color: 'red',
+        icon: <IconAlertTriangle size='1rem' />,
       });
     }
 
@@ -137,23 +124,21 @@ export default function MessageAutomation() {
 
   return (
     <>
-      <Box p="lg">
+      <Box p='lg'>
         <Title order={3}>Message Automation Settings</Title>
-        <Stack p="lg">
+        <Stack p='lg'>
           {/* General Settings */}
-          <Card withBorder shadow="md">
+          <Card withBorder shadow='md'>
             <Title order={4}>General Settings</Title>
             <Switch
-              mt="sm"
-              label="Disable AI when prospect responds"
+              mt='sm'
+              label='Disable AI when prospect responds'
               checked={prospectRespondOption}
-              onChange={(event) =>
-                setProspectRespondOption(event.currentTarget.checked)
-              }
+              onChange={(event) => setProspectRespondOption(event.currentTarget.checked)}
             />
             <Switch
-              mt="md"
-              label="Disable AI when I send a message"
+              mt='md'
+              label='Disable AI when I send a message'
               checked={messageSendOption}
               onChange={(event) => {
                 event.preventDefault();
@@ -171,56 +156,54 @@ export default function MessageAutomation() {
           <RealtimeResponseEngine />
 
           {/* AutoBump */}
-          <Card withBorder shadow="md">
+          <Card withBorder shadow='md'>
             <Title order={4}>AutoBump</Title>
-            <Text mt="sm" lh="1.5rem">
-              AutoBump is SellScale AI's system for automatically sending
-              follow-up messages to prospects. AutoBumps are sent when a
-              prospect does not respond to a message, and are sent at random
-              times between 9am and 5pm in your timezone on workdays.
+            <Text mt='sm' lh='1.5rem'>
+              AutoBump is SellScale AI's system for automatically sending follow-up messages to
+              prospects. AutoBumps are sent when a prospect does not respond to a message, and are
+              sent at random times between 9am and 5pm in your timezone on workdays.
             </Text>
 
             <Notification
               closeButtonProps={{ opacity: 0 }}
-              icon={<IconAlertTriangle size="1rem" />}
-              color={"yellow"}
-              title="Please test your bumps"
+              icon={<IconAlertTriangle size='1rem' />}
+              color={'yellow'}
+              title='Please test your bumps'
               withBorder
-              mt="md"
+              mt='md'
             >
               <Text>
-                Please test your bump frameworks before enabling AutoBump.
-                AutoBump will always use your default bump framework, so make
-                sure it is working as expected.
+                Please test your bump frameworks before enabling AutoBump. AutoBump will always use
+                your default bump framework, so make sure it is working as expected.
               </Text>
-              <Text mt="md" fw="bold">
-                AutoBumps using personalized bump frameworks see a significant
-                increase in response rates.
+              <Text mt='md' fw='bold'>
+                AutoBumps using personalized bump frameworks see a significant increase in response
+                rates.
               </Text>
             </Notification>
             <Switch
-              label="Enable AutoBump"
+              label='Enable AutoBump'
               checked={userData.auto_bump}
-              mt="xl"
+              mt='xl'
               onChange={() => {
-                let status = userData.auto_bump;
+                let status = '';
                 let old_status;
-                if (status == true) {
-                  status = "disable";
-                  old_status = "enable";
+                if (userData.auto_bump) {
+                  status = 'disable';
+                  old_status = 'enable';
                 } else {
-                  status = "enable";
-                  old_status = "disable";
+                  status = 'enable';
+                  old_status = 'disable';
                 }
                 openConfirmModal({
-                  title: "Toggle AutoBump",
+                  title: 'Toggle AutoBump',
                   children: (
                     <Text>
-                      Are you sure you want to {status.toLowerCase()} AutoBump?
-                      You can {old_status.toLowerCase()} it at any time.
+                      Are you sure you want to {status.toLowerCase()} AutoBump? You can{' '}
+                      {old_status.toLowerCase()} it at any time.
                     </Text>
                   ),
-                  labels: { confirm: "Confirm", cancel: "Cancel" },
+                  labels: { confirm: 'Confirm', cancel: 'Cancel' },
                   onCancel: () => {},
                   onConfirm: () => {
                     triggerToggleAutoBump();
@@ -231,46 +214,43 @@ export default function MessageAutomation() {
           </Card>
 
           {/* Blacklisted Words */}
-          <Card withBorder shadow="md">
+          <Card withBorder shadow='md'>
             <Title order={4}>Blacklisted Words</Title>
-            <Text mt="sm" lh="1.5rem">
-              Our AI will not send any messages that contain words that are in
-              your blacklist. This is useful for preventing the AI from sending
-              messages that may not fit your speaking style. Case-insensitive
-              (capitalizations don't matter).
+            <Text mt='sm' lh='1.5rem'>
+              Our AI will not send any messages that contain words that are in your blacklist. This
+              is useful for preventing the AI from sending messages that may not fit your speaking
+              style. Case-insensitive (capitalizations don't matter).
             </Text>
 
             <TextInput
-              mt="sm"
-              label="Add a new word to your blacklist"
+              mt='sm'
+              label='Add a new word to your blacklist'
               placeholder="e.g. 'howdy'"
               value={newBlacklistWord}
-              onChange={(event) =>
-                setNewBlacklistWord(event.currentTarget.value)
-              }
+              onChange={(event) => setNewBlacklistWord(event.currentTarget.value)}
               onKeyDown={(event) => {
-                if (event.key === "Enter" && newBlacklistWord.length > 0) {
+                if (event.key === 'Enter' && newBlacklistWord.length > 0) {
                   setBlacklistWords([...blacklistWords, newBlacklistWord]);
-                  setNewBlacklistWord("");
+                  setNewBlacklistWord('');
                 }
               }}
               rightSection={
                 <ActionIcon
-                  p="4px"
-                  variant="transparent"
-                  color="blue"
+                  p='4px'
+                  variant='transparent'
+                  color='blue'
                   disabled={newBlacklistWord.length === 0}
                   onClick={() => {
                     setBlacklistWords([...blacklistWords, newBlacklistWord]);
-                    setNewBlacklistWord("");
+                    setNewBlacklistWord('');
                   }}
                 >
-                  <IconPlus size={".75 rem"} />
+                  <IconPlus size={'.75 rem'} />
                 </ActionIcon>
               }
             />
 
-            <Flex mt="md">
+            <Flex mt='md'>
               {!blacklistWords || blacklistWords.length > 0 ? (
                 <>
                   {blacklistWords &&
@@ -278,9 +258,9 @@ export default function MessageAutomation() {
                       const removeButton = // Removes the word from the blacklist
                         (
                           <ActionIcon
-                            mx="-5px"
-                            size="xs"
-                            variant="transparent"
+                            mx='-5px'
+                            size='xs'
+                            variant='transparent'
                             onClick={() => {
                               const newBlacklistWords = blacklistWords.filter(
                                 (w: string) => w !== word
@@ -293,47 +273,43 @@ export default function MessageAutomation() {
                         );
 
                       return (
-                        <Badge rightSection={removeButton} mx="2px">
+                        <Badge rightSection={removeButton} mx='2px'>
                           {word}
                         </Badge>
                       );
                     })}
                 </>
               ) : (
-                <Text fz="xs" color="gray">
+                <Text fz='xs' color='gray'>
                   No blacklisted words.
                 </Text>
               )}
             </Flex>
-            <Flex mt="sm" justify={"flex-end"}>
-              <Button
-                onClick={triggerUpdateBlacklistWords}
-                disabled={saveDisabled}
-              >
+            <Flex mt='sm' justify={'flex-end'}>
+              <Button onClick={triggerUpdateBlacklistWords} disabled={saveDisabled}>
                 Save
               </Button>
             </Flex>
           </Card>
 
           {/* Research Points */}
-          <Card withBorder shadow="md">
+          <Card withBorder shadow='md'>
             <Title order={4}>Research Points</Title>
-            <Text mt="sm" lh="1.5rem">
-              Our AI performs best when it can personalize messages using
-              research points. You can customize which research points will be
-              used by default in your campaigns and sequences.
-            </Text>
-            <Text my="sm" fz="sm" fs="italic">
-              Note: You can override these settings on a per-campaign and
-              per-sequence basis, in their respective sections. These default
-              settings will be applied on creation of new campaigns and
+            <Text mt='sm' lh='1.5rem'>
+              Our AI performs best when it can personalize messages using research points. You can
+              customize which research points will be used by default in your campaigns and
               sequences.
+            </Text>
+            <Text my='sm' fz='sm' fs='italic'>
+              Note: You can override these settings on a per-campaign and per-sequence basis, in
+              their respective sections. These default settings will be applied on creation of new
+              campaigns and sequences.
             </Text>
             <PersonalizationSection
               blocklist={userData.default_transformer_blocklist}
               onItemsChange={async (items) => {
                 await displayNotification(
-                  "update-sdr-transformer-blocklist",
+                  'update-sdr-transformer-blocklist',
                   async () => {
                     const result = await updateSDRDefaultBlocklist(
                       userToken,
@@ -342,20 +318,19 @@ export default function MessageAutomation() {
                     return result;
                   },
                   {
-                    title: "Updating Research Point Preferences:",
-                    message: "Working with servers...",
-                    color: "grape",
+                    title: 'Updating Research Point Preferences:',
+                    message: 'Working with servers...',
+                    color: 'grape',
                   },
                   {
-                    title: "Updated!",
-                    message:
-                      "Your research point preferences have been updated.",
-                    color: "teal",
+                    title: 'Updated!',
+                    message: 'Your research point preferences have been updated.',
+                    color: 'teal',
                   },
                   {
-                    title: "Error",
-                    message: "Something went wrong. Please try again later.",
-                    color: "red",
+                    title: 'Error',
+                    message: 'Something went wrong. Please try again later.',
+                    color: 'red',
                   }
                 );
               }}
@@ -364,18 +339,13 @@ export default function MessageAutomation() {
           </Card>
         </Stack>
       </Box>
-      <Modal
-        opened={opened}
-        onClose={close}
-        title={<Title order={3}>Are you sure?</Title>}
-      >
+      <Modal opened={opened} onClose={close} title={<Title order={3}>Are you sure?</Title>}>
         <Stack>
           <Text>
-            If you turn this off, SellScale will not be able to work
-            conversations from you. An example of this is you have a
-            conversation with a prospect but they don’t respond. In this
-            scenario, SellScale usually follow-ups to revive the conversation,
-            but not when this option is enabled.
+            If you turn this off, SellScale will not be able to work conversations from you. An
+            example of this is you have a conversation with a prospect but they don’t respond. In
+            this scenario, SellScale usually follow-ups to revive the conversation, but not when
+            this option is enabled.
           </Text>
           <Center>
             <Button
@@ -383,7 +353,7 @@ export default function MessageAutomation() {
                 setMessageSendOption(true);
                 close();
               }}
-              color="red"
+              color='red'
             >
               Disable It.
             </Button>

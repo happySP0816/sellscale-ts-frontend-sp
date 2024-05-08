@@ -716,7 +716,7 @@ export default function SegmentV2(props: PropsType) {
                   setPopoverOpened(true);
                 }}
               >
-                {segmentTags?.length > 0 && segmentTags.map((tag: { name: string }, index: number) => (
+                {segmentTags?.length > 0 ? segmentTags.map((tag: { name: string }, index: number) => (
                   <Badge key={index} radius="xl" size='md' color={deterministicMantineColor(tag.name)} style={{ margin: '5px' }}>
                     {tag.name}
                   </Badge>

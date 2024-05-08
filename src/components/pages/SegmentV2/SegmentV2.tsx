@@ -101,7 +101,7 @@ export default function SegmentV2(props: PropsType) {
   const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(false);
   const [sdrs, setAllSDRs] = useState([] as any[]);
   const [selectedSdrId, setSelectedSdrId] = useState(null);
-  const [segmentTagCategories, setSegmentTagCategories] = useState([]);
+  const [segmentTagCategories, setSegmentTagCategories] = useState<Array<{ id: number; name: string; }>>([]);
   const [tagMenuOpen, setTagMenuOpen] = useState(false);
   const [tagMenuLoading, setTagMenuLoading] = useState(false);
   const [showEditSegmentNameModal, setShowEditSegmentNameModal] = useState(false);
@@ -687,7 +687,7 @@ export default function SegmentV2(props: PropsType) {
         </Flex>
       ),
       cell: (cell: any) => {
-        const [availableSegmentTags, setAvailableSegmentTags] = useState([]);
+        const [availableSegmentTags, setAvailableSegmentTags] = useState<Array<{ id: number; name: string; }>>([]);
         const [addTagClicked, setAddTagClicked] = useState(false);
         const [segmentTagsLoading, setSegmentTagsLoading] = useState(false);
         const [segmentTags, setSegmentTags] = useState(cell.row.original.segment_tags);
@@ -748,12 +748,12 @@ export default function SegmentV2(props: PropsType) {
                           e.stopPropagation();
                           if (!isTagInSegment) {
                             addTagToSegment(userToken, cell.row.original.id, tag.id).then(() => {
-                              setSegmentTags(prev => [...prev, tag]);
+                              setSegmentTags((prev: any) => [...prev, tag]);
                               cell.row.original.segment_tags.push(tag);
                             });
                           } else {
                             removeTagFromSegment(userToken, cell.row.original.id, tag.id).then(() => {
-                              setSegmentTags(prev => prev.filter((t: { id: number }) => t.id !== tag.id));
+                              setSegmentTags((prev: any[]) => prev.filter((t: { id: number }) => t.id !== tag.id));
                               cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
                             });
                           }
@@ -776,7 +776,7 @@ export default function SegmentV2(props: PropsType) {
                                 onCancel: () => {setPopoverOpened(true)},
                                 onConfirm: () => {
                                   deleteTag(userToken, tag.id).then(() => {
-                                    setSegmentTags(prev => prev.filter((t: { id: number }) => t.id !== tag.id));
+                                    setSegmentTags((prev: any[]) => prev.filter((t: { id: number }) => t.id !== tag.id));
                                     cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
                                     getAllSegments(true);
                                     //prevent the popover from closing
@@ -807,8 +807,8 @@ export default function SegmentV2(props: PropsType) {
                         const newTagName = e.currentTarget.value.trim();
                         if (newTagName !== '' && !availableSegmentTags.some(tag => tag.name === newTagName)) {
                           createSegmentTag(userToken, cell.row.original.id, newTagName, '#000000').then((newTag) => {
-                            setAvailableSegmentTags(prev => [...prev, newTag.data]);
-                            setSegmentTags(prev => [...prev, newTag.data]);
+                            setAvailableSegmentTags((prev: any[]) => [...prev, newTag.data]);
+                            setSegmentTags((prev: any[]) => [...prev, newTag.data]);
                             setAddTagClicked(false);
                             e.currentTarget.value = ''; // Clear input after sending
                           });

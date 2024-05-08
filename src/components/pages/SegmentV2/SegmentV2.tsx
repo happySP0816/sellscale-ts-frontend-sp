@@ -1783,7 +1783,4 @@ export default function SegmentV2(props: PropsType) {
     </Paper>
   );
 }
-function setSegmentTagsLoading(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
 

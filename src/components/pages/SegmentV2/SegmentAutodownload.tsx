@@ -21,6 +21,7 @@ import { useRecoilValue } from "recoil";
 type PropsType = {
   segmentId: number | undefined | null;
   onDownloadHistoryClick: () => void;
+  getAllSegments: (arg0: boolean) => void;
 };
 
 export default function SegmentAutodownload(props: PropsType) {
@@ -55,7 +56,12 @@ export default function SegmentAutodownload(props: PropsType) {
       body: JSON.stringify({
         segment_id: props.segmentId,
       }),
-    }).then(() => props.segmentId && getSegment(props.segmentId));
+    }).then(() => {
+      if (props.segmentId) {
+        getSegment(props.segmentId);
+        props.getAllSegments(true);
+      }
+    });
   };
 
   const setCurrentScrapePage = () => {
@@ -131,7 +137,7 @@ export default function SegmentAutodownload(props: PropsType) {
           <Switch
             color="blue"
             size="lg"
-            style={{ marginLeft: "auto" }}
+            style={{ marginLeft: "auto", cursor: "pointer" }}
             onChange={toggleAutoDownload}
             checked={segment?.autoscrape_enabled}
           />

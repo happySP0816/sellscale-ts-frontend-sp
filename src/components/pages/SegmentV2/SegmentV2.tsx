@@ -548,7 +548,13 @@ export default function SegmentV2(props: PropsType) {
       ),
       cell: (cell: any) => {
         const { isChild } = cell.row.original;
-        const { contacts, filters, client_sdr, apollo_query } = cell.row.original;
+        const { contacts, filters, client_sdr, apollo_query, autoscrape_enabled } = cell.row.original;
+
+        const successfulScrapes = Math.min(
+          cell.row.original.current_scrape_page,
+          Math.ceil(apollo_query?.num_results / 100));
+        const totalScrapes = Math.ceil(apollo_query?.num_results / 100);
+        const doneScraping = successfulScrapes === totalScrapes;
 
         const notMyCampaign = client_sdr.id !== userData.id;
 
@@ -596,7 +602,7 @@ export default function SegmentV2(props: PropsType) {
                     {showAutoDownloadFeature && (
                       <Button
                         w='100%'
-                        variant={cell.row.original.autoscrape_enabled ? 'filled' : 'outline'}
+                        variant={autoscrape_enabled ? 'filled' : 'outline'}
                         compact
                         size='xs'
                         color='teal'
@@ -605,11 +611,8 @@ export default function SegmentV2(props: PropsType) {
                           setOpenAutoDownloadModal(true);
                         }}
                       >
-                        {cell.row.original.autoscrape_enabled
-                          ? `Auto-Download Enabled - ${Math.min(
-                              cell.row.original.current_scrape_page,
-                              Math.ceil(apollo_query.num_results / 100)
-                            )} / ${Math.ceil(apollo_query.num_results / 100)} scraped (${Math.round(
+                        {autoscrape_enabled
+                          ? `Auto-Download Enabled - ${successfulScrapes} / ${totalScrapes} scraped (${Math.round(
                               (Math.min(
                                 cell.row.original.current_scrape_page,
                                 Math.ceil(apollo_query.num_results / 100)
@@ -618,7 +621,7 @@ export default function SegmentV2(props: PropsType) {
                                 100
                             )}%
                             )`
-                          : 'Enable Auto-Download'}
+                          : 'Enable Auto-Download'} {!doneScraping && !autoscrape_enabled && successfulScrapes > 0 ? ' - ' + successfulScrapes + '/' + totalScrapes + ' scraped (' + Math.round((successfulScrapes / totalScrapes + 0.0001) * 100) + '%)' : ''}
                       </Button>
                     )}
                   </>
@@ -774,8 +777,6 @@ export default function SegmentV2(props: PropsType) {
                                 onCancel: () => {setPopoverOpened(true)},
                                 onConfirm: () => {
                                   deleteTag(userToken, tag.id).then(() => {
-                                    setSegmentTags((prev: any[]) => prev.filter((t: { id: number }) => t.id !== tag.id));
-                                    cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
                                     getAllSegments(true);
                                     //prevent the popover from closing
                                     setPopoverOpened(true);
@@ -1184,6 +1185,7 @@ export default function SegmentV2(props: PropsType) {
         padding='md'
       >
         <SegmentAutodownload
+          getAllSegments={getAllSegments}
           segmentId={selectedSegmentId}
           onDownloadHistoryClick={() => {
             props.onDownloadHistoryClick && props.onDownloadHistoryClick();

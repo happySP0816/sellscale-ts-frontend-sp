@@ -529,16 +529,16 @@ export default function SegmentV2(props: PropsType) {
                         w={140}
                         color='blue'
                       />
-                      <Text color='#3B85EF' fw={600}>
+                      <Text color={!isChild ? '#3B85EF' : '#FF10F0'} fw={600}>
                         {Math.round((num_contacted / (num_prospected + 0.0001)) * 100)}% (
-                        {num_contacted} / {num_prospected}) {'in segment'}
+                        {num_contacted} / {num_prospected}) {'in' + (isChild ? ' child segment' : ' segment')}
                       </Text>
                       {sub_segments && sub_segments.length > 0 && (
                         // console log subsegments here
                         <><Progress
                           value={Math.round((totalContactedChildren / totalProspectedChildren + 0.0001) * 100)}
                           w={140}
-                          color='violet' /><Text color='violet' fw={600}>
+                          color='#FF10F0' /><Text color='#FF10F0' fw={600}>
                             {`${Math.round((totalContactedChildren / totalProspectedChildren + 0.0001) * 100) || 0}% ( ${totalContactedChildren} / ${totalProspectedChildren} ) in children segments`}
                           </Text></>
                       )}

@@ -661,28 +661,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           paddingRight: 10,
         }}
       >
-        <Flex align={"center"} justify={"space-between"} my={"sm"}>
-          <Flex align={"center"} gap={"xs"}>
-            <IconSparkles size={"0.9rem"} />
-            <Text fw={500} size={"sm"} color="gray">
-              AI Response:
-            </Text>
-            <Flex mah={35} miw={220} style={{ border: "1px solid #ced4da", borderRadius: "6px" }} align={"center"}>
-              <Flex w={"100%"} my={7} ml={10}>
-                <div className=" px-2 py-[3px] rounded-md text-[14px]">K8s in Depth</div>
-              </Flex>
-              <Flex h={"100%"} px={4} sx={{ borderLeft: "1px solid #ced4da" }}>
-                <ActionIcon className="m-auto ">
-                  <IconAdjustmentsHorizontal color="gray" />
-                </ActionIcon>
-              </Flex>
-            </Flex>
-          </Flex>
-          <Button variant="outline" leftIcon={<IconEdit size={"0.9rem"} />}>
-            Generate
-          </Button>
-        </Flex>
-        <Flex justify={"space-between"} gap={"md"} align={"center"}>
+        <Flex mt={"xs"} justify={"space-between"} gap={"md"} align={"center"}>
           <Flex w={"100%"} h={36} style={{ border: "1px solid #ced4da", borderRadius: "5px" }} align={"center"}>
             <span
               style={{
@@ -697,11 +676,11 @@ export default forwardRef(function InboxProspectConvoSendBox(
             <Flex w={"100%"} my={7} mx={4}>
               <div className="bg-[#ECEEF1] px-2 py-[3px] rounded-md text-[14px]">{props.email}</div>
             </Flex>
-            <Flex h={"100%"} px={4} sx={{ borderLeft: "1px solid #ced4da" }}>
+            {/* <Flex h={"100%"} px={4} sx={{ borderLeft: "1px solid #ced4da" }}>
               <ActionIcon className="m-auto ">
                 <IconAdjustmentsHorizontal color="gray" />
               </ActionIcon>
-            </Flex>
+            </Flex> */}
           </Flex>
           <Button.Group>
             <Button
@@ -866,6 +845,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           </Flex>
           <Flex gap={"xs"} align={"center"} w="70%" justify={"space-between"}>
             {/* only show for linkedin */}
+            <IconSparkles size={"0.9rem"} />
             <Text fw={700} fz={"10px"} color="gray.6" w="25%">
               AI Response
             </Text>

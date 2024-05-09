@@ -527,7 +527,7 @@ export default function SegmentV2(props: PropsType) {
                       <Progress
                         value={Math.round((num_contacted / (num_prospected + 0.0001)) * 100)}
                         w={140}
-                        color='blue'
+                        color={isChild ? '#FF10F0' : '#3B85EF'}
                       />
                       <Text color={!isChild ? '#3B85EF' : '#FF10F0'} fw={600}>
                         {Math.round((num_contacted / (num_prospected + 0.0001)) * 100)}% (

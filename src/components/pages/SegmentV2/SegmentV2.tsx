@@ -534,7 +534,6 @@ export default function SegmentV2(props: PropsType) {
                         {num_contacted} / {num_prospected}) {'in' + (isChild ? ' child segment' : ' segment')}
                       </Text>
                       {sub_segments && sub_segments.length > 0 && (
-                        // console log subsegments here
                         <><Progress
                           value={Math.round((totalContactedChildren / totalProspectedChildren + 0.0001) * 100)}
                           w={140}

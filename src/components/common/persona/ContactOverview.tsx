@@ -47,13 +47,13 @@ const ContactOverview = () => {
             />
             History
           </Tabs.Tab>
-          <Tabs.Tab value="ongoing_scrapes">
+          {/* <Tabs.Tab value="ongoing_scrapes">
             <IconWallpaper
               size="0.8rem"
               style={{ marginRight: "8px", marginTop: "4px" }}
             />
             Ongoing Scrapes
-          </Tabs.Tab>
+          </Tabs.Tab> */}
         </Tabs.List>
 
         {/* <Tabs.Panel value="personas">
@@ -64,9 +64,9 @@ const ContactOverview = () => {
           <Territories />
         </Tabs.Panel>
 
-        <Tabs.Panel value="ongoing_scrapes" pt="xs">
+        {/* <Tabs.Panel value="ongoing_scrapes" pt="xs">
           <OngoingScrapes />
-        </Tabs.Panel>
+        </Tabs.Panel> */}
 
         <Tabs.Panel value="history">
           <ProspectUploadHistory />

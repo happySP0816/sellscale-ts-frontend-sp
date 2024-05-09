@@ -43,24 +43,24 @@ export default function EmailSequenceStepCard(props: {
   const userToken = useRecoilValue(userTokenState);
   const { hovered, ref } = useHover();
 
-  const [defaultSequenceStep, setDefaultSequenceStep] = useState<EmailSequenceStep>();
+  // const [defaultSequenceStep, setDefaultSequenceStep] = useState<EmailSequenceStep>();
   const [loading, setLoading] = useState<boolean>(false);
   const delayDaysRef = useRef(3);
 
   const currentProject = useRecoilValue(currentProjectState);
 
-  const triggerPatchEmailDelayDays = async (delayDays: number) => {
-    if (delayDays < 1 || !defaultSequenceStep) return;
+  const triggerPatchEmailDelayDays = async (step: EmailSequenceStep, delayDays: number) => {
+    if (delayDays < 1 || !step) return;
 
     setLoading(true);
 
     const result = await patchSequenceStep(
       userToken,
-      defaultSequenceStep.step.id,
-      defaultSequenceStep.step.overall_status,
-      defaultSequenceStep.step.title,
-      defaultSequenceStep.step.template,
-      defaultSequenceStep.step.bumped_count,
+      step.step.id,
+      step.step.overall_status,
+      step.step.title,
+      step.step.template,
+      step.step.bumped_count,
       true,
       delayDays
     );
@@ -116,14 +116,14 @@ export default function EmailSequenceStepCard(props: {
     setLoading(false);
   };
 
-  useEffect(() => {
-    // Get the default sequence step
-    if (props.sequenceBucket?.templates) {
-      const defaultSequenceStep = props.sequenceBucket?.templates.find((s) => s.step.active);
-      setDefaultSequenceStep(defaultSequenceStep);
-      delayDaysRef.current = defaultSequenceStep?.step.sequence_delay_days || 3;
-    }
-  }, [props.sequenceBucket, props.active]);
+  // useEffect(() => {
+  //   // Get the default sequence step
+  //   if (props.sequenceBucket?.templates) {
+  //     const defaultSequenceStep = props.sequenceBucket?.templates.find((s) => s.step.active);
+  //     setDefaultSequenceStep(defaultSequenceStep);
+  //     delayDaysRef.current = defaultSequenceStep?.step.sequence_delay_days || 3;
+  //   }
+  // }, [props.sequenceBucket, props.active]);
 
   return (
     <Card
@@ -203,30 +203,29 @@ export default function EmailSequenceStepCard(props: {
         </Group>
         <Divider />
         <Box px={20} py={10}>
-          {defaultSequenceStep && defaultSequenceStep.step.title ? (
-            <Text fw={700} size='xl'>
-              {defaultSequenceStep.step.title}
-            </Text>
-          ) : (
-            <Flex w='100%' justify='center'>
-              <Text size='lg' color='gray.7'>
-                No active template set
+          <Text size={'sm'} fw={500} color='gray.5'>
+            Active Variants
+          </Text>
+          {props.sequenceBucket?.templates
+            .filter((t) => t.step.active)
+            .map((template, index) => (
+              <Text key={index} size='sm' color='gray.7'>
+                • {template.step.title}
               </Text>
-            </Flex>
-          )}
+            ))}
           <Text size={'sm'} fw={500} color='gray.5'>
             {props.content}
           </Text>
         </Box>
-        {props.includeFooter && defaultSequenceStep && (
+        {props.includeFooter && (
           <>
             <Divider />
             <Box px={20} py={10}>
               <Flex align='center' justify={'center'}>
                 <Text fz={14} fw={500}>
-                  Wait for
+                  Wait for some days, then:
                 </Text>
-                {defaultSequenceStep ? (
+                {/* {defaultSequenceStep ? (
                   <NumberInput
                     mx='xs'
                     w='32px'
@@ -262,10 +261,7 @@ export default function EmailSequenceStepCard(props: {
                       />
                     </div>
                   </Tooltip>
-                )}
-                <Text fz={14} fw={500}>
-                  days, then:
-                </Text>
+                )} */}
               </Flex>
             </Box>
           </>

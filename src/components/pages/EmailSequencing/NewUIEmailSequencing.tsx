@@ -370,7 +370,7 @@ const NewUIEmailSequencing: FC<{
   );
   const [activeTab, setActiveTab] = React.useState('PROSPECTED');
 
-  const PAGE_HEIGHT = 550;
+  const PAGE_HEIGHT = `calc(100vh - 200px)`;
   const viewport = useRef<HTMLDivElement>(null);
   const scrollToTop = () => viewport.current!.scrollTo({ top: 0 });
 

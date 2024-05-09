@@ -578,33 +578,49 @@ function NewDetailEmailSequencing(props: {
                 return 0;
               })
               .map((subjectLine: SubjectLineTemplate, index: number) => (
-                <Accordion.Item key={index} value={`${index}`}>
-                  <Accordion.Control>
-                    <Group position='apart'>
-                      <Text fz='lg'>{subjectLine.subject_line}</Text>
-                      <Group>
-                        {subjectLine.active && <Badge>Active</Badge>}
-                        <Button
-                          size='xs'
-                          radius='lg'
-                          color='violet'
-                          variant={activeSubjectLine?.id === subjectLine.id ? 'filled' : 'outline'}
-                          compact
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setSubjectLine(subjectLine);
-                          }}
-                        >
-                          Regen Example
-                        </Button>
-                      </Group>
-                    </Group>
-                  </Accordion.Control>
-                  <Accordion.Panel>
-                    <SubjectLineItem subjectLine={subjectLine} refetch={props.refetch} />
-                  </Accordion.Panel>
-                </Accordion.Item>
+                <Box
+                  key={index}
+                  style={{
+                    position: 'relative',
+                  }}
+                >
+                  <Button
+                    style={{
+                      position: 'absolute',
+                      top: 10,
+                      right: 150,
+                      zIndex: 100,
+                    }}
+                    size='xs'
+                    radius='lg'
+                    color='violet'
+                    variant={activeSubjectLine?.id === subjectLine.id ? 'filled' : 'outline'}
+                    compact
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSubjectLine(subjectLine);
+                    }}
+                  >
+                    Regen Example
+                  </Button>
+
+                  <SubjectLineItem subjectLine={subjectLine} refetch={props.refetch} />
+                </Box>
+                // <Accordion.Item key={index} value={`${index}`}>
+                //   <Accordion.Control>
+                //     <Group position='apart'>
+                //       <Text fz='lg'>{subjectLine.subject_line}</Text>
+                //       <Group>
+                //         {subjectLine.active && <Badge>Active</Badge>}
+
+                //       </Group>
+                //     </Group>
+                //   </Accordion.Control>
+                //   <Accordion.Panel>
+                //     <SubjectLineItem subjectLine={subjectLine} refetch={props.refetch} />
+                //   </Accordion.Panel>
+                // </Accordion.Item>
               ))}
           </Accordion>
         </Box>

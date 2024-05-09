@@ -18,7 +18,9 @@ export interface TodayActivityData {
 
 const borderGray = "#E9ECEF";
 const blue = "#228be6";
-const TodayActivity: FC<{ aiActivityData: TodayActivityData }> = ({ aiActivityData }) => {
+const TodayActivity: FC<{ aiActivityData: TodayActivityData }> = ({
+  aiActivityData,
+}) => {
   const values = useMemo(
     () => [
       {
@@ -35,10 +37,10 @@ const TodayActivity: FC<{ aiActivityData: TodayActivityData }> = ({ aiActivityDa
         name: "AI Replies",
         icon: <IconMessageCheck size={"0.75rem"} stroke="gray.6" />,
         number: !aiActivityData.newReplies ? 0 : aiActivityData.newReplies,
-      }
+      },
     ],
     [aiActivityData]
-  )
+  );
 
   return (
     <>
@@ -56,7 +58,7 @@ const TodayActivity: FC<{ aiActivityData: TodayActivityData }> = ({ aiActivityDa
             AI Activity today &nbsp;
           </Text>
           <Text size={"0.75rem"} color="gray.8" fw={700}>
-            {aiActivityData.totalActivity} touches
+            {aiActivityData.totalActivity.toLocaleString()} touches
           </Text>
         </Flex>
 

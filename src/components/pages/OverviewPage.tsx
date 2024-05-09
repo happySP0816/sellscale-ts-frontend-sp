@@ -422,6 +422,7 @@ export function ActiveChannels() {
     setLoading(true);
 
     const result = await getDomainDetails(userToken);
+
     const data = result.data;
     setSDRs(data.sdr_inbox_details || []);
 
@@ -484,11 +485,7 @@ export function ActiveChannels() {
   let totalEmailWarmup = 0;
   for (const x of sdrs) {
     const sdr: any = x;
-    if (sdr.emails) {
-      for (const inbox of sdr.emails) {
-        totalEmailWarmup += inbox.daily_limit;
-      }
-    }
+    totalEmailWarmup += sdr.weekly_email_outbound_target;
   }
   for (const x of linkedinSeats) {
     const seat: any = x;
@@ -585,7 +582,7 @@ export function ActiveChannels() {
                         >
                           LinkedIn:
                         </span>{" "}
-                        {totalLinkedInWarmup} / day
+                        {totalLinkedInWarmup * 5} / week
                       </Text>
                     </Flex>
                     <Flex
@@ -607,7 +604,7 @@ export function ActiveChannels() {
                         >
                           Email:
                         </span>{" "}
-                        {totalEmailWarmup} / day
+                        {totalEmailWarmup.toLocaleString()} / week
                       </Text>
                     </Flex>
                   </Flex>

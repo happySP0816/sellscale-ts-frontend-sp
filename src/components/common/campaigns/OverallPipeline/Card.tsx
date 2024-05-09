@@ -24,16 +24,23 @@ const Card: React.FC<{
         borderImage: `linear-gradient(#FFFFFF, ${blue}, #FFFFFF) 0 100%`,
       }}
     >
-      <Box style={{ justifyContent: "center", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+      <Box
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "0.5rem",
+          marginBottom: "0.5rem",
+        }}
+      >
         <Flex>
           {icon}
-          <Text size={"0.6rem"} color="gray.6" fw={500} ml='4px'>
+          <Text size={"0.6rem"} color="gray.6" fw={500} ml="4px">
             {title}
           </Text>
         </Flex>
 
         <Text weight={700} size={"0.8rem"}>
-          {value}
+          {value?.toLocaleString()}
         </Text>
       </Box>
     </Flex>

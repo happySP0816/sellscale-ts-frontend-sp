@@ -697,7 +697,7 @@ export default function SegmentV2(props: PropsType) {
           <Popover 
             opened={popoverOpened}
             width={400} 
-            position="bottom" 
+            position="left" 
             withArrow 
             shadow="md"
             onClose={() => setPopoverOpened(false)}
@@ -717,7 +717,7 @@ export default function SegmentV2(props: PropsType) {
                 }}
               >
                 {segmentTags?.length > 0 ? segmentTags.map((tag: { name: string }, index: number) => (
-                  <Badge key={index} radius="xl" size='md' color={deterministicMantineColor(tag.name)} style={{ margin: '5px' }}>
+                  tag && <Badge key={index} radius="xl" size='md' color={deterministicMantineColor(tag.name)} style={{ margin: '5px' }}>
                     {tag.name}
                   </Badge>
                 )) : (
@@ -732,9 +732,9 @@ export default function SegmentV2(props: PropsType) {
               <Box style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap'}}>
                 {/* Available / New Tags */}
                 {availableSegmentTags?.map((tag: { name: string, id: number }, index: number) => {
-                  const isTagInSegment = segmentTags.some((existingTag: { name: string; }) => existingTag.name === tag.name);
+                  const isTagInSegment = segmentTags?.some((existingTag: { name: string; }) => existingTag?.name === tag?.name);
                   return (
-                    <Group spacing="xs" style={{ margin: '2px' }}>
+                    tag && <Group spacing="xs" style={{ margin: '2px' }}>
                       <Badge 
                         radius="xl" 
                         size='md' 
@@ -748,13 +748,11 @@ export default function SegmentV2(props: PropsType) {
                           e.stopPropagation();
                           if (!isTagInSegment) {
                             addTagToSegment(userToken, cell.row.original.id, tag.id).then(() => {
-                              setSegmentTags((prev: any) => [...prev, tag]);
-                              cell.row.original.segment_tags.push(tag);
+                              getAllSegments(true);
                             });
                           } else {
                             removeTagFromSegment(userToken, cell.row.original.id, tag.id).then(() => {
-                              setSegmentTags((prev: any[]) => prev.filter((t: { id: number }) => t.id !== tag.id));
-                              cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
+                              getAllSegments(true);
                             });
                           }
                         }}
@@ -807,9 +805,7 @@ export default function SegmentV2(props: PropsType) {
                         const newTagName = e.currentTarget.value.trim();
                         if (newTagName !== '' && !availableSegmentTags?.some(tag => tag.name === newTagName)) {
                           createSegmentTag(userToken, cell.row.original.id, newTagName, '#000000').then((newTag) => {
-                            setAvailableSegmentTags((prev: any[]) => Array.isArray(prev) ? [...prev, newTag.data] : [newTag.data]);
-                            setSegmentTags((prev: any[]) => Array.isArray(prev) ? [...prev, newTag.data] : [newTag.data]);
-                            setAddTagClicked(false);
+                            getAllSegments(true);
                             e.currentTarget.value = ''; // Clear input after sending
                           });
                         }

@@ -23,7 +23,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import SlackLogo from "@assets/images/slack-logo.png";
 import { CustomizeSlackNotifications } from "./SlackNotifications";
 
-export default function SlackbotSection(props: { setActiveTab: (value: string) => void }) {
+export default function SlackbotSection(props: { setActiveTab: (value: string) => void, setPageLoading: (value: boolean) => void }) {
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
   const [loading, setLoading] = useState<boolean>(false);
@@ -31,11 +31,13 @@ export default function SlackbotSection(props: { setActiveTab: (value: string) =
   const [webhook, setWebhook] = useState<string>("");
 
   useEffect(() => {
+    props.setPageLoading(true); // Trigger loading overlay
     syncLocalStorage(userToken, setUserData).then(() => {
       setWebhook(userData.client.pipeline_notifications_webhook_url);
       if (userData.client.pipeline_notifications_webhook_url && !userData.client.slack_bot_connected) {
         props.setActiveTab('advanced_setup');
       }
+      props.setPageLoading(false); // Remove loading overlay
     });
   }, []);
 

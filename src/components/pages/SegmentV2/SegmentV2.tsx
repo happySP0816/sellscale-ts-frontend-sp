@@ -548,7 +548,13 @@ export default function SegmentV2(props: PropsType) {
       ),
       cell: (cell: any) => {
         const { isChild } = cell.row.original;
-        const { contacts, filters, client_sdr, apollo_query } = cell.row.original;
+        const { contacts, filters, client_sdr, apollo_query, autoscrape_enabled } = cell.row.original;
+
+        const successfulScrapes = Math.min(
+          cell.row.original.current_scrape_page,
+          Math.ceil(apollo_query?.num_results / 100));
+        const totalScrapes = Math.ceil(apollo_query?.num_results / 100);
+        const doneScraping = successfulScrapes === totalScrapes;
 
         const notMyCampaign = client_sdr.id !== userData.id;
 
@@ -596,7 +602,7 @@ export default function SegmentV2(props: PropsType) {
                     {showAutoDownloadFeature && (
                       <Button
                         w='100%'
-                        variant={cell.row.original.autoscrape_enabled ? 'filled' : 'outline'}
+                        variant={autoscrape_enabled ? 'filled' : 'outline'}
                         compact
                         size='xs'
                         color='teal'
@@ -605,11 +611,8 @@ export default function SegmentV2(props: PropsType) {
                           setOpenAutoDownloadModal(true);
                         }}
                       >
-                        {cell.row.original.autoscrape_enabled
-                          ? `Auto-Download Enabled - ${Math.min(
-                              cell.row.original.current_scrape_page,
-                              Math.ceil(apollo_query.num_results / 100)
-                            )} / ${Math.ceil(apollo_query.num_results / 100)} scraped (${Math.round(
+                        {autoscrape_enabled
+                          ? `Auto-Download Enabled - ${successfulScrapes} / ${totalScrapes} scraped (${Math.round(
                               (Math.min(
                                 cell.row.original.current_scrape_page,
                                 Math.ceil(apollo_query.num_results / 100)
@@ -618,7 +621,7 @@ export default function SegmentV2(props: PropsType) {
                                 100
                             )}%
                             )`
-                          : 'Enable Auto-Download'}
+                          : 'Enable Auto-Download'} {!doneScraping && !autoscrape_enabled && successfulScrapes > 0 ? ' - ' + successfulScrapes + '/' + totalScrapes + ' scraped (' + Math.round((successfulScrapes / totalScrapes + 0.0001) * 100) + '%)' : ''}
                       </Button>
                     )}
                   </>
@@ -697,7 +700,7 @@ export default function SegmentV2(props: PropsType) {
           <Popover 
             opened={popoverOpened}
             width={400} 
-            position="bottom" 
+            position="left" 
             withArrow 
             shadow="md"
             onClose={() => setPopoverOpened(false)}
@@ -717,7 +720,7 @@ export default function SegmentV2(props: PropsType) {
                 }}
               >
                 {segmentTags?.length > 0 ? segmentTags.map((tag: { name: string }, index: number) => (
-                  <Badge key={index} radius="xl" size='md' color={deterministicMantineColor(tag.name)} style={{ margin: '5px' }}>
+                  tag && <Badge key={index} radius="xl" size='md' color={deterministicMantineColor(tag.name)} style={{ margin: '5px' }}>
                     {tag.name}
                   </Badge>
                 )) : (
@@ -732,9 +735,9 @@ export default function SegmentV2(props: PropsType) {
               <Box style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap'}}>
                 {/* Available / New Tags */}
                 {availableSegmentTags?.map((tag: { name: string, id: number }, index: number) => {
-                  const isTagInSegment = segmentTags.some((existingTag: { name: string; }) => existingTag.name === tag.name);
+                  const isTagInSegment = segmentTags?.some((existingTag: { name: string; }) => existingTag?.name === tag?.name);
                   return (
-                    <Group spacing="xs" style={{ margin: '2px' }}>
+                    tag && <Group spacing="xs" style={{ margin: '2px' }}>
                       <Badge 
                         radius="xl" 
                         size='md' 
@@ -748,13 +751,11 @@ export default function SegmentV2(props: PropsType) {
                           e.stopPropagation();
                           if (!isTagInSegment) {
                             addTagToSegment(userToken, cell.row.original.id, tag.id).then(() => {
-                              setSegmentTags((prev: any) => [...prev, tag]);
-                              cell.row.original.segment_tags.push(tag);
+                              getAllSegments(true);
                             });
                           } else {
                             removeTagFromSegment(userToken, cell.row.original.id, tag.id).then(() => {
-                              setSegmentTags((prev: any[]) => prev.filter((t: { id: number }) => t.id !== tag.id));
-                              cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
+                              getAllSegments(true);
                             });
                           }
                         }}
@@ -776,8 +777,6 @@ export default function SegmentV2(props: PropsType) {
                                 onCancel: () => {setPopoverOpened(true)},
                                 onConfirm: () => {
                                   deleteTag(userToken, tag.id).then(() => {
-                                    setSegmentTags((prev: any[]) => prev.filter((t: { id: number }) => t.id !== tag.id));
-                                    cell.row.original.segment_tags = cell.row.original.segment_tags.filter((t: { id: number }) => t.id !== tag.id);
                                     getAllSegments(true);
                                     //prevent the popover from closing
                                     setPopoverOpened(true);
@@ -807,9 +806,7 @@ export default function SegmentV2(props: PropsType) {
                         const newTagName = e.currentTarget.value.trim();
                         if (newTagName !== '' && !availableSegmentTags?.some(tag => tag.name === newTagName)) {
                           createSegmentTag(userToken, cell.row.original.id, newTagName, '#000000').then((newTag) => {
-                            setAvailableSegmentTags((prev: any[]) => Array.isArray(prev) ? [...prev, newTag.data] : [newTag.data]);
-                            setSegmentTags((prev: any[]) => Array.isArray(prev) ? [...prev, newTag.data] : [newTag.data]);
-                            setAddTagClicked(false);
+                            getAllSegments(true);
                             e.currentTarget.value = ''; // Clear input after sending
                           });
                         }
@@ -1188,6 +1185,7 @@ export default function SegmentV2(props: PropsType) {
         padding='md'
       >
         <SegmentAutodownload
+          getAllSegments={getAllSegments}
           segmentId={selectedSegmentId}
           onDownloadHistoryClick={() => {
             props.onDownloadHistoryClick && props.onDownloadHistoryClick();

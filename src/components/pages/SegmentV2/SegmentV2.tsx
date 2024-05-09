@@ -524,23 +524,27 @@ export default function SegmentV2(props: PropsType) {
                       )}
                     </Flex>
                     <Flex direction="column" align={'left'} gap={'sm'} mt={3}>
+                    <Flex direction="row" align={'left'} gap={'sm'} mt={3}>
                       <Progress
                         value={Math.round((num_contacted / (num_prospected + 0.0001)) * 100)}
                         w={140}
                         color={isChild ? 'grape' : '#3B85EF'}
                       />
-                      <Text color={!isChild ? '#3B85EF' : 'grape'} fw={600}>
+                      <Text size='10px' color={!isChild ? '#3B85EF' : 'grape'} fw={600}>
                         {Math.round((num_contacted / (num_prospected + 0.0001)) * 100)}% (
                         {num_contacted} / {num_prospected}) {'in' + (isChild ? ' child segment' : ' segment')}
                       </Text>
+                      </Flex>
+                      <Flex direction="row" align={'left'} gap={'sm'} mt={3}>
                       {sub_segments && sub_segments.length > 0 && (
                         <><Progress
                           value={Math.round((totalContactedChildren / totalProspectedChildren + 0.0001) * 100)}
                           w={140}
-                          color='grape' /><Text color='grape' fw={600}>
+                          color='grape' /><Text size='10px' color='grape' fw={600}>
                             {`${Math.round((totalContactedChildren / totalProspectedChildren + 0.0001) * 100) || 0}% ( ${totalContactedChildren} / ${totalProspectedChildren} ) in children segments`}
                           </Text></>
                       )}
+                      </Flex>
                     </Flex>
                   </Box>
                 </Box>

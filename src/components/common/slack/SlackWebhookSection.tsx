@@ -23,7 +23,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import SlackLogo from "@assets/images/slack-logo.png";
 import { CustomizeSlackNotifications } from "./SlackNotifications";
 
-export default function SlackbotSection() {
+export default function SlackbotSection(props: { setActiveTab: (value: string) => void }) {
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
   const [loading, setLoading] = useState<boolean>(false);
@@ -33,6 +33,9 @@ export default function SlackbotSection() {
   useEffect(() => {
     syncLocalStorage(userToken, setUserData).then(() => {
       setWebhook(userData.client.pipeline_notifications_webhook_url);
+      if (userData.client.pipeline_notifications_webhook_url) {
+        props.setActiveTab('advanced_setup');
+      }
     });
   }, []);
 

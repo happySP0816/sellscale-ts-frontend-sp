@@ -550,6 +550,12 @@ export default function SegmentV2(props: PropsType) {
         const { isChild } = cell.row.original;
         const { contacts, filters, client_sdr, apollo_query } = cell.row.original;
 
+        const successfulScrapes = Math.min(
+          cell.row.original.current_scrape_page,
+          Math.ceil(apollo_query?.num_results / 100));
+        const totalScrapes = Math.ceil(apollo_query?.num_results / 100);
+        const doneScraping = successfulScrapes === totalScrapes;
+
         const notMyCampaign = client_sdr.id !== userData.id;
 
         return (
@@ -596,7 +602,7 @@ export default function SegmentV2(props: PropsType) {
                     {showAutoDownloadFeature && (
                       <Button
                         w='100%'
-                        variant={cell.row.original.autoscrape_enabled ? 'filled' : 'outline'}
+                        variant={doneScraping ? 'filled' : 'outline'}
                         compact
                         size='xs'
                         color='teal'

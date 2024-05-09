@@ -43,9 +43,7 @@ export default function EmailSequenceStepCard(props: {
   const userToken = useRecoilValue(userTokenState);
   const { hovered, ref } = useHover();
 
-  // const [defaultSequenceStep, setDefaultSequenceStep] = useState<EmailSequenceStep>();
   const [loading, setLoading] = useState<boolean>(false);
-  const delayDaysRef = useRef(3);
 
   const currentProject = useRecoilValue(currentProjectState);
 
@@ -66,12 +64,14 @@ export default function EmailSequenceStepCard(props: {
     );
     if (result.status != 'success') {
       showNotification({
+        id: 'email-delay-days-updated',
         title: 'Error',
         message: result.message,
         color: 'red',
       });
     } else {
       showNotification({
+        id: 'email-delay-days-updated',
         title: 'Success',
         message: 'Email delay days updated',
         color: 'green',
@@ -115,15 +115,6 @@ export default function EmailSequenceStepCard(props: {
 
     setLoading(false);
   };
-
-  // useEffect(() => {
-  //   // Get the default sequence step
-  //   if (props.sequenceBucket?.templates) {
-  //     const defaultSequenceStep = props.sequenceBucket?.templates.find((s) => s.step.active);
-  //     setDefaultSequenceStep(defaultSequenceStep);
-  //     delayDaysRef.current = defaultSequenceStep?.step.sequence_delay_days || 3;
-  //   }
-  // }, [props.sequenceBucket, props.active]);
 
   return (
     <Card
@@ -223,45 +214,36 @@ export default function EmailSequenceStepCard(props: {
             <Box px={20} py={10}>
               <Flex align='center' justify={'center'}>
                 <Text fz={14} fw={500}>
-                  Wait for some days, then:
+                  Wait for
                 </Text>
-                {/* {defaultSequenceStep ? (
-                  <NumberInput
-                    mx='xs'
-                    w='32px'
-                    variant='filled'
-                    hideControls
-                    sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
-                    size='xs'
-                    min={1}
-                    defaultValue={delayDaysRef.current}
-                    onChange={(e) => {
-                      delayDaysRef.current = Number(e);
-                      triggerPatchEmailDelayDays(Number(e));
-                    }}
-                  />
-                ) : (
-                  <Tooltip
-                    label={'Please activate a template to set a wait time'}
-                    withinPortal
-                    withArrow
-                  >
-                    <div>
-                      <NumberInput
-                        mx='xs'
-                        w='32px'
-                        variant='filled'
-                        hideControls
-                        sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
-                        size='xs'
-                        min={2}
-                        max={99}
-                        value={3}
-                        disabled
-                      />
-                    </div>
-                  </Tooltip>
-                )} */}
+
+                <NumberInput
+                  mx='xs'
+                  w='32px'
+                  variant='filled'
+                  hideControls
+                  sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                  size='xs'
+                  min={1}
+                  defaultValue={
+                    props.sequenceBucket &&
+                    props.sequenceBucket?.templates.filter((t) => t.step.active).length > 0
+                      ? props.sequenceBucket?.templates.filter((t) => t.step.active)[0].step
+                          .sequence_delay_days ?? 3
+                      : 3
+                  }
+                  onChange={(value) => {
+                    for (const template of props.sequenceBucket?.templates.filter(
+                      (t) => t.step.active
+                    ) ?? []) {
+                      triggerPatchEmailDelayDays(template, parseInt(`${value}`));
+                    }
+                  }}
+                />
+
+                <Text fz={14} fw={500}>
+                  days, then:
+                </Text>
               </Flex>
             </Box>
           </>

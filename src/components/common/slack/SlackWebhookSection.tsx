@@ -33,7 +33,7 @@ export default function SlackbotSection(props: { setActiveTab: (value: string) =
   useEffect(() => {
     syncLocalStorage(userToken, setUserData).then(() => {
       setWebhook(userData.client.pipeline_notifications_webhook_url);
-      if (userData.client.pipeline_notifications_webhook_url) {
+      if (userData.client.pipeline_notifications_webhook_url && !userData.client.slack_bot_connected) {
         props.setActiveTab('advanced_setup');
       }
     });

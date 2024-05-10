@@ -1,20 +1,4 @@
-import {
-  ActionIcon,
-  Avatar,
-  Badge,
-  Box,
-  Button,
-  Card,
-  Flex,
-  Image,
-  NumberInput,
-  Paper,
-  Select,
-  Text,
-  TextInput,
-  Title,
-  useMantineTheme,
-} from "@mantine/core";
+import { ActionIcon, Avatar, Badge, Box, Button, Card, Flex, Image, NumberInput, Paper, Select, Text, TextInput, Title, useMantineTheme } from "@mantine/core";
 import {
   IconArrowRight,
   IconCalendar,
@@ -22,6 +6,7 @@ import {
   IconChevronRight,
   IconFileDownload,
   IconInfoCircle,
+  IconPlus,
   IconSearch,
   IconWorld,
 } from "@tabler/icons";
@@ -32,6 +17,7 @@ import { useChampionApi } from "./ChampionChangeApi";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import moment from "moment";
+import { openContextModal } from "@mantine/modals";
 
 interface ChampionDataType {
   prospect_name: string;
@@ -47,13 +33,7 @@ interface ChampionDataType {
 export default function ChampionChange() {
   const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
-  const {
-    isLoading,
-    getChampionChanges,
-    getChampionStats,
-    postRefreshChampionJobData,
-    postMarkChampions,
-  } = useChampionApi(userToken);
+  const { isLoading, getChampionChanges, getChampionStats, postRefreshChampionJobData, postMarkChampions } = useChampionApi(userToken);
   const [loading, setLoading] = useState(isLoading);
 
   const [championData, setChampionData] = useState<ChampionDataType[]>([]);
@@ -111,23 +91,25 @@ export default function ChampionChange() {
           Champion Change Detector
         </Title>
         <Flex gap={"sm"} align={"center"}>
-          <TextInput
-            maw={200}
-            placeholder="Search"
-            rightSection={<IconSearch size={"0.9rem"} />}
-          />
+          <TextInput maw={200} placeholder="Search" rightSection={<IconSearch size={"0.9rem"} />} />
           <Button color="blue" onClick={handleJobRefreshData} loading={loading}>
             Refresh Job Data
           </Button>
-          <Button
-            color="green"
-            leftIcon={<IconFileDownload size={"0.9rem"} />}
-            disabled
-          >
+          <Button color="green" leftIcon={<IconFileDownload size={"0.9rem"} />} disabled>
             Download CSV
           </Button>
-          <Button leftIcon={<IconWorld size={"0.9rem"} />} disabled>
-            Synced to Salesforce
+          <Button leftIcon={<IconWorld size={"0.9rem"} />}>Synced to Salesforce</Button>
+          <Button
+            leftIcon={<IconPlus size={"0.9rem"} />}
+            onClick={() => {
+              openContextModal({
+                modal: "championChange",
+                title: <Title order={3}>Add New Champion</Title>,
+                innerProps: {},
+              });
+            }}
+          >
+            Champion Import
           </Button>
         </Flex>
       </Flex>
@@ -145,7 +127,7 @@ export default function ChampionChange() {
             <Flex gap={"xs"} align={"center"} mt={3}>
               <IconInfoCircle size={"0.9rem"} color="gray" />
               <Text fz={10} fw={500} color="gray">
-                # of unique companies that champions are working at
+                Lorem ipsum doior sit amet, consectetur adipiscing elit
               </Text>
             </Flex>
           </Box>
@@ -163,7 +145,7 @@ export default function ChampionChange() {
             <Flex gap={"xs"} align={"center"} mt={3}>
               <IconInfoCircle size={"0.9rem"} color="gray" />
               <Text fz={10} fw={500} color="gray">
-                # of unique champions in the closed won accounts
+                Lorem ipsum doior sit amet, consectetur adipiscing elit
               </Text>
             </Flex>
           </Box>
@@ -249,13 +231,7 @@ export default function ChampionChange() {
               </Flex>
             ),
             cell: (cell) => {
-              const {
-                new_company,
-                new_company_url,
-                origin_company,
-                origin_company_url,
-                type,
-              } = cell.row.original;
+              const { new_company, new_company_url, origin_company, origin_company_url, type } = cell.row.original;
 
               return (
                 <Flex align={"center"} gap={"md"} w={"100%"} h={"100%"}>
@@ -335,12 +311,10 @@ export default function ChampionChange() {
                   <Select
                     maw={100}
                     value={`${table.getState().pagination.pageIndex + 1}`}
-                    data={new Array(table.getPageCount())
-                      .fill(0)
-                      .map((i, idx) => ({
-                        label: String(idx + 1),
-                        value: String(idx + 1),
-                      }))}
+                    data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
+                      label: String(idx + 1),
+                      value: String(idx + 1),
+                    }))}
                     onChange={(v) => {
                       table.setPageIndex(Number(v) - 1);
                     }}
@@ -369,9 +343,7 @@ export default function ChampionChange() {
                     h={36}
                     disabled={table.getState().pagination.pageIndex === 0}
                     onClick={() => {
-                      table.setPageIndex(
-                        table.getState().pagination.pageIndex - 1
-                      );
+                      table.setPageIndex(table.getState().pagination.pageIndex - 1);
                     }}
                   >
                     <IconChevronLeft stroke={theme.colors.gray[4]} />
@@ -380,14 +352,9 @@ export default function ChampionChange() {
                     variant="default"
                     color="gray.4"
                     h={36}
-                    disabled={
-                      table.getState().pagination.pageIndex ===
-                      table.getPageCount() - 1
-                    }
+                    disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
                     onClick={() => {
-                      table.setPageIndex(
-                        table.getState().pagination.pageIndex + 1
-                      );
+                      table.setPageIndex(table.getState().pagination.pageIndex + 1);
                     }}
                   >
                     <IconChevronRight stroke={theme.colors.gray[4]} />

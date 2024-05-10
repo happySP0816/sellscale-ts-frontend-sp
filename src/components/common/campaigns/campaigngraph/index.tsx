@@ -18,6 +18,7 @@ import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { showNotification } from "@mantine/notifications";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
 
 const Hook: React.FC<{ linkedLeft: boolean; linkedRight: boolean }> = ({
   linkedLeft,
@@ -88,6 +89,34 @@ const CampaignGraph = (props: {
   const [isActiveNurture, setActiveNurture] = useState(
     nurtureSection[0]?.sends > 0
   );
+  const [selectedConnectionType, setSelectedConnectionType] = useState(
+    "RANDOM"
+  );
+
+  const updateConnectionType = (newConnectionType: string) => {
+    const archetypeId = props.personaId;
+    fetch(
+      `${API_URL}/client/archetype/${archetypeId}/update_email_to_linkedin_connection`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          email_to_linkedin_connection: newConnectionType,
+        }),
+      }
+    ).then((response) => {
+      if (response.ok) {
+        console.log("Connection type updated");
+      }
+      showNotification({
+        title: "Connection Type Updated",
+        message: "Connection type has been updated.",
+      });
+    });
+  };
 
   useEffect(() => {
     setActiveEmail(isEnabledLinkedin);
@@ -182,23 +211,36 @@ const CampaignGraph = (props: {
               ]}
             />
             <Hook
-              linkedLeft={isEnabledLinkedin}
+              linkedLeft={isEnabledEmail}
               linkedRight={isActiveEmail && isEnabledEmail}
             />
+            {/* </Box> */}
             <Select
-              label="Prospects to contact"
+              label="Connect Sequences"
               size="xs"
-              value="all"
-              disabled
+              value={selectedConnectionType}
+              w="250px"
+              onChange={(value) => {
+                console.log(value);
+                setSelectedConnectionType(value || "");
+                updateConnectionType(value || "");
+              }}
               data={[
-                { value: "all", label: "All Prospects" },
                 {
-                  value: "opened",
-                  label: "Opened only",
+                  label: "[❌] No Connection",
+                  value: "RANDOM",
                 },
                 {
-                  value: "clicked",
-                  label: "Clicked only",
+                  label: "[📧 → 🤝] Contact After Email Sent",
+                  value: "ALL_PROSPECTS",
+                },
+                {
+                  label: "[👀 → 🤝] Send to Opened Only",
+                  value: "OPENED_EMAIL_PROSPECTS_ONLY",
+                },
+                {
+                  label: "[⚡️ → 🤝] Send to Clicked Only",
+                  value: "CLICKED_LINK_PROSPECTS_ONLY",
                 },
               ]}
               placeholder="Select an event"

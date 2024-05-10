@@ -670,20 +670,20 @@ export default function ClientCampaignView() {
                         h={"100%"}
                       >
                         <Flex direction={"column"} gap={"3px"} align={"center"}>
-                          <IconBrandLinkedin
-                            size={"1.3rem"}
-                            fill="#228be6"
-                            color="white"
-                          />
-                          <Switch defaultChecked={linkedin} readOnly />
-                        </Flex>
-                        <Flex direction={"column"} gap={"3px"} align={"center"}>
                           <IconMail
                             size={"1.3rem"}
                             fill="#228be6"
                             color="white"
                           />
                           <Switch defaultChecked={email} readOnly />
+                        </Flex>
+                        <Flex direction={"column"} gap={"3px"} align={"center"}>
+                          <IconBrandLinkedin
+                            size={"1.3rem"}
+                            fill="#228be6"
+                            color="white"
+                          />
+                          <Switch defaultChecked={linkedin} readOnly />
                         </Flex>
                       </Flex>
                     );
@@ -1080,24 +1080,24 @@ export default function ClientCampaignView() {
                             gap={"3px"}
                             align={"center"}
                           >
-                            <IconBrandLinkedin
-                              size={"1.3rem"}
-                              fill="#228be6"
-                              color="white"
-                            />
-                            <Switch defaultChecked={linkedin} readOnly />
-                          </Flex>
-                          <Flex
-                            direction={"column"}
-                            gap={"3px"}
-                            align={"center"}
-                          >
                             <IconMail
                               size={"1.3rem"}
                               fill="#228be6"
                               color="white"
                             />
                             <Switch defaultChecked={email} readOnly />
+                          </Flex>
+                          <Flex
+                            direction={"column"}
+                            gap={"3px"}
+                            align={"center"}
+                          >
+                            <IconBrandLinkedin
+                              size={"1.3rem"}
+                              fill="#228be6"
+                              color="white"
+                            />
+                            <Switch defaultChecked={linkedin} readOnly />
                           </Flex>
                         </Flex>
                       );

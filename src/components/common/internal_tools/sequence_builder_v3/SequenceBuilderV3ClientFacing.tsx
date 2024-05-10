@@ -37,14 +37,20 @@ import { getClientArchetypes } from "@utils/requests/getClientArchetypes";
 import { getClientSdrAccess } from "@utils/requests/getClientSdrAccess";
 import { getClients } from "@utils/requests/getClients";
 import _, { set } from "lodash";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Archetype, Client } from "src";
+import { Archetype, Client, PersonaOverview } from "src";
 
 const EXAMPLE_COUNT = 1;
 
-export default function SequenceBuilderV3ClientFacing() {
+type PropsType = {
+  campaign?: PersonaOverview;
+  sequenceType: string;
+  currentStep?: number;
+};
+
+export default function SequenceBuilderV3ClientFacing(props: PropsType) {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const client_id = userData?.client?.id;
@@ -57,17 +63,39 @@ export default function SequenceBuilderV3ClientFacing() {
   const [loading, setLoading] = useState(false);
   const [bigLoading, setBigLoading] = useState(false);
   const [clientId, setClientId] = useState<number | null>(client_id);
-  const [archetypeId, setArchetypeId] = useState<number | null>(null);
+  const [archetypeId, setArchetypeId] = useState<number | null>(
+    props.campaign?.id || null
+  );
   const [_currentProject, setCurrentProject] = useRecoilState(
     currentProjectState
   );
 
   const [openedAssetLibrary, setOpenedAssetLibrary] = useState(false);
-  const [sequenceType, setSequenceType] = useState("EMAIL");
+  const [sequenceType, setSequenceType] = useState(
+    props.sequenceType || "EMAIL"
+  );
   const [numSteps, setNumSteps] = useState(3);
   const [additionalPrompting, setAdditionalPrompting] = useState("");
 
   const totalGenerated = useRef(0);
+
+  // reset everything if props change
+  useEffect(() => {
+    if (props.campaign) {
+      setArchetypeId(props.campaign.id);
+    }
+    if (props.sequenceType) {
+      setSequenceType(props.sequenceType);
+    }
+    setLoading(false);
+    setBigLoading(false);
+    setSelectedData({
+      subject_lines: [],
+      steps: [],
+    });
+    setNumSteps(3);
+    setAdditionalPrompting("");
+  }, [props.campaign, props.sequenceType, props.currentStep]);
 
   const onAddSequence = async () => {
     if (!clientId || !archetypeId || !sequenceType) return;
@@ -142,7 +170,7 @@ export default function SequenceBuilderV3ClientFacing() {
         <Paper maw="30vw" style={{ position: "relative" }}>
           <LoadingOverlay visible={loading} />
           <Stack h="90vh" p="lg">
-            <Title order={3}>Sequence Builder V3</Title>
+            <Title order={3}>Sequence Builder</Title>
             {/* <Autocomplete
               disabled={clients === undefined}
               label={
@@ -176,6 +204,7 @@ export default function SequenceBuilderV3ClientFacing() {
                   value: archetype.archetype,
                 })) ?? []
               }
+              defaultValue={props.campaign?.name}
               onChange={(value) => {
                 const archetype = archetypes?.find(
                   (c) => c.archetype === value
@@ -195,9 +224,7 @@ export default function SequenceBuilderV3ClientFacing() {
             >
               Open Assets
             </Button>
-
             <Divider my={5} />
-
             <Group grow noWrap>
               <Select
                 label="Sequence Type"
@@ -222,14 +249,12 @@ export default function SequenceBuilderV3ClientFacing() {
                 onChange={(value) => setNumSteps(value || 0)}
               />
             </Group>
-
             <Textarea
               label="Additional Prompting"
               placeholder="Extra prompt instructions"
               value={additionalPrompting}
               onChange={(e) => setAdditionalPrompting(e.currentTarget.value)}
             />
-
             <Button
               my={5}
               variant="filled"

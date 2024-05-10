@@ -19,6 +19,8 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { useLoaderData } from "react-router-dom";
 import { userTokenState } from "@atoms/userAtoms";
+import posthog from "posthog-js";
+
 import {
   IconBooks,
   IconBrandLinkedin,
@@ -35,6 +37,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getPersonasOverview } from "@utils/requests/getPersonas";
 import { PersonaOverview } from "src";
 import ICPFiltersDashboard from "@common/persona/ICPFilter/ICPFiltersDashboard";
+import CampaignSetupWizard from "./CampaignSetupWizard";
 
 export default function CampaignChannelPage(props: {
   cType?: string;
@@ -238,7 +241,21 @@ export default function CampaignChannelPage(props: {
     setSelectedChannel(loaderData?.channelType || props.cType || "");
   }, [loaderData?.channelType, props.cType]);
 
-  const HEADER_HEIGHT = props.hideHeader ? 0 : 75;
+  useEffect(() => {
+    posthog.onFeatureFlags(function () {
+      if (posthog.isFeatureEnabled("campaign_setup_wizard")) {
+        setSetupWizardFeatureEnabled(true);
+      }
+    });
+  }, []);
+
+  const [setupMode, setSetupMode] = useState(false);
+
+  const [setupWizardFeatureEnabled, setSetupWizardFeatureEnabled] = useState(
+    false
+  );
+
+  const HEADER_HEIGHT = props.hideHeader ? 0 : 90;
   const PANEL_HEIGHT = `calc(100vh - ${HEADER_HEIGHT + 80}px)`;
   return (
     <Box h="100vh">
@@ -249,185 +266,194 @@ export default function CampaignChannelPage(props: {
             selectedChannel={selectedChannel}
             hideChannels={true}
             campaign={campaign ?? undefined}
+            setSetupMode={setSetupMode}
+            setupMode={setupMode}
+            setupWizardFeatureEnabled={setupWizardFeatureEnabled}
           />
         </Box>
       )}
 
-      <Box>
-        <LoadingOverlay visible={loading} />
-        {
-          <Tabs
-            value={selectedChannel}
-            onTabChange={(v) => setSelectedChannel(`${v}`)}
-            styles={(theme) => ({
-              tabsList: {
-                height: "44px",
-              },
-              panel: {
-                backgroundColor: theme.white,
-              },
-              tab: {
-                ...theme.fn.focusStyles(),
-                backgroundColor: theme.white,
-                marginBottom: 0,
-                paddingLeft: 20,
-                paddingRight: 20,
-                color: theme.colors.blue[theme.fn.primaryShade()],
-                "&:hover": {
-                  // color: theme.white,
+      {setupMode && <CampaignSetupWizard campaign={campaign} />}
+
+      {!setupMode && (
+        <Box>
+          <LoadingOverlay visible={loading} />
+          {
+            <Tabs
+              value={selectedChannel}
+              onTabChange={(v) => setSelectedChannel(`${v}`)}
+              styles={(theme) => ({
+                tabsList: {
+                  height: "44px",
                 },
-                "&[data-active]": {
-                  backgroundColor: theme.colors.blue[theme.fn.primaryShade()],
-                  borderBottomColor: theme.white,
-                  color: theme.white,
+                panel: {
+                  backgroundColor: theme.white,
                 },
-                "&:disabled": {
-                  backgroundColor: theme.colors.gray[theme.fn.primaryShade()],
-                  color: theme.colors.gray[4],
+                tab: {
+                  ...theme.fn.focusStyles(),
+                  backgroundColor: theme.white,
+                  marginBottom: 0,
+                  paddingLeft: 20,
+                  paddingRight: 20,
+                  color: theme.colors.blue[theme.fn.primaryShade()],
+                  "&:hover": {
+                    // color: theme.white,
+                  },
+                  "&[data-active]": {
+                    backgroundColor: theme.colors.blue[theme.fn.primaryShade()],
+                    borderBottomColor: theme.white,
+                    color: theme.white,
+                  },
+                  "&:disabled": {
+                    backgroundColor: theme.colors.gray[theme.fn.primaryShade()],
+                    color: theme.colors.gray[4],
+                  },
                 },
-              },
-              tabLabel: {
-                fontWeight: 700,
-                fontSize: rem(14),
-              },
-            })}
-          >
-            <Tabs.List>
-              <Tabs.Tab
-                value="filter_contact"
-                icon={<IconUser size={"0.8rem"} />}
-                disabled={props.hideIcpFilters}
-                style={{
-                  visibility: props.hideIcpFilters ? "hidden" : undefined,
-                }}
-              >
-                {`Filter ${icpProspects.length} Contacts`}
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="linkedin"
-                icon={<IconBrandLinkedin size={"0.8rem"} />}
-                ml="xs"
-                disabled={props.hideLinkedIn}
-                style={{
-                  visibility: props.hideLinkedIn ? "hidden" : undefined,
-                }}
-              >
-                <Flex align={"center"} gap={"md"}>
-                  <Text>Linkedin</Text>
+                tabLabel: {
+                  fontWeight: 700,
+                  fontSize: rem(14),
+                },
+              })}
+            >
+              <Tabs.List>
+                <Tabs.Tab
+                  value="filter_contact"
+                  icon={<IconUser size={"0.8rem"} />}
+                  disabled={props.hideIcpFilters}
+                  style={{
+                    visibility: props.hideIcpFilters ? "hidden" : undefined,
+                  }}
+                >
+                  {`Filter ${icpProspects.length} Contacts`}
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="linkedin"
+                  icon={<IconBrandLinkedin size={"0.8rem"} />}
+                  ml="xs"
+                  disabled={props.hideLinkedIn}
+                  style={{
+                    visibility: props.hideLinkedIn ? "hidden" : undefined,
+                  }}
+                >
+                  <Flex align={"center"} gap={"md"}>
+                    <Text>Linkedin</Text>
 
-                  <Tooltip
-                    label={
-                      isEnabledLinkedin ? "Disable Linkedin" : "Enable Linkedin"
-                    }
-                    position="bottom"
-                    withArrow
-                    withinPortal
-                  >
-                    <Box>
-                      <Switch
-                        size="xs"
-                        sx={{ zIndex: 200, cursor: "pointer" }}
-                        checked={isEnabledLinkedin}
-                        onChange={() => {
-                          onToggleLinkedin();
-                        }}
-                      />
-                    </Box>
-                  </Tooltip>
-                </Flex>
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="email"
-                icon={<IconMailOpened size={"0.8rem"} />}
-                ml="xs"
-                disabled={props.hideEmail}
-                style={{
-                  visibility: props.hideEmail ? "hidden" : undefined,
-                }}
-              >
-                <Flex align={"center"} gap={"md"}>
-                  <Text>Email</Text>
+                    <Tooltip
+                      label={
+                        isEnabledLinkedin
+                          ? "Disable Linkedin"
+                          : "Enable Linkedin"
+                      }
+                      position="bottom"
+                      withArrow
+                      withinPortal
+                    >
+                      <Box>
+                        <Switch
+                          size="xs"
+                          sx={{ zIndex: 200, cursor: "pointer" }}
+                          checked={isEnabledLinkedin}
+                          onChange={() => {
+                            onToggleLinkedin();
+                          }}
+                        />
+                      </Box>
+                    </Tooltip>
+                  </Flex>
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="email"
+                  icon={<IconMailOpened size={"0.8rem"} />}
+                  ml="xs"
+                  disabled={props.hideEmail}
+                  style={{
+                    visibility: props.hideEmail ? "hidden" : undefined,
+                  }}
+                >
+                  <Flex align={"center"} gap={"md"}>
+                    <Text>Email</Text>
 
-                  <Tooltip
-                    label={isEnabledEmail ? "Disable Email" : "Enable Email"}
-                    position="bottom"
-                    withArrow
-                    withinPortal
-                  >
-                    <Box>
-                      <Switch
-                        size="xs"
-                        sx={{ zIndex: 200 }}
-                        checked={isEnabledEmail}
-                        onChange={() => {
-                          onToggleEmail();
-                        }}
-                      />
-                    </Box>
-                  </Tooltip>
-                </Flex>
-              </Tabs.Tab>
+                    <Tooltip
+                      label={isEnabledEmail ? "Disable Email" : "Enable Email"}
+                      position="bottom"
+                      withArrow
+                      withinPortal
+                    >
+                      <Box>
+                        <Switch
+                          size="xs"
+                          sx={{ zIndex: 200 }}
+                          checked={isEnabledEmail}
+                          onChange={() => {
+                            onToggleEmail();
+                          }}
+                        />
+                      </Box>
+                    </Tooltip>
+                  </Flex>
+                </Tabs.Tab>
 
-              <Tabs.Tab
-                value="assets"
-                icon={<IconBooks size={"0.8rem"} />}
-                ml="auto"
-                disabled={props.hideAssets}
-                style={{
-                  visibility: props.hideAssets ? "hidden" : undefined,
-                }}
-              >
-                <Flex align={"center"} gap={"md"}>
-                  <Text>{`${assets.length} Used Assets`}</Text>
-                </Flex>
-              </Tabs.Tab>
-            </Tabs.List>
+                <Tabs.Tab
+                  value="assets"
+                  icon={<IconBooks size={"0.8rem"} />}
+                  ml="auto"
+                  disabled={props.hideAssets}
+                  style={{
+                    visibility: props.hideAssets ? "hidden" : undefined,
+                  }}
+                >
+                  <Flex align={"center"} gap={"md"}>
+                    <Text>{`${assets.length} Used Assets`}</Text>
+                  </Flex>
+                </Tabs.Tab>
+              </Tabs.List>
 
-            <Tabs.Panel value="filter_contact">
-              <ScrollArea h={PANEL_HEIGHT}>
-                {campaign && <ICPFiltersDashboard hideTitleBar />}
-              </ScrollArea>
-            </Tabs.Panel>
-            <Tabs.Panel value="assets">
-              <ScrollArea h={PANEL_HEIGHT}>
-                {selectedChannel === "assets" && campaign && (
-                  <AssetLibraryRetool />
-                )}
-              </ScrollArea>
-            </Tabs.Panel>
-            <Tabs.Panel value="linkedin">
-              <Box
-                sx={(theme) => ({
-                  padding: theme.spacing.md,
-                  width: "100%",
-                })}
-              >
+              <Tabs.Panel value="filter_contact">
                 <ScrollArea h={PANEL_HEIGHT}>
-                  {selectedChannel === "linkedin" && campaign && (
-                    <BumpFrameworksPage hideTitle />
+                  {campaign && <ICPFiltersDashboard hideTitleBar />}
+                </ScrollArea>
+              </Tabs.Panel>
+              <Tabs.Panel value="assets">
+                <ScrollArea h={PANEL_HEIGHT}>
+                  {selectedChannel === "assets" && campaign && (
+                    <AssetLibraryRetool />
                   )}
                 </ScrollArea>
-              </Box>
-            </Tabs.Panel>
+              </Tabs.Panel>
+              <Tabs.Panel value="linkedin">
+                <Box
+                  sx={(theme) => ({
+                    padding: theme.spacing.md,
+                    width: "100%",
+                  })}
+                >
+                  <ScrollArea h={PANEL_HEIGHT}>
+                    {selectedChannel === "linkedin" && campaign && (
+                      <BumpFrameworksPage hideTitle />
+                    )}
+                  </ScrollArea>
+                </Box>
+              </Tabs.Panel>
 
-            <Tabs.Panel value="email">
-              <Box
-                sx={(theme) => ({
-                  paddingTop: theme.spacing.md,
-                  paddingBottom: theme.spacing.md,
-                  width: "100%",
-                })}
-              >
-                <ScrollArea h={PANEL_HEIGHT}>
-                  {selectedChannel === "email" && campaign && (
-                    <EmailSequencingPage hideTitle />
-                  )}
-                </ScrollArea>
-              </Box>
-            </Tabs.Panel>
-          </Tabs>
-        }
-      </Box>
+              <Tabs.Panel value="email">
+                <Box
+                  sx={(theme) => ({
+                    paddingTop: theme.spacing.md,
+                    paddingBottom: theme.spacing.md,
+                    width: "100%",
+                  })}
+                >
+                  <ScrollArea h={PANEL_HEIGHT}>
+                    {selectedChannel === "email" && campaign && (
+                      <EmailSequencingPage hideTitle />
+                    )}
+                  </ScrollArea>
+                </Box>
+              </Tabs.Panel>
+            </Tabs>
+          }
+        </Box>
+      )}
     </Box>
   );
 }

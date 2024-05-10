@@ -776,9 +776,6 @@ export default function EmailSequencingPage(props: {
             <Tabs.Tab value="replies" icon={<IconBook size="0.8rem" />}>
               Replies
             </Tabs.Tab>
-            <Tabs.Tab value="settings" icon={<IconWashMachine size="0.8rem" />}>
-              Settings
-            </Tabs.Tab>
 
             <Tabs.Tab
               value="email-scraper"
@@ -788,7 +785,11 @@ export default function EmailSequencingPage(props: {
               Email Scraper
             </Tabs.Tab>
 
-            {currentProject.smartlead_campaign_id && (
+            <Tabs.Tab value="settings" icon={<IconWashMachine size="0.8rem" />}>
+              Settings
+            </Tabs.Tab>
+
+            {/* {currentProject.smartlead_campaign_id && (
               <Tabs.Tab
                 value="smartlead"
                 icon={<IconMessages size="0.8rem" />}
@@ -796,7 +797,7 @@ export default function EmailSequencingPage(props: {
               >
                 Beta - Variants
               </Tabs.Tab>
-            )}
+            )} */}
           </Tabs.List>
           <Tabs.Panel value="sequence">
             <NewUIEmailSequencing

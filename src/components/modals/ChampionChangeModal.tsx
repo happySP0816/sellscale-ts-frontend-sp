@@ -23,7 +23,7 @@ export default function ChampionChangeModal() {
   const [validLinkedin, setValidLinkedin] = useState(false);
 
   function isValidLinkedInProfile(url: string) {
-    const regex = /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9-]{5,100}$/;
+    const regex = /^https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+/;
     if (regex.test(url)) setPreview(true);
   }
 

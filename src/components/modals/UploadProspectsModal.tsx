@@ -184,11 +184,29 @@ export default function UploadProspectsModal({
                 // required
                 onChange={(e) => setCreatedPersona(e.currentTarget.value)}
               />
+
+              <Select
+                label="Select Cycle"
+                description="(optional) Analyze groups of campaigns by cycle"
+                disabled
+                defaultValue="1"
+                data={[
+                  {
+                    value: "1",
+                    label: "Cycle 1",
+                  },
+                  {
+                    value: "2",
+                    label: "Cycle 2",
+                  },
+                ]}
+              />
+
               <Textarea
                 label="Who do you want to target"
                 placeholder="Eg. I want to see product mangers in chicago who went to BYU and are currently in a hedge fund role at a large financial institution"
                 minRows={3}
-                disabled
+                onChange={(e) => setICPMatchingPrompt(e.currentTarget.value)}
               />
 
               <Textarea

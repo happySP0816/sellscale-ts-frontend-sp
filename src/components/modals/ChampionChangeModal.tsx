@@ -20,7 +20,6 @@ export default function ChampionChangeModal() {
   const [linkedinUrl, setLinkedinUrl] = useState("");
 
   const [createNext, setCreateNext] = useState(false);
-  const [validLinkedin, setValidLinkedin] = useState(false);
 
   function isValidLinkedInProfile(url: string) {
     const regex = /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9-]{5,100}$/;
@@ -87,7 +86,7 @@ export default function ChampionChangeModal() {
             placeholder="For eg. https://linkedin.com/johndoe"
             onChange={(e) => setLinkedinUrl(e.target.value)}
           />
-          {validLinkedin && createNext && <LinkedinAvatar avatar={""} title={""} location={""} experience={""} />}
+          {createNext && <LinkedinAvatar avatar={""} title={""} location={""} experience={""} />}
         </Tabs.Panel>
 
         <Tabs.Panel value="csv" pt="xs">

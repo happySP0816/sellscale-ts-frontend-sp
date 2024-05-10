@@ -745,7 +745,7 @@ function EmailPreviewHeader(props: {
       const [
         _key,
         { prospectId, currentTab, template, subjectLine },
-      ] = queryKey;
+      ]: any = queryKey;
 
       if (!props.subjectLine?.id || !props.template?.step.id) {
         return null;

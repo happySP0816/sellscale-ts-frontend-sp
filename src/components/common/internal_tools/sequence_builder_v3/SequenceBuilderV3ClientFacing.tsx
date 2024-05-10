@@ -45,8 +45,8 @@ import { Archetype, Client, PersonaOverview } from "src";
 const EXAMPLE_COUNT = 1;
 
 type PropsType = {
-  campaign?: PersonaOverview;
-  sequenceType: string;
+  campaign?: PersonaOverview | null;
+  sequenceType?: string;
   currentStep?: number;
 };
 

@@ -22,11 +22,11 @@ import CampaignChannelPage from "./CampaignChannelPage";
 import { IconCheck } from "@tabler/icons";
 
 type PropsType = {
-  campaign?: PersonaOverview;
+  campaign?: PersonaOverview | null;
 };
 
 type StepProps = {
-  campaign?: PersonaOverview;
+  campaign?: PersonaOverview | null;
   setLinkedin: (value: boolean) => void;
   setEmail: (value: boolean) => void;
   linkedin: boolean;

@@ -158,6 +158,7 @@ export type CampaignPersona = {
   smartlead_campaign_id?: number;
   meta_data?: Record<string, any>;
   first_message_delay_days?: number;
+  email_to_linkedin_connection?: string;
 };
 
 export default function PersonaCampaigns() {
@@ -1878,6 +1879,9 @@ export function PersonCampaignCard(props: {
           {props.viewMode === "node-view" && (
             <Box>
               <CampaignGraph
+                emailToLinkedinConnectionType={
+                  props.persona.email_to_linkedin_connection
+                }
                 personaId={props.persona.id}
                 unusedProspects={`${unusedProspects}/${
                   props.project?.num_prospects ?? 0

@@ -19,6 +19,7 @@ import { showNotification } from "@mantine/notifications";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
+import { PersonaOverview } from "src";
 
 const Hook: React.FC<{ linkedLeft: boolean; linkedRight: boolean }> = ({
   linkedLeft,
@@ -61,6 +62,7 @@ const Hook: React.FC<{ linkedLeft: boolean; linkedRight: boolean }> = ({
 };
 
 const CampaignGraph = (props: {
+  emailToLinkedinConnectionType?: string;
   sections: any;
   personaId: number;
   unusedProspects: string;
@@ -90,7 +92,7 @@ const CampaignGraph = (props: {
     nurtureSection[0]?.sends > 0
   );
   const [selectedConnectionType, setSelectedConnectionType] = useState(
-    "RANDOM"
+    props.emailToLinkedinConnectionType
   );
 
   const updateConnectionType = (newConnectionType: string) => {
@@ -125,6 +127,10 @@ const CampaignGraph = (props: {
   useEffect(() => {
     setActiveNurture(isEnabledEmail && isActiveEmail);
   }, [isEnabledEmail, isActiveEmail]);
+
+  useEffect(() => {
+    setSelectedConnectionType(props.emailToLinkedinConnectionType);
+  }, [props.emailToLinkedinConnectionType]);
 
   return (
     <Container size={"xl"} p={"1.5rem"} bg={"white"}>

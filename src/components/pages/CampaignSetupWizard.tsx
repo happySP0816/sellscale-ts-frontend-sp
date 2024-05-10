@@ -66,14 +66,14 @@ function CampaignDetailsStep(props: StepProps) {
       </Text>
       <Flex direction="row" gap="md">
         <Checkbox
-          label="LinkedIn"
-          checked={linkedin}
-          onChange={(event) => setLinkedin(event.currentTarget.checked)}
-        />
-        <Checkbox
           label="Email"
           checked={email}
           onChange={(event) => setEmail(event.currentTarget.checked)}
+        />
+        <Checkbox
+          label="LinkedIn"
+          checked={linkedin}
+          onChange={(event) => setLinkedin(event.currentTarget.checked)}
         />
       </Flex>
     </Card>
@@ -154,24 +154,24 @@ export default function CampaignSetupWizard(props: PropsType) {
             </StepWrapper>
           </Stepper.Step>
 
-          {linkedinChannel && (
-            <Stepper.Step label="LinkedIn" description="Setup LinkedIn">
-              <StepWrapper>
-                <SequenceBuilderV3ClientFacing
-                  campaign={props.campaign}
-                  sequenceType="LINKEDIN-TEMPLATE"
-                  currentStep={active}
-                />
-              </StepWrapper>
-            </Stepper.Step>
-          )}
-
           {emailChannel && (
             <Stepper.Step label="Email" description="Setup Email">
               <StepWrapper>
                 <SequenceBuilderV3ClientFacing
                   campaign={props.campaign}
                   sequenceType="EMAIL"
+                  currentStep={active}
+                />
+              </StepWrapper>
+            </Stepper.Step>
+          )}
+
+          {linkedinChannel && (
+            <Stepper.Step label="LinkedIn" description="Setup LinkedIn">
+              <StepWrapper>
+                <SequenceBuilderV3ClientFacing
+                  campaign={props.campaign}
+                  sequenceType="LINKEDIN-TEMPLATE"
                   currentStep={active}
                 />
               </StepWrapper>

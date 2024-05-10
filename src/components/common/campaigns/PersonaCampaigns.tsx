@@ -1753,6 +1753,34 @@ export function PersonCampaignCard(props: {
                 <Center>
                   <ThemeIcon
                     size="xs"
+                    color={props.persona.email_active ? undefined : "gray.4"}
+                  >
+                    <IconMail style={{ width: "90%", height: "90%" }} />
+                  </ThemeIcon>
+                </Center>
+                <UserStatusToggle
+                  projectId={props.persona.id}
+                  isActive={props.persona.email_active}
+                  onChangeUserStatusSuccess={(status: boolean) => {
+                    const result = postTogglePersonaActive(
+                      userToken,
+                      props.persona.id,
+                      "email",
+                      !props.persona.email_active
+                    ).then((res) => {
+                      // setPersonaActive(status);
+                      props.onPersonaActiveStatusUpdate?.(
+                        props.persona?.id ?? 0,
+                        status
+                      );
+                    });
+                  }}
+                />
+              </Stack>
+              <Stack spacing={5}>
+                <Center>
+                  <ThemeIcon
+                    size="xs"
                     color={props.persona.linkedin_active ? undefined : "gray.4"}
                   >
                     <IconBrandLinkedin
@@ -1769,34 +1797,6 @@ export function PersonCampaignCard(props: {
                       props.persona.id,
                       "linkedin",
                       !props.persona.linkedin_active
-                    ).then((res) => {
-                      // setPersonaActive(status);
-                      props.onPersonaActiveStatusUpdate?.(
-                        props.persona?.id ?? 0,
-                        status
-                      );
-                    });
-                  }}
-                />
-              </Stack>
-              <Stack spacing={5}>
-                <Center>
-                  <ThemeIcon
-                    size="xs"
-                    color={props.persona.email_active ? undefined : "gray.4"}
-                  >
-                    <IconMail style={{ width: "90%", height: "90%" }} />
-                  </ThemeIcon>
-                </Center>
-                <UserStatusToggle
-                  projectId={props.persona.id}
-                  isActive={props.persona.email_active}
-                  onChangeUserStatusSuccess={(status: boolean) => {
-                    const result = postTogglePersonaActive(
-                      userToken,
-                      props.persona.id,
-                      "email",
-                      !props.persona.email_active
                     ).then((res) => {
                       // setPersonaActive(status);
                       props.onPersonaActiveStatusUpdate?.(

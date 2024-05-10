@@ -327,6 +327,37 @@ export default function CampaignChannelPage(props: {
                   {`Filter ${icpProspects.length} Contacts`}
                 </Tabs.Tab>
                 <Tabs.Tab
+                  value="email"
+                  icon={<IconMailOpened size={"0.8rem"} />}
+                  ml="xs"
+                  disabled={props.hideEmail}
+                  style={{
+                    visibility: props.hideEmail ? "hidden" : undefined,
+                  }}
+                >
+                  <Flex align={"center"} gap={"md"}>
+                    <Text>Email</Text>
+
+                    <Tooltip
+                      label={isEnabledEmail ? "Disable Email" : "Enable Email"}
+                      position="bottom"
+                      withArrow
+                      withinPortal
+                    >
+                      <Box>
+                        <Switch
+                          size="xs"
+                          sx={{ zIndex: 200 }}
+                          checked={isEnabledEmail}
+                          onChange={() => {
+                            onToggleEmail();
+                          }}
+                        />
+                      </Box>
+                    </Tooltip>
+                  </Flex>
+                </Tabs.Tab>
+                <Tabs.Tab
                   value="linkedin"
                   icon={<IconBrandLinkedin size={"0.8rem"} />}
                   ml="xs"
@@ -355,37 +386,6 @@ export default function CampaignChannelPage(props: {
                           checked={isEnabledLinkedin}
                           onChange={() => {
                             onToggleLinkedin();
-                          }}
-                        />
-                      </Box>
-                    </Tooltip>
-                  </Flex>
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="email"
-                  icon={<IconMailOpened size={"0.8rem"} />}
-                  ml="xs"
-                  disabled={props.hideEmail}
-                  style={{
-                    visibility: props.hideEmail ? "hidden" : undefined,
-                  }}
-                >
-                  <Flex align={"center"} gap={"md"}>
-                    <Text>Email</Text>
-
-                    <Tooltip
-                      label={isEnabledEmail ? "Disable Email" : "Enable Email"}
-                      position="bottom"
-                      withArrow
-                      withinPortal
-                    >
-                      <Box>
-                        <Switch
-                          size="xs"
-                          sx={{ zIndex: 200 }}
-                          checked={isEnabledEmail}
-                          onChange={() => {
-                            onToggleEmail();
                           }}
                         />
                       </Box>

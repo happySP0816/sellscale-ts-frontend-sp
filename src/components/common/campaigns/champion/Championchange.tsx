@@ -1,8 +1,41 @@
-import { ActionIcon, Avatar, Badge, Box, Button, Card, Flex, Image, NumberInput, Paper, Select, Text, TextInput, Title, useMantineTheme } from '@mantine/core';
-import { IconArrowRight, IconCalendar, IconChevronLeft, IconChevronRight, IconFileDownload, IconInfoCircle, IconSearch, IconWorld } from '@tabler/icons';
-import { IconUserSquareRounded } from '@tabler/icons-react';
-import { DataGrid } from 'mantine-data-grid';
-import { useState } from 'react';
+import {
+  ActionIcon,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  Flex,
+  Image,
+  Modal,
+  NumberInput,
+  Paper,
+  Select,
+  Tabs,
+  Text,
+  TextInput,
+  Title,
+  useMantineTheme,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { openContextModal } from "@mantine/modals";
+import {
+  IconArrowRight,
+  IconBrandLinkedin,
+  IconCalendar,
+  IconChevronLeft,
+  IconChevronRight,
+  IconCloud,
+  IconFileDownload,
+  IconFileUpload,
+  IconInfoCircle,
+  IconPlus,
+  IconSearch,
+  IconWorld,
+} from "@tabler/icons";
+import { IconUserSquareRounded } from "@tabler/icons-react";
+import { DataGrid } from "mantine-data-grid";
+import { useState } from "react";
 
 interface ChampionDataType {
   prospect_name: string;
@@ -17,46 +50,47 @@ interface ChampionDataType {
 
 export default function ChampionChange() {
   const theme = useMantineTheme();
+  const [opened, { open, close }] = useDisclosure(false);
   const [championData, setChampionData] = useState<ChampionDataType[]>([
     {
-      prospect_name: 'Fernando Gozal',
-      change_date: 'Mar 7, 2024 8:43 PM',
-      origin_company_url: 'https://google.com',
-      origin_company: 'Google',
-      new_company_url: 'https://microsoft.com',
-      new_company: 'Microsoft',
-      type: 'new',
-      avatar: '',
+      prospect_name: "Fernando Gozal",
+      change_date: "Mar 7, 2024 8:43 PM",
+      origin_company_url: "https://google.com",
+      origin_company: "Google",
+      new_company_url: "https://microsoft.com",
+      new_company: "Microsoft",
+      type: "new",
+      avatar: "",
     },
     {
-      prospect_name: 'Ishan Sharma',
-      change_date: 'Mar 7, 2024 8:43 PM',
-      origin_company_url: 'https://apple.com',
-      origin_company: 'Apple',
-      new_company_url: 'https://app.sellscale.com',
-      new_company: 'SellScale',
-      type: 'new',
-      avatar: '',
+      prospect_name: "Ishan Sharma",
+      change_date: "Mar 7, 2024 8:43 PM",
+      origin_company_url: "https://apple.com",
+      origin_company: "Apple",
+      new_company_url: "https://app.sellscale.com",
+      new_company: "SellScale",
+      type: "new",
+      avatar: "",
     },
     {
-      prospect_name: 'David Wei',
-      change_date: 'Mar 5, 2024 6:43 PM',
-      origin_company_url: 'https://google.com',
-      origin_company: 'Google',
-      new_company_url: 'https://app.sellscale.com',
-      new_company: 'SellScale',
-      type: 'new',
-      avatar: '',
+      prospect_name: "David Wei",
+      change_date: "Mar 5, 2024 6:43 PM",
+      origin_company_url: "https://google.com",
+      origin_company: "Google",
+      new_company_url: "https://app.sellscale.com",
+      new_company: "SellScale",
+      type: "new",
+      avatar: "",
     },
     {
-      prospect_name: 'Varun Uttampadi',
-      change_date: 'Mar 5, 2024 6:43 PM',
-      origin_company_url: 'https://apple.com',
-      origin_company: 'Apple',
-      new_company_url: 'https://google.com',
-      new_company: 'Google',
-      type: 'new',
-      avatar: '',
+      prospect_name: "Varun Uttampadi",
+      change_date: "Mar 5, 2024 6:43 PM",
+      origin_company_url: "https://apple.com",
+      origin_company: "Apple",
+      new_company_url: "https://google.com",
+      new_company: "Google",
+      type: "new",
+      avatar: "",
     },
   ]);
   const [data, setData] = useState({
@@ -65,69 +99,81 @@ export default function ChampionChange() {
     champion_change: 81,
   });
   return (
-    <Flex direction={'column'} gap={'xl'}>
-      <Flex align={'center'} justify={'space-between'}>
+    <Flex direction={"column"} gap={"xl"}>
+      <Flex align={"center"} justify={"space-between"}>
         <Title order={3} fw={600}>
           Champion Change Detector
         </Title>
-        <Flex gap={'sm'} align={'center'}>
-          <TextInput maw={200} placeholder='Search' rightSection={<IconSearch size={'0.9rem'} />} />
-          <Button color='green' leftIcon={<IconFileDownload size={'0.9rem'} />}>
+        <Flex gap={"sm"} align={"center"}>
+          <TextInput maw={200} placeholder="Search" rightSection={<IconSearch size={"0.9rem"} />} />
+          <Button color="green" leftIcon={<IconFileDownload size={"0.9rem"} />}>
             Download CSV
           </Button>
-          <Button leftIcon={<IconWorld size={'0.9rem'} />}>Synced to Salesforce</Button>
+          <Button leftIcon={<IconWorld size={"0.9rem"} />}>Synced to Salesforce</Button>
+          <Button
+            leftIcon={<IconPlus size={"0.9rem"} />}
+            onClick={() => {
+              openContextModal({
+                modal: "championChange",
+                title: <Title order={3}>Add New Champion</Title>,
+                innerProps: {},
+              });
+            }}
+          >
+            Champion Import
+          </Button>
         </Flex>
       </Flex>
-      <Flex gap={'xl'} justify={'space-between'}>
-        <Card withBorder radius={'sm'} px={'xl'} py={'md'} w={'100%'}>
+      <Flex gap={"xl"} justify={"space-between"}>
+        <Card withBorder radius={"sm"} px={"xl"} py={"md"} w={"100%"}>
           <Box>
-            <Flex gap={'xs'} align={'end'}>
+            <Flex gap={"xs"} align={"end"}>
               <Title order={2} fw={600}>
                 {data.close}
               </Title>
-              <Text color='gray' fw={600} size={'sm'} mb={2}>
+              <Text color="gray" fw={600} size={"sm"} mb={2}>
                 Closed Won Accounts
               </Text>
             </Flex>
-            <Flex gap={'xs'} align={'center'} mt={3}>
-              <IconInfoCircle size={'0.9rem'} color='gray' />
-              <Text fz={10} fw={500} color='gray'>
+            <Flex gap={"xs"} align={"center"} mt={3}>
+              <IconInfoCircle size={"0.9rem"} color="gray" />
+              <Text fz={10} fw={500} color="gray">
                 Lorem ipsum doior sit amet, consectetur adipiscing elit
               </Text>
             </Flex>
           </Box>
         </Card>
-        <Card withBorder radius={'sm'} px={'xl'} py={'md'} w={'100%'}>
+        <Card withBorder radius={"sm"} px={"xl"} py={"md"} w={"100%"}>
           <Box>
-            <Flex gap={'xs'} align={'end'}>
+            <Flex gap={"xs"} align={"end"}>
               <Title order={2} fw={600}>
                 {data.champion_win}
               </Title>
-              <Text color='gray' fw={600} size={'sm'} mb={2}>
+              <Text color="gray" fw={600} size={"sm"} mb={2}>
                 Champions in Won Accounts
               </Text>
             </Flex>
-            <Flex gap={'xs'} align={'center'} mt={3}>
-              <IconInfoCircle size={'0.9rem'} color='gray' />
-              <Text fz={10} fw={500} color='gray'>
+            <Flex gap={"xs"} align={"center"} mt={3}>
+              <IconInfoCircle size={"0.9rem"} color="gray" />
+              <Text fz={10} fw={500} color="gray">
                 Lorem ipsum doior sit amet, consectetur adipiscing elit
               </Text>
             </Flex>
           </Box>
         </Card>
-        <Card withBorder radius={'sm'} px={'xl'} py={'md'} w={'100%'}>
+        <Card withBorder radius={"sm"} px={"xl"} py={"md"} w={"100%"}>
           <Box>
-            <Flex gap={'xs'} align={'end'}>
+            <Flex gap={"xs"} align={"end"}>
               <Title order={2} fw={600}>
                 {data.champion_change}
               </Title>
-              <Text color='gray' fw={600} size={'sm'} mb={2}>
+              <Text color="gray" fw={600} size={"sm"} mb={2}>
                 Champions Changed Jobs
               </Text>
             </Flex>
-            <Flex gap={'xs'} align={'center'} mt={3}>
-              <IconInfoCircle size={'0.9rem'} color='gray' />
-              <Text fz={10} fw={500} color='gray'>
+            <Flex gap={"xs"} align={"center"} mt={3}>
+              <IconInfoCircle size={"0.9rem"} color="gray" />
+              <Text fz={10} fw={500} color="gray">
                 Lorem ipsum doior sit amet, consectetur adipiscing elit
               </Text>
             </Flex>
@@ -135,47 +181,47 @@ export default function ChampionChange() {
         </Card>
       </Flex>
       <DataGrid
-        bg={'white'}
+        bg={"white"}
         data={championData}
         highlightOnHover
         withSorting
         withBorder
         withPagination
         withColumnBorders
-        sx={{ cursor: 'pointer' }}
+        sx={{ cursor: "pointer" }}
         columns={[
           {
-            accessorKey: 'prospect_name',
+            accessorKey: "prospect_name",
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconUserSquareRounded color='gray' size={'0.9rem'} />
-                <Text color='gray'>Prospect Name</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconUserSquareRounded color="gray" size={"0.9rem"} />
+                <Text color="gray">Prospect Name</Text>
               </Flex>
             ),
             cell: (cell) => {
               const { prospect_name, avatar } = cell.row.original;
               return (
-                <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'}>
-                  <Avatar src={avatar} size={'sm'} radius={'xl'} />
-                  <Text size={'sm'}>{prospect_name}</Text>
+                <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
+                  <Avatar src={avatar} size={"sm"} radius={"xl"} />
+                  <Text size={"sm"}>{prospect_name}</Text>
                 </Flex>
               );
             },
           },
           {
-            accessorKey: 'change_date',
+            accessorKey: "change_date",
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconCalendar color='gray' size={'0.9rem'} />
-                <Text color='gray'>Date of Change</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconCalendar color="gray" size={"0.9rem"} />
+                <Text color="gray">Date of Change</Text>
               </Flex>
             ),
             maxSize: 200,
             cell: (cell) => {
               const { change_date } = cell.row.original;
               return (
-                <Flex w={'100%'} h={'100%'} align={'center'}>
-                  <Text color='gray' fw={400} size={'sm'}>
+                <Flex w={"100%"} h={"100%"} align={"center"}>
+                  <Text color="gray" fw={400} size={"sm"}>
                     {change_date}
                   </Text>
                 </Flex>
@@ -183,34 +229,34 @@ export default function ChampionChange() {
             },
           },
           {
-            accessorKey: 'people',
+            accessorKey: "people",
             header: () => (
-              <Flex align={'center'} gap={'3px'}>
-                <IconUserSquareRounded color='gray' size={'0.9rem'} />
-                <Text color='gray'>People</Text>
+              <Flex align={"center"} gap={"3px"}>
+                <IconUserSquareRounded color="gray" size={"0.9rem"} />
+                <Text color="gray">People</Text>
               </Flex>
             ),
             cell: (cell) => {
               const { new_company, new_company_url, origin_company, origin_company_url, type } = cell.row.original;
 
               return (
-                <Flex align={'center'} gap={'md'} w={'100%'} h={'100%'}>
-                  <Flex gap={'xs'} align={'center'}>
+                <Flex align={"center"} gap={"md"} w={"100%"} h={"100%"}>
+                  <Flex gap={"xs"} align={"center"}>
                     <Image src={`https://logo.clearbit.com/${origin_company_url}`} width={20} height={20} />
-                    <Text fw={500} size={'sm'}>
+                    <Text fw={500} size={"sm"}>
                       {origin_company}
                     </Text>
                   </Flex>
                   <Flex>
-                    <IconArrowRight size={'0.9rem'} />
+                    <IconArrowRight size={"0.9rem"} />
                   </Flex>
-                  <Flex gap={'xs'} align={'center'}>
+                  <Flex gap={"xs"} align={"center"}>
                     <Image src={`https://logo.clearbit.com/${new_company_url}`} width={20} height={20} />
-                    <Text fw={500} size={'sm'}>
+                    <Text fw={500} size={"sm"}>
                       {new_company}
                     </Text>
-                    <Badge size='sm' color={type === 'new' ? 'green' : 'red'}>
-                      {type === 'new' ? 'new account' : 'old account'}
+                    <Badge size="sm" color={type === "new" ? "green" : "red"}>
+                      {type === "new" ? "new account" : "old account"}
                     </Badge>
                   </Flex>
                 </Flex>
@@ -224,21 +270,21 @@ export default function ChampionChange() {
         components={{
           pagination: ({ table }) => (
             <Flex
-              justify={'space-between'}
-              align={'center'}
-              px={'sm'}
-              py={'1.25rem'}
+              justify={"space-between"}
+              align={"center"}
+              px={"sm"}
+              py={"1.25rem"}
               sx={(theme) => ({
                 border: `1px solid ${theme.colors.gray[4]}`,
                 borderTopWidth: 0,
               })}
             >
-              <Flex align={'center'} gap={'sm'}>
-                <Text fw={500} color='gray.6'>
+              <Flex align={"center"} gap={"sm"}>
+                <Text fw={500} color="gray.6">
                   Show
                 </Text>
 
-                <Flex align={'center'}>
+                <Flex align={"center"}>
                   <NumberInput
                     maw={100}
                     value={table.getState().pagination.pageSize}
@@ -253,24 +299,24 @@ export default function ChampionChange() {
                       borderTop: `1px solid ${theme.colors.gray[4]}`,
                       borderRight: `1px solid ${theme.colors.gray[4]}`,
                       borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                      marginLeft: '-2px',
-                      paddingLeft: '1rem',
-                      paddingRight: '1rem',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '0.25rem',
+                      marginLeft: "-2px",
+                      paddingLeft: "1rem",
+                      paddingRight: "1rem",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "0.25rem",
                     })}
                     h={36}
                   >
-                    <Text color='gray.5' fw={500} fz={14}>
+                    <Text color="gray.5" fw={500} fz={14}>
                       of {table.getPrePaginationRowModel().rows.length}
                     </Text>
                   </Flex>
                 </Flex>
               </Flex>
 
-              <Flex align={'center'} gap={'sm'}>
-                <Flex align={'center'}>
+              <Flex align={"center"} gap={"sm"}>
+                <Flex align={"center"}>
                   <Select
                     maw={100}
                     value={`${table.getState().pagination.pageIndex + 1}`}
@@ -287,22 +333,22 @@ export default function ChampionChange() {
                       borderTop: `1px solid ${theme.colors.gray[4]}`,
                       borderRight: `1px solid ${theme.colors.gray[4]}`,
                       borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                      marginLeft: '-2px',
-                      paddingLeft: '1rem',
-                      paddingRight: '1rem',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '0.25rem',
+                      marginLeft: "-2px",
+                      paddingLeft: "1rem",
+                      paddingRight: "1rem",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "0.25rem",
                     })}
                     h={36}
                   >
-                    <Text color='gray.5' fw={500} fz={14}>
+                    <Text color="gray.5" fw={500} fz={14}>
                       of {table.getPageCount()} pages
                     </Text>
                   </Flex>
                   <ActionIcon
-                    variant='default'
-                    color='gray.4'
+                    variant="default"
+                    color="gray.4"
                     h={36}
                     disabled={table.getState().pagination.pageIndex === 0}
                     onClick={() => {
@@ -312,8 +358,8 @@ export default function ChampionChange() {
                     <IconChevronLeft stroke={theme.colors.gray[4]} />
                   </ActionIcon>
                   <ActionIcon
-                    variant='default'
-                    color='gray.4'
+                    variant="default"
+                    color="gray.4"
                     h={36}
                     disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
                     onClick={() => {
@@ -327,17 +373,17 @@ export default function ChampionChange() {
             </Flex>
           ),
         }}
-        w={'100%'}
+        w={"100%"}
         styles={(theme) => ({
           thead: {
-            height: '44px',
+            height: "44px",
             // backgroundColor: theme.colors.gray[0],
-            '::after': {
-              backgroundColor: 'transparent',
+            "::after": {
+              backgroundColor: "transparent",
             },
           },
           td: {
-            paddingBlock: '20px !important',
+            paddingBlock: "20px !important",
           },
           wrapper: {
             gap: 0,
@@ -347,7 +393,7 @@ export default function ChampionChange() {
             gap: 0,
           },
           dataCellContent: {
-            width: '100%',
+            width: "100%",
           },
         })}
       />

@@ -16,7 +16,7 @@ export default function ChampionChangeModal() {
   const MAX_FILE_SIZE_MB = 2;
 
   const [fileJSON, setFileJSON] = useState<any[] | null>(null);
-  const [file, setFile] = useState<any[] | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [linkedinUrl, setLinkedinUrl] = useState("");
 
   const [createNext, setCreateNext] = useState(false);

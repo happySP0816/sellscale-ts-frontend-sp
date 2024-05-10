@@ -1,10 +1,33 @@
-import { ActionIcon, Avatar, Badge, Box, Button, Card, Flex, Image, NumberInput, Paper, Select, Text, TextInput, Title, useMantineTheme } from "@mantine/core";
+import {
+  ActionIcon,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  Flex,
+  Image,
+  Modal,
+  NumberInput,
+  Paper,
+  Select,
+  Tabs,
+  Text,
+  TextInput,
+  Title,
+  useMantineTheme,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { openContextModal } from "@mantine/modals";
 import {
   IconArrowRight,
+  IconBrandLinkedin,
   IconCalendar,
   IconChevronLeft,
   IconChevronRight,
+  IconCloud,
   IconFileDownload,
+  IconFileUpload,
   IconInfoCircle,
   IconPlus,
   IconSearch,
@@ -17,8 +40,6 @@ import { useChampionApi } from "./ChampionChangeApi";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import moment from "moment";
-import { openContextModal } from "@mantine/modals";
-
 interface ChampionDataType {
   prospect_name: string;
   change_date: string;
@@ -36,7 +57,48 @@ export default function ChampionChange() {
   const { isLoading, getChampionChanges, getChampionStats, postRefreshChampionJobData, postMarkChampions } = useChampionApi(userToken);
   const [loading, setLoading] = useState(isLoading);
 
-  const [championData, setChampionData] = useState<ChampionDataType[]>([]);
+  const [championData, setChampionData] = useState<ChampionDataType[]>([
+    {
+      prospect_name: "Fernando Gozal",
+      change_date: "Mar 7, 2024 8:43 PM",
+      origin_company_url: "https://google.com",
+      origin_company: "Google",
+      new_company_url: "https://microsoft.com",
+      new_company: "Microsoft",
+      type: "new",
+      avatar: "",
+    },
+    {
+      prospect_name: "Ishan Sharma",
+      change_date: "Mar 7, 2024 8:43 PM",
+      origin_company_url: "https://apple.com",
+      origin_company: "Apple",
+      new_company_url: "https://app.sellscale.com",
+      new_company: "SellScale",
+      type: "new",
+      avatar: "",
+    },
+    {
+      prospect_name: "David Wei",
+      change_date: "Mar 5, 2024 6:43 PM",
+      origin_company_url: "https://google.com",
+      origin_company: "Google",
+      new_company_url: "https://app.sellscale.com",
+      new_company: "SellScale",
+      type: "new",
+      avatar: "",
+    },
+    {
+      prospect_name: "Varun Uttampadi",
+      change_date: "Mar 5, 2024 6:43 PM",
+      origin_company_url: "https://apple.com",
+      origin_company: "Apple",
+      new_company_url: "https://google.com",
+      new_company: "Google",
+      type: "new",
+      avatar: "",
+    },
+  ]);
   const [data, setData] = useState({
     num_changed_last_60_days: 0,
     num_companies: 0,
@@ -95,7 +157,7 @@ export default function ChampionChange() {
           <Button color="blue" onClick={handleJobRefreshData} loading={loading}>
             Refresh Job Data
           </Button>
-          <Button color="green" leftIcon={<IconFileDownload size={"0.9rem"} />} disabled>
+          <Button color="green" leftIcon={<IconFileDownload size={"0.9rem"} />}>
             Download CSV
           </Button>
           <Button leftIcon={<IconWorld size={"0.9rem"} />}>Synced to Salesforce</Button>
@@ -236,7 +298,7 @@ export default function ChampionChange() {
               return (
                 <Flex align={"center"} gap={"md"} w={"100%"} h={"100%"}>
                   <Flex gap={"xs"} align={"center"}>
-                    <Image src={origin_company_url} width={20} height={20} />
+                    <Image src={`https://logo.clearbit.com/${origin_company_url}`} width={20} height={20} />
                     <Text fw={500} size={"sm"}>
                       {origin_company}
                     </Text>

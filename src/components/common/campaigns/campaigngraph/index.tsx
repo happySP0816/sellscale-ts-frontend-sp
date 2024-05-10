@@ -92,6 +92,11 @@ const CampaignGraph = (props: {
   const [selectedConnectionType, setSelectedConnectionType] = useState(
     "RANDOM"
   );
+  const [connectionTypeAmounts, setConnectionTypeAmounts] = useState({
+    ALL_PROSPECTS: "... loading",
+    OPENED_EMAIL_PROSPECTS_ONLY: "... loading",
+    CLICKED_LINK_PROSPECTS_ONLY: "... loading",
+  });
 
   const updateConnectionType = (newConnectionType: string) => {
     const archetypeId = props.personaId;
@@ -116,6 +121,35 @@ const CampaignGraph = (props: {
         message: "Connection type has been updated.",
       });
     });
+  };
+
+  const getConnectionTypeAmounts = () => {
+    const archetypeId = props.personaId;
+    fetch(
+      `${API_URL}/client/archetype/${archetypeId}/email_to_linkedin_connection_amounts`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data.data);
+        setConnectionTypeAmounts({
+          ALL_PROSPECTS: data.data.prospects_sent_outreach
+            ? data.data.prospects_sent_outreach + " prospects"
+            : "n/a",
+          OPENED_EMAIL_PROSPECTS_ONLY: data.data.prospects_email_opened
+            ? data.data.prospects_email_opened + " prospects"
+            : "n/a",
+          CLICKED_LINK_PROSPECTS_ONLY: data.data.prospects_clicked
+            ? data.data.prospects_clicked + " prospects"
+            : "n/a",
+        });
+      });
   };
 
   useEffect(() => {
@@ -219,7 +253,10 @@ const CampaignGraph = (props: {
               label="Connect Sequences"
               size="xs"
               value={selectedConnectionType}
-              w="250px"
+              w="300px"
+              onClick={() => {
+                getConnectionTypeAmounts();
+              }}
               onChange={(value) => {
                 console.log(value);
                 setSelectedConnectionType(value || "");
@@ -231,15 +268,21 @@ const CampaignGraph = (props: {
                   value: "RANDOM",
                 },
                 {
-                  label: "[📧 → 🤝] Contact After Email Sent",
+                  label:
+                    "[📧 → 🤝] Sent Only - " +
+                    connectionTypeAmounts.ALL_PROSPECTS,
                   value: "ALL_PROSPECTS",
                 },
                 {
-                  label: "[👀 → 🤝] Send to Opened Only",
+                  label:
+                    "[👀 → 🤝] Opened Only - " +
+                    connectionTypeAmounts.OPENED_EMAIL_PROSPECTS_ONLY,
                   value: "OPENED_EMAIL_PROSPECTS_ONLY",
                 },
                 {
-                  label: "[⚡️ → 🤝] Send to Clicked Only",
+                  label:
+                    "[⚡️ → 🤝] Clicked Only - " +
+                    connectionTypeAmounts.CLICKED_LINK_PROSPECTS_ONLY,
                   value: "CLICKED_LINK_PROSPECTS_ONLY",
                 },
               ]}

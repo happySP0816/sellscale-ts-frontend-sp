@@ -52,7 +52,7 @@ const nurturingModeState = atom({
 
 const mainTabState = atom({
   key: 'inbox-main-tab',
-  default: 'inbox',
+  default: 'manual_bucket',
 });
 
 const selectedBumpFrameworkState = atom({

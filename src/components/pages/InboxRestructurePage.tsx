@@ -31,7 +31,11 @@ import {
 } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import { setPageTitle } from '@utils/documentChange';
-import { getProspects, getProspectsForInboxRestructure } from '@utils/requests/getProspects';
+import {
+  getProspectBucketsForInbox,
+  getProspects,
+  getProspectsForInboxRestructure,
+} from '@utils/requests/getProspects';
 import { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { Prospect, ProspectShallow } from 'src';
@@ -61,6 +65,32 @@ export type ProspectRestructured = {
   img_url?: string;
 };
 
+export type ProspectBucketRecord = {
+  client_sdr_name: string;
+  company: string;
+  deactivate_ai_engagement: boolean;
+  email_last_message_from_prospect?: string;
+  email_last_message_timestamp?: string;
+  full_name: string;
+  title: string;
+  hidden_until?: string;
+  li_last_message_from_prospect?: string;
+  li_last_message_timestamp?: string;
+  overall_status: string;
+  prospect_id: number;
+  status_email?: string;
+  status_linkedin?: string;
+};
+
+export type ProspectBuckets = {
+  ai_bucket: ProspectBucketRecord[];
+  crm_bucket: ProspectBucketRecord[];
+  demo_bucket: ProspectBucketRecord[];
+  manual_bucket: ProspectBucketRecord[];
+  outreach_bucket: ProspectBucketRecord[];
+  snoozed_bucket: ProspectBucketRecord[];
+};
+
 export default function InboxRestructurePage(props: { all?: boolean }) {
   setPageTitle('Inbox');
 
@@ -69,8 +99,8 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
   const [openedList, setOpenedList] = useRecoilState(openedProspectListState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(openedBumpFameworksState);
-  const [currentInboxCount, setCurrentInboxCount] = useRecoilState(currentInboxCountState);
   const [displayConvo, refreshConvo] = useRefresh();
+  const [mainTab, setMainTab] = useRecoilState(mainTabState);
 
   useEffect(() => {
     setOpenedList(true);
@@ -83,33 +113,36 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
       // eslint-disable-next-line
       const [_key, {}] = queryKey;
 
-      const response = await getProspectsForInboxRestructure(userToken);
-      const prospects =
-        response.status === 'success' ? (response.data as ProspectRestructured[]) : [];
+      // Old method
+      // const response = await getProspectsForInboxRestructure(userToken);
+      // const prospects =
+      //   response.status === 'success' ? (response.data as ProspectRestructured[]) : [];
 
+      const response = await getProspectBucketsForInbox(userToken);
+      const buckets = response.status === 'success' ? (response.data as ProspectBuckets) : null;
+
+      // @ts-ignore
+      const bucket = buckets[mainTab] as ProspectBucketRecord[];
       if (openedProspectId === -1) {
-        if (prospects.length > 0) {
-          setOpenedProspectId(prospects[0].id);
+        if (bucket.length > 0) {
+          setOpenedProspectId(bucket[0].prospect_id);
         }
       } else if (openedProspectId < 0) {
         // Set to the next X proepct in the list where X is the negative openedProspectId
-        const nextProspect = prospects[Math.abs(openedProspectId) - 1];
+        const nextProspect = bucket[Math.abs(openedProspectId) - 1];
         if (nextProspect) {
-          setOpenedProspectId(nextProspect.id);
+          setOpenedProspectId(nextProspect.prospect_id);
         }
       }
 
-      return prospects;
+      return buckets;
     },
     refetchOnWindowFocus: false,
   });
-  const prospects = data ?? [];
 
   useEffect(() => {
     refreshConvo();
   }, [openedProspectId]);
-
-  setCurrentInboxCount(prospects.filter((p) => p.section === 'Inbox').length);
 
   if (isFetching)
     return (
@@ -120,7 +153,7 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
 
   return (
     <Box style={{ position: 'relative' }}>
-      {prospects.length === 0 ? (
+      {!data || openedProspectId === -1 ? (
         <Center h={500}>
           <Container w='100%' mt='300px' sx={{ justifyContent: 'center', textAlign: 'center' }}>
             <Title
@@ -172,15 +205,6 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
         </Center>
       ) : (
         <>
-          <Box
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-            }}
-          >
-            <InboxProspectListRestruct prospects={prospects} />
-          </Box>
           <Grid gutter={0} h={INBOX_PAGE_HEIGHT} sx={{ overflow: 'hidden' }}>
             <Grid.Col span={8}>
               {displayConvo && (
@@ -197,6 +221,17 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
             </Grid.Col>
           </Grid>
         </>
+      )}
+      {data && (
+        <Box
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }}
+        >
+          <InboxProspectListRestruct buckets={data} />
+        </Box>
       )}
     </Box>
   );

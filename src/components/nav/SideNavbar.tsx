@@ -43,6 +43,8 @@ import { getPreOnboardingData } from '@pages/PreOnboarding';
 import { IconBrain, IconHome, IconPencil, IconTarget } from '@tabler/icons';
 import { currentInboxCountState } from '@atoms/personaAtoms';
 import { getInboxCounts } from '@utils/requests/getInboxCounts';
+import { getProspectBucketsForInbox } from '@utils/requests/getProspects';
+import { ProspectBuckets } from '@pages/InboxRestructurePage';
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -150,9 +152,15 @@ export default function SideNavbar(props: {}) {
   useQuery({
     queryKey: [`query-sdr-get-inbox-counts`],
     queryFn: async () => {
-      const response = await getInboxCounts(userToken);
-      const data = response.status === 'success' ? response.data : null;
-      setCurrentInboxCount(data);
+      // const response = await getInboxCounts(userToken);
+      // const data = response.status === 'success' ? response.data : null;
+
+      const response = await getProspectBucketsForInbox(userToken);
+      const buckets = response.status === 'success' ? (response.data as ProspectBuckets) : null;
+
+      setCurrentInboxCount(buckets?.manual_bucket.length ?? 0);
+
+      return buckets;
     },
     enabled: isLoggedIn(),
   });

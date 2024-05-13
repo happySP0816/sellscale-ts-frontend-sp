@@ -74,3 +74,14 @@ export async function getProspectsForInboxRestructure(userToken: string): Promis
 
   return await processResponse(response, 'data');
 }
+
+export async function getProspectBucketsForInbox(userToken: string): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/sight_inbox/details`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
+
+  return await processResponse(response, 'data');
+}

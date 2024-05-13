@@ -13,6 +13,7 @@ import {
   Input,
   Loader,
   LoadingOverlay,
+  Menu,
   ScrollArea,
   Stack,
   Tabs,
@@ -30,6 +31,7 @@ import {
   IconClock,
   IconStar,
   IconBellOff,
+  IconSparkles,
 } from '@tabler/icons-react';
 import _ from 'lodash';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -46,34 +48,55 @@ import InboxProspectListFilter, {
   InboxProspectListFilterState,
   defaultInboxProspectListFilterState,
 } from './InboxProspectListFilter';
-import { IconChevronUp } from '@tabler/icons';
+import { IconAlertCircle, IconChevronUp, IconGridDots } from '@tabler/icons';
 import { useNavigate } from 'react-router-dom';
-import { INBOX_PAGE_HEIGHT, type ProspectRestructured } from '../../pages/InboxRestructurePage';
+import {
+  INBOX_PAGE_HEIGHT,
+  ProspectBucketRecord,
+  ProspectBuckets,
+} from '../../pages/InboxRestructurePage';
 import { mainTabState, openedProspectIdState, openedProspectListState } from '@atoms/inboxAtoms';
 import { useDisclosure } from '@mantine/hooks';
 import { NAV_BAR_SIDE_WIDTH } from '@constants/data';
 import { ProspectConvoCard } from './InboxProspectList';
 import { currentInboxCountState } from '@atoms/personaAtoms';
 
-export function InboxProspectListRestruct(props: { prospects: ProspectRestructured[] }) {
+export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const theme = useMantineTheme();
   const [openedList, setOpenedList] = useRecoilState(openedProspectListState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
 
   const [searchFilter, setSearchFilter] = useState('');
   const [mainTab, setMainTab] = useRecoilState(mainTabState);
+  const inboxTab = (() => {
+    if (mainTab === 'manual_bucket') return 'manual';
+    if (mainTab === 'ai_bucket') return 'ai';
+    return 'other';
+  })();
+  const setInboxTab = (tab: string) => {
+    if (tab === 'manual') setMainTab('manual_bucket');
+    if (tab === 'ai') setMainTab('ai_bucket');
+    // Else don't set
+  };
 
-  const prospects = props.prospects
-    .filter((p) => !['REMOVED', 'NULL'].includes((p.status ?? 'NULL').toUpperCase()))
-    .filter((p) => p.section.toLowerCase() === mainTab)
+  // @ts-ignore
+  const bucket = props.buckets[mainTab] as ProspectBucketRecord[];
+
+  const prospects = bucket
+    .filter((p) => !['REMOVED', 'NULL'].includes((p.overall_status ?? 'NULL').toUpperCase()))
     .filter(
       (p) =>
-        p.title.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        p.company.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        p.full_name.toLowerCase().includes(searchFilter.toLowerCase())
+        p.title?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        p.company?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        p.full_name?.toLowerCase().includes(searchFilter.toLowerCase())
     );
 
-  const prospectGroups = Object.entries(_.groupBy(prospects, (p) => p.status))
+  const prospectGroups = Object.entries(
+    _.groupBy(
+      prospects.map((p) => ({ ...p, status: p.status_email ?? p.status_linkedin })),
+      (p) => p.status
+    )
+  )
     .sort((a, b) => {
       console.log(a[0].toLowerCase());
       if (a[0].toLowerCase().includes('scheduling')) return -1;
@@ -81,8 +104,8 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
       return b[0].localeCompare(a[0]);
     })
     .filter((group) => {
-      if (group[0].toLowerCase().includes('sent_outreach')) return false;
-      if (group[0].toLowerCase().includes('email_opened')) return false;
+      // if (group[0].toLowerCase().includes('sent_outreach')) return false;
+      // if (group[0].toLowerCase().includes('email_opened')) return false;
       return true;
     });
 
@@ -116,9 +139,9 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
           >
             {/* Section tabs */}
             <Tabs
-              value={mainTab}
+              value={inboxTab}
               onTabChange={(value) => {
-                setMainTab(value as string);
+                setInboxTab(value as string);
               }}
               styles={(theme) => ({
                 tab: {
@@ -128,59 +151,92 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
                   '&[data-active]': {
                     color: theme.colors.blue[theme.fn.primaryShade()],
                   },
-                  paddingTop: rem(16),
-                  paddingBottom: rem(16),
+                  paddingTop: rem(6),
+                  paddingBottom: rem(6),
                 },
               })}
             >
               <Tabs.List grow>
-                <Tabs.Tab
-                  value='inbox'
-                  rightSection={
-                    <Badge
-                      sx={{ pointerEvents: 'none' }}
-                      variant='filled'
-                      size='xs'
-                      color={mainTab === 'inbox' ? 'blue' : 'gray'}
-                    >
-                      {props.prospects.filter((p) => p.section === 'Inbox').length}
-                    </Badge>
-                  }
-                >
-                  Inbox
+                <Tabs.Tab value='manual'>
+                  <Indicator size={6} disabled={props.buckets.manual_bucket.length === 0}>
+                    <Group spacing={5} noWrap>
+                      <IconAlertCircle size='1rem' />
+                      {mainTab === 'manual_bucket' && <Text>Needs Attention</Text>}
+                    </Group>
+                  </Indicator>
                 </Tabs.Tab>
-                <Tabs.Tab
-                  value='snoozed'
-                  rightSection={
-                    <Badge
-                      sx={{ pointerEvents: 'none' }}
-                      variant='filled'
-                      size='xs'
-                      color={mainTab === 'inbox' ? 'blue' : 'gray'}
-                    >
-                      {props.prospects.filter((p) => p.section === 'Snoozed').length}
-                    </Badge>
-                  }
-                >
-                  Snoozed
+                <Tabs.Tab value='ai'>
+                  <Indicator size={6} disabled={props.buckets.ai_bucket.length === 0}>
+                    <Group spacing={5} noWrap>
+                      <IconSparkles size='1rem' />
+                      {mainTab === 'ai_bucket' && <Text>Queued for AI</Text>}
+                    </Group>
+                  </Indicator>
                 </Tabs.Tab>
-                <Tabs.Tab
-                  value='demos'
-                  rightSection={
-                    <Badge
-                      w={16}
-                      h={16}
-                      sx={{ pointerEvents: 'none' }}
-                      variant='filled'
-                      size='xs'
-                      p={0}
+                <Menu shadow='md' width={200}>
+                  <Menu.Target>
+                    <Tabs.Tab value='other'>
+                      <Group spacing={5} noWrap>
+                        <IconGridDots size='1rem' />
+                        {inboxTab === 'other' && (
+                          <Text>{_.startCase(mainTab.split('_bucket')[0])}</Text>
+                        )}
+                      </Group>
+                    </Tabs.Tab>
+                  </Menu.Target>
+
+                  <Menu.Dropdown>
+                    <Menu.Label>
+                      <Group spacing={5} noWrap>
+                        <IconGridDots size='1rem' />
+                        <Text fz={14} fw={600}>
+                          Other Views
+                        </Text>
+                      </Group>
+                    </Menu.Label>
+                    <Menu.Divider />
+                    <Menu.Item
+                      onClick={() => {
+                        setMainTab('snoozed_bucket');
+                      }}
                     >
-                      {props.prospects.filter((p) => p.section === 'Demos').length}
-                    </Badge>
-                  }
-                >
-                  Demos
-                </Tabs.Tab>
+                      <Group spacing={5} noWrap position='apart'>
+                        <Text>Snoozed</Text>
+                        <Badge>{props.buckets.snoozed_bucket.length}</Badge>
+                      </Group>
+                    </Menu.Item>
+                    <Menu.Item
+                      onClick={() => {
+                        setMainTab('demo_bucket');
+                      }}
+                    >
+                      <Group spacing={5} noWrap position='apart'>
+                        <Text>Demo Set</Text>
+                        <Badge>{props.buckets.demo_bucket.length}</Badge>
+                      </Group>
+                    </Menu.Item>
+                    <Menu.Item
+                      onClick={() => {
+                        setMainTab('crm_bucket');
+                      }}
+                    >
+                      <Group spacing={5} noWrap position='apart'>
+                        <Text>CRM Sync</Text>
+                        <Badge>{props.buckets.crm_bucket.length}</Badge>
+                      </Group>
+                    </Menu.Item>
+                    <Menu.Item
+                      onClick={() => {
+                        setMainTab('outreach_bucket');
+                      }}
+                    >
+                      <Group spacing={5} noWrap position='apart'>
+                        <Text>Sent Outreach</Text>
+                        <Badge>{props.buckets.outreach_bucket.length}</Badge>
+                      </Group>
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
               </Tabs.List>
             </Tabs>
 
@@ -230,24 +286,22 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
                           <Box
                             key={index}
                             onClick={() => {
-                              setOpenedProspectId(prospect.id);
+                              setOpenedProspectId(prospect.prospect_id);
                               setOpenedList(false);
                             }}
                           >
                             <ProspectConvoCard
-                              id={prospect.id}
+                              id={prospect.prospect_id}
                               name={prospect.full_name}
                               title={prospect.title}
-                              img_url={prospect.img_url ?? ''}
-                              latest_msg={prospect.last_message}
-                              latest_msg_time={prospect.last_message_timestamp}
-                              icp_fit={prospect.icp_fit_score}
+                              img_url={''}
+                              latest_msg={prospect.email_last_message_from_prospect ?? ''}
+                              latest_msg_time={prospect.li_last_message_timestamp ?? ''}
+                              icp_fit={-1}
                               new_msg_count={0}
                               latest_msg_from_sdr={false}
-                              default_channel={
-                                mainTab !== 'snoozed' ? prospect.primary_channel : undefined
-                              }
-                              opened={prospect.id === openedProspectId}
+                              default_channel={mainTab !== 'snoozed' ? 'LINKEDIN' : undefined}
+                              opened={prospect.prospect_id === openedProspectId}
                               snoozed_until={prospect.hidden_until}
                             />
                           </Box>
@@ -259,6 +313,11 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
               </Stack>
             </>
           </Stack>
+          {prospectGroups.length === 0 && (
+            <Text ta='center' fz='sm' c='dimmed' fs='italic' py='sm'>
+              No prospects found.
+            </Text>
+          )}
         </ScrollArea>
       </Drawer>
 

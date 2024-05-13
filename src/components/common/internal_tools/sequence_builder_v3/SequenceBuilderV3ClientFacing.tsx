@@ -24,6 +24,7 @@ import {
   HoverCard,
   ScrollArea,
   Loader,
+  Card,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -33,7 +34,10 @@ import {
   addSequence,
   generateSequence,
 } from "@utils/requests/generateSequence";
-import { getClientArchetypes } from "@utils/requests/getClientArchetypes";
+import {
+  getClientArchetypes,
+  getClientSDRArchetypes,
+} from "@utils/requests/getClientArchetypes";
 import { getClientSdrAccess } from "@utils/requests/getClientSdrAccess";
 import { getClients } from "@utils/requests/getClients";
 import _, { set } from "lodash";
@@ -76,6 +80,7 @@ export default function SequenceBuilderV3ClientFacing(props: PropsType) {
   );
   const [numSteps, setNumSteps] = useState(3);
   const [additionalPrompting, setAdditionalPrompting] = useState("");
+  const [clickedAddAssets, setClickedAddAssets] = useState(false);
 
   const totalGenerated = useRef(0);
 
@@ -139,11 +144,9 @@ export default function SequenceBuilderV3ClientFacing(props: PropsType) {
       // @ts-ignore
       // eslint-disable-next-line
       const [_key, { clientId }] = queryKey;
-      const result = await getClientArchetypes(userToken, clientId);
+      const result = await getClientSDRArchetypes(userToken);
       return result.status === "success"
-        ? (result.data as Archetype[]).sort((a, b) =>
-            a.archetype.localeCompare(b.archetype)
-          )
+        ? (result.data as Archetype[]).sort((a, b) => (a.id < b.id ? 1 : -1))
         : [];
     },
     enabled: !!clientId,
@@ -162,6 +165,10 @@ export default function SequenceBuilderV3ClientFacing(props: PropsType) {
   });
 
   const [results, setResults] = useState<MessageResult[]>([]);
+  const [showGeneratedSequence, setShowGeneratedSequence] = useState(false);
+
+  const showStep2 = archetypeId;
+  const showStep3 = showStep2 && clickedAddAssets;
 
   return (
     <Box p="lg">
@@ -171,241 +178,283 @@ export default function SequenceBuilderV3ClientFacing(props: PropsType) {
           <LoadingOverlay visible={loading} />
           <Stack h="90vh" p="lg">
             <Title order={3}>Sequence Builder</Title>
-            {/* <Autocomplete
-              disabled={clients === undefined}
-              label={
-                <Group position="apart">
-                  <Text>Client</Text>
-                  {clients === undefined && isFetchingClients && (
-                    <Loader variant="dots" size="xs" />
-                  )}
-                </Group>
-              }
-              placeholder="Clients"
-              data={clients?.map((client) => ({ value: client.company })) ?? []}
-              onChange={(value) => {
-                const client = clients?.find((c) => c.company === value);
-                setClientId(client?.id ?? null);
-              }}
-            /> */}
-            <Autocomplete
-              disabled={archetypes === undefined}
-              label={
-                <Group position="apart">
-                  <Text>Campaigns</Text>
-                  {archetypes === undefined && isFetchingCampaigns && (
-                    <Loader variant="dots" size="xs" />
-                  )}
-                </Group>
-              }
-              placeholder="Campaigns"
-              data={
-                archetypes?.map((archetype) => ({
-                  value: archetype.archetype,
-                })) ?? []
-              }
-              defaultValue={props.campaign?.name}
-              onChange={(value) => {
-                const archetype = archetypes?.find(
-                  (c) => c.archetype === value
-                );
-                setArchetypeId(archetype?.id ?? null);
-                // @ts-ignore, might be a bug here in the future
-                setCurrentProject(archetype);
-              }}
-            />
-            <Button
-              my={5}
-              variant="outline"
-              fullWidth
-              onClick={() => {
-                setOpenedAssetLibrary(true);
-              }}
-            >
-              Open Assets
-            </Button>
-            <Divider my={5} />
-            <Group grow noWrap>
-              <Select
-                label="Sequence Type"
-                placeholder="Type"
-                data={[
-                  { value: "LINKEDIN-CTA", label: "LinkedIn (CTAs)" },
-                  { value: "LINKEDIN-TEMPLATE", label: "LinkedIn (Templates)" },
-                  { value: "EMAIL", label: "Email" },
-                ]}
-                miw={200}
-                value={sequenceType}
+            <Card withBorder>
+              <Title order={5}>
+                {!archetypeId ? "🟡 " : "🟢 "}
+                Step 1: Connect to Campaign
+              </Title>
+              <Autocomplete
+                withinPortal
+                disabled={archetypes === undefined}
+                mt="xs"
+                label={
+                  <Group position="apart">
+                    <Text>Select Campaign</Text>
+                    {archetypes === undefined && isFetchingCampaigns && (
+                      <Loader variant="dots" size="xs" />
+                    )}
+                  </Group>
+                }
+                placeholder="Campaigns"
+                data={
+                  archetypes?.map((archetype) => ({
+                    value: archetype.archetype,
+                    label: archetype.emoji + " " + archetype.archetype,
+                  })) ?? []
+                }
+                defaultValue={props.campaign?.name}
                 onChange={(value) => {
-                  setResults([]);
-                  setSequenceType(value ?? "");
+                  const archetype = archetypes?.find(
+                    (c) => c.archetype === value
+                  );
+                  setArchetypeId(archetype?.id ?? null);
+                  // @ts-ignore, might be a bug here in the future
+                  setCurrentProject(archetype);
                 }}
               />
-              <NumberInput
-                placeholder="X Steps"
-                label="# Steps"
-                hideControls
-                value={numSteps}
-                onChange={(value) => setNumSteps(value || 0)}
-              />
-            </Group>
-            <Textarea
-              label="Additional Prompting"
-              placeholder="Extra prompt instructions"
-              value={additionalPrompting}
-              onChange={(e) => setAdditionalPrompting(e.currentTarget.value)}
-            />
-            <Button
-              my={5}
-              variant="filled"
-              fullWidth
-              onClick={async () => {
-                setResults([]);
+            </Card>
 
-                if (!clientId || !archetypeId || !sequenceType || !numSteps)
-                  return;
+            {showStep2 && (
+              <Title order={3} align="center">
+                ↓
+              </Title>
+            )}
 
-                setLoading(true);
+            {showStep2 && (
+              <Card withBorder>
+                <Title order={5}>
+                  {!clickedAddAssets ? "🟡 " : "🟢 "}
+                  Step 2: Add Assets
+                </Title>
 
-                for (let i = 0; i < EXAMPLE_COUNT; i++) {
-                  for (let j = 0; j < numSteps; j++) {
-                    await generateSequence(
-                      userToken,
-                      clientId,
-                      archetypeId,
-                      sequenceType,
-                      j + 1,
-                      additionalPrompting
-                    )
-                      .then((response) => {
-                        if (response.status === "success") {
-                          const data = response.data as MessageResult[];
-                          setResults((prev) => [...prev, ...data]);
-                        } else {
+                <Button
+                  variant="outline"
+                  fullWidth
+                  onClick={() => {
+                    setOpenedAssetLibrary(true);
+                    setClickedAddAssets(true);
+                  }}
+                  mt="md"
+                >
+                  Add & Connect Assets
+                </Button>
+              </Card>
+            )}
+
+            {showStep3 && (
+              <Title order={3} align="center">
+                ↓
+              </Title>
+            )}
+
+            {showStep3 && (
+              <Card withBorder>
+                <Title order={5}>
+                  {!sequenceType ? "🟡 " : "🟢 "}
+                  Step 3: Channel, Steps, Details
+                </Title>
+                <Group grow noWrap>
+                  <Select
+                    mt="md"
+                    label="Sequence Type"
+                    placeholder="Type"
+                    data={[
+                      { value: "LINKEDIN-CTA", label: "LinkedIn (CTAs)" },
+                      {
+                        value: "LINKEDIN-TEMPLATE",
+                        label: "LinkedIn (Templates)",
+                      },
+                      { value: "EMAIL", label: "Email" },
+                    ]}
+                    miw={200}
+                    value={sequenceType}
+                    onChange={(value) => {
+                      setResults([]);
+                      setSequenceType(value ?? "");
+                    }}
+                  />
+                  <NumberInput
+                    mt="md"
+                    placeholder="X Steps"
+                    label="# Steps"
+                    hideControls
+                    value={numSteps}
+                    onChange={(value) => setNumSteps(value || 0)}
+                  />
+                </Group>
+                <Textarea
+                  label="Additional Prompting"
+                  placeholder="Extra prompt instructions"
+                  value={additionalPrompting}
+                  onChange={(e) =>
+                    setAdditionalPrompting(e.currentTarget.value)
+                  }
+                />
+              </Card>
+            )}
+
+            {showStep3 && (
+              <Title order={3} align="center">
+                ↓
+              </Title>
+            )}
+
+            {showStep3 && (
+              <Button
+                my={5}
+                variant="filled"
+                fullWidth
+                onClick={async () => {
+                  setResults([]);
+                  setShowGeneratedSequence(true);
+
+                  if (!clientId || !archetypeId || !sequenceType || !numSteps)
+                    return;
+
+                  setLoading(true);
+
+                  for (let i = 0; i < EXAMPLE_COUNT; i++) {
+                    for (let j = 0; j < numSteps; j++) {
+                      await generateSequence(
+                        userToken,
+                        clientId,
+                        archetypeId,
+                        sequenceType,
+                        j + 1,
+                        additionalPrompting
+                      )
+                        .then((response) => {
+                          if (response.status === "success") {
+                            const data = response.data as MessageResult[];
+                            setResults((prev) => [...prev, ...data]);
+                          } else {
+                            showNotification({
+                              title: "Error",
+                              message: response.message,
+                              color: "red",
+                            });
+                            setLoading(false);
+                          }
+
+                          totalGenerated.current += 1;
+
+                          showNotification({
+                            title: "Success",
+                            message: "Successfully generated step #" + (j + 1),
+                            color: "teal",
+                          });
+
+                          if (
+                            totalGenerated.current ===
+                            EXAMPLE_COUNT * numSteps
+                          ) {
+                            showNotification({
+                              title: "Success",
+                              message: "Successfully generated sequence",
+                              color: "teal",
+                            });
+                            setLoading(false);
+                            totalGenerated.current = 0;
+                          }
+                        })
+                        .catch((e) => {
                           showNotification({
                             title: "Error",
-                            message: response.message,
+                            message: `Failed to generate sequence: ${e}`,
                             color: "red",
                           });
                           setLoading(false);
-                        }
-
-                        totalGenerated.current += 1;
-
-                        showNotification({
-                          title: "Success",
-                          message: "Successfully generated step #" + (j + 1),
-                          color: "teal",
                         });
-
-                        if (
-                          totalGenerated.current ===
-                          EXAMPLE_COUNT * numSteps
-                        ) {
-                          showNotification({
-                            title: "Success",
-                            message: "Successfully generated sequence",
-                            color: "teal",
-                          });
-                          setLoading(false);
-                          totalGenerated.current = 0;
-                        }
-                      })
-                      .catch((e) => {
-                        showNotification({
-                          title: "Error",
-                          message: `Failed to generate sequence: ${e}`,
-                          color: "red",
-                        });
-                        setLoading(false);
-                      });
+                    }
                   }
-                }
-              }}
-            >
-              Generate Sequence
-            </Button>
+                }}
+              >
+                Generate Sequence
+              </Button>
+            )}
           </Stack>
         </Paper>
         <Box maw="60vw">
-          <Stack h="90vh" p="lg">
-            <Group position="apart" noWrap>
-              <Title order={3}>Generated Sequence</Title>
-              <Button
-                radius="lg"
-                onClick={async () => {
-                  modals.openConfirmModal({
-                    title: "Add to Sequence",
-                    children: (
-                      <Text size="sm">
-                        Are you sure you want to add to the current sequence
-                        with the selected options?
-                      </Text>
-                    ),
-                    labels: { confirm: "Confirm", cancel: "Cancel" },
-                    onCancel: () => {},
-                    onConfirm: async () => await onAddSequence(),
-                  });
-                }}
-              >
-                Add Sequence
-              </Button>
-            </Group>
-            {sequenceType !== "LINKEDIN-TEMPLATE" && (
-              <TitleGenerationSection
+          {showGeneratedSequence && (
+            <Stack h="90vh" p="lg">
+              <Group position="apart" noWrap>
+                <Title order={3}>Generated Sequence</Title>
+                <Button
+                  radius="lg"
+                  onClick={async () => {
+                    modals.openConfirmModal({
+                      title: "Add to Sequence",
+                      children: (
+                        <Text size="sm">
+                          Are you sure you want to add to the current sequence
+                          with the selected options?
+                        </Text>
+                      ),
+                      labels: { confirm: "Confirm", cancel: "Cancel" },
+                      onCancel: () => {},
+                      onConfirm: async () => await onAddSequence(),
+                    });
+                  }}
+                >
+                  Add Sequence
+                </Button>
+              </Group>
+              {sequenceType !== "LINKEDIN-TEMPLATE" && (
+                <TitleGenerationSection
+                  isCTAs={sequenceType === "LINKEDIN-CTA"}
+                  results={results}
+                  onClick={(text, assets, remove, uuid) => {
+                    if (remove) {
+                      setSelectedData((prev) => ({
+                        ...prev,
+                        subject_lines: prev.subject_lines.filter(
+                          (s: any) => s.uuid !== uuid
+                        ),
+                      }));
+                    }
+                    setSelectedData((prev) => ({
+                      ...prev,
+                      subject_lines: [
+                        ...prev.subject_lines,
+                        {
+                          text,
+                          assets,
+                          uuid,
+                        },
+                      ],
+                    }));
+                  }}
+                  selectedData={selectedData}
+                />
+              )}
+              <StepGenerationSection
                 isCTAs={sequenceType === "LINKEDIN-CTA"}
                 results={results}
-                onClick={(text, assets, remove, uuid) => {
+                onClick={(step_num, text, assets, remove, uuid, angle) => {
                   if (remove) {
                     setSelectedData((prev) => ({
                       ...prev,
-                      subject_lines: prev.subject_lines.filter(
-                        (s: any) => s.uuid !== uuid
-                      ),
+                      steps: prev.steps.filter((s: any) => s.uuid !== uuid),
                     }));
                   }
                   setSelectedData((prev) => ({
                     ...prev,
-                    subject_lines: [
-                      ...prev.subject_lines,
+                    steps: [
+                      ...prev.steps,
                       {
+                        step_num,
                         text,
                         assets,
                         uuid,
+                        angle,
                       },
                     ],
                   }));
                 }}
                 selectedData={selectedData}
               />
-            )}
-            <StepGenerationSection
-              isCTAs={sequenceType === "LINKEDIN-CTA"}
-              results={results}
-              onClick={(step_num, text, assets, remove, uuid, angle) => {
-                if (remove) {
-                  setSelectedData((prev) => ({
-                    ...prev,
-                    steps: prev.steps.filter((s: any) => s.uuid !== uuid),
-                  }));
-                }
-                setSelectedData((prev) => ({
-                  ...prev,
-                  steps: [
-                    ...prev.steps,
-                    {
-                      step_num,
-                      text,
-                      assets,
-                      uuid,
-                      angle,
-                    },
-                  ],
-                }));
-              }}
-              selectedData={selectedData}
-            />
-          </Stack>
+            </Stack>
+          )}
         </Box>
       </Group>
       <Modal

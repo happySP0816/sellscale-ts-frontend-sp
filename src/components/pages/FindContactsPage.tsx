@@ -1,5 +1,5 @@
-import { userTokenState } from '@atoms/userAtoms';
-import YourNetworkSection from '@common/your_network/YourNetworkSection';
+import { userTokenState } from "@atoms/userAtoms";
+import YourNetworkSection from "@common/your_network/YourNetworkSection";
 import {
   Card,
   Flex,
@@ -23,33 +23,45 @@ import {
   Divider,
   Avatar,
   rem,
-} from '@mantine/core';
-import { useForm } from '@mantine/form';
-import { openConfirmModal } from '@mantine/modals';
-import { showNotification } from '@mantine/notifications';
-import { IconAffiliate, IconBrandLinkedin, IconDatabase, IconDownload, IconFile, IconUpload } from '@tabler/icons';
-import { setPageTitle } from '@utils/documentChange';
-import { valueToColor } from '@utils/general';
-import getSalesNavigatorLaunches, { getSalesNavigatorLaunch } from '@utils/requests/getSalesNavigatorLaunches';
-import postLaunchSalesNavigator from '@utils/requests/postLaunchSalesNavigator';
-import { useEffect, useRef, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { SalesNavigatorLaunch } from 'src';
-import SalesNavigatorComponent from './SalesNavigatorPage';
-import IndividualsDashboard from '@common/individuals/IndividualsDashboard';
-import { IconCsv, IconSparkles } from '@tabler/icons-react';
-import FileDropAndPreview from '@modals/upload-prospects/FileDropAndPreview';
-import LinkedInURLUpload from '@modals/upload-prospects/LinkedInURLUpload';
-import { currentProjectState } from '@atoms/personaAtoms';
-import ChatDashboard from '@common/individuals/ChatDashboard';
-import UploadDetailsDrawer from '@drawers/UploadDetailsDrawer';
-import { prospectUploadDrawerIdState, prospectUploadDrawerOpenState } from '@atoms/uploadAtoms';
-import { getAllUploads } from '@utils/requests/getPersonas';
-import { useQuery } from '@tanstack/react-query';
-import { DataTable, DataTableSortStatus } from 'mantine-datatable';
-import _ from 'lodash';
-import FileDropAndPreviewV2 from '@modals/upload-prospects/FileDropAndPreviewV2';
-import { API_URL } from '@constants/data';
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { openConfirmModal } from "@mantine/modals";
+import { showNotification } from "@mantine/notifications";
+import {
+  IconAffiliate,
+  IconBrandLinkedin,
+  IconDatabase,
+  IconDownload,
+  IconFile,
+  IconUpload,
+} from "@tabler/icons";
+import { setPageTitle } from "@utils/documentChange";
+import { valueToColor } from "@utils/general";
+import getSalesNavigatorLaunches, {
+  getSalesNavigatorLaunch,
+} from "@utils/requests/getSalesNavigatorLaunches";
+import postLaunchSalesNavigator from "@utils/requests/postLaunchSalesNavigator";
+import { useEffect, useRef, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { SalesNavigatorLaunch } from "src";
+import SalesNavigatorComponent from "./SalesNavigatorPage";
+import IndividualsDashboard from "@common/individuals/IndividualsDashboard";
+import { IconCsv, IconSparkles } from "@tabler/icons-react";
+import FileDropAndPreview from "@modals/upload-prospects/FileDropAndPreview";
+import LinkedInURLUpload from "@modals/upload-prospects/LinkedInURLUpload";
+import { currentProjectState } from "@atoms/personaAtoms";
+import ChatDashboard from "@common/individuals/ChatDashboard";
+import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
+import {
+  prospectUploadDrawerIdState,
+  prospectUploadDrawerOpenState,
+} from "@atoms/uploadAtoms";
+import { getAllUploads } from "@utils/requests/getPersonas";
+import { useQuery } from "@tanstack/react-query";
+import { DataTable, DataTableSortStatus } from "mantine-datatable";
+import _ from "lodash";
+import FileDropAndPreviewV2 from "@modals/upload-prospects/FileDropAndPreviewV2";
+import { API_URL } from "@constants/data";
 
 type UploadDetailType = {
   process: number;
@@ -73,10 +85,10 @@ type CSVType = {
 
 const test_data = [
   {
-    fileName: 'NewUploads1.csv',
+    fileName: "NewUploads1.csv",
     sdr: {
-      avatar: '',
-      name: 'Adam Meehan',
+      avatar: "",
+      name: "Adam Meehan",
     } as SDRType,
     upload_details: {
       process: 300,
@@ -88,10 +100,10 @@ const test_data = [
     } as UploadDetailType,
   },
   {
-    fileName: 'NewUploads2.csv',
+    fileName: "NewUploads2.csv",
     sdr: {
-      avatar: '',
-      name: 'Adam Meehan',
+      avatar: "",
+      name: "Adam Meehan",
     } as SDRType,
     upload_details: {
       process: 100,
@@ -103,10 +115,10 @@ const test_data = [
     } as UploadDetailType,
   },
   {
-    fileName: 'NewUploads3.csv',
+    fileName: "NewUploads3.csv",
     sdr: {
-      avatar: '',
-      name: 'Adam Meehan',
+      avatar: "",
+      name: "Adam Meehan",
     } as SDRType,
     upload_details: {
       process: 521,
@@ -118,10 +130,10 @@ const test_data = [
     } as UploadDetailType,
   },
   {
-    fileName: 'NewUploads4.csv',
+    fileName: "NewUploads4.csv",
     sdr: {
-      avatar: '',
-      name: 'Adam Meehan',
+      avatar: "",
+      name: "Adam Meehan",
     } as SDRType,
     upload_details: {
       process: 521,
@@ -133,10 +145,10 @@ const test_data = [
     } as UploadDetailType,
   },
   {
-    fileName: 'NewUploads5.csv',
+    fileName: "NewUploads5.csv",
     sdr: {
-      avatar: '',
-      name: 'Adam Meehan',
+      avatar: "",
+      name: "Adam Meehan",
     } as SDRType,
     upload_details: {
       process: 100,
@@ -157,7 +169,7 @@ type Segment = {
 };
 
 export default function FindContactsPage() {
-  setPageTitle('Find Contacts');
+  setPageTitle("Find Contacts");
 
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
@@ -165,18 +177,26 @@ export default function FindContactsPage() {
   const activePersonaEmoji = currentProject?.emoji;
   const activePersonaName = currentProject?.name;
 
-  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(prospectUploadDrawerOpenState);
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
+    prospectUploadDrawerOpenState
+  );
   const [uploadId, setUploadId] = useRecoilState(prospectUploadDrawerIdState);
 
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
-    columnAccessor: 'fileName',
-    direction: 'desc',
+    columnAccessor: "fileName",
+    direction: "desc",
   });
 
   const [records, setRecords] = useState(test_data);
 
   const [segments, setSegments]: any = useState<Segment[]>([]);
-  const [selectedSegmentId, setSelectedSegmentId]: any = useState<number | null>(null);
+  const urlParams = new URLSearchParams(window.location.search);
+
+  const [selectedSegmentId, setSelectedSegmentId]: any = useState<
+    number | null
+  >(
+    urlParams.get("segment_id") ? parseInt(urlParams.get("segment_id")!) : null
+  );
 
   const fetchSegments = async () => {
     const response = await fetch(`${API_URL}/segment/all`, {
@@ -193,7 +213,7 @@ export default function FindContactsPage() {
     // setPage(1)
     console.log(status);
     const data = _.sortBy(test_data, sortStatus.columnAccessor);
-    setRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
+    setRecords(sortStatus.direction === "desc" ? data.reverse() : data);
     // const data = sortBy(companies, sortStatus.columnAccessor) as Company[]
     // setRecords(sortStatus.direction === 'desc' ? data.reverse() : data)
     setSortStatus(status);
@@ -203,41 +223,41 @@ export default function FindContactsPage() {
     queryKey: [`query-get-persona-uploads`],
     queryFn: async () => {
       const response = await getAllUploads(userToken, activePersona!);
-      return response.status === 'success' ? response.data : [];
+      return response.status === "success" ? response.data : [];
     },
     enabled: !!activePersona,
   });
-  const [tab, setTab] = useState('');
+  const [tab, setTab] = useState("");
 
   useEffect(() => {
     fetchSegments();
   }, []);
 
   return (
-    <Flex p='lg' direction='column' h='100%'>
+    <Flex p="lg" direction="column" h="100%">
       <Title order={2}>
-        <Text color='gray'>
+        <Text color="gray">
           Find Contacts: {activePersonaEmoji} {activePersonaName}
         </Text>
       </Title>
       <Tabs
-        defaultValue='sellscale-db'
-        mt='md'
+        defaultValue="sellscale-db"
+        mt="md"
         keepMounted={false}
-        h='100%'
-        variant='unstyled'
+        h="100%"
+        variant="unstyled"
         styles={(theme) => ({
           tabsList: {
             // backgroundColor: theme.colors.blue[theme.fn.primaryShade()],
 
-            height: '44px',
-            marginInline: '20px',
+            height: "44px",
+            marginInline: "20px",
           },
           panel: {
             backgroundColor: theme.white,
-            border: '1.5px solid #e6f0fc',
-            borderRadius: '8px',
-            padding: `0 0 ${rem('20px')} 0`,
+            border: "1.5px solid #e6f0fc",
+            borderRadius: "8px",
+            padding: `0 0 ${rem("20px")} 0`,
           },
           tab: {
             ...theme.fn.focusStyles(),
@@ -250,12 +270,12 @@ export default function FindContactsPage() {
             borderTopRightRadius: 8,
             color: theme.colors.blue[theme.fn.primaryShade()],
 
-            '&[data-active]': {
+            "&[data-active]": {
               backgroundColor: theme.colors.blue[theme.fn.primaryShade()],
               borderBottomColor: theme.white,
               color: theme.white,
             },
-            '&:disabled': {
+            "&:disabled": {
               backgroundColor: theme.colors.gray[theme.fn.primaryShade()],
               color: theme.colors.gray[4],
             },
@@ -267,22 +287,42 @@ export default function FindContactsPage() {
         })}
       >
         <Tabs.List grow>
-          <Tooltip label='Advanced - SellScale Database' position='bottom'>
-            <Tabs.Tab value='sellscale-db' icon={<IconDatabase size='0.9rem' />} onClick={() => setTab('sellscale-db')}>
+          <Tooltip label="Advanced - SellScale Database" position="bottom">
+            <Tabs.Tab
+              value="sellscale-db"
+              icon={<IconDatabase size="0.9rem" />}
+              onClick={() => setTab("sellscale-db")}
+            >
               Contact Database
             </Tabs.Tab>
           </Tooltip>
-          <Tabs.Tab value='by-csv' icon={<IconUpload size='0.9rem' />} onClick={() => setTab('by-csv')}>
+          <Tabs.Tab
+            value="by-csv"
+            icon={<IconUpload size="0.9rem" />}
+            onClick={() => setTab("by-csv")}
+          >
             Upload CSV
           </Tabs.Tab>
 
-          <Tabs.Tab value='linkedin-url' icon={<IconBrandLinkedin size='0.9rem' />} onClick={() => setTab('linkedin-url')}>
+          <Tabs.Tab
+            value="linkedin-url"
+            icon={<IconBrandLinkedin size="0.9rem" />}
+            onClick={() => setTab("linkedin-url")}
+          >
             LinkedIn URL
           </Tabs.Tab>
-          <Tabs.Tab value='linkedin-sales-navigator' icon={<IconBrandLinkedin size='0.9rem' />} onClick={() => setTab('linkedin-sales-navigator')}>
+          <Tabs.Tab
+            value="linkedin-sales-navigator"
+            icon={<IconBrandLinkedin size="0.9rem" />}
+            onClick={() => setTab("linkedin-sales-navigator")}
+          >
             SalesNav Search
           </Tabs.Tab>
-          <Tabs.Tab value='individuals' icon={<IconDatabase size='0.9rem' />} onClick={() => setTab('individuals')}>
+          <Tabs.Tab
+            value="individuals"
+            icon={<IconDatabase size="0.9rem" />}
+            onClick={() => setTab("individuals")}
+          >
             Chat
           </Tabs.Tab>
           {/* <Tabs.Tab value='csv-beta' icon={<IconSparkles size='0.9rem' />} onClick={() => setTab('csv-beta')}></Tabs.Tab>
@@ -292,12 +332,12 @@ export default function FindContactsPage() {
           </Tooltip> */}
         </Tabs.List>
 
-        <Tabs.Panel value='individuals' pt='xs' h='95%'>
+        <Tabs.Panel value="individuals" pt="xs" h="95%">
           {/* <IndividualsDashboard openFilter={() => {}} /> */}
           <ChatDashboard />
         </Tabs.Panel>
 
-        <Tabs.Panel value='linkedin-sales-navigator' pt='xs'>
+        <Tabs.Panel value="linkedin-sales-navigator" pt="xs">
           <SalesNavigatorComponent />
         </Tabs.Panel>
 
@@ -305,28 +345,29 @@ export default function FindContactsPage() {
           <YourNetworkSection />
         </Tabs.Panel> */}
 
-        <Tabs.Panel value='linkedin-url' pt='xs'>
-          <Card maw='600px' ml='auto' mr='auto'>
+        <Tabs.Panel value="linkedin-url" pt="xs">
+          <Card maw="600px" ml="auto" mr="auto">
             <Title order={3}>Upload Prospect from One LinkedIn URL</Title>
-            <Text mb='md' color='gray'>
-              Upload a LinkedIn URL to add a prospect to your database. This can be a Sales Navigator link (i.e. /sales) or a regular LinkedIn profile link
-              (i.e. /in).
+            <Text mb="md" color="gray">
+              Upload a LinkedIn URL to add a prospect to your database. This can
+              be a Sales Navigator link (i.e. /sales) or a regular LinkedIn
+              profile link (i.e. /in).
             </Text>
             <LinkedInURLUpload
               afterUpload={() => {
                 showNotification({
-                  title: 'Success',
-                  message: 'Uploaded contact successfully',
-                  color: 'teal',
+                  title: "Success",
+                  message: "Uploaded contact successfully",
+                  color: "teal",
                 });
               }}
             />
           </Card>
         </Tabs.Panel>
-        <Tabs.Panel value='by-csv' pt='xs' style={{ position: 'relative' }}>
-          <Card maw='600px' ml='auto' mr='auto'>
+        <Tabs.Panel value="by-csv" pt="xs" style={{ position: "relative" }}>
+          <Card maw="600px" ml="auto" mr="auto">
             <Title order={3}>Upload CSV</Title>
-            <Text mb='md' color='gray'>
+            <Text mb="md" color="gray">
               Upload a CSV file with the following columns
               <ul>
                 <li>linkedin_url (required; if no email)</li>
@@ -340,11 +381,11 @@ export default function FindContactsPage() {
 
             {/* Segment Selector */}
             <Select
-              mb='md'
-              mt='md'
-              placeholder='Select Segment'
-              label='(optional) Select Segment'
-              description='Select a segment to add these prospects to'
+              mb="md"
+              mt="md"
+              placeholder="Select Segment"
+              label="(optional) Select Segment"
+              description="Select a segment to add these prospects to"
               value={selectedSegmentId}
               onChange={(value: any) => {
                 setSelectedSegmentId(value);
@@ -359,12 +400,12 @@ export default function FindContactsPage() {
 
             <FileDropAndPreview
               segmentId={selectedSegmentId}
-              personaId={activePersona + ''}
+              personaId={activePersona + ""}
               onUploadSuccess={() => {
                 showNotification({
-                  title: 'Success',
-                  message: 'File uploaded successfully',
-                  color: 'teal',
+                  title: "Success",
+                  message: "File uploaded successfully",
+                  color: "teal",
                 });
               }}
             />
@@ -373,17 +414,17 @@ export default function FindContactsPage() {
           {uploads && uploads.length > 0 && (
             <Select
               style={{
-                position: 'absolute',
+                position: "absolute",
                 top: 10,
                 right: 0,
               }}
-              placeholder='View Upload Details'
+              placeholder="View Upload Details"
               data={uploads.map((upload: any) => ({
-                value: upload.id + '',
+                value: upload.id + "",
                 label: upload.created_at,
               }))}
-              searchValue=''
-              value=''
+              searchValue=""
+              value=""
               onChange={(value) => {
                 if (value) {
                   setUploadId(+value);
@@ -394,17 +435,23 @@ export default function FindContactsPage() {
           )}
         </Tabs.Panel>
 
-        <Tabs.Panel value='sellscale-db' pt='xs' style={{ position: 'relative' }}>
-          {userToken && 
+        <Tabs.Panel
+          value="sellscale-db"
+          pt="xs"
+          style={{ position: "relative" }}
+        >
+          {userToken && (
             <iframe
-              src={'https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=' + userToken}
-              style={{ width: '100%', height: window.innerHeight + 120 }}
+              src={
+                "https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=" +
+                userToken
+              }
+              style={{ width: "100%", height: window.innerHeight + 120 }}
               frameBorder={0}
             />
-          }
+          )}
         </Tabs.Panel>
-        
-        
+
         {/* <Tabs.Panel value='csv-beta' pt='xs' style={{ position: 'relative' }}>
           <Card ml='auto' mr='auto'>
             <FileDropAndPreviewV2

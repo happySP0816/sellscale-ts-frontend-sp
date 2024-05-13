@@ -23,8 +23,8 @@ import {
   Input,
   Popover,
   Loader,
-} from '@mantine/core';
-import posthog from 'posthog-js';
+} from "@mantine/core";
+import posthog from "posthog-js";
 
 import {
   IconArrowRight,
@@ -56,22 +56,32 @@ import {
   IconUsers,
   IconWand,
   IconX,
-} from '@tabler/icons';
-import { DataGrid } from 'mantine-data-grid';
-import { useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
-import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { API_URL } from '@constants/data';
-import { IconArrowsSplit2, IconUsersMinus, IconUsersPlus } from '@tabler/icons-react';
-import SegmentV2Overview from './SegmentV2Overview';
-import { openConfirmModal, openContextModal } from '@mantine/modals';
-import PersonaSelect from '@common/persona/PersonaSplitSelect';
-import { showNotification } from '@mantine/notifications';
-import SegmentAutodownload from './SegmentAutodownload';
-import { RequestCampaignModal } from '@modals/SegmentV2/RequestCampaignModal';
-import { addCampaignAiRequest } from '@utils/requests/aiRequests';
-import { createSegmentTag, getAllSegmentTags, addTagToSegment, removeTagFromSegment, deleteTag } from '@utils/requests/segmentTagTemplates';
-import { deterministicMantineColor } from '@utils/requests/utils';
+} from "@tabler/icons";
+import { DataGrid } from "mantine-data-grid";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
+import {
+  IconArrowsSplit2,
+  IconUsersMinus,
+  IconUsersPlus,
+} from "@tabler/icons-react";
+import SegmentV2Overview from "./SegmentV2Overview";
+import { openConfirmModal, openContextModal } from "@mantine/modals";
+import PersonaSelect from "@common/persona/PersonaSplitSelect";
+import { showNotification } from "@mantine/notifications";
+import SegmentAutodownload from "./SegmentAutodownload";
+import { RequestCampaignModal } from "@modals/SegmentV2/RequestCampaignModal";
+import { addCampaignAiRequest } from "@utils/requests/aiRequests";
+import {
+  createSegmentTag,
+  getAllSegmentTags,
+  addTagToSegment,
+  removeTagFromSegment,
+  deleteTag,
+} from "@utils/requests/segmentTagTemplates";
+import { deterministicMantineColor } from "@utils/requests/utils";
 
 type PropsType = {
   onDownloadHistoryClick?: () => void;
@@ -81,7 +91,7 @@ export default function SegmentV2(props: PropsType) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
-  const [createSegmentName, setCreateSegmentName] = useState('');
+  const [createSegmentName, setCreateSegmentName] = useState("");
   const [createSegmentParentId, setCreateSegmentParentId] = useState(null);
   const [totalProspected, setTotalProspected] = useState(0);
   const [totalContacted, setTotalContacted] = useState(0);
@@ -89,23 +99,33 @@ export default function SegmentV2(props: PropsType) {
   const [totalInFilters, setTotalInFilters] = useState(0);
   const [showAllSegments, setShowAllSegments] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [isFullscreenModalOpen, setFullscreenModalOpen] = useState(false);
-  const [iframeUrl, setIframeUrl] = useState('');
-  const [showConnectCampaignModal, setShowConnectCampaignModal] = useState(false);
+  const [iframeUrl, setIframeUrl] = useState("");
+  const [showConnectCampaignModal, setShowConnectCampaignModal] = useState(
+    false
+  );
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
-  const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
+  const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(
+    null
+  );
 
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
-  const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(false);
+  const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(
+    false
+  );
   const [sdrs, setAllSDRs] = useState([] as any[]);
   const [selectedSdrId, setSelectedSdrId] = useState(null);
-  const [segmentTagCategories, setSegmentTagCategories] = useState<Array<{ id: number; name: string; }>>([]);
+  const [segmentTagCategories, setSegmentTagCategories] = useState<
+    Array<{ id: number; name: string }>
+  >([]);
   const [tagMenuOpen, setTagMenuOpen] = useState(false);
   const [tagMenuLoading, setTagMenuLoading] = useState(false);
-  const [showEditSegmentNameModal, setShowEditSegmentNameModal] = useState(false);
-  const [editSegmentName, setEditSegmentName] = useState('');
+  const [showEditSegmentNameModal, setShowEditSegmentNameModal] = useState(
+    false
+  );
+  const [editSegmentName, setEditSegmentName] = useState("");
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [createBatchNumber, setCreateBatchNumber] = useState(2);
   const [moveSegmentParentId, setMoveSegmentParentId] = useState(null);
@@ -115,8 +135,12 @@ export default function SegmentV2(props: PropsType) {
   const [showAutoDownloadFeature, setShowAutoDownloadFeature] = useState(false);
 
   // methods = FROM_SCRATCH, FROM_TEMPLATE, FROM_AI
-  const [createCampaignMethods, setCreateCampaignMethods] = useState('FROM_SCRATCH');
-  const [connectCampaignView, setConnectCampaignView] = useState('SELECT_METHOD');
+  const [createCampaignMethods, setCreateCampaignMethods] = useState(
+    "FROM_SCRATCH"
+  );
+  const [connectCampaignView, setConnectCampaignView] = useState(
+    "SELECT_METHOD"
+  );
 
   const [arrow, setArrow] = useState(false);
   const [data, setData] = useState([]);
@@ -133,33 +157,42 @@ export default function SegmentV2(props: PropsType) {
   const getNestedRows = (rows: any) => {
     const data = rows.flatMap((row: any) => {
       const hasChildren =
-        expandedRows.includes(row.id) && row.sub_segments && row.sub_segments.length > 0;
+        expandedRows.includes(row.id) &&
+        row.sub_segments &&
+        row.sub_segments.length > 0;
       const nestedRows = hasChildren
-        ? row.sub_segments.map((subSegment: any, index: number, array: any[]) => ({
-            ...subSegment,
-            parentId: row.id,
-            isChild: true,
-            isLastChild: index === array.length - 1,
-          }))
+        ? row.sub_segments.map(
+            (subSegment: any, index: number, array: any[]) => ({
+              ...subSegment,
+              parentId: row.id,
+              isChild: true,
+              isLastChild: index === array.length - 1,
+            })
+          )
         : [];
-      return [{ ...row, isChild: false, hasChildren: hasChildren }, ...nestedRows];
+      return [
+        { ...row, isChild: false, hasChildren: hasChildren },
+        ...nestedRows,
+      ];
     });
 
     return data.filter((row: any) => {
       if (searchQuery) {
-        return JSON.stringify(row).toLowerCase().includes(searchQuery.toLowerCase());
+        return JSON.stringify(row)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
       }
       return true;
     });
   };
   const columns = [
     {
-      accessorKey: 'persona_name',
+      accessorKey: "persona_name",
       minSize: 350,
       header: () => (
-        <Flex align={'center'} gap={'3px'}>
-          <IconLetterT color='gray' size={'0.9rem'} />
-          <Text color='gray'>Persona Name</Text>
+        <Flex align={"center"} gap={"3px"}>
+          <IconLetterT color="gray" size={"0.9rem"} />
+          <Text color="gray">Persona Name</Text>
         </Flex>
       ),
       cell: (cell: any) => {
@@ -175,8 +208,15 @@ export default function SegmentV2(props: PropsType) {
           client_sdr,
         } = cell.row.original;
 
-        const totalProspectedChildren = sub_segments.reduce((total: number, segment: any) => total + (segment.num_prospected || 0), 0);
-        const totalContactedChildren = sub_segments.reduce((total: number, segment: any) => total + (segment.num_contacted || 0), 0);
+        const totalProspectedChildren = sub_segments.reduce(
+          (total: number, segment: any) =>
+            total + (segment.num_prospected || 0),
+          0
+        );
+        const totalContactedChildren = sub_segments.reduce(
+          (total: number, segment: any) => total + (segment.num_contacted || 0),
+          0
+        );
 
         if (!num_prospected) {
           num_prospected = 0;
@@ -188,65 +228,71 @@ export default function SegmentV2(props: PropsType) {
         const isMySegment = client_sdr.id !== userData.id;
 
         return (
-          <div className={`${isChild ? 'bg-[#F7F8FA] pl-8 h-full' : ''} relative`}>
+          <div
+            className={`${isChild ? "bg-[#F7F8FA] pl-8 h-full" : ""} relative`}
+          >
             {isChild && (
               <div
                 className={`absolute flex flex-col  ${
-                  isLastChild ? 'h-[55%] justify-end' : 'h-full justify-center'
+                  isLastChild ? "h-[55%] justify-end" : "h-full justify-center"
                 } mr-10`}
-                style={{ borderLeft: '2px solid #D9DEE5' }}
+                style={{ borderLeft: "2px solid #D9DEE5" }}
               >
                 <IconArrowRight
-                  size={'1.2rem'}
-                  color='#D9DEE5'
+                  size={"1.2rem"}
+                  color="#D9DEE5"
                   className={`${
-                    isLastChild ? 'absolute bottom-[-9.2px] left-[-3px]' : 'absolute left-[-3px]'
+                    isLastChild
+                      ? "absolute bottom-[-9.2px] left-[-3px]"
+                      : "absolute left-[-3px]"
                   }`}
                 />
               </div>
             )}
 
             <Flex
-              h={'100%'}
-              px={'sm'}
-              align={'center'}
-              justify={'start'}
-              py={'md'}
-              ml={isChild ? 'sm' : '0px'}
+              h={"100%"}
+              px={"sm"}
+              align={"center"}
+              justify={"start"}
+              py={"md"}
+              ml={isChild ? "sm" : "0px"}
               className={`${
                 isChild
-                  ? 'absolute before:absolute before:-inset-1 before:bg-[#8D8DC5] before:w-[2px] before:left-1 before:top-[1px]'
-                  : ''
+                  ? "absolute before:absolute before:-inset-1 before:bg-[#8D8DC5] before:w-[2px] before:left-1 before:top-[1px]"
+                  : ""
               } `}
-              w='100%'
+              w="100%"
             >
               <Menu
-                shadow='md'
+                shadow="md"
                 withinPortal
-                position='right'
+                position="right"
                 disabled={isMySegment}
                 styles={{
                   itemLabel: {
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
                   },
                 }}
               >
                 <Menu.Target>
                   <ActionIcon disabled={isMySegment}>
-                    <IconDotsVertical size={'1.2rem'} />
+                    <IconDotsVertical size={"1.2rem"} />
                   </ActionIcon>
                 </Menu.Target>
 
                 <Menu.Dropdown>
-                  <Menu.Label display={isMySegment ? 'block' : 'none'}>Prospects</Menu.Label>
+                  <Menu.Label display={isMySegment ? "block" : "none"}>
+                    Prospects
+                  </Menu.Label>
                   <Menu.Item
                     onClick={() => {
-                      window.location.href = `/contacts/find`;
+                      window.location.href = `/contacts/find?segment_id=${id}`;
                     }}
                   >
-                    <IconUsersPlus size={'0.9rem'} />
+                    <IconUsersPlus size={"0.9rem"} />
                     Add Prospects
                   </Menu.Item>
                   <Menu.Item
@@ -255,7 +301,7 @@ export default function SegmentV2(props: PropsType) {
                       setSelectedSegmentId(id);
                     }}
                   >
-                    <IconUsers size={'0.9rem'} />
+                    <IconUsers size={"0.9rem"} />
                     View Prospects
                   </Menu.Item>
 
@@ -267,7 +313,7 @@ export default function SegmentV2(props: PropsType) {
                       duplicateSegment(id, true);
                     }}
                   >
-                    <IconCopy size={'0.9rem'} />
+                    <IconCopy size={"0.9rem"} />
                     Duplicate Segment
                   </Menu.Item>
                   <Menu.Item
@@ -276,7 +322,7 @@ export default function SegmentV2(props: PropsType) {
                       setShowBatchModal(true);
                     }}
                   >
-                    <IconArrowsSplit2 size={'0.9rem'} />
+                    <IconArrowsSplit2 size={"0.9rem"} />
                     Create Batches
                   </Menu.Item>
                   <Menu.Item
@@ -285,7 +331,7 @@ export default function SegmentV2(props: PropsType) {
                       setSelectedSegmentId(id);
                     }}
                   >
-                    <IconSwitch size={'0.9rem'} />
+                    <IconSwitch size={"0.9rem"} />
                     Move Segment
                   </Menu.Item>
 
@@ -294,19 +340,22 @@ export default function SegmentV2(props: PropsType) {
                   <Menu.Item
                     onClick={() =>
                       openContextModal({
-                        modal: 'splitSegment',
+                        modal: "splitSegment",
                         title: (
-                          <Group position='apart'>
+                          <Group position="apart">
                             <div>
                               <Title
                                 order={3}
                                 sx={{
-                                  display: 'flex',
-                                  gap: '8px',
-                                  alignItems: 'center',
+                                  display: "flex",
+                                  gap: "8px",
+                                  alignItems: "center",
                                 }}
                               >
-                                <IconButterfly color='#228be6' style={{ marginTop: '-5px' }} />
+                                <IconButterfly
+                                  color="#228be6"
+                                  style={{ marginTop: "-5px" }}
+                                />
                                 Split Segment
                               </Title>
                             </div>
@@ -314,7 +363,7 @@ export default function SegmentV2(props: PropsType) {
                         ),
                         styles: (theme) => ({
                           title: {
-                            width: '100%',
+                            width: "100%",
                           },
                           header: {
                             margin: 0,
@@ -332,25 +381,25 @@ export default function SegmentV2(props: PropsType) {
                       })
                     }
                   >
-                    <IconButterfly size={'0.9rem'} />
+                    <IconButterfly size={"0.9rem"} />
                     Manually Split Segment
                   </Menu.Item>
                   <Menu.Item
                     onClick={() =>
                       openContextModal({
-                        modal: 'autosplitsegment',
+                        modal: "autosplitsegment",
                         title: (
-                          <Group position='apart'>
+                          <Group position="apart">
                             <div>
                               <Title
                                 order={2}
                                 sx={{
-                                  display: 'flex',
-                                  gap: '8px',
-                                  alignItems: 'center',
+                                  display: "flex",
+                                  gap: "8px",
+                                  alignItems: "center",
                                 }}
                               >
-                                <IconWand color='#228be6' />
+                                <IconWand color="#228be6" />
                                 Auto Split Segment
                               </Title>
                             </div>
@@ -358,7 +407,7 @@ export default function SegmentV2(props: PropsType) {
                         ),
                         styles: (theme) => ({
                           title: {
-                            width: '100%',
+                            width: "100%",
                           },
                           header: {
                             margin: 0,
@@ -368,39 +417,39 @@ export default function SegmentV2(props: PropsType) {
                       })
                     }
                   >
-                    <IconWand size={'0.9rem'} />
+                    <IconWand size={"0.9rem"} />
                     Auto Split Segment
                   </Menu.Item>
 
                   <Menu.Divider />
-                  <Menu.Label color='red'>Danger zone</Menu.Label>
+                  <Menu.Label color="red">Danger zone</Menu.Label>
                   <Menu.Item
-                    color='red'
+                    color="red"
                     onClick={() => {
                       setSelectedSegmentId(id);
                       setShowTransferSegmentModal(true);
                     }}
                   >
-                    <IconUsersMinus size={'0.9rem'} />
+                    <IconUsersMinus size={"0.9rem"} />
                     Transfer to Teammate
                   </Menu.Item>
                   <Menu.Item
-                    color='red'
+                    color="red"
                     onClick={() =>
                       openContextModal({
-                        modal: 'clearsegment',
+                        modal: "clearsegment",
                         title: (
-                          <Group position='apart'>
+                          <Group position="apart">
                             <div>
                               <Title
                                 order={2}
                                 sx={{
-                                  display: 'flex',
-                                  gap: '8px',
-                                  alignItems: 'center',
+                                  display: "flex",
+                                  gap: "8px",
+                                  alignItems: "center",
                                 }}
                               >
-                                <IconTrash color='red' />
+                                <IconTrash color="red" />
                                 Clear Segment
                               </Title>
                             </div>
@@ -408,7 +457,7 @@ export default function SegmentV2(props: PropsType) {
                         ),
                         styles: (theme) => ({
                           title: {
-                            width: '100%',
+                            width: "100%",
                           },
                           header: {
                             margin: 0,
@@ -423,27 +472,27 @@ export default function SegmentV2(props: PropsType) {
                       })
                     }
                   >
-                    <IconBackspace size={'0.9rem'} />
+                    <IconBackspace size={"0.9rem"} />
                     Clear Prospects
                   </Menu.Item>
                   <Menu.Item
-                    color='red'
-                    style={{ display: 'flex', alignItems: 'center' }}
+                    color="red"
+                    style={{ display: "flex", alignItems: "center" }}
                     onClick={() => {
                       openContextModal({
-                        modal: 'deletesegment',
+                        modal: "deletesegment",
                         title: (
-                          <Group position='apart'>
+                          <Group position="apart">
                             <div>
                               <Title
                                 order={2}
                                 sx={{
-                                  display: 'flex',
-                                  gap: '8px',
-                                  alignItems: 'center',
+                                  display: "flex",
+                                  gap: "8px",
+                                  alignItems: "center",
                                 }}
                               >
-                                <IconTrash color='red' />
+                                <IconTrash color="red" />
                                 Delete Segment
                               </Title>
                             </div>
@@ -451,10 +500,10 @@ export default function SegmentV2(props: PropsType) {
                         ),
                         styles: (theme) => ({
                           root: {
-                            maxWidth: '40%',
+                            maxWidth: "40%",
                           },
                           title: {
-                            width: '100%',
+                            width: "100%",
                           },
                           header: {
                             margin: 0,
@@ -468,31 +517,33 @@ export default function SegmentV2(props: PropsType) {
                       });
                     }}
                   >
-                    <IconTrash size={'0.9rem'} />
+                    <IconTrash size={"0.9rem"} />
                     Delete Segment
                   </Menu.Item>
                 </Menu.Dropdown>
               </Menu>
-              <Flex align={'center'} gap={'sm'} className='segment' w='100%'>
-                <Box w='100%' sx={{ flexDirection: 'row', display: 'flex' }}>
+              <Flex align={"center"} gap={"sm"} className="segment" w="100%">
+                <Box w="100%" sx={{ flexDirection: "row", display: "flex" }}>
                   <Box
-                    w='36px'
-                    h='36px'
-                    mr='xs'
+                    w="36px"
+                    h="36px"
+                    mr="xs"
                     sx={{
-                      backgroundColor: client_archetype?.emoji ? '#E1F7FF' : '#F7F8FA',
-                      padding: '0.5rem',
-                      borderRadius: '1rem',
+                      backgroundColor: client_archetype?.emoji
+                        ? "#E1F7FF"
+                        : "#F7F8FA",
+                      padding: "0.5rem",
+                      borderRadius: "1rem",
                     }}
                   >
-                    <Text size='lg' mt='-3px'>
-                      {client_archetype?.emoji ? client_archetype.emoji : ''}
+                    <Text size="lg" mt="-3px">
+                      {client_archetype?.emoji ? client_archetype.emoji : ""}
                     </Text>
                   </Box>
                   <Box>
-                    <Flex align={'center'} gap={'sm'}>
+                    <Flex align={"center"} gap={"sm"}>
                       <Flex>
-                        <Text size={'sm'} fw={500}>
+                        <Text size={"sm"} fw={500}>
                           {person_name}
                         </Text>
                         <ActionIcon
@@ -502,48 +553,79 @@ export default function SegmentV2(props: PropsType) {
                             setSelectedSegmentId(id);
                           }}
                         >
-                          <IconEdit size={'0.8rem'} />
+                          <IconEdit size={"0.8rem"} />
                         </ActionIcon>
                       </Flex>
                       {sub_segments && sub_segments.length > 0 && (
                         <Badge
-                          tt={'initial'}
-                          variant='outline'
+                          tt={"initial"}
+                          variant="outline"
                           onClick={() => toggle(id)}
                           rightSection={
                             expandedRows.includes(id) ? (
-                              <IconChevronUp size={'0.9rem'} style={{ marginTop: '5px' }} />
+                              <IconChevronUp
+                                size={"0.9rem"}
+                                style={{ marginTop: "5px" }}
+                              />
                             ) : (
-                              <IconChevronDown size={'0.9rem'} style={{ marginTop: '5px' }} />
+                              <IconChevronDown
+                                size={"0.9rem"}
+                                style={{ marginTop: "5px" }}
+                              />
                             )
                           }
                         >
-                          {expandedRows.includes(id) ? 'Hide' : 'Show'} {sub_segments.length}{' '}
-                          Sub-Segments
+                          {expandedRows.includes(id) ? "Hide" : "Show"}{" "}
+                          {sub_segments.length} Sub-Segments
                         </Badge>
                       )}
                     </Flex>
-                    <Flex direction="column" align={'left'} gap={'sm'} mt={3}>
-                    <Flex direction="row" align={'left'} gap={'sm'} mt={3}>
-                      <Progress
-                        value={Math.round((num_contacted / (num_prospected + 0.0001)) * 100)}
-                        w={140}
-                        color={isChild ? 'grape' : '#3B85EF'}
-                      />
-                      <Text size='10px' color={!isChild ? '#3B85EF' : 'grape'} fw={600}>
-                        {Math.round((num_contacted / (num_prospected + 0.0001)) * 100)}% (
-                        {num_contacted} / {num_prospected}) {'in' + (isChild ? ' child segment' : ' segment')}
-                      </Text>
-                      </Flex>
-                      <Flex direction="row" align={'left'} gap={'sm'} mt={3}>
-                      {sub_segments && sub_segments.length > 0 && (
-                        <><Progress
-                          value={Math.round((totalContactedChildren / totalProspectedChildren + 0.0001) * 100)}
+                    <Flex direction="column" align={"left"} gap={"sm"} mt={3}>
+                      <Flex direction="row" align={"left"} gap={"sm"} mt={3}>
+                        <Progress
+                          value={Math.round(
+                            (num_contacted / (num_prospected + 0.0001)) * 100
+                          )}
                           w={140}
-                          color='grape' /><Text size='10px' color='grape' fw={600}>
-                            {`${Math.round((totalContactedChildren / totalProspectedChildren + 0.0001) * 100) || 0}% ( ${totalContactedChildren} / ${totalProspectedChildren} ) in children segments`}
-                          </Text></>
-                      )}
+                          color={isChild ? "grape" : "#3B85EF"}
+                        />
+                        <Text
+                          size="10px"
+                          color={!isChild ? "#3B85EF" : "grape"}
+                          fw={600}
+                        >
+                          {Math.round(
+                            (num_contacted / (num_prospected + 0.0001)) * 100
+                          )}
+                          % ({num_contacted} / {num_prospected}){" "}
+                          {"in" + (isChild ? " child segment" : " segment")}
+                        </Text>
+                      </Flex>
+                      <Flex direction="row" align={"left"} gap={"sm"} mt={3}>
+                        {sub_segments && sub_segments.length > 0 && (
+                          <>
+                            <Progress
+                              value={Math.round(
+                                (totalContactedChildren /
+                                  totalProspectedChildren +
+                                  0.0001) *
+                                  100
+                              )}
+                              w={140}
+                              color="grape"
+                            />
+                            <Text size="10px" color="grape" fw={600}>
+                              {`${
+                                Math.round(
+                                  (totalContactedChildren /
+                                    totalProspectedChildren +
+                                    0.0001) *
+                                    100
+                                ) || 0
+                              }% ( ${totalContactedChildren} / ${totalProspectedChildren} ) in children segments`}
+                            </Text>
+                          </>
+                        )}
                       </Flex>
                     </Flex>
                   </Box>
@@ -555,20 +637,27 @@ export default function SegmentV2(props: PropsType) {
       },
     },
     {
-      accessorKey: 'pre_filters',
+      accessorKey: "pre_filters",
       header: () => (
-        <Flex align={'center'} gap={'3px'}>
-          <IconBolt color='gray' size={'0.9rem'} />
-          <Text color='gray'>Pre-Filters</Text>
+        <Flex align={"center"} gap={"3px"}>
+          <IconBolt color="gray" size={"0.9rem"} />
+          <Text color="gray">Pre-Filters</Text>
         </Flex>
       ),
       cell: (cell: any) => {
         const { isChild } = cell.row.original;
-        const { contacts, filters, client_sdr, apollo_query, autoscrape_enabled } = cell.row.original;
+        const {
+          contacts,
+          filters,
+          client_sdr,
+          apollo_query,
+          autoscrape_enabled,
+        } = cell.row.original;
 
         const successfulScrapes = Math.min(
           cell.row.original.current_scrape_page,
-          Math.ceil(apollo_query?.num_results / 100));
+          Math.ceil(apollo_query?.num_results / 100)
+        );
         const totalScrapes = Math.ceil(apollo_query?.num_results / 100);
         const doneScraping = successfulScrapes === totalScrapes;
 
@@ -576,37 +665,37 @@ export default function SegmentV2(props: PropsType) {
 
         return (
           <Flex
-            w={'100%'}
-            h={'100%'}
+            w={"100%"}
+            h={"100%"}
             mah={window.innerHeight}
-            sx={{ overflowY: 'scroll' }}
-            px={'sm'}
-            py={'md'}
-            align={'center'}
-            justify={'start'}
-            bg={isChild ? '#F7F8FA' : 'white'}
+            sx={{ overflowY: "scroll" }}
+            px={"sm"}
+            py={"md"}
+            align={"center"}
+            justify={"start"}
+            bg={isChild ? "#F7F8FA" : "white"}
           >
             <Box>
               <Box>
                 {apollo_query?.num_results ? (
                   <>
-                    <Flex gap={4} fw={600} ml='xs'>
+                    <Flex gap={4} fw={600} ml="xs">
                       <Text>{apollo_query?.num_results.toLocaleString()}</Text>
-                      <Text color='gray'>people</Text>
+                      <Text color="gray">people</Text>
                     </Flex>
                     <Button
-                      leftIcon={<IconEdit size={'0.9rem'} />}
-                      variant='subtle'
-                      color='blue'
-                      size='xs'
-                      radius='md'
+                      leftIcon={<IconEdit size={"0.9rem"} />}
+                      variant="subtle"
+                      color="blue"
+                      size="xs"
+                      radius="md"
                       compact
-                      mb='xs'
+                      mb="xs"
                       onClick={() => {
                         setIframeUrl(
-                          'https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=' +
+                          "https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=" +
                             userToken +
-                            '&segment_id=' +
+                            "&segment_id=" +
                             cell.row.original.id
                         );
                         setFullscreenModalOpen(true);
@@ -617,11 +706,11 @@ export default function SegmentV2(props: PropsType) {
                     </Button>
                     {showAutoDownloadFeature && (
                       <Button
-                        w='100%'
-                        variant={autoscrape_enabled ? 'filled' : 'outline'}
+                        w="100%"
+                        variant={autoscrape_enabled ? "filled" : "outline"}
                         compact
-                        size='xs'
-                        color='teal'
+                        size="xs"
+                        color="teal"
                         onClick={() => {
                           setSelectedSegmentId(cell.row.original.id);
                           setOpenAutoDownloadModal(true);
@@ -637,20 +726,33 @@ export default function SegmentV2(props: PropsType) {
                                 100
                             )}%
                             )`
-                          : 'Enable Auto-Download'} {!doneScraping && !autoscrape_enabled && successfulScrapes > 0 ? ' - ' + successfulScrapes + '/' + totalScrapes + ' scraped (' + Math.round((successfulScrapes / totalScrapes + 0.0001) * 100) + '%)' : ''}
+                          : "Enable Auto-Download"}{" "}
+                        {!doneScraping &&
+                        !autoscrape_enabled &&
+                        successfulScrapes > 0
+                          ? " - " +
+                            successfulScrapes +
+                            "/" +
+                            totalScrapes +
+                            " scraped (" +
+                            Math.round(
+                              (successfulScrapes / totalScrapes + 0.0001) * 100
+                            ) +
+                            "%)"
+                          : ""}
                       </Button>
                     )}
                   </>
                 ) : (
                   <Button
-                    size='xs'
+                    size="xs"
                     compact
                     disabled={notMyCampaign}
                     onClick={() => {
                       setIframeUrl(
-                        'https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=' +
+                        "https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=" +
                           userToken +
-                          '&segment_id=' +
+                          "&segment_id=" +
                           cell.row.original.id
                       );
                       setFullscreenModalOpen(true);
@@ -666,38 +768,55 @@ export default function SegmentV2(props: PropsType) {
       },
     },
     {
-      accessorKey: 'tags',
+      accessorKey: "tags",
       header: () => (
-        <Flex align='center' justify='space-between'>
-          <Flex align='center'>
-            <IconTag size={16} stroke={1.5} color='gray' style={{ marginRight: '4px' }} />
-            <Text color='gray'>Tags</Text>
+        <Flex align="center" justify="space-between">
+          <Flex align="center">
+            <IconTag
+              size={16}
+              stroke={1.5}
+              color="gray"
+              style={{ marginRight: "4px" }}
+            />
+            <Text color="gray">Tags</Text>
           </Flex>
-          <Flex align='center'>
-            <Menu 
-            withinPortal
-            opened={tagMenuOpen}
-            onOpen={async () => {
-              setTagMenuOpen(true);
-              setTagMenuLoading(true);
-              try {
-                const res = await getAllSegmentTags(userToken);
-                setSegmentTagCategories(res.data);
-              } catch (error) {
-                console.error('Failed to fetch tags:', error);
-              }
-              setTagMenuLoading(false);
-            }} onClose={() => { setTagMenuLoading(false); setTagMenuOpen(false); }}>
+          <Flex align="center">
+            <Menu
+              withinPortal
+              opened={tagMenuOpen}
+              onOpen={async () => {
+                setTagMenuOpen(true);
+                setTagMenuLoading(true);
+                try {
+                  const res = await getAllSegmentTags(userToken);
+                  setSegmentTagCategories(res.data);
+                } catch (error) {
+                  console.error("Failed to fetch tags:", error);
+                }
+                setTagMenuLoading(false);
+              }}
+              onClose={() => {
+                setTagMenuLoading(false);
+                setTagMenuOpen(false);
+              }}
+            >
               <Menu.Target>
-                <Button size='xs' variant='subtle'>
+                <Button size="xs" variant="subtle">
                   Filter by Tag
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
                 <Menu.Label>Available Tags</Menu.Label>
                 {segmentTagCategories?.map((tag, index) => (
-                  <Menu.Item key={index} onClick={() => { getAllSegments(true, tag.id); }}>
-                    <Badge color={deterministicMantineColor(tag.name)}>{tag.name}</Badge>
+                  <Menu.Item
+                    key={index}
+                    onClick={() => {
+                      getAllSegments(true, tag.id);
+                    }}
+                  >
+                    <Badge color={deterministicMantineColor(tag.name)}>
+                      {tag.name}
+                    </Badge>
                   </Menu.Item>
                 ))}
               </Menu.Dropdown>
@@ -706,18 +825,22 @@ export default function SegmentV2(props: PropsType) {
         </Flex>
       ),
       cell: (cell: any) => {
-        const [availableSegmentTags, setAvailableSegmentTags] = useState<Array<{ id: number; name: string; }>>([]);
+        const [availableSegmentTags, setAvailableSegmentTags] = useState<
+          Array<{ id: number; name: string }>
+        >([]);
         const [addTagClicked, setAddTagClicked] = useState(false);
         const [segmentTagsLoading, setSegmentTagsLoading] = useState(false);
-        const [segmentTags, setSegmentTags] = useState(cell.row.original.segment_tags);
+        const [segmentTags, setSegmentTags] = useState(
+          cell.row.original.segment_tags
+        );
         const [popoverOpened, setPopoverOpened] = useState(false);
 
         return (
-          <Popover 
+          <Popover
             opened={popoverOpened}
-            width={400} 
-            position="left" 
-            withArrow 
+            width={400}
+            position="left"
+            withArrow
             shadow="md"
             onClose={() => setPopoverOpened(false)}
             onOpen={() => {
@@ -729,112 +852,189 @@ export default function SegmentV2(props: PropsType) {
             }}
           >
             <Popover.Target>
-              <Box 
-                style={{ display: 'flex', justifyContent: 'left', flexWrap: 'wrap', cursor: 'pointer', width: '100%' }}
+              <Box
+                style={{
+                  display: "flex",
+                  justifyContent: "left",
+                  flexWrap: "wrap",
+                  cursor: "pointer",
+                  width: "100%",
+                }}
                 onClick={() => {
                   setPopoverOpened(true);
                 }}
               >
-                {segmentTags?.length > 0 ? segmentTags.map((tag: { name: string }, index: number) => (
-                  tag && <Badge key={index} radius="xl" size='md' color={deterministicMantineColor(tag.name)} style={{ margin: '5px' }}>
-                    {tag.name}
-                  </Badge>
-                )) : (
-                  <Button radius="xl" size='xs' color={'blue'} compact style={{ color: 'white', margin: '5px' }} onClick={() => setPopoverOpened(true)}>
+                {segmentTags?.length > 0 ? (
+                  segmentTags.map(
+                    (tag: { name: string }, index: number) =>
+                      tag && (
+                        <Badge
+                          key={index}
+                          radius="xl"
+                          size="md"
+                          color={deterministicMantineColor(tag.name)}
+                          style={{ margin: "5px" }}
+                        >
+                          {tag.name}
+                        </Badge>
+                      )
+                  )
+                ) : (
+                  <Button
+                    radius="xl"
+                    size="xs"
+                    color={"blue"}
+                    compact
+                    style={{ color: "white", margin: "5px" }}
+                    onClick={() => setPopoverOpened(true)}
+                  >
                     <IconPlus size={18} />
                   </Button>
                 )}
               </Box>
             </Popover.Target>
             <Popover.Dropdown>
-              {segmentTagsLoading ? <Loader /> : (
-              <Box style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap'}}>
-                {/* Available / New Tags */}
-                {availableSegmentTags?.map((tag: { name: string, id: number }, index: number) => {
-                  const isTagInSegment = segmentTags?.some((existingTag: { name: string; }) => existingTag?.name === tag?.name);
-                  return (
-                    tag && <Group spacing="xs" style={{ margin: '2px' }}>
-                      <Badge 
-                        radius="xl" 
-                        size='md' 
-                        color={deterministicMantineColor(tag.name)}
-                        style={{ 
-                          cursor: 'pointer',
-                          backgroundColor: isTagInSegment ? 'transparent' : '',
-                          color: isTagInSegment ? 'darkgrey' : ''
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!isTagInSegment) {
-                            addTagToSegment(userToken, cell.row.original.id, tag.id).then(() => {
-                              getAllSegments(true);
-                            });
-                          } else {
-                            removeTagFromSegment(userToken, cell.row.original.id, tag.id).then(() => {
-                              getAllSegments(true);
-                            });
-                          }
-                        }}
-                      >
-                        {tag.name} &nbsp;
-                      </Badge>
-                      <div style={{ marginLeft: '-35px' }}>
-                        <ActionIcon 
-                            color="red" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openConfirmModal({
-                                title: 'Confirm Global Tag Deletion',
-                                children: (
-                                  <Text size="sm">Are you sure you want to permanently delete this tag? It will get removed from all locations.</Text>
-                                ),
-                                labels: { confirm: 'Delete Tag', cancel: 'Cancel' },
-                                confirmProps: { color: 'red' },
-                                onCancel: () => {setPopoverOpened(true)},
-                                onConfirm: () => {
-                                  deleteTag(userToken, tag.id).then(() => {
+              {segmentTagsLoading ? (
+                <Loader />
+              ) : (
+                <Box
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {/* Available / New Tags */}
+                  {availableSegmentTags?.map(
+                    (tag: { name: string; id: number }, index: number) => {
+                      const isTagInSegment = segmentTags?.some(
+                        (existingTag: { name: string }) =>
+                          existingTag?.name === tag?.name
+                      );
+                      return (
+                        tag && (
+                          <Group spacing="xs" style={{ margin: "2px" }}>
+                            <Badge
+                              radius="xl"
+                              size="md"
+                              color={deterministicMantineColor(tag.name)}
+                              style={{
+                                cursor: "pointer",
+                                backgroundColor: isTagInSegment
+                                  ? "transparent"
+                                  : "",
+                                color: isTagInSegment ? "darkgrey" : "",
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isTagInSegment) {
+                                  addTagToSegment(
+                                    userToken,
+                                    cell.row.original.id,
+                                    tag.id
+                                  ).then(() => {
                                     getAllSegments(true);
-                                    //prevent the popover from closing
-                                    setPopoverOpened(true);
+                                  });
+                                } else {
+                                  removeTagFromSegment(
+                                    userToken,
+                                    cell.row.original.id,
+                                    tag.id
+                                  ).then(() => {
+                                    getAllSegments(true);
                                   });
                                 }
-                              })
-                            }}
-                            sx={(theme) => ({
-                              '&:hover': {
-                                backgroundColor: theme.colors.red[2],
-                                borderRadius: '50%'
-                              }
-                            })}
-                          >
-                            <IconX color='darkgrey' size={14} />
-                          </ActionIcon>
-                      </div>
-                    </Group>
-                  );
-                })}
-                {addTagClicked ? (
-                  <TextInput
-                    placeholder="Type here..."
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        const newTagName = e.currentTarget.value.trim();
-                        if (newTagName !== '' && !availableSegmentTags?.some(tag => tag.name === newTagName)) {
-                          createSegmentTag(userToken, cell.row.original.id, newTagName, '#000000').then((newTag) => {
-                            getAllSegments(true);
-                            e.currentTarget.value = ''; // Clear input after sending
-                          });
+                              }}
+                            >
+                              {tag.name} &nbsp;
+                            </Badge>
+                            <div style={{ marginLeft: "-35px" }}>
+                              <ActionIcon
+                                color="red"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openConfirmModal({
+                                    title: "Confirm Global Tag Deletion",
+                                    children: (
+                                      <Text size="sm">
+                                        Are you sure you want to permanently
+                                        delete this tag? It will get removed
+                                        from all locations.
+                                      </Text>
+                                    ),
+                                    labels: {
+                                      confirm: "Delete Tag",
+                                      cancel: "Cancel",
+                                    },
+                                    confirmProps: { color: "red" },
+                                    onCancel: () => {
+                                      setPopoverOpened(true);
+                                    },
+                                    onConfirm: () => {
+                                      deleteTag(userToken, tag.id).then(() => {
+                                        getAllSegments(true);
+                                        //prevent the popover from closing
+                                        setPopoverOpened(true);
+                                      });
+                                    },
+                                  });
+                                }}
+                                sx={(theme) => ({
+                                  "&:hover": {
+                                    backgroundColor: theme.colors.red[2],
+                                    borderRadius: "50%",
+                                  },
+                                })}
+                              >
+                                <IconX color="darkgrey" size={14} />
+                              </ActionIcon>
+                            </div>
+                          </Group>
+                        )
+                      );
+                    }
+                  )}
+                  {addTagClicked ? (
+                    <TextInput
+                      placeholder="Type here..."
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const newTagName = e.currentTarget.value.trim();
+                          if (
+                            newTagName !== "" &&
+                            !availableSegmentTags?.some(
+                              (tag) => tag.name === newTagName
+                            )
+                          ) {
+                            createSegmentTag(
+                              userToken,
+                              cell.row.original.id,
+                              newTagName,
+                              "#000000"
+                            ).then((newTag) => {
+                              getAllSegments(true);
+                              e.currentTarget.value = ""; // Clear input after sending
+                            });
+                          }
                         }
-                      }
-                      e.stopPropagation();
-                    }}
-                    style={{ width: '50%', margin: '5px' }}
-                  />
-                ) : (
-                  <Button onClick={(e) => { e.stopPropagation(); setAddTagClicked(true); }} size='xs' style={{ backgroundColor: '#4682B4', color: 'white' }}><IconPlus size={18} /></Button>
-                )}
-              </Box>
+                        e.stopPropagation();
+                      }}
+                      style={{ width: "50%", margin: "5px" }}
+                    />
+                  ) : (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAddTagClicked(true);
+                      }}
+                      size="xs"
+                      style={{ backgroundColor: "#4682B4", color: "white" }}
+                    >
+                      <IconPlus size={18} />
+                    </Button>
+                  )}
+                </Box>
               )}
             </Popover.Dropdown>
           </Popover>
@@ -842,34 +1042,45 @@ export default function SegmentV2(props: PropsType) {
       },
     },
     {
-      accessorKey: 'campaigns',
+      accessorKey: "campaigns",
       // minSize: 180,
       header: () => (
-        <Flex align={'center'} gap={'3px'}>
-          <IconTargetArrow color='gray' size={'0.9rem'} />
-          <Text color='gray'>Campaign</Text>
+        <Flex align={"center"} gap={"3px"}>
+          <IconTargetArrow color="gray" size={"0.9rem"} />
+          <Text color="gray">Campaign</Text>
         </Flex>
       ),
       cell: (cell: any) => {
         const { isChild } = cell.row.original;
-        const { campaign, client_archetype, client_sdr, id } = cell.row.original;
+        const {
+          campaign,
+          client_archetype,
+          client_sdr,
+          id,
+        } = cell.row.original;
         const notMyCampaign = client_sdr.id !== userData.id;
         return (
-          <Box w={'100%'} h={'100%'} px={'sm'} py={'md'} bg={isChild ? '#F7F8FA' : 'white'}>
+          <Box
+            w={"100%"}
+            h={"100%"}
+            px={"sm"}
+            py={"md"}
+            bg={isChild ? "#F7F8FA" : "white"}
+          >
             <Button
-              variant={client_archetype?.archetype ? 'filled' : 'outline'}
-              color='blue'
-              radius='md'
-              size='xs'
+              variant={client_archetype?.archetype ? "filled" : "outline"}
+              color="blue"
+              radius="md"
+              size="xs"
               leftIcon={
                 client_archetype?.archetype ? (
-                  <IconCheck size={'0.9rem'} />
+                  <IconCheck size={"0.9rem"} />
                 ) : (
-                  <IconTargetArrow size={'0.9rem'} />
+                  <IconTargetArrow size={"0.9rem"} />
                 )
               }
               fw={600}
-              sx={{ fontSize: '12px' }}
+              sx={{ fontSize: "12px" }}
               disabled={notMyCampaign}
               onClick={() => {
                 setShowConnectCampaignModal(true);
@@ -878,13 +1089,13 @@ export default function SegmentV2(props: PropsType) {
             >
               {client_archetype?.archetype
                 ? client_archetype.archetype?.substring(0, 22) +
-                  (client_archetype.archetype.length > 22 ? '...' : '')
-                : 'Connect to Campaign'}
+                  (client_archetype.archetype.length > 22 ? "..." : "")
+                : "Connect to Campaign"}
             </Button>
 
-            <Flex mt='xs'>
-              <Avatar size={'xs'} radius={'xl'} src={client_sdr?.img_url} />
-              <Text size='xs' color='gray' ml='xs'>
+            <Flex mt="xs">
+              <Avatar size={"xs"} radius={"xl"} src={client_sdr?.img_url} />
+              <Text size="xs" color="gray" ml="xs">
                 {client_sdr?.sdr_name}
               </Text>
             </Flex>
@@ -924,9 +1135,9 @@ export default function SegmentV2(props: PropsType) {
       setLoading(true);
     }
     fetch(`${API_URL}/segment/${selectedSegmentId}`, {
-      method: 'PATCH',
+      method: "PATCH",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
@@ -947,9 +1158,9 @@ export default function SegmentV2(props: PropsType) {
       setLoading(true);
     }
     fetch(`${API_URL}/segment/create_n_subsegments`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
@@ -971,9 +1182,9 @@ export default function SegmentV2(props: PropsType) {
       setLoading(true);
     }
     fetch(`${API_URL}/segment/transfer_segment`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
@@ -995,9 +1206,9 @@ export default function SegmentV2(props: PropsType) {
       setLoading(true);
     }
     fetch(`${API_URL}/segment/${selectedSegmentId}`, {
-      method: 'PATCH',
+      method: "PATCH",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
@@ -1018,9 +1229,9 @@ export default function SegmentV2(props: PropsType) {
       setLoading(true);
     }
     fetch(`${API_URL}/segment/move_segment`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
@@ -1038,14 +1249,18 @@ export default function SegmentV2(props: PropsType) {
       });
   };
 
-  const createSegment = async (showLoader: boolean, segmentId?: string, segmentName?: string) => {
+  const createSegment = async (
+    showLoader: boolean,
+    segmentId?: string,
+    segmentName?: string
+  ) => {
     if (showLoader) {
       setLoading(true);
     }
     fetch(`${API_URL}/segment/create`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
@@ -1058,7 +1273,7 @@ export default function SegmentV2(props: PropsType) {
       .then((data) => {})
       .finally(() => {
         setLoading(false);
-        setCreateSegmentName('');
+        setCreateSegmentName("");
         setCreateSegmentParentId(null);
         getAllSegments(true);
       });
@@ -1066,9 +1281,9 @@ export default function SegmentV2(props: PropsType) {
 
   const getAllSDRs = async () => {
     fetch(`${API_URL}/client/sdrs`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
     })
@@ -1082,13 +1297,20 @@ export default function SegmentV2(props: PropsType) {
     if (showLoader) {
       setLoading(true);
     }
-    fetch(`${API_URL}/segment/all` + (showAllSegments ? '?include_all_in_client=true' : '') + (tagFilter !== -1 ? `${showAllSegments ? '&' : '?'}tag_filter=${tagFilter}` : ''), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userToken}`,
-      },
-    })
+    fetch(
+      `${API_URL}/segment/all` +
+        (showAllSegments ? "?include_all_in_client=true" : "") +
+        (tagFilter !== -1
+          ? `${showAllSegments ? "&" : "?"}tag_filter=${tagFilter}`
+          : ""),
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    )
       .then((response) => response.json())
       .then((data) => {
         const segments = data.segments;
@@ -1105,14 +1327,17 @@ export default function SegmentV2(props: PropsType) {
           0
         );
         const totalProspectsInPreFilters = segments.reduce(
-          (acc: number, segment: any) => acc + (segment.apollo_query?.num_results || 0),
+          (acc: number, segment: any) =>
+            acc + (segment.apollo_query?.num_results || 0),
           0
         );
         setTotalProspected(totalProspected);
         setTotalContacted(totalContacted);
         setTotalUniqueCompanies(totalUniqueCompanies);
         setTotalInFilters(totalProspectsInPreFilters);
-        const parentSegments = segments.filter((segment: any) => !segment.parent_segment_id);
+        const parentSegments = segments.filter(
+          (segment: any) => !segment.parent_segment_id
+        );
         let parentSegmentsTransformed = transformData(parentSegments);
 
         const parentSegmentsTransformedWithSubSegments: any = parentSegmentsTransformed?.map(
@@ -1139,9 +1364,9 @@ export default function SegmentV2(props: PropsType) {
       setLoading(true);
     }
     fetch(`${API_URL}/segment/duplicate_segment`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
@@ -1156,14 +1381,17 @@ export default function SegmentV2(props: PropsType) {
       });
   };
 
-  const clearSegmentProspects = async (showLoader: boolean, segmentId: string) => {
+  const clearSegmentProspects = async (
+    showLoader: boolean,
+    segmentId: string
+  ) => {
     if (showLoader) {
       setLoading(true);
     }
     fetch(`${API_URL}/segment/wipe_segment`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
@@ -1182,7 +1410,7 @@ export default function SegmentV2(props: PropsType) {
     getAllSDRs();
     getAllSegments(true);
 
-    if (posthog.isFeatureEnabled('segments-auto-downloads')) {
+    if (posthog.isFeatureEnabled("segments-auto-downloads")) {
       setShowAutoDownloadFeature(true);
     }
   }, [false, showAllSegments]);
@@ -1197,8 +1425,8 @@ export default function SegmentV2(props: PropsType) {
         onClose={() => {
           setOpenAutoDownloadModal(false);
         }}
-        size='450px'
-        padding='md'
+        size="450px"
+        padding="md"
       >
         <SegmentAutodownload
           getAllSegments={getAllSegments}
@@ -1216,17 +1444,17 @@ export default function SegmentV2(props: PropsType) {
           setShowUnassignedSegments(false);
           getAllSegments(true);
         }}
-        size='1000px'
+        size="1000px"
         // h={"500px"}
-        padding='md'
-        title='Unassigned Segments'
+        padding="md"
+        title="Unassigned Segments"
       >
         <iframe
           // Unassigned Contacts Retool Editor: https://sellscale.retool.com/editor/2d7d839a-034d-11ef-b670-47ca220bbc00/Segments%20v2%20Modules/Segments%20-%20View%20Unassigned%20Contacts#authToken=81EpYvSxFIcRucTnBPjpcnC6xymDqlb2
           src={`https://sellscale.retool.com/embedded/public/d2fcac97-380c-4e30-a3e4-ad393e058f6a#authToken=${userToken}`}
-          width='100%'
-          height='700px'
-          style={{ border: 'none' }}
+          width="100%"
+          height="700px"
+          style={{ border: "none" }}
         ></iframe>
       </Modal>
       {/* Move Segment Modal */}
@@ -1236,28 +1464,28 @@ export default function SegmentV2(props: PropsType) {
           setShowMoveSegmentModal(false);
           getAllSegments(true);
         }}
-        size='sm'
-        padding='md'
-        title='Move Segment'
+        size="sm"
+        padding="md"
+        title="Move Segment"
       >
         <Select
           withinPortal
-          label='Move under new parent segment'
-          placeholder='Select Parent Segment'
+          label="Move under new parent segment"
+          placeholder="Select Parent Segment"
           data={data
             .filter((segment: any) => !segment.parent_segment_id)
             .map((segment: any) => ({
-              label: '|___' + segment.segment_title,
+              label: "|___" + segment.segment_title,
               value: segment.id,
             }))
             .concat([
               {
-                label: 'No Parent Segment',
+                label: "No Parent Segment",
                 value: null,
               },
             ])
             .reverse()}
-          mb={'sm'}
+          mb={"sm"}
           onChange={(v: any) => {
             setMoveSegmentParentId(v);
           }}
@@ -1266,9 +1494,9 @@ export default function SegmentV2(props: PropsType) {
         />
         <Button
           fullWidth
-          size='xs'
-          radius={'md'}
-          mt={'md'}
+          size="xs"
+          radius={"md"}
+          mt={"md"}
           disabled={!selectedSegmentId}
           onClick={() => {
             moveSegment(true);
@@ -1285,23 +1513,23 @@ export default function SegmentV2(props: PropsType) {
           setShowEditSegmentNameModal(false);
           getAllSegments(true);
         }}
-        size='sm'
-        padding='md'
-        title='Edit Segment Name'
+        size="sm"
+        padding="md"
+        title="Edit Segment Name"
       >
         <TextInput
-          label='Segment Name'
-          placeholder='Enter Segment Name'
+          label="Segment Name"
+          placeholder="Enter Segment Name"
           required
-          mb={'sm'}
+          mb={"sm"}
           defaultValue={editSegmentName}
           onChange={(e) => setEditSegmentName(e.target.value)}
         />
         <Button
           fullWidth
-          size='xs'
-          radius={'md'}
-          mt={'md'}
+          size="xs"
+          radius={"md"}
+          mt={"md"}
           disabled={!editSegmentName}
           onClick={() => {
             patchEditSegmentName(true);
@@ -1317,18 +1545,18 @@ export default function SegmentV2(props: PropsType) {
           setShowTransferSegmentModal(false);
           getAllSegments(true);
         }}
-        size='sm'
-        padding='md'
-        title='Transfer to Teammate'
+        size="sm"
+        padding="md"
+        title="Transfer to Teammate"
       >
-        <Text color='gray' size='sm'>
-          Transfer all unused prospects from this segment to a teammate. After, the specified
-          teammate will be able to view and manage the segment.
+        <Text color="gray" size="sm">
+          Transfer all unused prospects from this segment to a teammate. After,
+          the specified teammate will be able to view and manage the segment.
         </Text>
         <Select
           withinPortal
-          label='Select Teammate'
-          mt={'md'}
+          label="Select Teammate"
+          mt={"md"}
           data={sdrs?.map((x) => {
             return {
               label: x.sdr_name,
@@ -1339,9 +1567,9 @@ export default function SegmentV2(props: PropsType) {
         ></Select>
         <Button
           fullWidth
-          size='xs'
-          radius={'md'}
-          mt={'md'}
+          size="xs"
+          radius={"md"}
+          mt={"md"}
           disabled={!selectedSdrId || !selectedSegmentId}
           onClick={() => {
             transferSegment(true);
@@ -1358,17 +1586,17 @@ export default function SegmentV2(props: PropsType) {
           setShowViewProspectsModal(false);
           getAllSegments(true);
         }}
-        size='1200px'
+        size="1200px"
         // h={"500px"}
-        padding='md'
-        title='View Prospects'
+        padding="md"
+        title="View Prospects"
       >
         <iframe
           // Edit URL: https://sellscale.retool.com/editor/0037d48c-00df-11ef-9943-1fa602cbecb8/Segments%20v2%20Modules/View%20Prospect%20in%20Segment
           src={`https://sellscale.retool.com/embedded/public/639c4389-18d5-42a5-ad68-e84fd643b5ee#authToken=${userToken}&segmentId=${selectedSegmentId}`}
-          width='100%'
-          height='700px'
-          style={{ border: 'none' }}
+          width="100%"
+          height="700px"
+          style={{ border: "none" }}
         ></iframe>
       </Modal>
       {/* Request Campaign Modal */}
@@ -1379,9 +1607,10 @@ export default function SegmentV2(props: PropsType) {
           setRequestCampaignModal(false);
 
           showNotification({
-            title: 'Campaign Requested',
-            message: 'Your campaign request has been sent to the SellScale team.',
-            color: 'green',
+            title: "Campaign Requested",
+            message:
+              "Your campaign request has been sent to the SellScale team.",
+            color: "green",
           });
 
           await addCampaignAiRequest(
@@ -1401,53 +1630,53 @@ export default function SegmentV2(props: PropsType) {
         onClose={() => {
           setShowConnectCampaignModal(false);
           getAllSegments(true);
-          setConnectCampaignView('SELECT_METHOD');
+          setConnectCampaignView("SELECT_METHOD");
         }}
-        size='sm'
-        padding='md'
-        title='Connect to Campaign'
+        size="sm"
+        padding="md"
+        title="Connect to Campaign"
       >
-        {connectCampaignView === 'SELECT_METHOD' ? (
+        {connectCampaignView === "SELECT_METHOD" ? (
           <>
             <Title>Select method</Title>
-            <Text color='gray' size='sm'>
+            <Text color="gray" size="sm">
               Choose how you want to connect this segment to a campaign
             </Text>
-            <Divider mt='xs' />
+            <Divider mt="xs" />
             <Button
-              color='violet'
-              mt='md'
+              color="violet"
+              mt="md"
               onClick={() => {
-                setConnectCampaignView('SELECT_CAMPAIGN');
+                setConnectCampaignView("SELECT_CAMPAIGN");
               }}
             >
-              <IconPencil size={'0.9rem'} style={{ marginRight: '4px' }} />
+              <IconPencil size={"0.9rem"} style={{ marginRight: "4px" }} />
               Attach to Existing Campaign
             </Button>
             <Button
-              mt='md'
-              color='teal'
+              mt="md"
+              color="teal"
               onClick={() => {
                 setShowConnectCampaignModal(false);
                 setRequestCampaignModal(true);
               }}
             >
-              <IconRobot size={'0.9rem'} style={{ marginRight: '4px' }} />
+              <IconRobot size={"0.9rem"} style={{ marginRight: "4px" }} />
               Request SellScale
             </Button>
             <Button
-              mt='md'
-              color='orange'
+              mt="md"
+              color="orange"
               disabled
               onClick={() => {
                 showNotification({
-                  title: 'Coming Soon',
-                  message: 'This feature is coming soon!',
-                  color: 'red',
+                  title: "Coming Soon",
+                  message: "This feature is coming soon!",
+                  color: "red",
                 });
               }}
             >
-              <IconTemplate size={'0.9rem'} style={{ marginRight: '4px' }} />
+              <IconTemplate size={"0.9rem"} style={{ marginRight: "4px" }} />
               Duplicate Template
             </Button>
           </>
@@ -1458,17 +1687,17 @@ export default function SegmentV2(props: PropsType) {
                 if (!v || v.length === 0) {
                   return;
                 }
-                setSelectedCampaignId(v[0]['archetype_id']);
+                setSelectedCampaignId(v[0]["archetype_id"]);
               }}
               disabled={false}
-              label='Select Campaign'
-              description='Select a campaign to connect to this segment'
+              label="Select Campaign"
+              description="Select a campaign to connect to this segment"
             />
             <Button
               fullWidth
-              size='xs'
-              radius={'md'}
-              mt={'md'}
+              size="xs"
+              radius={"md"}
+              mt={"md"}
               disabled={!selectedCampaignId || !selectedSegmentId}
               onClick={() => {
                 connectCampaignToSegment(true);
@@ -1487,7 +1716,7 @@ export default function SegmentV2(props: PropsType) {
           setFullscreenModalOpen(false);
           getAllSegments(true);
         }}
-        size='full'
+        size="full"
         padding={0}
         w={window.innerWidth}
         // h={window.innerHeight}
@@ -1498,26 +1727,30 @@ export default function SegmentV2(props: PropsType) {
           src={iframeUrl}
           width={window.innerWidth - 400}
           height={window.innerHeight}
-          style={{ border: 'none' }}
+          style={{ border: "none" }}
         ></iframe>
       </Modal>
 
       {/* Create Segment Modal */}
-      <Modal onClose={() => setModalOpened(false)} opened={modalOpened} size='sm'>
+      <Modal
+        onClose={() => setModalOpened(false)}
+        opened={modalOpened}
+        size="sm"
+      >
         <Title order={4}>Create Segment</Title>
-        <Text size={'sm'} color='gray' fw={500} mt={'sm'} mb={'md'}>
+        <Text size={"sm"} color="gray" fw={500} mt={"sm"} mb={"md"}>
           Create a new segment to organize your contacts and campaigns
         </Text>
         <TextInput
-          label='Segment Name'
-          placeholder='Enter Segment Name'
+          label="Segment Name"
+          placeholder="Enter Segment Name"
           required
-          mb={'sm'}
+          mb={"sm"}
           onChange={(e) => setCreateSegmentName(e.target.value)}
         />
         <Select
-          label='(Optional) Parent Segment'
-          placeholder='Select Parent Segment'
+          label="(Optional) Parent Segment"
+          placeholder="Select Parent Segment"
           withinPortal
           data={data
             .filter((segment: any) => !segment.parent_segment_id)
@@ -1525,18 +1758,24 @@ export default function SegmentV2(props: PropsType) {
               label: segment.segment_title,
               value: segment.id,
             }))}
-          mb={'sm'}
+          mb={"sm"}
           onChange={(v: any) => setCreateSegmentParentId(v)}
           clearable
         />
-        <Flex gap={'md'} mt='xl'>
-          <Button fullWidth size='xs' radius={'md'} variant='outline' color='gray'>
+        <Flex gap={"md"} mt="xl">
+          <Button
+            fullWidth
+            size="xs"
+            radius={"md"}
+            variant="outline"
+            color="gray"
+          >
             Cancel
           </Button>
           <Button
             fullWidth
-            size='xs'
-            radius={'md'}
+            size="xs"
+            radius={"md"}
             onClick={() => {
               createSegment(true);
               setModalOpened(false);
@@ -1548,35 +1787,40 @@ export default function SegmentV2(props: PropsType) {
       </Modal>
 
       {/* Create Batch Modal */}
-      <Modal onClose={() => setShowBatchModal(false)} opened={showBatchModal} size='sm'>
+      <Modal
+        onClose={() => setShowBatchModal(false)}
+        opened={showBatchModal}
+        size="sm"
+      >
         <Title order={4}>Create Batches</Title>
-        <Text size={'sm'} color='gray' fw={500} mt={'sm'} mb={'md'}>
-          Equally split the unused prospects in the segment into N batches as child segments.
+        <Text size={"sm"} color="gray" fw={500} mt={"sm"} mb={"md"}>
+          Equally split the unused prospects in the segment into N batches as
+          child segments.
         </Text>
         <NumberInput
-          label='Number of Batches (min: 2, max: 10)'
-          placeholder='Enter Number of Batches'
+          label="Number of Batches (min: 2, max: 10)"
+          placeholder="Enter Number of Batches"
           required
-          mb={'sm'}
+          mb={"sm"}
           max={10}
           defaultValue={createBatchNumber}
           onChange={(value: number) => setCreateBatchNumber(value)}
         />
-        <Flex gap={'md'} mt='xl'>
+        <Flex gap={"md"} mt="xl">
           <Button
             fullWidth
-            size='xs'
-            radius={'md'}
-            variant='outline'
-            color='gray'
+            size="xs"
+            radius={"md"}
+            variant="outline"
+            color="gray"
             onClick={() => setShowBatchModal(false)}
           >
             Cancel
           </Button>
           <Button
             fullWidth
-            size='xs'
-            radius={'md'}
+            size="xs"
+            radius={"md"}
             onClick={() => {
               createNSubsegments(true);
               setShowBatchModal(false);
@@ -1587,17 +1831,17 @@ export default function SegmentV2(props: PropsType) {
         </Flex>
       </Modal>
 
-      <Flex direction={'column'} w={'90%'} mx={'auto'} pt={'lg'}>
-        <Flex align={'center'} justify={'space-between'}>
-          <Text size={'lg'} fw={600}>
+      <Flex direction={"column"} w={"90%"} mx={"auto"} pt={"lg"}>
+        <Flex align={"center"} justify={"space-between"}>
+          <Text size={"lg"} fw={600}>
             Segments
           </Text>
           <Button
-            ml='auto'
-            mr='xs'
+            ml="auto"
+            mr="xs"
             onClick={() =>
               (window.location.href =
-                '/contacts/find?campaign_id=' + userData?.unassigned_persona_id)
+                "/contacts/find?campaign_id=" + userData?.unassigned_persona_id)
             }
           >
             Add Contacts
@@ -1606,7 +1850,7 @@ export default function SegmentV2(props: PropsType) {
             Create Segment
           </Button>
         </Flex>
-        <Text color='gray' fw={500} size={'sm'} mb={'xl'}>
+        <Text color="gray" fw={500} size={"sm"} mb={"xl"}>
           View and manage your segments to organize your contacts and campaigns
         </Text>
         <SegmentV2Overview
@@ -1619,31 +1863,36 @@ export default function SegmentV2(props: PropsType) {
         <Box>
           <Flex>
             <TextInput
-              miw={'200px'}
-              w={'50%'}
-              icon={<IconSearch size={'0.9rem'} />}
-              placeholder='Search Segments'
+              miw={"200px"}
+              w={"50%"}
+              icon={<IconSearch size={"0.9rem"} />}
+              placeholder="Search Segments"
               onChange={(e) => setSearchQuery(e.target.value)}
-              mb='xs'
+              mb="xs"
             />
-            <Button ml='auto' size='xs' mr='xs' onClick={() => setShowUnassignedSegments(true)}>
+            <Button
+              ml="auto"
+              size="xs"
+              mr="xs"
+              onClick={() => setShowUnassignedSegments(true)}
+            >
               View Unassigned Prospects
             </Button>
             <Checkbox
-              mt='4px'
-              ml='auto'
-              label='Show all client segments'
-              color='blue'
-              mr='md'
+              mt="4px"
+              ml="auto"
+              label="Show all client segments"
+              color="blue"
+              mr="md"
               onChange={(e) => setShowAllSegments(e.target.checked)}
             />
             <Button
-              variant='outline'
-              color='gray'
-              size='xs'
-              radius={'md'}
+              variant="outline"
+              color="gray"
+              size="xs"
+              radius={"md"}
               onClick={() => getAllSegments(true)}
-              leftIcon={<IconRefresh size={'0.9rem'} />}
+              leftIcon={<IconRefresh size={"0.9rem"} />}
             >
               Refresh
             </Button>
@@ -1652,29 +1901,29 @@ export default function SegmentV2(props: PropsType) {
             loading={loading}
             withPagination
             withBorder
-            sx={{ cursor: 'pointer' }}
+            sx={{ cursor: "pointer" }}
             withColumnBorders
             data={getNestedRows(data)}
             columns={columns}
             components={{
               pagination: ({ table }) => (
                 <Flex
-                  justify={'space-between'}
-                  align={'center'}
-                  px={'sm'}
-                  bg={'white'}
-                  py={'1.25rem'}
+                  justify={"space-between"}
+                  align={"center"}
+                  px={"sm"}
+                  bg={"white"}
+                  py={"1.25rem"}
                   sx={(theme) => ({
                     border: `1px solid ${theme.colors.gray[4]}`,
                     borderTopWidth: 0,
                   })}
                 >
-                  <Flex align={'center'} gap={'sm'}>
-                    <Text fw={500} size={'sm'} color='gray.6'>
+                  <Flex align={"center"} gap={"sm"}>
+                    <Text fw={500} size={"sm"} color="gray.6">
                       Show
                     </Text>
 
-                    <Flex align={'center'}>
+                    <Flex align={"center"}>
                       <NumberInput
                         maw={100}
                         value={table.getState().pagination.pageSize}
@@ -1689,31 +1938,33 @@ export default function SegmentV2(props: PropsType) {
                           borderTop: `1px solid ${theme.colors.gray[4]}`,
                           borderRight: `1px solid ${theme.colors.gray[4]}`,
                           borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                          marginLeft: '-2px',
-                          paddingLeft: '1rem',
-                          paddingRight: '1rem',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: '0.25rem',
+                          marginLeft: "-2px",
+                          paddingLeft: "1rem",
+                          paddingRight: "1rem",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: "0.25rem",
                         })}
                         h={36}
                       >
-                        <Text color='gray.5' fw={500} fz={14}>
+                        <Text color="gray.5" fw={500} fz={14}>
                           of {table.getPrePaginationRowModel().rows.length}
                         </Text>
                       </Flex>
                     </Flex>
                   </Flex>
 
-                  <Flex align={'center'} gap={'sm'}>
-                    <Flex align={'center'}>
+                  <Flex align={"center"} gap={"sm"}>
+                    <Flex align={"center"}>
                       <Select
                         maw={100}
                         value={`${table.getState().pagination.pageIndex + 1}`}
-                        data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                          label: String(idx + 1),
-                          value: String(idx + 1),
-                        }))}
+                        data={new Array(table.getPageCount())
+                          .fill(0)
+                          .map((i, idx) => ({
+                            label: String(idx + 1),
+                            value: String(idx + 1),
+                          }))}
                         onChange={(v) => {
                           table.setPageIndex(Number(v) - 1);
                         }}
@@ -1723,39 +1974,44 @@ export default function SegmentV2(props: PropsType) {
                           borderTop: `1px solid ${theme.colors.gray[4]}`,
                           borderRight: `1px solid ${theme.colors.gray[4]}`,
                           borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                          marginLeft: '-2px',
-                          paddingLeft: '1rem',
-                          paddingRight: '1rem',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: '0.25rem',
+                          marginLeft: "-2px",
+                          paddingLeft: "1rem",
+                          paddingRight: "1rem",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: "0.25rem",
                         })}
                         h={36}
                       >
-                        <Text color='gray.5' fw={500} fz={14}>
+                        <Text color="gray.5" fw={500} fz={14}>
                           of {table.getPageCount()} pages
                         </Text>
                       </Flex>
                       <ActionIcon
-                        variant='default'
-                        color='gray.4'
+                        variant="default"
+                        color="gray.4"
                         h={36}
                         disabled={table.getState().pagination.pageIndex === 0}
                         onClick={() => {
-                          table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                          table.setPageIndex(
+                            table.getState().pagination.pageIndex - 1
+                          );
                         }}
                       >
                         <IconChevronLeft stroke={theme.colors.gray[4]} />
                       </ActionIcon>
                       <ActionIcon
-                        variant='default'
-                        color='gray.4'
+                        variant="default"
+                        color="gray.4"
                         h={36}
                         disabled={
-                          table.getState().pagination.pageIndex === table.getPageCount() - 1
+                          table.getState().pagination.pageIndex ===
+                          table.getPageCount() - 1
                         }
                         onClick={() => {
-                          table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                          table.setPageIndex(
+                            table.getState().pagination.pageIndex + 1
+                          );
                         }}
                       >
                         <IconChevronRight stroke={theme.colors.gray[4]} />
@@ -1765,12 +2021,12 @@ export default function SegmentV2(props: PropsType) {
                 </Flex>
               ),
             }}
-            w={'100%'}
-            pageSizes={['20']}
+            w={"100%"}
+            pageSizes={["20"]}
             styles={(theme) => ({
               thead: {
-                '::after': {
-                  backgroundColor: 'transparent',
+                "::after": {
+                  backgroundColor: "transparent",
                 },
               },
               th: {
@@ -1778,15 +2034,15 @@ export default function SegmentV2(props: PropsType) {
                 paddingBottom: `${rem(10)} !important`,
               },
               tbody: {
-                backgroundColor: 'white',
+                backgroundColor: "white",
               },
               td: {
-                padding: '0px !important',
+                padding: "0px !important",
               },
 
               wrapper: {
                 gap: 0,
-                marginTop: '0 !important',
+                marginTop: "0 !important",
               },
               scrollArea: {
                 paddingBottom: 0,
@@ -1794,8 +2050,8 @@ export default function SegmentV2(props: PropsType) {
               },
 
               dataCellContent: {
-                width: '100%',
-                whiteSpace: 'normal',
+                width: "100%",
+                whiteSpace: "normal",
               },
             })}
           />
@@ -1804,4 +2060,3 @@ export default function SegmentV2(props: PropsType) {
     </Paper>
   );
 }
-

@@ -321,13 +321,13 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
         </ScrollArea>
       </Drawer>
 
-      <Button
+      {/* <Button
         onClick={() => {
           setOpenedList(true);
         }}
       >
         Open drawer
-      </Button>
+      </Button> */}
     </>
   );
 }

@@ -19,7 +19,7 @@ import { IconAdjustments, IconDots } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { proxyURL, valueToColor, nameToInitials } from '@utils/general';
 import { getClientSDRs } from '@utils/requests/client';
-// import { MRT_ColumnDef, MantineReactTable, useMantineReactTable } from 'mantine-react-table';
+import { MRT_ColumnDef, MantineReactTable, useMantineReactTable } from 'mantine-react-table';
 import { useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ClientSDR } from 'src';
@@ -177,10 +177,10 @@ export default function Organization(props: {}) {
     []
   );
 
-  // const table = useMantineReactTable({
-  //   columns,
-  //   data: data ?? [],
-  // });
+  const table = useMantineReactTable({
+    columns,
+    data: data ?? [],
+  });
 
   return (
     <Box>
@@ -189,7 +189,7 @@ export default function Organization(props: {}) {
           <Title order={3}>Your Organization</Title>
           <Button>Add Seat</Button>
         </Group>
-        {/* <MantineReactTable table={table} /> */}
+        <MantineReactTable table={table} />
       </Stack>
     </Box>
   );

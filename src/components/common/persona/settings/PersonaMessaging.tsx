@@ -1,20 +1,21 @@
-import { userDataState } from "@atoms/userAtoms";
-import { Card, Flex, Title, TextInput, Textarea } from "@mantine/core";
-import { useRecoilValue } from "recoil";
+import { userDataState } from '@atoms/userAtoms';
+import { Card, Flex, Title, TextInput, Textarea } from '@mantine/core';
+import { useRecoilValue } from 'recoil';
 
 export const PersonaMessaging = () => {
-
   const userData = useRecoilValue(userDataState);
-  console.log('user', userData)
+  console.log('user', userData);
 
   return (
     <>
-      <Card withBorder w="100%" mb="sm">
-        <Title order={4} mb='4px'>Messaging Info (Global)</Title>
+      <Card withBorder w='100%' mb='sm'>
+        <Title order={4} mb='4px'>
+          Messaging Info (Global)
+        </Title>
         <Flex direction='column'>
           <Textarea
             mb='sm'
-            label="Example outbound copy"
+            label='Example outbound copy'
             contentEditable={false}
             autosize
             minRows={2}
@@ -23,7 +24,7 @@ export const PersonaMessaging = () => {
           />
           <Textarea
             mb='sm'
-            label="Links to case studies"
+            label='Links to case studies'
             contentEditable={false}
             autosize
             minRows={2}
@@ -32,28 +33,27 @@ export const PersonaMessaging = () => {
           />
           <TextInput
             mb='sm'
-            label="Exciting, existing clients to reference"
+            label='Exciting, existing clients to reference'
             contentEditable={false}
             value={userData?.client?.existing_clients}
           />
           <TextInput
             mb='sm'
-            label="Impressive facts about your service"
+            label='Impressive facts about your service'
             contentEditable={false}
             value={userData?.client?.impressive_facts}
           />
           <Textarea
             mb='sm'
-            label="Messaging tone"
+            label='Messaging tone'
             contentEditable={false}
             autosize
             minRows={2}
             maxRows={3}
-            value={userData?.client?.tone_attributes?.join('\n')}
+            value={userData?.client?.tone_attributes}
           />
-
         </Flex>
       </Card>
     </>
-  )
+  );
 };

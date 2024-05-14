@@ -17,6 +17,7 @@ import {
   Title,
   useMantineTheme,
 } from "@mantine/core";
+import {  proxyURL } from "@utils/general";
 import { useDisclosure } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import {
@@ -35,8 +36,11 @@ import {
 } from "@tabler/icons";
 import { IconUserSquareRounded } from "@tabler/icons-react";
 import { DataGrid } from "mantine-data-grid";
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { useChampionApi } from "./ChampionChangeApi";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import moment from "moment";
 interface ChampionDataType {
   prospect_name: string;
   change_date: string;
@@ -49,55 +53,59 @@ interface ChampionDataType {
 }
 
 export default function ChampionChange() {
+  const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
-  const [opened, { open, close }] = useDisclosure(false);
-  const [championData, setChampionData] = useState<ChampionDataType[]>([
-    {
-      prospect_name: "Fernando Gozal",
-      change_date: "Mar 7, 2024 8:43 PM",
-      origin_company_url: "https://google.com",
-      origin_company: "Google",
-      new_company_url: "https://microsoft.com",
-      new_company: "Microsoft",
-      type: "new",
-      avatar: "",
-    },
-    {
-      prospect_name: "Ishan Sharma",
-      change_date: "Mar 7, 2024 8:43 PM",
-      origin_company_url: "https://apple.com",
-      origin_company: "Apple",
-      new_company_url: "https://app.sellscale.com",
-      new_company: "SellScale",
-      type: "new",
-      avatar: "",
-    },
-    {
-      prospect_name: "David Wei",
-      change_date: "Mar 5, 2024 6:43 PM",
-      origin_company_url: "https://google.com",
-      origin_company: "Google",
-      new_company_url: "https://app.sellscale.com",
-      new_company: "SellScale",
-      type: "new",
-      avatar: "",
-    },
-    {
-      prospect_name: "Varun Uttampadi",
-      change_date: "Mar 5, 2024 6:43 PM",
-      origin_company_url: "https://apple.com",
-      origin_company: "Apple",
-      new_company_url: "https://google.com",
-      new_company: "Google",
-      type: "new",
-      avatar: "",
-    },
-  ]);
+  const { isLoading, getChampionChanges, getChampionStats, postRefreshChampionJobData, postMarkChampions } = useChampionApi(userToken);
+  const [loading, setLoading] = useState(isLoading);
+
+  const [championData, setChampionData] = useState<ChampionDataType[]>([]);
   const [data, setData] = useState({
-    close: 430,
-    champion_win: 1301,
-    champion_change: 81,
+    num_changed_last_60_days: 0,
+    num_companies: 0,
+    num_contacts: 0,
   });
+
+  useEffect(() => {
+    refreshStats();
+  }, [userToken]);
+
+  const refreshStats = () => {
+    getChampionStats().then((data: any) => {
+      setData(data.data);
+    });
+
+    setLoading(true);
+    getChampionChanges()
+      .then((data: any) => {
+        setChampionData(
+          data.data.map((d: any) => ({
+            prospect_name: d.full_name,
+            change_date: d.new_company_start_date,
+            origin_company_url: d.old_company_logo,
+            origin_company: d.last_company_name,
+            new_company_url: d.new_company_logo,
+            new_company: d.new_company_name,
+            type: d.change_detected ? "Job Changed" : "",
+            avatar: d.linkedin_url,
+          }))
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const handleJobRefreshData = () => {
+    setLoading(true);
+    postRefreshChampionJobData()
+      .then(() => {
+        refreshStats();
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   return (
     <Flex direction={"column"} gap={"xl"}>
       <Flex align={"center"} justify={"space-between"}>
@@ -106,6 +114,9 @@ export default function ChampionChange() {
         </Title>
         <Flex gap={"sm"} align={"center"}>
           <TextInput maw={200} placeholder="Search" rightSection={<IconSearch size={"0.9rem"} />} />
+          <Button color="blue" onClick={handleJobRefreshData} loading={loading}>
+            Refresh Job Data
+          </Button>
           <Button color="green" leftIcon={<IconFileDownload size={"0.9rem"} />}>
             Download CSV
           </Button>
@@ -129,7 +140,7 @@ export default function ChampionChange() {
           <Box>
             <Flex gap={"xs"} align={"end"}>
               <Title order={2} fw={600}>
-                {data.close}
+                {data.num_companies}
               </Title>
               <Text color="gray" fw={600} size={"sm"} mb={2}>
                 Closed Won Accounts
@@ -147,7 +158,7 @@ export default function ChampionChange() {
           <Box>
             <Flex gap={"xs"} align={"end"}>
               <Title order={2} fw={600}>
-                {data.champion_win}
+                {data.num_contacts}
               </Title>
               <Text color="gray" fw={600} size={"sm"} mb={2}>
                 Champions in Won Accounts
@@ -165,16 +176,16 @@ export default function ChampionChange() {
           <Box>
             <Flex gap={"xs"} align={"end"}>
               <Title order={2} fw={600}>
-                {data.champion_change}
+                {data.num_changed_last_60_days}
               </Title>
               <Text color="gray" fw={600} size={"sm"} mb={2}>
-                Champions Changed Jobs
+                # Job Changes (Last 60 Days)
               </Text>
             </Flex>
             <Flex gap={"xs"} align={"center"} mt={3}>
               <IconInfoCircle size={"0.9rem"} color="gray" />
               <Text fz={10} fw={500} color="gray">
-                Lorem ipsum doior sit amet, consectetur adipiscing elit
+                # of champions that have changed jobs in the last 60 days
               </Text>
             </Flex>
           </Box>
@@ -199,11 +210,16 @@ export default function ChampionChange() {
               </Flex>
             ),
             cell: (cell) => {
-              const { prospect_name, avatar } = cell.row.original;
+              const { prospect_name, avatar, type } = cell.row.original;
               return (
                 <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
                   <Avatar src={avatar} size={"sm"} radius={"xl"} />
                   <Text size={"sm"}>{prospect_name}</Text>
+                  {type && (
+                    <Badge color="teal" variant="filled">
+                      ✨ {type} ✨
+                    </Badge>
+                  )}
                 </Flex>
               );
             },
@@ -222,7 +238,7 @@ export default function ChampionChange() {
               return (
                 <Flex w={"100%"} h={"100%"} align={"center"}>
                   <Text color="gray" fw={400} size={"sm"}>
-                    {change_date}
+                    ~ {moment(change_date).format("MMMM DD, YYYY")}
                   </Text>
                 </Flex>
               );
@@ -242,7 +258,7 @@ export default function ChampionChange() {
               return (
                 <Flex align={"center"} gap={"md"} w={"100%"} h={"100%"}>
                   <Flex gap={"xs"} align={"center"}>
-                    <Image src={`https://logo.clearbit.com/${origin_company_url}`} width={20} height={20} />
+                    <Image src={origin_company_url} width={20} height={20} />
                     <Text fw={500} size={"sm"}>
                       {origin_company}
                     </Text>
@@ -251,13 +267,10 @@ export default function ChampionChange() {
                     <IconArrowRight size={"0.9rem"} />
                   </Flex>
                   <Flex gap={"xs"} align={"center"}>
-                    <Image src={`https://logo.clearbit.com/${new_company_url}`} width={20} height={20} />
+                    <Image src={new_company_url} width={20} height={20} />
                     <Text fw={500} size={"sm"}>
                       {new_company}
                     </Text>
-                    <Badge size="sm" color={type === "new" ? "green" : "red"}>
-                      {type === "new" ? "new account" : "old account"}
-                    </Badge>
                   </Flex>
                 </Flex>
               );

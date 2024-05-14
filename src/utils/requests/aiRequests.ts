@@ -7,9 +7,10 @@ export async function addCampaignAiRequest(
   name: string,
   description: string,
   linkedin: boolean,
-  email: boolean
+  email: boolean,
+  segmentId?: number
 ): Promise<MsgResponse> {
-  const response = await fetch(`${API_URL}/campaign/create_campaign_ai_request`, {
+  const response = await fetch(`${API_URL}/campaigns/create_campaign_ai_request`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${userToken}`,
@@ -20,6 +21,7 @@ export async function addCampaignAiRequest(
       description,
       linkedin,
       email,
+      segmentId,
     }),
   });
   return await processResponse(response, 'data');

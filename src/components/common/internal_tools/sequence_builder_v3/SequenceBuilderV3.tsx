@@ -140,7 +140,7 @@ export default function SequenceBuilderV3() {
         <Paper maw="30vw" style={{ position: "relative" }}>
           <LoadingOverlay visible={loading} />
           <Stack h="90vh" p="lg">
-            <Title order={3}>Sequence Builder V3</Title>
+            <Title order={3}>Sequence Builder</Title>
             <Autocomplete
               disabled={clients === undefined}
               label={
@@ -253,7 +253,12 @@ export default function SequenceBuilderV3() {
                       .then((response) => {
                         if (response.status === "success") {
                           const data = response.data as MessageResult[];
-                          setResults((prev) => [...prev, ...data]);
+                          setResults((prev) => [
+                            ...prev,
+                            ...data.map((m) => {
+                              return m;
+                            }),
+                          ]);
                         } else {
                           showNotification({
                             title: "Error",
@@ -333,21 +338,22 @@ export default function SequenceBuilderV3() {
                     setSelectedData((prev) => ({
                       ...prev,
                       subject_lines: prev.subject_lines.filter(
-                        (s: any) => s.uuid !== uuid
+                        (s) => s.uuid !== uuid
                       ),
                     }));
+                  } else {
+                    setSelectedData((prev) => ({
+                      ...prev,
+                      subject_lines: [
+                        ...prev.subject_lines,
+                        {
+                          text,
+                          assets,
+                          uuid,
+                        },
+                      ],
+                    }));
                   }
-                  setSelectedData((prev) => ({
-                    ...prev,
-                    subject_lines: [
-                      ...prev.subject_lines,
-                      {
-                        text,
-                        assets,
-                        uuid,
-                      },
-                    ],
-                  }));
                 }}
                 selectedData={selectedData}
               />
@@ -359,22 +365,23 @@ export default function SequenceBuilderV3() {
                 if (remove) {
                   setSelectedData((prev) => ({
                     ...prev,
-                    steps: prev.steps.filter((s: any) => s.uuid !== uuid),
+                    steps: prev.steps.filter((s) => s.uuid !== uuid),
+                  }));
+                } else {
+                  setSelectedData((prev) => ({
+                    ...prev,
+                    steps: [
+                      ...prev.steps,
+                      {
+                        step_num,
+                        text,
+                        assets,
+                        uuid,
+                        angle,
+                      },
+                    ],
                   }));
                 }
-                setSelectedData((prev) => ({
-                  ...prev,
-                  steps: [
-                    ...prev.steps,
-                    {
-                      step_num,
-                      text,
-                      assets,
-                      uuid,
-                      angle,
-                    },
-                  ],
-                }));
               }}
               selectedData={selectedData}
             />
@@ -461,7 +468,7 @@ function TitleGenerationSection(props: {
                       w={200}
                       variant={
                         props.selectedData.subject_lines.find(
-                          (s: any) => s.uuid === subject.uuid
+                          (s) => s.uuid === subject.uuid
                         )
                           ? "filled"
                           : "outline"
@@ -471,14 +478,14 @@ function TitleGenerationSection(props: {
                           subject.subject,
                           subject.assets.map((a) => a.id),
                           !!props.selectedData.subject_lines.find(
-                            (s: any) => s.uuid === subject.uuid
+                            (s) => s.uuid === subject.uuid
                           ),
                           subject.uuid
                         );
                       }}
                     >
                       {props.selectedData.subject_lines.find(
-                        (s: any) => s.uuid === subject.uuid
+                        (s) => s.uuid === subject.uuid
                       )
                         ? "Selected"
                         : "Use"}
@@ -515,8 +522,14 @@ interface Asset {
 }
 
 interface SelectedData {
-  subject_lines: { text: string; assets: number[] }[];
-  steps: { step_num: number; text: string; assets: number[]; angle: string }[];
+  subject_lines: { text: string; assets: number[]; uuid: string }[];
+  steps: {
+    step_num: number;
+    text: string;
+    assets: number[];
+    angle: string;
+    uuid: string;
+  }[];
 }
 
 function StepGenerationSection(props: {
@@ -562,7 +575,7 @@ function StepGenerationSection(props: {
                           w={200}
                           variant={
                             props.selectedData.steps.find(
-                              (s: any) => s.uuid === msg.uuid
+                              (s) => s.uuid === msg.uuid
                             )
                               ? "filled"
                               : "outline"
@@ -573,7 +586,7 @@ function StepGenerationSection(props: {
                               msg.message,
                               msg.asset_ids,
                               !!props.selectedData.steps.find(
-                                (s: any) => s.uuid === msg.uuid
+                                (s) => s.uuid === msg.uuid
                               ),
                               msg.uuid,
                               msg.angle
@@ -581,7 +594,7 @@ function StepGenerationSection(props: {
                           }}
                         >
                           {props.selectedData.steps.find(
-                            (s: any) => s.uuid === msg.uuid
+                            (s) => s.uuid === msg.uuid
                           )
                             ? "Selected"
                             : "Use"}

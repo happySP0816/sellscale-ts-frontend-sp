@@ -1,5 +1,5 @@
-import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { authorize } from '@auth/core';
+import { adminDataState, userDataState, userTokenState } from '@atoms/userAtoms';
+import { authorize, handleAdminUser } from '@auth/core';
 import { LoadingOverlay } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { navigateToPage } from '@utils/documentChange';
@@ -46,6 +46,7 @@ export default function AuthPage() {
   const [searchParams] = useSearchParams();
   const [userData, setUserData] = useRecoilState(userDataState);
   const [userToken, setUserToken] = useRecoilState(userTokenState);
+  const [_adminData, setAdminData] = useRecoilState(adminDataState);
 
   useEffect(() => {
     setTimeout(() => {
@@ -70,11 +71,13 @@ export default function AuthPage() {
       if (tokenType === 'magic_links') {
         sendAuthToken(authToken, email).then(async (response) => {
           await authorize(response.token, setUserToken, setUserData);
+          await handleAdminUser(response.token, setAdminData);
           navigateToPage(navigate, redirect);
         });
       } else if (tokenType === 'direct') {
         (async () => {
           await authorize(authToken, setUserToken, setUserData);
+          await handleAdminUser(authToken, setAdminData);
           if (redirect.includes('?')) {
             const to = redirect.split('?')[0];
             const params = new URLSearchParams(redirect.split('?')[1]);

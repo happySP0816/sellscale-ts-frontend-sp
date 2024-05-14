@@ -158,6 +158,7 @@ export type CampaignPersona = {
   smartlead_campaign_id?: number;
   meta_data?: Record<string, any>;
   first_message_delay_days?: number;
+  email_to_linkedin_connection?: string;
 };
 
 export default function PersonaCampaigns() {
@@ -1544,6 +1545,10 @@ export function PersonCampaignCard(props: {
                         onClick={() => {
                           if (props.persona.sdr_id != userData?.id) return;
 
+                          if (props.project) {
+                            setCurrentProject(props.project);
+                          }
+
                           if (
                             props.persona.email_sent > props.persona.li_sent
                           ) {
@@ -1749,6 +1754,34 @@ export function PersonCampaignCard(props: {
                 <Center>
                   <ThemeIcon
                     size="xs"
+                    color={props.persona.email_active ? undefined : "gray.4"}
+                  >
+                    <IconMail style={{ width: "90%", height: "90%" }} />
+                  </ThemeIcon>
+                </Center>
+                <UserStatusToggle
+                  projectId={props.persona.id}
+                  isActive={props.persona.email_active}
+                  onChangeUserStatusSuccess={(status: boolean) => {
+                    const result = postTogglePersonaActive(
+                      userToken,
+                      props.persona.id,
+                      "email",
+                      !props.persona.email_active
+                    ).then((res) => {
+                      // setPersonaActive(status);
+                      props.onPersonaActiveStatusUpdate?.(
+                        props.persona?.id ?? 0,
+                        status
+                      );
+                    });
+                  }}
+                />
+              </Stack>
+              <Stack spacing={5}>
+                <Center>
+                  <ThemeIcon
+                    size="xs"
                     color={props.persona.linkedin_active ? undefined : "gray.4"}
                   >
                     <IconBrandLinkedin
@@ -1765,34 +1798,6 @@ export function PersonCampaignCard(props: {
                       props.persona.id,
                       "linkedin",
                       !props.persona.linkedin_active
-                    ).then((res) => {
-                      // setPersonaActive(status);
-                      props.onPersonaActiveStatusUpdate?.(
-                        props.persona?.id ?? 0,
-                        status
-                      );
-                    });
-                  }}
-                />
-              </Stack>
-              <Stack spacing={5}>
-                <Center>
-                  <ThemeIcon
-                    size="xs"
-                    color={props.persona.email_active ? undefined : "gray.4"}
-                  >
-                    <IconMail style={{ width: "90%", height: "90%" }} />
-                  </ThemeIcon>
-                </Center>
-                <UserStatusToggle
-                  projectId={props.persona.id}
-                  isActive={props.persona.email_active}
-                  onChangeUserStatusSuccess={(status: boolean) => {
-                    const result = postTogglePersonaActive(
-                      userToken,
-                      props.persona.id,
-                      "email",
-                      !props.persona.email_active
                     ).then((res) => {
                       // setPersonaActive(status);
                       props.onPersonaActiveStatusUpdate?.(
@@ -1874,6 +1879,9 @@ export function PersonCampaignCard(props: {
           {props.viewMode === "node-view" && (
             <Box>
               <CampaignGraph
+                emailToLinkedinConnectionType={
+                  props.persona.email_to_linkedin_connection
+                }
                 personaId={props.persona.id}
                 unusedProspects={`${unusedProspects}/${
                   props.project?.num_prospects ?? 0

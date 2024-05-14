@@ -64,9 +64,8 @@ export default function CreatePersona(props: PropsType) {
     }
     setCreatingPersona(false);
     showNotification({
-      title: "Persona created!",
-      message:
-        "You can now create a segment to import new contacts into... redirecting now...",
+      title: "Campaign created!",
+      message: "Your campaign has been created successfully.",
       color: "teal",
     });
 
@@ -84,9 +83,11 @@ export default function CreatePersona(props: PropsType) {
       );
     }
 
-    setTimeout(() => {
-      window.location.href = "/contacts/overview";
-    }, 3000);
+    // setTimeout(() => {
+    //   window.location.href = "/contacts/overview";
+    // }, 3000);
+
+    window.location.reload();
 
     setCurrentProject(result.data);
     return result.data as number;

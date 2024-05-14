@@ -372,9 +372,9 @@ function ProfileCard() {
     >
       <ProfileIcon />
       <Box>
-        <Tooltip label={userData.sdr_name} openDelay={750} withArrow>
+        <Tooltip label={userData?.sdr_name} openDelay={750} withArrow>
           <Text fw={500} fz={12} c='gray.0'>
-            {_.truncate(userData.sdr_name, { length: 12 })}
+            {_.truncate(userData?.sdr_name, { length: 12 })}
           </Text>
         </Tooltip>
         <Text fw={500} fz={8} c='dimmed'>

@@ -1,5 +1,5 @@
-import { currentProjectState } from '@atoms/personaAtoms';
-import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { currentProjectState } from "@atoms/personaAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import {
   Flex,
   Title,
@@ -21,11 +21,11 @@ import {
   Checkbox,
   Select,
   Accordion,
-} from '@mantine/core';
-import { useDebouncedValue, useDisclosure } from '@mantine/hooks';
-import { showNotification } from '@mantine/notifications';
-import EmailSequenceStepModal from '@modals/EmailSequenceStepModal';
-import ManageEmailSubjectLineTemplatesModal from '@modals/ManageEmailSubjectLineTemplatesModal';
+} from "@mantine/core";
+import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
+import { showNotification } from "@mantine/notifications";
+import EmailSequenceStepModal from "@modals/EmailSequenceStepModal";
+import ManageEmailSubjectLineTemplatesModal from "@modals/ManageEmailSubjectLineTemplatesModal";
 import {
   IconBook,
   IconCheck,
@@ -40,35 +40,46 @@ import {
   IconUser,
   IconWashMachine,
   IconX,
-} from '@tabler/icons';
-import { IconMessageUp } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
+} from "@tabler/icons";
+import { IconMessageUp } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 import {
   createEmailSequenceStep,
   getEmailSequenceSteps,
   patchSequenceStep,
-} from '@utils/requests/emailSequencing';
-import { getEmailSubjectLineTemplates } from '@utils/requests/emailSubjectLines';
-import getChannels from '@utils/requests/getChannels';
-import { useEffect, useRef, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { EmailReplyFramework, EmailSequenceStep, MsgResponse, SubjectLineTemplate } from 'src';
-import DOMPurify from 'dompurify';
-import NewUIEmailSequencing from './EmailSequencing/NewUIEmailSequencing';
-import NylasConnectedCard from '@common/settings/NylasConnectedCard';
-import { getEmailReplyFrameworks, patchEmailReplyFrameworks } from '@utils/requests/emailReplies';
-import { valueToColor } from '@utils/general';
-import React from 'react';
-import { JSONContent } from '@tiptap/react';
-import DynamicRichTextArea from '@common/library/DynamicRichTextArea';
-import CreateEmailReplyFrameworkModal from '@modals/CreateEmailReplyFrameworkModal';
+} from "@utils/requests/emailSequencing";
+import { getEmailSubjectLineTemplates } from "@utils/requests/emailSubjectLines";
+import getChannels from "@utils/requests/getChannels";
+import { useEffect, useRef, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  EmailReplyFramework,
+  EmailSequenceStep,
+  MsgResponse,
+  SubjectLineTemplate,
+} from "src";
+import DOMPurify from "dompurify";
+import NewUIEmailSequencing from "./EmailSequencing/NewUIEmailSequencing";
+import NylasConnectedCard from "@common/settings/NylasConnectedCard";
+import {
+  getEmailReplyFrameworks,
+  patchEmailReplyFrameworks,
+} from "@utils/requests/emailReplies";
+import { valueToColor } from "@utils/general";
+import React from "react";
+import { JSONContent } from "@tiptap/react";
+import DynamicRichTextArea from "@common/library/DynamicRichTextArea";
+import CreateEmailReplyFrameworkModal from "@modals/CreateEmailReplyFrameworkModal";
 
-import IconImg from '@assets/images/icon.svg';
-import { PullProspectEmailsCardPage } from '@common/credits/PullProspectEmailsCardPage';
-import PullProspectEmailsCard from '@common/credits/PullProspectEmailsCard';
-import { postEmailTrackingSettings } from '@utils/requests/emailTrackingSettings';
-import { DataTable } from 'mantine-datatable';
-import { getEmailAccounts, toggleEmailAccounts } from '@utils/requests/smartlead';
+import IconImg from "@assets/images/icon.svg";
+import { PullProspectEmailsCardPage } from "@common/credits/PullProspectEmailsCardPage";
+import PullProspectEmailsCard from "@common/credits/PullProspectEmailsCard";
+import { postEmailTrackingSettings } from "@utils/requests/emailTrackingSettings";
+import { DataTable } from "mantine-datatable";
+import {
+  getEmailAccounts,
+  toggleEmailAccounts,
+} from "@utils/requests/smartlead";
 
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
@@ -103,14 +114,24 @@ function EmailInitialOutboundView(props: {
 }) {
   const userToken = useRecoilValue(userTokenState);
 
-  const [subjectLineTemplates, setSubjectLineTemplates] = useState<SubjectLineTemplate[]>();
+  const [subjectLineTemplates, setSubjectLineTemplates] = useState<
+    SubjectLineTemplate[]
+  >();
 
   const [showAll, setShowAll] = useState(false);
-  const [editSequenceStepModalOpened, { open: openEdit, close: closeEdit }] = useDisclosure();
-  const [createSequenceStepModalOpened, { open: openCreate, close: closeCreate }] = useDisclosure();
+  const [
+    editSequenceStepModalOpened,
+    { open: openEdit, close: closeEdit },
+  ] = useDisclosure();
+  const [
+    createSequenceStepModalOpened,
+    { open: openCreate, close: closeCreate },
+  ] = useDisclosure();
 
-  const [manageSubjectLineOpened, { open: openManageSubject, close: closeManageSubject }] =
-    useDisclosure();
+  const [
+    manageSubjectLineOpened,
+    { open: openManageSubject, close: closeManageSubject },
+  ] = useDisclosure();
 
   const [editModalData, setEditModalData] = useState<{
     title: string;
@@ -120,59 +141,71 @@ function EmailInitialOutboundView(props: {
 
   return (
     <>
-      <Card shadow='sm' padding='sm' withBorder w='100%'>
+      <Card shadow="sm" padding="sm" withBorder w="100%">
         {/* Header */}
-        <Flex justify='space-between' align='center'>
-          <Flex align='center'>
+        <Flex justify="space-between" align="center">
+          <Flex align="center">
             <Title order={5}>Email 1</Title>
-            <Text ml='sm' size='xs'>
+            <Text ml="sm" size="xs">
               Hyperpersonalized cold outreach sent to the prospect.
             </Text>
           </Flex>
           <Flex>
-            <Tooltip label={'Create a template'} withArrow withinPortal>
+            <Tooltip label={"Create a template"} withArrow withinPortal>
               <ActionIcon onClick={openCreate}>
-                <IconPlus size={'1rem'} />
+                <IconPlus size={"1rem"} />
               </ActionIcon>
             </Tooltip>
             <EmailSequenceStepModal
               modalOpened={createSequenceStepModalOpened}
               openModal={openCreate}
               closeModal={closeCreate}
-              type={'CREATE'}
+              type={"CREATE"}
               backFunction={props.afterCreate}
-              status={'PROSPECTED'}
+              status={"PROSPECTED"}
               archetypeID={props.archetypeID || -1}
               bumpedCount={0}
               isDefault={true}
-              onFinish={async (title, sequence, isDefault, status, substatus) => {
+              onFinish={async (
+                title,
+                sequence,
+                isDefault,
+                status,
+                substatus
+              ) => {
                 const result = await createEmailSequenceStep(
                   userToken,
                   props.archetypeID || -1,
-                  status ?? '',
+                  status ?? "",
                   title,
                   sequence,
                   0,
                   isDefault,
                   substatus
                 );
-                return result.status === 'success';
+                return result.status === "success";
               }}
             />
           </Flex>
         </Flex>
         <Card.Section>
-          <Divider mt='sm' />
-          <Flex px='md' direction='column'>
+          <Divider mt="sm" />
+          <Flex px="md" direction="column">
             {/* Subject Line */}
-            <Flex direction='row' mt='sm' mb='6px' align='center' justify='space-between'>
+            <Flex
+              direction="row"
+              mt="sm"
+              mb="6px"
+              align="center"
+              justify="space-between"
+            >
               <Flex>
                 <Title order={5}>Subject Line: </Title>
                 <Text
-                  ml='12px'
-                  mr='4px'
-                  variant='gradient'
-                  gradient={{ from: 'pink', to: 'purple', deg: 45 }}
+                  ml="12px"
+                  mr="4px"
+                  variant="gradient"
+                  gradient={{ from: "pink", to: "purple", deg: 45 }}
                 >
                   {/* {randomSubjectLineTemplate
                     ? randomSubjectLineTemplate?.subject_line.slice(0, 40) +
@@ -181,9 +214,17 @@ function EmailInitialOutboundView(props: {
                 </Text>
               </Flex>
               <Flex>
-                <Tooltip label='Edit or create a subject line' withinPortal withArrow>
-                  <ActionIcon size='xs' variant='transparent' onClick={openManageSubject}>
-                    <IconEdit size={'1rem'} />
+                <Tooltip
+                  label="Edit or create a subject line"
+                  withinPortal
+                  withArrow
+                >
+                  <ActionIcon
+                    size="xs"
+                    variant="transparent"
+                    onClick={openManageSubject}
+                  >
+                    <IconEdit size={"1rem"} />
                   </ActionIcon>
                 </Tooltip>
               </Flex>
@@ -196,12 +237,14 @@ function EmailInitialOutboundView(props: {
               /> */}
             </Flex>
 
-            <Divider mt='6px' />
+            <Divider mt="6px" />
 
             {props.initialOutboundBucket?.templates?.length === 0 && (
-              <Flex my='sm' justify={'space-between'} align='center'>
-                <Card withBorder w='100%' mr='xs'>
-                  <Flex justify={'center'}>Add an email body template above</Flex>
+              <Flex my="sm" justify={"space-between"} align="center">
+                <Card withBorder w="100%" mr="xs">
+                  <Flex justify={"center"}>
+                    Add an email body template above
+                  </Flex>
                 </Card>
               </Flex>
             )}
@@ -214,28 +257,33 @@ function EmailInitialOutboundView(props: {
 
               return (
                 <>
-                  <Flex align='center' mt='8px'>
+                  <Flex align="center" mt="8px">
                     <Title order={5}>Body:</Title>
                     <Text
-                      ml='12px'
-                      mr='4px'
-                      variant='gradient'
-                      gradient={{ from: 'purple', to: 'pink', deg: 45 }}
+                      ml="12px"
+                      mr="4px"
+                      variant="gradient"
+                      gradient={{ from: "purple", to: "pink", deg: 45 }}
                     >
                       {template.step.title}
                     </Text>
                   </Flex>
-                  <Flex direction='row' mb='md' align='center' justify='space-between'>
+                  <Flex
+                    direction="row"
+                    mb="md"
+                    align="center"
+                    justify="space-between"
+                  >
                     <Box
                       sx={() => ({
-                        border: '1px solid #E0E0E0',
-                        borderRadius: '8px',
-                        backgroundColor: '#F5F5F5',
+                        border: "1px solid #E0E0E0",
+                        borderRadius: "8px",
+                        backgroundColor: "#F5F5F5",
                       })}
-                      px='md'
-                      mt='sm'
+                      px="md"
+                      mt="sm"
                     >
-                      <Text fz='sm'>
+                      <Text fz="sm">
                         <div
                           dangerouslySetInnerHTML={{
                             __html: DOMPurify.sanitize(template.step.template),
@@ -243,38 +291,44 @@ function EmailInitialOutboundView(props: {
                         />
                       </Text>
                     </Box>
-                    <Tooltip label='Edit Body' withinPortal>
+                    <Tooltip label="Edit Body" withinPortal>
                       <ActionIcon
                         onClick={() => {
                           openEdit();
                         }}
                       >
-                        <IconEdit size='1rem' />
+                        <IconEdit size="1rem" />
                       </ActionIcon>
                     </Tooltip>
                     <EmailSequenceStepModal
                       modalOpened={editSequenceStepModalOpened}
                       openModal={openEdit}
                       closeModal={closeEdit}
-                      type='EDIT'
+                      type="EDIT"
                       backFunction={props.afterEdit}
-                      status='PROSPECTED'
+                      status="PROSPECTED"
                       archetypeID={props.archetypeID || -1}
                       bumpedCount={0}
                       title={template.step.title}
                       isDefault={template.step.default}
                       sequence={template.step.template}
-                      onFinish={async (title, sequence, isDefault, status, substatus) => {
+                      onFinish={async (
+                        title,
+                        sequence,
+                        isDefault,
+                        status,
+                        substatus
+                      ) => {
                         const result = await patchSequenceStep(
                           userToken,
                           template.step.id,
-                          status ?? '',
+                          status ?? "",
                           title,
                           sequence,
                           template.step.bumped_count,
                           isDefault
                         );
-                        return result.status === 'success';
+                        return result.status === "success";
                       }}
                     />
                   </Flex>
@@ -283,20 +337,20 @@ function EmailInitialOutboundView(props: {
             })}
             {props.initialOutboundBucket.templates.length > 1 && (
               <Card.Section>
-                <Flex justify='center'>
+                <Flex justify="center">
                   <Button
-                    variant='subtle'
+                    variant="subtle"
                     styles={{
                       root: {
-                        '&:hover': {
-                          backgroundColor: 'transparent',
+                        "&:hover": {
+                          backgroundColor: "transparent",
                         },
                       },
                     }}
                     onClick={() => setShowAll(!showAll)}
                   >
                     {showAll
-                      ? 'Hide'
+                      ? "Hide"
                       : `Show all ${props.initialOutboundBucket.total} frameworks...`}
                   </Button>
                 </Flex>
@@ -327,30 +381,33 @@ function EmailSequenceStepView(props: {
   const userToken = useRecoilValue(userTokenState);
 
   const [createSequenceStepModalOpened, { open, close }] = useDisclosure();
-  const [editSequenceStepModalOpened, { open: openEdit, close: closeEdit }] = useDisclosure();
+  const [
+    editSequenceStepModalOpened,
+    { open: openEdit, close: closeEdit },
+  ] = useDisclosure();
   const [showAll, setShowAll] = useState(false);
 
   return (
     <>
-      <Card shadow='sm' padding='sm' withBorder w='100%'>
+      <Card shadow="sm" padding="sm" withBorder w="100%">
         {/* Header */}
-        <Flex justify='space-between' align='center'>
-          <Flex align='center'>
+        <Flex justify="space-between" align="center">
+          <Flex align="center">
             <Title order={5}>{props.sequenceStepTitle}</Title>
-            <Text ml='sm' size='xs'>
+            <Text ml="sm" size="xs">
               {props.sequenceStepDescription}
             </Text>
           </Flex>
-          <Tooltip label='Create a new Template' withinPortal>
+          <Tooltip label="Create a new Template" withinPortal>
             <ActionIcon onClick={open}>
-              <IconPlus size='1.25rem' />
+              <IconPlus size="1.25rem" />
             </ActionIcon>
           </Tooltip>
           <EmailSequenceStepModal
             modalOpened={createSequenceStepModalOpened}
             openModal={open}
             closeModal={close}
-            type={'CREATE'}
+            type={"CREATE"}
             backFunction={props.afterCreate}
             dataChannels={props.dataChannels}
             status={props.status}
@@ -361,24 +418,25 @@ function EmailSequenceStepView(props: {
               const result = await createEmailSequenceStep(
                 userToken,
                 props.archetypeID || -1,
-                status ?? '',
+                status ?? "",
                 title,
                 sequence,
                 props.bumpedCount || 0,
                 isDefault,
                 substatus
               );
-              return result.status === 'success';
+              return result.status === "success";
             }}
           />
         </Flex>
         <Card.Section>
-          <Divider mt='sm' />
+          <Divider mt="sm" />
         </Card.Section>
 
         {/* Sequence Steps */}
-        <Card.Section px='xs'>
-          {props.sequenceBucket && Object.keys(props.sequenceBucket).length === 0 ? (
+        <Card.Section px="xs">
+          {props.sequenceBucket &&
+          Object.keys(props.sequenceBucket).length === 0 ? (
             // No Sequence Steps
             <Text>Please create a Sequence Step using the + button above.</Text>
           ) : (
@@ -391,24 +449,28 @@ function EmailSequenceStepView(props: {
 
                 return (
                   <>
-                    <Flex justify='space-between' align='center' pt='xs'>
-                      <Flex direction='row' align='center'>
+                    <Flex justify="space-between" align="center" pt="xs">
+                      <Flex direction="row" align="center">
                         <Switch
-                          ml='md'
-                          onLabel='Default'
-                          offLabel='Default'
+                          ml="md"
+                          onLabel="Default"
+                          offLabel="Default"
                           checked={template.step.default}
                           thumbIcon={
                             template.step.default ? (
                               <IconCheck
-                                size='0.8rem'
-                                color={theme.colors.teal[theme.fn.primaryShade()]}
+                                size="0.8rem"
+                                color={
+                                  theme.colors.teal[theme.fn.primaryShade()]
+                                }
                                 stroke={3}
                               />
                             ) : (
                               <IconX
-                                size='0.8rem'
-                                color={theme.colors.red[theme.fn.primaryShade()]}
+                                size="0.8rem"
+                                color={
+                                  theme.colors.red[theme.fn.primaryShade()]
+                                }
                                 stroke={3}
                               />
                             )
@@ -422,33 +484,35 @@ function EmailSequenceStepView(props: {
                             },
                           }}
                         />
-                        <Flex direction='column' ml='xl'>
-                          <Text fw='bold' fz='lg'>
+                        <Flex direction="column" ml="xl">
+                          <Text fw="bold" fz="lg">
                             {template.step.title}
                           </Text>
 
                           <Box
                             sx={() => ({
-                              border: '1px solid #E0E0E0',
-                              borderRadius: '8px',
-                              backgroundColor: '#F5F5F5',
+                              border: "1px solid #E0E0E0",
+                              borderRadius: "8px",
+                              backgroundColor: "#F5F5F5",
                             })}
-                            px='md'
-                            mt='sm'
+                            px="md"
+                            mt="sm"
                           >
-                            <Text fz='sm'>
+                            <Text fz="sm">
                               <div
                                 dangerouslySetInnerHTML={{
-                                  __html: DOMPurify.sanitize(template.step.template),
+                                  __html: DOMPurify.sanitize(
+                                    template.step.template
+                                  ),
                                 }}
                               />
                             </Text>
                           </Box>
                         </Flex>
                       </Flex>
-                      <Tooltip label='Edit Template' withinPortal>
+                      <Tooltip label="Edit Template" withinPortal>
                         <ActionIcon onClick={openEdit}>
-                          <IconEdit size='1.25rem' />
+                          <IconEdit size="1.25rem" />
                         </ActionIcon>
                       </Tooltip>
                     </Flex>
@@ -456,7 +520,7 @@ function EmailSequenceStepView(props: {
                       modalOpened={editSequenceStepModalOpened}
                       openModal={openEdit}
                       closeModal={closeEdit}
-                      type={'EDIT'}
+                      type={"EDIT"}
                       backFunction={props.afterEdit}
                       status={template.step.overall_status}
                       archetypeID={props.archetypeID || -1}
@@ -464,40 +528,48 @@ function EmailSequenceStepView(props: {
                       title={template.step.title}
                       isDefault={template.step.default}
                       sequence={template.step.template}
-                      onFinish={async (title, sequence, isDefault, status, substatus) => {
+                      onFinish={async (
+                        title,
+                        sequence,
+                        isDefault,
+                        status,
+                        substatus
+                      ) => {
                         const result = await patchSequenceStep(
                           userToken,
                           template.step.id,
-                          status ?? '',
+                          status ?? "",
                           title,
                           sequence,
                           template.step.bumped_count || 0,
                           isDefault
                         );
-                        return result.status === 'success';
+                        return result.status === "success";
                       }}
                     />
                     <Card.Section>
-                      <Divider mt='sm' />
+                      <Divider mt="sm" />
                     </Card.Section>
                   </>
                 );
               })}
               {props.sequenceBucket.templates.length > 1 && (
                 <Card.Section>
-                  <Flex justify='center'>
+                  <Flex justify="center">
                     <Button
-                      variant='subtle'
+                      variant="subtle"
                       styles={{
                         root: {
-                          '&:hover': {
-                            backgroundColor: 'transparent',
+                          "&:hover": {
+                            backgroundColor: "transparent",
                           },
                         },
                       }}
                       onClick={() => setShowAll(!showAll)}
                     >
-                      {showAll ? 'Hide' : `Show all ${props.sequenceBucket.total} frameworks...`}
+                      {showAll
+                        ? "Hide"
+                        : `Show all ${props.sequenceBucket.total} frameworks...`}
                     </Button>
                   </Flex>
                 </Card.Section>
@@ -518,18 +590,24 @@ export default function EmailSequencingPage(props: {
   const userToken = useRecoilValue(userTokenState);
 
   const [loading, setLoading] = useState(false);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const archetypeID = currentProject?.id || -1;
   const [userData, setUserData] = useRecoilState(userDataState);
 
-  const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] =
-    useDisclosure();
+  const [
+    addNewSequenceStepOpened,
+    { open: openSequenceStep, close: closeSequenceStep },
+  ] = useDisclosure();
 
   if (currentProject === undefined || currentProject === null) {
     return <></>;
   }
 
-  const [subjectLineTemplates, setSubjectLineTemplates] = useState<SubjectLineTemplate[]>([]);
+  const [subjectLineTemplates, setSubjectLineTemplates] = useState<
+    SubjectLineTemplate[]
+  >([]);
 
   const triggerGetEmailSubjectLineTemplates = async () => {
     const result = await getEmailSubjectLineTemplates(
@@ -537,15 +615,16 @@ export default function EmailSequencingPage(props: {
       currentProject?.id as number,
       false
     );
-    if (result.status != 'success') {
+    if (result.status != "success") {
       showNotification({
-        title: 'Error',
+        title: "Error",
         message: result.message,
-        color: 'red',
+        color: "red",
       });
     }
 
-    const templates = result.data.subject_line_templates as SubjectLineTemplate[];
+    const templates = result.data
+      .subject_line_templates as SubjectLineTemplate[];
 
     setSubjectLineTemplates(templates);
     return;
@@ -566,9 +645,10 @@ export default function EmailSequencingPage(props: {
       templates: [],
     },
   } as EmailSequenceStepBuckets);
-  const [sequenceBucketsState, setSequenceBucketsState] = useState<EmailSequenceStepBuckets>(
-    sequenceBuckets.current
-  );
+  const [
+    sequenceBucketsState,
+    setSequenceBucketsState,
+  ] = useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
 
   const { data: dataChannels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -581,14 +661,19 @@ export default function EmailSequencingPage(props: {
   const triggerGetEmailSequenceSteps = async () => {
     setLoading(true);
 
-    const result = await getEmailSequenceSteps(userToken, [], [], [archetypeID as number]);
+    const result = await getEmailSequenceSteps(
+      userToken,
+      [],
+      [],
+      [archetypeID as number]
+    );
 
-    if (result.status !== 'success') {
+    if (result.status !== "success") {
       setLoading(false);
       showNotification({
-        title: 'Error',
-        message: 'Could not get sequence steps.',
-        color: 'red',
+        title: "Error",
+        message: "Could not get sequence steps.",
+        color: "red",
         autoClose: false,
       });
       return;
@@ -610,23 +695,24 @@ export default function EmailSequencingPage(props: {
         templates: [],
       },
     } as EmailSequenceStepBuckets;
-    for (const bumpFramework of result.data.sequence_steps as EmailSequenceStep[]) {
+    for (const bumpFramework of result.data
+      .sequence_steps as EmailSequenceStep[]) {
       const status = bumpFramework.step.overall_status;
-      if (status === 'PROSPECTED') {
+      if (status === "PROSPECTED") {
         newsequenceBuckets.PROSPECTED.total += 1;
         if (bumpFramework.step.default) {
           newsequenceBuckets.PROSPECTED.templates.unshift(bumpFramework);
         } else {
           newsequenceBuckets.PROSPECTED.templates.push(bumpFramework);
         }
-      } else if (status === 'ACCEPTED') {
+      } else if (status === "ACCEPTED") {
         newsequenceBuckets.ACCEPTED.total += 1;
         if (bumpFramework.step.default) {
           newsequenceBuckets.ACCEPTED.templates.unshift(bumpFramework);
         } else {
           newsequenceBuckets.ACCEPTED.templates.push(bumpFramework);
         }
-      } else if (status === 'BUMPED') {
+      } else if (status === "BUMPED") {
         const bumpCount = bumpFramework.step.bumped_count as number;
         if (!(bumpCount in newsequenceBuckets.BUMPED)) {
           newsequenceBuckets.BUMPED[bumpCount] = {
@@ -640,7 +726,7 @@ export default function EmailSequencingPage(props: {
         } else {
           newsequenceBuckets.BUMPED[bumpCount].templates.push(bumpFramework);
         }
-      } else if (status === 'ACTIVE_CONVO') {
+      } else if (status === "ACTIVE_CONVO") {
         newsequenceBuckets.ACTIVE_CONVO.total += 1;
         if (bumpFramework.step.default) {
           newsequenceBuckets.ACTIVE_CONVO.templates.unshift(bumpFramework);
@@ -663,15 +749,20 @@ export default function EmailSequencingPage(props: {
   useEffect(() => {
     triggerGetEmailSubjectLineTemplates();
     triggerGetEmailSequenceSteps();
-  }, []);
+  }, [archetypeID]);
 
   return (
-    <Flex direction='column'>
+    <Flex direction="column">
       <LoadingOverlay visible={loading} />
       {!props.hideTitle && <Title>Email Setup</Title>}
 
-      <Card.Section px='md'>
-        <Tabs color='blue' variant='outline' defaultValue='sequence' orientation='horizontal'>
+      <Card.Section px="md">
+        <Tabs
+          color="blue"
+          variant="outline"
+          defaultValue="sequence"
+          orientation="horizontal"
+        >
           <Tabs.List>
             {/* <Tabs.Tab
                 value="qnolibrary"
@@ -679,27 +770,36 @@ export default function EmailSequencingPage(props: {
               >
                 Conversation
               </Tabs.Tab> */}
-            <Tabs.Tab value='sequence' icon={<IconMessages size='0.8rem' />}>
+            <Tabs.Tab value="sequence" icon={<IconMessages size="0.8rem" />}>
               Email Sequence
             </Tabs.Tab>
-            <Tabs.Tab value='replies' icon={<IconBook size='0.8rem' />}>
+            <Tabs.Tab value="replies" icon={<IconBook size="0.8rem" />}>
               Replies
             </Tabs.Tab>
-            <Tabs.Tab value='settings' icon={<IconWashMachine size='0.8rem' />}>
-              Settings
-            </Tabs.Tab>
 
-            <Tabs.Tab value='email-scraper' icon={<IconFingerprint size='0.8rem' />} ml='auto'>
+            <Tabs.Tab
+              value="email-scraper"
+              icon={<IconFingerprint size="0.8rem" />}
+              ml="auto"
+            >
               Email Scraper
             </Tabs.Tab>
 
-            {currentProject.smartlead_campaign_id && (
-              <Tabs.Tab value='smartlead' icon={<IconMessages size='0.8rem' />} ml='auto'>
+            <Tabs.Tab value="settings" icon={<IconWashMachine size="0.8rem" />}>
+              Settings
+            </Tabs.Tab>
+
+            {/* {currentProject.smartlead_campaign_id && (
+              <Tabs.Tab
+                value="smartlead"
+                icon={<IconMessages size="0.8rem" />}
+                ml="auto"
+              >
                 Beta - Variants
               </Tabs.Tab>
-            )}
+            )} */}
           </Tabs.List>
-          <Tabs.Panel value='sequence'>
+          <Tabs.Panel value="sequence">
             <NewUIEmailSequencing
               userToken={userToken}
               archetypeID={archetypeID}
@@ -715,18 +815,21 @@ export default function EmailSequencingPage(props: {
               openSequenceStep={openSequenceStep}
             />
           </Tabs.Panel>
-          <Tabs.Panel value='replies'>
-            <EmailReplyFrameworkView userToken={userToken} archetypeID={archetypeID} />
-          </Tabs.Panel>{' '}
-          <Tabs.Panel value='settings'>
-            <Box maw='800px' mt='md' ml='auto' mr='auto'>
+          <Tabs.Panel value="replies">
+            <EmailReplyFrameworkView
+              userToken={userToken}
+              archetypeID={archetypeID}
+            />
+          </Tabs.Panel>{" "}
+          <Tabs.Panel value="settings">
+            <Box maw="800px" mt="md" ml="auto" mr="auto">
               <EmailSettingsView userToken={userToken} />
               {/* <NylasConnectedCard
                 connected={userData ? userData.nylas_connected : false} showSmartlead={true}
               /> */}
             </Box>
           </Tabs.Panel>
-          <Tabs.Panel value='email-scraper'>
+          <Tabs.Panel value="email-scraper">
             <PullProspectEmailsCard archetype_id={archetypeID} />
           </Tabs.Panel>
         </Tabs>
@@ -749,7 +852,9 @@ const EmailSettingsView = (props: { userToken: string }) => {
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
 
-  const [selectedRecords, setSelectedRecords] = useState<SmartLeadEmailAccount[]>([]);
+  const [selectedRecords, setSelectedRecords] = useState<
+    SmartLeadEmailAccount[]
+  >([]);
   const [loading, setLoading] = useState(false);
 
   const [trackingLoading, setTrackingLoading] = useState(false);
@@ -775,7 +880,9 @@ const EmailSettingsView = (props: { userToken: string }) => {
 
       const response = await getEmailAccounts(userToken, currentProject.id);
       const results =
-        response.status === 'success' ? (response.data as SmartLeadEmailAccount[]) : [];
+        response.status === "success"
+          ? (response.data as SmartLeadEmailAccount[])
+          : [];
 
       setSelectedRecords(results.filter((record) => record.warming));
 
@@ -795,7 +902,8 @@ const EmailSettingsView = (props: { userToken: string }) => {
     // Any smartlead_inboxes that aren't in activeAccounts are inactive
     const inactiveAccounts =
       smartlead_inboxes?.filter(
-        (record) => !activeAccounts.map((record) => record.id).includes(record.id)
+        (record) =>
+          !activeAccounts.map((record) => record.id).includes(record.id)
       ) ?? [];
 
     await toggleEmailAccounts(
@@ -813,10 +921,10 @@ const EmailSettingsView = (props: { userToken: string }) => {
     );
 
     showNotification({
-      id: 'save-inbox-changes',
+      id: "save-inbox-changes",
       title: `Updated`,
       message: `Saved Active Inboxes`,
-      color: 'blue',
+      color: "blue",
       autoClose: 1000,
     });
 
@@ -825,7 +933,10 @@ const EmailSettingsView = (props: { userToken: string }) => {
 
   console.log(smartlead_inboxes);
 
-  const triggerPostEmailTrackingSettings = async (openTracking: boolean, linkTracking: boolean) => {
+  const triggerPostEmailTrackingSettings = async (
+    openTracking: boolean,
+    linkTracking: boolean
+  ) => {
     setTrackingLoading(true);
     const result = await postEmailTrackingSettings(
       props.userToken,
@@ -833,23 +944,23 @@ const EmailSettingsView = (props: { userToken: string }) => {
       openTracking,
       linkTracking
     );
-    if (result.status !== 'success') {
+    if (result.status !== "success") {
       showNotification({
-        title: 'Error',
-        message: 'Could not post tracking settings.',
-        color: 'red',
+        title: "Error",
+        message: "Could not post tracking settings.",
+        color: "red",
         autoClose: false,
       });
     } else {
       showNotification({
-        title: 'Success',
-        message: 'Tracking settings updated.',
-        color: 'green',
+        title: "Success",
+        message: "Tracking settings updated.",
+        color: "green",
         autoClose: true,
       });
     }
 
-    if (result.status === 'success') {
+    if (result.status === "success") {
       setOpenTracking(openTracking);
       setLinkTracking(linkTracking);
     }
@@ -862,14 +973,14 @@ const EmailSettingsView = (props: { userToken: string }) => {
       <Text fw={600} size={20}>
         Email Settings
       </Text>
-      <Divider my='md' />
-      <Text size='lg' fw={500}>
+      <Divider my="md" />
+      <Text size="lg" fw={500}>
         Tracking - Campaign
       </Text>
       <Checkbox
-        label='Track Email Opens'
-        description='Enable to track when an email is opened by the recipient. May affect deliverability.'
-        mt='sm'
+        label="Track Email Opens"
+        description="Enable to track when an email is opened by the recipient. May affect deliverability."
+        mt="sm"
         checked={openTracking}
         onChange={() => {
           triggerPostEmailTrackingSettings(!openTracking, linkTracking);
@@ -877,10 +988,10 @@ const EmailSettingsView = (props: { userToken: string }) => {
         disabled={trackingLoading}
       />
       <Checkbox
-        label='Track Link Clicks'
-        description='Enable to track when a link in an email is clicked by the recipient. May affect deliverability.'
+        label="Track Link Clicks"
+        description="Enable to track when a link in an email is clicked by the recipient. May affect deliverability."
         defaultChecked
-        mt='sm'
+        mt="sm"
         checked={linkTracking}
         onChange={() => {
           triggerPostEmailTrackingSettings(openTracking, !linkTracking);
@@ -890,17 +1001,22 @@ const EmailSettingsView = (props: { userToken: string }) => {
 
       <Box pt={10}>
         <Group>
-          <Text size='lg' fw={500}>
+          <Text size="lg" fw={500}>
             Inboxes
           </Text>
-          <Button size='xs' compact loading={loading} onClick={saveInboxChanges}>
+          <Button
+            size="xs"
+            compact
+            loading={loading}
+            onClick={saveInboxChanges}
+          >
             Save
           </Button>
         </Group>
         <Box>
           <DataTable
             withBorder
-            borderRadius='sm'
+            borderRadius="sm"
             withColumnBorders
             striped
             highlightOnHover
@@ -909,24 +1025,30 @@ const EmailSettingsView = (props: { userToken: string }) => {
             records={smartlead_inboxes || []}
             columns={[
               {
-                accessor: 'aws_username',
-                title: 'Name',
-                render: ({ aws_username }) => <Text weight={700}>{aws_username}</Text>,
+                accessor: "aws_username",
+                title: "Name",
+                render: ({ aws_username }) => (
+                  <Text weight={700}>{aws_username}</Text>
+                ),
               },
               {
-                accessor: 'email_address',
-                title: 'Email',
-                render: ({ email_address }) => <Text weight={700}>{email_address}</Text>,
+                accessor: "email_address",
+                title: "Email",
+                render: ({ email_address }) => (
+                  <Text weight={700}>{email_address}</Text>
+                ),
               },
               {
-                accessor: 'smartlead_reputation',
-                title: 'Reputation',
+                accessor: "smartlead_reputation",
+                title: "Reputation",
                 render: ({ smartlead_reputation }) => (
                   <Text weight={700}>{smartlead_reputation}%</Text>
                 ),
               },
             ]}
-            onRowClick={({ email_address }) => console.log(`You clicked on ${email_address}`)}
+            onRowClick={({ email_address }) =>
+              console.log(`You clicked on ${email_address}`)
+            }
           />
         </Box>
       </Box>
@@ -934,34 +1056,49 @@ const EmailSettingsView = (props: { userToken: string }) => {
   );
 };
 
-const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number | null }) => {
+const EmailReplyFrameworkView = (props: {
+  userToken: string;
+  archetypeID: number | null;
+}) => {
   const theme = useMantineTheme();
 
   const [fetchingReplyFrameworks, setFetchingReplyFrameworks] = useState(false);
-  const [replyFrameworks, setReplyFrameworks] = useState<EmailReplyFramework[]>([]);
+  const [replyFrameworks, setReplyFrameworks] = useState<EmailReplyFramework[]>(
+    []
+  );
 
   const [isSellScaleFramework, setIsSellScaleFramework] = useState(false);
-  const [selectedFramework, _setSelectedFramework] = useState<EmailReplyFramework>();
+  const [
+    selectedFramework,
+    _setSelectedFramework,
+  ] = useState<EmailReplyFramework>();
   const setSelectedFramework = (framework: EmailReplyFramework) => {
     _setSelectedFramework(framework);
     setIsSellScaleFramework(false);
-    if (framework.client_archetype_id === null && framework.client_sdr_id === null) {
+    if (
+      framework.client_archetype_id === null &&
+      framework.client_sdr_id === null
+    ) {
       setIsSellScaleFramework(true);
     }
   };
 
   const [
     createFrameworkOpened,
-    { open: openCreateFramework, close: closeCreateFramework, toggle: toggleCreateFramework },
+    {
+      open: openCreateFramework,
+      close: closeCreateFramework,
+      toggle: toggleCreateFramework,
+    },
   ] = useDisclosure(false);
 
   const [editTitle, setEditTitle] = useState(false);
   const [editTemplate, setEditTemplate] = useState(false);
   const [editAdditionalInfo, setEditAdditionalInfo] = useState(false);
 
-  let templateBody = '';
+  let templateBody = "";
   const [template, _setTemplate] = React.useState<string>(templateBody);
-  const templateRichRaw = React.useRef<JSONContent | string>('');
+  const templateRichRaw = React.useRef<JSONContent | string>("");
   const [patchingTemplate, setPatchingTemplate] = useState(false);
 
   const triggerPatchTemplate = async () => {
@@ -969,9 +1106,9 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
 
     if (!selectedFramework) {
       showNotification({
-        title: 'Error',
-        message: 'No framework selected.',
-        color: 'red',
+        title: "Error",
+        message: "No framework selected.",
+        color: "red",
         autoClose: false,
       });
       return;
@@ -987,18 +1124,18 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
       null,
       null
     );
-    if (result.status !== 'success') {
+    if (result.status !== "success") {
       showNotification({
-        title: 'Error',
-        message: 'Could not patch template.',
-        color: 'red',
+        title: "Error",
+        message: "Could not patch template.",
+        color: "red",
         autoClose: false,
       });
     } else {
       showNotification({
-        title: 'Success',
-        message: 'Template patched.',
-        color: 'green',
+        title: "Success",
+        message: "Template patched.",
+        color: "green",
         autoClose: true,
       });
       setSelectedFramework({
@@ -1015,11 +1152,11 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
 
     const result = await getEmailReplyFrameworks(props.userToken, []);
 
-    if (result.status !== 'success') {
+    if (result.status !== "success") {
       showNotification({
-        title: 'Error',
-        message: 'Could not get reply frameworks.',
-        color: 'red',
+        title: "Error",
+        message: "Could not get reply frameworks.",
+        color: "red",
         autoClose: false,
       });
     } else {
@@ -1037,24 +1174,27 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
   }, []);
 
   return (
-    <Flex mt='md' w={'100%'} gap={'50px'}>
-      <Flex w='40%' direction='column'>
+    <Flex mt="md" w={"100%"} gap={"50px"}>
+      <Flex w="40%" direction="column">
         <Button
-          variant='outline'
-          mb='md'
+          variant="outline"
+          mb="md"
           leftIcon={<IconPlus />}
           onClick={openCreateFramework}
-          style={{ borderStyle: 'dashed', fontSize: '16px' }}
-          size='lg'
-          fw={'sm'}
+          style={{ borderStyle: "dashed", fontSize: "16px" }}
+          size="lg"
+          fw={"sm"}
         >
           Create New Framework
         </Button>
-        <Radio.Group value={selectedFramework?.id + ''}>
+        <Radio.Group value={selectedFramework?.id + ""}>
           <LoadingOverlay visible={fetchingReplyFrameworks} />
-          <Group mt='xs'>
+          <Group mt="xs">
             {replyFrameworks.map((item: any, i: number) => {
-              const splitted_substatus = item.substatus?.replace('ACTIVE_CONVO_', '');
+              const splitted_substatus = item.substatus?.replace(
+                "ACTIVE_CONVO_",
+                ""
+              );
 
               return (
                 <>
@@ -1062,22 +1202,25 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
                     item.substatus !== replyFrameworks[i - 1].substatus) && (
                     <Divider
                       label={
-                        <Flex align={'center'} gap={4}>
+                        <Flex align={"center"} gap={4}>
                           <div
                             style={{
-                              width: '10px',
-                              height: '10px',
-                              background: valueToColor(theme, splitted_substatus || 'ACTIVE_CONVO'),
-                              borderRadius: '100%',
+                              width: "10px",
+                              height: "10px",
+                              background: valueToColor(
+                                theme,
+                                splitted_substatus || "ACTIVE_CONVO"
+                              ),
+                              borderRadius: "100%",
                             }}
                           ></div>
-                          <Text color='gray' fw={600}>
-                            {splitted_substatus || 'ACTIVE_CONVERSATION'}
+                          <Text color="gray" fw={600}>
+                            {splitted_substatus || "ACTIVE_CONVERSATION"}
                           </Text>
                         </Flex>
                       }
-                      labelPosition='left'
-                      w={'100%'}
+                      labelPosition="left"
+                      w={"100%"}
                     />
                   )}
 
@@ -1086,33 +1229,38 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
                     style={{
                       outline: `${
                         selectedFramework?.id === item?.id
-                          ? ' 0.125rem solid #228be6'
-                          : ' 0.0625rem solid #ced4da'
+                          ? " 0.125rem solid #228be6"
+                          : " 0.0625rem solid #ced4da"
                       }`,
-                      borderRadius: '8px',
-                      padding: '10px 14px',
-                      width: '100%',
+                      borderRadius: "8px",
+                      padding: "10px 14px",
+                      width: "100%",
                     }}
                   >
-                    <Flex align={'center'} gap={10} justify={'space-between'}>
-                      <Flex align={'center'}>
+                    <Flex align={"center"} gap={10} justify={"space-between"}>
+                      <Flex align={"center"}>
                         <Radio
-                          value={item?.id + ''}
+                          value={item?.id + ""}
                           id={item?.title}
-                          size='xs'
+                          size="xs"
                           onClick={() => {
                             setSelectedFramework(item);
                             // setBlockList(item?.transformer_blocklist);
                           }}
-                          mr='sm'
+                          mr="sm"
                         />
                         <Text fw={600} mt={2}>
                           {item?.title}
                         </Text>
                       </Flex>
                       {!item.client_archetype_id && !item.client_sdr_id && (
-                        <Tooltip label='SellScale AI Default Framework'>
-                          <Image width={10} fit='contain' src={IconImg} alt='SellScale Sight' />
+                        <Tooltip label="SellScale AI Default Framework">
+                          <Image
+                            width={10}
+                            fit="contain"
+                            src={IconImg}
+                            alt="SellScale Sight"
+                          />
                         </Tooltip>
                       )}
                     </Flex>
@@ -1124,23 +1272,23 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
         </Radio.Group>
       </Flex>
 
-      <Flex w={'100%'} direction='column' gap={'xl'}>
-        <Flex w={'100%'} justify={'space-between'} align={'center'} mt='md'>
+      <Flex w={"100%"} direction="column" gap={"xl"}>
+        <Flex w={"100%"} justify={"space-between"} align={"center"} mt="md">
           <Text
-            size={'24px'}
+            size={"24px"}
             fw={600}
-            color='gray'
+            color="gray"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
             }}
             inline
-            mr='md'
+            mr="md"
           >
             {editTitle ? (
               <TextInput
-                size='md'
+                size="md"
                 value={selectedFramework?.title}
                 onChange={(e) => {
                   if (!selectedFramework) {
@@ -1151,57 +1299,62 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
                     title: e.target.value,
                   });
                 }}
-                w='400px'
+                w="400px"
               />
             ) : (
-              <span style={{ color: 'black' }}>{selectedFramework?.title}</span>
+              <span style={{ color: "black" }}>{selectedFramework?.title}</span>
             )}
-            <Flex ml='4px'>
+            <Flex ml="4px">
               {isSellScaleFramework ? (
                 <Tooltip label="SellScale frameworks are AI trained over time and can't be edited. Please create a new framework to edit.">
-                  <Image width={20} fit='contain' src={IconImg} alt='SellScale Sight' />
+                  <Image
+                    width={20}
+                    fit="contain"
+                    src={IconImg}
+                    alt="SellScale Sight"
+                  />
                 </Tooltip>
               ) : (
                 <>
                   {editTitle ? (
                     <IconCheck
                       onClick={() => setEditTitle(!editTitle)}
-                      style={{ cursor: 'pointer' }}
-                      size={'1rem'}
+                      style={{ cursor: "pointer" }}
+                      size={"1rem"}
                     />
                   ) : (
                     <IconPencil
                       onClick={() => setEditTitle(!editTitle)}
-                      style={{ cursor: 'pointer' }}
-                      size={'1rem'}
+                      style={{ cursor: "pointer" }}
+                      size={"1rem"}
                     />
                   )}
                 </>
               )}
             </Flex>
           </Text>
-          <Checkbox label='Default Framework' defaultChecked mr='20px' />
+          <Checkbox label="Default Framework" defaultChecked mr="20px" />
         </Flex>
-        <Flex w='100%' gap={'xl'}>
-          <Flex direction='column' w='100%'>
-            <Text color='gray' fw={600}>
+        <Flex w="100%" gap={"xl"}>
+          <Flex direction="column" w="100%">
+            <Text color="gray" fw={600}>
               SUB-STATUS
             </Text>
             <Select
-              description=' '
-              placeholder=' '
-              data={[selectedFramework?.substatus || 'ACTIVE_CONVO']}
+              description=" "
+              placeholder=" "
+              data={[selectedFramework?.substatus || "ACTIVE_CONVO"]}
               defaultValue={selectedFramework?.substatus}
               disabled
-              maw='300px'
+              maw="300px"
             />
           </Flex>
         </Flex>
-        <Flex direction='column'>
+        <Flex direction="column">
           <Text fw={600}>TEMPLATE</Text>
-          <Text fw={400} fz='xs' mb='2px'>
-            Template to be fed to GPT. Include [[brackets]] for AI instructions. Everything else
-            will be followed exactly.
+          <Text fw={400} fz="xs" mb="2px">
+            Template to be fed to GPT. Include [[brackets]] for AI instructions.
+            Everything else will be followed exactly.
           </Text>
           {editTemplate ? (
             <>
@@ -1217,13 +1370,13 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
                   inserts={[]}
                 />
               </Box>
-              <Flex mt='sm' justify={'flex-end'}>
+              <Flex mt="sm" justify={"flex-end"}>
                 <Button
-                  mr='sm'
-                  color='red'
+                  mr="sm"
+                  color="red"
                   onClick={() => {
-                    _setTemplate(templateBody || '');
-                    templateRichRaw.current = selectedFramework?.template || '';
+                    _setTemplate(templateBody || "");
+                    templateRichRaw.current = selectedFramework?.template || "";
                     setEditTemplate(false);
                   }}
                   disabled={patchingTemplate}
@@ -1231,7 +1384,7 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
                   Cancel
                 </Button>
                 <Button
-                  color='green'
+                  color="green"
                   onClick={() => {
                     triggerPatchTemplate();
                     setEditTemplate(false);
@@ -1245,12 +1398,12 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
           ) : (
             <Box
               sx={() => ({
-                border: '1px solid #E0E0E0',
-                borderRadius: '8px',
-                backgroundColor: '#F5F5F5',
+                border: "1px solid #E0E0E0",
+                borderRadius: "8px",
+                backgroundColor: "#F5F5F5",
               })}
-              px='md'
-              py='xs'
+              px="md"
+              py="xs"
               onClick={() => {
                 if (isSellScaleFramework) {
                   return;
@@ -1258,21 +1411,23 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
                 setEditTemplate(true);
               }}
             >
-              <Text fz='sm'>
+              <Text fz="sm">
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(selectedFramework?.template as string),
+                    __html: DOMPurify.sanitize(
+                      selectedFramework?.template as string
+                    ),
                   }}
                 />
               </Text>
-              <Flex h='0px' w='100%' mt='40px'>
+              <Flex h="0px" w="100%" mt="40px">
                 <Button
-                  leftIcon={<IconEdit size='1.0rem' />}
-                  variant='outline'
-                  pos='relative'
-                  bottom='40px'
-                  left='88%'
-                  h='32px'
+                  leftIcon={<IconEdit size="1.0rem" />}
+                  variant="outline"
+                  pos="relative"
+                  bottom="40px"
+                  left="88%"
+                  h="32px"
                   onClick={() => {
                     setEditTemplate(true);
                   }}
@@ -1285,23 +1440,26 @@ const EmailReplyFrameworkView = (props: { userToken: string; archetypeID: number
           )}
         </Flex>
 
-        <Accordion defaultValue='additional-information'>
-          <Accordion.Item key='additional-information' value='additional-information'>
-            <Accordion.Control icon={<IconSettings size='1rem' />}>
+        <Accordion defaultValue="additional-information">
+          <Accordion.Item
+            key="additional-information"
+            value="additional-information"
+          >
+            <Accordion.Control icon={<IconSettings size="1rem" />}>
               Advanced Controls - Coming Soon
             </Accordion.Control>
             <Accordion.Panel>
               <Flex
                 style={{
-                  border: '0.0625rem solid #ced4da',
-                  borderRadius: '8px',
+                  border: "0.0625rem solid #ced4da",
+                  borderRadius: "8px",
                 }}
-                align={'center'}
-                px='md'
-                py={'8px'}
-                justify={'space-between'}
+                align={"center"}
+                px="md"
+                py={"8px"}
+                justify={"space-between"}
               >
-                <Text color='gray' fw={600}>
+                <Text color="gray" fw={600}>
                   USER ACCOUNT RESEARCH:
                 </Text>
                 <Switch

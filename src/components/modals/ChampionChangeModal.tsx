@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
-import { Button, Flex, Group, Tabs, Text, TextInput, rem, useMantineTheme } from "@mantine/core";
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { Button, Flex, Group, Tabs, Text, TextInput, rem, useMantineTheme, Loader, ActionIcon } from "@mantine/core";
 import { IconBrandLinkedin, IconCloud, IconCloudUpload, IconFileSpreadsheet, IconFileUpload, IconUpload, IconX } from "@tabler/icons";
 import LinkedinAvatar from "@pages/LinkedinAvatar";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
+import { getIndividual } from "@utils/requests/getIndividuals";
+import { createProspectFromLinkedinLink, createManyProspectsFromLinkedinLinks } from "@utils/requests/createProspectFromLinkedinLink";
+import { markProspectsAsChampion } from "@utils/requests/createProspectFromLinkedinLink";
 import { convertFileToJSON } from "@utils/fileProcessing";
 import { showNotification } from "@mantine/notifications";
 import { IconCsv } from "@tabler/icons-react";
@@ -14,13 +19,17 @@ export default function ChampionChangeModal() {
   const [currentTab, setCurrentTab] = useState<string | null>("linkedin");
   const [preview, setPreview] = useState(false);
   const MAX_FILE_SIZE_MB = 2;
+  const userToken = useRecoilValue(userTokenState);
 
   const [fileJSON, setFileJSON] = useState<any[] | null>(null);
-  const [file, setFile] = useState<any[] | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [linkedinUrl, setLinkedinUrl] = useState("");
 
   const [createNext, setCreateNext] = useState(false);
-  const [validLinkedin, setValidLinkedin] = useState(false);
+
+  const [individual, setIndividual] = useState<any | null>(null);
+  const [loadingIndividual, setLoadingIndividual] = useState(false);
+  const [loadingChampion, setLoadingChampion] = useState(false);
 
   function isValidLinkedInProfile(url: string) {
     const regex = /^https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+/;
@@ -84,10 +93,44 @@ export default function ChampionChangeModal() {
           <TextInput
             value={linkedinUrl}
             label="Linkedin URL:"
+            type="text"
             placeholder="For eg. https://linkedin.com/johndoe"
-            onChange={(e) => setLinkedinUrl(e.target.value)}
+            onChange={(e) => {
+              setLinkedinUrl(e.target.value);
+              if (e.target.value === '') {
+                setLinkedinUrl('');
+                setIndividual(undefined);
+                setCreateNext(false);
+              }
+            }}
+            rightSection={
+              linkedinUrl && (
+                <ActionIcon
+                  onClick={() => {
+                    setLinkedinUrl('');
+                    setIndividual(undefined);
+                    setCreateNext(false);
+                  }}
+                >
+                  <IconX />
+                </ActionIcon>
+              )
+            }
           />
-          {validLinkedin && createNext && <LinkedinAvatar avatar={""} title={""} location={""} experience={""} />}
+          {loadingIndividual ? (
+            <Loader />
+          ) : createNext && (
+            <LinkedinAvatar 
+              name={individual?.data.full_name} 
+              avatar={individual?.data.img_url} 
+              title={individual?.data.title} 
+              location={individual?.data.location?.default} 
+              experience={
+                individual?.data.work.history.slice(0, 2).map((h: { company: { name: string } }) => h.company.name).join(', ') +
+                (individual?.data.work.history.length > 2 ? `, and ${individual?.data.work.history.length - 2} more` : '')
+              }
+            />
+          )}
         </Tabs.Panel>
 
         <Tabs.Panel value="csv" pt="xs">
@@ -151,7 +194,7 @@ export default function ChampionChangeModal() {
                       Drag & drop files or <span style={{ color: "#2476eb", textDecoration: "underline" }}>Browse</span>
                     </Text>
                     <Text size="sm" color="dimmed" inline mt={12}>
-                      Supported formats: CSV, Excel
+                      Acceptable formats: CSV (required column: linkedin_url)
                     </Text>
                   </div>
                 </Group>
@@ -160,8 +203,8 @@ export default function ChampionChangeModal() {
           ) : (
             <Flex gap={"xs"} align={"center"} justify={"space-between"} px={"md"}>
               <Flex>
-                <IconFileSpreadsheet />
-                <Text size={"lg"}>{file?.name}</Text>
+                <IconFileSpreadsheet color="teal" />
+                <Text size={"lg"} style={{ color: "teal" }}>{file?.name}</Text>
               </Flex>
               <IconX
                 color="red"
@@ -184,9 +227,47 @@ export default function ChampionChangeModal() {
         <Button variant="outline" color="gray" fullWidth onClick={() => closeAllModals()}>
           Go Back
         </Button>
-        <Button fullWidth onClick={() => setCreateNext(true)} disabled={!preview}>
-          Next
-        </Button>
+        {loadingChampion ? (
+          <Loader />
+        ) : (
+          <Button 
+            fullWidth 
+            onClick={async () => {
+              if (currentTab === "csv") {
+                setLoadingChampion(true);
+                //console log the entire csv
+                const linkedinUrls = fileJSON?.map(entry => entry.linkedin_url);
+                createManyProspectsFromLinkedinLinks(userToken, linkedinUrls, true);
+                showNotification({
+                  title: "Adding champions...",
+                  message: "Please wait while we add champions to your account. This may take a few minutes.",
+                  color: "blue",
+                  autoClose: 5000,
+                });
+                closeAllModals();
+                return;
+              }
+              else if (currentTab === "linkedin") {
+                if (createNext) {
+                  setLoadingChampion(true);
+                  const newProspect = await createProspectFromLinkedinLink(userToken, null, linkedinUrl);
+                  const markResponse = await markProspectsAsChampion(userToken, [newProspect.data.prospect_id], true);
+                  setLoadingChampion(false);
+                  closeAllModals();
+                  return;
+                }
+                setLoadingIndividual(true);
+                const response = await getIndividual(linkedinUrl);
+                setIndividual(response);
+                setLoadingIndividual(false);
+                setCreateNext(true);
+              }
+            }} 
+            disabled={!preview}
+          >
+            Next
+          </Button>
+        )}
       </Flex>
     </>
   );

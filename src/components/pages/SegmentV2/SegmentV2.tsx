@@ -21,6 +21,8 @@ import {
   Divider,
   Stack,
   Input,
+  Popover,
+  Loader,
 } from '@mantine/core';
 import posthog from 'posthog-js';
 
@@ -47,11 +49,13 @@ import {
   IconRobot,
   IconSearch,
   IconSwitch,
+  IconTag,
   IconTargetArrow,
   IconTemplate,
   IconTrash,
   IconUsers,
   IconWand,
+  IconX,
 } from '@tabler/icons';
 import { DataGrid } from 'mantine-data-grid';
 import { useEffect, useState } from 'react';
@@ -60,12 +64,14 @@ import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { API_URL } from '@constants/data';
 import { IconArrowsSplit2, IconUsersMinus, IconUsersPlus } from '@tabler/icons-react';
 import SegmentV2Overview from './SegmentV2Overview';
-import { openContextModal } from '@mantine/modals';
+import { openConfirmModal, openContextModal } from '@mantine/modals';
 import PersonaSelect from '@common/persona/PersonaSplitSelect';
 import { showNotification } from '@mantine/notifications';
 import SegmentAutodownload from './SegmentAutodownload';
 import { RequestCampaignModal } from '@modals/SegmentV2/RequestCampaignModal';
 import { addCampaignAiRequest } from '@utils/requests/aiRequests';
+import { createSegmentTag, getAllSegmentTags, addTagToSegment, removeTagFromSegment, deleteTag } from '@utils/requests/segmentTagTemplates';
+import { deterministicMantineColor } from '@utils/requests/utils';
 
 type PropsType = {
   onDownloadHistoryClick?: () => void;
@@ -89,12 +95,15 @@ export default function SegmentV2(props: PropsType) {
   const [iframeUrl, setIframeUrl] = useState('');
   const [showConnectCampaignModal, setShowConnectCampaignModal] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
-  const [selectedSegmentId, setSelectedSegmentId] = useState(null);
+  const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
 
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
   const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(false);
   const [sdrs, setAllSDRs] = useState([] as any[]);
   const [selectedSdrId, setSelectedSdrId] = useState(null);
+  const [segmentTagCategories, setSegmentTagCategories] = useState<Array<{ id: number; name: string; }>>([]);
+  const [tagMenuOpen, setTagMenuOpen] = useState(false);
+  const [tagMenuLoading, setTagMenuLoading] = useState(false);
   const [showEditSegmentNameModal, setShowEditSegmentNameModal] = useState(false);
   const [editSegmentName, setEditSegmentName] = useState('');
   const [showBatchModal, setShowBatchModal] = useState(false);
@@ -165,6 +174,9 @@ export default function SegmentV2(props: PropsType) {
           num_contacted,
           client_sdr,
         } = cell.row.original;
+
+        const totalProspectedChildren = sub_segments.reduce((total: number, segment: any) => total + (segment.num_prospected || 0), 0);
+        const totalContactedChildren = sub_segments.reduce((total: number, segment: any) => total + (segment.num_contacted || 0), 0);
 
         if (!num_prospected) {
           num_prospected = 0;
@@ -511,15 +523,28 @@ export default function SegmentV2(props: PropsType) {
                         </Badge>
                       )}
                     </Flex>
-                    <Flex align={'center'} gap={'sm'} mt={3}>
+                    <Flex direction="column" align={'left'} gap={'sm'} mt={3}>
+                    <Flex direction="row" align={'left'} gap={'sm'} mt={3}>
                       <Progress
                         value={Math.round((num_contacted / (num_prospected + 0.0001)) * 100)}
                         w={140}
+                        color={isChild ? 'grape' : '#3B85EF'}
                       />
-                      <Text color='#3B85EF' fw={600}>
+                      <Text size='10px' color={!isChild ? '#3B85EF' : 'grape'} fw={600}>
                         {Math.round((num_contacted / (num_prospected + 0.0001)) * 100)}% (
-                        {num_contacted} / {num_prospected})
+                        {num_contacted} / {num_prospected}) {'in' + (isChild ? ' child segment' : ' segment')}
                       </Text>
+                      </Flex>
+                      <Flex direction="row" align={'left'} gap={'sm'} mt={3}>
+                      {sub_segments && sub_segments.length > 0 && (
+                        <><Progress
+                          value={Math.round((totalContactedChildren / totalProspectedChildren + 0.0001) * 100)}
+                          w={140}
+                          color='grape' /><Text size='10px' color='grape' fw={600}>
+                            {`${Math.round((totalContactedChildren / totalProspectedChildren + 0.0001) * 100) || 0}% ( ${totalContactedChildren} / ${totalProspectedChildren} ) in children segments`}
+                          </Text></>
+                      )}
+                      </Flex>
                     </Flex>
                   </Box>
                 </Box>
@@ -539,7 +564,13 @@ export default function SegmentV2(props: PropsType) {
       ),
       cell: (cell: any) => {
         const { isChild } = cell.row.original;
-        const { contacts, filters, client_sdr, apollo_query } = cell.row.original;
+        const { contacts, filters, client_sdr, apollo_query, autoscrape_enabled } = cell.row.original;
+
+        const successfulScrapes = Math.min(
+          cell.row.original.current_scrape_page,
+          Math.ceil(apollo_query?.num_results / 100));
+        const totalScrapes = Math.ceil(apollo_query?.num_results / 100);
+        const doneScraping = successfulScrapes === totalScrapes;
 
         const notMyCampaign = client_sdr.id !== userData.id;
 
@@ -587,7 +618,7 @@ export default function SegmentV2(props: PropsType) {
                     {showAutoDownloadFeature && (
                       <Button
                         w='100%'
-                        variant={cell.row.original.autoscrape_enabled ? 'filled' : 'outline'}
+                        variant={autoscrape_enabled ? 'filled' : 'outline'}
                         compact
                         size='xs'
                         color='teal'
@@ -596,11 +627,8 @@ export default function SegmentV2(props: PropsType) {
                           setOpenAutoDownloadModal(true);
                         }}
                       >
-                        {cell.row.original.autoscrape_enabled
-                          ? `Auto-Download Enabled - ${Math.min(
-                              cell.row.original.current_scrape_page,
-                              Math.ceil(apollo_query.num_results / 100)
-                            )} / ${Math.ceil(apollo_query.num_results / 100)} scraped (${Math.round(
+                        {autoscrape_enabled
+                          ? `Auto-Download Enabled - ${successfulScrapes} / ${totalScrapes} scraped (${Math.round(
                               (Math.min(
                                 cell.row.original.current_scrape_page,
                                 Math.ceil(apollo_query.num_results / 100)
@@ -609,7 +637,7 @@ export default function SegmentV2(props: PropsType) {
                                 100
                             )}%
                             )`
-                          : 'Enable Auto-Download'}
+                          : 'Enable Auto-Download'} {!doneScraping && !autoscrape_enabled && successfulScrapes > 0 ? ' - ' + successfulScrapes + '/' + totalScrapes + ' scraped (' + Math.round((successfulScrapes / totalScrapes + 0.0001) * 100) + '%)' : ''}
                       </Button>
                     )}
                   </>
@@ -634,6 +662,182 @@ export default function SegmentV2(props: PropsType) {
               </Box>
             </Box>
           </Flex>
+        );
+      },
+    },
+    {
+      accessorKey: 'tags',
+      header: () => (
+        <Flex align='center' justify='space-between'>
+          <Flex align='center'>
+            <IconTag size={16} stroke={1.5} color='gray' style={{ marginRight: '4px' }} />
+            <Text color='gray'>Tags</Text>
+          </Flex>
+          <Flex align='center'>
+            <Menu 
+            withinPortal
+            opened={tagMenuOpen}
+            onOpen={async () => {
+              setTagMenuOpen(true);
+              setTagMenuLoading(true);
+              try {
+                const res = await getAllSegmentTags(userToken);
+                setSegmentTagCategories(res.data);
+              } catch (error) {
+                console.error('Failed to fetch tags:', error);
+              }
+              setTagMenuLoading(false);
+            }} onClose={() => { setTagMenuLoading(false); setTagMenuOpen(false); }}>
+              <Menu.Target>
+                <Button size='xs' variant='subtle'>
+                  Filter by Tag
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>Available Tags</Menu.Label>
+                {segmentTagCategories?.map((tag, index) => (
+                  <Menu.Item key={index} onClick={() => { getAllSegments(true, tag.id); }}>
+                    <Badge color={deterministicMantineColor(tag.name)}>{tag.name}</Badge>
+                  </Menu.Item>
+                ))}
+              </Menu.Dropdown>
+            </Menu>
+          </Flex>
+        </Flex>
+      ),
+      cell: (cell: any) => {
+        const [availableSegmentTags, setAvailableSegmentTags] = useState<Array<{ id: number; name: string; }>>([]);
+        const [addTagClicked, setAddTagClicked] = useState(false);
+        const [segmentTagsLoading, setSegmentTagsLoading] = useState(false);
+        const [segmentTags, setSegmentTags] = useState(cell.row.original.segment_tags);
+        const [popoverOpened, setPopoverOpened] = useState(false);
+
+        return (
+          <Popover 
+            opened={popoverOpened}
+            width={400} 
+            position="left" 
+            withArrow 
+            shadow="md"
+            onClose={() => setPopoverOpened(false)}
+            onOpen={() => {
+              setSegmentTagsLoading(true);
+              getAllSegmentTags(userToken).then((res) => {
+                setAvailableSegmentTags(res.data);
+                setSegmentTagsLoading(false);
+              });
+            }}
+          >
+            <Popover.Target>
+              <Box 
+                style={{ display: 'flex', justifyContent: 'left', flexWrap: 'wrap', cursor: 'pointer', width: '100%' }}
+                onClick={() => {
+                  setPopoverOpened(true);
+                }}
+              >
+                {segmentTags?.length > 0 ? segmentTags.map((tag: { name: string }, index: number) => (
+                  tag && <Badge key={index} radius="xl" size='md' color={deterministicMantineColor(tag.name)} style={{ margin: '5px' }}>
+                    {tag.name}
+                  </Badge>
+                )) : (
+                  <Button radius="xl" size='xs' color={'blue'} compact style={{ color: 'white', margin: '5px' }} onClick={() => setPopoverOpened(true)}>
+                    <IconPlus size={18} />
+                  </Button>
+                )}
+              </Box>
+            </Popover.Target>
+            <Popover.Dropdown>
+              {segmentTagsLoading ? <Loader /> : (
+              <Box style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap'}}>
+                {/* Available / New Tags */}
+                {availableSegmentTags?.map((tag: { name: string, id: number }, index: number) => {
+                  const isTagInSegment = segmentTags?.some((existingTag: { name: string; }) => existingTag?.name === tag?.name);
+                  return (
+                    tag && <Group spacing="xs" style={{ margin: '2px' }}>
+                      <Badge 
+                        radius="xl" 
+                        size='md' 
+                        color={deterministicMantineColor(tag.name)}
+                        style={{ 
+                          cursor: 'pointer',
+                          backgroundColor: isTagInSegment ? 'transparent' : '',
+                          color: isTagInSegment ? 'darkgrey' : ''
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isTagInSegment) {
+                            addTagToSegment(userToken, cell.row.original.id, tag.id).then(() => {
+                              getAllSegments(true);
+                            });
+                          } else {
+                            removeTagFromSegment(userToken, cell.row.original.id, tag.id).then(() => {
+                              getAllSegments(true);
+                            });
+                          }
+                        }}
+                      >
+                        {tag.name} &nbsp;
+                      </Badge>
+                      <div style={{ marginLeft: '-35px' }}>
+                        <ActionIcon 
+                            color="red" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openConfirmModal({
+                                title: 'Confirm Global Tag Deletion',
+                                children: (
+                                  <Text size="sm">Are you sure you want to permanently delete this tag? It will get removed from all locations.</Text>
+                                ),
+                                labels: { confirm: 'Delete Tag', cancel: 'Cancel' },
+                                confirmProps: { color: 'red' },
+                                onCancel: () => {setPopoverOpened(true)},
+                                onConfirm: () => {
+                                  deleteTag(userToken, tag.id).then(() => {
+                                    getAllSegments(true);
+                                    //prevent the popover from closing
+                                    setPopoverOpened(true);
+                                  });
+                                }
+                              })
+                            }}
+                            sx={(theme) => ({
+                              '&:hover': {
+                                backgroundColor: theme.colors.red[2],
+                                borderRadius: '50%'
+                              }
+                            })}
+                          >
+                            <IconX color='darkgrey' size={14} />
+                          </ActionIcon>
+                      </div>
+                    </Group>
+                  );
+                })}
+                {addTagClicked ? (
+                  <TextInput
+                    placeholder="Type here..."
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const newTagName = e.currentTarget.value.trim();
+                        if (newTagName !== '' && !availableSegmentTags?.some(tag => tag.name === newTagName)) {
+                          createSegmentTag(userToken, cell.row.original.id, newTagName, '#000000').then((newTag) => {
+                            getAllSegments(true);
+                            e.currentTarget.value = ''; // Clear input after sending
+                          });
+                        }
+                      }
+                      e.stopPropagation();
+                    }}
+                    style={{ width: '50%', margin: '5px' }}
+                  />
+                ) : (
+                  <Button onClick={(e) => { e.stopPropagation(); setAddTagClicked(true); }} size='xs' style={{ backgroundColor: '#4682B4', color: 'white' }}><IconPlus size={18} /></Button>
+                )}
+              </Box>
+              )}
+            </Popover.Dropdown>
+          </Popover>
         );
       },
     },
@@ -708,6 +912,7 @@ export default function SegmentV2(props: PropsType) {
         num_prospected: segment.num_prospected,
         num_contacted: segment.num_contacted,
         apollo_query: segment.apollo_query,
+        segment_tags: segment.attached_segments,
         autoscrape_enabled: segment.autoscrape_enabled,
         current_scrape_page: segment.current_scrape_page,
       };
@@ -873,11 +1078,11 @@ export default function SegmentV2(props: PropsType) {
       });
   };
 
-  const getAllSegments = async (showLoader: boolean) => {
+  const getAllSegments = async (showLoader: boolean, tagFilter?: Number) => {
     if (showLoader) {
       setLoading(true);
     }
-    fetch(`${API_URL}/segment/all` + (showAllSegments ? '?include_all_in_client=true' : ''), {
+    fetch(`${API_URL}/segment/all` + (showAllSegments ? '?include_all_in_client=true' : '') + (tagFilter !== -1 ? `${showAllSegments ? '&' : '?'}tag_filter=${tagFilter}` : ''), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -996,6 +1201,7 @@ export default function SegmentV2(props: PropsType) {
         padding='md'
       >
         <SegmentAutodownload
+          getAllSegments={getAllSegments}
           segmentId={selectedSegmentId}
           onDownloadHistoryClick={() => {
             props.onDownloadHistoryClick && props.onDownloadHistoryClick();
@@ -1178,7 +1384,14 @@ export default function SegmentV2(props: PropsType) {
             color: 'green',
           });
 
-          await addCampaignAiRequest(userToken, title, description, liEnabled, emailEnabled);
+          await addCampaignAiRequest(
+            userToken,
+            title,
+            description,
+            liEnabled,
+            emailEnabled,
+            selectedSegmentId ?? undefined
+          );
         }}
       />
 
@@ -1591,3 +1804,4 @@ export default function SegmentV2(props: PropsType) {
     </Paper>
   );
 }
+

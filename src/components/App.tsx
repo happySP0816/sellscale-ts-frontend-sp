@@ -69,6 +69,7 @@ import DeleteSegmentModal from "@modals/SegmentV2/DeleteSegmentModal";
 import DuplicateCampaignModal from "@modals/DuplicateCampaignModal";
 
 import posthog from "posthog-js";
+import WebsiteIntentSplitModal from "@modals/WebsiteIntentsplitModal";
 import ChampionChangeModal from "@modals/ChampionChangeModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
@@ -243,6 +244,7 @@ export default function App() {
               clearsegment: ClearSegmentModal,
               deletesegment: DeleteSegmentModal,
               duplicateCampaign: DuplicateCampaignModal,
+              websiteintentsplit: WebsiteIntentSplitModal,
               championChange: ChampionChangeModal,
             }}
             modalProps={{

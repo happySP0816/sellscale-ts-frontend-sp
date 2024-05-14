@@ -45,7 +45,7 @@ export async function createManyProspectsFromLinkedinLinks(userToken: string, ur
         archetype_id: -1,
         mark_as_champion: markAsChampion,
         urls: urls,
-        live: true,
+        live: false,
       })
     }
   );

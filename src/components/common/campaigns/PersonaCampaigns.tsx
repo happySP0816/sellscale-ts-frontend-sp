@@ -24,6 +24,7 @@ import {
   Button,
   Divider,
   Box,
+  Modal,
   Popover,
   Text,
   Paper,
@@ -39,7 +40,6 @@ import {
   RingProgress,
   MantineColor,
   Badge,
-  Modal,
   CloseButton,
   Anchor,
   ThemeIcon,
@@ -2470,6 +2470,8 @@ export const PersonCampaignTable = (props: {
 }) => {
   const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
+  const [selectedCycleId, setSelectedCycleId] = useState(-1);
 
   const [cycleModeShowCycleIds, setCycleModeShowCycleIds]: any = useState([]);
 
@@ -2497,6 +2499,25 @@ export const PersonCampaignTable = (props: {
 
   return (
     <>
+      <Modal
+        opened={showAnalyticsModal}
+        onClose={() => setShowAnalyticsModal(false)}
+        title="Campaign Analytics"
+        size="1000px"
+      >
+        <iframe
+          src={
+            "https://sellscale.retool.com/embedded/public/3e03c40e-b862-4bda-a4d1-ecfade8bcfd2#authToken=" +
+            userToken +
+            "&cycle=" +
+            selectedCycleId
+          }
+          width="100%"
+          height="600px"
+          frameBorder="0"
+          title="Campaign Analytics"
+        ></iframe>
+      </Modal>
       <Paper radius="md">
         <Group
           id="dssss"
@@ -2718,6 +2739,10 @@ export const PersonCampaignTable = (props: {
                         ml="auto"
                         compact
                         mr="xs"
+                        onClick={() => {
+                          setShowAnalyticsModal(true);
+                          setSelectedCycleId(persona.cycle);
+                        }}
                       >
                         View Analytics
                       </Button>

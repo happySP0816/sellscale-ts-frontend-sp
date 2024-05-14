@@ -235,8 +235,7 @@ export default function ChampionChangeModal() {
             onClick={async () => {
               if (currentTab === "csv") {
                 setLoadingChampion(true);
-                //console log the entire csv
-                const linkedinUrls = fileJSON?.map(entry => entry.linkedin_url);
+                const linkedinUrls : string[] = fileJSON?.map(entry => entry.linkedin_url) || [];
                 createManyProspectsFromLinkedinLinks(userToken, linkedinUrls, true);
                 showNotification({
                   title: "Adding champions...",

@@ -2497,6 +2497,12 @@ export const PersonCampaignTable = (props: {
     data = props.filteredProjects;
   }
 
+  if (props.showCycles) {
+    data = data.sort((a: any, b: any) => {
+      return a.cycle - b.cycle;
+    });
+  }
+
   return (
     <>
       <Modal
@@ -2661,10 +2667,16 @@ export const PersonCampaignTable = (props: {
       </Paper>
       {data
         .sort((a: any, b: any) => {
-          if (a.active && b.active) return -(a.total_sent - b.total_sent);
-          if (a.active && !b.active) return -1;
-          if (!a.active && b.active) return 1;
-          return a.total_sent - b.total_sent;
+          if (a.cycle && b.cycle) {
+            return -(a.cycle - b.cycle);
+          }
+          if (a.cycle) {
+            return -1;
+          }
+          if (b.cycle) {
+            return 1;
+          }
+          return 0;
         })
         .map((persona: any, index) => (
           <>

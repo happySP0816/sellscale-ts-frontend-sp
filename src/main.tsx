@@ -77,6 +77,8 @@ import Utilization from "@pages/Utilization/Utilization";
 import SegmentV2 from "@pages/SegmentV2/SegmentV2";
 
 import { PostHogProvider } from "posthog-js/react";
+import ComingSoonCard from "@common/library/ComingSoonCard";
+import CampaingCurator from "@common/campaigns/CampaignCurator";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -299,6 +301,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "setup",
         element: <RestrictedRoute page={<SetupPage />} />,
+      },
+      {
+        path: "curator",
+        element: <RestrictedRoute page={<CampaingCurator />} />,
       },
       {
         path: "authenticate",

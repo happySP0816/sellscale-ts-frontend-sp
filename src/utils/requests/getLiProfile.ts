@@ -16,3 +16,17 @@ export default async function getLiProfile(userToken: string): Promise<MsgRespon
   );
   return await processResponse(response, 'data');
 }
+
+
+export async function getOtherLiProfile(userToken: string, public_id: string): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/voyager/profile?public_id=${public_id}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  return await processResponse(response, 'data');
+}

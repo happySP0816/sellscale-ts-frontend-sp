@@ -26,6 +26,7 @@ export default function CRMEventHandler(props: { crmSync: ClientSyncCRM }) {
   //////////////// Stages
   let sellscaleStages = [
     { value: "ACTIVE_CONVO", label: "Active Convo (All)" },
+    { value: "ACTIVE_CONVO_POSITIVE_REPLY", label: "Active Convo (Positive Reply)" },
     { value: "DEMO", label: "Demo Set" },
   ];
   const [crmStages, setCRMStages] = useState<CRMStage[]>([]);

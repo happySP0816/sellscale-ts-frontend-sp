@@ -24,6 +24,7 @@ import {
   Button,
   Divider,
   Box,
+  Modal,
   Popover,
   Text,
   Paper,
@@ -39,7 +40,6 @@ import {
   RingProgress,
   MantineColor,
   Badge,
-  Modal,
   CloseButton,
   Anchor,
   ThemeIcon,
@@ -47,6 +47,9 @@ import {
   Progress,
   List,
   Menu,
+  SegmentedControl,
+  Card,
+  Indicator,
 } from "@mantine/core";
 import { useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
@@ -56,6 +59,7 @@ import {
   IconBuilding,
   IconCalendar,
   IconChargingPile,
+  IconChartArcs,
   IconCheck,
   IconChecks,
   IconChevronDown,
@@ -64,6 +68,8 @@ import {
   IconCopy,
   IconEdit,
   IconExternalLink,
+  IconFlower,
+  IconList,
   IconLoader,
   IconMail,
   IconMailbox,
@@ -116,6 +122,8 @@ import Utilization from "@pages/Utilization/Utilization";
 import AccountBased from "@pages/AccountBased";
 import WebsiteIntent from "./websiteIntent/WebsiteIntent";
 import ChampionChange from "./champion/Championchange";
+import ComingSoonCard from "@common/library/ComingSoonCard";
+import { deterministicMantineColor } from "@utils/requests/utils";
 
 export type CampaignPersona = {
   id: number;
@@ -159,6 +167,7 @@ export type CampaignPersona = {
   meta_data?: Record<string, any>;
   first_message_delay_days?: number;
   email_to_linkedin_connection?: string;
+  cycle?: number;
 };
 
 export default function PersonaCampaigns() {
@@ -202,8 +211,8 @@ export default function PersonaCampaigns() {
   let [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
 
   const [campaignViewMode, setCampaignViewMode] = useState<
-    "node-view" | "list-view"
-  >("node-view");
+    "node-view" | "list-view" | "cycle-view"
+  >("list-view");
 
   const fetchCampaignPersonas = async () => {
     if (!isLoggedIn()) return;
@@ -311,11 +320,11 @@ export default function PersonaCampaigns() {
                 navigateToPage(navigate, `/settings/linkedin`);
               }}
             >
-              LINKEDIN SEND RATE:
+              LINKEDIN SENDS:
               <Text color="blue" mt={2} mx={4} size={"md"} fw={700}>
                 {currentLinkedInSLA}
               </Text>{" "}
-              / Week
+              / wk
             </Button>
           ) : (
             <Tooltip
@@ -341,7 +350,7 @@ export default function PersonaCampaigns() {
                 <Text color="blue" mt={2} mx={4} size={"md"} fw={700}>
                   {currentLinkedInSLA}
                 </Text>{" "}
-                / Week
+                / wk
               </Button>
             </Tooltip>
           )}
@@ -354,12 +363,39 @@ export default function PersonaCampaigns() {
               navigateToPage(navigate, `/settings/email`);
             }}
           >
-            EMAIL SEND RATE:
+            EMAIL SENDS:
             <Text color="orange" mt={2} mx={4} size={"md"} fw={700}>
               {currentEmailSla}
             </Text>{" "}
-            / Week
+            / wk
           </Button>
+
+          <SegmentedControl
+            onChange={(value: any) => {
+              setCampaignViewMode(value);
+            }}
+            data={[
+              {
+                value: "list-view",
+                label: (
+                  <Center style={{ gap: 10 }}>
+                    <IconList size="1rem" />
+                    <span>List</span>
+                  </Center>
+                ),
+              },
+              {
+                value: "cycle-view",
+                label: (
+                  <Center style={{ gap: 10 }}>
+                    <IconFlower size="1rem" />
+                    <span>Cycles</span>
+                  </Center>
+                ),
+              },
+            ]}
+          />
+
           <Button.Group>
             <Button
               radius="md"
@@ -514,9 +550,50 @@ export default function PersonaCampaigns() {
                       <Loader />
                     </Center>
                   )}
-                  {!loadingPersonas && (
+
+                  {campaignViewMode === "cycle-view" && !loadingPersonas && (
                     <PersonCampaignTable
-                      campaignViewMode={campaignViewMode}
+                      showCycles
+                      campaignViewMode={"node-view"}
+                      projects={projects}
+                      filteredProjects={filteredProjects
+                        .filter(
+                          (persona: CampaignPersona) =>
+                            persona.sdr_id === userData?.id
+                        )
+                        .sort((a, b) => {
+                          if (a.cycle && b.cycle) {
+                            return a.cycle - b.cycle;
+                          } else if (a.cycle) {
+                            return -1;
+                          } else if (b.cycle) {
+                            return 1;
+                          } else {
+                            return 0;
+                          }
+                        })}
+                      onPersonaActiveStatusUpdate={async (
+                        id: number,
+                        active: boolean
+                      ) => {
+                        setProjects((cur) => {
+                          const temp = [...cur].map((e) => {
+                            if (e.id === id) {
+                              e.active = active;
+                              return e;
+                            }
+                            return e;
+                          });
+                          return temp;
+                        });
+                        await fetchCampaignPersonas();
+                      }}
+                    />
+                  )}
+
+                  {!loadingPersonas && campaignViewMode === "list-view" && (
+                    <PersonCampaignTable
+                      campaignViewMode={"node-view"}
                       projects={projects}
                       filteredProjects={filteredProjects
                         .filter(
@@ -542,81 +619,87 @@ export default function PersonaCampaigns() {
                       }}
                     />
                   )}
-                  {showInactivePersonas && !loadingPersonas && (
-                    <>
-                      <PersonCampaignTable
-                        hideHeader
-                        campaignViewMode={campaignViewMode}
-                        projects={projects}
-                        filteredProjects={filteredProjects
-                          .filter((persona) => !persona.active)
-                          .filter(
-                            (persona: CampaignPersona) =>
-                              persona.sdr_id === userData?.id
-                          )}
-                        onPersonaActiveStatusUpdate={async (
-                          id: number,
-                          active: boolean
-                        ) => {
-                          setProjects((cur) => {
-                            const temp = [...cur].map((e) => {
-                              if (e.id === id) {
-                                e.active = active;
+                  {showInactivePersonas &&
+                    !loadingPersonas &&
+                    campaignViewMode === "list-view" && (
+                      <>
+                        <PersonCampaignTable
+                          hideHeader
+                          campaignViewMode={campaignViewMode}
+                          projects={projects}
+                          filteredProjects={filteredProjects
+                            .filter((persona) => !persona.active)
+                            .filter(
+                              (persona: CampaignPersona) =>
+                                persona.sdr_id === userData?.id
+                            )}
+                          onPersonaActiveStatusUpdate={async (
+                            id: number,
+                            active: boolean
+                          ) => {
+                            setProjects((cur) => {
+                              const temp = [...cur].map((e) => {
+                                if (e.id === id) {
+                                  e.active = active;
+                                  return e;
+                                }
                                 return e;
-                              }
-                              return e;
+                              });
+                              return temp;
                             });
-                            return temp;
-                          });
-                          await fetchCampaignPersonas();
-                        }}
-                      />
-                    </>
-                  )}
+                            await fetchCampaignPersonas();
+                          }}
+                        />
+                      </>
+                    )}
 
-                  {filteredProjects
-                    .filter((persona) => !persona.active)
-                    .filter(
-                      (persona: CampaignPersona) =>
-                        persona.sdr_id === userData?.id
-                    ).length > 0 && (
-                    <Button
-                      color="gray"
-                      leftIcon={
-                        <IconCalendar color="gray" size="0.8rem"></IconCalendar>
-                      }
-                      variant="outline"
-                      size="xs"
-                      w="300px"
-                      ml="auto"
-                      mr="auto"
-                      sx={{ borderRadius: "0.5rem" }}
-                      onClick={() =>
-                        setShowInactivePersonas(!showInactivePersonas)
-                      }
-                      mt="md"
-                      mb="md"
-                    >
-                      {showInactivePersonas ? "Hide" : "Show"}{" "}
-                      {
-                        filteredProjects
+                  {campaignViewMode === "list-view" &&
+                    filteredProjects
+                      .filter((persona) => !persona.active)
+                      .filter(
+                        (persona: CampaignPersona) =>
+                          persona.sdr_id === userData?.id
+                      ).length > 0 && (
+                      <Button
+                        color="gray"
+                        leftIcon={
+                          <IconCalendar
+                            color="gray"
+                            size="0.8rem"
+                          ></IconCalendar>
+                        }
+                        variant="outline"
+                        size="xs"
+                        w="300px"
+                        ml="auto"
+                        mr="auto"
+                        sx={{ borderRadius: "0.5rem" }}
+                        onClick={() =>
+                          setShowInactivePersonas(!showInactivePersonas)
+                        }
+                        mt="md"
+                        mb="md"
+                      >
+                        {showInactivePersonas ? "Hide" : "Show"}{" "}
+                        {
+                          filteredProjects
+                            .filter((persona) => !persona.active)
+                            .filter(
+                              (persona: CampaignPersona) =>
+                                persona.sdr_id === userData?.id
+                            ).length
+                        }{" "}
+                        Inactive Campaign
+                        {filteredProjects
                           .filter((persona) => !persona.active)
                           .filter(
                             (persona: CampaignPersona) =>
                               persona.sdr_id === userData?.id
-                          ).length
-                      }{" "}
-                      Inactive Campaign
-                      {filteredProjects
-                        .filter((persona) => !persona.active)
-                        .filter(
-                          (persona: CampaignPersona) =>
-                            persona.sdr_id === userData?.id
-                        ).length > 1
-                        ? "s"
-                        : ""}
-                    </Button>
-                  )}
+                          ).length > 1
+                          ? "s"
+                          : ""}
+                      </Button>
+                    )}
 
                   {!loadingPersonas && filteredProjects.length === 0 && (
                     <Center h={200}>
@@ -662,6 +745,7 @@ export function PersonCampaignCard(props: {
   persona: CampaignPersona;
   project?: PersonaOverview;
   viewMode: "node-view" | "list-view";
+  showCycles?: boolean;
   onPersonaActiveStatusUpdate?: (id: number, active: boolean) => void;
 }) {
   const navigate = useNavigate();
@@ -1537,29 +1621,42 @@ export function PersonCampaignCard(props: {
                       }
                       withArrow
                     >
-                      <Text
-                        mt={4}
-                        fz={"sm"}
-                        c={"gray.7"}
-                        fw={600}
-                        onClick={() => {
-                          if (props.persona.sdr_id != userData?.id) return;
+                      <Box>
+                        {props.persona.cycle && props.showCycles && (
+                          <Badge
+                            size="xs"
+                            mt="xs"
+                            color={deterministicMantineColor(
+                              props.persona.cycle + ""
+                            )}
+                          >
+                            Cycle #{props.persona.cycle}
+                          </Badge>
+                        )}
+                        <Text
+                          mt={4}
+                          fz={"sm"}
+                          c={"gray.7"}
+                          fw={600}
+                          onClick={() => {
+                            if (props.persona.sdr_id != userData?.id) return;
 
-                          if (props.project) {
-                            setCurrentProject(props.project);
-                          }
+                            if (props.project) {
+                              setCurrentProject(props.project);
+                            }
 
-                          if (
-                            props.persona.email_sent > props.persona.li_sent
-                          ) {
-                            window.location.href = `/setup/email/${props.persona.id}`;
-                          } else {
-                            window.location.href = `/setup/linkedin/${props.persona.id}`;
-                          }
-                        }}
-                      >
-                        {props.persona.name}
-                      </Text>
+                            if (
+                              props.persona.email_sent > props.persona.li_sent
+                            ) {
+                              window.location.href = `/setup/email/${props.persona.id}`;
+                            } else {
+                              window.location.href = `/setup/linkedin/${props.persona.id}`;
+                            }
+                          }}
+                        >
+                          {props.persona.name}
+                        </Text>
+                      </Box>
                     </Tooltip>
 
                     {/* {
@@ -2367,11 +2464,16 @@ export const PersonCampaignTable = (props: {
   filteredProjects: CampaignPersona[];
   projects?: PersonaOverview[];
   campaignViewMode: "node-view" | "list-view";
+  showCycles?: boolean;
   onPersonaActiveStatusUpdate?: (id: number, active: boolean) => void;
   hideHeader?: boolean;
 }) => {
   const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
+  const [selectedCycleId, setSelectedCycleId] = useState(-1);
+
+  const [cycleModeShowCycleIds, setCycleModeShowCycleIds]: any = useState([]);
 
   const [sort, setSort] = useState<"asc" | "desc">("desc");
   let tempData = useMemo(() => {
@@ -2395,8 +2497,33 @@ export const PersonCampaignTable = (props: {
     data = props.filteredProjects;
   }
 
+  if (props.showCycles) {
+    data = data.sort((a: any, b: any) => {
+      return a.cycle - b.cycle;
+    });
+  }
+
   return (
     <>
+      <Modal
+        opened={showAnalyticsModal}
+        onClose={() => setShowAnalyticsModal(false)}
+        title="Campaign Analytics"
+        size="1000px"
+      >
+        <iframe
+          src={
+            "https://sellscale.retool.com/embedded/public/3e03c40e-b862-4bda-a4d1-ecfade8bcfd2#authToken=" +
+            userToken +
+            "&cycle=" +
+            selectedCycleId
+          }
+          width="100%"
+          height="600px"
+          frameBorder="0"
+          title="Campaign Analytics"
+        ></iframe>
+      </Modal>
       <Paper radius="md">
         <Group
           id="dssss"
@@ -2540,12 +2667,154 @@ export const PersonCampaignTable = (props: {
       </Paper>
       {data
         .sort((a: any, b: any) => {
-          if (a.active && b.active) return -(a.total_sent - b.total_sent);
-          if (a.active && !b.active) return -1;
-          if (!a.active && b.active) return 1;
-          return a.total_sent - b.total_sent;
+          if (a.cycle && b.cycle) {
+            return -(a.cycle - b.cycle);
+          }
+          if (a.cycle) {
+            return -1;
+          }
+          if (b.cycle) {
+            return 1;
+          }
+          return 0;
         })
-        .map((persona, index) => (
+        .map((persona: any, index) => (
+          <>
+            {props.showCycles &&
+            ((persona.cycle && index === 0) ||
+              (index > 0 &&
+                data[index - 1].cycle &&
+                data[index - 1].cycle !== persona.cycle))
+              ? [
+                  <Card
+                    withBorder
+                    key={index}
+                    onClick={() => {
+                      if (persona.cycle) {
+                        if (cycleModeShowCycleIds.includes(persona.cycle)) {
+                          setCycleModeShowCycleIds(
+                            cycleModeShowCycleIds.filter(
+                              (id: any) => id !== persona.cycle
+                            )
+                          );
+                        } else {
+                          setCycleModeShowCycleIds([
+                            ...cycleModeShowCycleIds,
+                            persona.cycle,
+                          ]);
+                        }
+                      }
+                    }}
+                  >
+                    <Flex>
+                      <Indicator
+                        size={6}
+                        color={deterministicMantineColor(persona.cycle + "")}
+                      >
+                        <Title order={4}>Cycle {persona.cycle}</Title>
+                      </Indicator>
+                      <Avatar.Group ml="20px">
+                        {
+                          // loop through first 3 personas in the cycle
+                          data
+                            .filter((p) => p.cycle === persona.cycle)
+                            .slice(0, 4)
+                            .map((p, i) => (
+                              <Avatar
+                                key={i}
+                                src={
+                                  "https://ui-avatars.com/api/?background=efefef&name=" +
+                                  p.emoji
+                                }
+                                sx={{ borderRadius: "100%" }}
+                              />
+                            ))
+                        }
+                        {
+                          // if list > 4 then add a +1 avatar
+                          data.filter((p) => p.cycle === persona.cycle).length >
+                          4 ? (
+                            <Avatar>
+                              +
+                              {data.filter((p) => p.cycle === persona.cycle)
+                                .length - 4}
+                            </Avatar>
+                          ) : null
+                        }
+                      </Avatar.Group>
+
+                      <Button
+                        color="grape"
+                        leftIcon={<IconChartArcs size="0.9rem" />}
+                        size="xs"
+                        variant="outline"
+                        ml="auto"
+                        compact
+                        mr="xs"
+                        onClick={() => {
+                          setShowAnalyticsModal(true);
+                          setSelectedCycleId(persona.cycle);
+                        }}
+                      >
+                        View Analytics
+                      </Button>
+                      <Badge
+                        color={
+                          // if active campaigns > 0 then green else gray
+                          data.filter(
+                            (p) => p.cycle === persona.cycle && p.active
+                          ).length > 0
+                            ? "green"
+                            : "gray"
+                        }
+                        variant="outline"
+                        mr="xs"
+                      >
+                        {
+                          data.filter(
+                            (p) => p.cycle === persona.cycle && p.active
+                          ).length
+                        }{" "}
+                        / {data.filter((p) => p.cycle === persona.cycle).length}{" "}
+                        Active Campaigns
+                      </Badge>
+                      <IconChevronDown
+                        size="1.5rem"
+                        style={{
+                          transform: cycleModeShowCycleIds.includes(
+                            persona.cycle
+                          )
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
+                        }}
+                      />
+                    </Flex>
+                  </Card>,
+                ]
+              : null}
+            {
+              // only show cards if the cycle is not set or the cycle is set and the cycle is in the show list
+              props.showCycles &&
+                (!persona.cycle ||
+                  (cycleModeShowCycleIds.includes(persona.cycle) && (
+                    <PersonCampaignCard
+                      key={index}
+                      persona={persona}
+                      project={props.projects?.find(
+                        (project) => project.id == persona.id
+                      )}
+                      viewMode={props.campaignViewMode}
+                      onPersonaActiveStatusUpdate={
+                        props.onPersonaActiveStatusUpdate
+                      }
+                      showCycles={props.showCycles}
+                    />
+                  )))
+            }
+          </>
+        ))}
+      {!props.showCycles &&
+        data.map((persona, index) => (
           <PersonCampaignCard
             key={index}
             persona={persona}
@@ -2554,6 +2823,7 @@ export const PersonCampaignTable = (props: {
             )}
             viewMode={props.campaignViewMode}
             onPersonaActiveStatusUpdate={props.onPersonaActiveStatusUpdate}
+            showCycles={props.showCycles}
           />
         ))}
     </>

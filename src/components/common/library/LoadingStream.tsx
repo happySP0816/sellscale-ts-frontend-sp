@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { socket } from '../../App';
 import { userDataState } from '@atoms/userAtoms';
 import { useRecoilValue } from 'recoil';
-import { Box, Group, Loader, Text, useMantineTheme } from '@mantine/core';
+import { Box, Group, Loader, ScrollArea, Text, useMantineTheme } from '@mantine/core';
 import { TypeAnimation } from 'react-type-animation';
 import { useDebouncedState } from '@mantine/hooks';
 import useRefresh from '@common/library/use-refresh';
@@ -22,7 +22,12 @@ function removeFromEnd(str: string, toRemove: string) {
  * @param roomId - The room to join (optional)
  * @param label - The label to display (optional)
  */
-export default function LoadingStream(props: { event: string; roomId?: string; label?: string }) {
+export default function LoadingStream(props: {
+  event: string;
+  roomId?: string;
+  label?: string;
+  h?: string;
+}) {
   const theme = useMantineTheme();
   const userData = useRecoilValue(userDataState);
 
@@ -81,7 +86,7 @@ export default function LoadingStream(props: { event: string; roomId?: string; l
         </Text>
         <Loader color='blue' size='sm' />
       </Group>
-      <>
+      <ScrollArea h={props.h}>
         {display ? (
           <Text>
             <Text style={{ whiteSpace: 'pre-line', color: color }} span>
@@ -98,7 +103,7 @@ export default function LoadingStream(props: { event: string; roomId?: string; l
         ) : (
           <Text style={{ whiteSpace: 'pre-line', color: color }}>{preTotal}</Text>
         )}
-      </>
+      </ScrollArea>
     </Box>
   );
 }

@@ -99,6 +99,31 @@ export async function generateSequence(
   return await processResponse(response, 'data');
 }
 
+export async function generateSequencePiece(
+  userToken: string,
+  client_id: number,
+  archetype_id: number,
+  gen_type: string,
+  additional_prompting: string,
+  roomGenId: string
+): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/personas/generate_sequence_piece`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      client_id: client_id,
+      archetype_id: archetype_id,
+      gen_type: gen_type,
+      additional_prompting: additional_prompting,
+      room_gen_id: roomGenId,
+    }),
+  });
+  return await processResponse(response, 'data');
+}
+
 export async function addSequence(
   userToken: string,
   client_id: number,

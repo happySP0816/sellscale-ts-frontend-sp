@@ -266,50 +266,52 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                   placeholder='Search...'
                 />
 
-                <Stack spacing={0}>
-                  {/* Grouped prospects by overall status */}
-                  {prospectGroups.map((group, index) => (
-                    <Box key={index}>
-                      <Box bg='blue.1' py={'sm'} px={'md'} color='blue'>
-                        <Flex w='100%'>
-                          <Text color='blue' ta='center' fz={14} fw={700}>
-                            {labelizeConvoSubstatus(group[0])}
-                          </Text>
-                          <Badge color='blue' size='xs' ml='xs' mt='2px'>
-                            {group[1].length}
-                          </Badge>
-                        </Flex>
+                <ScrollArea h={'calc(92vh - 90px)'}>
+                  <Stack spacing={0}>
+                    {/* Grouped prospects by overall status */}
+                    {prospectGroups.map((group, index) => (
+                      <Box key={index}>
+                        <Box bg='blue.1' py={'sm'} px={'md'} color='blue'>
+                          <Flex w='100%'>
+                            <Text color='blue' ta='center' fz={14} fw={700}>
+                              {labelizeConvoSubstatus(group[0])}
+                            </Text>
+                            <Badge color='blue' size='xs' ml='xs' mt='2px'>
+                              {group[1].length}
+                            </Badge>
+                          </Flex>
+                        </Box>
+                        {/* List of prospects in that group */}
+                        <Stack spacing={0}>
+                          {group[1].map((prospect, index) => (
+                            <Box
+                              key={index}
+                              onClick={() => {
+                                setOpenedProspectId(prospect.prospect_id);
+                                setOpenedList(false);
+                              }}
+                            >
+                              <ProspectConvoCard
+                                id={prospect.prospect_id}
+                                name={prospect.full_name}
+                                title={prospect.title}
+                                img_url={''}
+                                latest_msg={prospect.email_last_message_from_prospect ?? ''}
+                                latest_msg_time={prospect.li_last_message_timestamp ?? ''}
+                                icp_fit={-1}
+                                new_msg_count={0}
+                                latest_msg_from_sdr={false}
+                                default_channel={mainTab !== 'snoozed' ? 'LINKEDIN' : undefined}
+                                opened={prospect.prospect_id === openedProspectId}
+                                snoozed_until={prospect.hidden_until}
+                              />
+                            </Box>
+                          ))}
+                        </Stack>
                       </Box>
-                      {/* List of prospects in that group */}
-                      <Stack spacing={0}>
-                        {group[1].map((prospect, index) => (
-                          <Box
-                            key={index}
-                            onClick={() => {
-                              setOpenedProspectId(prospect.prospect_id);
-                              setOpenedList(false);
-                            }}
-                          >
-                            <ProspectConvoCard
-                              id={prospect.prospect_id}
-                              name={prospect.full_name}
-                              title={prospect.title}
-                              img_url={''}
-                              latest_msg={prospect.email_last_message_from_prospect ?? ''}
-                              latest_msg_time={prospect.li_last_message_timestamp ?? ''}
-                              icp_fit={-1}
-                              new_msg_count={0}
-                              latest_msg_from_sdr={false}
-                              default_channel={mainTab !== 'snoozed' ? 'LINKEDIN' : undefined}
-                              opened={prospect.prospect_id === openedProspectId}
-                              snoozed_until={prospect.hidden_until}
-                            />
-                          </Box>
-                        ))}
-                      </Stack>
-                    </Box>
-                  ))}
-                </Stack>
+                    ))}
+                  </Stack>
+                </ScrollArea>
               </Stack>
             </>
           </Stack>

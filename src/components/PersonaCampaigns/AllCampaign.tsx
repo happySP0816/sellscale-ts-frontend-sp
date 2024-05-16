@@ -3,10 +3,12 @@ import {
   Badge,
   Box,
   Button,
+  Center,
   Divider,
   Flex,
   Input,
   ScrollArea,
+  SegmentedControl,
   Title,
 } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
@@ -14,7 +16,13 @@ import { getAnalytics } from "@utils/requests/getAnalytics";
 import { useRecoilValue } from "recoil";
 import { useEffect, useMemo, useState } from "react";
 
-import { IconBrandLinkedin, IconMail, IconSearch } from "@tabler/icons";
+import {
+  IconBrandLinkedin,
+  IconFlower,
+  IconList,
+  IconMail,
+  IconSearch,
+} from "@tabler/icons";
 import {
   CampaignPersona,
   PersonCampaignTable,
@@ -31,6 +39,7 @@ const AllCampaign = (props: PropsType) => {
   const [status, setStatus] = useState("All");
 
   const [activeStatusesShow, setActiveStatusesShow] = useState([true]);
+  const [campaignViewMode, setCampaignViewMode] = useState("list-view");
 
   const filteredCampaigns = props.campaigns
     .sort((a: CampaignPersona, b: CampaignPersona): any => {
@@ -75,6 +84,31 @@ const AllCampaign = (props: PropsType) => {
           </Title>
 
           <Flex gap={"sm"} wrap={"wrap"} align={"center"} mb="md">
+            <SegmentedControl
+              onChange={(value: any) => {
+                setCampaignViewMode(value);
+              }}
+              data={[
+                {
+                  value: "list-view",
+                  label: (
+                    <Center style={{ gap: 10 }}>
+                      <IconList size="1rem" />
+                      <span>List</span>
+                    </Center>
+                  ),
+                },
+                {
+                  value: "cycle-view",
+                  label: (
+                    <Center style={{ gap: 10 }}>
+                      <IconFlower size="1rem" />
+                      <span>Cycles</span>
+                    </Center>
+                  ),
+                },
+              ]}
+            />
             <Button
               variant={status === "All" ? "filled" : "light"}
               color="dark"
@@ -145,6 +179,7 @@ const AllCampaign = (props: PropsType) => {
           <div className="min-w-[1280px]">
             <PersonCampaignTable
               campaignViewMode="node-view"
+              showCycles={campaignViewMode === "cycle-view"}
               filteredProjects={filteredCampaigns}
               onPersonaActiveStatusUpdate={async (
                 id: number,

@@ -4,14 +4,7 @@ import "./index.css";
 import App from "./components/App";
 import reportWebVitals from "./reportWebVitals";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  createBrowserRouter,
-  createRoutesFromChildren,
-  matchRoutes,
-  RouterProvider,
-  useLocation,
-  useNavigationType,
-} from "react-router-dom";
+import { createBrowserRouter, createRoutesFromChildren, matchRoutes, RouterProvider, useLocation, useNavigationType } from "react-router-dom";
 import ErrorPage from "./components/pages/ErrorPage";
 import PersonaPage from "./components/pages/PersonaPage";
 import MissingPage from "./components/pages/MissingPage";
@@ -79,6 +72,7 @@ import SegmentV2 from "@pages/SegmentV2/SegmentV2";
 import { PostHogProvider } from "posthog-js/react";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import CampaingCurator from "@common/campaigns/CampaignCurator";
+import CampaignWizard from "./components/CampaignWizard/CampaignWizard";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -89,17 +83,10 @@ const queryClient = new QueryClient();
 // Set Sentry up and wrap the router
 if (import.meta.env.PROD) {
   Sentry.init({
-    dsn:
-      "https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376",
+    dsn: "https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376",
     integrations: [
       new BrowserTracing({
-        routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-          React.useEffect,
-          useLocation,
-          useNavigationType,
-          createRoutesFromChildren,
-          matchRoutes
-        ),
+        routingInstrumentation: Sentry.reactRouterV6Instrumentation(React.useEffect, useLocation, useNavigationType, createRoutesFromChildren, matchRoutes),
       }),
     ],
 
@@ -108,9 +95,7 @@ if (import.meta.env.PROD) {
     tracesSampleRate: 1.0,
   });
 }
-const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(
-  createBrowserRouter
-);
+const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(createBrowserRouter);
 
 // Fixes cache issues on refresh
 (async () => {
@@ -546,25 +531,21 @@ const router = sentryCreateBrowserRouter([
         path: "/segmentsv2",
         element: <SegmentV2 />,
       },
+      {
+        path: "/CampaignWizard",
+        element: <CampaignWizard />,
+      },
     ],
   },
 ]);
 
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
   // <React.StrictMode>
   <QueryClientProvider client={queryClient}>
     <RecoilRoot>
-      <Sentry.ErrorBoundary
-        fallback={<div>An error has occurred</div>}
-        showDialog
-      >
-        <PostHogProvider
-          apiKey={"phc_h2RzN7RxZ4RG8cz6pP3hmJydfC89jG34ulCHO5Oi7ip"}
-          options={options}
-        >
+      <Sentry.ErrorBoundary fallback={<div>An error has occurred</div>} showDialog>
+        <PostHogProvider apiKey={"phc_h2RzN7RxZ4RG8cz6pP3hmJydfC89jG34ulCHO5Oi7ip"} options={options}>
           <RouterProvider router={router} />
         </PostHogProvider>
       </Sentry.ErrorBoundary>

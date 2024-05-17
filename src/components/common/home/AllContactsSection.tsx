@@ -8,80 +8,73 @@ import {
   Group,
   Text,
   useMantineTheme,
-} from "@mantine/core";
-import { IconUpload, IconUserPlus } from "@tabler/icons";
-import { useMediaQuery } from "@mantine/hooks";
-import { API_URL, SCREEN_SIZES } from "@constants/data";
-import PipelineSelector, { icons } from "../pipeline/PipelineSelector";
-import ProspectTable_old from "../pipeline/ProspectTable_old";
-import PageFrame from "@common/PageFrame";
-import { useQuery } from "@tanstack/react-query";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
-import { logout } from "@auth/core";
-import { useLoaderData, useNavigate } from "react-router-dom";
+} from '@mantine/core';
+import { IconUpload, IconUserPlus } from '@tabler/icons';
+import { useMediaQuery } from '@mantine/hooks';
+import { API_URL, SCREEN_SIZES } from '@constants/data';
+import PipelineSelector, { icons } from '../pipeline/PipelineSelector';
+import ProspectTable_old from '../pipeline/ProspectTable_old';
+import PageFrame from '@common/PageFrame';
+import { useQuery } from '@tanstack/react-query';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
+import { logout } from '@auth/core';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import {
   prospectDrawerIdState,
   prospectDrawerOpenState,
   prospectShowPurgatoryState,
-} from "@atoms/prospectAtoms";
-import { useEffect, useState } from "react";
-import {
-  currentProjectState,
-  uploadDrawerOpenState,
-} from "@atoms/personaAtoms";
-import PersonaUploadDrawer from "@drawers/PersonaUploadDrawer";
-import { getAllUploads } from "@utils/requests/getPersonas";
-import {
-  prospectUploadDrawerIdState,
-  prospectUploadDrawerOpenState,
-} from "@atoms/uploadAtoms";
-import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
-import { navigateToPage } from "@utils/documentChange";
-import { ProjectSelect } from "@common/library/ProjectSelect";
+} from '@atoms/prospectAtoms';
+import { useEffect, useState } from 'react';
+import { currentProjectState, uploadDrawerOpenState } from '@atoms/personaAtoms';
+import PersonaUploadDrawer from '@drawers/PersonaUploadDrawer';
+import { getAllUploads } from '@utils/requests/getPersonas';
+import { prospectUploadDrawerIdState, prospectUploadDrawerOpenState } from '@atoms/uploadAtoms';
+import UploadDetailsDrawer from '@drawers/UploadDetailsDrawer';
+import { navigateToPage } from '@utils/documentChange';
+import { ProjectSelect } from '@common/library/ProjectSelect';
 
 function getPipelineSelectorData(data: any) {
   return new Map()
-    .set("all", {
-      title: "All Prospects",
-      description: "All prospects in the pipeline",
+    .set('all', {
+      title: 'All Prospects',
+      description: 'All prospects in the pipeline',
       icon: IconUserPlus,
-      value: data?.pipeline_data?.SELLSCALE.SENT_OUTREACH || "-",
-      color: "blue",
+      value: data?.pipeline_data?.SELLSCALE.SENT_OUTREACH || '-',
+      color: 'blue',
     })
-    .set("accepted", {
-      title: "Accepted",
-      description: "Accepted prospects in the pipeline",
+    .set('accepted', {
+      title: 'Accepted',
+      description: 'Accepted prospects in the pipeline',
       icon: IconUserPlus,
-      value: data?.pipeline_data?.SELLSCALE.ACCEPTED || "-",
-      color: "green",
+      value: data?.pipeline_data?.SELLSCALE.ACCEPTED || '-',
+      color: 'green',
     })
-    .set("bumped", {
-      title: "Bumped",
-      description: "Bumped prospects in the pipeline",
+    .set('bumped', {
+      title: 'Bumped',
+      description: 'Bumped prospects in the pipeline',
       icon: IconUserPlus,
-      value: data?.pipeline_data?.SELLSCALE.BUMPED || "-",
-      color: "orange",
+      value: data?.pipeline_data?.SELLSCALE.BUMPED || '-',
+      color: 'orange',
     })
-    .set("active", {
-      title: "Active Convos",
-      description: "Active conversations in the pipeline",
+    .set('active', {
+      title: 'Active Convos',
+      description: 'Active conversations in the pipeline',
       icon: IconUserPlus,
-      value: data?.pipeline_data?.SELLSCALE.ACTIVE_CONVO || "-",
-      color: "yellow",
+      value: data?.pipeline_data?.SELLSCALE.ACTIVE_CONVO || '-',
+      color: 'yellow',
     })
-    .set("demo", {
-      title: "Demo Set",
-      description: "Demo set prospects in the pipeline",
+    .set('demo', {
+      title: 'Demo Set',
+      description: 'Demo set prospects in the pipeline',
       icon: IconUserPlus,
-      value: data?.pipeline_data?.SELLSCALE.DEMO || "-",
-      color: "grape",
+      value: data?.pipeline_data?.SELLSCALE.DEMO || '-',
+      color: 'grape',
     });
 }
 
 export default function AllContactsSection(props: { all?: boolean }) {
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const { prospectId } = useLoaderData() as {
     prospectId: string;
   };
@@ -95,9 +88,7 @@ export default function AllContactsSection(props: { all?: boolean }) {
     }
   }, [prospectId]);
 
-  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
-    uploadDrawerOpenState
-  );
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
   const openUploadProspects = () => {
     setUploadDrawerOpened(true);
   };
@@ -120,7 +111,7 @@ export default function AllContactsSection(props: { all?: boolean }) {
       const response = await fetch(
         `${API_URL}/analytics/pipeline/all_details?include_purgatory=${showPurgatory}`,
         {
-          method: "GET",
+          method: 'GET',
           headers: {
             Authorization: `Bearer ${userToken}`,
           },
@@ -139,8 +130,9 @@ export default function AllContactsSection(props: { all?: boolean }) {
   });
 
   const navigate = useNavigate();
-  const [prospectUploadDrawerOpened, setProspectUploadDrawerOpened] =
-    useRecoilState(prospectUploadDrawerOpenState);
+  const [prospectUploadDrawerOpened, setProspectUploadDrawerOpened] = useRecoilState(
+    prospectUploadDrawerOpenState
+  );
   const [prospectUploadDrawerId, setProspectUploadDrawerId] = useRecoilState(
     prospectUploadDrawerIdState
   );
@@ -150,21 +142,22 @@ export default function AllContactsSection(props: { all?: boolean }) {
     currentProject?.uploads[0].stats.in_progress > 0;
 
   const openUploadHistory = () => {
-    setProspectUploadDrawerId(
-      currentProject?.uploads && currentProject?.uploads[0].id
-    );
+    setProspectUploadDrawerId(currentProject?.uploads && currentProject?.uploads[0].id);
     setProspectUploadDrawerOpened(true);
   };
 
-  const fetchUploads = () => {
-    if (fetchedUploads) return;
-    if (!currentProject) return;
-    getAllUploads(userToken, currentProject?.id).then((res) => {
+  useQuery({
+    queryKey: [`query-all-uploads`],
+    queryFn: async () => {
+      if (fetchedUploads) return null;
+      if (!currentProject) return null;
+      const res = await getAllUploads(userToken, currentProject?.id);
       setCurrentProject(Object.assign({ uploads: res.data }, currentProject));
-    });
-    setFetchedUploads(true);
-  };
-  fetchUploads();
+      setFetchedUploads(true);
+
+      return true;
+    },
+  });
 
   const PIPELINE_SELECTOR_DATA = getPipelineSelectorData(data);
   return (
@@ -175,57 +168,56 @@ export default function AllContactsSection(props: { all?: boolean }) {
       />
 
       <Collapse in={showPipelineSelector}>
-        <PipelineSelector
-          data={PIPELINE_SELECTOR_DATA}
-          loadingData={loadingData}
-        />
+        <PipelineSelector data={PIPELINE_SELECTOR_DATA} loadingData={loadingData} />
       </Collapse>
 
-      <Group position="apart" mt="sm">
+      <Group position='apart' mt='sm'>
         <Box>
-          <ProjectSelect onClick={(persona) => {
-            navigateToPage(navigate, `/prioritize` + (persona ? `/${persona.id}` : ''));
-          }} />
+          <ProjectSelect
+            onClick={(persona) => {
+              navigateToPage(navigate, `/prioritize` + (persona ? `/${persona.id}` : ''));
+            }}
+          />
         </Box>
         <Box>
           <Box>
             <Button
-              variant="subtle"
-              color="gray"
-              size="sm"
-              mr="md"
-              sx={{ cursor: "pointer" }}
+              variant='subtle'
+              color='gray'
+              size='sm'
+              mr='md'
+              sx={{ cursor: 'pointer' }}
               onClick={() => {
                 setShowPipelineSelector(!showPipelineSelector);
               }}
             >
-              {showPipelineSelector ? "Hide" : "Show"} Pipeline Selector +
+              {showPipelineSelector ? 'Hide' : 'Show'} Pipeline Selector +
             </Button>
           </Box>
           <Box>
-            <Flex direction="row">
+            <Flex direction='row'>
               {currentProject?.uploads && currentProject?.uploads.length > 0 ? (
                 <>
                   <Button
-                    variant="outline"
-                    color="dark"
-                    size="sm"
-                    mr="md"
+                    variant='outline'
+                    color='dark'
+                    size='sm'
+                    mr='md'
                     onClick={openUploadHistory}
                   >
-                    {isUploading ? "Upload in Progress..." : "Latest Upload"}
+                    {isUploading ? 'Upload in Progress...' : 'Latest Upload'}
                   </Button>
                 </>
               ) : (
-                ""
+                ''
               )}
               {currentProject?.id && (
                 <Button
-                  variant="filled"
-                  color="teal"
-                  radius="md"
-                  ml="auto"
-                  mr="0"
+                  variant='filled'
+                  color='teal'
+                  radius='md'
+                  ml='auto'
+                  mr='0'
                   rightIcon={<IconUpload size={14} />}
                   onClick={openUploadProspects}
                 >
@@ -238,9 +230,7 @@ export default function AllContactsSection(props: { all?: boolean }) {
       </Group>
 
       <div style={{ paddingTop: 15 }}>
-        <ProspectTable_old
-          personaSpecific={props.all ? undefined : currentProject?.id}
-        />
+        <ProspectTable_old personaSpecific={props.all ? undefined : currentProject?.id} />
       </div>
       <UploadDetailsDrawer />
     </div>

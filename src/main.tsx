@@ -73,6 +73,7 @@ import { PostHogProvider } from "posthog-js/react";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import CampaingCurator from "@common/campaigns/CampaignCurator";
 import CampaignWizard from "./components/CampaignWizard/CampaignWizard";
+import CampaignLandingV2 from "@pages/CampaignV2/CampaignLandingV2";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -534,6 +535,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/CampaignWizard",
         element: <CampaignWizard />,
+      },
+      {
+        path: "/campaign_v2",
+        element: <CampaignLandingV2 />,
       },
     ],
   },

@@ -7,28 +7,22 @@ import {
   Card,
   Flex,
   Image,
-  Modal,
   NumberInput,
-  Paper,
   Select,
-  Tabs,
   Text,
   TextInput,
   Title,
   useMantineTheme,
+  LoadingOverlay,
 } from "@mantine/core";
-import {  proxyURL } from "@utils/general";
-import { useDisclosure } from "@mantine/hooks";
+import { useDebouncedValue } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import {
   IconArrowRight,
-  IconBrandLinkedin,
   IconCalendar,
   IconChevronLeft,
   IconChevronRight,
-  IconCloud,
   IconFileDownload,
-  IconFileUpload,
   IconInfoCircle,
   IconPlus,
   IconSearch,
@@ -41,6 +35,7 @@ import { useChampionApi } from "./ChampionChangeApi";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import moment from "moment";
+
 interface ChampionDataType {
   prospect_name: string;
   change_date: string;
@@ -55,7 +50,7 @@ interface ChampionDataType {
 export default function ChampionChange() {
   const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
-  const { isLoading, getChampionChanges, getChampionStats, postRefreshChampionJobData, postMarkChampions } = useChampionApi(userToken);
+  const { isLoading, getChampionChanges, getChampionStats, postRefreshChampionJobData } = useChampionApi(userToken);
   const [loading, setLoading] = useState(isLoading);
 
   const [championData, setChampionData] = useState<ChampionDataType[]>([]);
@@ -65,9 +60,38 @@ export default function ChampionChange() {
     num_contacts: 0,
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
+  const [showJobChanges, setShowJobChanges] = useState(false);
+  const [showChampionsInWonAccounts, setShowChampionsInWonAccounts] = useState(false);
+
   useEffect(() => {
     refreshStats();
   }, [userToken]);
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      searchChampions(debouncedSearchTerm);
+    } else {
+      refreshStats();
+    }
+  }, [debouncedSearchTerm]);
+
+  useEffect(() => {
+    if (showJobChanges) {
+      filterJobChanges();
+    } else {
+      refreshStats();
+    }
+  }, [showJobChanges]);
+
+  useEffect(() => {
+    if (showChampionsInWonAccounts) {
+      filterChampionsInWonAccounts();
+    } else {
+      refreshStats();
+    }
+  }, [showChampionsInWonAccounts]);
 
   const refreshStats = () => {
     getChampionStats().then((data: any) => {
@@ -77,22 +101,62 @@ export default function ChampionChange() {
     setLoading(true);
     getChampionChanges()
       .then((data: any) => {
-        setChampionData(
-          data.data.map((d: any) => ({
-            prospect_name: d.full_name,
-            change_date: d.new_company_start_date,
-            origin_company_url: d.old_company_logo,
-            origin_company: d.last_company_name,
-            new_company_url: d.new_company_logo,
-            new_company: d.new_company_name,
-            type: d.change_detected ? "Job Changed" : "",
-            avatar: d.linkedin_url,
-          }))
-        );
+        let updatedData = data.data.map((d: any) => ({
+          prospect_name: d.full_name,
+          change_date: d.new_company_start_date,
+          origin_company_url: d.old_company_logo,
+          origin_company: d.last_company_name,
+          new_company_url: d.new_company_logo,
+          new_company: d.new_company_name,
+          type: d.change_detected ? "Job Changed" : "",
+          avatar: d.linkedin_url,
+        }));
+
+        if (showJobChanges) {
+          updatedData = updatedData.filter((d: any) => d.type === "Job Changed");
+        }
+
+        setChampionData(updatedData);
       })
       .finally(() => {
         setLoading(false);
       });
+  };
+
+  const searchChampions = (term: string) => {
+    setLoading(true);
+    getChampionChanges(term)
+      .then((data: any) => {
+        let updatedData = data.data.map((d: any) => ({
+          prospect_name: d.full_name,
+          change_date: d.new_company_start_date,
+          origin_company_url: d.old_company_logo,
+          origin_company: d.last_company_name,
+          new_company_url: d.new_company_logo,
+          new_company: d.new_company_name,
+          type: d.change_detected ? "Job Changed" : "",
+          avatar: d.linkedin_url,
+        }));
+
+        if (showJobChanges) {
+          updatedData = updatedData.filter((d: any) => d.type === "Job Changed");
+        }
+
+        setChampionData(updatedData);
+      })
+      .finally(() => {
+        setLoading(false);
+        setShowChampionsInWonAccounts(false);
+      });
+  };
+
+  const filterJobChanges = () => {
+    setChampionData((prevData) => prevData.filter((d) => d.type === "Job Changed"));
+  };
+
+  const filterChampionsInWonAccounts = () => {
+    setShowJobChanges(false);
+    searchChampions('')
   };
 
   const handleJobRefreshData = () => {
@@ -113,7 +177,13 @@ export default function ChampionChange() {
           Champion Change Detector
         </Title>
         <Flex gap={"sm"} align={"center"}>
-          <TextInput maw={200} placeholder="Search" rightSection={<IconSearch size={"0.9rem"} />} />
+          <TextInput
+            maw={200}
+            placeholder="Search"
+            rightSection={<IconSearch size={"0.9rem"} />}
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.currentTarget.value)}
+          />
           <Button color="blue" onClick={handleJobRefreshData} loading={loading}>
             Refresh Job Data
           </Button>
@@ -149,12 +219,28 @@ export default function ChampionChange() {
             <Flex gap={"xs"} align={"center"} mt={3}>
               <IconInfoCircle size={"0.9rem"} color="gray" />
               <Text fz={10} fw={500} color="gray">
-                Lorem ipsum doior sit amet, consectetur adipiscing elit
+                Number of unique companies where champions are employed
               </Text>
             </Flex>
           </Box>
         </Card>
-        <Card withBorder radius={"sm"} px={"xl"} py={"md"} w={"100%"}>
+        <Card
+          withBorder
+          radius={"sm"}
+          px={"xl"}
+          py={"md"}
+          w={"100%"}
+          sx={{
+            cursor: "pointer",
+            transition: "transform 0.2s, box-shadow 0.2s",
+            backgroundColor: showChampionsInWonAccounts ? theme.colors.blue[0] : "white",
+            "&:hover": {
+              transform: "scale(1.05)",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            },
+          }}
+          onClick={() => setShowChampionsInWonAccounts((prev) => !prev)}
+        >
           <Box>
             <Flex gap={"xs"} align={"end"}>
               <Title order={2} fw={600}>
@@ -167,12 +253,31 @@ export default function ChampionChange() {
             <Flex gap={"xs"} align={"center"} mt={3}>
               <IconInfoCircle size={"0.9rem"} color="gray" />
               <Text fz={10} fw={500} color="gray">
-                Lorem ipsum doior sit amet, consectetur adipiscing elit
+                # of unique champions in the closed won accounts
               </Text>
             </Flex>
           </Box>
         </Card>
-        <Card withBorder radius={"sm"} px={"xl"} py={"md"} w={"100%"}>
+        <Card
+          withBorder
+          radius={"sm"}
+          px={"xl"}
+          py={"md"}
+          w={"100%"}
+          sx={{
+            cursor: "pointer",
+            transition: "transform 0.2s, box-shadow 0.2s",
+            backgroundColor: showJobChanges ? theme.colors.blue[0] : "white",
+            "&:hover": {
+              transform: "scale(1.05)",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            },
+          }}
+          onClick={() => {
+            setShowJobChanges((prev) => !prev);
+            setShowChampionsInWonAccounts(false);
+          }}
+        >
           <Box>
             <Flex gap={"xs"} align={"end"}>
               <Title order={2} fw={600}>
@@ -191,225 +296,227 @@ export default function ChampionChange() {
           </Box>
         </Card>
       </Flex>
-      <DataGrid
-        bg={"white"}
-        data={championData}
-        highlightOnHover
-        withSorting
-        withBorder
-        withPagination
-        withColumnBorders
-        sx={{ cursor: "pointer" }}
-        columns={[
-          {
-            accessorKey: "prospect_name",
-            header: () => (
-              <Flex align={"center"} gap={"3px"}>
-                <IconUserSquareRounded color="gray" size={"0.9rem"} />
-                <Text color="gray">Prospect Name</Text>
-              </Flex>
-            ),
-            cell: (cell) => {
-              const { prospect_name, avatar, type } = cell.row.original;
-              return (
-                <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                  <Avatar src={avatar} size={"sm"} radius={"xl"} />
-                  <Text size={"sm"}>{prospect_name}</Text>
-                  {type && (
-                    <Badge color="teal" variant="filled">
-                      ✨ {type} ✨
-                    </Badge>
-                  )}
+      <Box sx={{ position: 'relative' }}>
+        <LoadingOverlay visible={loading} overlayBlur={2} />
+        <DataGrid
+          bg={"white"}
+          data={championData}
+          highlightOnHover
+          withSorting
+          withBorder
+          withPagination
+          withColumnBorders
+          sx={{ cursor: "pointer" }}
+          columns={[
+            {
+              accessorKey: "prospect_name",
+              header: () => (
+                <Flex align={"center"} gap={"3px"}>
+                  <IconUserSquareRounded color="gray" size={"0.9rem"} />
+                  <Text color="gray">Prospect Name</Text>
                 </Flex>
-              );
+              ),
+              cell: (cell) => {
+                const { prospect_name, avatar, type } = cell.row.original;
+                return (
+                  <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
+                    <Avatar src={avatar} size={"sm"} radius={"xl"} />
+                    <Text size={"sm"}>{prospect_name}</Text>
+                    {type && (
+                      <Badge color="teal" variant="filled">
+                        ✨ {type} ✨
+                      </Badge>
+                    )}
+                  </Flex>
+                );
+              },
             },
-          },
-          {
-            accessorKey: "change_date",
-            header: () => (
-              <Flex align={"center"} gap={"3px"}>
-                <IconCalendar color="gray" size={"0.9rem"} />
-                <Text color="gray">Date of Change</Text>
-              </Flex>
-            ),
-            maxSize: 200,
-            cell: (cell) => {
-              const { change_date } = cell.row.original;
-              return (
-                <Flex w={"100%"} h={"100%"} align={"center"}>
-                  <Text color="gray" fw={400} size={"sm"}>
-                    ~ {moment(change_date).format("MMMM DD, YYYY")}
+            {
+              accessorKey: "change_date",
+              header: () => (
+                <Flex align={"center"} gap={"3px"}>
+                  <IconCalendar color="gray" size={"0.9rem"} />
+                  <Text color="gray">Date of Change</Text>
+                </Flex>
+              ),
+              maxSize: 200,
+              cell: (cell) => {
+                const { change_date } = cell.row.original;
+                return (
+                  <Flex w={"100%"} h={"100%"} align={"center"}>
+                    <Text color="gray" fw={400} size={"sm"}>
+                      ~ {moment(change_date).format("MMMM DD, YYYY")}
+                    </Text>
+                  </Flex>
+                );
+              },
+            },
+            {
+              accessorKey: "people",
+              header: () => (
+                <Flex align={"center"} gap={"3px"}>
+                  <IconUserSquareRounded color="gray" size={"0.9rem"} />
+                  <Text color="gray">People</Text>
+                </Flex>
+              ),
+              cell: (cell) => {
+                const { new_company, new_company_url, origin_company, origin_company_url } = cell.row.original;
+
+                return (
+                  <Flex align={"center"} gap={"md"} w={"100%"} h={"100%"}>
+                    <Flex gap={"xs"} align={"center"}>
+                      <Image src={origin_company_url} width={20} height={20} />
+                      <Text fw={500} size={"sm"}>
+                        {origin_company}
+                      </Text>
+                    </Flex>
+                    <Flex>
+                      <IconArrowRight size={"0.9rem"} />
+                    </Flex>
+                    <Flex gap={"xs"} align={"center"}>
+                      <Image src={new_company_url} width={20} height={20} />
+                      <Text fw={500} size={"sm"}>
+                        {new_company}
+                      </Text>
+                    </Flex>
+                  </Flex>
+                );
+              },
+            },
+          ]}
+          options={{
+            enableFilters: true,
+          }}
+          components={{
+            pagination: ({ table }) => (
+              <Flex
+                justify={"space-between"}
+                align={"center"}
+                px={"sm"}
+                py={"1.25rem"}
+                sx={(theme) => ({
+                  border: `1px solid ${theme.colors.gray[4]}`,
+                  borderTopWidth: 0,
+                })}
+              >
+                <Flex align={"center"} gap={"sm"}>
+                  <Text fw={500} color="gray.6">
+                    Show
                   </Text>
+
+                  <Flex align={"center"}>
+                    <NumberInput
+                      maw={100}
+                      value={table.getState().pagination.pageSize}
+                      onChange={(v) => {
+                        if (v) {
+                          table.setPageSize(v);
+                        }
+                      }}
+                    />
+                    <Flex
+                      sx={(theme) => ({
+                        borderTop: `1px solid ${theme.colors.gray[4]}`,
+                        borderRight: `1px solid ${theme.colors.gray[4]}`,
+                        borderBottom: `1px solid ${theme.colors.gray[4]}`,
+                        marginLeft: "-2px",
+                        paddingLeft: "1rem",
+                        paddingRight: "1rem",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "0.25rem",
+                      })}
+                      h={36}
+                    >
+                      <Text color="gray.5" fw={500} fz={14}>
+                        of {table.getPrePaginationRowModel().rows.length}
+                      </Text>
+                    </Flex>
+                  </Flex>
                 </Flex>
-              );
-            },
-          },
-          {
-            accessorKey: "people",
-            header: () => (
-              <Flex align={"center"} gap={"3px"}>
-                <IconUserSquareRounded color="gray" size={"0.9rem"} />
-                <Text color="gray">People</Text>
+
+                <Flex align={"center"} gap={"sm"}>
+                  <Flex align={"center"}>
+                    <Select
+                      maw={100}
+                      value={`${table.getState().pagination.pageIndex + 1}`}
+                      data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
+                        label: String(idx + 1),
+                        value: String(idx + 1),
+                      }))}
+                      onChange={(v) => {
+                        table.setPageIndex(Number(v) - 1);
+                      }}
+                    />
+                    <Flex
+                      sx={(theme) => ({
+                        borderTop: `1px solid ${theme.colors.gray[4]}`,
+                        borderRight: `1px solid ${theme.colors.gray[4]}`,
+                        borderBottom: `1px solid ${theme.colors.gray[4]}`,
+                        marginLeft: "-2px",
+                        paddingLeft: "1rem",
+                        paddingRight: "1rem",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "0.25rem",
+                      })}
+                      h={36}
+                    >
+                      <Text color="gray.5" fw={500} fz={14}>
+                        of {table.getPageCount()} pages
+                      </Text>
+                    </Flex>
+                    <ActionIcon
+                      variant="default"
+                      color="gray.4"
+                      h={36}
+                      disabled={table.getState().pagination.pageIndex === 0}
+                      onClick={() => {
+                        table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                      }}
+                    >
+                      <IconChevronLeft stroke={theme.colors.gray[4]} />
+                    </ActionIcon>
+                    <ActionIcon
+                      variant="default"
+                      color="gray.4"
+                      h={36}
+                      disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                      onClick={() => {
+                        table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                      }}
+                    >
+                      <IconChevronRight stroke={theme.colors.gray[4]} />
+                    </ActionIcon>
+                  </Flex>
+                </Flex>
               </Flex>
             ),
-            cell: (cell) => {
-              const { new_company, new_company_url, origin_company, origin_company_url, type } = cell.row.original;
-
-              return (
-                <Flex align={"center"} gap={"md"} w={"100%"} h={"100%"}>
-                  <Flex gap={"xs"} align={"center"}>
-                    <Image src={origin_company_url} width={20} height={20} />
-                    <Text fw={500} size={"sm"}>
-                      {origin_company}
-                    </Text>
-                  </Flex>
-                  <Flex>
-                    <IconArrowRight size={"0.9rem"} />
-                  </Flex>
-                  <Flex gap={"xs"} align={"center"}>
-                    <Image src={new_company_url} width={20} height={20} />
-                    <Text fw={500} size={"sm"}>
-                      {new_company}
-                    </Text>
-                  </Flex>
-                </Flex>
-              );
+          }}
+          w={"100%"}
+          styles={(theme) => ({
+            thead: {
+              height: "44px",
+              "::after": {
+                backgroundColor: "transparent",
+              },
             },
-          },
-        ]}
-        options={{
-          enableFilters: true,
-        }}
-        components={{
-          pagination: ({ table }) => (
-            <Flex
-              justify={"space-between"}
-              align={"center"}
-              px={"sm"}
-              py={"1.25rem"}
-              sx={(theme) => ({
-                border: `1px solid ${theme.colors.gray[4]}`,
-                borderTopWidth: 0,
-              })}
-            >
-              <Flex align={"center"} gap={"sm"}>
-                <Text fw={500} color="gray.6">
-                  Show
-                </Text>
-
-                <Flex align={"center"}>
-                  <NumberInput
-                    maw={100}
-                    value={table.getState().pagination.pageSize}
-                    onChange={(v) => {
-                      if (v) {
-                        table.setPageSize(v);
-                      }
-                    }}
-                  />
-                  <Flex
-                    sx={(theme) => ({
-                      borderTop: `1px solid ${theme.colors.gray[4]}`,
-                      borderRight: `1px solid ${theme.colors.gray[4]}`,
-                      borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                      marginLeft: "-2px",
-                      paddingLeft: "1rem",
-                      paddingRight: "1rem",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: "0.25rem",
-                    })}
-                    h={36}
-                  >
-                    <Text color="gray.5" fw={500} fz={14}>
-                      of {table.getPrePaginationRowModel().rows.length}
-                    </Text>
-                  </Flex>
-                </Flex>
-              </Flex>
-
-              <Flex align={"center"} gap={"sm"}>
-                <Flex align={"center"}>
-                  <Select
-                    maw={100}
-                    value={`${table.getState().pagination.pageIndex + 1}`}
-                    data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                      label: String(idx + 1),
-                      value: String(idx + 1),
-                    }))}
-                    onChange={(v) => {
-                      table.setPageIndex(Number(v) - 1);
-                    }}
-                  />
-                  <Flex
-                    sx={(theme) => ({
-                      borderTop: `1px solid ${theme.colors.gray[4]}`,
-                      borderRight: `1px solid ${theme.colors.gray[4]}`,
-                      borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                      marginLeft: "-2px",
-                      paddingLeft: "1rem",
-                      paddingRight: "1rem",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: "0.25rem",
-                    })}
-                    h={36}
-                  >
-                    <Text color="gray.5" fw={500} fz={14}>
-                      of {table.getPageCount()} pages
-                    </Text>
-                  </Flex>
-                  <ActionIcon
-                    variant="default"
-                    color="gray.4"
-                    h={36}
-                    disabled={table.getState().pagination.pageIndex === 0}
-                    onClick={() => {
-                      table.setPageIndex(table.getState().pagination.pageIndex - 1);
-                    }}
-                  >
-                    <IconChevronLeft stroke={theme.colors.gray[4]} />
-                  </ActionIcon>
-                  <ActionIcon
-                    variant="default"
-                    color="gray.4"
-                    h={36}
-                    disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
-                    onClick={() => {
-                      table.setPageIndex(table.getState().pagination.pageIndex + 1);
-                    }}
-                  >
-                    <IconChevronRight stroke={theme.colors.gray[4]} />
-                  </ActionIcon>
-                </Flex>
-              </Flex>
-            </Flex>
-          ),
-        }}
-        w={"100%"}
-        styles={(theme) => ({
-          thead: {
-            height: "44px",
-            // backgroundColor: theme.colors.gray[0],
-            "::after": {
-              backgroundColor: "transparent",
+            td: {
+              paddingBlock: "20px !important",
             },
-          },
-          td: {
-            paddingBlock: "20px !important",
-          },
-          wrapper: {
-            gap: 0,
-          },
-          scrollArea: {
-            paddingBottom: 0,
-            gap: 0,
-          },
-          dataCellContent: {
-            width: "100%",
-          },
-        })}
-      />
+            wrapper: {
+              gap: 0,
+            },
+            scrollArea: {
+              paddingBottom: 0,
+              gap: 0,
+            },
+            dataCellContent: {
+              width: "100%",
+            },
+          })}
+        />
+      </Box>
     </Flex>
   );
 }

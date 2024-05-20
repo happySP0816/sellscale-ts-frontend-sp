@@ -177,13 +177,6 @@ export default function ChampionChange() {
           Champion Change Detector
         </Title>
         <Flex gap={"sm"} align={"center"}>
-          <TextInput
-            maw={200}
-            placeholder="Search"
-            rightSection={<IconSearch size={"0.9rem"} />}
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.currentTarget.value)}
-          />
           <Button color="blue" onClick={handleJobRefreshData} loading={loading}>
             Refresh Job Data
           </Button>
@@ -297,6 +290,14 @@ export default function ChampionChange() {
         </Card>
       </Flex>
       <Box sx={{ position: 'relative' }}>
+      <TextInput
+            maw={200}
+            placeholder="Search"
+            rightSection={<IconSearch size={"0.9rem"} />}
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.currentTarget.value)}
+            mb={'sm'}
+          />
         <LoadingOverlay visible={loading} overlayBlur={2} />
         <DataGrid
           bg={"white"}

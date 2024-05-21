@@ -21,6 +21,7 @@ import {
   TextInput,
   Timeline,
   Title,
+  Tooltip,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import Hook from "@pages/channels/components/Hook";
@@ -33,10 +34,12 @@ import {
   IconChevronRight,
   IconChevronUp,
   IconCircleCheck,
+  IconCopy,
   IconEdit,
   IconMailOpened,
   IconMessages,
   IconPlus,
+  IconQuestionMark,
   IconRefresh,
   IconSearch,
   IconSend,
@@ -49,6 +52,7 @@ import { fetchCampaignContacts, fetchCampaignSequences, fetchCampaignStats } fro
 import { useParams } from "react-router-dom";
 import { userTokenState } from "@atoms/userAtoms";
 import { useRecoilValue } from "recoil";
+import { Any } from "@react-spring/web";
 
 
 interface StatsData {
@@ -59,7 +63,10 @@ interface StatsData {
   num_opens: number;
   num_prospects: number;
   num_prospects_with_emails: number;
+  email_active: boolean;
+  linkedin_active: boolean;
   num_replies: number;
+  num_pos_replies: number;
   num_sent: number;
   sdr_name: string;
 }
@@ -122,15 +129,18 @@ export default function CampaignLandingV2() {
   const [loadingContacts, setLoadingContacts] = useState(true);
   const [loadingSequences, setLoadingSequences] = useState(true);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [activeStep, setActiveStep] = useState(0);
 
   const userToken = useRecoilValue(userTokenState);
 
   const [contactsData, setContactsData] = useState<any[]>([]);
   const [sequencesData, setSequencesData] = useState<any[]>([]);
+  const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
+  const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
 
   //sequence variable
-  const [sequences, setSequences] = useState([]);
+  const [sequences, setSequences] = useState<any[]>([]);
   const [selectStep, setSelectStep] = useState<number | null>(null);
   const [opened, setOpened] = useState(false);
   const [type, setType] = useState("email");
@@ -168,6 +178,9 @@ export default function CampaignLandingV2() {
           setContactsData(contacts);
           // console.log("contacts", contacts);
           setContacts(contacts.sample_contacts);
+          if (contacts.sample_contacts.length > 0) {
+            setActiveStep(prev => prev + 1);
+          }
           setLoadingContacts(false);
         })
         .catch((error) => {
@@ -177,7 +190,19 @@ export default function CampaignLandingV2() {
 
       sequencesPromise
         .then((sequences) => {
-          setSequencesData(sequences);
+          console.log("sequences", sequences);
+          if (sequences.email_sequence.length > 0) {
+            setEmailSequenceData(sequences.email_sequence);
+          } else {
+            setEmailSequenceData([]);
+          }
+          if (sequences.linkedin_sequence.length > 0) {
+            setLinkedinSequenceData(sequences.linkedin_sequence);
+          } else 
+          {
+            setLinkedinSequenceData([]);
+          }
+          setSequences(sequences.email_sequence);
           setLoadingSequences(false);
         })
         .catch((error) => {
@@ -202,12 +227,14 @@ export default function CampaignLandingV2() {
 
   return (
     <Paper p={"lg"}>
-      {loadingStats ? (
-        <Flex justify="center" align="center" w="100%" my="lg">
-          <Loader />
+      {loadingStats || !statsData ? (
+        <Flex direction="column" gap="sm" p="lg" style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
+          <Skeleton height={50} radius="xl" width="100%" />
+          <Skeleton height={40} radius="xl" width="80%" />
+          <Skeleton height={30} radius="xl" width="60%" />
         </Flex>
       ) : (
-        <Flex p={"lg"} style={{ border: "1px solid #3B85EF", borderRadius: "6px" }}>
+        <Flex p={"lg"} style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
           <Flex direction={"column"} gap={"sm"} w={"100%"}>
             <Flex gap={"sm"} align={"center"}>
               <Avatar src={""} size={"md"} radius={"xl"} />
@@ -246,8 +273,8 @@ export default function CampaignLandingV2() {
                 Created:
               </Text>
               <Text fw={600} size={"xs"}>
-                {new Date(statsData?.created_at).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'})}
-              </Text>
+                {new Date(statsData.created_at).toLocaleString('en-US', { dateStyle: 'full' })}
+                </Text>
               {/* <Divider orientation="vertical" h={"70%"} my={"auto"} />
               <Text color="gray" fw={600} size={"xs"}>
                 Average Contract Value (ACV):
@@ -258,9 +285,12 @@ export default function CampaignLandingV2() {
               <ActionIcon>
                 <IconEdit />
               </ActionIcon> */}
-              <Text size={"xs"} fw={600} underline color="#3B85EF" ml={"sm"}>
-                Duplicate Campaign
-              </Text>
+              <Tooltip label="Duplicate Campaign" withArrow>
+                <ActionIcon variant="light" color="blue" ml={"sm"}>
+                  <IconCopy size={16} />
+                </ActionIcon>
+              </Tooltip>
+
             </Flex>
             {/* <Text size={"sm"}>
               <span style={{ fontWeight: 600 }}>Campaign Objective:</span>
@@ -286,6 +316,7 @@ export default function CampaignLandingV2() {
                 >
                   <Group noWrap sx={{ flex: 1, justifyContent: "center" }}>
                     <Switch
+                      checked={statsData.email_active}
                       labelPosition="left"
                       label={
                         <Flex gap={4} align={"center"}>
@@ -339,6 +370,7 @@ export default function CampaignLandingV2() {
                     />
                     <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
                     <Switch
+                      checked={statsData?.linkedin_active}
                       labelPosition="left"
                       label={
                         <Flex gap={4} align={"center"}>
@@ -364,6 +396,21 @@ export default function CampaignLandingV2() {
                       }}
                     />
                   </Group>
+                  <Tooltip 
+                    label={
+                      <Text>
+                        Omnichannel outbound allows you to control the order of personalized outbound messages.  <br></br>
+                        If both email and LinkedIn are enabled, an email is sent first, followed by a LinkedIn message after a few days.  <br></br>
+                        Otherwise, only one channel is used.
+                      </Text>
+                    } 
+                    withArrow
+                    position="bottom"
+                  >
+                    <Text color="gray" size="xs" mt="md" sx={{ cursor: "default" }}>
+                      What is this?
+                    </Text>
+                  </Tooltip>
                 </Paper>
               </Flex>
               <Flex w={"40%"}>
@@ -469,7 +516,7 @@ export default function CampaignLandingV2() {
                     </Text>
                   </Flex>
                   <Flex align={"center"} gap={"sm"}>
-                    <Text fz={24}>{"00"}</Text>
+                    <Text fz={24}>{statsData.num_pos_replies}</Text>
                     <Badge color="green" size="xs">
                       {`${((0 / statsData.num_prospects) * 100).toFixed(2)}%`}
                     </Badge>
@@ -494,14 +541,29 @@ export default function CampaignLandingV2() {
           <Paper withBorder h={"100%"}>
             <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
               <Flex gap={"sm"} align={"center"}>
-                <Text fw={600} size={20} color="#37414E">
-                  Personalizers
-                </Text>
+                <Flex align="center" gap="xs">
+                  <Text fw={600} size={20} color="#37414E">
+                    Personalizers
+                  </Text>
+                  <Tooltip 
+                    label={
+                      <Text size="sm">
+                        Create hyper-relevant outreach strategies <br></br>using AI-powered research for personalized engagement.
+                      </Text>
+                    } 
+                    withArrow
+                    position="right"
+                  >
+                    <Text color="#37414E" size="xs">
+                      <IconQuestionMark size={"1rem"} color="#37414E" />
+                    </Text>
+                  </Tooltip>
+                </Flex>
                 <Badge leftSection={<IconTrafficCone size={"0.9rem"} className="mt-1" />} color="orange">
-                  under contruction
+                  under construction
                 </Badge>
               </Flex>
-              <Button
+              {/* <Button
                 leftIcon={<IconPlus size={"0.9rem"} />}
                 onClick={() => {
                   openContextModal({
@@ -520,7 +582,7 @@ export default function CampaignLandingV2() {
                 }}
               >
                 Add
-              </Button>
+              </Button> */}
             </Flex>
             <Flex h={"70%"}>
               {personalizers && personalizers.length > 0 ? (
@@ -588,21 +650,80 @@ export default function CampaignLandingV2() {
                   </Flex>
                 </Flex>
               ) : (
-                <Text color="gray" fw={400} m={"auto"} size={"sm"}>
-                  There are no personalizers here. Add one to get started.
-                </Text>
+                <Flex
+                  direction="column"
+                  align="center"
+                  justify="center"
+                  m="auto"
+                  sx={(theme) => ({
+                    border: "2px dotted gray",
+                    borderRadius: "15px",
+                    padding: "20px",
+                    cursor: "pointer",
+                    transition: "transform 0.2s, background-color 0.2s",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      backgroundColor: theme.colors.gray[0],
+                    },
+                  })}
+                  onClick={() => {
+                    openContextModal({
+                      modal: "campaignPersonalizersModal",
+                      title: <Title order={3}>Personalizers</Title>,
+                      innerProps: {
+                        setPersonalizers,
+                      },
+                      centered: true,
+                      styles: {
+                        content: {
+                          minWidth: "1040px",
+                        },
+                      },
+                    });
+                  }}
+                >
+                  <Flex align="center" gap="xs">
+                    <Text color="gray" fw={400} size={"sm"}>
+                      There are no personalizers here. Add one to get started.
+                    </Text>
+                    <ActionIcon>
+                      <IconPlus size={"1.2rem"} />
+                    </ActionIcon>
+                  </Flex>
+                </Flex>
               )}
             </Flex>
           </Paper>
           <Paper withBorder h={"100%"}>
             <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
-              <Text fw={600} size={20} color="#37414E">
-                Sequences
-              </Text>
-              {sequences && sequences.length > 0 ? (
+            <Flex align="center" gap="xs">
+                  <Text fw={600} size={20} color="#37414E">
+                    Sequences
+                  </Text>
+                  <Tooltip 
+                    label={
+                      <Text size="sm">
+                        Generate or manually create custom sequences to guide your outreach strategy. 
+                        <br></br>
+                        </Text>
+                    } 
+                    withArrow
+                    position="right"
+                  >
+                    <Text color="#37414E" size="xs">
+                      <IconQuestionMark size={"1rem"} color="#37414E" />
+                    </Text>
+                  </Tooltip>
+                </Flex>
+              {sequences ? (
                 <SegmentedControl
                   onChange={(value: any) => {
                     setType(value);
+                    if (value === "email") {
+                      setSequences(emailSequenceData);
+                    } else {
+                      setSequences(linkedinSequenceData);
+                    }
                   }}
                   data={[
                     {
@@ -695,7 +816,7 @@ export default function CampaignLandingV2() {
                                     {item?.name}
                                   </Text>
                                   <Text fw={500} size={"xs"}>
-                                    {item?.message}
+                                    {item?.description}
                                   </Text>
                                 </Box>
                               </Flex>
@@ -744,89 +865,143 @@ export default function CampaignLandingV2() {
                   </Flex>
                 </Flex>
               ) : (
-                <Text color="gray" fw={400} m={"auto"} size={"sm"}>
-                  There are no templates here. Add one to get started.
-                </Text>
+                <Flex
+                  direction="column"
+                  align="center"
+                  justify="center"
+                  m="auto"
+                  sx={(theme) => ({
+                    border: "2px dotted gray",
+                    borderRadius: "15px",
+                    padding: "20px",
+                    cursor: "pointer",
+                    transition: "transform 0.2s, background-color 0.2s",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      backgroundColor: theme.colors.gray[0],
+                    },
+                  })}
+                  onClick={() => {
+                    openContextModal({
+                      modal: "campaignTemplateModal",
+                      title: <Title order={3}>{createTemplateBuilder ? "Template Builder" : "Template"}</Title>,
+                      innerProps: {
+                        createTemplateBuilder,
+                        setCreateTemplateBuilder,
+                        setSequences,
+                      },
+                      centered: true,
+                      styles: {
+                        content: {
+                          minWidth: "1040px",
+                        },
+                      },
+                    });
+                  }}
+                >
+                  <Flex align="center" gap="xs">
+                    <Text color="gray" fw={400} size={"sm"}>
+                      There are no personalizers here. Add one to get started.
+                    </Text>
+                    <ActionIcon>
+                      <IconPlus size={"1.2rem"} />
+                    </ActionIcon>
+                  </Flex>
+                </Flex>
               )}
             </Flex>
           </Paper>
         </Flex>
-        <Flex direction={"column"} gap={"lg"}>
-          <Paper withBorder p={"md"}>
-            <Text fw={600} size={20} color="#37414E">
-              Campaign Progress
-            </Text>
-            <Timeline
-              active={0}
-              bulletSize={28}
-              lineWidth={2}
-              mt={"lg"}
-              styles={{
-                itemTitle: {
-                  fontWeight: 600,
-                },
-                itemBody: {
-                  paddingTop: "4px",
-                },
-                itemBullet: {
-                  fontSize: "14px",
-                },
-              }}
-            >
-              <Timeline.Item bullet={1} title="Add Contacts" lineVariant="dashed">
-                <Text c="dimmed" size="sm">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                </Text>
-              </Timeline.Item>
+        <Flex direction={"column"} w={'24vw'} gap={"lg"}>
+          {loadingContacts ? (
+            <Paper p={"md"} >
+              <Skeleton height={30} radius="xl" width="40%" />
+              <Skeleton height={20} radius="xl" width="60%" mt="sm" />
+              <Skeleton height={20} radius="xl" width="60%" mt="sm" />
+              <Skeleton height={20} radius="xl" width="60%" mt="sm" />
+            </Paper>
+          ) : (
+            <Paper p={"sm"}>
+              <Text fw={600} size={15} color="#37414E">
+                Campaign Progress
+              </Text>
+              <Timeline
+                active={activeStep}
+                bulletSize={20}
+                lineWidth={2}
+                mt={"lg"}
+                styles={{
+                  itemTitle: {
+                    fontWeight: 600,
+                    fontSize: "0.875rem", // Slightly lower the font size
+                  },
+                  itemBody: {
+                    paddingTop: "4px",
+                    fontSize: "0.875rem", // Slightly lower the font size
+                  },
+                  itemBullet: {
+                    fontSize: "12px", // Slightly lower the font size
+                  },
+                  item: {
+                    marginBottom: "8px", // Reduce space between bullets
+                  },
+                }}
+              >
+                <Timeline.Item bullet={1} title="Add Contacts" lineVariant="dashed">
+                  <Text c="dimmed" size="xs">
+                    {/* Lorem ipsum dolor sit amet, consectetur adipiscing elit. */}
+                  </Text>
+                </Timeline.Item>
 
-              <Timeline.Item bullet={2} title="Setup Templates" lineVariant="dashed">
-                <Text c="dimmed" size="sm">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elt.
-                </Text>
-              </Timeline.Item>
+                <Timeline.Item bullet={2} title="Setup Templates" lineVariant="dashed">
+                  <Text c="dimmed" size="xs">
+                    {/* Lorem ipsum dolor sit amet, consectetur adipiscing elt. */}
+                  </Text>
+                </Timeline.Item>
 
-              <Timeline.Item bullet={3} title="Add Personalizers">
-                <Text c="dimmed" size="sm">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elt.
-                </Text>
-              </Timeline.Item>
-            </Timeline>
-          </Paper>
+                <Timeline.Item bullet={3} title="Add Personalizers">
+                  <Text c="dimmed" size="xs">
+                    {/* Lorem ipsum dolor sit amet, consectetur adipiscing elt. */}
+                  </Text>
+                </Timeline.Item>
+              </Timeline>
+            </Paper>
+          )}
           <Paper withBorder w={"100%"}>
           {loadingContacts ? (
-            <Flex direction="column" gap="sm" p="md" align="left">
+            <Flex justify={"space-between"} direction="column" gap="sm" p="md" align="left" w="24vw">
               <Text size="md" fw={500} color="gray">Loading contacts...</Text>
               <Loader size="sm" />
               <Flex direction="row" align="center" gap="sm">
-                <Skeleton height={50} width={50} radius="200%" />
+                <Skeleton height={50} width={50} radius="150%" />
                 <Flex direction="column" gap="xs" w="100%">
                   <Skeleton height={8} radius="xl" width="80%" />
                   <Skeleton height={8} radius="xl" width="60%" />
                 </Flex>
               </Flex>
               <Flex direction="row" align="center" gap="sm">
-                <Skeleton height={50} circle />
+                <Skeleton height={50} width={50} radius="100%" />
                 <Flex direction="column" gap="xs" w="100%">
                   <Skeleton height={8} radius="xl" width="80%" />
                   <Skeleton height={8} radius="xl" width="60%" />
                 </Flex>
               </Flex>
               <Flex direction="row" align="center" gap="sm">
-                <Skeleton height={50} circle />
+                <Skeleton height={50} width={50} radius="100%" />
                 <Flex direction="column" gap="xs" w="100%">
                   <Skeleton height={8} radius="xl" width="80%" />
                   <Skeleton height={8} radius="xl" width="60%" />
                 </Flex>
               </Flex>
               <Flex direction="row" align="center" gap="sm">
-                <Skeleton height={50} circle />
+                <Skeleton height={50} width={50} radius="100%" />
                 <Flex direction="column" gap="xs" w="100%">
                   <Skeleton height={8} radius="xl" width="80%" />
                   <Skeleton height={8} radius="xl" width="60%" />
                 </Flex>
               </Flex>
               <Flex direction="row" align="center" gap="sm">
-                <Skeleton height={50} circle />
+                <Skeleton height={50} width={50} radius="100%" />
                 <Flex direction="column" gap="xs" w="100%">
                   <Skeleton height={8} radius="xl" width="80%" />
                   <Skeleton height={8} radius="xl" width="60%" />
@@ -835,7 +1010,7 @@ export default function CampaignLandingV2() {
             </Flex>
           ) : (
             <>
-              <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
+              <Flex align={"center"} justify={"space-between"} p={"md"} w={'24vw'} style={{ borderBottom: "1px solid #ECEEF1" }}>
                 <Flex align={"center"} gap={"sm"}>
                   <Text fw={600} size={20} color="#37414E">
                     Contacts

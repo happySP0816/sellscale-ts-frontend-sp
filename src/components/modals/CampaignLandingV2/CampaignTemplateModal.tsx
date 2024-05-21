@@ -35,9 +35,12 @@ import { useEffect, useState } from "react";
 
 export default function CampaignTemplateModal({
   innerProps,
+  context,
+  id,
 }: ContextModalProps<{
   createTemplateBuilder: boolean;
   setCreateTemplateBuilder: Function;
+  setSequences: Function;
 }>) {
   const [sequenceType, setSequenceType] = useState<string | null>("");
   const [steps, setSteps] = useState();
@@ -45,6 +48,42 @@ export default function CampaignTemplateModal({
   const [openid, setOpenId] = useState<number>(0);
   const [opened, setOpened] = useState(false);
   const [selectStep, setSelectStep] = useState<number | null>(null);
+
+  const data = [
+    {
+      title: "Personalized Opener",
+      avatar: "",
+      name: "Ishan Sharma",
+      message:
+        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
+      point_used: 14,
+      asset_used: 14,
+      opened: 12,
+      replied: 4.6,
+    },
+    {
+      title: "Personalized Opener",
+      avatar: "",
+      name: "Ishan Sharma",
+      message:
+        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
+      point_used: 14,
+      asset_used: 14,
+      opened: 12,
+      replied: 4.6,
+    },
+    {
+      title: "Personalized Opener",
+      avatar: "",
+      name: "Ishan Sharma",
+      message:
+        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
+      point_used: 14,
+      asset_used: 14,
+      opened: 12,
+      replied: 4.6,
+    },
+  ];
 
   const handleToggle = (key: number) => {
     if (selectStep === key) {
@@ -434,7 +473,15 @@ export default function CampaignTemplateModal({
               <Button fullWidth variant="outline">
                 Reset
               </Button>
-              <Button fullWidth>Add Sequence</Button>
+              <Button
+                fullWidth
+                onClick={() => {
+                  innerProps.setSequences(data);
+                  context.closeModal(id);
+                }}
+              >
+                Add Sequence
+              </Button>
             </Flex>
           </Paper>
         </Flex>

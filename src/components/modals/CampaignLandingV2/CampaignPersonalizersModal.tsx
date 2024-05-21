@@ -1,7 +1,25 @@
 import { ActionIcon, Avatar, Box, Button, Checkbox, Flex, Paper, ScrollArea, Text, Textarea } from "@mantine/core";
+import { ContextModalProps } from "@mantine/modals";
 import { IconBuilding, IconEdit, IconPlus, IconPoint } from "@tabler/icons";
+import { useState } from "react";
 
-export default function CampaignPersonalizersModal() {
+export default function CampaignPersonalizersModal({
+  innerProps,
+  context,
+  id,
+}: ContextModalProps<{
+  setPersonalizers: Function;
+}>) {
+  const [personalizersData, setPersonalizersData] = useState([
+    {
+      title: "10K Filing",
+      content: "Find any mention of sales",
+    },
+    {
+      title: "Recent Job Opening",
+      content: "Mention of SDRs is great!",
+    },
+  ]);
   return (
     <>
       <Paper withBorder w={"100%"}>
@@ -164,7 +182,15 @@ export default function CampaignPersonalizersModal() {
         <Button fullWidth variant="outline" color="gray">
           Go Back
         </Button>
-        <Button fullWidth>Save</Button>
+        <Button
+          fullWidth
+          onClick={() => {
+            innerProps.setPersonalizers(personalizersData);
+            context.closeModal(id);
+          }}
+        >
+          Save
+        </Button>
       </Flex>
     </>
   );

@@ -4,18 +4,19 @@ import { API_URL } from "@constants/data";
 export const useChampionApi = (userToken: string) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const getChampionChanges = async () => {
+  const getChampionChanges = async (searchTerm?: string) => {
     setIsLoading(true);
-    const response = await fetch(
-      `${API_URL}/prospect/champion/get_champion_changes`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-      }
-    );
+    const url = new URL(`${API_URL}/prospect/champion/get_champion_changes`);
+    if (searchTerm) {
+      url.searchParams.append("search", searchTerm);
+    }
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
     const data = await response.json();
     setIsLoading(false);
     return data;

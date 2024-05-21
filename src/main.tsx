@@ -537,7 +537,7 @@ const router = sentryCreateBrowserRouter([
         element: <CampaignWizard />,
       },
       {
-        path: "/campaign_v2",
+        path: "/campaign_v2/:id",
         element: <CampaignLandingV2 />,
       },
     ],

@@ -405,9 +405,9 @@ export default function CampaignTemplateModal({
             </Flex>
             <ScrollArea h={500}>
               <Flex p={"lg"} h={"100%"} direction={"column"}>
-                {generateSequence && steps && steps > 0 ? (
+                {generateSequence && steps && Number(steps) > 0 ? (
                   <>
-                    {Array.from({ length: steps }, (_, index) => {
+                    {Array.from({ length: Number(steps) }, (_, index) => {
                       return (
                         <>
                           <>

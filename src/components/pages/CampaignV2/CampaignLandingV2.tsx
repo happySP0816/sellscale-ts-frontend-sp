@@ -716,7 +716,13 @@ export default function CampaignLandingV2() {
             <Flex>
               {personalizers && personalizers.length > 0 ? (
                 <Flex direction={"column"} w={"100%"}>
-                  <Flex w={"100%"} mah={300} gap={"md"} p={"lg"}>
+                  <Flex
+                    w={"100%"}
+                    mah={300}
+                    gap={"md"}
+                    p={"lg"}
+                    direction="column"
+                  >
                     {personalizers &&
                       personalizers.length > 0 &&
                       personalizers.map((item: any, index: number) => {
@@ -725,7 +731,7 @@ export default function CampaignLandingV2() {
                             labelPosition="left"
                             label={
                               <Flex key={index} gap={"md"} align={"center"}>
-                                <Text fw={600} size="12px">
+                                <Text fw={600} size="12px" miw="200px">
                                   {item.key}
                                 </Text>
                                 <Divider orientation="vertical" />

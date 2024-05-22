@@ -30,6 +30,39 @@ export const fetchCampaignPersonalizers = async (
   }
 };
 
+export const patchTestingVolume = async (
+  userToken: string,
+  client_archetype_id: number,
+  testing_volume: number
+) => {
+  try {
+    const response = await fetch(
+      `${API_URL}/client/archetype/${client_archetype_id}/testing_volume`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: "Bearer " + userToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ testing_volume, client_archetype_id }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error patching testing volume", error);
+  } finally {
+    console.log("Testing volume patch API call completed");
+  }
+};
+
+
+
 export const fetchCampaignContacts = async (
   userToken: string,
   client_archetype_id: number

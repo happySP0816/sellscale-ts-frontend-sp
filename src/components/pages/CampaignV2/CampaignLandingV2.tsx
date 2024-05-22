@@ -53,17 +53,18 @@ import {
 } from "@tabler/icons";
 import { IconMessageCheck } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
-import { fetchCampaignContacts, fetchCampaignPersonalizers, fetchCampaignSequences, fetchCampaignStats } from "@utils/requests/campaignOverview";
+import { fetchCampaignContacts, fetchCampaignPersonalizers, patchTestingVolume, fetchCampaignSequences, fetchCampaignStats } from "@utils/requests/campaignOverview";
 import { useParams } from "react-router-dom";
 import { userTokenState } from "@atoms/userAtoms";
 import { useRecoilValue } from "recoil";
-import { Any } from "@react-spring/web";
 import CampaignChannelPage from "@pages/CampaignChannelPage";
+import { cl } from "@fullcalendar/core/internal-common";
 
 interface StatsData {
   archetype_name: string;
   created_at: string;
   emoji: string;
+  testing_volume: number;
   num_demos: number;
   num_opens: number;
   num_prospects: number;
@@ -143,6 +144,7 @@ export default function CampaignLandingV2() {
   const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
+  const [testingVolume, setTestingVolume] = useState(0);
 
   //sequence variable
   const [sequences, setSequences] = useState<any[]>([]);
@@ -474,20 +476,31 @@ export default function CampaignLandingV2() {
                 <Paper p="md" withBorder w={"100%"}>
                   <Flex justify={"space-between"}>
                     <Text size={"sm"} fw={500}>
-                      Testing volume per cycle:
+                      Testing volume per cycle 
                     </Text>
                     <Text size={"sm"} fw={500}>
-                      200/week (Email)
+                    {testingVolume}/week {cycleStatus && (
+                        <Text component="span" color="red" size="xs" fw={700} ml={4}>
+                          (Unsaved)
+                        </Text>
+                      )}
                     </Text>
                   </Flex>
                   <Flex w={"100%"} align={"start"} gap={"sm"} mt={"md"}>
                     <Slider
                       w={"100%"}
-                      onChange={() => setCycleStatus(true)}
+                      defaultValue={statsData.testing_volume}
+                      value={testingVolume}
+                      onChange={(value) => {
+                        setCycleStatus(true);
+                        setTestingVolume(value);
+                        statsData.testing_volume = value;
+                      }}
+                      max={500}
                       marks={[
                         { value: 0, label: "0" },
                         {
-                          value: 100,
+                          value: 500,
                           label: (
                             <div
                               style={{
@@ -501,7 +514,22 @@ export default function CampaignLandingV2() {
                         },
                       ]}
                     />
-                    <Button disabled={!cycleStatus}>Save</Button>
+                    <Button 
+                      disabled={!cycleStatus} 
+                      onClick={async () => {
+                        const clientArchetypeId = Number(id);
+                        const response = await patchTestingVolume(userToken, clientArchetypeId, testingVolume);
+                        if (response) {
+                          console.log("Testing volume updated successfully", response);
+                        }
+                        setLoadingStats(true);
+                        await fetchCampaignStats(userToken, clientArchetypeId);
+                        setLoadingStats(false);
+                        setCycleStatus(false);
+                      }}
+                    >
+                      Save
+                    </Button>
                   </Flex>
                 </Paper>
               </Flex>

@@ -49,7 +49,7 @@ import {
 } from "@tabler/icons";
 import { IconMessageCheck } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
-import { fetchCampaignContacts, fetchCampaignSequences, fetchCampaignStats } from "@utils/requests/campaign_overview";
+import { fetchCampaignContacts, fetchCampaignSequences, fetchCampaignStats } from "@utils/requests/campaignOverview";
 import { useParams } from "react-router-dom";
 import { userTokenState } from "@atoms/userAtoms";
 import { useRecoilValue } from "recoil";
@@ -870,7 +870,7 @@ export default function CampaignLandingV2() {
                             label={
                               <Flex gap={1} align={"center"}>
                                 <Text color="gray" fw={500} size={"xs"}>
-                                  Wait for {2} days
+                                  Wait for {item.bump} days
                                 </Text>
                                 <ActionIcon>
                                   <IconEdit size={"0.9rem"} />

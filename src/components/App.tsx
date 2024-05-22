@@ -71,6 +71,9 @@ import DuplicateCampaignModal from "@modals/DuplicateCampaignModal";
 import posthog from "posthog-js";
 import WebsiteIntentSplitModal from "@modals/WebsiteIntentsplitModal";
 import ChampionChangeModal from "@modals/ChampionChangeModal";
+import CampaignPersonalizersModal from "@modals/CampaignLandingV2/CampaignPersonalizersModal";
+import CampaignContactsModal from "@modals/CampaignLandingV2/CampaignContactsModal";
+import CampaignTemplateModal from "@modals/CampaignLandingV2/CampaignTemplateModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -246,6 +249,9 @@ export default function App() {
               duplicateCampaign: DuplicateCampaignModal,
               websiteintentsplit: WebsiteIntentSplitModal,
               championChange: ChampionChangeModal,
+              campaignPersonalizersModal: CampaignPersonalizersModal,
+              campaignContactsModal: CampaignContactsModal,
+              campaignTemplateModal: CampaignTemplateModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

@@ -98,7 +98,6 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
     )
   )
     .sort((a, b) => {
-      console.log(a[0].toLowerCase());
       if (a[0].toLowerCase().includes('scheduling')) return -1;
       if (b[0].toLowerCase().includes('scheduling')) return 1;
       return b[0].localeCompare(a[0]);

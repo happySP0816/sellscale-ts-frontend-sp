@@ -18,6 +18,8 @@ import {
   Textarea,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
+import CampaignChannelPage from '@pages/CampaignChannelPage';
+
 import {
   IconArrowRight,
   IconBuilding,
@@ -41,6 +43,8 @@ export default function CampaignTemplateModal({
   createTemplateBuilder: boolean;
   setCreateTemplateBuilder: Function;
   setSequences: Function;
+  campaignId: number;
+  cType?: string;
 }>) {
   const [sequenceType, setSequenceType] = useState<string | null>("");
   const [steps, setSteps] = useState();
@@ -106,6 +110,15 @@ export default function CampaignTemplateModal({
     setIsBuilder(newBuilderState); // Update local state to force re-render
     innerProps.setCreateTemplateBuilder(newBuilderState); // Update parent state
   };
+
+  return (<CampaignChannelPage
+    campaignId={innerProps.campaignId}
+    cType={innerProps.cType || "linkedin"}
+    hideHeader={true}
+    hideEmail={false}
+    hideLinkedIn={false}
+    hideAssets={true}
+  />)
 
   return (
     <div key={innerProps.createTemplateBuilder ? "builder" : "template"}>
@@ -392,9 +405,9 @@ export default function CampaignTemplateModal({
             </Flex>
             <ScrollArea h={500}>
               <Flex p={"lg"} h={"100%"} direction={"column"}>
-                {generateSequence && steps && steps > 0 ? (
+                {generateSequence && steps && Number(steps) > 0 ? (
                   <>
-                    {Array.from({ length: steps }, (_, index) => {
+                    {Array.from({ length: Number(steps) }, (_, index) => {
                       return (
                         <>
                           <>

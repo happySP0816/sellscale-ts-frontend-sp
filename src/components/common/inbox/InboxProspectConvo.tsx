@@ -601,6 +601,13 @@ export default function InboxProspectConvo(props: Props) {
   }, [isFetchingMessages]);
 
   useEffect(() => {
+    if (!prospect) {
+      return;
+    }
+    triggerGetBumpFrameworks();
+  }, [prospect]);
+
+  useEffect(() => {
     sendBoxRef.current?.setAiGenerated(false);
     sendBoxRef.current?.setMessageDraft('');
     sendBoxRef.current?.setAiMessage('');

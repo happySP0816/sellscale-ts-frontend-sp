@@ -71,8 +71,6 @@ export default function ProspectUploadHistory() {
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-upload-history-all`],
     queryFn: async () => {
-      console.log('here 123');
-
       const result = await getProspectUploadHistory(userToken, undefined, undefined);
       const d = result.data.history.map((d: UploadHistoryDataType) => {
         return {
@@ -83,6 +81,7 @@ export default function ProspectUploadHistory() {
       return d as UploadHistoryDataType[];
     },
     refetchOnWindowFocus: false,
+    refetchInterval: 5 * 1000,
   });
 
   const handleDate = (date: string) => {

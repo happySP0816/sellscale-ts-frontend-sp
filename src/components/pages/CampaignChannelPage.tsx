@@ -242,12 +242,16 @@ export default function CampaignChannelPage(props: {
   }, [loaderData?.channelType, props.cType]);
 
   useEffect(() => {
+
     posthog.onFeatureFlags(function () {
       if (posthog.isFeatureEnabled("campaign_setup_wizard")) {
-        setSetupWizardFeatureEnabled(true);
+        setSetupWizardFeatureEnabled(true);    
+      }
+      if (posthog.isFeatureEnabled('campaign_shell_v2') && campaign?.id && !window.location.href.includes('campaign_v2') ) {
+        window.location.href = `/campaign_v2/${campaign.id}`;
       }
     });
-  }, []);
+  }, [campaign?.id]);
 
   const [setupMode, setSetupMode] = useState(false);
 

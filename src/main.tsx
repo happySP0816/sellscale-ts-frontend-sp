@@ -74,6 +74,7 @@ import ComingSoonCard from "@common/library/ComingSoonCard";
 import CampaingCurator from "@common/campaigns/CampaignCurator";
 import CampaignWizard from "./components/CampaignWizard/CampaignWizard";
 import CampaignLandingV2 from "@pages/CampaignV2/CampaignLandingV2";
+import B2BSearch from "@pages/B2BSearch/B2bSearch";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -539,6 +540,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/campaign_v2/:id",
         element: <CampaignLandingV2 />,
+      },
+      {
+        path: "/b2b_search",
+        element: <B2BSearch />,
       },
     ],
   },

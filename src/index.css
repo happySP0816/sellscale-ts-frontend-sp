@@ -85,6 +85,33 @@ code {
 .pulse {
   animation: pulsing 1300ms infinite;
 }
+.loading-animation {
+  animation: pulse 1.5s infinite, sizeChange 3s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes sizeChange {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 
 /* CSS Animation Frames */
 @keyframes pull-in-from-left {

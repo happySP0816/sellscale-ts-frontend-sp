@@ -2063,7 +2063,7 @@ export const EmailBodyItem: React.FC<{
 
     if (newText) {
       newText.match(/\[\[(.*?)]\]/g)?.forEach((v) => {
-        const content = v; //v.replace("[[", "").replace("]]", "");
+        const content = v.replace('[[', '').replace(']]', '');
 
         // Add 'https://' to urls that don't have a 'https://'
         for (const word of content.trim().split(/\s/)) {
@@ -2105,9 +2105,9 @@ export const EmailBodyItem: React.FC<{
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               })}
-              highlight={content}
+              highlight={`[[${content}]]`}
             >
-              {content}
+              {`[[${content}]]`}
             </Highlight>
           )
         );

@@ -391,7 +391,7 @@ export default function CampaignLandingV2() {
     });
   }
   return (
-    <Paper p={"lg"} mx={"xl"}>
+    <Paper p={"lg"} h="100%">
       <Modal
         opened={showCampaignTemplateModal}
         onClose={() => {
@@ -428,7 +428,7 @@ export default function CampaignLandingV2() {
         <iframe src="https://sellscale.retool.com/apps/Internal%20Modules/SellScale%20AI%20Researcher#authToken=${userToken}&campaignId=${id}&embedMode=true" width="100%" height="800px"></iframe>
       </Modal>
       {loadingStats || !statsData ? (
-        <Flex direction="column" justify="center" mb="lg" align="center" gap="sm" p="lg" style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
+        <Flex mx={"xl"} direction="column" justify="center" mb="lg" align="center" gap="sm" p="lg" style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
           <Skeleton height={50} radius="xl" width="100%" />
           <Skeleton height={40} radius="xl" width="80%" />
           <Skeleton height={30} radius="xl" width="60%" />
@@ -438,7 +438,7 @@ export default function CampaignLandingV2() {
           </Flex>
         </Flex>
       ) : (
-        <Flex style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
+        <Flex mx={"xl"} style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
           <Flex direction={"column"} w={"100%"}>
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
             <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
@@ -779,9 +779,9 @@ export default function CampaignLandingV2() {
           </Flex>
         </Flex>
       )}
-      <Flex gap={"lg"} mt={"md"}>
+      <Flex mx={"xl"} gap={"lg"} mt={"md"}>
         <Flex direction={"column"} gap={"md"} w={"80%"}>
-          <Paper withBorder h={"100%"}>
+          <Paper withBorder>
             <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
               <Flex align="center" gap="xs">
                 <Text fw={600} size={20} color="#37414E">
@@ -976,7 +976,7 @@ export default function CampaignLandingV2() {
                             }}
                           >
                             <Flex align={"center"} justify={"space-between"} px={"sm"} py={"xs"}>
-                              <Flex align={"center"} gap={"xs"}>
+                              <Flex mx="lg" align={"center"} gap={"xs"}>
                                 <IconMessages color="#228be6" size={"0.9rem"} />
                                 <Text color="gray" fw={500} size={"xs"}>
                                   Example Message #{index + 1}:

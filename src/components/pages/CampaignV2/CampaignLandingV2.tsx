@@ -527,7 +527,7 @@ export default function CampaignLandingV2() {
                       </ActionIcon>
                     </Tooltip>
                   </Flex>
-                  <Group spacing={'sm'}>
+                  <Group noWrap spacing={'sm'}>
                     <Switch
                       onChange={() => togglePersonaChannel(id, 'email', userToken, !statsData.email_active)}
                       checked={statsData.email_active}

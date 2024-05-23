@@ -1532,7 +1532,7 @@ export default function InboxProspectConvo(props: Props) {
                 </Box>
               </Box>
             )}
-            <Box sx={{ width: '100%', height: openedConvoBox ? '250px' : '50px' }}></Box>
+            <Box sx={{ width: '100%', height: openedConvoBox ? '350px' : '50px' }}></Box>
           </div>
         </ScrollArea>
 

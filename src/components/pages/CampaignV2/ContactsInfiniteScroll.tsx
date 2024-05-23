@@ -1,9 +1,10 @@
-import { Badge, Group, Paper, Text, ScrollArea, Flex, Avatar, Box, Loader, Skeleton, TextInput, ActionIcon } from '@mantine/core';
+import { Badge, Group, Paper, Text, ScrollArea, Flex, Avatar, Box, Loader, Skeleton, TextInput, ActionIcon, Modal } from '@mantine/core';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { IconSearch, IconFilter } from '@tabler/icons-react';
 import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
+import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { debounce } from 'lodash';
 
 interface Contact {
@@ -24,6 +25,7 @@ export function ContactsInfiniteScroll({ campaignId, setContactsData }: { campai
     const [searchTerm, setSearchTerm] = useState('');
     const [hasMoreContacts, setHasMoreContacts] = useState(true);
     const scrollViewportRef = useRef<HTMLDivElement>(null);
+    const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
     const userToken = useRecoilValue(userTokenState);
     const offsetRef = useRef(0);
 
@@ -78,6 +80,7 @@ export function ContactsInfiniteScroll({ campaignId, setContactsData }: { campai
                 setHasMoreContacts(false); // No more contacts to load
             } else {
                 setContacts((prevContacts) => [...prevContacts, ...newContacts.sample_contacts]);
+                setContactsData((prevContacts: any) => [...prevContacts, ...newContacts.sample_contacts]);
                 offsetRef.current += batchSize;
             }
         } catch (error) {
@@ -92,6 +95,7 @@ export function ContactsInfiniteScroll({ campaignId, setContactsData }: { campai
         try {
             const initialContacts = await fetchCampaignContacts(userToken, campaignId, 0, batchSize, searchTerm);
             setContacts(initialContacts.sample_contacts);
+            setContactsData(initialContacts.sample_contacts);
             offsetRef.current = batchSize;
             setHasMoreContacts(initialContacts.sample_contacts.length === batchSize);
         } catch (error) {
@@ -113,6 +117,15 @@ export function ContactsInfiniteScroll({ campaignId, setContactsData }: { campai
 
     return (
         <Paper withBorder w={"100%"}>
+            <Modal
+                opened={showCampaignTemplateModal}
+                onClose={() => {
+                setShowCampaignTemplateModal(false);
+                }}
+                size="1100px"
+            >
+        <CampaignChannelPage campaignId={campaignId} cType={"filter_contact"} hideHeader={true} hideEmail={false} hideLinkedIn={false} hideAssets={true} />
+      </Modal>
             <Flex gap={"sm"} align={"center"} p={"md"}>
                 <TextInput
                     w={"100%"}
@@ -129,6 +142,7 @@ export function ContactsInfiniteScroll({ campaignId, setContactsData }: { campai
                             border: "1px solid #ced4da !important",
                         },
                     }}
+                    onClick={() => setShowCampaignTemplateModal(true)}
                 >
                     <IconFilter />
                 </ActionIcon>

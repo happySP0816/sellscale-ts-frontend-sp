@@ -131,7 +131,7 @@ export default function CampaignLandingV2() {
   const [contactPercent, setContactPercent] = useState(40);
 
   // Loading states
-  const [loadingContacts, setLoadingContacts] = useState(true);
+  const [loadingContacts, setLoadingContacts] = useState(false);
   const [loadingSequences, setLoadingSequences] = useState(true);
   const [loadingStats, setLoadingStats] = useState(true);
   const [activeStep, setActiveStep] = useState(0);
@@ -208,29 +208,13 @@ export default function CampaignLandingV2() {
       const clientArchetypeId = Number(id); // Assuming id is the client_archetype_id
 
       // Set loading states to true at the beginning
-      setLoadingContacts(true);
+      setLoadingContacts(false);
       setLoadingSequences(true);
       setLoadingStats(true);
 
       const statsPromise = fetchCampaignStats(userToken, clientArchetypeId);
       getPersonalizers();
       refetchSequenceData(clientArchetypeId);
-
-      // const contactsPromise = fetchCampaignContacts(userToken, clientArchetypeId);
-      // contactsPromise
-      //   .then((contacts) => {
-      //     setContactsData(contacts);
-      //     // console.log("contacts", contacts);
-      //     setContacts(contacts.sample_contacts);
-      //     if (contacts.sample_contacts.length > 0) {
-      //       setActiveStep((prev) => prev + 1);
-      //     }
-      //     setLoadingContacts(false);
-      //   })
-      //   .catch((error) => {
-      //     console.error("Error fetching contacts", error);
-      //     setLoadingContacts(false);
-      //   });
 
       statsPromise
         .then((stats) => {
@@ -246,42 +230,6 @@ export default function CampaignLandingV2() {
 
     fetchData();
   }, [id, userToken]);
-
-  const data = [
-    {
-      title: "Personalized Opener",
-      avatar: "",
-      name: "Ishan Sharma",
-      message:
-        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
-      point_used: 14,
-      asset_used: 14,
-      opened: 12,
-      replied: 4.6,
-    },
-    {
-      title: "Personalized Opener",
-      avatar: "",
-      name: "Ishan Sharma",
-      message:
-        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
-      point_used: 14,
-      asset_used: 14,
-      opened: 12,
-      replied: 4.6,
-    },
-    {
-      title: "Personalized Opener",
-      avatar: "",
-      name: "Ishan Sharma",
-      message:
-        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
-      point_used: 14,
-      asset_used: 14,
-      opened: 12,
-      replied: 4.6,
-    },
-  ];
 
   return (
     <Paper p={"lg"}>
@@ -1114,7 +1062,7 @@ export default function CampaignLandingV2() {
           )}
           <Paper withBorder w={"100%"}>
             <ContactsInfiniteScroll
-              campaignId={146}
+              campaignId={Number(id)}
               setContactsData={setContactsData}
               />
           </Paper>

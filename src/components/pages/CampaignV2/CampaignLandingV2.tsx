@@ -59,6 +59,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { useRecoilValue } from "recoil";
 import { Any } from "@react-spring/web";
 import CampaignChannelPage from "@pages/CampaignChannelPage";
+import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 
 interface StatsData {
   archetype_name: string;
@@ -138,7 +139,6 @@ export default function CampaignLandingV2() {
   const userToken = useRecoilValue(userTokenState);
 
   const [contactsData, setContactsData] = useState<any[]>([]);
-  const [sequencesData, setSequencesData] = useState<any[]>([]);
   const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
   const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
@@ -216,21 +216,21 @@ export default function CampaignLandingV2() {
       getPersonalizers();
       refetchSequenceData(clientArchetypeId);
 
-      const contactsPromise = fetchCampaignContacts(userToken, clientArchetypeId);
-      contactsPromise
-        .then((contacts) => {
-          setContactsData(contacts);
-          // console.log("contacts", contacts);
-          setContacts(contacts.sample_contacts);
-          if (contacts.sample_contacts.length > 0) {
-            setActiveStep((prev) => prev + 1);
-          }
-          setLoadingContacts(false);
-        })
-        .catch((error) => {
-          console.error("Error fetching contacts", error);
-          setLoadingContacts(false);
-        });
+      // const contactsPromise = fetchCampaignContacts(userToken, clientArchetypeId);
+      // contactsPromise
+      //   .then((contacts) => {
+      //     setContactsData(contacts);
+      //     // console.log("contacts", contacts);
+      //     setContacts(contacts.sample_contacts);
+      //     if (contacts.sample_contacts.length > 0) {
+      //       setActiveStep((prev) => prev + 1);
+      //     }
+      //     setLoadingContacts(false);
+      //   })
+      //   .catch((error) => {
+      //     console.error("Error fetching contacts", error);
+      //     setLoadingContacts(false);
+      //   });
 
       statsPromise
         .then((stats) => {
@@ -1113,128 +1113,10 @@ export default function CampaignLandingV2() {
             </Paper>
           )}
           <Paper withBorder w={"100%"}>
-            {loadingContacts ? (
-              <Flex justify={"space-between"} direction="column" gap="sm" p="md" align="left" w="24vw">
-                <Text size="md" fw={500} color="gray">
-                  Loading contacts...
-                </Text>
-                <Loader size="sm" />
-                <Flex direction="row" align="center" gap="sm">
-                  <Skeleton height={50} width={50} radius="150%" />
-                  <Flex direction="column" gap="xs" w="100%">
-                    <Skeleton height={8} radius="xl" width="80%" />
-                    <Skeleton height={8} radius="xl" width="60%" />
-                  </Flex>
-                </Flex>
-                <Flex direction="row" align="center" gap="sm">
-                  <Skeleton height={50} width={50} radius="100%" />
-                  <Flex direction="column" gap="xs" w="100%">
-                    <Skeleton height={8} radius="xl" width="80%" />
-                    <Skeleton height={8} radius="xl" width="60%" />
-                  </Flex>
-                </Flex>
-                <Flex direction="row" align="center" gap="sm">
-                  <Skeleton height={50} width={50} radius="100%" />
-                  <Flex direction="column" gap="xs" w="100%">
-                    <Skeleton height={8} radius="xl" width="80%" />
-                    <Skeleton height={8} radius="xl" width="60%" />
-                  </Flex>
-                </Flex>
-                <Flex direction="row" align="center" gap="sm">
-                  <Skeleton height={50} width={50} radius="100%" />
-                  <Flex direction="column" gap="xs" w="100%">
-                    <Skeleton height={8} radius="xl" width="80%" />
-                    <Skeleton height={8} radius="xl" width="60%" />
-                  </Flex>
-                </Flex>
-                <Flex direction="row" align="center" gap="sm">
-                  <Skeleton height={50} width={50} radius="100%" />
-                  <Flex direction="column" gap="xs" w="100%">
-                    <Skeleton height={8} radius="xl" width="80%" />
-                    <Skeleton height={8} radius="xl" width="60%" />
-                  </Flex>
-                </Flex>
-              </Flex>
-            ) : (
-              <>
-                <Flex align={"center"} justify={"space-between"} p={"md"} w={"24vw"} style={{ borderBottom: "1px solid #ECEEF1" }}>
-                  <Flex align={"center"} gap={"sm"}>
-                    <Text fw={600} size={20} color="#37414E">
-                      Contacts
-                    </Text>
-                    {/* {contacts && contacts.length > 0 && (
-                    <Badge variant="light" color={contactPercent < 50 ? "orange" : "green"}>
-                      {contactPercent}%
-                    </Badge>
-                  )} */}
-                  </Flex>
-                  <Button
-                    leftIcon={<IconPlus size={"0.9rem"} />}
-                    onClick={() => {
-                      openContextModal({
-                        modal: "campaignContactsModal",
-                        title: <Title order={3}>Contacts</Title>,
-                        innerProps: {
-                          setContacts,
-                        },
-                        centered: true,
-                        styles: {
-                          content: {
-                            minWidth: "1040px",
-                          },
-                        },
-                      });
-                    }}
-                  >
-                    Add
-                  </Button>
-                </Flex>
-                <Flex h={"100%"} p={contacts && contacts.length > 0 ? "" : 80}>
-                  {contacts && contacts.length > 0 ? (
-                    <Flex direction={"column"} gap={"sm"} w={"100%"}>
-                      <Flex gap={"sm"} align={"center"}>
-                        <TextInput w={"100%"} placeholder="Search prospects, companies, titles" rightSection={<IconSearch size={"0.9rem"} color="gray" />} />
-                        <ActionIcon
-                          variant="outline"
-                          size={"lg"}
-                          styles={{
-                            root: {
-                              border: "1px solid #ced4da !important",
-                            },
-                          }}
-                        >
-                          <IconFilter />
-                        </ActionIcon>
-                      </Flex>
-                      <ScrollArea h={365}>
-                        <Flex direction={"column"} gap={"sm"}>
-                          {contacts.map((item: any, index: number) => {
-                            return (
-                              <Flex key={index} gap={"sm"}>
-                                <Avatar size={"md"} radius={"xl"} src={item.avatar} />
-                                <Box>
-                                  <Flex align={"center"} gap={"xs"}>
-                                    <Text fw={500}>{item.first_name + " " + item.last_name}</Text>
-                                    {getIcpFitBadge(item.icp_fit_score)}
-                                  </Flex>
-                                  <Text color="gray" fw={500} size={"xs"}>
-                                    {item.title + " at " + item.company}
-                                  </Text>
-                                </Box>
-                              </Flex>
-                            );
-                          })}
-                        </Flex>
-                      </ScrollArea>
-                    </Flex>
-                  ) : (
-                    <Text color="gray" fw={400} m={"auto"} align="center" size={"sm"}>
-                      There are no contacts here. Add one to get started.
-                    </Text>
-                  )}
-                </Flex>
-              </>
-            )}
+            <ContactsInfiniteScroll
+              campaignId={146}
+              setContactsData={setContactsData}
+              />
           </Paper>
         </Flex>
       </Flex>

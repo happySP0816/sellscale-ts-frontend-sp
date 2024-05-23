@@ -32,11 +32,14 @@ export const fetchCampaignPersonalizers = async (
 
 export const fetchCampaignContacts = async (
   userToken: string,
-  client_archetype_id: number
+  client_archetype_id: number,
+  offset: number,
+  limit: number,
+  text: string
 ) => {
   try {
     const response = await fetch(
-      `${API_URL}/client/campaign_contacts?client_archetype_id=${client_archetype_id}`,
+      `${API_URL}/client/campaign_contacts?client_archetype_id=${client_archetype_id}&offset=${offset}&limit=${limit}&text=${encodeURIComponent(text)}`,
       {
         headers: {
           Authorization: "Bearer " + userToken,

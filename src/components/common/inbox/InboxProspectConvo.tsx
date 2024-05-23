@@ -750,12 +750,15 @@ export default function InboxProspectConvo(props: Props) {
               <Title order={3} truncate>
                 {prospect?.full_name}
               </Title>
-              <Text weight={300} fs='italic' size={10} c='dimmed' truncate>
-                {prospect && new Date(prospect.hidden_until).getTime() > new Date().getTime() ? (
+              <Text weight={300} fs='italic' size={10} truncate>
+                {prospect && new Date(prospect.hidden_until).getTime() > new Date().getTime() && (
                   <>Snoozed Until: {convertDateToLocalTime(new Date(prospect.hidden_until))}</>
-                ) : (
-                  <>Last Updated: {convertDateToCasualTime(new Date())}</>
                 )}
+                {/*
+                  : (
+                   <>Last Updated: {convertDateToCasualTime(new Date())}</>
+                 )}
+                */}
               </Text>
             </div>
             <Group sx={{ flexWrap: 'nowrap' }}>

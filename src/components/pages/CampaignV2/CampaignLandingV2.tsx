@@ -25,11 +25,14 @@ import {
   Modal,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
+import { showNotification } from "@mantine/notifications";
 import Hook from "@pages/channels/components/Hook";
+import { API_URL } from "@constants/data";
 import {
   IconArrowRight,
   IconBrandLinkedin,
   IconCalendar,
+  IconCheck,
   IconChecks,
   IconChevronDown,
   IconChevronLeft,
@@ -53,19 +56,26 @@ import {
 } from "@tabler/icons";
 import { IconMessageCheck } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
-import { fetchCampaignContacts, fetchCampaignPersonalizers, fetchCampaignSequences, fetchCampaignStats } from "@utils/requests/campaignOverview";
+import { fetchCampaignContacts, fetchCampaignPersonalizers, patchTestingVolume, fetchCampaignSequences, fetchCampaignStats } from "@utils/requests/campaignOverview";
+import { proxyURL } from "@utils/general";
+import { activatePersona, deactivatePersona } from "@utils/requests/postPersonaActivation";
+import postTogglePersonaActive from '@utils/requests/postTogglePersonaActive';
 import { useParams } from "react-router-dom";
 import { userTokenState } from "@atoms/userAtoms";
 import { useRecoilValue } from "recoil";
-import { Any } from "@react-spring/web";
 import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
+import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
 
 interface StatsData {
   archetype_name: string;
   created_at: string;
   emoji: string;
+  testing_volume: number;
   num_demos: number;
+  active: boolean;
+  email_to_linkedin_connection?: string;
+  sdr_img_url: string;
   num_opens: number;
   num_prospects: number;
   num_prospects_with_emails: number;
@@ -116,12 +126,12 @@ export default function CampaignLandingV2() {
     return <Badge color={color}>{label}</Badge>;
   };
 
-  const { id } = useParams();
+  const id = Number(useParams().id);
   const [templates, setTemplates] = useState([]);
   const [personalizers, setPersonalizers] = useState([]);
 
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
-  const [status, setStatus] = useState("setup");
+  const [status, setStatus] = useState("SETUP");
 
   //testing per cycle value
   const [cycleStatus, setCycleStatus] = useState(false);
@@ -143,6 +153,9 @@ export default function CampaignLandingV2() {
   const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
+  const [testingVolume, setTestingVolume] = useState(0);
+  const [editableIndex, setEditableIndex] = useState<number | null>(null);
+  const [showLinkedInConvoSimulatorModal, setShowLinkedInConvoSimulatorModal] = useState(false);
 
   //sequence variable
   const [sequences, setSequences] = useState<any[]>([]);
@@ -159,6 +172,28 @@ export default function CampaignLandingV2() {
     setSelectStep(key);
   };
 
+  const editSequenceBumpCount = (index: number, value: string) => {
+
+    //todo: make this change the value in the backend.
+
+    // fetch(`${API_URL}/bump_framework/bump`, {
+    //   method: "PATCH",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${userToken}`,
+    //     },
+    //     body: JSON.stringify({
+    //       bump_framework_id: sequences[index].bump_framework_id,
+    //       bumped_count: Number(value)
+    //     }),
+    //   })
+    const newSequences = [...sequences];
+    newSequences[index].bumped_count = Number(value);
+    setSequences(newSequences);
+  }
+
+
+
   const getPersonalizers = async () => {
     const clientArchetypeId = Number(id);
     const response = await fetchCampaignPersonalizers(userToken, clientArchetypeId);
@@ -167,27 +202,83 @@ export default function CampaignLandingV2() {
     }
   };
 
+  const updateConnectionType = (newConnectionType: string, campaignId: number) => {
+    setLoadingStats(true);
+    fetch(
+      `${API_URL}/client/archetype/${campaignId}/update_email_to_linkedin_connection`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          email_to_linkedin_connection: newConnectionType,
+        }),
+      }
+    ).then((response) => {
+      if (response.ok) {
+        console.log("Connection type updated");
+      }
+      showNotification({
+        title: "Connection Type Updated",
+        message: "Connection type has been updated.",
+      });
+    }).catch((error) => {
+      console.error("Error updating connection type", error);
+    }).finally(() => {
+      setStatsData({...(statsData as StatsData), email_to_linkedin_connection: newConnectionType});
+      setLoadingStats(false);
+    });
+  };
+
+  const refetchCampaignStatsData = async () => {
+    setLoadingStats(true);
+    const statsPromise = fetchCampaignStats(userToken, id);
+    statsPromise
+      .then((stats) => {
+        const loadedStats = stats as StatsData;
+        setStatsData(loadedStats);
+        //set the setup status
+        if (loadedStats.active && loadedStats.num_sent > 0) {
+          setStatus("ACTIVE");
+        } else if (loadedStats.active && loadedStats.num_sent === 0) {
+          setStatus("SETUP");
+        } else if (loadedStats.active === false) {
+          setStatus("INACTIVE");
+        }
+        setLoadingStats(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching stats", error);
+        setLoadingStats(false);
+      });
+  }
+
   const refetchSequenceData = async (clientArchetypeId: number) => {
+    setLoadingSequences(true);
     const sequencesPromise = fetchCampaignSequences(userToken, clientArchetypeId);
     sequencesPromise
-      .then((sequences) => {
-        console.log("sequences", sequences);
-        if (sequences.email_sequence.length > 0) {
-          setEmailSequenceData(sequences.email_sequence);
-        } else {
-          setEmailSequenceData([]);
-        }
-        if (sequences.linkedin_sequence.length > 0) {
-          setLinkedinSequenceData(sequences.linkedin_sequence);
-        } else {
-          setLinkedinSequenceData([]);
-        }
-        if (sequences.email_sequence.length > 0) {
-          setSequences(sequences.email_sequence);
-          setType("email");
-        } else if (sequences.linkedin_sequence.length > 0) {
-          setSequences(sequences.linkedin_sequence);
+      .then((sequencesData) => {
+        console.log("sequencesData", sequencesData);
+        if (sequencesData.linkedin_sequence.length > 0 && sequencesData.email_sequence.length === 0) {
+          setSequences(sequencesData.linkedin_sequence);
           setType("linkedin");
+        } else if (sequencesData.email_sequence.length > 0 && sequencesData.linkedin_sequence.length === 0) {
+          setSequences(sequencesData.email_sequence);
+          setType("email");
+        } else if (sequencesData.email_sequence.length > 0 && sequencesData.linkedin_sequence.length > 0) {
+          // Both sequences are available, prioritize email sequence
+          setSequences(sequencesData.email_sequence);
+          setType("email");
+          setEmailSequenceData(sequencesData.email_sequence);
+          setLinkedinSequenceData(sequencesData.linkedin_sequence);
+        } else {
+          // No sequences available
+          setSequences([]);
+          setType("none");
+          setEmailSequenceData([]);
+          setLinkedinSequenceData([]);
         }
         setLoadingSequences(false);
       })
@@ -196,6 +287,20 @@ export default function CampaignLandingV2() {
         setLoadingSequences(false);
       });
   };
+
+  useEffect(() => {
+    if (!loadingContacts && !loadingSequences && !loadingStats) {
+      //data fetching is complete.
+
+      if (!sequences || sequences.length === 0) {
+        setActiveStep(0);
+      } else if (personalizers.length === 0) {
+        setActiveStep(1);
+      } else {
+        setActiveStep(3);
+      }
+    }
+  }, [loadingSequences, loadingStats]);
 
   // This useEffect hook runs on page load and whenever the 'id' or 'userToken' changes.
   // It fetches campaign-related data (contacts, sequences, and stats) for a specific client archetype.
@@ -218,8 +323,17 @@ export default function CampaignLandingV2() {
 
       statsPromise
         .then((stats) => {
-          console.log("stats", stats);
-          setStatsData(stats as StatsData);
+          const loadedStats = stats as StatsData;
+          console.log("stats", loadedStats);
+          setStatsData(loadedStats);
+          //set the setup status
+          if (loadedStats.active && loadedStats.num_sent > 0) {
+            setStatus("ACTIVE");
+          } else if (loadedStats.active && loadedStats.num_sent === 0) {
+            setStatus("SETUP");
+          } else if (loadedStats.active === false) {
+            setStatus("INACTIVE");
+          }
           setLoadingStats(false);
         })
         .catch((error) => {
@@ -231,18 +345,73 @@ export default function CampaignLandingV2() {
     fetchData();
   }, [id, userToken]);
 
+  const togglePersona = async (persona: StatsData, userToken: string) => {
+    setLoadingStats(true);
+    let response;
+    if (persona.active) {
+      response = await deactivatePersona(userToken, id);
+    } else {
+      response = await activatePersona(userToken, id);
+    }
+
+    if (response) {
+      setStatsData((prev) => {
+        if (prev) {
+          return {
+            ...prev,
+            active: !prev.active,
+          };
+        }
+        return prev;
+      });
+      if (persona.active) {
+        setStatus("INACTIVE");
+      } else if (!persona.active && persona.num_sent > 0) {
+        setStatus("ACTIVE");
+      } else if (!persona.active && persona.num_sent === 0) {
+        setStatus("SETUP");
+      }
+    }
+    setLoadingStats(false);
+  };
+
+  const togglePersonaChannel = async (campaignId: number, channel: 'email' | 'linkedin', userToken: string, active: boolean) => {
+    setLoadingStats(true);
+    const result = postTogglePersonaActive(
+      userToken,
+      campaignId,
+      channel,
+      active,
+    ).then((res) => {
+      refetchCampaignStatsData();
+    });
+  }
   return (
     <Paper p={"lg"}>
       <Modal
         opened={showCampaignTemplateModal}
         onClose={() => {
-          alert("Modal closed");
+          refetchCampaignStatsData();
           refetchSequenceData(Number(id));
           setShowCampaignTemplateModal(false);
         }}
         size="1100px"
       >
         <CampaignChannelPage campaignId={Number(id)} cType={"linkedin"} hideHeader={true} hideEmail={false} hideLinkedIn={false} hideAssets={true} />
+      </Modal>
+      <Modal
+        opened={showLinkedInConvoSimulatorModal}
+        onClose={() => {
+          refetchCampaignStatsData();
+          refetchSequenceData(Number(id));
+          setShowLinkedInConvoSimulatorModal(false);
+        }}
+        size="1100px"
+      >
+        <LinkedInConvoSimulator
+            personaId={id as number}
+            sequenceSetUpMode={true}
+          />
       </Modal>
       {loadingStats || !statsData ? (
         <Flex direction="column" gap="sm" p="lg" style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
@@ -256,7 +425,7 @@ export default function CampaignLandingV2() {
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
             <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
               <Flex gap={"sm"} align={"center"}>
-                <Avatar src={""} size={"md"} radius={"xl"} />
+                {statsData?.emoji}
                 <Text fw={600} size={20}>
                   {statsData?.archetype_name}
                 </Text>
@@ -264,12 +433,12 @@ export default function CampaignLandingV2() {
                   tt={"uppercase"}
                   variant="light"
                   size="xs"
-                  disabled={status === "deactivated" && true}
-                  color={status === "setup" ? "orange" : status === "activate" ? "green" : ""}
+                  disabled={status === "INACTIVE" && true}
+                  color={status === "SETUP" ? "orange" : status === "ACTIVE" ? "green" : ""}
                   onClick={() => {
-                    if (status === "setup") setStatus("activate");
-                    else if (status === "activate") {
-                      setStatus("deactivated");
+                    if (status === "SETUP") setStatus("ACTIVE");
+                    else if (status === "ACTIVE") {
+                      setStatus("ACTIVE");
                     }
                   }}
                 >
@@ -280,7 +449,7 @@ export default function CampaignLandingV2() {
                 <Text color="gray" size={"xs"} fw={600}>
                   Created by:
                 </Text>
-                <Avatar size={"sm"} src={""} />
+                <Avatar size={"sm"} src={proxyURL(statsData.sdr_img_url)} />
                 <Text fw={600} size={"xs"}>
                   {statsData?.sdr_name}
                 </Text>
@@ -298,8 +467,14 @@ export default function CampaignLandingV2() {
                     <IconCopy size={16} />
                   </ActionIcon>
                 </Tooltip>
-                <Text underline color="red" size={"sm"} className="hover:cursor-pointer select-none">
-                  Deactivate Campaign
+                <Text
+                  underline
+                  color={statsData?.active ? "red" : "green"}
+                  size={"sm"}
+                  className="hover:cursor-pointer select-none"
+                  onClick={() => togglePersona(statsData, userToken)}
+                >
+                  {statsData?.active ? "Deactivate Campaign" : "Activate Campaign"}
                 </Text>
               </Flex>
             </Flex>
@@ -336,10 +511,11 @@ export default function CampaignLandingV2() {
                   </Flex>
                   <Group noWrap sx={{ flex: 1, justifyContent: "center" }}>
                     <Switch
-                      // checked={statsData.email_active}
+                      onChange={() => togglePersonaChannel(id, 'email', userToken, !statsData.email_active)}
+                      checked={statsData.email_active}
                       labelPosition="left"
                       label={
-                        <Flex gap={4} align={"center"}>
+                        <Flex gap={4} align={"center"} className="hover:cursor-pointer">
                           <IconMailOpened size={"1.2rem"} fill="#3B85EF" color="white" />
                           <Text color="#3B85EF" fw={500}>
                             Email
@@ -363,10 +539,15 @@ export default function CampaignLandingV2() {
                     />
                     <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
                     <Select
+                      onChange={(value) => {
+                        if (typeof value === 'string') {
+                          updateConnectionType(value, id);
+                        }
+                      }}
                       label="Connect Sequences"
                       size="sm"
                       mb={"md"}
-                      // value={selectedConnectionType}
+                      value={statsData.email_to_linkedin_connection}
                       w={200}
                       data={[
                         {
@@ -390,6 +571,7 @@ export default function CampaignLandingV2() {
                     />
                     <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
                     <Switch
+                      onChange={() => togglePersonaChannel(id, 'linkedin', userToken, !statsData.linkedin_active)}
                       checked={statsData?.linkedin_active}
                       labelPosition="left"
                       label={
@@ -422,20 +604,31 @@ export default function CampaignLandingV2() {
                 <Paper p="md" withBorder w={"100%"}>
                   <Flex justify={"space-between"}>
                     <Text size={"sm"} fw={500}>
-                      Testing volume per cycle:
+                      Testing volume per cycle 
                     </Text>
                     <Text size={"sm"} fw={500}>
-                      200/week (Email)
+                    {testingVolume}/week {cycleStatus && (
+                        <Text component="span" color="red" size="xs" fw={700} ml={4}>
+                          (Unsaved)
+                        </Text>
+                      )}
                     </Text>
                   </Flex>
                   <Flex w={"100%"} align={"start"} gap={"sm"} mt={"md"}>
                     <Slider
                       w={"100%"}
-                      onChange={() => setCycleStatus(true)}
+                      defaultValue={statsData.testing_volume}
+                      value={testingVolume}
+                      onChange={(value) => {
+                        setCycleStatus(true);
+                        setTestingVolume(value);
+                        statsData.testing_volume = value;
+                      }}
+                      max={500}
                       marks={[
                         { value: 0, label: "0" },
                         {
-                          value: 100,
+                          value: 500,
                           label: (
                             <div
                               style={{
@@ -449,7 +642,22 @@ export default function CampaignLandingV2() {
                         },
                       ]}
                     />
-                    <Button disabled={!cycleStatus}>Save</Button>
+                    <Button 
+                      disabled={!cycleStatus} 
+                      onClick={async () => {
+                        const clientArchetypeId = Number(id);
+                        const response = await patchTestingVolume(userToken, clientArchetypeId, testingVolume);
+                        if (response) {
+                          console.log("Testing volume updated successfully", response);
+                        }
+                        setLoadingStats(true);
+                        await fetchCampaignStats(userToken, clientArchetypeId);
+                        setLoadingStats(false);
+                        setCycleStatus(false);
+                      }}
+                    >
+                      Save
+                    </Button>
                   </Flex>
                 </Paper>
               </Flex>
@@ -611,9 +819,15 @@ export default function CampaignLandingV2() {
               </Flex>
               {sequences && sequences.length > 0 ? (
                 <Flex gap={"sm"}>
-                  <Button variant="outline" rightIcon={<IconArrowRight size={"0.9rem"} />}>
-                    Simulate
-                  </Button>
+                  {type === 'linkedin' && (
+                    <Button
+                      variant="outline"
+                      rightIcon={<IconArrowRight size={"0.9rem"} />}
+                      onClick={() => {setShowLinkedInConvoSimulatorModal(true)}}
+                    >
+                      Simulate
+                    </Button>
+                  )}
                   <Button
                     onClick={() => {
                       openContextModal({
@@ -630,6 +844,10 @@ export default function CampaignLandingV2() {
                           content: {
                             minWidth: "1100px",
                           },
+                        },
+                        onClose: () => {
+                          const clientArchetypeId = Number(id);
+                          refetchSequenceData(clientArchetypeId);
                         },
                       });
                     }}
@@ -679,6 +897,59 @@ export default function CampaignLandingV2() {
                     {sequences.map((item: any, index: number) => {
                       return (
                         <>
+                        {index !== 0 && (
+                          <Divider
+                            variant="dashed"
+                            labelPosition="center"
+                            label={
+                              <Flex gap={1} align={"center"}>
+                                {editableIndex === index ? (
+                                  <>
+                                    <Text color="gray" fw={500} size={"xs"}>
+                                      Wait for
+                                    </Text>
+                                    <input
+                                      type="number"
+                                      defaultValue={item.bumped_count}
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                          console.log((e.target as HTMLInputElement).value);
+                                          editSequenceBumpCount(index, (e.target as HTMLInputElement).value);
+                                          setEditableIndex(null);
+                                        }
+                                      }}
+                                      onFocus={(e) => e.target.select()}
+                                      style={{ 
+                                        width: "50px", 
+                                        fontSize: "0.75rem", 
+                                        borderRadius: "8px" 
+                                      }}
+                                      autoFocus
+                                    />
+                                    <Text color="gray" fw={500} size={"xs"}>
+                                      {item.bumped_count === 1 ? "day" : "days"}
+                                    </Text>
+                                    <ActionIcon onClick={(e) => {
+                                      editSequenceBumpCount(index, (e.target as HTMLInputElement).value);
+                                      setEditableIndex(null);
+                                    }}>
+                                      <IconCheck size={"0.9rem"} />
+                                    </ActionIcon>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Text color="gray" fw={500} size={"xs"}>
+                                      Wait for {item.bumped_count} {item.bumped_count === 1 ? "day" : "days"}
+                                    </Text>
+                                    <ActionIcon onClick={() => setEditableIndex(index)}>
+                                      <IconEdit size={"0.9rem"} />
+                                    </ActionIcon>
+                                  </>
+                                )}
+                              </Flex>
+                            }
+                          />
+                        )}
                           <Box
                             style={{
                               border: selectStep === index ? "1px solid #228be6" : "1px solid #ced4da",
@@ -725,7 +996,7 @@ export default function CampaignLandingV2() {
                                   <IconTrash size={"0.9rem"} />
                                 </ActionIcon> */}
                                 <Badge variant="outline" leftSection={<IconPoint fill="green" color="white" className="mt-1" />}>
-                                  {2} active
+                                 active
                                 </Badge>
                                 <ActionIcon
                                   onClick={() => {
@@ -781,20 +1052,7 @@ export default function CampaignLandingV2() {
                               </Flex>
                             </Collapse>
                           </Box>
-                          <Divider
-                            variant="dashed"
-                            labelPosition="center"
-                            label={
-                              <Flex gap={1} align={"center"}>
-                                <Text color="gray" fw={500} size={"xs"}>
-                                  Wait for {item.bump} days
-                                </Text>
-                                <ActionIcon>
-                                  <IconEdit size={"0.9rem"} />
-                                </ActionIcon>
-                              </Flex>
-                            }
-                          />
+
                         </>
                       );
                     })}
@@ -1014,7 +1272,7 @@ export default function CampaignLandingV2() {
               <Skeleton height={20} radius="xl" width="60%" mt="sm" />
             </Paper>
           ) : (
-            <Paper withBorder p={"sm"}>
+            activeStep !== 3 && (<Paper withBorder p={"sm"}>
               <Text fw={600} size={15} color="#37414E">
                 Campaign Progress
               </Text>
@@ -1058,7 +1316,7 @@ export default function CampaignLandingV2() {
                   </Text>
                 </Timeline.Item>
               </Timeline>
-            </Paper>
+            </Paper>)
           )}
           <Paper withBorder w={"100%"}>
             <ContactsInfiniteScroll

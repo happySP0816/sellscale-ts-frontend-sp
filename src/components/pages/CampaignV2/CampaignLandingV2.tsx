@@ -527,13 +527,13 @@ export default function CampaignLandingV2() {
                       </ActionIcon>
                     </Tooltip>
                   </Flex>
-                  <Group noWrap sx={{ flex: 1, justifyContent: "center" }}>
+                  <Group spacing={'sm'}>
                     <Switch
                       onChange={() => togglePersonaChannel(id, 'email', userToken, !statsData.email_active)}
                       checked={statsData.email_active}
                       labelPosition="left"
                       label={
-                        <Flex gap={2} align={"center"} className="hover:cursor-pointer">
+                        <Flex gap={1} align={"center"} className="hover:cursor-pointer">
                           <IconMailOpened size={"1.2rem"} fill="#3B85EF" color="white" />
                           <Text color="#3B85EF" fw={500}>
                             Email
@@ -543,6 +543,7 @@ export default function CampaignLandingV2() {
                       miw={160}
                       styles={{
                         root: {
+                          minWidth: '9rem !important',
                           border: "1px solid #D9DEE5",
                           padding: "7px",
                           borderRadius: "4px",
@@ -603,6 +604,7 @@ export default function CampaignLandingV2() {
                       miw={160}
                       styles={{
                         root: {
+                          minWidth: '9rem !important',
                           border: "1px solid #D9DEE5",
                           padding: "7px",
                           borderRadius: "4px",

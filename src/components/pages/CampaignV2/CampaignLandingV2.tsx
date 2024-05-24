@@ -241,6 +241,9 @@ export default function CampaignLandingV2() {
           ...(statsData as StatsData),
           email_to_linkedin_connection: newConnectionType,
         });
+        if (statsData && statsData.testing_volume) {
+          setTestingVolume(statsData.testing_volume);
+        }
         setLoadingStats(false);
       });
   };
@@ -252,6 +255,9 @@ export default function CampaignLandingV2() {
       .then((stats) => {
         const loadedStats = stats as StatsData;
         setStatsData(loadedStats);
+        if (loadedStats && loadedStats.testing_volume) {
+          setTestingVolume(loadedStats.testing_volume);
+        }
         //set the setup status
         if (loadedStats.active && loadedStats.num_sent > 0) {
           setStatus("ACTIVE");
@@ -339,6 +345,9 @@ export default function CampaignLandingV2() {
           const loadedStats = stats as StatsData;
           console.log("stats", loadedStats);
           setStatsData(loadedStats);
+          if (loadedStats && loadedStats.testing_volume) {
+            setTestingVolume(loadedStats.testing_volume);
+          }
           //set the setup status
           if (loadedStats.active && loadedStats.num_sent > 0) {
             setStatus("ACTIVE");

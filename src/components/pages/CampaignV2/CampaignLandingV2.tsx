@@ -668,7 +668,7 @@ export default function CampaignLandingV2() {
                 <Paper p="md" withBorder w={"100%"}>
                   <Flex justify={"space-between"}>
                     <Text size={"sm"} fw={500}>
-                      Testing volume per cycle
+                      Weekly Outreach Volume
                     </Text>
                     <Text size={"sm"} fw={500}>
                       {testingVolume}/week{" "}
@@ -701,7 +701,7 @@ export default function CampaignLandingV2() {
                                 marginLeft: "-100px",
                               }}
                             >
-                              MAX (DISTRIBUTE)
+                              Max
                             </div>
                           ),
                         },
@@ -1005,7 +1005,7 @@ export default function CampaignLandingV2() {
                 </Button>
               )}
             </Flex>
-            <Flex h={"70%"}>
+            <Flex h={"20%"}>
               {loadingSequences ? (
                 <Flex direction="column" align="center" justify="center" m="auto" mt="sm">
                   <Skeleton height={30} radius="xl" width="80%" />
@@ -1188,6 +1188,7 @@ export default function CampaignLandingV2() {
                 </Flex>
               ) : (
                 <Flex
+                  mb="xl"
                   direction="column"
                   align="center"
                   justify="center"
@@ -1195,7 +1196,7 @@ export default function CampaignLandingV2() {
                   sx={(theme) => ({
                     border: "2px dotted gray",
                     borderRadius: "15px",
-                    padding: "20px",
+                    padding: "10px", // Reduced padding to make the area less height
                     cursor: "pointer",
                     transition: "transform 0.2s, background-color 0.2s",
                     "&:hover": {
@@ -1293,10 +1294,6 @@ export default function CampaignLandingV2() {
                               <Flex key={index} gap={"md"} align={"center"}>
                                 <Text fw={600} size="12px" miw="200px">
                                   {item.key}
-                                </Text>
-                                <Divider orientation="vertical" />
-                                <Text fw={500} color="gray" size={"12px"}>
-                                  {item.relevancy}
                                 </Text>
                               </Flex>
                             }

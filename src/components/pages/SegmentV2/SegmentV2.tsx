@@ -848,18 +848,14 @@ export default function SegmentV2(props: PropsType) {
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
+                              //this will immediately add the tag to the segment and update the UI
+                              //but the API call will be made after the user clicks the save button
                               if (!isTagInSegment) {
-                                addTagToSegment(userToken, cell.row.original.id, tag.id).then(
-                                  () => {
-                                    getAllSegments(true);
-                                  }
-                                );
+                                setSegmentTags((prevTags: any) => [...prevTags, tag]);
+                                addTagToSegment(userToken, cell.row.original.id, tag.id);
                               } else {
-                                removeTagFromSegment(userToken, cell.row.original.id, tag.id).then(
-                                  () => {
-                                    getAllSegments(true);
-                                  }
-                                );
+                                setSegmentTags((prevTags: any) => prevTags.filter((t: any) => t.id !== tag.id));
+                                removeTagFromSegment(userToken, cell.row.original.id, tag.id);
                               }
                             }}
                           >

@@ -18,7 +18,7 @@ import {
   Textarea,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
-import CampaignChannelPage from '@pages/CampaignChannelPage';
+import CampaignChannelPage from "@pages/CampaignChannelPage";
 
 import {
   IconArrowRight,
@@ -111,14 +111,16 @@ export default function CampaignTemplateModal({
     innerProps.setCreateTemplateBuilder(newBuilderState); // Update parent state
   };
 
-  return (<CampaignChannelPage
-    campaignId={innerProps.campaignId}
-    cType={innerProps.cType || "linkedin"}
-    hideHeader={true}
-    hideEmail={false}
-    hideLinkedIn={false}
-    hideAssets={true}
-  />)
+  return (
+    <CampaignChannelPage
+      campaignId={innerProps.campaignId}
+      cType={innerProps.cType || "linkedin"}
+      hideHeader={true}
+      hideEmail={false}
+      hideLinkedIn={false}
+      hideAssets={true}
+    />
+  );
 
   return (
     <div key={innerProps.createTemplateBuilder ? "builder" : "template"}>

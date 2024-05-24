@@ -30,7 +30,9 @@ import {
   IconGitCommit,
   IconGitPullRequest,
   IconInfoCircle,
+  IconLink,
   IconMail,
+  IconMailOpened,
   IconMessage2,
   IconMessageDots,
   IconNotebook,
@@ -62,7 +64,9 @@ type HistoryEvent =
   | 'LINKEDIN_MESSAGE'
   | 'EMAIL_MESSAGE'
   | 'STATUS_CHANGE'
-  | 'DEMO_FEEDBACK';
+  | 'DEMO_FEEDBACK'
+  | 'EMAIL_OPENED'
+  | 'EMAIL_LINK_CLICKED'
 
 type Channel = 'LINKEDIN' | 'EMAIL';
 interface HistoryItem extends Record<string, string> {
@@ -114,6 +118,18 @@ function historyEventToIcon(event: HistoryEvent, size?: number) {
       return (
         <ThemeIcon color='grape' radius='xl'>
           <IconReportAnalytics size={size} />
+        </ThemeIcon>
+      );
+    case 'EMAIL_OPENED':
+      return (
+        <ThemeIcon color='blue' radius='xl'>
+          <IconMailOpened size={size} />
+        </ThemeIcon>
+      );
+    case 'EMAIL_LINK_CLICKED':
+      return (
+        <ThemeIcon color='blue' radius='xl'>
+          <IconLink size={size} />
         </ThemeIcon>
       );
     default:
@@ -190,6 +206,7 @@ export default function ProspectDetailsHistory(props: {
   const theme = useMantineTheme();
   const [linkedinHistory, setLinkedInHistory] = useState<any>();
   const [emailHistory, setEmailHistory] = useState<any>();
+  const [engagementHistory, setEngagementHistory] = useState<any>();
   const [historyFetchedForId, setHistoryFetchedForId] = useState<number>(-1);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
@@ -211,6 +228,7 @@ export default function ProspectDetailsHistory(props: {
       const response = await getProspectHistory(userToken, props.prospectId);
       setLinkedInHistory(response.data.linkedin);
       setEmailHistory(response.data.email);
+      setEngagementHistory(response.data.engagements);
       setLoadingHistory(false);
     })();
   }, [props.forceRefresh]);
@@ -277,12 +295,39 @@ export default function ProspectDetailsHistory(props: {
     }
   }
 
+  if (engagementHistory) {
+    for (const engagement of engagementHistory) {
+      // Deduplicate using a "1 minute" heuristic. 
+      // If the date of this engagement is within 1 minute of any date in events, then we omit this engagement.
+      let skip = false;
+      const engagementUTC = new Date(engagement.created_at + "Z");
+      for (const event of events) {
+        if (Math.abs(new Date(engagementUTC).getTime() - new Date(event.date).getTime()) < 60000) {
+          skip = true;
+          break;
+        }
+      }
+      if (skip) {
+        continue;
+      }
+      events.push({
+        event: engagement.engagement_type,
+        date: engagement.created_at,
+        channel: engagement.channel_type,
+      });
+    }
+  }
+
   // Remove status change dupes that seem to be a bug in the backend
   events = _.uniqWith(events, (obj1, obj2) => {
+    if (obj1.event !== 'STATUS_CHANGE' || obj2.event !== 'STATUS_CHANGE') {
+      return false;
+    }
     return _.isEqual(_.omit(obj1, 'date'), _.omit(obj2, 'date'));
   });
-  events = _.sortBy(events, (item) => new Date(item.date));
+
   // sort reversed
+  events = _.sortBy(events, (item) => new Date(item.date));
   events = events.reverse();
 
   if (loadingHistory) {

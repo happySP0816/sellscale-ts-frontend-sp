@@ -320,6 +320,9 @@ export default function ProspectDetailsHistory(props: {
 
   // Remove status change dupes that seem to be a bug in the backend
   events = _.uniqWith(events, (obj1, obj2) => {
+    if (obj1.event !== 'STATUS_CHANGE' || obj2.event !== 'STATUS_CHANGE') {
+      return false;
+    }
     return _.isEqual(_.omit(obj1, 'date'), _.omit(obj2, 'date'));
   });
 

@@ -1,6 +1,6 @@
-import { ActionIcon, Avatar, Box, Button, Checkbox, Flex, Paper, ScrollArea, Text, Textarea } from "@mantine/core";
+import { ActionIcon, Avatar, Badge, Box, Button, Checkbox, Divider, Flex, Paper, ScrollArea, Select, Text, Textarea } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
-import { IconBuilding, IconEdit, IconPlus, IconPoint } from "@tabler/icons";
+import { IconBuilding, IconBulb, IconEdit, IconPlus, IconPoint, IconTrash } from "@tabler/icons";
 import { useState } from "react";
 
 export default function CampaignPersonalizersModal({
@@ -10,19 +10,80 @@ export default function CampaignPersonalizersModal({
 }: ContextModalProps<{
   setPersonalizers: Function;
 }>) {
-  const [personalizersData, setPersonalizersData] = useState([
+  // const [personalizersData, setPersonalizersData] = useState([
+  //   {
+  //     title: "10K Filing",
+  //     content: "Find any mention of sales",
+  //   },
+  //   {
+  //     title: "Recent Job Opening",
+  //     content: "Mention of SDRs is great!",
+  //   },
+  // ]);
+  const [researchData, setResearchData] = useState([
     {
-      title: "10K Filing",
-      content: "Find any mention of sales",
+      title: "Linkedin Bio",
+      type: "Linkedin",
+      content: "Use anything in their bio taht we can connect with and be humanistic (i.e quotes, fun facts, anything).",
     },
     {
-      title: "Recent Job Opening",
-      content: "Mention of SDRs is great!",
+      title: "Is [[company]] hiring for data engineers?",
+      type: "Question",
+      content: "If the company is hiring for data roles, they probably have a need to build out ETL pipelines for business systems and databases.",
+    },
+    {
+      title: "Conduct general research about [[company]]",
+      type: "General",
+      content: "If there is any information pertaining to how the company uses data, databases, warehouses in their product or services, that would be useful.",
+    },
+    {
+      title: "Linkedin Bio",
+      type: "linkedin",
+      content: "Use anything in their bio taht we can connect with and be humanistic (i.e quotes, fun facts, anything).",
+    },
+    {
+      title: "Is [[company]] hiring for data engineers?",
+      type: "Question",
+      content: "If the company is hiring for data roles, they probably have a need to build out ETL pipelines for business systems and databases.",
+    },
+  ]);
+  const [simulateData, setSimulateData] = useState([
+    {
+      title: "Conduct general research about [[company]]",
+      type: "General",
+      content:
+        "Security and Compliance: Bubble is hosted on Amazon Web Services (AWS), which is compliant with certifications such as SOC 2, CSA, and ISO 27001.",
+      ai_response:
+        "Relevant, as it details the security measures and compliance standards that Bubble adheres to, which are important considerations for data integration and ETL syncing.",
+      status: true,
+    },
+    {
+      title: "Linkedin Bio",
+      type: "Linkedin",
+      content: "Could not find the information related to this query",
+      ai_response: "Could not find the information related to this query",
+      status: false,
+    },
+    {
+      title: "Conduct general research about [[company]]",
+      type: "Question",
+      content:
+        "Security and Compliance: Bubble is hosted on Amazon Web Services (AWS), which is compliant with certifications such as SOC 2, CSA, and ISO 27001.",
+      ai_response:
+        "Relevant, as it details the security measures and compliance standards that Bubble adheres to, which are important considerations for data integration and ETL syncing.",
+      status: false,
+    },
+    {
+      title: "Linkedin Bio",
+      type: "LinkedIn",
+      content: "Could not find the information related to this query",
+      ai_response: "Could not find the information related to this query",
+      status: false,
     },
   ]);
   return (
     <>
-      <Paper withBorder w={"100%"}>
+      {/* <Paper withBorder w={"100%"}>
         <Box p={"lg"} style={{ borderBottom: "1px solid #dee2e6" }}>
           <Text size={"lg"} fw={600}>
             Example Contact
@@ -189,6 +250,105 @@ export default function CampaignPersonalizersModal({
             context.closeModal(id);
           }}
         >
+          Save
+        </Button>
+      </Flex> */}
+      <Flex mt={"lg"} style={{ border: "1px solid gray", borderRadius: "6px" }}>
+        <Paper p={"md"} pr={"xs"} w={"40%"} display={"flex"} style={{ gap: "16px", flexDirection: "column" }}>
+          <Flex align={"center"} justify={"space-between"}>
+            <Text fw={600}>Research Points</Text>
+          </Flex>
+          <Button variant="outline" leftIcon={<IconPlus size={"0.9rem"} />} mr={"md"}>
+            Add research point
+          </Button>
+          <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
+            <Flex h={"100%"} gap={"xs"} direction={"column"}>
+              {researchData.map((item, index) => {
+                return (
+                  <Paper withBorder p={"md"} key={index}>
+                    <Flex align={"start"} justify={"space-between"}>
+                      <Text size={"sm"} fw={600} pt={4}>
+                        {item.title}
+                      </Text>
+                      <Flex gap={3} align={"center"}>
+                        <ActionIcon>
+                          <IconEdit color="gray" size={"0.9rem"} />
+                        </ActionIcon>
+                        <ActionIcon>
+                          <IconTrash color="gray" size={"0.9rem"} />
+                        </ActionIcon>
+                        <Badge size="sm" radius={"sm"} color={item.type === "General" ? "orange" : item.type === "Linkedin" ? "" : "green"}>
+                          {item.type}
+                        </Badge>
+                      </Flex>
+                    </Flex>
+                    <Text size={"sm"} mt={2}>
+                      {item.content}
+                    </Text>
+                  </Paper>
+                );
+              })}
+            </Flex>
+          </ScrollArea>
+        </Paper>
+        <Divider orientation="vertical" />
+        <Paper w={"66%"} display={"flex"} style={{ gap: "16px", flexDirection: "column" }}>
+          <Flex p={"lg"} justify={"space-between"} align={"center"} gap={"sm"} style={{ borderBottom: "1px solid gray" }}>
+            <Text fw={600}>Simulate Research</Text>
+            <Flex gap={"sm"} align={"center"}>
+              <Text color="gray" size={"sm"}>
+                Simulating on:
+              </Text>
+              <Select
+                placeholder="Select Sequence type"
+                // value={sequenceType || ""}
+                // onChange={(value) => setSequenceType(value)}
+                data={[
+                  { label: "Linkedin", value: "linkedin" },
+                  { label: "Email", value: "email" },
+                ]}
+              />
+            </Flex>
+          </Flex>
+          <ScrollArea h={500} scrollbarSize={8} px={"md"}>
+            <Flex gap={"xs"} direction={"column"}>
+              {simulateData.map((item, index) => {
+                return (
+                  <Paper withBorder p={"lg"}>
+                    <Flex justify={"space-between"}>
+                      <Flex>
+                        <IconPoint size={"2rem"} fill={item.status ? "#17B26A" : "red"} color="white" className="mt-[-6px] ml-[-12px]" />
+                        <Text fw={600} size={"sm"}>
+                          {item.title}
+                        </Text>
+                      </Flex>
+                      <Badge radius={"sm"} size="sm" color={item.type === "General" ? "orange" : item.type === "Linkedin" ? "" : "green"}>
+                        {item.type}
+                      </Badge>
+                    </Flex>
+                    <Text size={"sm"} fw={500}>
+                      {item.content}
+                    </Text>
+                    <Flex p={"sm"} className="bg-[#D444F1]/5" gap={4} align={"start"}>
+                      <Flex>
+                        <IconBulb size={"0.9rem"} color="#D444F1" />
+                      </Flex>
+                      <Text color="#D444F1" size={"xs"}>
+                        {item.ai_response}
+                      </Text>
+                    </Flex>
+                  </Paper>
+                );
+              })}
+            </Flex>
+          </ScrollArea>
+        </Paper>
+      </Flex>
+      <Flex align={"center"} gap={"md"} mt={"lg"}>
+        <Button variant="outline" color="gray" fullWidth onClick={() => context.closeModal(id)}>
+          Go Back
+        </Button>
+        <Button onClick={() => context.closeModal(id)} fullWidth>
           Save
         </Button>
       </Flex>

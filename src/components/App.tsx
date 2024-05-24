@@ -74,6 +74,8 @@ import ChampionChangeModal from "@modals/ChampionChangeModal";
 import CampaignPersonalizersModal from "@modals/CampaignLandingV2/CampaignPersonalizersModal";
 import CampaignContactsModal from "@modals/CampaignLandingV2/CampaignContactsModal";
 import CampaignTemplateModal from "@modals/CampaignLandingV2/CampaignTemplateModal";
+import CampaignTemplateEditModal from "@modals/CampaignLandingV2/CampaignTemplateEditModal";
+import CampaignTemplatesModal from "@modals/CampaignLandingV2/CampainTemplates";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -252,6 +254,8 @@ export default function App() {
               campaignPersonalizersModal: CampaignPersonalizersModal,
               campaignContactsModal: CampaignContactsModal,
               campaignTemplateModal: CampaignTemplateModal,
+              campaignTemplateEditModal: CampaignTemplateEditModal,
+              campaignTemplates: CampaignTemplatesModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

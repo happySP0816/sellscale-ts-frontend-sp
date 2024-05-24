@@ -67,7 +67,7 @@ import { proxyURL } from "@utils/general";
 import { activatePersona, deactivatePersona } from "@utils/requests/postPersonaActivation";
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { useParams } from "react-router-dom";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { useRecoilValue } from "recoil";
 import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
@@ -94,6 +94,9 @@ interface StatsData {
 }
 
 export default function CampaignLandingV2() {
+  const userData = useRecoilValue(userDataState);
+  console.log("======", userData);
+
   const getIcpFitBadge = (icp_fit_score: number) => {
     let label = "";
     let color = "";
@@ -824,7 +827,8 @@ export default function CampaignLandingV2() {
                     <IconQuestionMark size={"1rem"} color="#37414E" />
                   </Text>
                 </Tooltip>
-                {sequences && sequences.length > 0 && (
+                {/* {sequences && sequences.length > 0 && ( */}
+                {sequences && (
                   <SegmentedControl
                     value={type}
                     onChange={(value: any) => {
@@ -858,20 +862,70 @@ export default function CampaignLandingV2() {
                   />
                 )}
               </Flex>
-              {sequences && sequences.length > 0 ? (
+              {/* {sequences && sequences.length > 0 ? ( */}
+              {sequences ? (
                 <Flex gap={"sm"}>
+                  <Button
+                    leftIcon={<IconPlus size={"0.9rem"} />}
+                    onClick={() => {
+                      openContextModal({
+                        modal: "campaignTemplateEditModal",
+                        title: <Title order={3}>{createTemplateBuilder ? "Template Builder" : "Template"}</Title>,
+                        innerProps: {
+                          campaignId: id,
+                          createTemplateBuilder,
+                          setCreateTemplateBuilder,
+                          setSequences,
+                        },
+                        centered: true,
+                        styles: {
+                          content: {
+                            minWidth: "1100px",
+                          },
+                        },
+                        onClose: () => {
+                          const clientArchetypeId = Number(id);
+                          refetchSequenceData(clientArchetypeId);
+                        },
+                      });
+                    }}
+                  >
+                    Add
+                  </Button>
                   {type === "linkedin" && (
                     <Button
                       variant="outline"
                       rightIcon={<IconArrowRight size={"0.9rem"} />}
+                      // onClick={() => {
+                      //   setShowLinkedInConvoSimulatorModal(true);
+                      // }}
                       onClick={() => {
-                        setShowLinkedInConvoSimulatorModal(true);
+                        openContextModal({
+                          modal: "campaignTemplateModal",
+                          title: <Title order={3}>{createTemplateBuilder ? "Template Builder" : "Template"}</Title>,
+                          innerProps: {
+                            campaignId: id,
+                            createTemplateBuilder,
+                            setCreateTemplateBuilder,
+                            setSequences,
+                          },
+                          centered: true,
+                          styles: {
+                            content: {
+                              minWidth: "1100px",
+                            },
+                          },
+                          onClose: () => {
+                            const clientArchetypeId = Number(id);
+                            refetchSequenceData(clientArchetypeId);
+                          },
+                        });
                       }}
                     >
                       Simulate
                     </Button>
                   )}
-                  <Button
+                  {/* <Button
                     onClick={() => {
                       openContextModal({
                         modal: "campaignTemplateModal",
@@ -896,7 +950,7 @@ export default function CampaignLandingV2() {
                     }}
                   >
                     Edit
-                  </Button>
+                  </Button> */}
                 </Flex>
               ) : (
                 <Button
@@ -1182,6 +1236,9 @@ export default function CampaignLandingV2() {
                   })
                 }
               >
+                Add
+              </Button>
+              <Button leftIcon={<IconPlus size={"0.9rem"} />} onClick={() => setShowPersonalizerModal(true)}>
                 Add
               </Button>
             </Flex>

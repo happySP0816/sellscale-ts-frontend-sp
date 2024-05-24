@@ -1,10 +1,11 @@
-import { Badge, Group, Paper, Text, ScrollArea, Flex, Avatar, Box, Loader, Skeleton, TextInput, ActionIcon, Modal } from '@mantine/core';
+import { Badge, Group, Paper, Text, ScrollArea, Flex, Avatar, Box, Loader, Skeleton, TextInput, ActionIcon, Modal, Button, Select } from '@mantine/core';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { IconSearch, IconFilter } from '@tabler/icons-react';
 import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import CampaignChannelPage from "@pages/CampaignChannelPage";
+import FindContactsPage from "@pages/FindContactsPage";
 import { debounce } from 'lodash';
 
 interface Contact {
@@ -28,6 +29,7 @@ export function ContactsInfiniteScroll({ campaignId, setContactsData }: { campai
     const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
     const userToken = useRecoilValue(userTokenState);
     const offsetRef = useRef(0);
+    const [modalOpened, setModalOpened] = useState(false);
 
     const getIcpFitBadge = (icp_fit_score: number) => {
         let label = "";
@@ -117,6 +119,9 @@ export function ContactsInfiniteScroll({ campaignId, setContactsData }: { campai
 
     return (
         <Paper withBorder w={"100%"}>
+        <Modal size="1100px" opened={modalOpened} onClose={() => setModalOpened(false)}>
+        <FindContactsPage/>
+            </Modal>
             <Modal
                 opened={showCampaignTemplateModal}
                 onClose={() => {
@@ -127,25 +132,43 @@ export function ContactsInfiniteScroll({ campaignId, setContactsData }: { campai
         <CampaignChannelPage campaignId={campaignId} cType={"filter_contact"} hideHeader={true} hideEmail={false} hideLinkedIn={false} hideAssets={true} />
       </Modal>
             <Flex gap={"sm"} align={"center"} p={"md"}>
-                <TextInput
-                    w={"100%"}
-                    placeholder="Search prospects, companies, titles"
-                    rightSection={<IconSearch size={"0.9rem"} color="gray" />}
-                    value={searchTerm}
-                    onChange={(event) => setSearchTerm(event.currentTarget.value)}
-                />
-                <ActionIcon
-                    variant="outline"
-                    size={"lg"}
-                    styles={{
-                        root: {
-                            border: "1px solid #ced4da !important",
-                        },
-                    }}
-                    onClick={() => setShowCampaignTemplateModal(true)}
-                >
-                    <IconFilter />
-                </ActionIcon>
+                <Flex direction="column" w={"100%"} gap="sm">
+                    <Flex justify="space-between" align="center" w={"100%"}>
+                        <Text fw={600} size={20} color="#37414E">
+                            Contacts
+                        </Text>
+                        <Button
+                            variant="filled"
+                            size="sm"
+                            onClick={() => {
+                                setModalOpened(true);
+                            }}
+                        >
+                            Add Contacts
+                        </Button>
+                    </Flex>
+                    <Flex w={"100%"} gap="sm">
+                        <TextInput
+                            w={"100%"}
+                            placeholder="Search prospects, companies, titles"
+                            rightSection={<IconSearch size={"0.9rem"} color="gray" />}
+                            value={searchTerm}
+                            onChange={(event) => setSearchTerm(event.currentTarget.value)}
+                        />
+                        <ActionIcon
+                            variant="outline"
+                            size={"lg"}
+                            styles={{
+                                root: {
+                                    border: "1px solid #ced4da !important",
+                                },
+                            }}
+                            onClick={() => setShowCampaignTemplateModal(true)}
+                        >
+                            <IconFilter />
+                        </ActionIcon>
+                    </Flex>
+                </Flex>
             </Flex>
             <ScrollArea
                 style={{ height: 300 }}

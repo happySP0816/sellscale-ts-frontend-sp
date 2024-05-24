@@ -1294,10 +1294,6 @@ export default function CampaignLandingV2() {
                                 <Text fw={600} size="12px" miw="200px">
                                   {item.key}
                                 </Text>
-                                <Divider orientation="vertical" />
-                                <Text fw={500} color="gray" size={"12px"}>
-                                  {item.relevancy}
-                                </Text>
                               </Flex>
                             }
                             checked={true}

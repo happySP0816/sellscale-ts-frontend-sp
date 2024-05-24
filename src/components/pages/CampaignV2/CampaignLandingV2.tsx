@@ -144,6 +144,7 @@ export default function CampaignLandingV2() {
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [loadingSequences, setLoadingSequences] = useState(true);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [loadingPersonalizers, setLoadingPersonalizers] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
 
   const userToken = useRecoilValue(userTokenState);
@@ -155,6 +156,7 @@ export default function CampaignLandingV2() {
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
   const [testingVolume, setTestingVolume] = useState(0);
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
+  const [showPersonalizerModal, setShowPersonalizerModal] = useState(false);
   const [showLinkedInConvoSimulatorModal, setShowLinkedInConvoSimulatorModal] = useState(false);
 
   //sequence variable
@@ -195,11 +197,13 @@ export default function CampaignLandingV2() {
 
 
   const getPersonalizers = async () => {
+    setLoadingPersonalizers(true);
     const clientArchetypeId = Number(id);
     const response = await fetchCampaignPersonalizers(userToken, clientArchetypeId);
     if (response) {
       setPersonalizers(response.questions);
     }
+    setLoadingPersonalizers(false);
   };
 
   const updateConnectionType = (newConnectionType: string, campaignId: number) => {
@@ -387,7 +391,7 @@ export default function CampaignLandingV2() {
     });
   }
   return (
-    <Paper p={"lg"}>
+    <Paper p={"lg"} h="100%">
       <Modal
         opened={showCampaignTemplateModal}
         onClose={() => {
@@ -413,14 +417,28 @@ export default function CampaignLandingV2() {
             sequenceSetUpMode={true}
           />
       </Modal>
+      <Modal
+        opened={showPersonalizerModal}
+        onClose={() => {
+          getPersonalizers();
+          setShowPersonalizerModal(false);
+        }}
+        size="1100px"
+      >
+        <iframe src="https://sellscale.retool.com/apps/Internal%20Modules/SellScale%20AI%20Researcher#authToken=${userToken}&campaignId=${id}&embedMode=true" width="100%" height="800px"></iframe>
+      </Modal>
       {loadingStats || !statsData ? (
-        <Flex direction="column" gap="sm" p="lg" style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
+        <Flex mx={"xl"} direction="column" justify="center" mb="lg" align="center" gap="sm" p="lg" style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
           <Skeleton height={50} radius="xl" width="100%" />
           <Skeleton height={40} radius="xl" width="80%" />
           <Skeleton height={30} radius="xl" width="60%" />
+          <Flex align="center" gap="sm" mt="sm">
+            <Loader color="gray" variant="dots" size="md" />
+            <Text color="gray" size="md" className="loading-animation">Loading campaign stats</Text>
+          </Flex>
         </Flex>
       ) : (
-        <Flex style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
+        <Flex mx={"xl"} style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
           <Flex direction={"column"} w={"100%"}>
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
             <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
@@ -478,7 +496,7 @@ export default function CampaignLandingV2() {
                 </Text>
               </Flex>
             </Flex>
-            <Flex gap={"lg"} w={"100%"} justify={"center"} p={"lg"}>
+            <Flex gap={"sm"} w={"100%"} justify={"center"} p={"lg"}>
               <Flex>
                 <Paper
                   p="md"
@@ -509,22 +527,23 @@ export default function CampaignLandingV2() {
                       </ActionIcon>
                     </Tooltip>
                   </Flex>
-                  <Group noWrap sx={{ flex: 1, justifyContent: "center" }}>
+                  <Group noWrap spacing={'sm'}>
                     <Switch
                       onChange={() => togglePersonaChannel(id, 'email', userToken, !statsData.email_active)}
                       checked={statsData.email_active}
                       labelPosition="left"
                       label={
-                        <Flex gap={4} align={"center"} className="hover:cursor-pointer">
+                        <Flex gap={1} align={"center"} className="hover:cursor-pointer">
                           <IconMailOpened size={"1.2rem"} fill="#3B85EF" color="white" />
                           <Text color="#3B85EF" fw={500}>
                             Email
                           </Text>
                         </Flex>
                       }
-                      miw={190}
+                      miw={160}
                       styles={{
                         root: {
+                          minWidth: '9rem !important',
                           border: "1px solid #D9DEE5",
                           padding: "7px",
                           borderRadius: "4px",
@@ -569,22 +588,23 @@ export default function CampaignLandingV2() {
                       ]}
                       placeholder="Select an event"
                     />
-                    <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
+                    <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false}/>} />
                     <Switch
                       onChange={() => togglePersonaChannel(id, 'linkedin', userToken, !statsData.linkedin_active)}
                       checked={statsData?.linkedin_active}
                       labelPosition="left"
                       label={
-                        <Flex gap={4} align={"center"}>
+                        <Flex gap={2} align={"center"}>
                           <IconBrandLinkedin size={"1.4rem"} fill="#3B85EF" color="white" />
                           <Text color="#3B85EF" fw={500}>
                             Linkedin
                           </Text>
                         </Flex>
                       }
-                      miw={190}
+                      miw={160}
                       styles={{
                         root: {
+                          minWidth: '9rem !important',
                           border: "1px solid #D9DEE5",
                           padding: "7px",
                           borderRadius: "4px",
@@ -761,9 +781,9 @@ export default function CampaignLandingV2() {
           </Flex>
         </Flex>
       )}
-      <Flex gap={"lg"} mt={"md"}>
+      <Flex mx={"xl"} gap={"lg"} mt={"md"}>
         <Flex direction={"column"} gap={"md"} w={"80%"}>
-          <Paper withBorder h={"100%"}>
+          <Paper withBorder>
             <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
               <Flex align="center" gap="xs">
                 <Text fw={600} size={20} color="#37414E">
@@ -883,13 +903,14 @@ export default function CampaignLandingV2() {
             </Flex>
             <Flex h={"70%"}>
               {loadingSequences ? (
-                <Flex direction="column" align="center" justify="center" m="auto">
+                <Flex direction="column" align="center" justify="center" m="auto" mt="sm">
                   <Skeleton height={30} radius="xl" width="80%" />
                   <Skeleton height={20} radius="xl" width="60%" mt="sm" />
                   <Skeleton height={20} radius="xl" width="60%" mt="sm" />
-                  <Text color="gray" fw={400} size={"sm"} mt="sm">
-                    Loading sequences...
-                  </Text>
+                  <Flex align="center" gap="sm" mt="sm">
+                    <Loader color="gray" variant="dots" size="md" />
+                    <Text color="gray" size="md" className="loading-animation">Loading sequences...</Text>
+                  </Flex>
                 </Flex>
               ) : sequences && sequences.length > 0 ? (
                 <Flex direction={"column"} h={"fit-content"} w={"100%"}>
@@ -957,7 +978,7 @@ export default function CampaignLandingV2() {
                             }}
                           >
                             <Flex align={"center"} justify={"space-between"} px={"sm"} py={"xs"}>
-                              <Flex align={"center"} gap={"xs"}>
+                              <Flex mx="lg" align={"center"} gap={"xs"}>
                                 <IconMessages color="#228be6" size={"0.9rem"} />
                                 <Text color="gray" fw={500} size={"xs"}>
                                   Example Message #{index + 1}:
@@ -1077,28 +1098,6 @@ export default function CampaignLandingV2() {
                   })}
                   onClick={() => {
                     setShowCampaignTemplateModal(true);
-                    //   openContextModal({
-                    //     modal: "campaignTemplateModal",
-                    //     title: (
-                    //       <Title order={3}>
-                    //         {createTemplateBuilder
-                    //           ? "Template Builder"
-                    //           : "Template"}
-                    //       </Title>
-                    //     ),
-                    //     innerProps: {
-                    //       createTemplateBuilder,
-                    //       setCreateTemplateBuilder,
-                    //       setSequences,
-                    //     },
-                    //     centered: true,
-                    //     styles: {
-                    //       content: {
-                    //         minWidth: "1040px",
-                    //       },
-                    //     },
-                    //   });
-                    //
                   }}
                 >
                   <Flex align="center" gap="xs">
@@ -1140,27 +1139,24 @@ export default function CampaignLandingV2() {
               </Flex>
               <Button
                 leftIcon={<IconPlus size={"0.9rem"} />}
-                onClick={() => {
-                  openContextModal({
-                    modal: "campaignPersonalizersModal",
-                    title: <Title order={3}>Personalizers</Title>,
-                    innerProps: {
-                      setPersonalizers,
-                    },
-                    centered: true,
-                    styles: {
-                      content: {
-                        minWidth: "1040px",
-                      },
-                    },
-                  });
-                }}
+                onClick={() => setShowPersonalizerModal(true)}
               >
                 Add
               </Button>
             </Flex>
             <Flex>
-              {personalizers && personalizers.length > 0 ? (
+              {loadingPersonalizers ? (
+                <Flex direction="column" align="center" justify="center" m="auto" mt="sm">
+                <Skeleton height={30} radius="xl" width="80%" />
+                <Skeleton height={20} radius="xl" width="60%" mt="sm" />
+                <Skeleton height={20} radius="xl" width="60%" mt="sm" />
+                <Flex align="center" gap="sm" mt="sm">
+                  <Loader color="gray" variant="dots" size="md" />
+                  <Text color="gray" size="md" className="loading-animation">Loading Personalizers</Text>
+                </Flex>
+              </Flex>
+
+              ) : personalizers && personalizers.length > 0 ? (
                 <Flex direction={"column"} w={"100%"}>
                   <Flex w={"100%"} mah={300} gap={"md"} p={"lg"} direction="column">
                     {personalizers &&
@@ -1202,7 +1198,7 @@ export default function CampaignLandingV2() {
                   <Flex align={"center"} w={"100%"} justify={"space-between"} p={"md"} style={{ borderTop: "1px solid #ECEEF1" }}>
                     <Flex w={"100%"} align={"center"} justify={"space-between"} style={{ border: "1px solid #ced4da" }}>
                       <Text w={"100%"} align="center" color="gray" size={"sm"} fw={500}>
-                        {personalizers.length} Personalizers
+                        {personalizers.length} {personalizers.length === 1 ? "Personalizer" : "Personalizers"}
                       </Text>
                       <Divider orientation="vertical" />
                       <ActionIcon h={"100%"} mx={3}>

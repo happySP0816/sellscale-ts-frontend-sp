@@ -167,6 +167,7 @@ export default function CampaignLandingV2() {
   const [testingVolume, setTestingVolume] = useState(0);
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
   const [showPersonalizerModal, setShowPersonalizerModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showLinkedInConvoSimulatorModal, setShowLinkedInConvoSimulatorModal] = useState(false);
 
   //sequence variable
@@ -406,6 +407,31 @@ export default function CampaignLandingV2() {
   };
   return (
     <Paper p={"lg"} h="100%" style={{ backgroundColor: "transparent" }}>
+      <Modal opened={showSettingsModal} onClose={() => setShowSettingsModal(false)} size="350px">
+        <Title mb='xl' size={'sm'} align="center">Campaign Settings</Title>
+        <Flex direction="column" align="center" gap="md">
+          <Flex justify="center" align="center" gap="xs" w="100%">
+            <Flex align="center" gap="xs">
+              <Text>Campaign Status:</Text>
+              <Text>{statsData?.active ? "Active" : "Inactive"}</Text>
+              <Switch
+                checked={statsData?.active}
+                onChange={() => {
+                  togglePersona(statsData as StatsData, userToken);
+                  setShowSettingsModal(false);
+                }}
+                color={statsData?.active ? "green" : "red"}
+              />
+            </Flex>
+          </Flex>
+          <Button variant="light" color="blue" onClick={() => {
+            // Duplicate Campaign logic here
+            setShowSettingsModal(false);
+          }}>
+            Duplicate Campaign
+          </Button>
+        </Flex>
+      </Modal>
       <Modal
         opened={showCampaignTemplateModal}
         onClose={() => {
@@ -469,26 +495,31 @@ export default function CampaignLandingV2() {
           <Flex direction={"column"} w={"100%"}>
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
             <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
-              <Flex gap={"sm"} align={"center"}>
-                {statsData?.emoji}
-                <Text fw={600} size={20}>
-                  {statsData?.archetype_name}
-                </Text>
-                <Button
-                  tt={"uppercase"}
-                  variant="light"
-                  size="xs"
-                  disabled={status === "INACTIVE" && true}
-                  color={status === "SETUP" ? "orange" : status === "ACTIVE" ? "green" : ""}
-                  onClick={() => {
-                    if (status === "SETUP") setStatus("ACTIVE");
-                    else if (status === "ACTIVE") {
-                      setStatus("ACTIVE");
-                    }
-                  }}
-                >
-                  {status}
-                </Button>
+              <Flex gap={"sm"} align={"center"} justify="space-between" w="100%">
+                <Flex gap={"sm"} align={"center"}>
+                  {statsData?.emoji}
+                  <Text fw={600} size={20}>
+                    {statsData?.archetype_name}
+                  </Text>
+                  <Button
+                    tt={"uppercase"}
+                    variant="light"
+                    size="xs"
+                    disabled={status === "INACTIVE" && true}
+                    color={status === "SETUP" ? "orange" : status === "ACTIVE" ? "green" : ""}
+                    onClick={() => {
+                      if (status === "SETUP") setStatus("ACTIVE");
+                      else if (status === "ACTIVE") {
+                        setStatus("ACTIVE");
+                      }
+                    }}
+                  >
+                    {status}
+                  </Button>
+                </Flex>
+                <ActionIcon variant="light" color="gray" onClick={() => setShowSettingsModal(true)}>
+                  <IconSettings size={"1.2rem"} />
+                </ActionIcon>
               </Flex>
               <Flex align={"center"} gap={"xs"}>
                 <Text color="gray" size={"xs"} fw={600}>
@@ -506,20 +537,6 @@ export default function CampaignLandingV2() {
                   {new Date(statsData.created_at).toLocaleString("en-US", {
                     dateStyle: "full",
                   })}
-                </Text>
-                <Tooltip label="Duplicate Campaign" withArrow>
-                  <ActionIcon variant="light" color="blue" ml={"sm"}>
-                    <IconCopy size={16} />
-                  </ActionIcon>
-                </Tooltip>
-                <Text
-                  underline
-                  color={statsData?.active ? "red" : "green"}
-                  size={"sm"}
-                  className="hover:cursor-pointer select-none"
-                  onClick={() => togglePersona(statsData, userToken)}
-                >
-                  {statsData?.active ? "Deactivate Campaign" : "Activate Campaign"}
                 </Text>
               </Flex>
             </Flex>

@@ -51,6 +51,7 @@ import {
   IconRefresh,
   IconSearch,
   IconSend,
+  IconSettings,
   IconTrafficCone,
   IconTrash,
 } from "@tabler/icons";
@@ -395,7 +396,7 @@ export default function CampaignLandingV2() {
     });
   };
   return (
-    <Paper p={"lg"} h="100%">
+    <Paper p={"lg"} h="100%" style={{ backgroundColor: "transparent" }}>
       <Modal
         opened={showCampaignTemplateModal}
         onClose={() => {
@@ -442,7 +443,7 @@ export default function CampaignLandingV2() {
           align="center"
           gap="sm"
           p="lg"
-          style={{ border: "1px solid lightgray", borderRadius: "6px" }}
+          style={{ backgroundColor: 'white', border: "1px solid lightblue", borderRadius: "6px" }}
         >
           <Skeleton height={50} radius="xl" width="100%" />
           <Skeleton height={40} radius="xl" width="80%" />
@@ -455,7 +456,7 @@ export default function CampaignLandingV2() {
           </Flex>
         </Flex>
       ) : (
-        <Flex mx={"xl"} style={{ border: "1px solid lightgray", borderRadius: "6px" }}>
+        <Flex mx={"xl"} style={{ backgroundColor: "white", border: "1px solid lightblue", borderRadius: "6px" }}>
           <Flex direction={"column"} w={"100%"}>
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
             <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
@@ -1213,34 +1214,32 @@ export default function CampaignLandingV2() {
                     </Text>
                   </Tooltip>
                 </Flex>
-                <Badge leftSection={<IconTrafficCone size={"0.9rem"} className="mt-1" />} color="orange">
-                  under construction
-                </Badge>
               </Flex>
-              <Button
-                leftIcon={<IconPlus size={"0.9rem"} />}
-                // onClick={() => setShowPersonalizerModal(true)}
-                onClick={() =>
-                  openContextModal({
-                    modal: "campaignPersonalizersModal",
-                    title: <Title order={3}>Personalizers</Title>,
-                    innerProps: {
-                      setPersonalizers,
-                    },
-                    centered: true,
-                    styles: {
-                      content: {
-                        minWidth: "1100px",
+              <Flex gap={"sm"} align={"center"}>
+                <Button
+                  leftIcon={<IconPlus size={"0.9rem"} />}
+                  onClick={() =>
+                    openContextModal({
+                      modal: "campaignPersonalizersModal",
+                      title: <Title order={3}>Personalizers</Title>,
+                      innerProps: {
+                        setPersonalizers,
                       },
-                    },
-                  })
-                }
-              >
-                Add
-              </Button>
-              <Button leftIcon={<IconPlus size={"0.9rem"} />} onClick={() => setShowPersonalizerModal(true)}>
-                Add
-              </Button>
+                      centered: true,
+                      styles: {
+                        content: {
+                          minWidth: "1100px",
+                        },
+                      },
+                    })
+                  }
+                >
+                  Add
+                </Button>
+                <ActionIcon color="gray" onClick={() => setShowPersonalizerModal(true)}>
+                  <IconSettings size={"1.2rem"} />
+                </ActionIcon>
+              </Flex>
             </Flex>
             <Flex>
               {loadingPersonalizers ? (

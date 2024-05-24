@@ -1217,6 +1217,27 @@ export default function CampaignLandingV2() {
                   under construction
                 </Badge>
               </Flex>
+              <Button
+                leftIcon={<IconPlus size={"0.9rem"} />}
+                // onClick={() => setShowPersonalizerModal(true)}
+                onClick={() =>
+                  openContextModal({
+                    modal: "campaignPersonalizersModal",
+                    title: <Title order={3}>Personalizers</Title>,
+                    innerProps: {
+                      setPersonalizers,
+                    },
+                    centered: true,
+                    styles: {
+                      content: {
+                        minWidth: "1100px",
+                      },
+                    },
+                  })
+                }
+              >
+                Add
+              </Button>
               <Button leftIcon={<IconPlus size={"0.9rem"} />} onClick={() => setShowPersonalizerModal(true)}>
                 Add
               </Button>

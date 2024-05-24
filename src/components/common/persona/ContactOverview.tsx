@@ -68,10 +68,11 @@ const ContactOverview = () => {
           <OngoingScrapes />
         </Tabs.Panel> */}
 
-        <Tabs.Panel value="history">
-          <ProspectUploadHistory />
-        </Tabs.Panel>
-
+        {tabValue === "history" && (
+          <Tabs.Panel value="history">
+            <ProspectUploadHistory />
+          </Tabs.Panel>
+        )}
         <Tabs.Panel value="upload_overview">
           <UploadOverviewV2 />
         </Tabs.Panel>

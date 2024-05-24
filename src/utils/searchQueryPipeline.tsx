@@ -1,12 +1,12 @@
-import { logout } from "@auth/core";
-import { MantineTheme, Image, Avatar } from "@mantine/core";
-import { SpotlightAction } from "@mantine/spotlight";
-import { NavigateFunction } from "react-router-dom";
-import { navigateToPage } from "./documentChange";
-import { nameToInitials, proxyURL, valueToColor } from "./general";
-import { API_URL } from "@constants/data";
-import { getProspects } from "./requests/getProspects";
-import { Prospect } from "src";
+import { logout } from '@auth/core';
+import { MantineTheme, Image, Avatar } from '@mantine/core';
+import { SpotlightAction } from '@mantine/spotlight';
+import { NavigateFunction } from 'react-router-dom';
+import { navigateToPage } from './documentChange';
+import { nameToInitials, proxyURL, valueToColor } from './general';
+import { API_URL } from '@constants/data';
+import { getProspects } from './requests/getProspects';
+import { Prospect } from 'src';
 
 /**
  *
@@ -33,15 +33,8 @@ async function checkProspects(
   theme: MantineTheme,
   userToken: string
 ) {
-  const response = await getProspects(
-    userToken,
-    query,
-    undefined,
-    30,
-    undefined,
-    "ALL"
-  );
-  if (response.status === "error") {
+  const response = await getProspects(userToken, query, undefined, 5, undefined, 'ALL');
+  if (response.status === 'error') {
     return [];
   }
 
@@ -50,7 +43,7 @@ async function checkProspects(
       title: prospect.full_name,
       description: prospect.title,
       keywords: prospect.company,
-      group: "Prospects",
+      group: 'Prospects',
       onTrigger: () => {
         const url = new URL(window.location.href);
 
@@ -61,7 +54,7 @@ async function checkProspects(
           src={proxyURL(prospect.img_url)}
           alt={prospect.full_name}
           color={valueToColor(theme, prospect.full_name)}
-          radius="lg"
+          radius='lg'
           size={30}
         >
           {nameToInitials(prospect.full_name)}

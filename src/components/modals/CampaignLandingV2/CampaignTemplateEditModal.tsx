@@ -429,12 +429,16 @@ export const Templates = () => {
         onClick={() =>
           openContextModal({
             modal: "campaignTemplates",
-            title: <Title order={3}>Template Builder</Title>,
+            title: (
+              <Title order={3}>
+                <span className=" text-gray-500">Go back to</span> Sequence Builder
+              </Title>
+            ),
             innerProps: {},
             centered: true,
             styles: {
               content: {
-                minWidth: "1100px",
+                minWidth: "800px",
               },
             },
           })

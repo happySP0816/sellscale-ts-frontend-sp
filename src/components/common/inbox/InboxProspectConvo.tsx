@@ -895,11 +895,11 @@ export default function InboxProspectConvo(props: Props) {
                 LinkedIn <Badge>{currentConvoLiMessages?.length}</Badge>
               </Tabs.Tab>
             )}
-            {hasEmail(prospect) && !hasSmartleadEmail(prospect) && (
+            {/* {hasEmail(prospect) && !hasSmartleadEmail(prospect) && (
               <Tabs.Tab value='EMAIL' icon={<IconMail size='0.8rem' />}>
                 Email (Primary Inbox)
               </Tabs.Tab>
-            )}
+            )} */}
             {hasSmartleadEmail(prospect) && (
               <Tabs.Tab value='SMARTLEAD' icon={<IconMail size='0.8rem' />}>
                 Email

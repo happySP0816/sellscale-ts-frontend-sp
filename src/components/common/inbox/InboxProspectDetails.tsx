@@ -154,19 +154,17 @@ export default function ProjectDetails(props: {
   );
   const openedOutboundChannel = useRecoilValue(currentConvoChannelState);
 
-  const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(
-    demosDrawerOpenState
-  );
+  const [demosDrawerOpened, setDemosDrawerOpened] =
+    useRecoilState(demosDrawerOpenState);
+
   const [drawerProspectId, setDrawerProspectId] = useRecoilState(
     demosDrawerProspectIdState
   );
 
-  const [openedNotInterestedPopover, setOpenedNotInterestedPopover] = useState(
-    false
-  );
-  const [openedNotQualifiedPopover, setOpenedNotQualifiedPopover] = useState(
-    false
-  );
+  const [openedNotInterestedPopover, setOpenedNotInterestedPopover] =
+    useState(false);
+  const [openedNotQualifiedPopover, setOpenedNotQualifiedPopover] =
+    useState(false);
   const [loadingNotInterested, setLoadingNotInterested] = useState(false);
   const [loadingNotQualified, setLoadingNotQualified] = useState(false);
 
@@ -214,10 +212,8 @@ export default function ProjectDetails(props: {
 
   let statusValue = data?.details?.linkedin_status || "ACCEPTED";
 
-  const [
-    deactivateAiEngagementStatus,
-    setDeactivateAiEngagementStatus,
-  ] = useState(!prospect?.deactivate_ai_engagement);
+  const [deactivateAiEngagementStatus, setDeactivateAiEngagementStatus] =
+    useState(!prospect?.deactivate_ai_engagement);
   if (
     props.emailStatuses ||
     openedOutboundChannel === "EMAIL" ||
@@ -753,7 +749,30 @@ export default function ProjectDetails(props: {
                             setOpenedSnoozeModal(true);
                           }}
                         />
-                        <Popover
+                        <Box>
+                          <StatusBlockButton
+                            title="Demo Set"
+                            icon={
+                              <IconCalendarEvent
+                                color={theme.colors.green[6]}
+                                size={24}
+                              />
+                            }
+                            onClick={async () => {
+                              setDemoSetType("DIRECT");
+                              if (!prospect) return;
+
+                              await setDemoSetProspect(
+                                userToken,
+                                prospect.id,
+                                "DIRECT",
+                                handoffText
+                              );
+                              changeStatus("DEMO_SET", false);
+                            }}
+                          />
+                        </Box>
+                        {/* <Popover
                           width={250}
                           position="bottom"
                           withArrow
@@ -764,20 +783,6 @@ export default function ProjectDetails(props: {
                           }}
                         >
                           <Popover.Target>
-                            <Box>
-                              <StatusBlockButton
-                                title="Demo Set"
-                                icon={
-                                  <IconCalendarEvent
-                                    color={theme.colors.green[6]}
-                                    size={24}
-                                  />
-                                }
-                                onClick={() => {
-                                  setOpenedDemoSetPopover(true);
-                                }}
-                              />
-                            </Box>
                           </Popover.Target>
                           <Popover.Dropdown>
                             <Stack spacing={10}>
@@ -831,7 +836,7 @@ export default function ProjectDetails(props: {
                               </Button>
                             </Stack>
                           </Popover.Dropdown>
-                        </Popover>
+                        </Popover> */}
                         <Popover
                           opened={openedNotInterestedPopover}
                           width={430}
@@ -1096,20 +1101,22 @@ export default function ProjectDetails(props: {
                             </Box>
                           )}
 
-                          {data && demoFeedbacks && demoFeedbacks.length > 0 && (
-                            <ScrollArea h="250px">
-                              {demoFeedbacks?.map((feedback, index) => (
-                                <div style={{ marginBottom: 10 }}>
-                                  <DemoFeedbackCard
-                                    prospect={data.data}
-                                    index={index + 1}
-                                    demoFeedback={feedback}
-                                    refreshDemoFeedback={refreshDemoFeedback}
-                                  />
-                                </div>
-                              ))}
-                            </ScrollArea>
-                          )}
+                          {data &&
+                            demoFeedbacks &&
+                            demoFeedbacks.length > 0 && (
+                              <ScrollArea h="250px">
+                                {demoFeedbacks?.map((feedback, index) => (
+                                  <div style={{ marginBottom: 10 }}>
+                                    <DemoFeedbackCard
+                                      prospect={data.data}
+                                      index={index + 1}
+                                      demoFeedback={feedback}
+                                      refreshDemoFeedback={refreshDemoFeedback}
+                                    />
+                                  </div>
+                                ))}
+                              </ScrollArea>
+                            )}
                           <Button
                             variant="light"
                             radius="md"

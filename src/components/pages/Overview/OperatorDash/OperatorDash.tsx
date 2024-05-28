@@ -250,7 +250,7 @@ const OperatorDashboard = (props: PropsType) => {
         {renderSection('Medium Priority', mediumPriorityTasks)}
         {renderSection('Low Priority', lowPriorityTasks)} */}
         {renderSection("Recent Updates", priorityTasks)}
-        <RecommendedSegments />
+        {/* <RecommendedSegments /> */}
         {renderSection("Completed", oldTasks)}
       </Stack>
     </Box>

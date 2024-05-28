@@ -23,7 +23,7 @@ import {
   Tooltip,
   rem,
   useMantineTheme,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconSearch,
   IconAdjustmentsFilled,
@@ -32,50 +32,56 @@ import {
   IconStar,
   IconBellOff,
   IconSparkles,
-} from '@tabler/icons-react';
-import _ from 'lodash';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { forwardRef, useEffect, useState } from 'react';
-import { HEADER_HEIGHT } from './InboxProspectConvo';
+} from "@tabler/icons-react";
+import _ from "lodash";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { forwardRef, useEffect, useState } from "react";
+import { HEADER_HEIGHT } from "./InboxProspectConvo";
 import {
   labelizeConvoSubstatus,
   prospectStatuses,
   nurturingProspectStatuses,
   getStatusDetails,
   labelizeStatus,
-} from './utils';
+} from "./utils";
 import InboxProspectListFilter, {
   InboxProspectListFilterState,
   defaultInboxProspectListFilterState,
-} from './InboxProspectListFilter';
-import { IconAlertCircle, IconChevronUp, IconGridDots } from '@tabler/icons';
-import { useNavigate } from 'react-router-dom';
+} from "./InboxProspectListFilter";
+import { IconAlertCircle, IconChevronUp, IconGridDots } from "@tabler/icons";
+import { useNavigate } from "react-router-dom";
 import {
   INBOX_PAGE_HEIGHT,
   ProspectBucketRecord,
   ProspectBuckets,
-} from '../../pages/InboxRestructurePage';
-import { mainTabState, openedProspectIdState, openedProspectListState } from '@atoms/inboxAtoms';
-import { useDisclosure } from '@mantine/hooks';
-import { NAV_BAR_SIDE_WIDTH } from '@constants/data';
-import { ProspectConvoCard } from './InboxProspectList';
-import { currentInboxCountState } from '@atoms/personaAtoms';
+} from "../../pages/InboxRestructurePage";
+import {
+  mainTabState,
+  openedProspectIdState,
+  openedProspectListState,
+} from "@atoms/inboxAtoms";
+import { useDisclosure } from "@mantine/hooks";
+import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
+import { ProspectConvoCard } from "./InboxProspectList";
+import { currentInboxCountState } from "@atoms/personaAtoms";
 
 export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const theme = useMantineTheme();
   const [openedList, setOpenedList] = useRecoilState(openedProspectListState);
-  const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
+  const [openedProspectId, setOpenedProspectId] = useRecoilState(
+    openedProspectIdState
+  );
 
-  const [searchFilter, setSearchFilter] = useState('');
+  const [searchFilter, setSearchFilter] = useState("");
   const [mainTab, setMainTab] = useRecoilState(mainTabState);
   const inboxTab = (() => {
-    if (mainTab === 'manual_bucket') return 'manual';
-    if (mainTab === 'ai_bucket') return 'ai';
-    return 'other';
+    if (mainTab === "manual_bucket") return "manual";
+    if (mainTab === "ai_bucket") return "ai";
+    return "other";
   })();
   const setInboxTab = (tab: string) => {
-    if (tab === 'manual') setMainTab('manual_bucket');
-    if (tab === 'ai') setMainTab('ai_bucket');
+    if (tab === "manual") setMainTab("manual_bucket");
+    if (tab === "ai") setMainTab("ai_bucket");
     // Else don't set
   };
 
@@ -83,7 +89,12 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const bucket = props.buckets[mainTab] as ProspectBucketRecord[];
 
   const prospects = bucket
-    .filter((p) => !['REMOVED', 'NULL'].includes((p.overall_status ?? 'NULL').toUpperCase()))
+    .filter(
+      (p) =>
+        !["REMOVED", "NULL"].includes(
+          (p.overall_status ?? "NULL").toUpperCase()
+        )
+    )
     .filter(
       (p) =>
         p.title?.toLowerCase().includes(searchFilter.toLowerCase()) ||
@@ -93,13 +104,16 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
 
   const prospectGroups = Object.entries(
     _.groupBy(
-      prospects.map((p) => ({ ...p, status: p.status_email ?? p.status_linkedin })),
+      prospects.map((p) => ({
+        ...p,
+        status: p.status_email ?? p.status_linkedin,
+      })),
       (p) => p.status
     )
   )
     .sort((a, b) => {
-      if (a[0].toLowerCase().includes('scheduling')) return -1;
-      if (b[0].toLowerCase().includes('scheduling')) return 1;
+      if (a[0].toLowerCase().includes("scheduling")) return -1;
+      if (b[0].toLowerCase().includes("scheduling")) return 1;
       return b[0].localeCompare(a[0]);
     })
     .filter((group) => {
@@ -126,14 +140,14 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
             paddingBottom: 0,
           },
         }}
-        size='sm'
+        size="sm"
       >
-        <ScrollArea h={'92vh'}>
+        <ScrollArea h={"92vh"}>
           <Stack
             spacing={0}
             sx={(theme) => ({
               backgroundColor: theme.colors.gray[1],
-              position: 'relative',
+              position: "relative",
             })}
           >
             {/* Section tabs */}
@@ -147,7 +161,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                   ...theme.fn.focusStyles(),
                   fontWeight: 600,
                   color: theme.colors.gray[5],
-                  '&[data-active]': {
+                  "&[data-active]": {
                     color: theme.colors.blue[theme.fn.primaryShade()],
                   },
                   paddingTop: rem(6),
@@ -156,29 +170,45 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
               })}
             >
               <Tabs.List grow>
-                <Tabs.Tab value='manual'>
-                  <Indicator size={6} disabled={props.buckets.manual_bucket.length === 0}>
-                    <Group spacing={5} noWrap>
-                      <IconAlertCircle size='1rem' />
-                      {mainTab === 'manual_bucket' && <Text>Needs Attention</Text>}
-                    </Group>
-                  </Indicator>
-                </Tabs.Tab>
-                <Tabs.Tab value='ai'>
-                  <Indicator size={6} disabled={props.buckets.ai_bucket.length === 0}>
-                    <Group spacing={5} noWrap>
-                      <IconSparkles size='1rem' />
-                      {mainTab === 'ai_bucket' && <Text>Queued for AI</Text>}
-                    </Group>
-                  </Indicator>
-                </Tabs.Tab>
-                <Menu shadow='md' width={200}>
-                  <Menu.Target>
-                    <Tabs.Tab value='other'>
+                <Tabs.Tab value="manual">
+                  <Indicator
+                    size={6}
+                    disabled={props.buckets.manual_bucket.length === 0}
+                  >
+                    <Tooltip
+                      label="Messages you're responsible for."
+                      withinPortal
+                      position="right"
+                    >
                       <Group spacing={5} noWrap>
-                        <IconGridDots size='1rem' />
-                        {inboxTab === 'other' && (
-                          <Text>{_.startCase(mainTab.split('_bucket')[0])}</Text>
+                        <IconAlertCircle size="1rem" />
+                        {mainTab === "manual_bucket" && (
+                          <Text>Human Inbox</Text>
+                        )}
+                      </Group>
+                    </Tooltip>
+                  </Indicator>
+                </Tabs.Tab>
+                <Tabs.Tab value="ai">
+                  <Indicator
+                    size={6}
+                    disabled={props.buckets.ai_bucket.length === 0}
+                  >
+                    <Group spacing={5} noWrap>
+                      <IconSparkles size="1rem" />
+                      {mainTab === "ai_bucket" && <Text>Queued for AI</Text>}
+                    </Group>
+                  </Indicator>
+                </Tabs.Tab>
+                <Menu shadow="md" width={200}>
+                  <Menu.Target>
+                    <Tabs.Tab value="other">
+                      <Group spacing={5} noWrap>
+                        <IconGridDots size="1rem" />
+                        {inboxTab === "other" && (
+                          <Text>
+                            {_.startCase(mainTab.split("_bucket")[0])}
+                          </Text>
                         )}
                       </Group>
                     </Tabs.Tab>
@@ -187,7 +217,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                   <Menu.Dropdown>
                     <Menu.Label>
                       <Group spacing={5} noWrap>
-                        <IconGridDots size='1rem' />
+                        <IconGridDots size="1rem" />
                         <Text fz={14} fw={600}>
                           Other Views
                         </Text>
@@ -196,40 +226,40 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                     <Menu.Divider />
                     <Menu.Item
                       onClick={() => {
-                        setMainTab('snoozed_bucket');
+                        setMainTab("snoozed_bucket");
                       }}
                     >
-                      <Group spacing={5} noWrap position='apart'>
+                      <Group spacing={5} noWrap position="apart">
                         <Text>Snoozed</Text>
                         <Badge>{props.buckets.snoozed_bucket.length}</Badge>
                       </Group>
                     </Menu.Item>
                     <Menu.Item
                       onClick={() => {
-                        setMainTab('demo_bucket');
+                        setMainTab("demo_bucket");
                       }}
                     >
-                      <Group spacing={5} noWrap position='apart'>
+                      <Group spacing={5} noWrap position="apart">
                         <Text>Demo Set</Text>
                         <Badge>{props.buckets.demo_bucket.length}</Badge>
                       </Group>
                     </Menu.Item>
                     <Menu.Item
                       onClick={() => {
-                        setMainTab('crm_bucket');
+                        setMainTab("crm_bucket");
                       }}
                     >
-                      <Group spacing={5} noWrap position='apart'>
+                      <Group spacing={5} noWrap position="apart">
                         <Text>CRM Sync</Text>
                         <Badge>{props.buckets.crm_bucket.length}</Badge>
                       </Group>
                     </Menu.Item>
                     <Menu.Item
                       onClick={() => {
-                        setMainTab('outreach_bucket');
+                        setMainTab("outreach_bucket");
                       }}
                     >
-                      <Group spacing={5} noWrap position='apart'>
+                      <Group spacing={5} noWrap position="apart">
                         <Text>Sent Outreach</Text>
                         <Badge>{props.buckets.outreach_bucket.length}</Badge>
                       </Group>
@@ -238,7 +268,6 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                 </Menu>
               </Tabs.List>
             </Tabs>
-
             <>
               <Stack spacing={0}>
                 {/* Search bar */}
@@ -249,33 +278,35 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                     input: {
                       backgroundColor: theme.white,
                       border: `1px solid ${theme.colors.gray[2]}`,
-                      '&:focus-within': {
+                      "&:focus-within": {
                         borderColor: theme.colors.gray[4],
                       },
-                      '&::placeholder': {
+                      "&::placeholder": {
                         color: theme.colors.gray[6],
                         fontWeight: 500,
                       },
                     },
                   }}
-                  icon={<IconSearch size='1.0rem' />}
+                  icon={<IconSearch size="1.0rem" />}
                   value={searchFilter}
-                  onChange={(event) => setSearchFilter(event.currentTarget.value)}
+                  onChange={(event) =>
+                    setSearchFilter(event.currentTarget.value)
+                  }
                   radius={theme.radius.md}
-                  placeholder='Search...'
+                  placeholder="Search..."
                 />
 
-                <ScrollArea h={'calc(92vh - 90px)'}>
+                <ScrollArea h={"calc(92vh - 90px)"}>
                   <Stack spacing={0}>
                     {/* Grouped prospects by overall status */}
                     {prospectGroups.map((group, index) => (
                       <Box key={index}>
-                        <Box bg='blue.1' py={'sm'} px={'md'} color='blue'>
-                          <Flex w='100%'>
-                            <Text color='blue' ta='center' fz={14} fw={700}>
+                        <Box bg="blue.1" py={"sm"} px={"md"} color="blue">
+                          <Flex w="100%">
+                            <Text color="blue" ta="center" fz={14} fw={700}>
                               {labelizeConvoSubstatus(group[0])}
                             </Text>
-                            <Badge color='blue' size='xs' ml='xs' mt='2px'>
+                            <Badge color="blue" size="xs" ml="xs" mt="2px">
                               {group[1].length}
                             </Badge>
                           </Flex>
@@ -294,14 +325,23 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                                 id={prospect.prospect_id}
                                 name={prospect.full_name}
                                 title={prospect.title}
-                                img_url={''}
-                                latest_msg={prospect.email_last_message_from_prospect ?? ''}
-                                latest_msg_time={prospect.li_last_message_timestamp ?? ''}
+                                img_url={""}
+                                latest_msg={
+                                  prospect.email_last_message_from_prospect ??
+                                  ""
+                                }
+                                latest_msg_time={
+                                  prospect.li_last_message_timestamp ?? ""
+                                }
                                 icp_fit={-1}
                                 new_msg_count={0}
                                 latest_msg_from_sdr={false}
-                                default_channel={mainTab !== 'snoozed' ? 'LINKEDIN' : undefined}
-                                opened={prospect.prospect_id === openedProspectId}
+                                default_channel={
+                                  mainTab !== "snoozed" ? "LINKEDIN" : undefined
+                                }
+                                opened={
+                                  prospect.prospect_id === openedProspectId
+                                }
                                 snoozed_until={prospect.hidden_until}
                               />
                             </Box>
@@ -315,7 +355,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
             </>
           </Stack>
           {prospectGroups.length === 0 && (
-            <Text ta='center' fz='sm' c='dimmed' fs='italic' py='sm'>
+            <Text ta="center" fz="sm" c="dimmed" fs="italic" py="sm">
               No prospects found.
             </Text>
           )}

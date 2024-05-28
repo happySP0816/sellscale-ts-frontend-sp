@@ -406,7 +406,7 @@ export default function CampaignLandingV2() {
     });
   };
   return (
-    <Paper p={"lg"} maw={1100} h="100%" style={{ backgroundColor: "transparent" }}>
+    <Paper p={"lg"} maw={1250} h="100%" style={{ backgroundColor: "transparent" }}>
       <Modal opened={showSettingsModal} onClose={() => setShowSettingsModal(false)} size="350px">
         <Title mb="xl" size={"sm"} align="center">
           Campaign Settings

@@ -475,7 +475,7 @@ export default function CampaignLandingV2() {
           style={{ border: "none" }}
         ></iframe>
       </Modal>
-      {/* {loadingStats || !statsData ? (
+      {loadingStats || !statsData ? (
         <Flex
           mx={"xl"}
           direction="column"
@@ -496,222 +496,222 @@ export default function CampaignLandingV2() {
             </Text>
           </Flex>
         </Flex>
-      ) : ( */}
-      <Flex style={{ backgroundColor: "white", border: "1px solid lightblue", borderRadius: "6px" }}>
-        <Flex direction={"column"} w={"100%"}>
-          {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
-          <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
-            <Flex gap={"sm"} align={"center"} justify="space-between" w="100%">
-              <Flex gap={"sm"} align={"center"}>
-                {statsData?.emoji}
-                <Text fw={600} size={20}>
-                  {statsData?.archetype_name}
-                </Text>
-                <Button
-                  tt={"uppercase"}
-                  variant="light"
-                  size="xs"
-                  disabled={status === "INACTIVE" && true}
-                  color={status === "SETUP" ? "orange" : status === "ACTIVE" ? "green" : ""}
-                  onClick={() => {
-                    if (status === "SETUP") setStatus("ACTIVE");
-                    else if (status === "ACTIVE") {
-                      setStatus("ACTIVE");
-                    }
-                  }}
-                >
-                  {status}
-                </Button>
-              </Flex>
-              <ActionIcon variant="light" color="gray" onClick={() => setShowSettingsModal(true)}>
-                <IconSettings size={"1.2rem"} />
-              </ActionIcon>
-            </Flex>
-            <Flex align={"center"} gap={"xs"}>
-              <Text color="gray" size={"xs"} fw={600}>
-                Created by:
-              </Text>
-              {/* <Avatar size={"sm"} src={proxyURL(statsData.sdr_img_url)} sx={{ borderRadius: "50%" }} /> */}
-              <Text fw={600} size={"xs"}>
-                {statsData?.sdr_name}
-              </Text>
-              <Divider orientation="vertical" h={"70%"} my={"auto"} />
-              <Text color="gray" size={"xs"} fw={600}>
-                Created:
-              </Text>
-              <Text fw={600} size={"xs"}>
-                {/* {new Date(statsData.created_at).toLocaleString("en-US", {
-                  dateStyle: "full",
-                })} */}
-              </Text>
-            </Flex>
-          </Flex>
-          <Flex gap={"sm"} w={"100%"} justify={"center"} p={"lg"}>
-            <Paper w={"100%"} withBorder>
-              {/* {loadingStats || !statsData ? (
-                <Flex direction="row" align="center" w="100%" my="md">
-                  <Flex direction="column" align="center" w="100%" my="md">
-                    <Skeleton height={50} width="80%" />
-                  </Flex>
-                  <Flex direction="column" align="center" w="100%" my="md">
-                    <Skeleton height={50} width="80%" />
-                  </Flex>
-                  <Flex direction="column" align="center" w="100%" my="md">
-                    <Skeleton height={50} width="80%" />
-                  </Flex>
-                  <Flex direction="column" align="center" w="100%" my="md">
-                    <Skeleton height={50} width="80%" />
-                  </Flex>
-                  <Flex direction="column" align="center" w="100%" my="md">
-                    <Skeleton height={50} width="80%" />
-                  </Flex>
-                </Flex>
-              ) : ( */}
-              <Flex align={"center"} justify={"space-between"} h={"100%"} w="100%">
-                <Box p={"lg"} w={"100%"} h={"100%"}>
-                  <Flex align={"center"} gap={"xs"}>
-                    <IconSend size={"0.9rem"} color="#3B85EF" className="mb-[2px]" />
-                    <Text fw={400} size={"sm"}>
-                      Sent
-                    </Text>
-                  </Flex>
-                  <Flex align={"center"} gap={"sm"}>
-                    {/* <Text fz={24}>{statsData.num_sent}</Text> */}
-                    <Badge color={"#3B85EF"} size="xs">
-                      {`${(100).toFixed(0)}%`}
-                    </Badge>
-                  </Flex>
-                </Box>
-                <Divider orientation="vertical" />
-                <Box p={"lg"} w={"100%"} h={"100%"}>
-                  <Flex align={"center"} gap={6}>
-                    <IconChecks size={"0.9rem"} color="pink" className="mb-[2px]" />
-                    <Text fw={400} size={"sm"}>
-                      Open
-                    </Text>
-                  </Flex>
-                  <Flex align={"center"} gap={"sm"}>
-                    {/* <Text fz={24}>{statsData.num_opens}</Text> */}
-                    <Badge color="pink" size="xs">
-                      {/* {`${((statsData.num_opens / (statsData.num_sent + 0.0001)) * 100).toFixed(0)}%`} */}
-                    </Badge>
-                  </Flex>
-                </Box>
-                <Divider orientation="vertical" />
-                <Box p={"lg"} w={"100%"} h={"100%"}>
-                  <Flex align={"center"} gap={6}>
-                    <IconMessageCheck size={"0.9rem"} color="orange" className="mb-[2px]" />
-                    <Text fw={400} size={"sm"}>
-                      Reply
-                    </Text>
-                  </Flex>
-                  <Flex align={"center"} gap={"sm"}>
-                    {/* <Text fz={24}>{statsData.num_replies}</Text> */}
-                    <Badge color="orange" size="xs">
-                      {/* {`${((statsData.num_replies / (statsData.num_opens + 0.0001)) * 100).toFixed(0)}%`} */}
-                    </Badge>
-                  </Flex>
-                </Box>
-                <Divider orientation="vertical" />
-                <Box p={"lg"} w={"100%"} h={"100%"}>
-                  <Flex align={"center"} gap={6}>
-                    <IconMessageCheck size={"0.9rem"} color="green" className="mb-[2px]" />
-                    <Text fw={400} size={"sm"}>
-                      (+) Reply
-                    </Text>
-                  </Flex>
-                  <Flex align={"center"} gap={"sm"}>
-                    {/* <Text fz={24}>{statsData.num_pos_replies}</Text> */}
-                    <Badge color="green" size="xs">
-                      {/* {`${((statsData.num_pos_replies / (statsData.num_replies + 0.0001)) * 100).toFixed(0)}%`} */}
-                    </Badge>
-                  </Flex>
-                </Box>
-                <Divider orientation="vertical" />
-                <Box p={"lg"} w={"100%"} h={"100%"}>
-                  <Flex align={"center"} gap={6}>
-                    <IconCalendar size={"0.9rem"} color={"#3B85EF"} className="mb-[2px]" />
-                    <Text fw={400}>Demo</Text>
-                  </Flex>
-                  <Flex align={"center"} gap={"sm"}>
-                    {/* <Text fz={24}>{statsData.num_demos}</Text> */}
-                    <Badge color="blue" size="xs">
-                      {/* {`${((statsData.num_demos / (statsData.num_pos_replies + 0.0001)) * 100).toFixed(0)}%`} */}
-                    </Badge>
-                  </Flex>
-                </Box>
-              </Flex>
-              {/* )} */}
-            </Paper>
-            <Flex w={"60%"}>
-              <Paper p="md" withBorder w={"100%"}>
-                <Flex justify={"space-between"}>
-                  <Text size={"xs"} fw={500}>
-                    Weekly Outreach Volume
+      ) : (
+        <Flex style={{ backgroundColor: "white", border: "1px solid lightblue", borderRadius: "6px" }}>
+          <Flex direction={"column"} w={"100%"}>
+            {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
+            <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
+              <Flex gap={"sm"} align={"center"} justify="space-between" w="100%">
+                <Flex gap={"sm"} align={"center"}>
+                  {statsData?.emoji}
+                  <Text fw={600} size={20}>
+                    {statsData?.archetype_name}
                   </Text>
-                  <Text size={"xs"} fw={500}>
-                    {testingVolume}/week{" "}
-                    {cycleStatus && (
-                      <Text component="span" color="red" size="xs" fw={700} ml={4}>
-                        (Unsaved)
-                      </Text>
-                    )}
-                    <Text component="span" underline color="#228be6" size="xs" fw={700} ml={4}>
-                      Analytics
-                    </Text>
-                  </Text>
-                </Flex>
-                <Flex w={"100%"} align={"start"} gap={"sm"} mt={"md"}>
-                  <Slider
-                    w={"100%"}
-                    // defaultValue={statsData.testing_volume}
-                    value={testingVolume}
-                    onChange={(value) => {
-                      setCycleStatus(true);
-                      setTestingVolume(value);
-                      // statsData.testing_volume = value;
-                    }}
-                    max={500}
-                    marks={[
-                      { value: 0, label: "0" },
-                      {
-                        value: 500,
-                        label: (
-                          <div
-                            style={{
-                              whiteSpace: "nowrap",
-                              marginLeft: "-100px",
-                            }}
-                          >
-                            Max
-                          </div>
-                        ),
-                      },
-                    ]}
-                  />
                   <Button
-                    disabled={!cycleStatus}
-                    onClick={async () => {
-                      const clientArchetypeId = Number(id);
-                      const response = await patchTestingVolume(userToken, clientArchetypeId, testingVolume);
-                      if (response) {
-                        console.log("Testing volume updated successfully", response);
+                    tt={"uppercase"}
+                    variant="light"
+                    size="xs"
+                    disabled={status === "INACTIVE" && true}
+                    color={status === "SETUP" ? "orange" : status === "ACTIVE" ? "green" : ""}
+                    onClick={() => {
+                      if (status === "SETUP") setStatus("ACTIVE");
+                      else if (status === "ACTIVE") {
+                        setStatus("ACTIVE");
                       }
-                      setLoadingStats(true);
-                      await fetchCampaignStats(userToken, clientArchetypeId);
-                      setLoadingStats(false);
-                      setCycleStatus(false);
                     }}
                   >
-                    Save
+                    {status}
                   </Button>
                 </Flex>
+                <ActionIcon variant="light" color="gray" onClick={() => setShowSettingsModal(true)}>
+                  <IconSettings size={"1.2rem"} />
+                </ActionIcon>
+              </Flex>
+              <Flex align={"center"} gap={"xs"}>
+                <Text color="gray" size={"xs"} fw={600}>
+                  Created by:
+                </Text>
+                <Avatar size={"sm"} src={proxyURL(statsData.sdr_img_url)} sx={{ borderRadius: "50%" }} />
+                <Text fw={600} size={"xs"}>
+                  {statsData?.sdr_name}
+                </Text>
+                <Divider orientation="vertical" h={"70%"} my={"auto"} />
+                <Text color="gray" size={"xs"} fw={600}>
+                  Created:
+                </Text>
+                <Text fw={600} size={"xs"}>
+                  {new Date(statsData.created_at).toLocaleString("en-US", {
+                    dateStyle: "full",
+                  })}
+                </Text>
+              </Flex>
+            </Flex>
+            <Flex gap={"sm"} w={"100%"} justify={"center"} p={"lg"}>
+              <Paper w={"100%"} withBorder>
+                {loadingStats || !statsData ? (
+                  <Flex direction="row" align="center" w="100%" my="md">
+                    <Flex direction="column" align="center" w="100%" my="md">
+                      <Skeleton height={50} width="80%" />
+                    </Flex>
+                    <Flex direction="column" align="center" w="100%" my="md">
+                      <Skeleton height={50} width="80%" />
+                    </Flex>
+                    <Flex direction="column" align="center" w="100%" my="md">
+                      <Skeleton height={50} width="80%" />
+                    </Flex>
+                    <Flex direction="column" align="center" w="100%" my="md">
+                      <Skeleton height={50} width="80%" />
+                    </Flex>
+                    <Flex direction="column" align="center" w="100%" my="md">
+                      <Skeleton height={50} width="80%" />
+                    </Flex>
+                  </Flex>
+                ) : (
+                  <Flex align={"center"} justify={"space-between"} h={"100%"} w="100%">
+                    <Box p={"lg"} w={"100%"} h={"100%"}>
+                      <Flex align={"center"} gap={"xs"}>
+                        <IconSend size={"0.9rem"} color="#3B85EF" className="mb-[2px]" />
+                        <Text fw={400} size={"sm"}>
+                          Sent
+                        </Text>
+                      </Flex>
+                      <Flex align={"center"} gap={"sm"}>
+                        <Text fz={24}>{statsData.num_sent}</Text>
+                        <Badge color={"#3B85EF"} size="xs">
+                          {`${(100).toFixed(0)}%`}
+                        </Badge>
+                      </Flex>
+                    </Box>
+                    <Divider orientation="vertical" />
+                    <Box p={"lg"} w={"100%"} h={"100%"}>
+                      <Flex align={"center"} gap={6}>
+                        <IconChecks size={"0.9rem"} color="pink" className="mb-[2px]" />
+                        <Text fw={400} size={"sm"}>
+                          Open
+                        </Text>
+                      </Flex>
+                      <Flex align={"center"} gap={"sm"}>
+                        <Text fz={24}>{statsData.num_opens}</Text>
+                        <Badge color="pink" size="xs">
+                          {`${((statsData.num_opens / (statsData.num_sent + 0.0001)) * 100).toFixed(0)}%`}
+                        </Badge>
+                      </Flex>
+                    </Box>
+                    <Divider orientation="vertical" />
+                    <Box p={"lg"} w={"100%"} h={"100%"}>
+                      <Flex align={"center"} gap={6}>
+                        <IconMessageCheck size={"0.9rem"} color="orange" className="mb-[2px]" />
+                        <Text fw={400} size={"sm"}>
+                          Reply
+                        </Text>
+                      </Flex>
+                      <Flex align={"center"} gap={"sm"}>
+                        <Text fz={24}>{statsData.num_replies}</Text>
+                        <Badge color="orange" size="xs">
+                          {`${((statsData.num_replies / (statsData.num_opens + 0.0001)) * 100).toFixed(0)}%`}
+                        </Badge>
+                      </Flex>
+                    </Box>
+                    <Divider orientation="vertical" />
+                    <Box p={"lg"} w={"100%"} h={"100%"}>
+                      <Flex align={"center"} gap={6}>
+                        <IconMessageCheck size={"0.9rem"} color="green" className="mb-[2px]" />
+                        <Text fw={400} size={"sm"}>
+                          (+) Reply
+                        </Text>
+                      </Flex>
+                      <Flex align={"center"} gap={"sm"}>
+                        <Text fz={24}>{statsData.num_pos_replies}</Text>
+                        <Badge color="green" size="xs">
+                          {`${((statsData.num_pos_replies / (statsData.num_replies + 0.0001)) * 100).toFixed(0)}%`}
+                        </Badge>
+                      </Flex>
+                    </Box>
+                    <Divider orientation="vertical" />
+                    <Box p={"lg"} w={"100%"} h={"100%"}>
+                      <Flex align={"center"} gap={6}>
+                        <IconCalendar size={"0.9rem"} color={"#3B85EF"} className="mb-[2px]" />
+                        <Text fw={400}>Demo</Text>
+                      </Flex>
+                      <Flex align={"center"} gap={"sm"}>
+                        <Text fz={24}>{statsData.num_demos}</Text>
+                        <Badge color="blue" size="xs">
+                          {`${((statsData.num_demos / (statsData.num_pos_replies + 0.0001)) * 100).toFixed(0)}%`}
+                        </Badge>
+                      </Flex>
+                    </Box>
+                  </Flex>
+                )}
               </Paper>
+              <Flex w={"60%"}>
+                <Paper p="md" withBorder w={"100%"}>
+                  <Flex justify={"space-between"}>
+                    <Text size={"xs"} fw={500}>
+                      Weekly Outreach Volume
+                    </Text>
+                    <Text size={"xs"} fw={500}>
+                      {testingVolume}/week{" "}
+                      {cycleStatus && (
+                        <Text component="span" color="red" size="xs" fw={700} ml={4}>
+                          (Unsaved)
+                        </Text>
+                      )}
+                      <Text component="span" underline color="#228be6" size="xs" fw={700} ml={4}>
+                        Analytics
+                      </Text>
+                    </Text>
+                  </Flex>
+                  <Flex w={"100%"} align={"start"} gap={"sm"} mt={"md"}>
+                    <Slider
+                      w={"100%"}
+                      // defaultValue={statsData.testing_volume}
+                      value={testingVolume}
+                      onChange={(value) => {
+                        setCycleStatus(true);
+                        setTestingVolume(value);
+                        // statsData.testing_volume = value;
+                      }}
+                      max={500}
+                      marks={[
+                        { value: 0, label: "0" },
+                        {
+                          value: 500,
+                          label: (
+                            <div
+                              style={{
+                                whiteSpace: "nowrap",
+                                marginLeft: "-100px",
+                              }}
+                            >
+                              Max
+                            </div>
+                          ),
+                        },
+                      ]}
+                    />
+                    <Button
+                      disabled={!cycleStatus}
+                      onClick={async () => {
+                        const clientArchetypeId = Number(id);
+                        const response = await patchTestingVolume(userToken, clientArchetypeId, testingVolume);
+                        if (response) {
+                          console.log("Testing volume updated successfully", response);
+                        }
+                        setLoadingStats(true);
+                        await fetchCampaignStats(userToken, clientArchetypeId);
+                        setLoadingStats(false);
+                        setCycleStatus(false);
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </Flex>
+                </Paper>
+              </Flex>
             </Flex>
           </Flex>
         </Flex>
-      </Flex>
-      {/* )} */}
+      )}
       <Flex gap={"lg"} mt={"md"}>
         <Flex direction={"column"} gap={"md"} w={"80%"}>
           <Paper withBorder>

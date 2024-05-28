@@ -1,6 +1,7 @@
-import { ActionIcon, Avatar, Badge, Box, Button, Checkbox, Divider, Flex, Paper, ScrollArea, Select, Text, Textarea } from "@mantine/core";
-import { ContextModalProps } from "@mantine/modals";
+import { ActionIcon, Avatar, Badge, Box, Button, Checkbox, Divider, Title, Flex, Paper, ScrollArea, Select, Text, Textarea } from "@mantine/core";
+import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { IconBuilding, IconBulb, IconEdit, IconPlus, IconPoint, IconTrash } from "@tabler/icons";
+import { IconSparkles } from "@tabler/icons-react";
 import { useState } from "react";
 
 export default function CampaignPersonalizersModal({
@@ -258,9 +259,36 @@ export default function CampaignPersonalizersModal({
           <Flex align={"center"} justify={"space-between"}>
             <Text fw={600}>Research Points</Text>
           </Flex>
-          <Button variant="outline" leftIcon={<IconPlus size={"0.9rem"} />} mr={"md"}>
-            Add research point
-          </Button>
+          <Flex>
+            <Button fullWidth leftIcon={<IconPlus size={"0.9rem"} />} mr={"md"}>
+              Research point
+            </Button>
+            <Button
+              fullWidth
+              variant="outline"
+              color="pink"
+              leftIcon={<IconSparkles size={"0.9rem"} />}
+              onClick={() =>
+                openContextModal({
+                  modal: "simulatepersonalizerModal",
+                  title: (
+                    <Title order={3}>
+                      <span className=" text-gray-500">Go back to</span> Personalizers
+                    </Title>
+                  ),
+                  innerProps: {},
+                  centered: true,
+                  styles: {
+                    content: {
+                      minWidth: "700px",
+                    },
+                  },
+                })
+              }
+            >
+              Personalize
+            </Button>
+          </Flex>
           <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
             <Flex h={"100%"} gap={"xs"} direction={"column"}>
               {researchData.map((item, index) => {

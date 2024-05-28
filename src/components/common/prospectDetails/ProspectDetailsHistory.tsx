@@ -1,6 +1,9 @@
-import { prospectDrawerNotesState, prospectDrawerOpenState } from '@atoms/prospectAtoms';
-import { userTokenState } from '@atoms/userAtoms';
-import { API_URL } from '@constants/data';
+import {
+  prospectDrawerNotesState,
+  prospectDrawerOpenState,
+} from "@atoms/prospectAtoms";
+import { userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
 import {
   createStyles,
   Card,
@@ -20,7 +23,7 @@ import {
   Divider,
   ActionIcon,
   Tooltip,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconBrandLinkedin,
   IconBrandTelegram,
@@ -39,36 +42,36 @@ import {
   IconReportAnalytics,
   IconStatusChange,
   IconUserPlus,
-} from '@tabler/icons';
-import { IconClockBolt } from '@tabler/icons-react';
+} from "@tabler/icons";
+import { IconClockBolt } from "@tabler/icons-react";
 import {
   convertDateToCasualTime,
   convertDateToLocalTime,
   formatToLabel,
   splitName,
   valueToColor,
-} from '@utils/general';
-import displayNotification from '@utils/notificationFlow';
-import { getProspectHistory } from '@utils/requests/getProspectHistory';
-import { addProspectNote } from '@utils/requests/prospectNotes';
-import _ from 'lodash';
+} from "@utils/general";
+import displayNotification from "@utils/notificationFlow";
+import { getProspectHistory } from "@utils/requests/getProspectHistory";
+import { addProspectNote } from "@utils/requests/prospectNotes";
+import _ from "lodash";
 
-import { useEffect, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { MsgResponse, ProspectNote } from 'src';
+import { useEffect, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { MsgResponse, ProspectNote } from "src";
 
 type HistoryEvent =
-  | 'CREATED'
-  | 'INTRO_MESSAGE'
-  | 'NOTE'
-  | 'LINKEDIN_MESSAGE'
-  | 'EMAIL_MESSAGE'
-  | 'STATUS_CHANGE'
-  | 'DEMO_FEEDBACK'
-  | 'EMAIL_OPENED'
-  | 'EMAIL_LINK_CLICKED'
+  | "CREATED"
+  | "INTRO_MESSAGE"
+  | "NOTE"
+  | "LINKEDIN_MESSAGE"
+  | "EMAIL_MESSAGE"
+  | "STATUS_CHANGE"
+  | "DEMO_FEEDBACK"
+  | "EMAIL_OPENED"
+  | "EMAIL_LINK_CLICKED";
 
-type Channel = 'LINKEDIN' | 'EMAIL';
+type Channel = "LINKEDIN" | "EMAIL";
 interface HistoryItem extends Record<string, string> {
   event: HistoryEvent;
   date: string;
@@ -78,57 +81,57 @@ interface HistoryItem extends Record<string, string> {
 function historyEventToIcon(event: HistoryEvent, size?: number) {
   size = size || 12;
   switch (event) {
-    case 'CREATED':
+    case "CREATED":
       return (
-        <ThemeIcon color='green' radius='xl'>
+        <ThemeIcon color="green" radius="xl">
           <IconUserPlus size={size} />
         </ThemeIcon>
       );
-    case 'INTRO_MESSAGE':
+    case "INTRO_MESSAGE":
       return (
-        <ThemeIcon color='teal' radius='xl'>
+        <ThemeIcon color="teal" radius="xl">
           <IconBrandTelegram size={size} />
         </ThemeIcon>
       );
-    case 'NOTE':
+    case "NOTE":
       return (
-        <ThemeIcon color='indigo' radius='xl'>
+        <ThemeIcon color="indigo" radius="xl">
           <IconNotebook size={size} />
         </ThemeIcon>
       );
-    case 'LINKEDIN_MESSAGE':
+    case "LINKEDIN_MESSAGE":
       return (
-        <ThemeIcon color='blue' radius='xl'>
+        <ThemeIcon color="blue" radius="xl">
           <IconBrandLinkedin size={size} />
         </ThemeIcon>
       );
-    case 'EMAIL_MESSAGE':
+    case "EMAIL_MESSAGE":
       return (
-        <ThemeIcon color='blue' radius='xl'>
+        <ThemeIcon color="blue" radius="xl">
           <IconMail size={size} />
         </ThemeIcon>
       );
-    case 'STATUS_CHANGE':
+    case "STATUS_CHANGE":
       return (
-        <ThemeIcon color='yellow' radius='xl'>
+        <ThemeIcon color="yellow" radius="xl">
           <IconStatusChange size={size} />
         </ThemeIcon>
       );
-    case 'DEMO_FEEDBACK':
+    case "DEMO_FEEDBACK":
       return (
-        <ThemeIcon color='grape' radius='xl'>
+        <ThemeIcon color="grape" radius="xl">
           <IconReportAnalytics size={size} />
         </ThemeIcon>
       );
-    case 'EMAIL_OPENED':
+    case "EMAIL_OPENED":
       return (
-        <ThemeIcon color='blue' radius='xl'>
+        <ThemeIcon color="blue" radius="xl">
           <IconMailOpened size={size} />
         </ThemeIcon>
       );
-    case 'EMAIL_LINK_CLICKED':
+    case "EMAIL_LINK_CLICKED":
       return (
-        <ThemeIcon color='blue' radius='xl'>
+        <ThemeIcon color="blue" radius="xl">
           <IconLink size={size} />
         </ThemeIcon>
       );
@@ -139,19 +142,19 @@ function historyEventToIcon(event: HistoryEvent, size?: number) {
 
 function historyEventToTimeSavedMinutes(event: HistoryEvent) {
   switch (event) {
-    case 'CREATED':
+    case "CREATED":
       return 1;
-    case 'INTRO_MESSAGE':
+    case "INTRO_MESSAGE":
       return 5;
-    case 'NOTE':
+    case "NOTE":
       return 3;
-    case 'LINKEDIN_MESSAGE':
+    case "LINKEDIN_MESSAGE":
       return 2;
-    case 'EMAIL_MESSAGE':
+    case "EMAIL_MESSAGE":
       return 5;
-    case 'STATUS_CHANGE':
+    case "STATUS_CHANGE":
       return 1.5;
-    case 'DEMO_FEEDBACK':
+    case "DEMO_FEEDBACK":
       return 5;
     default:
       return 0.5;
@@ -160,39 +163,55 @@ function historyEventToTimeSavedMinutes(event: HistoryEvent) {
 
 function historyEventToDescription(theme: MantineTheme, item: HistoryItem) {
   switch (item.event) {
-    case 'CREATED':
+    case "CREATED":
       return `Prospect created`;
-    case 'INTRO_MESSAGE':
+    case "INTRO_MESSAGE":
       return `Sent outreach: "${item.message.trim()}"`;
-    case 'NOTE':
+    case "NOTE":
       return `Updated note: "${item.message.trim()}"`;
-    case 'LINKEDIN_MESSAGE':
-      if (item.author === 'You') {
+    case "LINKEDIN_MESSAGE":
+      if (item.author === "You") {
         return `Sent message: "${item.message.trim()}"`;
       } else {
         return `Received message: "${item.message.trim()}"`;
       }
-    case 'EMAIL_MESSAGE':
+    case "EMAIL_MESSAGE":
       if (item.from_sdr) {
-        return `Sent email: "${item.email_body}"`;
+        return (
+          <div
+            style={{ maxHeight: "250px", overflowY: "auto" }}
+            dangerouslySetInnerHTML={{
+              __html: `Sent email: "${item.email_body}"`,
+            }}
+          />
+        );
       } else {
-        return `Received email: "${item.email_body}"`;
+        return (
+          <div
+            style={{ maxHeight: "250px", overflowY: "auto" }}
+            dangerouslySetInnerHTML={{
+              __html: `Received email: "${item.email_body}"`,
+            }}
+          />
+        );
       }
-    case 'STATUS_CHANGE':
+    case "STATUS_CHANGE":
       return (
         <>
-          Status changed to{' '}
+          Status changed to{" "}
           {/* <Badge color={valueToColor(theme, formatToLabel(item.from))} size='xs'>
             {formatToLabel(item.from)}
           </Badge>{" "}
           to{" "} */}
-          <Badge color={valueToColor(theme, formatToLabel(item.to))} size='xs'>
+          <Badge color={valueToColor(theme, formatToLabel(item.to))} size="xs">
             {formatToLabel(item.to)}
           </Badge>
         </>
       );
-    case 'DEMO_FEEDBACK':
-      return `Wrote demo feedback: ${item.status}, ${item.rating}, "${item.feedback.trim()}"`;
+    case "DEMO_FEEDBACK":
+      return `Wrote demo feedback: ${item.status}, ${
+        item.rating
+      }, "${item.feedback.trim()}"`;
     default:
       return <></>;
   }
@@ -237,43 +256,43 @@ export default function ProspectDetailsHistory(props: {
   let events: HistoryItem[] = [];
   if (linkedinHistory) {
     events.push({
-      event: 'CREATED',
+      event: "CREATED",
       date: linkedinHistory.creation_date,
-      channel: 'LINKEDIN',
+      channel: "LINKEDIN",
     });
     if (linkedinHistory.demo_feedback) {
       events.push({
-        event: 'DEMO_FEEDBACK',
+        event: "DEMO_FEEDBACK",
         ...linkedinHistory.demo_feedback,
-        channel: 'LINKEDIN',
+        channel: "LINKEDIN",
       });
     }
     if (linkedinHistory.intro_message) {
       events.push({
-        event: 'INTRO_MESSAGE',
+        event: "INTRO_MESSAGE",
         ...linkedinHistory.intro_message,
-        channel: 'LINKEDIN',
+        channel: "LINKEDIN",
       });
     }
     for (const msg of linkedinHistory.convo) {
       events.push({
-        event: 'LINKEDIN_MESSAGE',
+        event: "LINKEDIN_MESSAGE",
         ...msg,
-        channel: 'LINKEDIN',
+        channel: "LINKEDIN",
       });
     }
     for (const note of linkedinHistory.notes) {
       events.push({
-        event: 'NOTE',
+        event: "NOTE",
         ...note,
-        channel: 'LINKEDIN',
+        channel: "LINKEDIN",
       });
     }
     for (const status of linkedinHistory.statuses) {
       events.push({
-        event: 'STATUS_CHANGE',
+        event: "STATUS_CHANGE",
         ...status,
-        channel: 'LINKEDIN',
+        channel: "LINKEDIN",
       });
     }
   }
@@ -281,28 +300,32 @@ export default function ProspectDetailsHistory(props: {
   if (emailHistory) {
     for (const status of emailHistory.email_statuses) {
       events.push({
-        event: 'STATUS_CHANGE',
+        event: "STATUS_CHANGE",
         ...status,
-        channel: 'EMAIL',
+        channel: "EMAIL",
       });
     }
     for (const msg of emailHistory.emails) {
       events.push({
-        event: 'EMAIL_MESSAGE',
+        event: "EMAIL_MESSAGE",
         ...msg,
-        channel: 'EMAIL',
+        channel: "EMAIL",
       });
     }
   }
 
   if (engagementHistory) {
     for (const engagement of engagementHistory) {
-      // Deduplicate using a "1 minute" heuristic. 
+      // Deduplicate using a "1 minute" heuristic.
       // If the date of this engagement is within 1 minute of any date in events, then we omit this engagement.
       let skip = false;
       const engagementUTC = new Date(engagement.created_at + "Z");
       for (const event of events) {
-        if (Math.abs(new Date(engagementUTC).getTime() - new Date(event.date).getTime()) < 60000) {
+        if (
+          Math.abs(
+            new Date(engagementUTC).getTime() - new Date(event.date).getTime()
+          ) < 60000
+        ) {
           skip = true;
           break;
         }
@@ -320,10 +343,10 @@ export default function ProspectDetailsHistory(props: {
 
   // Remove status change dupes that seem to be a bug in the backend
   events = _.uniqWith(events, (obj1, obj2) => {
-    if (obj1.event !== 'STATUS_CHANGE' || obj2.event !== 'STATUS_CHANGE') {
+    if (obj1.event !== "STATUS_CHANGE" || obj2.event !== "STATUS_CHANGE") {
       return false;
     }
-    return _.isEqual(_.omit(obj1, 'date'), _.omit(obj2, 'date'));
+    return _.isEqual(_.omit(obj1, "date"), _.omit(obj2, "date"));
   });
 
   // sort reversed
@@ -332,56 +355,63 @@ export default function ProspectDetailsHistory(props: {
 
   if (loadingHistory) {
     return (
-      <Box p='xs'>
-        <Loader m='auto auto' />
+      <Box p="xs">
+        <Loader m="auto auto" />
       </Box>
     );
   }
 
   return (
-    <Box p='0'>
-      <Box sx={{ display: 'flex', flexDirection: 'row' }} mt='0px' mb='sm' pl='md' pr='md' pt='xs'>
+    <Box p="0">
+      <Box
+        sx={{ display: "flex", flexDirection: "row" }}
+        mt="0px"
+        mb="sm"
+        pl="md"
+        pr="md"
+        pt="xs"
+      >
         <ActionIcon>
           <IconClockBolt color={theme.colors.blue[6]} size={16} />
         </ActionIcon>
-        <Text size='sm' color='blue' ml='xs' fw='bold' mt='4px'>
-          Prospect AI Runtime:{' '}
+        <Text size="sm" color="blue" ml="xs" fw="bold" mt="4px">
+          Prospect AI Runtime:{" "}
         </Text>
-        <Text size='sm' color='black' ml='xs' fw='bold' mt='4px'>
+        <Text size="sm" color="black" ml="xs" fw="bold" mt="4px">
           {events
             ?.map((item, i) => historyEventToTimeSavedMinutes(item.event))
-            .reduce((a, b) => a + b, 0)}{' '}
+            .reduce((a, b) => a + b, 0)}{" "}
           min
         </Text>
 
         <Tooltip
-          label='The total amount of AI runtime SellScale saved you on nurturing this prospect.'
+          label="The total amount of AI runtime SellScale saved you on nurturing this prospect."
           withinPortal
         >
-          <ActionIcon ml='xs' mt='0px'>
+          <ActionIcon ml="xs" mt="0px">
             <IconInfoCircle color={theme.colors.gray[6]} size={16} />
           </ActionIcon>
         </Tooltip>
       </Box>
       <Divider />
-      <Box p='md'>
+      <Box p="md">
         <Timeline bulletSize={24} lineWidth={2}>
           {events?.map((item, i) => (
             <Timeline.Item
               key={i}
               title={
-                <Text size='sm' weight={500}>
+                <Text size="sm" weight={500}>
                   {_.startCase(item.event.toLowerCase())}
                   <Badge
-                    size='xs'
-                    variant='outline'
-                    color={'gray'}
-                    mt='-8px'
-                    ml='sm'
+                    size="xs"
+                    variant="outline"
+                    color={"gray"}
+                    mt="-8px"
+                    ml="sm"
                     leftSection={
                       <IconClock
                         size={12}
-                        style={{ marginTop: '4px' }}
+                        style={{ marginTop: "4px" }}
                         color={theme.colors.blue[6]}
                       />
                     }
@@ -391,13 +421,16 @@ export default function ProspectDetailsHistory(props: {
                 </Text>
               }
               bullet={historyEventToIcon(item.event)}
-              lineVariant='dashed'
+              lineVariant="dashed"
             >
-              <Text color='dimmed' size='xs'>
+              <Text color="dimmed" size="xs">
                 {historyEventToDescription(theme, item)}
               </Text>
-              <Tooltip label={convertDateToLocalTime(new Date(item.date))} openDelay={500}>
-                <Text size='xs' mt={4}>
+              <Tooltip
+                label={convertDateToLocalTime(new Date(item.date))}
+                openDelay={500}
+              >
+                <Text size="xs" mt={4}>
                   {convertDateToCasualTime(new Date(item.date))}
                 </Text>
               </Tooltip>

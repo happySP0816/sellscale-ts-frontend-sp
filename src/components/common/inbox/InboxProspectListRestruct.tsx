@@ -48,7 +48,13 @@ import InboxProspectListFilter, {
   InboxProspectListFilterState,
   defaultInboxProspectListFilterState,
 } from "./InboxProspectListFilter";
-import { IconAlertCircle, IconChevronUp, IconGridDots } from "@tabler/icons";
+import {
+  IconAlarm,
+  IconAlertCircle,
+  IconChevronUp,
+  IconEdit,
+  IconGridDots,
+} from "@tabler/icons";
 import { useNavigate } from "react-router-dom";
 import {
   INBOX_PAGE_HEIGHT,
@@ -64,6 +70,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
 import { ProspectConvoCard } from "./InboxProspectList";
 import { currentInboxCountState } from "@atoms/personaAtoms";
+import { openContextModal } from "@mantine/modals";
 
 export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const theme = useMantineTheme();
@@ -270,6 +277,87 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
             </Tabs>
             <>
               <Stack spacing={0}>
+                {inboxTab === "manual" ? (
+                  <Box bg={"#E4E5E6"} p={"md"}>
+                    <Text size={"sm"} color="gray">
+                      Off load some of the messages you have to respond to by
+                      assigning them to your AI!
+                    </Text>
+                    <Flex
+                      align={"center"}
+                      gap={3}
+                      className="hover:cursor-pointer"
+                      onClick={() =>
+                        openContextModal({
+                          modal: "assignConversationAIModal",
+                          title: (
+                            <Flex align={"center"} justify={"space-between"}>
+                              <Text
+                                size={"24px"}
+                                fw={600}
+                                color="gray"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                                mr={"20rem"}
+                              >
+                                Assign Conversations to the AI
+                              </Text>
+                            </Flex>
+                          ),
+                          styles: {
+                            content: {
+                              minWidth: "800px",
+                            },
+                          },
+                          innerProps: {},
+                        })
+                      }
+                    >
+                      <IconEdit size={"0.9rem"} color="#228BE6" />
+                      <Text fw={500} underline size={"sm"} color="#228BE6">
+                        Edit who responds on what here
+                      </Text>
+                    </Flex>
+                  </Box>
+                ) : inboxTab === "ai" ? (
+                  <>
+                    <Box bg={"#E4E5E6"} p={"md"}>
+                      <Text size={"sm"} color="gray">
+                        Teach your AI to automate replies
+                      </Text>
+                      <Flex
+                        align={"center"}
+                        gap={3}
+                        className="hover:cursor-pointer"
+                      >
+                        <IconEdit size={"0.9rem"} color="#888" />
+                        <Tooltip label="Coming soon.">
+                          <Text fw={500} underline size={"sm"} color="#888">
+                            Edit reply frameworks
+                          </Text>
+                        </Tooltip>
+                      </Flex>
+                    </Box>
+                    <Flex
+                      bg={"#FFFAEA"}
+                      align={"center"}
+                      gap={"xs"}
+                      px={"md"}
+                      py={"sm"}
+                    >
+                      <IconAlarm size={"0.9rem"} color="orange" />
+                      <Text color="orange">
+                        AI set to clear inbox in{" "}
+                        <Badge color="orange">{"03"}</Badge>days
+                      </Text>
+                    </Flex>
+                  </>
+                ) : (
+                  <></>
+                )}
                 {/* Search bar */}
                 <Input
                   p={5}

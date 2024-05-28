@@ -24,53 +24,27 @@ import {
   rem,
   useMantineTheme,
 } from "@mantine/core";
-import {
-  IconSearch,
-  IconAdjustmentsFilled,
-  IconInfoCircle,
-  IconClock,
-  IconStar,
-  IconBellOff,
-  IconSparkles,
-} from "@tabler/icons-react";
+import { IconSearch, IconAdjustmentsFilled, IconInfoCircle, IconClock, IconStar, IconBellOff, IconSparkles } from "@tabler/icons-react";
 import _ from "lodash";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { forwardRef, useEffect, useState } from "react";
 import { HEADER_HEIGHT } from "./InboxProspectConvo";
-import {
-  labelizeConvoSubstatus,
-  prospectStatuses,
-  nurturingProspectStatuses,
-  getStatusDetails,
-  labelizeStatus,
-} from "./utils";
-import InboxProspectListFilter, {
-  InboxProspectListFilterState,
-  defaultInboxProspectListFilterState,
-} from "./InboxProspectListFilter";
-import { IconAlertCircle, IconChevronUp, IconGridDots } from "@tabler/icons";
+import { labelizeConvoSubstatus, prospectStatuses, nurturingProspectStatuses, getStatusDetails, labelizeStatus } from "./utils";
+import InboxProspectListFilter, { InboxProspectListFilterState, defaultInboxProspectListFilterState } from "./InboxProspectListFilter";
+import { IconAlarm, IconAlertCircle, IconChevronUp, IconEdit, IconGridDots } from "@tabler/icons";
 import { useNavigate } from "react-router-dom";
-import {
-  INBOX_PAGE_HEIGHT,
-  ProspectBucketRecord,
-  ProspectBuckets,
-} from "../../pages/InboxRestructurePage";
-import {
-  mainTabState,
-  openedProspectIdState,
-  openedProspectListState,
-} from "@atoms/inboxAtoms";
+import { INBOX_PAGE_HEIGHT, ProspectBucketRecord, ProspectBuckets } from "../../pages/InboxRestructurePage";
+import { mainTabState, openedProspectIdState, openedProspectListState } from "@atoms/inboxAtoms";
 import { useDisclosure } from "@mantine/hooks";
 import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
 import { ProspectConvoCard } from "./InboxProspectList";
 import { currentInboxCountState } from "@atoms/personaAtoms";
+import { openContextModal } from "@mantine/modals";
 
 export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const theme = useMantineTheme();
   const [openedList, setOpenedList] = useRecoilState(openedProspectListState);
-  const [openedProspectId, setOpenedProspectId] = useRecoilState(
-    openedProspectIdState
-  );
+  const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
 
   const [searchFilter, setSearchFilter] = useState("");
   const [mainTab, setMainTab] = useRecoilState(mainTabState);
@@ -89,12 +63,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const bucket = props.buckets[mainTab] as ProspectBucketRecord[];
 
   const prospects = bucket
-    .filter(
-      (p) =>
-        !["REMOVED", "NULL"].includes(
-          (p.overall_status ?? "NULL").toUpperCase()
-        )
-    )
+    .filter((p) => !["REMOVED", "NULL"].includes((p.overall_status ?? "NULL").toUpperCase()))
     .filter(
       (p) =>
         p.title?.toLowerCase().includes(searchFilter.toLowerCase()) ||
@@ -171,29 +140,17 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
             >
               <Tabs.List grow>
                 <Tabs.Tab value="manual">
-                  <Indicator
-                    size={6}
-                    disabled={props.buckets.manual_bucket.length === 0}
-                  >
-                    <Tooltip
-                      label="Messages you're responsible for."
-                      withinPortal
-                      position="right"
-                    >
+                  <Indicator size={6} disabled={props.buckets.manual_bucket.length === 0}>
+                    <Tooltip label="Messages you're responsible for." withinPortal position="right">
                       <Group spacing={5} noWrap>
                         <IconAlertCircle size="1rem" />
-                        {mainTab === "manual_bucket" && (
-                          <Text>Human Inbox</Text>
-                        )}
+                        {mainTab === "manual_bucket" && <Text>Human Inbox</Text>}
                       </Group>
                     </Tooltip>
                   </Indicator>
                 </Tabs.Tab>
                 <Tabs.Tab value="ai">
-                  <Indicator
-                    size={6}
-                    disabled={props.buckets.ai_bucket.length === 0}
-                  >
+                  <Indicator size={6} disabled={props.buckets.ai_bucket.length === 0}>
                     <Group spacing={5} noWrap>
                       <IconSparkles size="1rem" />
                       {mainTab === "ai_bucket" && <Text>Queued for AI</Text>}
@@ -205,11 +162,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                     <Tabs.Tab value="other">
                       <Group spacing={5} noWrap>
                         <IconGridDots size="1rem" />
-                        {inboxTab === "other" && (
-                          <Text>
-                            {_.startCase(mainTab.split("_bucket")[0])}
-                          </Text>
-                        )}
+                        {inboxTab === "other" && <Text>{_.startCase(mainTab.split("_bucket")[0])}</Text>}
                       </Group>
                     </Tabs.Tab>
                   </Menu.Target>
@@ -270,6 +223,73 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
             </Tabs>
             <>
               <Stack spacing={0}>
+                {inboxTab === "manual" ? (
+                  <Box bg={"#E4E5E6"} p={"md"}>
+                    <Text size={"sm"} color="gray">
+                      Off load some of the messages you have to respond to by assigning them to your AI!
+                    </Text>
+                    <Flex
+                      align={"center"}
+                      gap={3}
+                      className="hover:cursor-pointer"
+                      onClick={() =>
+                        openContextModal({
+                          modal: "assignConversationAIModal",
+                          title: (
+                            <Flex align={"center"} justify={"space-between"}>
+                              <Text
+                                size={"24px"}
+                                fw={600}
+                                color="gray"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                                mr={"20rem"}
+                              >
+                                Assign conversations to the AI
+                              </Text>
+                            </Flex>
+                          ),
+                          styles: {
+                            content: {
+                              minWidth: "800px",
+                            },
+                          },
+                          innerProps: {},
+                        })
+                      }
+                    >
+                      <IconEdit size={"0.9rem"} color="#228BE6" />
+                      <Text fw={500} underline size={"sm"} color="#228BE6">
+                        Edit who responds on what here
+                      </Text>
+                    </Flex>
+                  </Box>
+                ) : inboxTab === "ai" ? (
+                  <>
+                    <Box bg={"#E4E5E6"} p={"md"}>
+                      <Text size={"sm"} color="gray">
+                        Teach your AI to automate replies
+                      </Text>
+                      <Flex align={"center"} gap={3} className="hover:cursor-pointer">
+                        <IconEdit size={"0.9rem"} color="#228BE6" />
+                        <Text fw={500} underline size={"sm"} color="#228BE6">
+                          Edit reply frameworks
+                        </Text>
+                      </Flex>
+                    </Box>
+                    <Flex bg={"#FFFAEA"} align={"center"} gap={"xs"} px={"md"} py={"sm"}>
+                      <IconAlarm size={"0.9rem"} color="orange" />
+                      <Text color="orange">
+                        AI set to clear inbox in <Badge color="orange">{"03"}</Badge>days
+                      </Text>
+                    </Flex>
+                  </>
+                ) : (
+                  <></>
+                )}
                 {/* Search bar */}
                 <Input
                   p={5}
@@ -289,9 +309,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                   }}
                   icon={<IconSearch size="1.0rem" />}
                   value={searchFilter}
-                  onChange={(event) =>
-                    setSearchFilter(event.currentTarget.value)
-                  }
+                  onChange={(event) => setSearchFilter(event.currentTarget.value)}
                   radius={theme.radius.md}
                   placeholder="Search..."
                 />
@@ -326,22 +344,13 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                                 name={prospect.full_name}
                                 title={prospect.title}
                                 img_url={""}
-                                latest_msg={
-                                  prospect.email_last_message_from_prospect ??
-                                  ""
-                                }
-                                latest_msg_time={
-                                  prospect.li_last_message_timestamp ?? ""
-                                }
+                                latest_msg={prospect.email_last_message_from_prospect ?? ""}
+                                latest_msg_time={prospect.li_last_message_timestamp ?? ""}
                                 icp_fit={-1}
                                 new_msg_count={0}
                                 latest_msg_from_sdr={false}
-                                default_channel={
-                                  mainTab !== "snoozed" ? "LINKEDIN" : undefined
-                                }
-                                opened={
-                                  prospect.prospect_id === openedProspectId
-                                }
+                                default_channel={mainTab !== "snoozed" ? "LINKEDIN" : undefined}
+                                opened={prospect.prospect_id === openedProspectId}
                                 snoozed_until={prospect.hidden_until}
                               />
                             </Box>

@@ -1,11 +1,27 @@
 import RichTextArea from "@common/library/RichTextArea";
 import CustomSelect from "@common/persona/ICPFilter/CustomSelect";
-import { Box, Button, Center, Flex, NumberInput, Paper, SegmentedControl, Switch, Text } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  NumberInput,
+  Paper,
+  SegmentedControl,
+  Switch,
+  Text,
+  TextInput,
+  Textarea,
+} from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import { IconBrandLinkedin, IconMailOpened } from "@tabler/icons";
 import { useState } from "react";
 
-export default function CampaignTemplatesModal({ innerProps, context, id }: ContextModalProps) {
+export default function CampaignTemplatesModal({
+  innerProps,
+  context,
+  id,
+}: ContextModalProps) {
   const [type, setType] = useState("email");
   const [tags, setTags] = useState(["Intro", "Pain Based"]);
 
@@ -26,7 +42,11 @@ export default function CampaignTemplatesModal({ innerProps, context, id }: Cont
                 value: "email",
                 label: (
                   <Center style={{ gap: 10 }}>
-                    <IconMailOpened size={"1.2rem"} fill="orange" color="white" />
+                    <IconMailOpened
+                      size={"1.2rem"}
+                      fill="orange"
+                      color="white"
+                    />
                     <Text fw={500}>Email</Text>
                   </Center>
                 ),
@@ -35,7 +55,11 @@ export default function CampaignTemplatesModal({ innerProps, context, id }: Cont
                 value: "linkedin",
                 label: (
                   <Center style={{ gap: 10 }}>
-                    <IconBrandLinkedin size={"1.4rem"} fill="#3B85EF" color="white" />
+                    <IconBrandLinkedin
+                      size={"1.4rem"}
+                      fill="#3B85EF"
+                      color="white"
+                    />
                     <Text fw={500}>Linkedin</Text>
                   </Center>
                 ),
@@ -43,15 +67,30 @@ export default function CampaignTemplatesModal({ innerProps, context, id }: Cont
             ]}
           />
           <Box>
-            <CustomSelect maxWidth="100%" value={tags} label="Add Tags" placeholder="" setValue={setTags} data={tags} setData={setTags} />
+            <CustomSelect
+              maxWidth="100%"
+              value={tags}
+              label="Add Tags"
+              placeholder=""
+              setValue={setTags}
+              data={tags}
+              setData={setTags}
+            />
+            <Text size={"sm"} color="gray" fw={500} mt={"md"}>
+              Title
+            </Text>
+            <Box mt={4}>
+              <TextInput placeholder="Title" />
+            </Box>
             <Text size={"sm"} color="gray" fw={500} mt={"md"}>
               Template
             </Text>
-            {/* <Text size={"xs"} fw={500} color="gray">
-              Past in case studies, phrases, email templates, or others.
-            </Text> */}
             <Box mt={4}>
-              <RichTextArea height={200} />
+              {type == "email" ? (
+                <RichTextArea></RichTextArea>
+              ) : (
+                <Textarea placeholder="Template" minRows={7} />
+              )}
             </Box>
           </Box>
           {/* <Flex direction={"column"} gap={"sm"}>
@@ -151,7 +190,12 @@ export default function CampaignTemplatesModal({ innerProps, context, id }: Cont
           {/* <Button fullWidth onClick={() => context.closeModal(id)}>
             Generate Assets
           </Button> */}
-          <Button variant="outline" color="gray" fullWidth onClick={() => context.closeModal(id)}>
+          <Button
+            variant="outline"
+            color="gray"
+            fullWidth
+            onClick={() => context.closeModal(id)}
+          >
             Cancel
           </Button>
           <Button fullWidth onClick={() => context.closeModal(id)}>

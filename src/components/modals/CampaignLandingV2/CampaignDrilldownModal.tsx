@@ -226,7 +226,7 @@ export default function CampaignDrilldownModal({
             icon={<IconMessage color={theme.colors.teal[6]} size="20" />}
             label="(+)Reply"
             percentcolor="#E8F6F2"
-            border={value === "total_pos_replied" ? "#CFF1E7" : ""}
+            border={value === "pos_reply" ? "#CFF1E7" : ""}
             total={innerProps.statsData?.num_pos_replies ?? 0}
             percentage={Math.floor(((innerProps.statsData?.num_pos_replies ?? 0) / (innerProps.statsData?.num_replies || 1)) * 100)}
           />

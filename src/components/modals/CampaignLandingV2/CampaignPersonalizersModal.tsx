@@ -8,7 +8,6 @@ import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
 import { modals } from '@mantine/modals';
 import * as researchers from "@utils/requests/researchers";
 import { useState, useEffect, useRef, Key } from "react";
-import QuestionModal from "./QuestionModal";
 
 export default function CampaignPersonalizersModal({
   innerProps,
@@ -16,6 +15,7 @@ export default function CampaignPersonalizersModal({
   id,
 }: ContextModalProps<{
   id(id: any): number;
+  sequences: any;
   ai_researcher_id: number;
   setPersonalizers: Function;
 }>) {
@@ -286,6 +286,7 @@ const generateTextWithBadges = (text: string) => {
                   ),
                   innerProps: {
                     edit: false,
+                    sequences: innerProps.sequences,
                     ai_researcher_id: innerProps.ai_researcher_id,
                     campaign_id: innerProps.id,
                     setPersonalizers: innerProps.setPersonalizers,
@@ -309,7 +310,7 @@ const generateTextWithBadges = (text: string) => {
                       <span className=" text-gray-500">Go back to</span> Personalizers
                     </Title>
                   ),
-                  innerProps: {prospectId: selectedProspect},
+                  innerProps: {prospectId: selectedProspect, sequences: innerProps.sequences},
                   centered: true,
                   styles: {
                     content: {
@@ -342,6 +343,7 @@ const generateTextWithBadges = (text: string) => {
                             ),
                             innerProps: {
                               edit: true,
+                              sequences: innerProps.sequences,
                               question_id: item.id,
                               currentTab: item.type,
                               relevancy: item.content,

@@ -1,5 +1,5 @@
 import RichTextArea from "@common/library/RichTextArea";
-import { Badge, Box, Button, Flex, Paper, Text, Loader, LoadingOverlay } from "@mantine/core";
+import { Badge, Box, Button, Flex, Paper, Text, Loader, LoadingOverlay, Select } from "@mantine/core";
 import { IconArrowRight, IconCopy } from "@tabler/icons";
 import * as researcher from "@utils/requests/researchers";
 import { IconSparkles } from "@tabler/icons-react";
@@ -11,14 +11,17 @@ import { JSONContent } from "@tiptap/react";
 
 export default function SimulatepersonalizerModal({
   innerProps,
-}: ContextModalProps<{ prospectId: string }>) {
+}: ContextModalProps<{
+  sequences: any; prospectId: string 
+}>) {
   const [simulate, setSimulate] = useState(false);
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
   const [emailBody, setEmailBody] = useState("");
   const [overrideEmailBody, setOverrideEmailBody] = useState<string | undefined>(undefined); 
   const [rawEmailBody, setRawEmailBody] = useState<JSONContent | undefined>(undefined);
-  
+  const sequences = innerProps.sequences.map((sequence: any) => sequence.description);
+
   const handleSimulate = async () => {
     setLoading(true);
     setSimulate(true);
@@ -56,15 +59,27 @@ export default function SimulatepersonalizerModal({
       </Text>
       <Box>
         <Flex justify={"space-between"} align={"center"} mt={"md"}>
-          <Flex align={"center"} gap={"sm"}>
-            {simulate && (
-              <Flex>
-                <IconSparkles size={"0.9rem"} color="#D444F1" />
-              </Flex>
+          <Flex justify={"space-between"} align={"center"} w={"100%"}>
+            <Flex align={"center"} gap={"sm"}>
+              {simulate && (
+                <Flex>
+                  <IconSparkles size={"0.9rem"} color="#D444F1" />
+                </Flex>
+              )}
+              <Text size={"sm"} fw={600}>
+                {simulate ? "Personalized" : "Original"} Email
+              </Text>
+            </Flex>
+            {sequences.length > 0 && !simulate && (
+              <Select
+                placeholder="Select template"
+                data={sequences.map((sequence: any, index: any) => ({ value: index, label: `Sequence ${index + 1}` }))}
+                onChange={(value: any) => {
+                  setOverrideEmailBody(sequences[value]);
+                  setEmailBody(sequences[value]);
+                }}
+                ></Select>
             )}
-            <Text size={"sm"} fw={600}>
-              {simulate ? "Personalized" : "Original"} Email
-            </Text>
           </Flex>
           {simulate && (
             <Flex gap={"sm"}>

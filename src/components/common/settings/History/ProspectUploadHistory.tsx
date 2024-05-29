@@ -129,7 +129,7 @@ export default function ProspectUploadHistory() {
                     : cell.row.original.upload_name}
                 </Text>
               </Tooltip>
-              <Tooltip label={cell.row.original.client_archetype_name}>
+              <Tooltip label={<span>{cell.row.original.client_archetype_name}</span>}>
                 {cell.row.original.client_archetype_name &&
                   cell.row.original.client_archetype_id && (
                     <Flex>
@@ -174,7 +174,7 @@ export default function ProspectUploadHistory() {
                     </Flex>
                   )}
               </Tooltip>
-              <Tooltip label={cell.row.original.client_segment_name}>
+              <Tooltip label={<span>{cell.row.original.client_segment_name}</span>}>
                 {cell.row.original.client_segment_name &&
                   cell.row.original.client_segment_id && (
                     <Flex direction={"row"}>

@@ -40,7 +40,7 @@ const generateTextWithBadges = (text: string) => {
 
   useEffect(() => {
     setLoadingProspects(true);
-    fetchCampaignContacts(userToken, Number(innerProps.id), 0, 2000, '').then((data) => {
+    fetchCampaignContacts(userToken, Number(innerProps.id), 0, 30, '').then((data) => {
       const newProspectData = data.sample_contacts.map((contact: { id: any; full_name: any; }) => ({
         value: contact.id,
         label: contact.full_name,

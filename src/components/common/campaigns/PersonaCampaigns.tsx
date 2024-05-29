@@ -1328,6 +1328,7 @@ export function PersonCampaignCard(props: {
                         c={"gray.7"}
                         fw={600}
                         onClick={() => {
+                          window.location.href = `/campaign_v2/${props.persona.id}`;
                           if (props.persona.sdr_id != userData?.id) return;
 
                           if (props.project) {

@@ -976,32 +976,7 @@ export default function CampaignLandingV2() {
                     //   setShowLinkedInConvoSimulatorModal(true);
                     // }}
                     onClick={() => {
-                      openContextModal({
-                        modal: "campaignTemplateModal",
-                        title: (
-                          <Title order={3}>
-                            {createTemplateBuilder
-                              ? "Template Builder"
-                              : "Template"}
-                          </Title>
-                        ),
-                        innerProps: {
-                          campaignId: id,
-                          createTemplateBuilder,
-                          setCreateTemplateBuilder,
-                          setSequences,
-                        },
-                        centered: true,
-                        styles: {
-                          content: {
-                            minWidth: "1100px",
-                          },
-                        },
-                        onClose: () => {
-                          const clientArchetypeId = Number(id);
-                          refetchSequenceData(clientArchetypeId);
-                        },
-                      });
+                      window.open(`/setup/${type}/${id}`, '_blank');
                     }}
                   >
                     Simulate

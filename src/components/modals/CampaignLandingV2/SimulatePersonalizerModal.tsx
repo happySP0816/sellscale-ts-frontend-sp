@@ -1,5 +1,5 @@
 import RichTextArea from "@common/library/RichTextArea";
-import { Badge, Box, Button, Flex, Paper, Text, Loader } from "@mantine/core";
+import { Badge, Box, Button, Flex, Paper, Text, Loader, LoadingOverlay } from "@mantine/core";
 import { IconArrowRight, IconCopy } from "@tabler/icons";
 import * as researcher from "@utils/requests/researchers";
 import { IconSparkles } from "@tabler/icons-react";
@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { ContextModalProps } from "@mantine/modals";
+import { JSONContent } from "@tiptap/react";
 
 export default function SimulatepersonalizerModal({
   innerProps,
@@ -15,14 +16,16 @@ export default function SimulatepersonalizerModal({
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
   const [emailBody, setEmailBody] = useState("");
-
+  const [overrideEmailBody, setOverrideEmailBody] = useState<string | undefined>(undefined); 
+  const [rawEmailBody, setRawEmailBody] = useState<JSONContent | undefined>(undefined);
+  
   const handleSimulate = async () => {
     setLoading(true);
     setSimulate(true);
     try {
       const prospectId = innerProps.prospectId; // Replace with actual prospectId
       const response = await researcher.getPersonalization(userToken, Number(prospectId), emailBody);
-      setEmailBody(response.personalized_email);
+      setOverrideEmailBody(response.personalized_email);
     } catch (error) {
       console.error("Error during personalization:", error);
     } finally {
@@ -31,19 +34,23 @@ export default function SimulatepersonalizerModal({
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(emailBody).then(() => {
-      console.log("Email body copied to clipboard");
-    }).catch((error) => {
-      console.error("Error copying email body:", error);
-    });
+    if (overrideEmailBody !== undefined) {
+      navigator.clipboard.writeText(overrideEmailBody).then(() => {
+        console.log("Email body copied to clipboard");
+      }).catch((error) => {
+        console.error("Error copying email body:", error);
+      });
+    }
   };
 
   const handleViewOriginal = () => {
+    setOverrideEmailBody(undefined);
     setSimulate(false);
   };
 
   return (
     <Paper>
+      <LoadingOverlay visible={loading} />
       <Text size={"xs"} fw={500} color="gray">
         Paste contents of your email here and SellScale will personalize the email using the Personalizer.
       </Text>
@@ -71,7 +78,12 @@ export default function SimulatepersonalizerModal({
           )}
         </Flex>
         <Box mt={4}>
-          <RichTextArea height={300} value={emailBody} onChange={(e) => setEmailBody(e)} />
+
+          <RichTextArea height={300} value={overrideEmailBody || rawEmailBody} onChange={(value, rawValue) => {
+                  setEmailBody(value)
+                  setRawEmailBody(rawValue)
+                }}
+                 />
         </Box>
       </Box>
       {!simulate && (

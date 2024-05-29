@@ -90,6 +90,7 @@ import CampaignTemplateEditModal from "@modals/CampaignLandingV2/CampaignTemplat
 import CampaignTemplatesModal from "@modals/CampaignLandingV2/CampainTemplates";
 import AssignConversationAIModal from "@modals/AssignConversationAIModa";
 import SimulatepersonalizerModal from "@modals/CampaignLandingV2/SimulatePersonalizerModal";
+import AddQuestionModal from "@modals/CampaignLandingV2/QuestionModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -297,6 +298,7 @@ export default function App() {
               campaignTemplates: CampaignTemplatesModal,
               assignConversationAIModal: AssignConversationAIModal,
               simulatepersonalizerModal: SimulatepersonalizerModal,
+              addQuestionModal: AddQuestionModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

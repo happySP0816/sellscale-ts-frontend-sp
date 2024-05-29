@@ -85,6 +85,7 @@ interface StatsData {
   num_demos: number;
   active: boolean;
   email_to_linkedin_connection?: string;
+  ai_researcher_id?: number;
   sdr_img_url: string;
   num_opens: number;
   num_prospects: number;
@@ -828,7 +829,6 @@ export default function CampaignLandingV2() {
                             <div
                               style={{
                                 whiteSpace: "nowrap",
-                                marginLeft: "-100px",
                               }}
                             >
                               Max
@@ -1532,6 +1532,8 @@ export default function CampaignLandingV2() {
                       modal: "campaignPersonalizersModal",
                       title: <Title order={3}>Personalizers</Title>,
                       innerProps: {
+                        ai_researcher_id: statsData?.ai_researcher_id,
+                        id,
                         setPersonalizers,
                       },
                       centered: true,
@@ -1673,6 +1675,8 @@ export default function CampaignLandingV2() {
                       modal: "campaignPersonalizersModal",
                       title: <Title order={3}>Personalizers</Title>,
                       innerProps: {
+                        ai_researcher_id: statsData?.ai_researcher_id,
+                        id,
                         setPersonalizers,
                       },
                       centered: true,

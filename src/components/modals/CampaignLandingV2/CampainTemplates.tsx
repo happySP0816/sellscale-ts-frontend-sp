@@ -1,5 +1,7 @@
+import { userTokenState } from "@atoms/userAtoms";
 import RichTextArea from "@common/library/RichTextArea";
 import CustomSelect from "@common/persona/ICPFilter/CustomSelect";
+import { API_URL } from "@constants/data";
 import {
   Box,
   Button,
@@ -14,32 +16,72 @@ import {
   Textarea,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
+import { showNotification } from "@mantine/notifications";
 import { IconBrandLinkedin, IconMailOpened } from "@tabler/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 
 export default function CampaignTemplatesModal({
   innerProps,
   context,
   id,
 }: ContextModalProps) {
-  const [type, setType] = useState("email");
-  const [tags, setTags] = useState(["Intro", "Pain Based"]);
+  const userToken = useRecoilValue(userTokenState);
+
+  const [type, setType]: any = useState("email template");
+  const [tags, setTags]: any = useState([]);
+  const [title, setTitle]: any = useState("");
+  const [template, setTemplate]: any = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const createClientAsset = async () => {
+    setLoading(true);
+    const tempTags = tags.concat(type);
+    fetch(`${API_URL}/client/create_archetype_asset`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        client_archetype_ids: [],
+        asset_key: title,
+        asset_value: template,
+        asset_type: "TEXT",
+        asset_tags: tempTags,
+        asset_raw_value: template,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        context.closeModal(id);
+        showNotification({
+          title: "Template Created",
+          message: "Template has been created successfully",
+          color: "teal",
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   return (
     <Paper>
       <Flex direction={"column"}>
-        {/* <Flex p={"lg"} style={{ borderBottom: "1px solid #dee2e6" }}>
-          <Text fw={600}>Mass Import Research</Text>
-        </Flex> */}
         <Flex direction={"column"} mt={"sm"} gap={"sm"} pb={70}>
           <SegmentedControl
             value={type}
             onChange={(value: any) => {
               setType(value);
+              setTemplate("");
+              setTags([]);
+              setTitle("");
             }}
             data={[
               {
-                value: "email",
+                value: "email template",
                 label: (
                   <Center style={{ gap: 10 }}>
                     <IconMailOpened
@@ -52,7 +94,7 @@ export default function CampaignTemplatesModal({
                 ),
               },
               {
-                value: "linkedin",
+                value: "linkedin template",
                 label: (
                   <Center style={{ gap: 10 }}>
                     <IconBrandLinkedin
@@ -80,116 +122,30 @@ export default function CampaignTemplatesModal({
               Title
             </Text>
             <Box mt={4}>
-              <TextInput placeholder="Title" />
+              <TextInput
+                placeholder="Title"
+                value={title}
+                onChange={(event) => setTitle(event.currentTarget.value)}
+              />
             </Box>
             <Text size={"sm"} color="gray" fw={500} mt={"md"}>
               Template
             </Text>
             <Box mt={4}>
               {type == "email" ? (
-                <RichTextArea></RichTextArea>
+                <RichTextArea onChange={(value) => setTemplate(value)} />
               ) : (
-                <Textarea placeholder="Template" minRows={7} />
+                <Textarea
+                  placeholder="Template"
+                  minRows={7}
+                  value={template}
+                  onChange={(event) => setTemplate(event.currentTarget.value)}
+                />
               )}
             </Box>
           </Box>
-          {/* <Flex direction={"column"} gap={"sm"}>
-            <Text size={"xs"} fw={500}>
-              Asset Extraction (Optional)
-            </Text>
-            <Flex gap={"xl"} justify={"space-between"}>
-              <Flex gap={"sm"} align={"center"} w={"100%"}>
-                <Switch
-                  labelPosition="left"
-                  label={"Value Props"}
-                  w={"100%"}
-                  styles={{
-                    root: {
-                      border: "1px solid #D9DEE5",
-                      padding: "7px",
-                      borderRadius: "4px",
-                    },
-                    body: {
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "space-between",
-                    },
-                  }}
-                />
-                <NumberInput w={200} placeholder="Amount" />
-              </Flex>
-              <Flex gap={"sm"} align={"center"} w={"100%"}>
-                <Switch
-                  labelPosition="left"
-                  label={"Offers"}
-                  w={"100%"}
-                  styles={{
-                    root: {
-                      border: "1px solid #D9DEE5",
-                      padding: "7px",
-                      borderRadius: "4px",
-                    },
-                    body: {
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "space-between",
-                    },
-                  }}
-                />
-                <NumberInput w={200} placeholder="Amount" />
-              </Flex>
-            </Flex>
-            <Flex gap={"xl"} justify={"space-between"}>
-              <Flex gap={"sm"} align={"center"} w={"100%"}>
-                <Switch
-                  labelPosition="left"
-                  label={"Pain Points"}
-                  w={"100%"}
-                  styles={{
-                    root: {
-                      border: "1px solid #D9DEE5",
-                      padding: "7px",
-                      borderRadius: "4px",
-                    },
-                    body: {
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "space-between",
-                    },
-                  }}
-                />
-                <NumberInput w={200} placeholder="Amount" />
-              </Flex>
-              <Flex gap={"sm"} align={"center"} w={"100%"}>
-                <Switch
-                  labelPosition="left"
-                  label={"Social Proof"}
-                  w={"100%"}
-                  styles={{
-                    root: {
-                      border: "1px solid #D9DEE5",
-                      padding: "7px",
-                      borderRadius: "4px",
-                    },
-                    body: {
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "space-between",
-                    },
-                  }}
-                />
-                <NumberInput w={200} placeholder="Amount" />
-              </Flex>
-            </Flex>
-          </Flex> */}
         </Flex>
         <Flex justify={"end"} gap={"lg"}>
-          {/* <Button variant="outline" color="gray" fullWidth onClick={() => context.closeModal(id)}>
-            Go Back
-          </Button> */}
-          {/* <Button fullWidth onClick={() => context.closeModal(id)}>
-            Generate Assets
-          </Button> */}
           <Button
             variant="outline"
             color="gray"
@@ -198,7 +154,14 @@ export default function CampaignTemplatesModal({
           >
             Cancel
           </Button>
-          <Button fullWidth onClick={() => context.closeModal(id)}>
+          <Button
+            fullWidth
+            onClick={() => {
+              createClientAsset();
+            }}
+            disabled={!title || !template || !tags.length || !type}
+            loading={loading}
+          >
             Create Template
           </Button>
         </Flex>

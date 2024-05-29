@@ -1,4 +1,6 @@
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import RichTextArea from "@common/library/RichTextArea";
+import { API_URL } from "@constants/data";
 import {
   ActionIcon,
   Avatar,
@@ -41,12 +43,29 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons";
+import { addSequence } from "@utils/requests/generateSequence";
+import { deterministicMantineColor } from "@utils/requests/utils";
 import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 
 interface SwitchStyle extends Partial<MantineStyleSystemProps> {
   label?: React.CSSProperties;
   root?: React.CSSProperties;
 }
+
+type AssetType = {
+  asset_key: string;
+  asset_raw_value: string;
+  asset_tags: string[];
+  asset_type: string;
+  asset_value: string;
+  client_archetype_ids: number[];
+  client_id: number;
+  id: number;
+  num_opens: number | null;
+  num_replies: number | null;
+  num_sends: number | null;
+};
 
 export default function CampaignTemplateEditModal({
   innerProps,
@@ -60,12 +79,84 @@ export default function CampaignTemplateEditModal({
   cType?: string;
 }>) {
   const [templateType, setTemplateType] = useState("template" || "generate");
-  const [sequenceType, setSequenceType] = useState<string | null>("");
-  const [steps, setSteps] = useState();
+  const [sequenceType, setSequenceType]: any = useState<string>("email");
+  const [steps, setSteps] = useState(3);
+  const [currentStepNum, setCurrentStepNum] = useState(1 || null);
   const [generateSequence, setGenerateSequence] = useState(false);
   const [openid, setOpenId] = useState<number>(0);
   const [opened, setOpened] = useState(false);
   const [selectStep, setSelectStep] = useState<number | null>(null);
+  const [assets, setAssets] = useState<AssetType[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const [stagingData, setStagingData]: any = useState({
+    linkedin: [
+      // {
+      //   angle: "",
+      //   text: "",
+      //   step_num: 1,
+      //   assets: [],
+      // },
+    ],
+    email: [
+      // {
+      //   angle: "",
+      //   text: "",
+      //   step_num: 1,
+      //   assets: [],
+      // },
+    ],
+  });
+
+  const addToStagingData = (asset: AssetType, step_num: number) => {
+    console.log("Adding to " + sequenceType + " staging data");
+    const type = sequenceType;
+    const angle = asset.asset_key;
+    const text = asset.asset_raw_value;
+    const assets = [asset.id];
+    const randomId = Math.floor(Math.random() * 1000000);
+
+    const newStagingData = {
+      angle,
+      text,
+      step_num,
+      assets,
+      id: randomId,
+    };
+
+    const newStagingDataArray = [...stagingData[type]];
+    newStagingDataArray.push(newStagingData);
+
+    setStagingData({
+      ...stagingData,
+      [type]: newStagingDataArray,
+    });
+
+    console.log(stagingData);
+  };
+
+  const removeFromStagingData = (randomId: number) => {
+    console.log("Removing from " + sequenceType + " staging data");
+    const type = sequenceType;
+
+    // Filter out the asset from the staging data based on randomId
+    const filteredStagingData = stagingData[type].filter(
+      (item: any) => item.id !== randomId
+    );
+
+    // Update the staging data state
+    setStagingData({
+      ...stagingData,
+      [type]: filteredStagingData,
+    });
+
+    console.log(stagingData);
+  };
+
+  const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
+  const campaignId = innerProps.campaignId;
 
   const data = [
     {
@@ -113,6 +204,30 @@ export default function CampaignTemplateEditModal({
     setSelectStep(key);
   };
 
+  const getAllAssets = async () => {
+    fetch(`${API_URL}/client/get_assets`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const filteredAssets = data.data.filter(
+          (asset: AssetType) =>
+            asset.asset_tags.includes("email template") ||
+            asset.asset_tags.includes("linkedin template")
+        );
+
+        setAssets(filteredAssets);
+      });
+  };
+
+  useEffect(() => {
+    getAllAssets();
+  }, []);
+
   const [isBuilder, setIsBuilder] = useState(innerProps.createTemplateBuilder);
   useEffect(() => {
     setIsBuilder(innerProps.createTemplateBuilder);
@@ -126,6 +241,11 @@ export default function CampaignTemplateEditModal({
   };
 
   const readyToGenerate = !sequenceType || !steps;
+  const filteredAssets = assets.filter((asset) =>
+    sequenceType === "linkedin"
+      ? asset.asset_tags.includes("linkedin template")
+      : asset.asset_tags.includes("email template")
+  );
 
   return (
     <div key={innerProps.createTemplateBuilder ? "builder" : "template"}>
@@ -269,16 +389,11 @@ export default function CampaignTemplateEditModal({
             style={{ gap: "16px", flexDirection: "column" }}
           >
             <Flex align={"center"} justify={"space-between"}>
-              <Text fw={600}>Templates</Text>
+              <Text fw={600}>Library</Text>
               <SegmentedControl
                 value={templateType}
                 onChange={(value: any) => {
                   setTemplateType(value);
-                  //   if (value === "template") {
-                  //     setSequences(emailSequenceData);
-                  //   } else {
-                  //     setSequences(linkedinSequenceData);
-                  //   }
                 }}
                 data={[
                   {
@@ -291,6 +406,7 @@ export default function CampaignTemplateEditModal({
                   },
                   {
                     value: "generate",
+                    disabled: true,
                     label: (
                       <Center style={{ gap: 10 }}>
                         <Text fw={500}>Generator</Text>
@@ -304,9 +420,18 @@ export default function CampaignTemplateEditModal({
               variant="filled"
               placeholder="Search"
               icon={<IconSearch size={"0.9rem"} color="gray" />}
+              onChange={(event) => setSearchQuery(event.currentTarget.value)}
             />
             {templateType === "template" ? (
-              <Templates readyToGenerate={readyToGenerate} />
+              <Templates
+                readyToGenerate={readyToGenerate}
+                assets={filteredAssets}
+                searchQuery={searchQuery}
+                addToStagingData={addToStagingData}
+                removeFromStagingData={removeFromStagingData}
+                currentStepNum={currentStepNum}
+                setCurrentStepNum={setCurrentStepNum}
+              />
             ) : (
               <Generates />
             )}
@@ -338,6 +463,7 @@ export default function CampaignTemplateEditModal({
                 label="No. of Steps"
                 onChange={(val: any) => setSteps(val)}
                 value={steps || undefined}
+                max={5}
               />
               {templateType === "generate" && (
                 <Button
@@ -362,6 +488,7 @@ export default function CampaignTemplateEditModal({
             )}
             <Tabs
               defaultValue="1"
+              onTabChange={(value) => setCurrentStepNum(Number(value))}
               styles={{
                 tabsList: {
                   background: "#ECEEF1",
@@ -370,193 +497,131 @@ export default function CampaignTemplateEditModal({
               }}
             >
               <Tabs.List>
-                <Tabs.Tab value="1">Step 1</Tabs.Tab>
-                <Tabs.Tab value="2">Step 2</Tabs.Tab>
+                {steps &&
+                  Array.from({ length: Number(steps) }, (_, index) => {
+                    return (
+                      <Tabs.Tab value={(index + 1).toString()}>
+                        Step {index + 1} (
+                        {stagingData[sequenceType].filter(
+                          (asset: any) => asset.step_num === index + 1
+                        ).length == 0
+                          ? "🔴 "
+                          : "🟢 "}
+                        {
+                          stagingData[sequenceType].filter(
+                            (asset: any) => asset.step_num === index + 1
+                          ).length
+                        }
+                        )
+                      </Tabs.Tab>
+                    );
+                  })}
               </Tabs.List>
 
-              <Tabs.Panel value="1">
-                {" "}
-                <ScrollArea h={350}>
-                  <Flex p={"lg"} h={"100%"} direction={"column"}>
-                    <>
-                      {Array.from({ length: Number(steps) }, (_, index) => {
-                        return (
-                          <Box
-                            mb={"sm"}
-                            style={{
-                              border:
-                                selectStep === index
-                                  ? "1px solid #228be6"
-                                  : "1px solid #ced4da",
-                              borderRadius: "8px",
-                            }}
-                          >
-                            <Flex
-                              align={"center"}
-                              justify={"space-between"}
-                              px={"sm"}
-                              py={"xs"}
-                            >
-                              <Flex align={"center"} gap={"xs"}>
-                                <IconMessages color="#228be6" size={"0.9rem"} />
-                                <Text color="gray" fw={500} size={"xs"}>
-                                  Example Message #{index + 1}:
-                                </Text>
-                                <Text fw={600} size={"xs"} ml={"-5px"}>
-                                  {"Pain point based"}
-                                </Text>
-                              </Flex>
-                              <Flex gap={1} align={"center"}>
-                                <Tooltip
-                                  label="Editing coming soon"
-                                  position="top"
-                                >
-                                  <ActionIcon disabled>
-                                    <IconEdit size={"0.9rem"} />
-                                  </ActionIcon>
-                                </Tooltip>
-                                <ActionIcon>
-                                  <IconTrash size={"0.9rem"} />
-                                </ActionIcon>
-                                <ActionIcon
-                                  onClick={() => {
-                                    handleToggle(index);
-                                  }}
-                                >
-                                  {selectStep === index && opened ? (
-                                    <IconChevronUp size={"0.9rem"} />
-                                  ) : (
-                                    <IconChevronDown size={"0.9rem"} />
-                                  )}
-                                </ActionIcon>
-                              </Flex>
-                            </Flex>
-                            <Collapse
-                              in={selectStep === index && opened}
-                              key={index}
-                            >
-                              <Flex
-                                gap={"sm"}
-                                p={"sm"}
-                                style={{ borderTop: "1px solid #ced4da" }}
-                              >
-                                <Avatar size={"md"} radius={"xl"} />
-                                <Box>
-                                  <Text fw={600} size={"sm"}>
-                                    {"Ishan Sharma"}
-                                  </Text>
-                                  <Text fw={500} size={"xs"}>
-                                    {"Hi,"}
-                                  </Text>
-                                  <Text fw={500} size={"xs"}>
-                                    {
-                                      "You need to increase pipeline. We have a solution that does that. Chat?"
-                                    }
-                                  </Text>
-                                </Box>
-                              </Flex>
-                            </Collapse>
-                          </Box>
-                        );
-                      })}
-                    </>
-                  </Flex>
-                </ScrollArea>
-              </Tabs.Panel>
-              <Tabs.Panel value="2">
-                {" "}
-                <ScrollArea h={350}>
-                  <Flex p={"lg"} h={"100%"} direction={"column"}>
-                    <>
-                      {Array.from({ length: Number(steps) }, (_, index) => {
-                        return (
+              {steps &&
+                Array.from({ length: Number(steps) }, (_, index) => {
+                  return (
+                    <Tabs.Panel value={(index + 1).toString()}>
+                      {" "}
+                      <ScrollArea h={350}>
+                        <Flex p={"lg"} h={"100%"} direction={"column"}>
                           <>
-                            <>
-                              <Box
-                                style={{
-                                  border:
-                                    selectStep === index
-                                      ? "1px solid #228be6"
-                                      : "1px solid #ced4da",
-                                  borderRadius: "8px",
-                                }}
-                                mb={"sm"}
-                              >
-                                <Flex
-                                  align={"center"}
-                                  justify={"space-between"}
-                                  px={"sm"}
-                                  py={"xs"}
-                                >
-                                  <Flex align={"center"} gap={"xs"}>
-                                    <IconMessages
-                                      color="#228be6"
-                                      size={"0.9rem"}
-                                    />
-                                    <Text color="gray" fw={500} size={"xs"}>
-                                      Example Message #{index + 1}:
-                                    </Text>
-                                    <Text fw={600} size={"xs"} ml={"-5px"}>
-                                      {"Pain point based"}
-                                    </Text>
-                                  </Flex>
-                                  <Flex gap={1} align={"center"}>
-                                    <ActionIcon>
-                                      <IconEdit size={"0.9rem"} />
-                                    </ActionIcon>
-                                    <ActionIcon>
-                                      <IconRefresh size={"0.9rem"} />
-                                    </ActionIcon>
-                                    <ActionIcon>
-                                      <IconTrash size={"0.9rem"} />
-                                    </ActionIcon>
-                                    <ActionIcon
-                                      onClick={() => {
-                                        handleToggle(index);
-                                      }}
-                                    >
-                                      {selectStep === index && opened ? (
-                                        <IconChevronUp size={"0.9rem"} />
-                                      ) : (
-                                        <IconChevronDown size={"0.9rem"} />
-                                      )}
-                                    </ActionIcon>
-                                  </Flex>
-                                </Flex>
-                                <Collapse
-                                  in={selectStep === index && opened}
-                                  key={index}
-                                >
-                                  <Flex
-                                    gap={"sm"}
-                                    p={"sm"}
-                                    style={{ borderTop: "1px solid #ced4da" }}
+                            {stagingData[sequenceType]
+                              .filter(
+                                (asset: any) => asset.step_num === index + 1
+                              )
+                              .map((asset: any, index: number) => {
+                                return (
+                                  <Box
+                                    mb={"sm"}
+                                    style={{
+                                      border:
+                                        selectStep === index
+                                          ? "1px solid #228be6"
+                                          : "1px solid #ced4da",
+                                      borderRadius: "8px",
+                                    }}
                                   >
-                                    <Avatar size={"md"} radius={"xl"} />
-                                    <Box>
-                                      <Text fw={600} size={"sm"}>
-                                        {"Ishan Sharma"}
-                                      </Text>
-                                      <Text fw={500} size={"xs"}>
-                                        {"Hi,"}
-                                      </Text>
-                                      <Text fw={500} size={"xs"}>
-                                        {
-                                          "You need to increase pipeline. We have a solution that does that. Chat?"
-                                        }
-                                      </Text>
-                                    </Box>
-                                  </Flex>
-                                </Collapse>
-                              </Box>
-                            </>
+                                    <Flex
+                                      align={"center"}
+                                      justify={"space-between"}
+                                      px={"sm"}
+                                      py={"xs"}
+                                    >
+                                      <Flex align={"center"} gap={"xs"}>
+                                        <IconMessages
+                                          color="#228be6"
+                                          size={"0.9rem"}
+                                        />
+                                        <Text color="gray" fw={500} size={"xs"}>
+                                          Variant #{index + 1}:
+                                        </Text>
+                                        <Text fw={600} size={"xs"} ml={"-5px"}>
+                                          {asset.angle}
+                                        </Text>
+                                      </Flex>
+                                      <Flex gap={1} align={"center"}>
+                                        <Tooltip
+                                          label="Editing coming soon"
+                                          position="top"
+                                        >
+                                          <ActionIcon disabled>
+                                            <IconEdit size={"0.9rem"} />
+                                          </ActionIcon>
+                                        </Tooltip>
+                                        <ActionIcon
+                                          onClick={() =>
+                                            removeFromStagingData(asset.id)
+                                          }
+                                        >
+                                          <IconTrash size={"0.9rem"} />
+                                        </ActionIcon>
+                                        <ActionIcon
+                                          onClick={() => {
+                                            handleToggle(index);
+                                          }}
+                                        >
+                                          {selectStep === index && opened ? (
+                                            <IconChevronUp size={"0.9rem"} />
+                                          ) : (
+                                            <IconChevronDown size={"0.9rem"} />
+                                          )}
+                                        </ActionIcon>
+                                      </Flex>
+                                    </Flex>
+                                    <Collapse
+                                      in={selectStep === index && opened}
+                                      key={index}
+                                    >
+                                      <Flex
+                                        gap={"sm"}
+                                        p={"sm"}
+                                        style={{
+                                          borderTop: "1px solid #ced4da",
+                                        }}
+                                      >
+                                        <Avatar size={"md"} radius={"xl"} />
+                                        <Box>
+                                          <Text fw={600} size={"sm"}>
+                                            {"Ishan Sharma"}
+                                          </Text>
+                                          <div
+                                            dangerouslySetInnerHTML={{
+                                              __html: asset.template,
+                                            }}
+                                          />
+                                        </Box>
+                                      </Flex>
+                                    </Collapse>
+                                  </Box>
+                                );
+                              })}
                           </>
-                        );
-                      })}
-                    </>
-                  </Flex>
-                </ScrollArea>
-              </Tabs.Panel>
+                        </Flex>
+                      </ScrollArea>
+                    </Tabs.Panel>
+                  );
+                })}
             </Tabs>
 
             <Flex
@@ -569,9 +634,34 @@ export default function CampaignTemplateEditModal({
               </Button>
               <Button
                 fullWidth
+                loading={loading}
                 onClick={() => {
                   innerProps.setSequences(data);
-                  context.closeModal(id);
+                  console.log(stagingData[sequenceType]);
+                  // context.closeModal(id);
+                  setLoading(true);
+                  console.log("Adding to sequence");
+
+                  let addType = "";
+                  if (sequenceType === "linkedin") {
+                    addType = "LINKEDIN-TEMPLATE";
+                  } else {
+                    addType = "EMAIL";
+                  }
+
+                  console.log(stagingData[sequenceType]);
+                  console.log(addType);
+                  addSequence(
+                    userToken,
+                    userData?.client?.id,
+                    campaignId,
+                    addType,
+                    [],
+                    stagingData[sequenceType]
+                  ).finally(() => {
+                    setLoading(false);
+                    context.closeModal(id);
+                  });
                 }}
               >
                 Add to Sequence
@@ -586,8 +676,20 @@ export default function CampaignTemplateEditModal({
 
 export const Templates = ({
   readyToGenerate,
+  assets,
+  searchQuery,
+  addToStagingData,
+  removeFromStagingData,
+  currentStepNum,
+  setCurrentStepNum,
 }: {
   readyToGenerate: boolean;
+  assets: AssetType[];
+  searchQuery: string;
+  addToStagingData: Function;
+  removeFromStagingData: Function;
+  currentStepNum: number;
+  setCurrentStepNum: Function;
 }) => {
   const switchStyle = {
     root: {
@@ -628,47 +730,71 @@ export const Templates = ({
       >
         Create New
       </Button>
-      <Flex direction={"column"} gap={"xs"}>
-        <Card withBorder>
-          <Flex>
-            <Popover withinPortal>
-              <Popover.Dropdown>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: "<p>Hi,</p><p>Would you like a 20$ gift ...</p>",
-                  }}
-                />
-              </Popover.Dropdown>
-              <Popover.Target>
-                <Box w={"90%"}>
-                  <Flex gap={6}>
-                    <Badge size="sm" radius={"sm"}>
-                      Intro
-                    </Badge>
-                    <Badge size="sm" color="pink" radius={"sm"}>
-                      Gift
-                    </Badge>
-                    <Badge size="sm" color="green" radius={"sm"}>
-                      $20
-                    </Badge>
-                  </Flex>
-                  <Text mt={3} size={"sm"} fw={500} className="truncate">
-                    Hi, would you like a 20$ gift ...
-                  </Text>
-                </Box>
-              </Popover.Target>
-            </Popover>
-            <Button
-              size="xs"
-              compact
-              variant="outline"
-              color="blue"
-              disabled={readyToGenerate}
-            >
-              Add
-            </Button>
-          </Flex>
-        </Card>
+      <Flex
+        direction={"column"}
+        gap={"xs"}
+        sx={{ maxHeight: 500, overflowY: "scroll" }}
+      >
+        {assets
+          .filter(
+            (asset) =>
+              asset.asset_key.includes(searchQuery) ||
+              asset.asset_tags.join(" ").includes(searchQuery) ||
+              !searchQuery
+          )
+          .map((asset) => {
+            return (
+              <Card withBorder mih={"75px"}>
+                <Flex>
+                  <Popover withinPortal>
+                    <Popover.Dropdown>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: asset.asset_raw_value,
+                        }}
+                      />
+                    </Popover.Dropdown>
+                    <Popover.Target>
+                      <Box w={"90%"}>
+                        <Flex gap={6}>
+                          {asset.asset_tags
+                            .filter((tag) => tag !== "email template")
+                            .filter((tag) => tag !== "linkedin template")
+                            .map((tag) => {
+                              return (
+                                <Badge
+                                  size="sm"
+                                  radius={"sm"}
+                                  color={deterministicMantineColor(tag)}
+                                >
+                                  {tag}
+                                </Badge>
+                              );
+                            })}
+                        </Flex>
+                        <Text mt={3} size={"sm"} fw={500} className="truncate">
+                          {asset.asset_key.substring(0, 30)}
+                          {asset.asset_key.length > 30 ? "..." : ""}
+                        </Text>
+                      </Box>
+                    </Popover.Target>
+                  </Popover>
+                  <Button
+                    size="xs"
+                    compact
+                    variant="outline"
+                    color="blue"
+                    disabled={readyToGenerate}
+                    onClick={() => {
+                      addToStagingData(asset, currentStepNum);
+                    }}
+                  >
+                    Add
+                  </Button>
+                </Flex>
+              </Card>
+            );
+          })}
       </Flex>
     </>
   );

@@ -946,13 +946,7 @@ export default function CampaignLandingV2() {
                     onClick={() => {
                       openContextModal({
                         modal: "campaignTemplateEditModal",
-                        title: (
-                          <Title order={3}>
-                            {createTemplateBuilder
-                              ? "Template Builder"
-                              : "Template"}
-                          </Title>
-                        ),
+                        title: <Title order={3}>Sequence Builder</Title>,
                         innerProps: {
                           campaignId: id,
                           createTemplateBuilder,

@@ -70,7 +70,8 @@ export async function updateResearcherQuestion(
   userToken: string,
   questionNumber: number,
   key: string,
-  relevancy: string
+  relevancy: string,
+  type: string
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/ml/researchers/questions/${questionNumber}`, {
     method: 'PATCH',
@@ -80,6 +81,7 @@ export async function updateResearcherQuestion(
     },
     body: JSON.stringify({
       key,
+      type,
       relevancy,
     }),
   });
@@ -106,6 +108,19 @@ export async function createResearcherAnswer(userToken: string, prospectId: Numb
     body: JSON.stringify({ prospect_id: prospectId }),
   });
   return response;
+}
+
+export async function getPersonalization(userToken: string, prospectId: number, emailBody: string): Promise<any> {
+  const response = await fetch(`${API_URL}/ml/researcher/email-personalize`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ prospect_id: prospectId, email_body: emailBody}),
+  });
+
+  return response.json();
 }
 
 export async function getResearcherAnswers(userToken: string, prospectId: number): Promise<any> {

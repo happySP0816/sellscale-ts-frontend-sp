@@ -4,10 +4,10 @@ import { IconBrandLinkedin, IconBuilding, IconBulb, IconEdit, IconPlus, IconPoin
 import { IconSparkles } from "@tabler/icons-react";
 import {useRecoilState, useRecoilValue} from "recoil";
 import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { getProspects } from '@utils/requests/getProspects';
+import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
 import { modals } from '@mantine/modals';
 import * as researchers from "@utils/requests/researchers";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Key } from "react";
 import QuestionModal from "./QuestionModal";
 
 export default function CampaignPersonalizersModal({
@@ -20,32 +20,38 @@ export default function CampaignPersonalizersModal({
   setPersonalizers: Function;
 }>) {
 
+const generateTextWithBadges = (text: string) => {
+  const parts = text.split(/(\[\[.*?\]\])/).filter(Boolean);
+  return parts.map((part, index) => {
+    if (part.startsWith("[[") && part.endsWith("]]")) {
+      const badgeText = part.slice(2, -2);
+      return <Badge key={index}>{badgeText}</Badge>;
+    }
+    return <span key={index}>{part}</span>;
+  });
+};
+
   const [loadingProspects, setLoadingProspects] = useState(false);
   const [prospectData, setProspectData] = useState([]);
-  const [selectedProspect, setSelectedProspect] = useState(null);
+  const [selectedProspect, setSelectedProspect] = useState<any>(null);
   const [researching, setResearching] = useState(false);
 
   const userToken = useRecoilValue(userTokenState);
 
   useEffect(() => {
     setLoadingProspects(true);
-    // researchers.getResearchers(userToken).then((data) => {
-    //   console.log('researchers are', data);
-    // }
-    // );
-    getProspects(userToken, undefined, undefined, undefined, undefined, undefined, Number(id)).then((data) => {
-      const newProspectData = data.data.map((item) => ({
-        value: item.id,
-        label: item.full_name,
+    fetchCampaignContacts(userToken, Number(innerProps.id), 0, 2000, '').then((data) => {
+      const newProspectData = data.sample_contacts.map((contact: { id: any; full_name: any; }) => ({
+        value: contact.id,
+        label: contact.full_name,
       }));
       setProspectData(newProspectData);
       setLoadingProspects(false);
     }
     );
 
-    researchers.getArchetypeQuestions(userToken, Number(innerProps.id)).then((data) => {
-      console.log('research data is', data);
-      const newResearchData = data.questions.map((item) => ({
+    researchers.getArchetypeQuestions(userToken, Number(innerProps.id)).then((data: any) => {
+      const newResearchData = data.questions.map((item: { id: any; key: any; type: any; relevancy: any; }) => ({
         id: item.id,
         title: item.key,
         type: item.type,
@@ -61,7 +67,6 @@ export default function CampaignPersonalizersModal({
     setResearching(true);
     researchers.createResearcherAnswer(userToken, prospectId).then((data) => {
       researchers.getResearcherAnswers(userToken, Number(prospectId)).then((data) => {
-        console.log('researchers' , data);
           const newSimulateData = data.answers
             .map((item: any) => ({
               title: item.question.key,
@@ -70,14 +75,14 @@ export default function CampaignPersonalizersModal({
               ai_response: item.relevancy_explanation,
               status: item.is_yes_response,
             }))
-            .sort((a, b) => b.status - a.status); //sort by status true first.
+            .sort((a: { status: number; }, b: { status: number; }) => b.status - a.status); //sort by status true first.
           setSimulateData(newSimulateData);
           setResearching(false);
       });
     });
   }
 
-  const [researchData, setResearchData] = useState([]);
+  const [researchData, setResearchData] = useState<any>([]);
   const [simulateData, setSimulateData] = useState([
   ]);
   return (
@@ -280,6 +285,7 @@ export default function CampaignPersonalizersModal({
                     </Title>
                   ),
                   innerProps: {
+                    edit: false,
                     ai_researcher_id: innerProps.ai_researcher_id,
                     campaign_id: innerProps.id,
                     setPersonalizers: innerProps.setPersonalizers,
@@ -291,8 +297,9 @@ export default function CampaignPersonalizersModal({
             </Button>
             <Button
               fullWidth
+              disabled={!selectedProspect}
               variant="outline"
-              color="pink"
+              color="grape"
               leftIcon={<IconSparkles size={"0.9rem"} />}
               onClick={() =>
                 openContextModal({
@@ -302,7 +309,7 @@ export default function CampaignPersonalizersModal({
                       <span className=" text-gray-500">Go back to</span> Personalizers
                     </Title>
                   ),
-                  innerProps: {},
+                  innerProps: {prospectId: selectedProspect},
                   centered: true,
                   styles: {
                     content: {
@@ -317,12 +324,12 @@ export default function CampaignPersonalizersModal({
           </Flex>
           <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
             <Flex h={"100%"} gap={"xs"} direction={"column"}>
-              {researchData.map((item, index) => {
+              {researchData.map((item: any, index: Key | null | undefined) => {
                 return (
                   <Paper withBorder p={"md"} key={index}>
                     <Flex align={"start"} justify={"space-between"}>
                       <Text size={"sm"} fw={600} pt={4}>
-                        {item.title}
+                        {generateTextWithBadges(item.title)}
                       </Text>
                       <Flex gap={3} align={"center"}>
                         <ActionIcon onClick={() =>
@@ -333,7 +340,16 @@ export default function CampaignPersonalizersModal({
                                 <span className=" text-gray-500">Edit</span> Research Point
                               </Title>
                             ),
-                            innerProps: { item, edit:true },
+                            innerProps: {
+                              edit: true,
+                              question_id: item.id,
+                              currentTab: item.type,
+                              relevancy: item.content,
+                              question: item.title,
+                              ai_researcher_id: innerProps.ai_researcher_id,
+                              campaign_id: innerProps.id,
+                              setPersonalizers: innerProps.setPersonalizers,
+                            },
                             centered: true,
                             styles: {
                               content: {
@@ -345,9 +361,8 @@ export default function CampaignPersonalizersModal({
                           <IconEdit color="gray" size={"0.9rem"} />
                         </ActionIcon>
                         <ActionIcon onClick={async () => {
-                          console.log('trying to delete', item);
                           researchers.deleteResearcherQuestion(userToken, Number(item.id));
-                          setResearchData(prevData => prevData.filter(researchItem => researchItem.id !== item.id));
+                          setResearchData((prevData: any[]) => prevData.filter(researchItem => researchItem.id !== item.id));
                         }}>
                           <IconTrash color="gray" size={"0.9rem"} />
                         </ActionIcon>
@@ -403,17 +418,17 @@ export default function CampaignPersonalizersModal({
                     No simulation run yet.
                   </Text>
                 ) : (
-                  simulateData.map((item, index) => {
+                  simulateData.map((item: any, index) => {
                     return (
                       <Paper withBorder p={"lg"} key={index}>
                         <Flex justify={"space-between"}>
                           <Flex>
                             <IconPoint size={"2rem"} fill={item.status ? "#17B26A" : "red"} color="white" className="mt-[-6px] ml-[-12px]" />
                             <Text fw={600} size={"sm"}>
-                              {item.title}
+                              {generateTextWithBadges(item.title)}
                             </Text>
                           </Flex>
-                          <Badge radius={"sm"} size="sm" color={item.type === "General" ? "orange" : item.type === "Linkedin" ? "" : "green"}>
+                          <Badge radius={"sm"} size="sm" color={item.type === "GENERAL" ? "orange" : item.type === "LINKEDIN" ? "" : "green"}>
                             {item.type}
                           </Badge>
                         </Flex>

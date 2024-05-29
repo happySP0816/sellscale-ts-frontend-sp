@@ -829,7 +829,6 @@ export default function CampaignLandingV2() {
                             <div
                               style={{
                                 whiteSpace: "nowrap",
-                                marginLeft: "-100px",
                               }}
                             >
                               Max

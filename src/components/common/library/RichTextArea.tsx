@@ -41,6 +41,11 @@ export default function RichTextArea(props: { personalizationBtn?: boolean, heig
       Placeholder.configure({ placeholder: 'Body' }),
     ],
     content: props.value ?? "",
+    onUpdate({ editor }) {
+      if (props.onChange) {
+        props.onChange(editor.getHTML(), editor.getJSON());
+      }
+    },
   });
 
   // If value updates, update the contents accordingly

@@ -20,7 +20,7 @@ export default function SimulatepersonalizerModal({
   const [emailBody, setEmailBody] = useState("");
   const [overrideEmailBody, setOverrideEmailBody] = useState<string | undefined>(undefined); 
   const [rawEmailBody, setRawEmailBody] = useState<JSONContent | undefined>(undefined);
-  const sequences = innerProps.sequences.map((sequence: any) => sequence.description);
+  const sequences = innerProps?.sequences?.map((sequence: any) => sequence.description);
 
   const handleSimulate = async () => {
     setLoading(true);
@@ -70,7 +70,7 @@ export default function SimulatepersonalizerModal({
                 {simulate ? "Personalized" : "Original"} Email
               </Text>
             </Flex>
-            {sequences.length > 0 && !simulate && (
+            {sequences?.length > 0 && !simulate && (
               <Select
                 placeholder="Select template"
                 data={sequences.map((sequence: any, index: any) => ({ value: index, label: `Sequence ${index + 1}` }))}

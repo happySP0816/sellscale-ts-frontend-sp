@@ -174,7 +174,10 @@ export function ContactsInfiniteScroll({
       <Modal
         size="1150px"
         opened={modalOpened}
-        onClose={() => setModalOpened(false)}
+        onClose={() => {
+          setModalOpened(false);
+          fetchInitialContacts(searchTerm);
+        }}
       >
         <Box mt="-20px">
           <FindContactsPage />

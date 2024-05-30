@@ -479,7 +479,7 @@ const generateTextWithBadges = (text: string) => {
                   modal: "simulatepersonalizerModal",
                   title: (
                     <Title order={3}>
-                      <span className=" text-gray-500">Go back to</span> Personalizers
+                      <span className=" text-gray-500"></span> Personalizers
                     </Title>
                   ),
                   innerProps: {prospectId: selectedProspect, sequences: innerProps.sequences},

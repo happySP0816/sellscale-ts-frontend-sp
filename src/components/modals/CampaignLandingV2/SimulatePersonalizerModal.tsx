@@ -21,14 +21,16 @@ export default function SimulatepersonalizerModal({
   const [overrideEmailBody, setOverrideEmailBody] = useState<string | undefined>(undefined); 
   const [rawEmailBody, setRawEmailBody] = useState<JSONContent | undefined>(undefined);
   const sequences = innerProps?.sequences?.map((sequence: any) => sequence.description);
+  const [originalEmailBody, setOriginalEmailBody] = useState<string | undefined>(undefined);
 
   const handleSimulate = async () => {
+    setOriginalEmailBody(emailBody);
     setLoading(true);
     setSimulate(true);
     try {
       const prospectId = innerProps.prospectId; // Replace with actual prospectId
       const response = await researcher.getPersonalization(userToken, Number(prospectId), emailBody);
-      setOverrideEmailBody(response.personalized_email);
+      setOverrideEmailBody(response.personalized_email.replace(/\n/g, "<br/>"));
     } catch (error) {
       console.error("Error during personalization:", error);
     } finally {
@@ -47,6 +49,7 @@ export default function SimulatepersonalizerModal({
   };
 
   const handleViewOriginal = () => {
+    setEmailBody(originalEmailBody || "");
     setOverrideEmailBody(undefined);
     setSimulate(false);
   };
@@ -94,7 +97,7 @@ export default function SimulatepersonalizerModal({
         </Flex>
         <Box mt={4}>
 
-          <RichTextArea height={300} value={overrideEmailBody || rawEmailBody} onChange={(value, rawValue) => {
+          <RichTextArea height={300} value={overrideEmailBody || originalEmailBody || rawEmailBody} onChange={(value, rawValue) => {
                   setEmailBody(value)
                   setRawEmailBody(rawValue)
                 }}

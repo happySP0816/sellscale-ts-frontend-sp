@@ -80,6 +80,7 @@ import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSim
 import { PersonaOverview } from "src";
 
 interface StatsData {
+  id: number;
   archetype_name: string;
   created_at: string;
   emoji: string;
@@ -106,7 +107,7 @@ export default function CampaignLandingV2() {
   const convertStatsDataToPersonaOverview = (statsData: StatsData): PersonaOverview => {
     return {
       active: statsData.active,
-      id: 0,
+      id: statsData.id,
       name: statsData.archetype_name,
       num_prospects: statsData.num_prospects,
       num_unused_email_prospects: 0,

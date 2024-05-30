@@ -52,12 +52,7 @@ const CustomSelect = ({
                 width: "100%",
               }}
             >
-              <Title
-                size={"14px"}
-                fw={"500"}
-                color="gray.6"
-                transform="uppercase"
-              >
+              <Title size={"14px"} fw={"500"} color="gray.6">
                 {label}
               </Title>
 
@@ -95,7 +90,6 @@ const CustomSelect = ({
         }}
         zIndex={9999}
         styles={{
-
           rightSection: { pointerEvents: "none" },
           label: { width: "100%" },
           value: {

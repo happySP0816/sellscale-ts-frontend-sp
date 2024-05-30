@@ -1,7 +1,34 @@
-import { prospectUploadDrawerIdState, prospectUploadDrawerOpenState } from "@atoms/uploadAtoms";
+import {
+  prospectUploadDrawerIdState,
+  prospectUploadDrawerOpenState,
+} from "@atoms/uploadAtoms";
 import PageFrame from "@common/PageFrame";
-import { ActionIcon, Badge, Box, Button, Flex, Menu, NavLink, Progress, Select, Text, Title, Tooltip, useMantineTheme } from "@mantine/core";
-import { IconBolt, IconCalendar, IconChevronLeft, IconChevronRight, IconExternalLink, IconLetterT, IconLoader, IconSend, IconUserCircle } from "@tabler/icons";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Flex,
+  Menu,
+  NavLink,
+  Progress,
+  Select,
+  Text,
+  Title,
+  Tooltip,
+  useMantineTheme,
+} from "@mantine/core";
+import {
+  IconBolt,
+  IconCalendar,
+  IconChevronLeft,
+  IconChevronRight,
+  IconExternalLink,
+  IconLetterT,
+  IconLoader,
+  IconSend,
+  IconUserCircle,
+} from "@tabler/icons";
 import { DataGrid } from "mantine-data-grid";
 import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
@@ -14,8 +41,8 @@ import {
   MRT_ColumnDef,
   MRT_GlobalFilterTextInput,
   MRT_ToggleFiltersButton,
-  // MantineReactTable,
-  // useMantineReactTable,
+  MantineReactTable,
+  useMantineReactTable,
 } from "mantine-react-table";
 import { data } from "@common/analytics/OverallPerformanceProgress/OverallPerformanceProgress";
 import { useQuery } from "@tanstack/react-query";
@@ -48,7 +75,11 @@ export default function ProspectUploadHistory() {
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-upload-history-all`],
     queryFn: async () => {
-      const result = await getProspectUploadHistory(userToken, undefined, undefined);
+      const result = await getProspectUploadHistory(
+        userToken,
+        undefined,
+        undefined
+      );
       const d = result.data.history.map((d: UploadHistoryDataType) => {
         return {
           ...d,
@@ -81,14 +112,26 @@ export default function ProspectUploadHistory() {
         ),
         Cell: ({ cell }) => {
           return (
-            <Flex direction={"column"} gap={"5px"} w={"100%"} h={"100%"} py={"xs"} px={"md"} align={"start"} justify={"center"}>
+            <Flex
+              direction={"column"}
+              gap={"5px"}
+              w={"100%"}
+              h={"100%"}
+              py={"xs"}
+              px={"md"}
+              align={"start"}
+              justify={"center"}
+            >
               <Tooltip label={cell.row.original.upload_name}>
                 <Text fw={600} size={"md"}>
-                  {cell.row.original.upload_name?.length > 35 ? cell.row.original.upload_name.slice(0, 35) + "..." : cell.row.original.upload_name}
+                  {cell.row.original.upload_name?.length > 35
+                    ? cell.row.original.upload_name.slice(0, 35) + "..."
+                    : cell.row.original.upload_name}
                 </Text>
               </Tooltip>
               <Tooltip label={cell.row.original.client_archetype_name}>
-                {cell.row.original.client_archetype_name && cell.row.original.client_archetype_id && (
+                {cell.row.original.client_archetype_name &&
+                cell.row.original.client_archetype_id ? (
                   <Flex>
                     <Text
                       mr="3px"
@@ -121,15 +164,19 @@ export default function ProspectUploadHistory() {
                       fw={600}
                     >
                       {cell.row.original.client_archetype_name?.length > 35
-                        ? cell.row.original.client_archetype_name.slice(0, 35) + "..."
+                        ? cell.row.original.client_archetype_name.slice(0, 35) +
+                          "..."
                         : cell.row.original.client_archetype_name}
                       <IconExternalLink size={"1.1rem"} />
                     </Text>
                   </Flex>
+                ) : (
+                  <div></div>
                 )}
               </Tooltip>
               <Tooltip label={cell.row.original.client_segment_name}>
-                {cell.row.original.client_segment_name && cell.row.original.client_segment_id && (
+                {cell.row.original.client_segment_name &&
+                cell.row.original.client_segment_id ? (
                   <Flex direction={"row"}>
                     <Text
                       mr="3px"
@@ -162,11 +209,14 @@ export default function ProspectUploadHistory() {
                       fw={600}
                     >
                       {cell.row.original.client_segment_name?.length > 35
-                        ? cell.row.original.client_segment_name.slice(0, 35) + "..."
+                        ? cell.row.original.client_segment_name.slice(0, 35) +
+                          "..."
                         : cell.row.original.client_segment_name}
                       <IconExternalLink size={"1.1rem"} />
                     </Text>
                   </Flex>
+                ) : (
+                  <div></div>
                 )}
               </Tooltip>
             </Flex>
@@ -191,7 +241,13 @@ export default function ProspectUploadHistory() {
           let upload_source_formatted = upload_source.replace(/_/g, " ");
 
           return (
-            <Flex w={"100%"} px={"sm"} h={"100%"} align={"center"} justify={"center"}>
+            <Flex
+              w={"100%"}
+              px={"sm"}
+              h={"100%"}
+              align={"center"}
+              justify={"center"}
+            >
               {/* <Text lineClamp={1}>{upload_source}</Text> */}
               {/* <Badge size='lg' color={valueToColor(theme, upload_source)}> */}
               <Badge
@@ -228,24 +284,52 @@ export default function ProspectUploadHistory() {
         minSize: 300,
         enableResizing: true,
         Cell: ({ cell }) => {
-          const { upload_size, uploads_completed, uploads_in_progress, uploads_failed, uploads_other, uploads_not_started } = cell.row.original;
+          const {
+            upload_size,
+            uploads_completed,
+            uploads_in_progress,
+            uploads_failed,
+            uploads_other,
+            uploads_not_started,
+          } = cell.row.original;
 
           return (
-            <Flex direction={"column"} align={"center"} justify={"center"} w={"100%"} h={"100%"} py={"sm"}>
-              <Flex w={"100%"} align={"center"} justify={"flex-start"} gap={"8px"} px={"xs"}>
+            <Flex
+              direction={"column"}
+              align={"center"}
+              justify={"center"}
+              w={"100%"}
+              h={"100%"}
+              py={"sm"}
+            >
+              <Flex
+                w={"100%"}
+                align={"center"}
+                justify={"flex-start"}
+                gap={"8px"}
+                px={"xs"}
+              >
                 <Progress
                   value={Math.round((uploads_completed / upload_size) * 100)}
                   w={"100%"}
-                  color={Math.round((uploads_completed / upload_size) * 100) >= 100 ? "green" : ""}
+                  color={
+                    Math.round((uploads_completed / upload_size) * 100) >= 100
+                      ? "green"
+                      : ""
+                  }
                   sections={[
                     {
-                      value: Math.round((uploads_completed / upload_size) * 100),
+                      value: Math.round(
+                        (uploads_completed / upload_size) * 100
+                      ),
                       color: "green",
                       // label: "Complete",
                       tooltip: "Complete",
                     },
                     {
-                      value: Math.round((uploads_in_progress / upload_size) * 100),
+                      value: Math.round(
+                        (uploads_in_progress / upload_size) * 100
+                      ),
                       color: "yellow",
                       // label: "In Progress",
                       tooltip: "In Progress",
@@ -263,7 +347,9 @@ export default function ProspectUploadHistory() {
                       tooltip: "Other",
                     },
                     {
-                      value: Math.round((uploads_not_started / upload_size) * 100),
+                      value: Math.round(
+                        (uploads_not_started / upload_size) * 100
+                      ),
                       color: "gray",
                       // label: "Not Started",
                       tooltip: "Not Started",
@@ -272,11 +358,28 @@ export default function ProspectUploadHistory() {
                 />
                 <Text
                   color={
-                    Math.round(((uploads_completed + uploads_in_progress + uploads_failed + uploads_other) / upload_size) * 100) >= 100 ? "green" : "#228be6"
+                    Math.round(
+                      ((uploads_completed +
+                        uploads_in_progress +
+                        uploads_failed +
+                        uploads_other) /
+                        upload_size) *
+                        100
+                    ) >= 100
+                      ? "green"
+                      : "#228be6"
                   }
                   fw={600}
                 >
-                  {Math.round(((uploads_completed + uploads_in_progress + uploads_failed + uploads_other) / upload_size) * 100)}%
+                  {Math.round(
+                    ((uploads_completed +
+                      uploads_in_progress +
+                      uploads_failed +
+                      uploads_other) /
+                      upload_size) *
+                      100
+                  )}
+                  %
                 </Text>
               </Flex>
               <Flex align={"start"} direction={"column"} w={"100%"} px={"sm"}>
@@ -284,7 +387,11 @@ export default function ProspectUploadHistory() {
                   <Text fw={500}>
                     {uploads_completed} / {upload_size}
                   </Text>
-                  <Text color="gray" fw={500} style={{ color: "gray !important" }}>
+                  <Text
+                    color="gray"
+                    fw={500}
+                    style={{ color: "gray !important" }}
+                  >
                     Uploaded
                   </Text>
                 </Flex>
@@ -326,8 +433,17 @@ export default function ProspectUploadHistory() {
           }
 
           return (
-            <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"center"}>
-              <Badge size="lg" color={status === "UPLOAD_COMPLETE" ? "green" : ""}>
+            <Flex
+              w={"100%"}
+              h={"100%"}
+              px={"sm"}
+              align={"center"}
+              justify={"center"}
+            >
+              <Badge
+                size="lg"
+                color={status === "UPLOAD_COMPLETE" ? "green" : ""}
+              >
                 {status_formatted}
               </Badge>
             </Flex>
@@ -349,7 +465,14 @@ export default function ProspectUploadHistory() {
           const { upload_date } = cell.row.original;
 
           return (
-            <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"} justify={"center"}>
+            <Flex
+              align={"center"}
+              gap={"xs"}
+              py={"sm"}
+              w={"100%"}
+              h={"100%"}
+              justify={"center"}
+            >
               <Text color="gray" fw={500}>
                 {upload_date}
               </Text>
@@ -361,26 +484,26 @@ export default function ProspectUploadHistory() {
     []
   );
 
-  // const table = useMantineReactTable({
-  //   columns,
-  //   data: data ?? [],
-  //   enableColumnFilterModes: true,
-  //   enableColumnOrdering: true,
-  //   enableFacetedValues: true,
-  //   enableGrouping: true,
-  //   enablePinning: true,
-  //   paginationDisplayMode: "pages",
-  //   positionToolbarAlertBanner: "bottom",
-  //   mantinePaginationProps: {
-  //     radius: "xl",
-  //     size: "lg",
-  //   },
-  //   mantineTableContainerProps: { sx: { maxHeight: "500px" } },
-  // });
+  const table = useMantineReactTable({
+    columns,
+    data: data ?? [],
+    enableColumnFilterModes: true,
+    enableColumnOrdering: true,
+    enableFacetedValues: true,
+    enableGrouping: true,
+    enablePinning: true,
+    paginationDisplayMode: "pages",
+    positionToolbarAlertBanner: "bottom",
+    mantinePaginationProps: {
+      radius: "xl",
+      size: "lg",
+    },
+    mantineTableContainerProps: { sx: { maxHeight: "500px" } },
+  });
 
   return (
     <Flex bg={"white"}>
-      {/* <MantineReactTable table={table} /> */}
+      <MantineReactTable table={table} />
       <UploadDetailsDrawer />
     </Flex>
   );

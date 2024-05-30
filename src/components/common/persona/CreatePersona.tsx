@@ -188,7 +188,13 @@ export default function CreatePersona(props: PropsType) {
                   ]}
                   placeholder="Connect sequences"
                   withinPortal
-                  onChange={(value) => setConnectionType(value)}
+                  onChange={(value) => {
+                    if (typeof value === 'string') {
+                      setConnectionType(value);
+                    } else {
+                      console.error('Invalid value type');
+                    }
+                  }}
                 />
                 <Divider
                   w={"100%"}

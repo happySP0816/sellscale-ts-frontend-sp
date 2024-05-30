@@ -142,7 +142,8 @@ export function ContactsInfiniteScroll({
         campaignId,
         0,
         batchSize,
-        searchTerm
+        searchTerm,
+        false,
       );
       setContacts(initialContacts.sample_contacts);
       setContactsData(initialContacts.sample_contacts);

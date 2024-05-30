@@ -412,8 +412,7 @@ const generateTextWithBadges = (text: string) => {
                   placeholder="-"
                   onChange={(value) => setSelectedProspect(value)}
                   data={prospectData}
-                  defaultValue={prospectData.length > 0 ? prospectData[0]?.value : null}
-                />
+                  defaultValue={prospectData.length > 0 ? (prospectData[0] as { value: string }).value : null}></Select>
                 {selectedProspect && (
                   researching ? (
                     <Loader size="sm" />

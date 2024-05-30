@@ -72,12 +72,15 @@ import {
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { useParams } from "react-router-dom";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { useRecoilValue } from "recoil";
+import { currentProjectState } from '@atoms/personaAtoms';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
+import { PersonaOverview } from "src";
 
 interface StatsData {
+  id: number;
   archetype_name: string;
   created_at: string;
   emoji: string;
@@ -99,7 +102,51 @@ interface StatsData {
 }
 
 export default function CampaignLandingV2() {
+
+  //todo: just change statsData to personaOverview.
+  const convertStatsDataToPersonaOverview = (statsData: StatsData): PersonaOverview => {
+    return {
+      active: statsData.active,
+      id: statsData.id,
+      name: statsData.archetype_name,
+      num_prospects: statsData.num_prospects,
+      num_unused_email_prospects: 0,
+      num_unused_li_prospects: 0,
+      icp_matching_prompt: "",
+      icp_matching_option_filters: {},
+      is_unassigned_contact_archetype: false,
+      persona_fit_reason: "",
+      persona_contact_objective: "",
+      uploads: [],
+      contract_size: 0,
+      transformer_blocklist: [],
+      transformer_blocklist_initial: [],
+      emoji: statsData.emoji,
+      avg_icp_fit_score: 0,
+      li_bump_amount: 0,
+      cta_framework_company: "",
+      cta_framework_persona: "",
+      cta_framework_action: "",
+      use_cases: "",
+      filters: "",
+      lookalike_profile_1: "",
+      lookalike_profile_2: "",
+      lookalike_profile_3: "",
+      lookalike_profile_4: "",
+      lookalike_profile_5: "",
+      template_mode: false,
+      smartlead_campaign_id: undefined,
+      meta_data: {},
+      first_message_delay_days: undefined,
+      linkedin_active: statsData.linkedin_active,
+      email_active: statsData.email_active,
+      email_open_tracking_enabled: false,
+      email_link_tracking_enabled: false,
+    };
+  };
   const userData = useRecoilValue(userDataState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+
   console.log("======", userData);
 
   const getIcpFitBadge = (icp_fit_score: number) => {
@@ -377,6 +424,7 @@ export default function CampaignLandingV2() {
           const loadedStats = stats as StatsData;
           console.log("stats", loadedStats);
           setStatsData(loadedStats);
+          setCurrentProject(convertStatsDataToPersonaOverview(loadedStats as StatsData));
           if (loadedStats && loadedStats.testing_volume) {
             setTestingVolume(loadedStats.testing_volume);
           }
@@ -600,12 +648,12 @@ export default function CampaignLandingV2() {
                         ? "green"
                         : ""
                     }
-                    onClick={() => {
-                      if (status === "SETUP") setStatus("ACTIVE");
-                      else if (status === "ACTIVE") {
-                        setStatus("ACTIVE");
-                      }
-                    }}
+                    // onClick={() => {
+                    //   if (status === "SETUP") 
+                    //   else if (status === "ACTIVE") {
+                    //     setStatus("ACTIVE");
+                    //   }
+                    // }}
                   >
                     {status}
                   </Button>
@@ -1456,7 +1504,26 @@ export default function CampaignLandingV2() {
                     },
                   })}
                   onClick={() => {
-                    setShowCampaignTemplateModal(true);
+                    openContextModal({
+                      modal: "campaignTemplateEditModal",
+                      title: <Title order={3}>Sequence Builder</Title>,
+                      innerProps: {
+                        campaignId: id,
+                        createTemplateBuilder,
+                        setCreateTemplateBuilder,
+                        setSequences,
+                      },
+                      centered: true,
+                      styles: {
+                        content: {
+                          minWidth: "1100px",
+                        },
+                      },
+                      onClose: () => {
+                        const clientArchetypeId = Number(id);
+                        refetchSequenceData(clientArchetypeId);
+                      },
+                    });
                   }}
                 >
                   <Flex align="center" gap="xs">
@@ -1517,6 +1584,9 @@ export default function CampaignLandingV2() {
                         content: {
                           minWidth: "1100px",
                         },
+                      },
+                      onClose: () => {
+                        getPersonalizers();
                       },
                     })
                   }

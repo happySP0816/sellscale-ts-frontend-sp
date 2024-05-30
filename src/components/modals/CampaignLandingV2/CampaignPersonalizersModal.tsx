@@ -1,6 +1,6 @@
 import { ActionIcon, Avatar, Badge, Box, Button, Checkbox, Divider, Title, Flex, Paper, ScrollArea, Select, Text, Textarea, Tooltip, Loader, Modal, Center, SegmentedControl, TextInput, Popover } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
-import { IconBrandLinkedin, IconBuilding, IconBulb, IconEdit, IconPlus, IconPoint, IconQuestionMark, IconSearch, IconTrash } from "@tabler/icons";
+import { IconBrandLinkedin, IconBuilding, IconBulb, IconEdit, IconEye, IconPlus, IconPoint, IconQuestionMark, IconSearch, IconTrash } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
 import {useRecoilState, useRecoilValue} from "recoil";
 import { userDataState, userTokenState } from '@atoms/userAtoms';
@@ -8,6 +8,8 @@ import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
 import { modals } from '@mantine/modals';
 import * as researchers from "@utils/requests/researchers";
 import { useState, useEffect, useRef, Key } from "react";
+import { deterministicMantineColor } from "@utils/requests/utils";
+import postEditStackRankedConfigurationName from "@utils/requests/postEditStackRankedConfigurationName";
 
 export default function CampaignPersonalizersModal({
   innerProps,
@@ -25,7 +27,7 @@ const generateTextWithBadges = (text: string) => {
   return parts.map((part, index) => {
     if (part.startsWith("[[") && part.endsWith("]]")) {
       let badgeText = part.slice(2, -2);
-      return <Badge key={index}>{badgeText}</Badge>;
+      return <Badge key={index} color="gray">{badgeText}</Badge>;
     }
     if (/^[A-Z_]+$/.test(part)) {
       let formattedText = part.toLowerCase().replace(/_/g, ' ');
@@ -52,6 +54,11 @@ const generateTextWithBadges = (text: string) => {
         label: contact.full_name,
       }));
       setProspectData(newProspectData);
+      if (newProspectData[0]?.value){
+        setSelectedProspect(newProspectData[0].value);
+        fetchResearcherAnswers(newProspectData[0].value);
+      }
+      
       setLoadingProspects(false);
     }
     );
@@ -71,25 +78,28 @@ const generateTextWithBadges = (text: string) => {
     });
   } ,[]);
 
-  const simulateResearch = (prospectId: Number) => {
+  const fetchResearcherAnswers = async (prospectId: Number) => {
     setResearching(true);
-    researchers.createResearcherAnswer(userToken, prospectId).then((data) => {
-      researchers.getResearcherAnswers(userToken, Number(prospectId)).then((data) => {
-          const newSimulateData = data.answers
-            .map((item: any) => ({
-              title: item.question.key,
-              type: item.question.type,
-              content: item.short_summary,
-              raw_response: item.raw_response,
-              ai_response: item.relevancy_explanation,
-              status: item.is_yes_response,
-            }))
-            .sort((a: { status: number; }, b: { status: number; }) => b.status - a.status); //sort by status true first.
-          setSimulateData(newSimulateData);
-          setResearching(false);
-      });
-    });
-  }
+    const data = await researchers.getResearcherAnswers(userToken, Number(prospectId));
+    const newSimulateData = data.answers
+      .map((item: any) => ({
+        title: item.question.key,
+        type: item.question.type,
+        content: item.short_summary,
+        raw_response: item.raw_response,
+        ai_response: item.relevancy_explanation,
+        status: item.is_yes_response,
+      }))
+      .sort((a: { status: number; }, b: { status: number; }) => b.status - a.status); //sort by status true first.
+    setSimulateData(newSimulateData);
+    setResearching(false);
+  };
+
+  const simulateResearch = async (prospectId: Number) => {
+    setResearching(true);
+    await researchers.createResearcherAnswer(userToken, prospectId);
+    fetchResearcherAnswers(prospectId);
+  };
 
   const [researchData, setResearchData] = useState<any>([]);
   const [simulateData, setSimulateData] = useState([
@@ -305,32 +315,6 @@ const generateTextWithBadges = (text: string) => {
             >
               Research point
             </Button>
-            <Button
-              fullWidth
-              disabled={!selectedProspect}
-              variant="outline"
-              color="grape"
-              leftIcon={<IconSparkles size={"0.9rem"} />}
-              onClick={() =>
-                openContextModal({
-                  modal: "simulatepersonalizerModal",
-                  title: (
-                    <Title order={3}>
-                      <span className=" text-gray-500">Go back to</span> Personalizers
-                    </Title>
-                  ),
-                  innerProps: {prospectId: selectedProspect, sequences: innerProps.sequences},
-                  centered: true,
-                  styles: {
-                    content: {
-                      minWidth: "700px",
-                    },
-                  },
-                })
-              }
-            >
-              Personalize
-            </Button>
           </Flex>
           <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
             {loadingResearchData ? (
@@ -382,7 +366,7 @@ const generateTextWithBadges = (text: string) => {
                           }}>
                             <IconTrash color="gray" size={"0.9rem"} />
                           </ActionIcon>
-                          <Badge size="sm" radius={"sm"} color={item.type === "General" ? "orange" : item.type === "Linkedin" ? "" : "green"}>
+                          <Badge size="sm" radius={"sm"} color={deterministicMantineColor(item.type)}>
                             {item.type}
                           </Badge>
                         </Flex>
@@ -410,9 +394,13 @@ const generateTextWithBadges = (text: string) => {
                 </Text>
                 <Select
                   placeholder="-"
-                  onChange={(value) => setSelectedProspect(value)}
+                  onChange={(value) => {
+                    setSelectedProspect(value);
+                    value && fetchResearcherAnswers(Number(value));
+                  }}
                   data={prospectData}
-                  defaultValue={prospectData.length > 0 ? (prospectData[0] as { value: string }).value : null}></Select>
+                  defaultValue={prospectData.length > 0 ? (prospectData[0] as { value: string }).value : null}>
+                </Select>
                 {selectedProspect && (
                   researching ? (
                     <Loader size="sm" />
@@ -462,9 +450,12 @@ const generateTextWithBadges = (text: string) => {
                         </Flex>
                         <Popover arrowPosition='center' zIndex={40000000} width={300} position="bottom" withArrow shadow="md">
                           <Popover.Target>
-                            <Text size={"sm"} fw={500} style={{ cursor: 'pointer' }}>
-                              Hover to see raw content
-                            </Text>
+                            <Flex align="center" style={{ cursor: 'pointer' }}>
+                              <IconEye size={"1rem"} style={{ marginRight: '4px' }} />
+                              <Text size={"xs"} fw={400}>
+                                See raw content
+                              </Text>
+                            </Flex>
                           </Popover.Target>
                           <Popover.Dropdown>
                             <Text size="xs">{item.raw_response}</Text>
@@ -477,6 +468,34 @@ const generateTextWithBadges = (text: string) => {
               </Flex>
             )}
           </ScrollArea>
+          <Flex align={"center"} gap={"md"} mt={"lg"}>
+            <Button
+              fullWidth
+              disabled={!selectedProspect}
+              color="grape"
+              leftIcon={<IconSparkles size={"0.9rem"} />}
+              onClick={() =>
+                openContextModal({
+                  modal: "simulatepersonalizerModal",
+                  title: (
+                    <Title order={3}>
+                      <span className=" text-gray-500"></span> Personalizers
+                    </Title>
+                  ),
+                  innerProps: {prospectId: selectedProspect, sequences: innerProps.sequences},
+                  centered: true,
+                  styles: {
+                    content: {
+                      minWidth: "700px",
+                    },
+                  },
+                })
+              }
+              style={{ margin: '0 8px 8px 8px' }} // Added margins to make the button smaller
+            >
+              Personalize
+            </Button>
+          </Flex>
         </Paper>
       </Flex>
       <Flex align={"center"} gap={"md"} mt={"lg"}>

@@ -123,7 +123,7 @@ export default function CampaignTemplatesModal({
               Template
             </Text>
             <Box mt={4}>
-              {type == "email" ? (
+              {type == "email template" ? (
                 <RichTextArea onChange={(value) => setTemplate(value)} />
               ) : (
                 <Textarea

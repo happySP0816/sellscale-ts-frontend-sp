@@ -32,6 +32,7 @@ const QuestionModal: React.FC<any> = ({ innerProps }) => {
   const [activeTab, setActiveTab] = useState<string>(innerProps.currentTab || 'LINKEDIN');
   const [question, setQuestion] = useState<string>(innerProps.question || '');
   const [relevancy, setRelevancy] = useState<string>(innerProps.relevancy ||'');
+  const [loading, setLoading] = useState<boolean>(false);
   const editing = innerProps.edit;
   const questionId = innerProps.question_id as any;
 
@@ -39,13 +40,16 @@ const QuestionModal: React.FC<any> = ({ innerProps }) => {
 
   const renderSpecificOrGeneralQuestions = () => (
     <Box pt="xs">
-      <Text size="sm" color="gray">
-        Reference company as [[company]] and prospect as [[prospect]]. (Ex. "Does [[company]] hire engineers?")
-      </Text>
+      <Paper shadow="xs" mt="lg" mb="lg" radius="md" p="md" style={{ backgroundColor: '#f0f4ff', borderLeft: '4px solid #3b82f6' }}>
+        <Text size="xs" color="#3b82f6" weight={500}>
+          Reference company as [[company]] and prospect as [[prospect]]. (Ex. "Does [[company]] hire engineers?")
+        </Text>
+      </Paper>
       <TextInput 
         defaultValue={question}
         label="Question" 
-        placeholder="Enter your question" 
+        placeholder="'Does [[company]] hire engineers?'" 
+        description="This question will be processed by SellScale's AI to guide the inquiry during its research."
         onChange={(event) => {
           if (event.currentTarget.value !== null && typeof event.currentTarget.value === 'string') {
             setQuestion(event.currentTarget.value);
@@ -55,7 +59,8 @@ const QuestionModal: React.FC<any> = ({ innerProps }) => {
       <Textarea 
         defaultValue={relevancy}
         label="Why is this relevant? / How should the AI use this?" 
-        placeholder="Enter details" 
+        placeholder="'This information helps in understanding [[prospect]]'s background, skills, and experience.'" 
+        description="Provide a detailed explanation of the relevance and how the AI should utilize this information."
         onChange={(event) => {
           if (event.currentTarget.value !== null && typeof event.currentTarget.value === 'string') {
             setRelevancy(event.currentTarget.value);
@@ -106,6 +111,7 @@ const QuestionModal: React.FC<any> = ({ innerProps }) => {
       {activeTab === 'LINKEDIN' && (
         <Box pt="xs">
           <Select
+            withinPortal
             defaultValue={question}
             label="Question"
             placeholder="Select your question"
@@ -132,7 +138,26 @@ const QuestionModal: React.FC<any> = ({ innerProps }) => {
 
       <Center mt="md">
         <Button onClick={() => {
-          
+          // disgusting hack to get us back to the main modal.
+          closeAllModals();
+          openContextModal({
+            modal: "campaignPersonalizersModal",
+            title: <Title order={3}>Personalizers</Title>,
+            innerProps: {
+              ai_researcher_id: innerProps.ai_researcher_id,
+              id: innerProps.campaign_id,
+              setPersonalizers: innerProps.setPersonalizers,
+            },
+            centered: true,
+            styles: {
+              content: {
+                minWidth: "1100px",
+              },
+            },
+          });
+        }} style={{ marginRight: '8px', backgroundColor: 'red' }}>Close</Button>
+        <Button loading={loading} onClick={() => {
+          setLoading(true);
           if (!editing) {
             researchers.createResearcherQuestion(userToken, activeTab, question, relevancy, Number(innerProps.ai_researcher_id))
             .then(response => {
@@ -168,28 +193,10 @@ const QuestionModal: React.FC<any> = ({ innerProps }) => {
                 },
               },
             });
+            setLoading(false);
           }, 350);
         
-        }} style={{ marginRight: '8px' }}>Save & Close</Button>
-        <Button onClick={() => {
-          // disgusting hack to get us back to the main modal.
-          closeAllModals();
-          openContextModal({
-            modal: "campaignPersonalizersModal",
-            title: <Title order={3}>Personalizers</Title>,
-            innerProps: {
-              ai_researcher_id: innerProps.ai_researcher_id,
-              id: innerProps.campaign_id,
-              setPersonalizers: innerProps.setPersonalizers,
-            },
-            centered: true,
-            styles: {
-              content: {
-                minWidth: "1100px",
-              },
-            },
-          });
-        }} style={{ marginLeft: '8px' }}>Close</Button>
+        }} style={{ marginLeft: '8px', backgroundColor: 'green' }}>Save & Close</Button>
       </Center>
     </Paper>
   );

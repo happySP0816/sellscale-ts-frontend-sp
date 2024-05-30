@@ -111,7 +111,8 @@ export function ContactsInfiniteScroll({
         campaignId,
         offsetRef.current,
         batchSize,
-        searchTerm
+        searchTerm,
+        false
       );
       if (newContacts.sample_contacts.length === 0) {
         setHasMoreContacts(false); // No more contacts to load

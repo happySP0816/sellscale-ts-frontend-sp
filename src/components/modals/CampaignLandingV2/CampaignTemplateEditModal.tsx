@@ -602,12 +602,15 @@ export default function CampaignTemplateEditModal({
                                       >
                                         <Avatar size={"md"} radius={"xl"} />
                                         <Box>
-                                          <Text fw={600} size={"sm"}>
+                                          {/* <Text fw={600} size={"sm"}>
                                             {"Ishan Sharma"}
-                                          </Text>
+                                          </Text> */}
                                           <div
+                                            style={{
+                                              fontSize: "11px",
+                                            }}
                                             dangerouslySetInnerHTML={{
-                                              __html: asset.template,
+                                              __html: asset.text,
                                             }}
                                           />
                                         </Box>
@@ -749,6 +752,10 @@ export const Templates = ({
                   <Popover withinPortal>
                     <Popover.Dropdown>
                       <div
+                        style={{
+                          maxWidth: "300px",
+                          fontSize: "10px",
+                        }}
                         dangerouslySetInnerHTML={{
                           __html: asset.asset_raw_value,
                         }}

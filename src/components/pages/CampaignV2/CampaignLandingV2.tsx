@@ -226,6 +226,7 @@ export default function CampaignLandingV2() {
     setShowLinkedInConvoSimulatorModal,
   ] = useState(false);
 
+  const [value, setValue] = useState("");
   //sequence variable
   const [sequences, setSequences] = useState<any[]>([]);
   const [selectStep, setSelectStep] = useState<number | null>(null);
@@ -493,6 +494,35 @@ export default function CampaignLandingV2() {
       refetchCampaignStatsData();
     });
   };
+
+  const handleModal = (
+    type: string,
+    id: number,
+    campaign_name: string,
+    statsData: any
+  ) => {
+    openContextModal({
+      modal: "campaignDrilldownModal",
+      withCloseButton: false,
+      innerProps: {
+        type: type,
+        persona_id: id,
+        campaign_name: campaign_name,
+        statsData: statsData,
+        setType: setValue,
+      },
+      centered: true,
+      styles: {
+        content: {
+          minWidth: "1100px",
+        },
+        body: {
+          padding: 0,
+        },
+      },
+    });
+  };
+
   return (
     <Paper
       p={"lg"}
@@ -716,7 +746,22 @@ export default function CampaignLandingV2() {
                     h={"100%"}
                     w="100%"
                   >
-                    <Box p={"lg"} w={"100%"} h={"100%"}>
+                    <Box
+                      p={"lg"}
+                      w={"100%"}
+                      h={"100%"}
+                      sx={{
+                        backgroundColor: "",
+                        cursor: "pointer",
+                        "&:hover": {
+                          backgroundColor: "#F7FDFF",
+                        },
+                      }}
+                      onClick={() => {
+                        setValue("sent");
+                        handleModal("sent", id, "aaaa", statsData);
+                      }}
+                    >
                       <Flex align={"center"} gap={"xs"}>
                         <IconSend
                           size={"0.9rem"}
@@ -735,7 +780,22 @@ export default function CampaignLandingV2() {
                       </Flex>
                     </Box>
                     <Divider orientation="vertical" />
-                    <Box p={"lg"} w={"100%"} h={"100%"}>
+                    <Box
+                      p={"lg"}
+                      w={"100%"}
+                      h={"100%"}
+                      sx={{
+                        backgroundColor: "",
+                        cursor: "pointer",
+                        "&:hover": {
+                          backgroundColor: "#FFF7FB",
+                        },
+                      }}
+                      onClick={() => {
+                        setValue("open");
+                        handleModal("open", id, "aaaa", statsData);
+                      }}
+                    >
                       <Flex align={"center"} gap={6}>
                         <IconChecks
                           size={"0.9rem"}
@@ -758,7 +818,22 @@ export default function CampaignLandingV2() {
                       </Flex>
                     </Box>
                     <Divider orientation="vertical" />
-                    <Box p={"lg"} w={"100%"} h={"100%"}>
+                    <Box
+                      p={"lg"}
+                      w={"100%"}
+                      h={"100%"}
+                      sx={{
+                        backgroundColor: "",
+                        cursor: "pointer",
+                        "&:hover": {
+                          backgroundColor: "#FFF9F2",
+                        },
+                      }}
+                      onClick={() => {
+                        setValue("reply");
+                        handleModal("reply", id, "aaaa", statsData);
+                      }}
+                    >
                       <Flex align={"center"} gap={6}>
                         <IconMessageCheck
                           size={"0.9rem"}
@@ -781,7 +856,22 @@ export default function CampaignLandingV2() {
                       </Flex>
                     </Box>
                     <Divider orientation="vertical" />
-                    <Box p={"lg"} w={"100%"} h={"100%"}>
+                    <Box
+                      p={"lg"}
+                      w={"100%"}
+                      h={"100%"}
+                      sx={{
+                        backgroundColor: "",
+                        cursor: "pointer",
+                        "&:hover": {
+                          backgroundColor: "#F4FBF5",
+                        },
+                      }}
+                      onClick={() => {
+                        setValue("pos_reply");
+                        handleModal("pos_reply", id, "aaaa", statsData);
+                      }}
+                    >
                       <Flex align={"center"} gap={6}>
                         <IconMessageCheck
                           size={"0.9rem"}
@@ -804,7 +894,22 @@ export default function CampaignLandingV2() {
                       </Flex>
                     </Box>
                     <Divider orientation="vertical" />
-                    <Box p={"lg"} w={"100%"} h={"100%"}>
+                    <Box
+                      p={"lg"}
+                      w={"100%"}
+                      h={"100%"}
+                      sx={{
+                        backgroundColor: "",
+                        cursor: "pointer",
+                        "&:hover": {
+                          backgroundColor: "#F7FDFF",
+                        },
+                      }}
+                      onClick={() => {
+                        setValue("demo");
+                        handleModal("demo", id, "aaaa", statsData);
+                      }}
+                    >
                       <Flex align={"center"} gap={6}>
                         <IconCalendar
                           size={"0.9rem"}
@@ -1024,7 +1129,7 @@ export default function CampaignLandingV2() {
                     //   setShowLinkedInConvoSimulatorModal(true);
                     // }}
                     onClick={() => {
-                      window.open(`/setup/${type}/${id}`, '_blank');
+                      window.open(`/setup/${type}/${id}`, "_blank");
                     }}
                   >
                     Simulate

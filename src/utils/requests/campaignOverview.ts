@@ -68,11 +68,12 @@ export const fetchCampaignContacts = async (
   client_archetype_id: number,
   offset: number,
   limit: number,
-  text: string
+  text: string,
+  include_analytics: boolean
 ) => {
   try {
     const response = await fetch(
-      `${API_URL}/client/campaign_contacts?client_archetype_id=${client_archetype_id}&offset=${offset}&limit=${limit}&text=${encodeURIComponent(text)}`,
+      `${API_URL}/client/campaign_contacts?client_archetype_id=${client_archetype_id}&offset=${offset}&limit=${limit}&text=${encodeURIComponent(text)}&include_analytics=${include_analytics}`,
       {
         headers: {
           Authorization: "Bearer " + userToken,

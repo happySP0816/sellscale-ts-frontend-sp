@@ -1507,6 +1507,7 @@ export default function CampaignLandingV2() {
                       modal: "campaignPersonalizersModal",
                       title: <Title order={3}>Personalizers</Title>,
                       innerProps: {
+                        sequences: sequences,
                         ai_researcher_id: statsData?.ai_researcher_id,
                         id,
                         setPersonalizers,

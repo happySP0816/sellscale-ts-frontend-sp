@@ -1,4 +1,4 @@
-import { ActionIcon, Avatar, Badge, Box, Button, Checkbox, Divider, Title, Flex, Paper, ScrollArea, Select, Text, Textarea, Tooltip, Loader, Modal, Center, SegmentedControl, TextInput } from "@mantine/core";
+import { ActionIcon, Avatar, Badge, Box, Button, Checkbox, Divider, Title, Flex, Paper, ScrollArea, Select, Text, Textarea, Tooltip, Loader, Modal, Center, SegmentedControl, TextInput, Popover } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { IconBrandLinkedin, IconBuilding, IconBulb, IconEdit, IconPlus, IconPoint, IconQuestionMark, IconSearch, IconTrash } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
@@ -8,7 +8,6 @@ import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
 import { modals } from '@mantine/modals';
 import * as researchers from "@utils/requests/researchers";
 import { useState, useEffect, useRef, Key } from "react";
-import QuestionModal from "./QuestionModal";
 
 export default function CampaignPersonalizersModal({
   innerProps,
@@ -16,6 +15,7 @@ export default function CampaignPersonalizersModal({
   id,
 }: ContextModalProps<{
   id(id: any): number;
+  sequences: any;
   ai_researcher_id: number;
   setPersonalizers: Function;
 }>) {
@@ -24,14 +24,20 @@ const generateTextWithBadges = (text: string) => {
   const parts = text.split(/(\[\[.*?\]\])/).filter(Boolean);
   return parts.map((part, index) => {
     if (part.startsWith("[[") && part.endsWith("]]")) {
-      const badgeText = part.slice(2, -2);
+      let badgeText = part.slice(2, -2);
       return <Badge key={index}>{badgeText}</Badge>;
+    }
+    if (/^[A-Z_]+$/.test(part)) {
+      let formattedText = part.toLowerCase().replace(/_/g, ' ');
+      formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
+      return <span key={index}>{formattedText}</span>;
     }
     return <span key={index}>{part}</span>;
   });
 };
 
   const [loadingProspects, setLoadingProspects] = useState(false);
+  const [loadingResearchData, setLoadingResearchData] = useState(false);
   const [prospectData, setProspectData] = useState([]);
   const [selectedProspect, setSelectedProspect] = useState<any>(null);
   const [researching, setResearching] = useState(false);
@@ -40,7 +46,7 @@ const generateTextWithBadges = (text: string) => {
 
   useEffect(() => {
     setLoadingProspects(true);
-    fetchCampaignContacts(userToken, Number(innerProps.id), 0, 30, '').then((data) => {
+    fetchCampaignContacts(userToken, Number(innerProps.id), 0, 10, '', false).then((data) => {
       const newProspectData = data.sample_contacts.map((contact: { id: any; full_name: any; }) => ({
         value: contact.id,
         label: contact.full_name,
@@ -49,7 +55,7 @@ const generateTextWithBadges = (text: string) => {
       setLoadingProspects(false);
     }
     );
-
+    setLoadingResearchData(true);
     researchers.getArchetypeQuestions(userToken, Number(innerProps.id)).then((data: any) => {
       const newResearchData = data.questions.map((item: { id: any; key: any; type: any; relevancy: any; }) => ({
         id: item.id,
@@ -60,6 +66,8 @@ const generateTextWithBadges = (text: string) => {
         status: '',
       }));
       setResearchData(newResearchData);
+    }).finally(() => {
+      setLoadingResearchData(false);
     });
   } ,[]);
 
@@ -72,6 +80,7 @@ const generateTextWithBadges = (text: string) => {
               title: item.question.key,
               type: item.question.type,
               content: item.short_summary,
+              raw_response: item.raw_response,
               ai_response: item.relevancy_explanation,
               status: item.is_yes_response,
             }))
@@ -286,6 +295,7 @@ const generateTextWithBadges = (text: string) => {
                   ),
                   innerProps: {
                     edit: false,
+                    sequences: innerProps.sequences,
                     ai_researcher_id: innerProps.ai_researcher_id,
                     campaign_id: innerProps.id,
                     setPersonalizers: innerProps.setPersonalizers,
@@ -309,7 +319,7 @@ const generateTextWithBadges = (text: string) => {
                       <span className=" text-gray-500">Go back to</span> Personalizers
                     </Title>
                   ),
-                  innerProps: {prospectId: selectedProspect},
+                  innerProps: {prospectId: selectedProspect, sequences: innerProps.sequences},
                   centered: true,
                   styles: {
                     content: {
@@ -323,61 +333,68 @@ const generateTextWithBadges = (text: string) => {
             </Button>
           </Flex>
           <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
-            <Flex h={"100%"} gap={"xs"} direction={"column"}>
-              {researchData.map((item: any, index: Key | null | undefined) => {
-                return (
-                  <Paper withBorder p={"md"} key={index}>
-                    <Flex align={"start"} justify={"space-between"}>
-                      <Text size={"sm"} fw={600} pt={4}>
-                        {generateTextWithBadges(item.title)}
-                      </Text>
-                      <Flex gap={3} align={"center"}>
-                        <ActionIcon onClick={() =>
-                          openContextModal({
-                            modal: "addQuestionModal",
-                            title: (
-                              <Title order={3}>
-                                <span className=" text-gray-500">Edit</span> Research Point
-                              </Title>
-                            ),
-                            innerProps: {
-                              edit: true,
-                              question_id: item.id,
-                              currentTab: item.type,
-                              relevancy: item.content,
-                              question: item.title,
-                              ai_researcher_id: innerProps.ai_researcher_id,
-                              campaign_id: innerProps.id,
-                              setPersonalizers: innerProps.setPersonalizers,
-                            },
-                            centered: true,
-                            styles: {
-                              content: {
-                                minWidth: "500px",
+            {loadingResearchData ? (
+              <Center h={"100%"}>
+                <Loader size="lg" />
+              </Center>
+            ) : (
+              <Flex h={"100%"} gap={"xs"} direction={"column"}>
+                {researchData.map((item: any, index: Key | null | undefined) => {
+                  return (
+                    <Paper withBorder p={"md"} key={index}>
+                      <Flex align={"start"} justify={"space-between"}>
+                        <Text size={"sm"} fw={600} pt={4}>
+                          {generateTextWithBadges(item.title)}
+                        </Text>
+                        <Flex gap={3} align={"center"}>
+                          <ActionIcon onClick={() =>
+                            openContextModal({
+                              modal: "addQuestionModal",
+                              title: (
+                                <Title order={3}>
+                                  <span className=" text-gray-500">Edit</span> Research Point
+                                </Title>
+                              ),
+                              innerProps: {
+                                edit: true,
+                                sequences: innerProps.sequences,
+                                question_id: item.id,
+                                currentTab: item.type,
+                                relevancy: item.content,
+                                question: item.title,
+                                ai_researcher_id: innerProps.ai_researcher_id,
+                                campaign_id: innerProps.id,
+                                setPersonalizers: innerProps.setPersonalizers,
                               },
-                            },
-                          })
-                        }>
-                          <IconEdit color="gray" size={"0.9rem"} />
-                        </ActionIcon>
-                        <ActionIcon onClick={async () => {
-                          researchers.deleteResearcherQuestion(userToken, Number(item.id));
-                          setResearchData((prevData: any[]) => prevData.filter(researchItem => researchItem.id !== item.id));
-                        }}>
-                          <IconTrash color="gray" size={"0.9rem"} />
-                        </ActionIcon>
-                        <Badge size="sm" radius={"sm"} color={item.type === "General" ? "orange" : item.type === "Linkedin" ? "" : "green"}>
-                          {item.type}
-                        </Badge>
+                              centered: true,
+                              styles: {
+                                content: {
+                                  minWidth: "500px",
+                                },
+                              },
+                            })
+                          }>
+                            <IconEdit color="gray" size={"0.9rem"} />
+                          </ActionIcon>
+                          <ActionIcon onClick={async () => {
+                            researchers.deleteResearcherQuestion(userToken, Number(item.id));
+                            setResearchData((prevData: any[]) => prevData.filter(researchItem => researchItem.id !== item.id));
+                          }}>
+                            <IconTrash color="gray" size={"0.9rem"} />
+                          </ActionIcon>
+                          <Badge size="sm" radius={"sm"} color={item.type === "General" ? "orange" : item.type === "Linkedin" ? "" : "green"}>
+                            {item.type}
+                          </Badge>
+                        </Flex>
                       </Flex>
-                    </Flex>
-                    <Text size={"sm"} mt={2}>
-                      {item.content}
-                    </Text>
-                  </Paper>
-                );
-              })}
-            </Flex>
+                      <Text size={"sm"} mt={2}>
+                        {item.content}
+                      </Text>
+                    </Paper>
+                  );
+                })}
+              </Flex>
+            )}
           </ScrollArea>
         </Paper>
         <Divider orientation="vertical" />
@@ -395,7 +412,7 @@ const generateTextWithBadges = (text: string) => {
                   placeholder="-"
                   onChange={(value) => setSelectedProspect(value)}
                   data={prospectData}
-                />
+                  defaultValue={prospectData.length > 0 ? (prospectData[0] as { value: string }).value : null}></Select>
                 {selectedProspect && (
                   researching ? (
                     <Loader size="sm" />
@@ -443,6 +460,16 @@ const generateTextWithBadges = (text: string) => {
                             {item.ai_response}
                           </Text>
                         </Flex>
+                        <Popover arrowPosition='center' zIndex={40000000} width={300} position="bottom" withArrow shadow="md">
+                          <Popover.Target>
+                            <Text size={"sm"} fw={500} style={{ cursor: 'pointer' }}>
+                              Hover to see raw content
+                            </Text>
+                          </Popover.Target>
+                          <Popover.Dropdown>
+                            <Text size="xs">{item.raw_response}</Text>
+                          </Popover.Dropdown>
+                        </Popover>
                       </Paper>
                     );
                   })

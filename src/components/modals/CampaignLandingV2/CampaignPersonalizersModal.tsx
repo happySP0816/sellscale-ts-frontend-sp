@@ -396,7 +396,7 @@ const generateTextWithBadges = (text: string) => {
                   placeholder="-"
                   onChange={(value) => {
                     setSelectedProspect(value);
-                    value && fetchResearcherAnswers(value);
+                    value && fetchResearcherAnswers(Number(value));
                   }}
                   data={prospectData}
                   defaultValue={prospectData.length > 0 ? (prospectData[0] as { value: string }).value : null}>

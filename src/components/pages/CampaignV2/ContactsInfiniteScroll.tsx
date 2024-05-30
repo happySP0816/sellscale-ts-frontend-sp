@@ -170,11 +170,13 @@ export function ContactsInfiniteScroll({
   return (
     <Paper withBorder w={"100%"}>
       <Modal
-        size="1100px"
+        size="1150px"
         opened={modalOpened}
         onClose={() => setModalOpened(false)}
       >
-        <FindContactsPage />
+        <Box mt="-20px">
+          <FindContactsPage />
+        </Box>
       </Modal>
       <Modal
         opened={showCampaignTemplateModal}

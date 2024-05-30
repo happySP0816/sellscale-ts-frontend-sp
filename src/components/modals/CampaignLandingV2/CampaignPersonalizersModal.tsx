@@ -1,86 +1,89 @@
-import { ActionIcon, Avatar, Badge, Box, Button, Checkbox, Divider, Title, Flex, Paper, ScrollArea, Select, Text, Textarea } from "@mantine/core";
+import { ActionIcon, Avatar, Badge, Box, Button, Checkbox, Divider, Title, Flex, Paper, ScrollArea, Select, Text, Textarea, Tooltip, Loader, Modal, Center, SegmentedControl, TextInput } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
-import { IconBuilding, IconBulb, IconEdit, IconPlus, IconPoint, IconTrash } from "@tabler/icons";
+import { IconBrandLinkedin, IconBuilding, IconBulb, IconEdit, IconPlus, IconPoint, IconQuestionMark, IconSearch, IconTrash } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
-import { useState } from "react";
+import {useRecoilState, useRecoilValue} from "recoil";
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
+import { modals } from '@mantine/modals';
+import * as researchers from "@utils/requests/researchers";
+import { useState, useEffect, useRef, Key } from "react";
+import QuestionModal from "./QuestionModal";
 
 export default function CampaignPersonalizersModal({
   innerProps,
   context,
   id,
 }: ContextModalProps<{
+  id(id: any): number;
+  ai_researcher_id: number;
   setPersonalizers: Function;
 }>) {
-  // const [personalizersData, setPersonalizersData] = useState([
-  //   {
-  //     title: "10K Filing",
-  //     content: "Find any mention of sales",
-  //   },
-  //   {
-  //     title: "Recent Job Opening",
-  //     content: "Mention of SDRs is great!",
-  //   },
-  // ]);
-  const [researchData, setResearchData] = useState([
-    {
-      title: "Linkedin Bio",
-      type: "Linkedin",
-      content: "Use anything in their bio taht we can connect with and be humanistic (i.e quotes, fun facts, anything).",
-    },
-    {
-      title: "Is [[company]] hiring for data engineers?",
-      type: "Question",
-      content: "If the company is hiring for data roles, they probably have a need to build out ETL pipelines for business systems and databases.",
-    },
-    {
-      title: "Conduct general research about [[company]]",
-      type: "General",
-      content: "If there is any information pertaining to how the company uses data, databases, warehouses in their product or services, that would be useful.",
-    },
-    {
-      title: "Linkedin Bio",
-      type: "linkedin",
-      content: "Use anything in their bio taht we can connect with and be humanistic (i.e quotes, fun facts, anything).",
-    },
-    {
-      title: "Is [[company]] hiring for data engineers?",
-      type: "Question",
-      content: "If the company is hiring for data roles, they probably have a need to build out ETL pipelines for business systems and databases.",
-    },
-  ]);
+
+const generateTextWithBadges = (text: string) => {
+  const parts = text.split(/(\[\[.*?\]\])/).filter(Boolean);
+  return parts.map((part, index) => {
+    if (part.startsWith("[[") && part.endsWith("]]")) {
+      const badgeText = part.slice(2, -2);
+      return <Badge key={index}>{badgeText}</Badge>;
+    }
+    return <span key={index}>{part}</span>;
+  });
+};
+
+  const [loadingProspects, setLoadingProspects] = useState(false);
+  const [prospectData, setProspectData] = useState([]);
+  const [selectedProspect, setSelectedProspect] = useState<any>(null);
+  const [researching, setResearching] = useState(false);
+
+  const userToken = useRecoilValue(userTokenState);
+
+  useEffect(() => {
+    setLoadingProspects(true);
+    fetchCampaignContacts(userToken, Number(innerProps.id), 0, 30, '').then((data) => {
+      const newProspectData = data.sample_contacts.map((contact: { id: any; full_name: any; }) => ({
+        value: contact.id,
+        label: contact.full_name,
+      }));
+      setProspectData(newProspectData);
+      setLoadingProspects(false);
+    }
+    );
+
+    researchers.getArchetypeQuestions(userToken, Number(innerProps.id)).then((data: any) => {
+      const newResearchData = data.questions.map((item: { id: any; key: any; type: any; relevancy: any; }) => ({
+        id: item.id,
+        title: item.key,
+        type: item.type,
+        content: item.relevancy,
+        ai_response: '',
+        status: '',
+      }));
+      setResearchData(newResearchData);
+    });
+  } ,[]);
+
+  const simulateResearch = (prospectId: Number) => {
+    setResearching(true);
+    researchers.createResearcherAnswer(userToken, prospectId).then((data) => {
+      researchers.getResearcherAnswers(userToken, Number(prospectId)).then((data) => {
+          const newSimulateData = data.answers
+            .map((item: any) => ({
+              title: item.question.key,
+              type: item.question.type,
+              content: item.short_summary,
+              ai_response: item.relevancy_explanation,
+              status: item.is_yes_response,
+            }))
+            .sort((a: { status: number; }, b: { status: number; }) => b.status - a.status); //sort by status true first.
+          setSimulateData(newSimulateData);
+          setResearching(false);
+      });
+    });
+  }
+
+  const [researchData, setResearchData] = useState<any>([]);
   const [simulateData, setSimulateData] = useState([
-    {
-      title: "Conduct general research about [[company]]",
-      type: "General",
-      content:
-        "Security and Compliance: Bubble is hosted on Amazon Web Services (AWS), which is compliant with certifications such as SOC 2, CSA, and ISO 27001.",
-      ai_response:
-        "Relevant, as it details the security measures and compliance standards that Bubble adheres to, which are important considerations for data integration and ETL syncing.",
-      status: true,
-    },
-    {
-      title: "Linkedin Bio",
-      type: "Linkedin",
-      content: "Could not find the information related to this query",
-      ai_response: "Could not find the information related to this query",
-      status: false,
-    },
-    {
-      title: "Conduct general research about [[company]]",
-      type: "Question",
-      content:
-        "Security and Compliance: Bubble is hosted on Amazon Web Services (AWS), which is compliant with certifications such as SOC 2, CSA, and ISO 27001.",
-      ai_response:
-        "Relevant, as it details the security measures and compliance standards that Bubble adheres to, which are important considerations for data integration and ETL syncing.",
-      status: false,
-    },
-    {
-      title: "Linkedin Bio",
-      type: "LinkedIn",
-      content: "Could not find the information related to this query",
-      ai_response: "Could not find the information related to this query",
-      status: false,
-    },
   ]);
   return (
     <>
@@ -257,16 +260,46 @@ export default function CampaignPersonalizersModal({
       <Flex mt={"lg"} style={{ border: "1px solid gray", borderRadius: "6px" }}>
         <Paper p={"md"} pr={"xs"} w={"40%"} display={"flex"} style={{ gap: "16px", flexDirection: "column" }}>
           <Flex align={"center"} justify={"space-between"}>
-            <Text fw={600}>Research Points</Text>
+            <Text fw={600}>Researcher Questions</Text>
+            <Tooltip
+              multiline
+              position="right"
+              label="SellScale AI Researcher will answer these questions by scouring the web, LinkedIn, and other sources to develop a better understanding for each prospect you reach out to for the most relevant and personalized messaging."
+            >
+              <ActionIcon>
+                <IconQuestionMark size={"1rem"} />
+              </ActionIcon>
+            </Tooltip>
           </Flex>
           <Flex>
-            <Button fullWidth leftIcon={<IconPlus size={"0.9rem"} />} mr={"md"}>
+            <Button
+              fullWidth
+              leftIcon={<IconPlus size={"0.9rem"} />}
+              mr={"md"}
+              onClick={() => {
+                modals.openContextModal({
+                  modal: "addQuestionModal",
+                  title: (
+                    <Title order={3}>
+                      <span className=" text-gray-500">Add</span> Research Point
+                    </Title>
+                  ),
+                  innerProps: {
+                    edit: false,
+                    ai_researcher_id: innerProps.ai_researcher_id,
+                    campaign_id: innerProps.id,
+                    setPersonalizers: innerProps.setPersonalizers,
+                  },
+                });
+              }}
+            >
               Research point
             </Button>
             <Button
               fullWidth
+              disabled={!selectedProspect}
               variant="outline"
-              color="pink"
+              color="grape"
               leftIcon={<IconSparkles size={"0.9rem"} />}
               onClick={() =>
                 openContextModal({
@@ -276,7 +309,7 @@ export default function CampaignPersonalizersModal({
                       <span className=" text-gray-500">Go back to</span> Personalizers
                     </Title>
                   ),
-                  innerProps: {},
+                  innerProps: {prospectId: selectedProspect},
                   centered: true,
                   styles: {
                     content: {
@@ -291,18 +324,46 @@ export default function CampaignPersonalizersModal({
           </Flex>
           <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
             <Flex h={"100%"} gap={"xs"} direction={"column"}>
-              {researchData.map((item, index) => {
+              {researchData.map((item: any, index: Key | null | undefined) => {
                 return (
                   <Paper withBorder p={"md"} key={index}>
                     <Flex align={"start"} justify={"space-between"}>
                       <Text size={"sm"} fw={600} pt={4}>
-                        {item.title}
+                        {generateTextWithBadges(item.title)}
                       </Text>
                       <Flex gap={3} align={"center"}>
-                        <ActionIcon>
+                        <ActionIcon onClick={() =>
+                          openContextModal({
+                            modal: "addQuestionModal",
+                            title: (
+                              <Title order={3}>
+                                <span className=" text-gray-500">Edit</span> Research Point
+                              </Title>
+                            ),
+                            innerProps: {
+                              edit: true,
+                              question_id: item.id,
+                              currentTab: item.type,
+                              relevancy: item.content,
+                              question: item.title,
+                              ai_researcher_id: innerProps.ai_researcher_id,
+                              campaign_id: innerProps.id,
+                              setPersonalizers: innerProps.setPersonalizers,
+                            },
+                            centered: true,
+                            styles: {
+                              content: {
+                                minWidth: "500px",
+                              },
+                            },
+                          })
+                        }>
                           <IconEdit color="gray" size={"0.9rem"} />
                         </ActionIcon>
-                        <ActionIcon>
+                        <ActionIcon onClick={async () => {
+                          researchers.deleteResearcherQuestion(userToken, Number(item.id));
+                          setResearchData((prevData: any[]) => prevData.filter(researchItem => researchItem.id !== item.id));
+                        }}>
                           <IconTrash color="gray" size={"0.9rem"} />
                         </ActionIcon>
                         <Badge size="sm" radius={"sm"} color={item.type === "General" ? "orange" : item.type === "Linkedin" ? "" : "green"}>
@@ -323,60 +384,79 @@ export default function CampaignPersonalizersModal({
         <Paper w={"66%"} display={"flex"} style={{ gap: "16px", flexDirection: "column" }}>
           <Flex p={"lg"} justify={"space-between"} align={"center"} gap={"sm"} style={{ borderBottom: "1px solid gray" }}>
             <Text fw={600}>Simulate Research</Text>
-            <Flex gap={"sm"} align={"center"}>
-              <Text color="gray" size={"sm"}>
-                Simulating on:
-              </Text>
-              <Select
-                placeholder="Select Sequence type"
-                // value={sequenceType || ""}
-                // onChange={(value) => setSequenceType(value)}
-                data={[
-                  { label: "Linkedin", value: "linkedin" },
-                  { label: "Email", value: "email" },
-                ]}
-              />
-            </Flex>
+            {loadingProspects ? (
+              <Loader size="sm" />
+            ) : (
+              <Flex gap={"sm"} align={"center"}>
+                <Text color="gray" size={"sm"}>
+                  Select prospect:
+                </Text>
+                <Select
+                  placeholder="-"
+                  onChange={(value) => setSelectedProspect(value)}
+                  data={prospectData}
+                />
+                {selectedProspect && (
+                  researching ? (
+                    <Loader size="sm" />
+                  ) : (
+                    <Button color="grape" onClick={() => simulateResearch(selectedProspect)}>
+                      Simulate
+                    </Button>
+                  )
+                )}
+              </Flex>
+            )}
           </Flex>
           <ScrollArea h={500} scrollbarSize={8} px={"md"}>
-            <Flex gap={"xs"} direction={"column"}>
-              {simulateData.map((item, index) => {
-                return (
-                  <Paper withBorder p={"lg"}>
-                    <Flex justify={"space-between"}>
-                      <Flex>
-                        <IconPoint size={"2rem"} fill={item.status ? "#17B26A" : "red"} color="white" className="mt-[-6px] ml-[-12px]" />
-                        <Text fw={600} size={"sm"}>
-                          {item.title}
+            {researching ? (
+              <Loader size="sm" />
+            ) : (
+              <Flex gap={"xs"} direction={"column"}>
+                {simulateData.length === 0 ? (
+                  <Text size={"sm"} color="gray">
+                    No simulation run yet.
+                  </Text>
+                ) : (
+                  simulateData.map((item: any, index) => {
+                    return (
+                      <Paper withBorder p={"lg"} key={index}>
+                        <Flex justify={"space-between"}>
+                          <Flex>
+                            <IconPoint size={"2rem"} fill={item.status ? "#17B26A" : "red"} color="white" className="mt-[-6px] ml-[-12px]" />
+                            <Text fw={600} size={"sm"}>
+                              {generateTextWithBadges(item.title)}
+                            </Text>
+                          </Flex>
+                          <Badge radius={"sm"} size="sm" color={item.type === "GENERAL" ? "orange" : item.type === "LINKEDIN" ? "" : "green"}>
+                            {item.type}
+                          </Badge>
+                        </Flex>
+                        <Text size={"sm"} fw={500}>
+                          {item.content}
                         </Text>
-                      </Flex>
-                      <Badge radius={"sm"} size="sm" color={item.type === "General" ? "orange" : item.type === "Linkedin" ? "" : "green"}>
-                        {item.type}
-                      </Badge>
-                    </Flex>
-                    <Text size={"sm"} fw={500}>
-                      {item.content}
-                    </Text>
-                    <Flex p={"sm"} className="bg-[#D444F1]/5" gap={4} align={"start"}>
-                      <Flex>
-                        <IconBulb size={"0.9rem"} color="#D444F1" />
-                      </Flex>
-                      <Text color="#D444F1" size={"xs"}>
-                        {item.ai_response}
-                      </Text>
-                    </Flex>
-                  </Paper>
-                );
-              })}
-            </Flex>
+                        <Flex p={"sm"} className="bg-[#D444F1]/5" gap={4} align={"start"}>
+                          <Flex>
+                            <IconBulb size={"0.9rem"} color="#D444F1" />
+                          </Flex>
+                          <Text color="#D444F1" size={"xs"}>
+                            {item.ai_response}
+                          </Text>
+                        </Flex>
+                      </Paper>
+                    );
+                  })
+                )}
+              </Flex>
+            )}
           </ScrollArea>
         </Paper>
       </Flex>
       <Flex align={"center"} gap={"md"} mt={"lg"}>
-        <Button variant="outline" color="gray" fullWidth onClick={() => context.closeModal(id)}>
+        <Button variant="outline" color="gray" fullWidth onClick={() => modals.closeAll()}>
           Go Back
         </Button>
-        <Button onClick={() => context.closeModal(id)} fullWidth>
+        <Button onClick={() => modals.closeAll()} fullWidth>
           Save
         </Button>
       </Flex>

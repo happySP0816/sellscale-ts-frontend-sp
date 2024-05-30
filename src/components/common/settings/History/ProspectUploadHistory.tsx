@@ -131,91 +131,93 @@ export default function ProspectUploadHistory() {
               </Tooltip>
               <Tooltip label={cell.row.original.client_archetype_name}>
                 {cell.row.original.client_archetype_name &&
-                  cell.row.original.client_archetype_id && (
-                    <Flex>
-                      <Text
-                        mr="3px"
-                        sx={{
-                          borderRadius: "16px",
-                          height: "1.3rem",
-                          display: "flex",
-                          gap: "4px",
-                          alignItems: "center",
-                        }}
-                        size={"xs"}
-                        fw={600}
-                      >
-                        Campaign:
-                      </Text>
-                      <Text
-                        sx={{
-                          borderRadius: "16px",
-                          height: "1.3rem",
-                          display: "flex",
-                          gap: "4px",
-                          alignItems: "center",
-                        }}
-                        underline
-                        onClick={() => {
-                          window.location.href = "/overview";
-                        }}
-                        size={"xs"}
-                        color="#228be6"
-                        fw={600}
-                      >
-                        {cell.row.original.client_archetype_name?.length > 35
-                          ? cell.row.original.client_archetype_name.slice(
-                              0,
-                              35
-                            ) + "..."
-                          : cell.row.original.client_archetype_name}
-                        <IconExternalLink size={"1.1rem"} />
-                      </Text>
-                    </Flex>
-                  )}
+                cell.row.original.client_archetype_id ? (
+                  <Flex>
+                    <Text
+                      mr="3px"
+                      sx={{
+                        borderRadius: "16px",
+                        height: "1.3rem",
+                        display: "flex",
+                        gap: "4px",
+                        alignItems: "center",
+                      }}
+                      size={"xs"}
+                      fw={600}
+                    >
+                      Campaign:
+                    </Text>
+                    <Text
+                      sx={{
+                        borderRadius: "16px",
+                        height: "1.3rem",
+                        display: "flex",
+                        gap: "4px",
+                        alignItems: "center",
+                      }}
+                      underline
+                      onClick={() => {
+                        window.location.href = "/overview";
+                      }}
+                      size={"xs"}
+                      color="#228be6"
+                      fw={600}
+                    >
+                      {cell.row.original.client_archetype_name?.length > 35
+                        ? cell.row.original.client_archetype_name.slice(0, 35) +
+                          "..."
+                        : cell.row.original.client_archetype_name}
+                      <IconExternalLink size={"1.1rem"} />
+                    </Text>
+                  </Flex>
+                ) : (
+                  <div></div>
+                )}
               </Tooltip>
               <Tooltip label={cell.row.original.client_segment_name}>
                 {cell.row.original.client_segment_name &&
-                  cell.row.original.client_segment_id && (
-                    <Flex direction={"row"}>
-                      <Text
-                        mr="3px"
-                        sx={{
-                          borderRadius: "16px",
-                          height: "1.3rem",
-                          display: "flex",
-                          gap: "4px",
-                          alignItems: "center",
-                        }}
-                        size={"xs"}
-                        fw={600}
-                      >
-                        Segment:
-                      </Text>
-                      <Text
-                        sx={{
-                          borderRadius: "16px",
-                          height: "1.3rem",
-                          display: "flex",
-                          gap: "4px",
-                          alignItems: "center",
-                        }}
-                        underline
-                        onClick={() => {
-                          window.location.href = "/overview";
-                        }}
-                        size={"xs"}
-                        color="#228be6"
-                        fw={600}
-                      >
-                        {cell.row.original.client_segment_name?.length > 35
-                          ? cell.row.original.client_segment_name.slice(0, 35) +
-                            "..."
-                          : cell.row.original.client_segment_name}
-                        <IconExternalLink size={"1.1rem"} />
-                      </Text>
-                    </Flex>
-                  )}
+                cell.row.original.client_segment_id ? (
+                  <Flex direction={"row"}>
+                    <Text
+                      mr="3px"
+                      sx={{
+                        borderRadius: "16px",
+                        height: "1.3rem",
+                        display: "flex",
+                        gap: "4px",
+                        alignItems: "center",
+                      }}
+                      size={"xs"}
+                      fw={600}
+                    >
+                      Segment:
+                    </Text>
+                    <Text
+                      sx={{
+                        borderRadius: "16px",
+                        height: "1.3rem",
+                        display: "flex",
+                        gap: "4px",
+                        alignItems: "center",
+                      }}
+                      underline
+                      onClick={() => {
+                        window.location.href = "/overview";
+                      }}
+                      size={"xs"}
+                      color="#228be6"
+                      fw={600}
+                    >
+                      {cell.row.original.client_segment_name?.length > 35
+                        ? cell.row.original.client_segment_name.slice(0, 35) +
+                          "..."
+                        : cell.row.original.client_segment_name}
+                      <IconExternalLink size={"1.1rem"} />
+                    </Text>
+                  </Flex>
+                ) : (
+                  <div></div>
+                )}
               </Tooltip>
             </Flex>
           );

@@ -64,6 +64,7 @@ export default function RichTextArea(props: { personalizationBtn?: boolean, heig
           minHeight: props.height || 200,
         }
       }}
+      onClick={() => editor?.commands.focus()} // Ensure the editor is focused when clicking anywhere on the textarea
     >
       <RichTextEditor.Toolbar sticky stickyOffset={60}>
 

@@ -1335,9 +1335,9 @@ export function PersonCampaignCard(props: {
                           }
 
                           if (props.persona.email_sent > props.persona.li_sent) {
-                            window.location.href = `/setup/email/${props.persona.id}`;
+                            window.location.href = `/campaign_v2/${props.persona.id}`;
                           } else {
-                            window.location.href = `/setup/linkedin/${props.persona.id}`;
+                            window.location.href = `/campaign_v2/${props.persona.id}`;
                           }
                         }}
                       >
@@ -1658,7 +1658,7 @@ export function PersonCampaignCard(props: {
                   if (props.project == undefined) return;
                   setOpenedProspectId(-1);
                   setCurrentProject(props.project);
-                  navigateToPage(navigate, `/setup/${sectionType.toLowerCase()}/${props.persona.id}`);
+                  navigateToPage(navigate, `/campaign_v2/${sectionType.toLowerCase()}/${props.persona.id}`);
                 }}
               />
             </Box>
@@ -1677,7 +1677,7 @@ export function PersonCampaignCard(props: {
                         if (props.project == undefined) return;
                         setOpenedProspectId(-1);
                         setCurrentProject(props.project);
-                        navigateToPage(navigate, `/setup/${section.type.toLowerCase()}/${props.persona.id}`);
+                        navigateToPage(navigate, `/campaign_v2/${section.type.toLowerCase()}/${props.persona.id}`);
                       }}
                     />
                   </Box>
@@ -1698,7 +1698,7 @@ export function PersonCampaignCard(props: {
                               if (props.project == undefined) return;
                               setOpenedProspectId(-1);
                               setCurrentProject(props.project);
-                              navigateToPage(navigate, `/setup/${section.type.toLowerCase()}/${props.persona.id}`);
+                              navigateToPage(navigate, `/campaign_v2/${section.type.toLowerCase()}/${props.persona.id}`);
                             }}
                           />
                         </Box>

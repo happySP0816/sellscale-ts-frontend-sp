@@ -33,6 +33,7 @@ import {
   IconDatabase,
   IconDownload,
   IconFile,
+  IconTable,
   IconUpload,
 } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
@@ -62,6 +63,7 @@ import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import _ from "lodash";
 import FileDropAndPreviewV2 from "@modals/upload-prospects/FileDropAndPreviewV2";
 import { API_URL } from "@constants/data";
+import SegmentV2 from "./SegmentV2/SegmentV2";
 
 type UploadDetailType = {
   process: number;
@@ -235,10 +237,12 @@ export default function FindContactsPage() {
 
   return (
     <Flex p="lg" direction="column" h="100%">
-      <Title order={2}>
-        <Text color="gray">
-          Find Contacts: {activePersonaEmoji} {activePersonaName}
-        </Text>
+      <Title order={4}>
+        <Card withBorder>
+          <Text color="gray">
+            Find Contacts: {activePersonaEmoji} {activePersonaName}
+          </Text>
+        </Card>
       </Title>
       <Tabs
         defaultValue="sellscale-db"
@@ -296,6 +300,15 @@ export default function FindContactsPage() {
               Contact Database
             </Tabs.Tab>
           </Tooltip>
+          <Tooltip label="Segments" position="bottom">
+            <Tabs.Tab
+              value="segments"
+              icon={<IconTable size="0.9rem" />}
+              onClick={() => setTab("sellscale-db")}
+            >
+              Segments
+            </Tabs.Tab>
+          </Tooltip>
           <Tabs.Tab
             value="by-csv"
             icon={<IconUpload size="0.9rem" />}
@@ -318,13 +331,13 @@ export default function FindContactsPage() {
           >
             SalesNav Search
           </Tabs.Tab>
-          <Tabs.Tab
+          {/* <Tabs.Tab
             value="individuals"
             icon={<IconDatabase size="0.9rem" />}
             onClick={() => setTab("individuals")}
           >
             Chat
-          </Tabs.Tab>
+          </Tabs.Tab> */}
           {/* <Tabs.Tab value='csv-beta' icon={<IconSparkles size='0.9rem' />} onClick={() => setTab('csv-beta')}></Tabs.Tab>
 
           <Tooltip label='Advanced - Linkedin Network' position='bottom'>
@@ -339,6 +352,10 @@ export default function FindContactsPage() {
 
         <Tabs.Panel value="linkedin-sales-navigator" pt="xs">
           <SalesNavigatorComponent />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="segments" pt="xs">
+          <SegmentV2 />
         </Tabs.Panel>
 
         {/* <Tabs.Panel value='your-network' pt='xs'>

@@ -30,7 +30,7 @@ export default function CampaignTemplatesModal({
 
   const [type, setType]: any = useState("email template");
   const [tags, setTags]: any = useState([]);
-  const [title, setTitle]: any = useState("");
+  const [title, setTitle]: any = useState("Template #X");
   const [template, setTemplate]: any = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -109,15 +109,6 @@ export default function CampaignTemplatesModal({
             ]}
           />
           <Box>
-            <CustomSelect
-              maxWidth="100%"
-              value={tags}
-              label="Add Tags"
-              placeholder=""
-              setValue={setTags}
-              data={tags}
-              setData={setTags}
-            />
             <Text size={"sm"} color="gray" fw={500} mt={"md"}>
               Title
             </Text>
@@ -136,12 +127,25 @@ export default function CampaignTemplatesModal({
                 <RichTextArea onChange={(value) => setTemplate(value)} />
               ) : (
                 <Textarea
-                  placeholder="Template"
+                  placeholder={
+                    "ex. Hi [[first_name]], I wanted to reach out to you because..."
+                  }
                   minRows={7}
                   value={template}
                   onChange={(event) => setTemplate(event.currentTarget.value)}
                 />
               )}
+            </Box>
+            <Box mt="xs">
+              <CustomSelect
+                maxWidth="100%"
+                value={tags}
+                label="Add Tags (optional)"
+                placeholder=""
+                setValue={setTags}
+                data={tags}
+                setData={setTags}
+              />
             </Box>
           </Box>
         </Flex>
@@ -159,7 +163,7 @@ export default function CampaignTemplatesModal({
             onClick={() => {
               createClientAsset();
             }}
-            disabled={!title || !template || !tags.length || !type}
+            disabled={!title || !template || !type}
             loading={loading}
           >
             Create Template

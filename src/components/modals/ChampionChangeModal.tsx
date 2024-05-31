@@ -126,8 +126,8 @@ export default function ChampionChangeModal() {
               title={individual?.data.title} 
               location={individual?.data.location?.default} 
               experience={
-                individual?.data.work.history.slice(0, 2).map((h: { company: { name: string } }) => h.company.name).join(', ') +
-                (individual?.data.work.history.length > 2 ? `, and ${individual?.data.work.history.length - 2} more` : '')
+                individual?.data.work.history?.slice(0, 2).map((h: { company: { name: string } }) => h.company.name).join(', ') +
+                (individual?.data.work.history?.length > 2 ? `, and ${individual?.data.work.history.length - 2} more` : '')
               }
             />
           )}

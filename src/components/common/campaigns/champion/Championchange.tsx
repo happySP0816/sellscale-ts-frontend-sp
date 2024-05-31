@@ -35,6 +35,7 @@ import { useChampionApi } from "./ChampionChangeApi";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import moment from "moment";
+import { CSVLink } from 'react-csv';
 
 interface ChampionDataType {
   prospect_name: string;
@@ -170,6 +171,40 @@ export default function ChampionChange() {
       });
   };
 
+  const downloadCSV = () => {
+    const csvData = championData.map((d: any) => ({
+      first_name: d.prospect_name.split(' ')[0],
+      last_name: d.prospect_name.split(' ')[1],
+      old_company: d.origin_company,
+      new_company: d.new_company,
+      date_of_change: moment(d.change_date).format("MMMM DD, YYYY"),
+      job_changed: d.type === "Job Changed",
+    }));
+
+    const csvHeaders = [
+      { label: "First Name", key: "first_name" },
+      { label: "Last Name", key: "last_name" },
+      { label: "Old Company", key: "old_company" },
+      { label: "New Company", key: "new_company" },
+      { label: "Date of Change", key: "date_of_change" },
+      { label: "Job Changed", key: "job_changed" },
+    ];
+
+    const csvReport = {
+      data: csvData,
+      headers: csvHeaders,
+      filename: 'Champion_Changes_Report.csv'
+    };
+
+    return (
+      <CSVLink {...csvReport}>
+        <Button color="green" leftIcon={<IconFileDownload size={"0.9rem"} />}>
+          Download CSV
+        </Button>
+      </CSVLink>
+    );
+  };
+
   return (
     <Flex direction={"column"} gap={"xl"}>
       <Flex align={"center"} justify={"space-between"}>
@@ -180,9 +215,7 @@ export default function ChampionChange() {
           <Button color="blue" onClick={handleJobRefreshData} loading={loading}>
             Refresh Job Data
           </Button>
-          <Button color="green" leftIcon={<IconFileDownload size={"0.9rem"} />}>
-            Download CSV
-          </Button>
+          {downloadCSV()}
           <Button leftIcon={<IconWorld size={"0.9rem"} />}>Synced to Salesforce</Button>
           <Button
             leftIcon={<IconPlus size={"0.9rem"} />}

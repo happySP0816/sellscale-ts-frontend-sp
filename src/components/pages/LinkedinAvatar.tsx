@@ -26,12 +26,12 @@ const LinkedinAvatar: React.FC<LinkedinAvatarProps> = ({ avatar, name, title, lo
           <Text fw={400} color="gray">
             {location}
           </Text>
-          <Flex gap={3} align={"center"} mt={4}>
+          {experience !=='undefined' && <Flex gap={3} align={"center"} mt={4}>
             <IconBuilding size={"0.9rem"} color="gray" />
             <Text fw={400} color="gray">
               {experience}
             </Text>
-          </Flex>
+          </Flex>}
         </Box>
       </Flex>
     </Box>

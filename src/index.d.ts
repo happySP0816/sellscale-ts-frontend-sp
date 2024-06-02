@@ -442,6 +442,7 @@ export interface PersonaOverview {
   email_active?: boolean;
   email_open_tracking_enabled: boolean;
   email_link_tracking_enabled: boolean;
+  is_ai_research_personalization_enabled: boolean;
 }
 
 export interface LinkedInMessage {

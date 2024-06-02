@@ -72,8 +72,8 @@ import {
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { useParams } from "react-router-dom";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { currentProjectState } from '@atoms/personaAtoms';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { currentProjectState } from "@atoms/personaAtoms";
+import { useRecoilState, useRecoilValue } from "recoil";
 import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
@@ -102,9 +102,10 @@ interface StatsData {
 }
 
 export default function CampaignLandingV2() {
-
   //todo: just change statsData to personaOverview.
-  const convertStatsDataToPersonaOverview = (statsData: StatsData): PersonaOverview => {
+  const convertStatsDataToPersonaOverview = (
+    statsData: StatsData
+  ): PersonaOverview => {
     return {
       active: statsData.active,
       id: statsData.id,
@@ -142,10 +143,13 @@ export default function CampaignLandingV2() {
       email_active: statsData.email_active,
       email_open_tracking_enabled: false,
       email_link_tracking_enabled: false,
+      is_ai_research_personalization_enabled: false,
     };
   };
   const userData = useRecoilValue(userDataState);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
 
   console.log("======", userData);
 
@@ -190,7 +194,10 @@ export default function CampaignLandingV2() {
   const id = Number(useParams().id);
   const [templates, setTemplates] = useState([]);
   const [personalizers, setPersonalizers] = useState([]);
-
+  const [personalizersEnabled, setPersonalizersEnabled] = useState(
+    currentProject?.is_ai_research_personalization_enabled
+  );
+  console.log("personalizersEnabled", personalizersEnabled);
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
   const [status, setStatus] = useState("SETUP");
 
@@ -240,6 +247,39 @@ export default function CampaignLandingV2() {
       setSelectStep(key);
     }
     setSelectStep(key);
+  };
+
+  useEffect(
+    () =>
+      setPersonalizersEnabled(
+        currentProject?.is_ai_research_personalization_enabled
+      ),
+    [currentProject]
+  );
+
+  const updatePersonalizersEnabled = (enabled: boolean) => {
+    fetch(`${API_URL}/client/archetype/${id}/update_personalizers_enabled`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        personalizers_enabled: enabled,
+      }),
+    })
+      .then((response) => {
+        showNotification({
+          title: "Personalizers Enabled",
+          message: `Personalizers have been ${
+            enabled ? "enabled" : "disabled"
+          }`,
+        });
+        setPersonalizersEnabled(enabled);
+      })
+      .catch((error) => {
+        console.error("Error updating personalizers enabled", error);
+      });
   };
 
   const editSequenceBumpCount = (index: number, value: string) => {
@@ -425,7 +465,9 @@ export default function CampaignLandingV2() {
           const loadedStats = stats as StatsData;
           console.log("stats", loadedStats);
           setStatsData(loadedStats);
-          setCurrentProject(convertStatsDataToPersonaOverview(loadedStats as StatsData));
+          setCurrentProject(
+            convertStatsDataToPersonaOverview(loadedStats as StatsData)
+          );
           if (loadedStats && loadedStats.testing_volume) {
             setTestingVolume(loadedStats.testing_volume);
           }
@@ -679,7 +721,7 @@ export default function CampaignLandingV2() {
                         : ""
                     }
                     // onClick={() => {
-                    //   if (status === "SETUP") 
+                    //   if (status === "SETUP")
                     //   else if (status === "ACTIVE") {
                     //     setStatus("ACTIVE");
                     //   }
@@ -1672,6 +1714,35 @@ export default function CampaignLandingV2() {
                 </Flex>
               </Flex>
               <Flex gap={"sm"} align={"center"}>
+                <Switch
+                  labelPosition="left"
+                  label={
+                    <Flex gap={"md"} align={"center"}>
+                      <Text fw={600} size="12px" miw="100px">
+                        ✨ Enable Personalizers
+                      </Text>
+                    </Flex>
+                  }
+                  checked={personalizersEnabled}
+                  miw={100}
+                  styles={{
+                    root: {
+                      border: "1px solid #D9DEE5",
+                      padding: "7px",
+                      borderRadius: "4px",
+                      background: "white",
+                    },
+                    body: {
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "space-between",
+                    },
+                  }}
+                  onChange={(e) => {
+                    setPersonalizersEnabled(!personalizersEnabled);
+                    updatePersonalizersEnabled(e.target.checked);
+                  }}
+                />
                 <Button
                   leftIcon={<IconPlus size={"0.9rem"} />}
                   onClick={() =>
@@ -1706,7 +1777,7 @@ export default function CampaignLandingV2() {
                 </ActionIcon>
               </Flex>
             </Flex>
-            <Flex>
+            <Flex sx={{ display: personalizersEnabled ? "block" : "none" }}>
               {loadingPersonalizers ? (
                 <Flex
                   direction="column"

@@ -1,14 +1,7 @@
 import { Box, Button, Flex, Tabs, Text } from "@mantine/core";
 import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import {
-  IconChartArcs,
-  IconList,
-  IconMap,
-  IconTarget,
-  IconUser,
-  IconWallpaper,
-} from "@tabler/icons";
+import { IconChartArcs, IconList, IconMap, IconTarget, IconUser, IconWallpaper } from "@tabler/icons";
 import GlobalContacts from "./GlobalContacts";
 import DoNotContactList from "@common/settings/DoNotContactList";
 import UploadOverviewV2 from "./UploadOverviewV2";
@@ -19,6 +12,7 @@ import ProspectUploadHistory from "@common/settings/History/ProspectUploadHistor
 import Personas from "./Personas";
 import SegmentV2 from "@pages/SegmentV2/SegmentV2";
 import { useState } from "react";
+import SellScaleSonar from "@common/settings/Sonar/SellscaleSonar";
 
 const ContactOverview = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -34,18 +28,15 @@ const ContactOverview = () => {
       <Tabs value={tabValue} onTabChange={(e: any) => setTabValue(e)}>
         <Tabs.List>
           <Tabs.Tab value="segments">
-            <IconChartArcs
-              size="0.8rem"
-              style={{ marginRight: "8px", marginTop: "4px" }}
-            />
+            <IconChartArcs size="0.8rem" style={{ marginRight: "8px", marginTop: "4px" }} />
             Segments
           </Tabs.Tab>{" "}
           <Tabs.Tab value="history">
-            <IconChartArcs
-              size="0.8rem"
-              style={{ marginRight: "8px", marginTop: "4px" }}
-            />
+            <IconChartArcs size="0.8rem" style={{ marginRight: "8px", marginTop: "4px" }} />
             History
+          </Tabs.Tab>
+          <Tabs.Tab value="sonar" mt={6}>
+            Sonar
           </Tabs.Tab>
           {/* <Tabs.Tab value="ongoing_scrapes">
             <IconWallpaper
@@ -87,6 +78,10 @@ const ContactOverview = () => {
               setTabValue("history");
             }}
           />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="sonar">
+          <SellScaleSonar />
         </Tabs.Panel>
       </Tabs>
     </Box>

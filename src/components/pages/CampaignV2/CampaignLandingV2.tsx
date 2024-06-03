@@ -642,6 +642,11 @@ export default function CampaignLandingV2() {
               <Text color="black">Please add a LinkedIn sequence.</Text>
             </List.Item>
           )}
+          {totalContacts === 0 && (
+            <List.Item>
+              <Text color="black">Please add a LinkedIn sequence.</Text>
+            </List.Item>
+          )}
         </List>
       </Flex>
       </Modal>

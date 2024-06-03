@@ -44,7 +44,6 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
       currentProject?.id || -1,
       url,
     )
-    console.log('result', result)
     if (result.status === 'success') {
       showNotification({
         title: "Success",
@@ -56,7 +55,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
 
       props.afterUpload();
 
-      const prospectResponse = await getProspectByID(userToken, result?.data?.data?.prospect_id);
+      const prospectResponse = await getProspectByID(userToken, result.data.data.prospect_id);
       if (prospectResponse.status === 'success') {
         setProspectDetails(prospectResponse.data satisfies ProspectDetails);
       }

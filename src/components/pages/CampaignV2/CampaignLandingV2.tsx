@@ -23,6 +23,7 @@ import {
   Title,
   Tooltip,
   Modal,
+  List,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -81,6 +82,7 @@ import { PersonaOverview } from "src";
 
 interface StatsData {
   id: number;
+  is_setting_up: boolean;
   archetype_name: string;
   created_at: string;
   emoji: string;
@@ -224,6 +226,7 @@ export default function CampaignLandingV2() {
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(
     false
   );
+  const [showActivateWarningModal, setShowActivateWarningModal] = useState(true);
   const [testingVolume, setTestingVolume] = useState(0);
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
   const [showPersonalizerModal, setShowPersonalizerModal] = useState(false);
@@ -367,12 +370,14 @@ export default function CampaignLandingV2() {
           setTestingVolume(loadedStats.testing_volume);
         }
         //set the setup status
-        if (loadedStats.active && loadedStats.num_sent > 0) {
-          setStatus("ACTIVE");
-        } else if (loadedStats.active && loadedStats.num_sent === 0) {
+        if (loadedStats.is_setting_up) {
           setStatus("SETUP");
-        } else if (loadedStats.active === false) {
-          setStatus("INACTIVE");
+        }
+        else if (loadedStats.active && loadedStats.num_sent > 0) {
+          setStatus("ACTIVE");
+        }
+        else if (loadedStats.active === false) {
+        setStatus("INACTIVE");
         }
         setLoadingStats(false);
       })
@@ -472,10 +477,10 @@ export default function CampaignLandingV2() {
             setTestingVolume(loadedStats.testing_volume);
           }
           //set the setup status
-          if (loadedStats.active && loadedStats.num_sent > 0) {
-            setStatus("ACTIVE");
-          } else if (loadedStats.active && loadedStats.num_sent === 0) {
+          if (loadedStats.is_setting_up) {
             setStatus("SETUP");
+          } else if (loadedStats.active) {
+            setStatus("ACTIVE");
           } else if (loadedStats.active === false) {
             setStatus("INACTIVE");
           }
@@ -608,6 +613,37 @@ export default function CampaignLandingV2() {
             Duplicate Campaign
           </Button>
         </Flex>
+      </Modal>
+      <Modal
+        opened={showActivateWarningModal}
+        size="600px"
+        onClose={() => setShowActivateWarningModal(false)}
+        >
+      <Flex direction="column" align="center" gap="md">
+        <Title size="lg" align="center" color="blue">
+          Hold your horses!
+        </Title>
+        <Text size="md" align="center">
+          To activate this campaign, please ensure the following:
+        </Text>
+        <List spacing="sm" size="md" center>
+          {(!statsData?.email_active && !statsData?.linkedin_active) && (
+            <List.Item>
+              <Text color="red">Enable either Email or LinkedIn.</Text>
+            </List.Item>
+          )}
+          {statsData?.email_active && emailSequenceData.length === 0 && (
+            <List.Item>
+              <Text color="black">Please add an email sequence.</Text>
+            </List.Item>
+          )}
+          {statsData?.linkedin_active && linkedinSequenceData.length === 0 && (
+            <List.Item>
+              <Text color="black">Please add a LinkedIn sequence.</Text>
+            </List.Item>
+          )}
+        </List>
+      </Flex>
       </Modal>
       <Modal
         opened={showCampaignTemplateModal}
@@ -1145,6 +1181,7 @@ export default function CampaignLandingV2() {
                         innerProps: {
                           campaignId: id,
                           createTemplateBuilder,
+                          refetchSequenceData,
                           setCreateTemplateBuilder,
                           setSequences,
                         },
@@ -1174,7 +1211,7 @@ export default function CampaignLandingV2() {
                       window.open(`/setup/${type}/${id}`, "_blank");
                     }}
                   >
-                    Simulate
+                    Edit & Simulate
                   </Button>
                   {/* )} */}
                   {/* <Button

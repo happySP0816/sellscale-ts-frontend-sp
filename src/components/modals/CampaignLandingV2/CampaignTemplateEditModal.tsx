@@ -28,7 +28,7 @@ import {
   Popover,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { ContextModalProps, openContextModal } from "@mantine/modals";
+import { ContextModalProps, openContextModal, closeAllModals } from "@mantine/modals";
 import { MantineStyleSystemProps } from "@mantine/styles";
 
 import {
@@ -72,6 +72,10 @@ export default function CampaignTemplateEditModal({
   context,
   id,
 }: ContextModalProps<{
+  stagingData: any;
+  refetchSequenceData: Function;
+  addedTemplate?: AssetType | null;
+  currentStepNum: any;
   createTemplateBuilder: boolean;
   setCreateTemplateBuilder: Function;
   setSequences: Function;
@@ -81,7 +85,8 @@ export default function CampaignTemplateEditModal({
   const [templateType, setTemplateType] = useState("template" || "generate");
   const [sequenceType, setSequenceType]: any = useState<string>("email");
   const [steps, setSteps] = useState(3);
-  const [currentStepNum, setCurrentStepNum] = useState(1 || null);
+  console.log('innerProps are', innerProps)
+  const [currentStepNum, setCurrentStepNum] = useState(innerProps.currentStepNum || 1 || null);
   const [generateSequence, setGenerateSequence] = useState(false);
   const [openid, setOpenId] = useState<number>(0);
   const [opened, setOpened] = useState(false);
@@ -89,28 +94,12 @@ export default function CampaignTemplateEditModal({
   const [assets, setAssets] = useState<AssetType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  console.log('template added was', innerProps.addedTemplate)
+  const [addedTemplate, setAddedTemplate] = useState<AssetType | null>(innerProps.addedTemplate || null);
 
-  const [stagingData, setStagingData]: any = useState({
-    linkedin: [
-      // {
-      //   angle: "",
-      //   text: "",
-      //   step_num: 1,
-      //   assets: [],
-      // },
-    ],
-    email: [
-      // {
-      //   angle: "",
-      //   text: "",
-      //   step_num: 1,
-      //   assets: [],
-      // },
-    ],
-  });
-
-  const addToStagingData = (asset: AssetType, step_num: number) => {
+  const addToStagingData = (asset: AssetType, step_num: number, stagingData: any, setStagingData: any) => {
     console.log("Adding to " + sequenceType + " staging data");
+    console.log('params are', asset, step_num, stagingData, setStagingData)
     const type = sequenceType;
     const angle = asset.asset_key;
     const text = asset.asset_raw_value;
@@ -125,7 +114,7 @@ export default function CampaignTemplateEditModal({
       id: randomId,
     };
 
-    const newStagingDataArray = [...stagingData[type]];
+    const newStagingDataArray = Array.isArray(stagingData[type]) ? [...stagingData[type]] : [];
     newStagingDataArray.push(newStagingData);
 
     setStagingData({
@@ -136,7 +125,7 @@ export default function CampaignTemplateEditModal({
     console.log(stagingData);
   };
 
-  const removeFromStagingData = (randomId: number) => {
+  const removeFromStagingData = (randomId: number, stagingData: any, setStagingData: any) => {
     console.log("Removing from " + sequenceType + " staging data");
     const type = sequenceType;
 
@@ -157,6 +146,7 @@ export default function CampaignTemplateEditModal({
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const campaignId = innerProps.campaignId;
+  const [stagingData, setStagingData] = useState(innerProps.stagingData || {'TEXT':[]});
 
   const data = [
     {
@@ -389,7 +379,7 @@ export default function CampaignTemplateEditModal({
             style={{ gap: "16px", flexDirection: "column" }}
           >
             <Flex align={"center"} justify={"space-between"}>
-              <Text fw={600}>Library</Text>
+              <Text size={'xs'} fw={600}>{userData.client_name}'s Templates</Text>
               <SegmentedControl
                 value={templateType}
                 onChange={(value: any) => {
@@ -423,15 +413,85 @@ export default function CampaignTemplateEditModal({
               onChange={(event) => setSearchQuery(event.currentTarget.value)}
             />
             {templateType === "template" ? (
+              <>
+              <Button
+                variant="light"
+                leftIcon={<IconPlus size={"0.9rem"} />}
+                onClick={() =>
+                  openContextModal({
+                    modal: "campaignTemplates",
+                    title: (
+                      <Title order={3}>
+                        Add Template
+                      </Title>
+                    ),
+                    innerProps: {
+                      stagingData,
+                        refetchSequenceData: innerProps.refetchSequenceData,
+                        currentStepNum,
+                        createTemplateBuilder: innerProps.createTemplateBuilder,
+                        setCreateTemplateBuilder: innerProps.setCreateTemplateBuilder,
+                        setSequences: innerProps.setSequences,
+                        campaignId: innerProps.campaignId,
+                        cType: innerProps.cType,
+                        setStagingData: setStagingData,
+                        addToStagingData: addToStagingData,
+                        setAddedTemplate: setAddedTemplate,
+                    },
+                    centered: true,
+                    styles: {
+                      content: {
+                        minWidth: "800px",
+                      },
+                    },
+                    onClose: () => {
+                      closeAllModals();
+                      //nasty hack to preserve the added templates
+                      console.log('previous assets are', assets)
+                      console.log('added template is', addedTemplate)
+                      openContextModal({
+                        modal: "campaignTemplateEditModal",
+                        title: <Title order={3}>Sequence Builder</Title>,
+                        innerProps: {
+                          stagingData,
+                            refetchSequenceData: innerProps.refetchSequenceData,
+                            currentStepNum,
+                            createTemplateBuilder: innerProps.createTemplateBuilder,
+                            setCreateTemplateBuilder: innerProps.setCreateTemplateBuilder,
+                            setSequences: innerProps.setSequences,
+                            campaignId: innerProps.campaignId,
+                            cType: innerProps.cType,
+                            setAddedTemplate: setAddedTemplate,
+                        },
+                        centered: true,
+                        styles: {
+                          content: {
+                            minWidth: "1100px",
+                          },
+                        },
+                        onClose: () => {
+                          const clientArchetypeId = Number(id);
+                          innerProps.refetchSequenceData(clientArchetypeId);
+                        },
+                      });
+                    },
+                  })
+                }
+              >
+                Create New
+              </Button>
               <Templates
                 readyToGenerate={readyToGenerate}
                 assets={filteredAssets}
                 searchQuery={searchQuery}
                 addToStagingData={addToStagingData}
                 removeFromStagingData={removeFromStagingData}
+                stagingData={stagingData}
+                setStagingData={setStagingData}
                 currentStepNum={currentStepNum}
                 setCurrentStepNum={setCurrentStepNum}
               />
+              </>
             ) : (
               <Generates />
             )}
@@ -502,13 +562,13 @@ export default function CampaignTemplateEditModal({
                     return (
                       <Tabs.Tab value={(index + 1).toString()}>
                         Step {index + 1} (
-                        {stagingData[sequenceType].filter(
+                        {stagingData[sequenceType]?.filter(
                           (asset: any) => asset.step_num === index + 1
                         ).length == 0
                           ? "🔴 "
                           : "🟢 "}
                         {
-                          stagingData[sequenceType].filter(
+                          stagingData[sequenceType]?.filter(
                             (asset: any) => asset.step_num === index + 1
                           ).length
                         }
@@ -526,8 +586,7 @@ export default function CampaignTemplateEditModal({
                       <ScrollArea h={350}>
                         <Flex p={"lg"} h={"100%"} direction={"column"}>
                           <>
-                            {stagingData[sequenceType]
-                              .filter(
+                            {stagingData[sequenceType]?.filter(
                                 (asset: any) => asset.step_num === index + 1
                               )
                               .map((asset: any, index: number) => {
@@ -571,7 +630,7 @@ export default function CampaignTemplateEditModal({
                                         </Tooltip>
                                         <ActionIcon
                                           onClick={() =>
-                                            removeFromStagingData(asset.id)
+                                            removeFromStagingData(asset.id, stagingData, setStagingData)
                                           }
                                         >
                                           <IconTrash size={"0.9rem"} />
@@ -682,6 +741,8 @@ export const Templates = ({
   assets,
   searchQuery,
   addToStagingData,
+  stagingData,
+  setStagingData,
   removeFromStagingData,
   currentStepNum,
   setCurrentStepNum,
@@ -691,6 +752,8 @@ export const Templates = ({
   searchQuery: string;
   addToStagingData: Function;
   removeFromStagingData: Function;
+  stagingData: any;
+  setStagingData: Function;
   currentStepNum: number;
   setCurrentStepNum: Function;
 }) => {
@@ -707,32 +770,9 @@ export const Templates = ({
       width: "100%",
     },
   };
+
   return (
     <>
-      <Button
-        variant="light"
-        leftIcon={<IconPlus size={"0.9rem"} />}
-        onClick={() =>
-          openContextModal({
-            modal: "campaignTemplates",
-            title: (
-              <Title order={3}>
-                <span className=" text-gray-500">Go back to</span> Sequence
-                Builder
-              </Title>
-            ),
-            innerProps: {},
-            centered: true,
-            styles: {
-              content: {
-                minWidth: "800px",
-              },
-            },
-          })
-        }
-      >
-        Create New
-      </Button>
       <Flex
         direction={"column"}
         gap={"xs"}
@@ -747,10 +787,20 @@ export const Templates = ({
           )
           .map((asset) => {
             return (
-              <Card withBorder mih={"75px"}>
+              <Card withBorder mih={"90px"}>
                 <Flex>
                   <Popover withinPortal>
                     <Popover.Dropdown>
+                      <div
+                        style={{
+                          maxWidth: "300px",
+                          fontSize: "14px", // Increased font size for bigger text
+                          fontWeight: "bold", // Make the text bold
+                        }}
+                        dangerouslySetInnerHTML={{
+                          __html: asset.asset_key, // Display the asset in bigger text
+                        }}
+                      />
                       <div
                         style={{
                           maxWidth: "300px",
@@ -783,6 +833,10 @@ export const Templates = ({
                           {asset.asset_key.substring(0, 30)}
                           {asset.asset_key.length > 30 ? "..." : ""}
                         </Text>
+                        <Text color="gray" mt={3} size={"xs"} fw={400} className="truncate" sx={{ cursor: 'pointer' }}>
+                          {asset.asset_value.replace(/<[^>]*>/g, "").substring(0, 40)}
+                          {asset.asset_value.replace(/<[^>]*>/g, "").length > 40 ? "..." : ""}
+                        </Text>
                       </Box>
                     </Popover.Target>
                   </Popover>
@@ -793,7 +847,7 @@ export const Templates = ({
                     color="blue"
                     disabled={readyToGenerate}
                     onClick={() => {
-                      addToStagingData(asset, currentStepNum);
+                      addToStagingData(asset, currentStepNum, stagingData, setStagingData);
                     }}
                   >
                     Add

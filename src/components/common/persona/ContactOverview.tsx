@@ -21,6 +21,7 @@ import Personas from "./Personas";
 import SegmentV2 from "@pages/SegmentV2/SegmentV2";
 import { useState } from "react";
 import SellScaleSonar from "@common/settings/Sonar/SellscaleSonar";
+import SegmentV3 from "@pages/SegmentV3/SegmentV3";
 
 const ContactOverview = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -63,6 +64,7 @@ const ContactOverview = () => {
             />
             Ongoing Scrapes
           </Tabs.Tab> */}
+          <Tabs.Tab value="segments_v3">Segments v3</Tabs.Tab>
         </Tabs.List>
 
         {/* <Tabs.Panel value="personas">
@@ -100,6 +102,10 @@ const ContactOverview = () => {
 
         <Tabs.Panel value="sonar">
           <SellScaleSonar />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="segments_v3">
+          <SegmentV3 />
         </Tabs.Panel>
       </Tabs>
     </Box>

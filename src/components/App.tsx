@@ -80,6 +80,7 @@ import AssignConversationAIModal from "@modals/AssignConversationAIModa";
 import SimulatepersonalizerModal from "@modals/CampaignLandingV2/SimulatePersonalizerModal";
 import CampaignDrilldownModal from "@modals/CampaignLandingV2/CampaignDrilldownModal";
 import AddQuestionModal from "@modals/CampaignLandingV2/QuestionModal";
+import CreateSegmentV3Modal from "@modals/SegmentV3/CreateSemgentV3Modal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -264,6 +265,7 @@ export default function App() {
               simulatepersonalizerModal: SimulatepersonalizerModal,
               campaignDrilldownModal: CampaignDrilldownModal,
               addQuestionModal: AddQuestionModal,
+              createsegmentV3: CreateSegmentV3Modal,
             }}
             modalProps={{
               closeOnClickOutside: false,

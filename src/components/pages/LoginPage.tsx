@@ -1,13 +1,4 @@
-import {
-  LoadingOverlay,
-  Modal,
-  Text,
-  Divider,
-  Button,
-  TextInput,
-  Center,
-  Container,
-} from "@mantine/core";
+import { LoadingOverlay, Modal, Text, Divider, Button, TextInput, Center, Container, Box, Flex, Image } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { IconAt } from "@tabler/icons";
@@ -18,20 +9,18 @@ import { userDataState } from "@atoms/userAtoms";
 import { LogoFull } from "@nav/Logo";
 import { API_URL, EMAIL_REGEX } from "@constants/data";
 import { setPageTitle } from "@utils/documentChange";
+import Logo from "@assets/images/logo.png";
 
 async function sendLogin(email: string) {
-  const response = await fetch(
-    `${API_URL}/client/send_magic_link_login`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        client_sdr_email: email,
-      }),
-    }
-  );
+  const response = await fetch(`${API_URL}/client/send_magic_link_login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      client_sdr_email: email,
+    }),
+  });
 
   let result = await response.text().catch((err) => {
     console.error("Failed to read response as plain text", err);
@@ -91,26 +80,26 @@ export default function LoginPage() {
     }
   };
 
-    return (
-      <Modal opened={true} withCloseButton={false} onClose={() => {}} size="sm">
-        <LogoFull size={35} />
-        <Text c="dimmed" fs="italic" ta="center" size="sm">
+  return (
+    <Modal opened={true} centered withCloseButton={false} onClose={() => {}} size="md">
+      <Flex px={"md"} py={"md"} gap={"md"} direction={"column"}>
+        <Image height={40} sx={{ minWidth: "100px" }} fit="contain" src={Logo} alt="SellScale Sight" />
+        <Text ta={"center"} fz={22} fw={600}>
+          Glad to see you!
+        </Text>
+        <Text c="dimmed" ta="center" size="sm">
           View your prospects, outbound analytics, and personas all in one place.
         </Text>
-        <Divider my="sm" label="Login" labelPosition="center" />
-
-        <Container>
+        <Divider w={"100%"} />
+        <Box>
           {!checkEmail && (
             <form onSubmit={form.onSubmit(handleSubmit)}>
+              <Text fw={600} align="center">
+                Log in to get started
+              </Text>
               <LoadingOverlay visible={loading} overlayBlur={2} />
 
-              <TextInput
-                mt="md"
-                required
-                placeholder={`Client Email`}
-                icon={<IconAt size={16} stroke={1.5} />}
-                {...form.getInputProps("email")}
-              />
+              <TextInput required placeholder={`Enter your email address`} {...form.getInputProps("email")} mt={"sm"} />
 
               {error && (
                 <Text color="red" size="sm" mt="sm">
@@ -118,22 +107,26 @@ export default function LoginPage() {
                 </Text>
               )}
 
-              {
-                <Center m={"sm"}>
-                  <Button variant="outline" radius="md" type="submit">
-                    Login
-                  </Button>
-                </Center>
-              }
+              <Button mt={"sm"} radius="md" type="submit" fullWidth>
+                Next
+              </Button>
             </form>
           )}
           {checkEmail && (
-          <>
-            <Text ta="center">A login link has been sent to your email.</Text>
-            <Text ta="center" fs="italic" c="dimmed">You may close this tab now.</Text>
-          </>
+            <>
+              <Text ta="center" fw={500}>
+                A login link has been sent to your email.
+              </Text>
+              <Text ta="center" c="dimmed">
+                You may close this tab now.
+              </Text>
+            </>
           )}
-        </Container>
-      </Modal>
-    );
+        </Box>
+        <Text size={"sm"} color="gray" align="center">
+          SellScale, 2024
+        </Text>
+      </Flex>
+    </Modal>
+  );
 }

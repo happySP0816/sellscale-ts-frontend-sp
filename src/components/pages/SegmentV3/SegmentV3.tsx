@@ -26,6 +26,7 @@ import {
   SimpleGrid,
   SegmentedControl,
   Center,
+  Tooltip,
 } from "@mantine/core";
 import posthog from "posthog-js";
 
@@ -46,11 +47,13 @@ import {
   IconEye,
   IconFilter,
   IconLetterT,
+  IconLoader,
   IconPencil,
   IconPlus,
   IconRefresh,
   IconRobot,
   IconSearch,
+  IconSend,
   IconSwitch,
   IconTag,
   IconTargetArrow,
@@ -62,7 +65,7 @@ import {
   IconX,
 } from "@tabler/icons";
 import { DataGrid } from "mantine-data-grid";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
@@ -116,6 +119,14 @@ export default function SegmentV3() {
   const [showUnassignedSegments, setShowUnassignedSegments] = useState(false);
   const [showAutoDownloadModal, setOpenAutoDownloadModal] = useState(false);
   const [showAutoDownloadFeature, setShowAutoDownloadFeature] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  const [requestCampaignModal, setRequestCampaignModal] = useState(false);
+  const [type, setType] = useState("user");
+
+  const [seletedTag, setSelectedTag] = useState<string | null>("");
+  const [segmentTags, setSegmentTags] = useState([]);
+  const [segmentTagLoading, setSegmentTagLoading] = useState(false);
 
   // methods = FROM_SCRATCH, FROM_TEMPLATE, FROM_AI
   const [createCampaignMethods, setCreateCampaignMethods] = useState("FROM_SCRATCH");
@@ -123,6 +134,7 @@ export default function SegmentV3() {
 
   const [arrow, setArrow] = useState(false);
   const [data, setData] = useState([]);
+  let FilteredData: any = [];
 
   const [expandedRows, setExpandedRows] = useState<any>([]);
   const toggle = (id: any) => {
@@ -148,8 +160,11 @@ export default function SegmentV3() {
     });
 
     return data.filter((row: any) => {
-      if (searchQuery) {
-        return JSON.stringify(row).toLowerCase().includes(searchQuery.toLowerCase());
+      if (searchQuery && !JSON.stringify(row).toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      if (seletedTag && !row.segment_tags.some((tag: any) => tag?.name.toLowerCase() === seletedTag.toLowerCase())) {
+        return false;
       }
       return true;
     });
@@ -345,8 +360,8 @@ export default function SegmentV3() {
     }
     fetch(
       `${API_URL}/segment/all` +
-        (showAllSegments ? "?include_all_in_client=true" : "") +
-        (tagFilter !== -1 ? `${showAllSegments ? "&" : "?"}tag_filter=${tagFilter}` : ""),
+        (type === "company" ? "?include_all_in_client=true" : "") +
+        (tagFilter !== -1 ? `${type === "company" ? "&" : "?"}tag_filter=${tagFilter}` : ""),
       {
         method: "GET",
         headers: {
@@ -378,6 +393,7 @@ export default function SegmentV3() {
         });
 
         setData(parentSegmentsTransformedWithSubSegments);
+        FilteredData = parentSegmentsTransformedWithSubSegments;
       })
       .finally(() => {
         console.log("Stopping");
@@ -436,28 +452,59 @@ export default function SegmentV3() {
     if (posthog.isFeatureEnabled("segments-auto-downloads")) {
       setShowAutoDownloadFeature(true);
     }
-  }, [false, showAllSegments]);
-
-  const [requestCampaignModal, setRequestCampaignModal] = useState(false);
-  const [type, setType] = useState("user");
+  }, [false, showAllSegments, currentTime, type]);
 
   return (
     <Paper>
       <Flex direction={"column"} w={"90%"} mx={"auto"} pt={"lg"}>
-        <Flex align={"center"} justify={"space-between"}>
-          <Text size={"lg"} fw={600}>
-            Segments
-          </Text>
-          <Button ml="auto" mr="xs" onClick={() => (window.location.href = "/contacts/find?campaign_id=" + userData?.unassigned_persona_id)}>
-            Add Contacts
-          </Button>
-          <Button onClick={() => setModalOpened(true)} leftIcon={<IconPlus />}>
-            Create Segment
-          </Button>
+        <Flex align={"center"} justify={"space-between"} mb={"md"}>
+          <Flex gap={"sm"} align={"center"}>
+            <Text size={"xl"} fw={600}>
+              Segments
+            </Text>
+          </Flex>
+          <Flex gap={"sm"} align={"center"}>
+            <SegmentedControl
+              value={type}
+              onChange={(value: any) => {
+                setType(value);
+              }}
+              data={[
+                {
+                  value: "user",
+                  label: (
+                    <Center style={{ gap: 4 }}>
+                      <Text fw={500}>Your Segments</Text>
+                    </Center>
+                  ),
+                },
+                {
+                  value: "company",
+                  label: (
+                    <Center style={{ gap: 4 }}>
+                      <Text fw={500}>Company Segments</Text>
+                    </Center>
+                  ),
+                },
+              ]}
+            />
+            {/* <Button ml="auto" onClick={() => (window.location.href = "/contacts/find?campaign_id=" + userData?.unassigned_persona_id)}>
+              Add Contacts
+            </Button> */}
+            <Button ml="auto" variant="outline" onClick={() => (window.location.href = "/contacts/find?campaign_id=" + userData?.unassigned_persona_id)}>
+              View Unassigned Contacts
+            </Button>
+            {/* <Button onClick={() => setModalOpened(true)} leftIcon={<IconPlus />}>
+              Create Segment
+            </Button> */}
+            <Button onClick={() => getAllSegments(true)} leftIcon={<IconRefresh size={"0.9rem"} />}>
+              Refresh
+            </Button>
+          </Flex>
         </Flex>
-        <Text color="gray" fw={500} size={"sm"} mb={"xl"}>
+        {/* <Text color="gray" fw={500} size={"sm"} mb={"xl"}>
           View and manage your segments to organize your contacts and campaigns
-        </Text>
+        </Text> */}
         <SegmentV3Overview
           data={data}
           totalProspected={totalProspected}
@@ -467,38 +514,32 @@ export default function SegmentV3() {
         />
         <Box>
           <Flex align={"center"} justify={"space-between"}>
-            <Flex gap={"sm"} align={"center"}>
-              <Text size={"xl"} fw={600}>
-                Segments
-              </Text>
-              <SegmentedControl
-                value={type}
-                onChange={(value: any) => {
-                  setType(value);
-                }}
-                data={[
-                  {
-                    value: "user",
-                    label: (
-                      <Center style={{ gap: 4 }}>
-                        <Text fw={500}>Your Segments</Text>
-                      </Center>
-                    ),
-                  },
-                  {
-                    value: "company",
-                    label: (
-                      <Center style={{ gap: 4 }}>
-                        <Text fw={500}>Company Segments</Text>
-                      </Center>
-                    ),
-                  },
-                ]}
-              />
-            </Flex>
+            <TextInput
+              w={200}
+              placeholder="Search"
+              rightSection={<IconSearch size={"0.9rem"} color="gray" />}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
             <Flex gap={"sm"}>
-              <TextInput w={200} placeholder="Search" rightSection={<IconSearch size={"0.9rem"} />} />
-              <Select w={200} data={["test1", "test2", "test3"]} placeholder="Filter by Tags" />
+              <Select
+                w={200}
+                data={["test1", "test2", "test3", "Q1 STRATEGY"]}
+                value={seletedTag}
+                placeholder="Filter by Tags"
+                onChange={(value) => {
+                  setSelectedTag(value);
+                  let newFilteredByTagData;
+                  if (value) {
+                    newFilteredByTagData = data.filter(
+                      (item: any) =>
+                        item.segment_tags.map((tag: any) => tag?.name.toLowerCase()).includes(value.toLowerCase()) || item.segment_tags.length === 0
+                    );
+                  } else {
+                    newFilteredByTagData = data;
+                  }
+                  getNestedRows(newFilteredByTagData);
+                }}
+              />
               <Button
                 leftIcon={<IconPlus size={"0.9rem"} />}
                 onClick={() => {
@@ -521,27 +562,332 @@ export default function SegmentV3() {
                   });
                 }}
               >
-                New Segment
+                Segment
               </Button>
             </Flex>
           </Flex>
           <SimpleGrid cols={3} mt={"lg"}>
-            {data.map((item: any, index) => {
+            {getNestedRows(data)?.map((item: any, index: any) => {
               return (
                 <Paper key={index} withBorder p={"sm"} className="flex flex-col justify-between">
                   <Flex justify={"space-between"} align={"center"}>
                     <Text fw={700} lineClamp={1}>
                       {item?.person_name}
                     </Text>
-                    <ActionIcon>
+                    {/* <ActionIcon>
                       <IconEdit size={"1.2rem"} />
-                    </ActionIcon>
+                    </ActionIcon> */}
+                    <Flex gap={1}>
+                      <Tooltip
+                        color="white"
+                        arrowPosition="center"
+                        arrowOffset={45}
+                        arrowSize={8}
+                        position="top-start"
+                        withArrow
+                        label={
+                          <Paper withBorder shadow="sm" p={"md"}>
+                            <Flex align={"center"} gap={4}>
+                              <IconSend size={"0.9rem"} color="#228be6" className="mb-[2px]" />
+                              <Text fw={500} size={"sm"}>
+                                Outreach Summary
+                              </Text>
+                            </Flex>
+                            <Box mt={"sm"}>
+                              <Flex gap={3} align={"center"}>
+                                <Progress value={50} w={"100%"} />
+                                <Text color="#228BE6" fw={600} size={"xs"}>
+                                  {50}%
+                                </Text>
+                              </Flex>
+                              <Text fw={600} size={"xs"}>
+                                {213}/{213} <span className=" text-gray-400">in Segment</span>
+                              </Text>
+                            </Box>
+                            <Box mt={"sm"}>
+                              <Flex gap={3} align={"center"}>
+                                <Progress value={50} w={"100%"} color="grape" />
+                                <Text color="grape" fw={600} size={"xs"}>
+                                  {50}%
+                                </Text>
+                              </Flex>
+                              <Text fw={600} size={"xs"}>
+                                {106}/{213} <span className=" text-gray-400">in Children Segment(s)</span>
+                              </Text>
+                            </Box>
+                          </Paper>
+                        }
+                        styles={{
+                          tooltip: {
+                            padding: 0,
+                            boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2);",
+                          },
+                          arrow: {
+                            boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2);",
+                          },
+                        }}
+                      >
+                        <ActionIcon>
+                          <IconLoader size={"1.2rem"} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Menu
+                        shadow="md"
+                        withinPortal
+                        position="right"
+                        // disabled={isMySegment}
+                        styles={{
+                          itemLabel: {
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          },
+                        }}
+                      >
+                        <Menu.Target>
+                          <ActionIcon>
+                            <IconDotsVertical size={"1.2rem"} />
+                          </ActionIcon>
+                        </Menu.Target>
+
+                        <Menu.Dropdown>
+                          <Menu.Label>Prospects</Menu.Label>
+                          <Menu.Item
+                          // onClick={() => {
+                          //   window.location.href = `/contacts/find?segment_id=${id}`;
+                          // }}
+                          >
+                            <IconUsersPlus size={"0.9rem"} />
+                            Add Prospects
+                          </Menu.Item>
+                          <Menu.Item
+                            onClick={() => {
+                              // setShowViewProspectsModal(true);
+                              // setSelectedSegmentId(id);
+                            }}
+                          >
+                            <IconUsers size={"0.9rem"} />
+                            View Prospects
+                          </Menu.Item>
+
+                          <Menu.Divider />
+                          <Menu.Label>Change</Menu.Label>
+
+                          <Menu.Item
+                            onClick={() => {
+                              // duplicateSegment(id, true);
+                            }}
+                          >
+                            <IconCopy size={"0.9rem"} />
+                            Duplicate Segment
+                          </Menu.Item>
+                          <Menu.Item
+                          // onClick={() => {
+                          //   setSelectedSegmentId(id);
+                          //   setShowBatchModal(true);
+                          // }}
+                          >
+                            <IconArrowsSplit2 size={"0.9rem"} />
+                            Create Batches
+                          </Menu.Item>
+                          <Menu.Item
+                          // onClick={() => {
+                          //   setShowMoveSegmentModal(true);
+                          //   setSelectedSegmentId(id);
+                          // }}
+                          >
+                            <IconSwitch size={"0.9rem"} />
+                            Move Segment
+                          </Menu.Item>
+
+                          <Menu.Divider />
+                          <Menu.Label>Split</Menu.Label>
+                          <Menu.Item
+                            onClick={() =>
+                              openContextModal({
+                                modal: "splitSegment",
+                                title: (
+                                  <Group position="apart">
+                                    <div>
+                                      <Title
+                                        order={3}
+                                        sx={{
+                                          display: "flex",
+                                          gap: "8px",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <IconButterfly color="#228be6" style={{ marginTop: "-5px" }} />
+                                        Split Segment
+                                      </Title>
+                                    </div>
+                                  </Group>
+                                ),
+                                styles: (theme) => ({
+                                  title: {
+                                    width: "100%",
+                                  },
+                                  header: {
+                                    margin: 0,
+                                  },
+                                }),
+                                innerProps: {
+                                  parentSegments: data.map((segment: any) => ({
+                                    segment_id: segment.id,
+                                    segment_title: segment.segment_title,
+                                  })),
+                                  onSplit: (segment_id: any, segment_title: any) => {
+                                    createSegment(true, segment_id, segment_title);
+                                  },
+                                },
+                              })
+                            }
+                          >
+                            <IconButterfly size={"0.9rem"} />
+                            Manually Split Segment
+                          </Menu.Item>
+                          <Menu.Item
+                            onClick={() =>
+                              openContextModal({
+                                modal: "autosplitsegment",
+                                title: (
+                                  <Group position="apart">
+                                    <div>
+                                      <Title
+                                        order={2}
+                                        sx={{
+                                          display: "flex",
+                                          gap: "8px",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <IconWand color="#228be6" />
+                                        Auto Split Segment
+                                      </Title>
+                                    </div>
+                                  </Group>
+                                ),
+                                styles: (theme) => ({
+                                  title: {
+                                    width: "100%",
+                                  },
+                                  header: {
+                                    margin: 0,
+                                  },
+                                }),
+                                innerProps: {},
+                              })
+                            }
+                          >
+                            <IconWand size={"0.9rem"} />
+                            Auto Split Segment
+                          </Menu.Item>
+
+                          <Menu.Divider />
+                          <Menu.Label color="red">Danger zone</Menu.Label>
+                          <Menu.Item
+                            color="red"
+                            // onClick={() => {
+                            //   setSelectedSegmentId(id);
+                            //   setShowTransferSegmentModal(true);
+                            // }}
+                          >
+                            <IconUsersMinus size={"0.9rem"} />
+                            Transfer to Teammate
+                          </Menu.Item>
+                          <Menu.Item
+                            color="red"
+                            onClick={() =>
+                              openContextModal({
+                                modal: "clearsegment",
+                                title: (
+                                  <Group position="apart">
+                                    <div>
+                                      <Title
+                                        order={2}
+                                        sx={{
+                                          display: "flex",
+                                          gap: "8px",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <IconTrash color="red" />
+                                        Clear Segment
+                                      </Title>
+                                    </div>
+                                  </Group>
+                                ),
+                                styles: (theme) => ({
+                                  title: {
+                                    width: "100%",
+                                  },
+                                  header: {
+                                    margin: 0,
+                                  },
+                                }),
+                                innerProps: {
+                                  // showLoader: true,
+                                  // segmentId: id,
+                                  // num_prospected: num_prospected,
+                                  // clearSegmentProspects: clearSegmentProspects,
+                                },
+                              })
+                            }
+                          >
+                            <IconBackspace size={"0.9rem"} />
+                            Clear Prospects
+                          </Menu.Item>
+                          <Menu.Item
+                            color="red"
+                            style={{ display: "flex", alignItems: "center" }}
+                            onClick={() => {
+                              openContextModal({
+                                modal: "deletesegment",
+                                title: (
+                                  <Group position="apart">
+                                    <div>
+                                      <Title
+                                        order={2}
+                                        sx={{
+                                          display: "flex",
+                                          gap: "8px",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <IconTrash color="red" />
+                                        Delete Segment
+                                      </Title>
+                                    </div>
+                                  </Group>
+                                ),
+                                styles: (theme) => ({
+                                  root: {
+                                    maxWidth: "40%",
+                                  },
+                                  title: {
+                                    width: "100%",
+                                  },
+                                  header: {
+                                    margin: 0,
+                                  },
+                                }),
+                                innerProps: {
+                                  // showLoader: true,
+                                  // segmentId: id,
+                                  // getAllSegments: getAllSegments,
+                                },
+                              });
+                            }}
+                          >
+                            <IconTrash size={"0.9rem"} />
+                            Delete Segment
+                          </Menu.Item>
+                        </Menu.Dropdown>
+                      </Menu>
+                    </Flex>
                   </Flex>
                   <Flex align={"center"} gap={3} mt={"xs"}>
-                    {item?.segment_tags &&
-                      item?.segment_tags.map((segments: any, segmentsIndex: number) => {
-                        return <Badge key={segmentsIndex}>{segments.name}</Badge>;
-                      })}
+                    <SegmentTags item={item} setCurrentTime={setCurrentTime} />
                   </Flex>
                   <Box mt={"sm"}>
                     <Flex align={"center"} gap={"xs"}>
@@ -556,8 +902,36 @@ export default function SegmentV3() {
                         {item.assets} accounts
                       </Text>
                     </Flex>
-                    <Button rightIcon={<IconArrowRight size={"0.9rem"} />} mt={"sm"}>
+                    <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                      <Text color="gray" size={"sm"} fw={500}>
+                        Created by:
+                      </Text>
+                      <Avatar src={item.client_sdr.img_url} size={"sm"} radius={"xl"} />
+                      <Text size={"sm"} fw={500}>
+                        {item.client_sdr.sdr_name}
+                      </Text>
+                    </Flex>
+                    {/* <Button rightIcon={<IconArrowRight size={"0.9rem"} />} mt={"sm"}>
                       Create Campaign
+                    </Button> */}
+                    <Button
+                      variant={item.client_archetype?.archetype ? "outline" : "filled"}
+                      color="blue"
+                      mt={"sm"}
+                      fullWidth
+                      leftIcon={!item.client_archetype?.archetype ? null : <IconTargetArrow size={"0.9rem"} />}
+                      rightIcon={!item.client_archetype?.archetype ? <IconArrowRight size={"0.9rem"} /> : null}
+                      fw={600}
+                      sx={{ fontSize: "12px" }}
+                      disabled={item.client_sdr.id !== userData.id}
+                      onClick={() => {
+                        setShowConnectCampaignModal(true);
+                        setSelectedSegmentId(item.id);
+                      }}
+                    >
+                      {item.client_archetype?.archetype
+                        ? item.client_archetype.archetype?.substring(0, 22) + (item.client_archetype.archetype.length > 22 ? "..." : "")
+                        : "Connect to Campaign"}
                     </Button>
                   </Box>
                 </Paper>
@@ -569,3 +943,163 @@ export default function SegmentV3() {
     </Paper>
   );
 }
+
+const SegmentTags = (props: any) => {
+  const userToken = useRecoilValue(userTokenState);
+
+  const [availableSegmentTags, setAvailableSegmentTags] = useState<Array<{ id: number; name: string }>>([]);
+  const [addTagClicked, setAddTagClicked] = useState(false);
+  const [segmentTagsLoading, setSegmentTagsLoading] = useState(false);
+  const [segmentTags, setSegmentTags] = useState(props.item.segment_tags);
+  const [popoverOpened, setPopoverOpened] = useState(false);
+
+  return (
+    <Popover
+      opened={popoverOpened}
+      width={400}
+      position="left"
+      withArrow
+      shadow="md"
+      onClose={() => setPopoverOpened(false)}
+      onOpen={() => {
+        setSegmentTagsLoading(true);
+        getAllSegmentTags(userToken).then((res) => {
+          setAvailableSegmentTags(res.data);
+          setSegmentTagsLoading(false);
+        });
+      }}
+    >
+      <Popover.Target>
+        <Flex align={"center"} gap={3} mt={"xs"} wrap={"wrap"}>
+          {props.item?.segment_tags &&
+            props.item?.segment_tags.length > 0 &&
+            props.item?.segment_tags.map((segments: any, segmentsIndex: any) => (
+              <Badge radius={"xs"} key={segmentsIndex}>
+                {segments.name}
+              </Badge>
+            ))}
+          {props.item?.segment_tags && props.item?.segment_tags.length > 0 ? (
+            <ActionIcon variant="filled" color="blue" size={"sm"} ml={3} onClick={() => setPopoverOpened(true)}>
+              <IconPlus size={"0.9rem"} />
+            </ActionIcon>
+          ) : (
+            <Button leftIcon={<IconPlus size={"0.9rem"} />} size="xs" onClick={() => setPopoverOpened(true)}>
+              Add Tag
+            </Button>
+          )}
+        </Flex>
+      </Popover.Target>
+      <Popover.Dropdown>
+        {segmentTagsLoading ? (
+          <Loader />
+        ) : (
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            {availableSegmentTags?.map((tag: { name: string; id: number }, index: number) => {
+              const isTagInSegment = segmentTags?.some((existingTag: { name: string }) => existingTag?.name === tag?.name);
+              return (
+                tag && (
+                  <Group spacing="xs" style={{ margin: "2px" }}>
+                    <Badge
+                      radius="xl"
+                      size="md"
+                      color={deterministicMantineColor(tag.name)}
+                      style={{
+                        cursor: "pointer",
+                        backgroundColor: isTagInSegment ? "transparent" : "",
+                        color: isTagInSegment ? "darkgrey" : "",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!isTagInSegment) {
+                          setSegmentTags((prevTags: any) => [...prevTags, tag]);
+                          addTagToSegment(userToken, props.item.id, tag.id);
+                          props.setCurrentTime(new Date());
+                        } else {
+                          setSegmentTags((prevTags: any) => prevTags.filter((t: any) => t.id !== tag.id));
+                          removeTagFromSegment(userToken, props.item.id, tag.id);
+                          props.setCurrentTime(new Date());
+                        }
+                      }}
+                    >
+                      {tag.name} &nbsp;
+                    </Badge>
+                    <div style={{ marginLeft: "-35px" }}>
+                      <ActionIcon
+                        color="red"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openConfirmModal({
+                            title: "Confirm Global Tag Deletion",
+                            children: <Text size="sm">Are you sure you want to permanently delete this tag? It will get removed from all locations.</Text>,
+                            labels: {
+                              confirm: "Delete Tag",
+                              cancel: "Cancel",
+                            },
+                            confirmProps: { color: "red" },
+                            onCancel: () => {
+                              setPopoverOpened(true);
+                            },
+                            onConfirm: () => {
+                              deleteTag(userToken, tag.id).then(() => {
+                                // getAllSegments(true);
+                                setPopoverOpened(true);
+                              });
+                            },
+                          });
+                        }}
+                        sx={(theme) => ({
+                          "&:hover": {
+                            backgroundColor: theme.colors.red[2],
+                            borderRadius: "50%",
+                          },
+                        })}
+                      >
+                        <IconX color="darkgrey" size={14} />
+                      </ActionIcon>
+                    </div>
+                  </Group>
+                )
+              );
+            })}
+            {addTagClicked ? (
+              <TextInput
+                placeholder="Type here..."
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const newTagName = e.currentTarget.value.trim();
+                    if (newTagName !== "" && !availableSegmentTags?.some((tag) => tag.name === newTagName)) {
+                      createSegmentTag(userToken, props.item.id, newTagName, "#000000").then((newTag) => {
+                        // getAllSegments(true);
+                        e.currentTarget.value = "";
+                      });
+                    }
+                  }
+                  e.stopPropagation();
+                }}
+                style={{ width: "50%", margin: "5px" }}
+              />
+            ) : (
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setAddTagClicked(true);
+                }}
+                size="xs"
+                style={{ backgroundColor: "#4682B4", color: "white" }}
+              >
+                <IconPlus size={18} />
+              </Button>
+            )}
+          </Box>
+        )}
+      </Popover.Dropdown>
+    </Popover>
+  );
+};

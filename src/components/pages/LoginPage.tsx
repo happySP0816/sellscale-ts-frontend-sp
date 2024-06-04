@@ -1,4 +1,16 @@
-import { LoadingOverlay, Modal, Text, Divider, Button, TextInput, Center, Container, Box, Flex, Image } from "@mantine/core";
+import {
+  LoadingOverlay,
+  Modal,
+  Text,
+  Divider,
+  Button,
+  TextInput,
+  Center,
+  Container,
+  Box,
+  Flex,
+  Image,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { IconAt } from "@tabler/icons";
@@ -81,14 +93,27 @@ export default function LoginPage() {
   };
 
   return (
-    <Modal opened={true} centered withCloseButton={false} onClose={() => {}} size="md">
+    <Modal
+      opened={true}
+      centered
+      withCloseButton={false}
+      onClose={() => {}}
+      size="md"
+    >
       <Flex px={"md"} py={"md"} gap={"md"} direction={"column"}>
-        <Image height={40} sx={{ minWidth: "100px" }} fit="contain" src={Logo} alt="SellScale Sight" />
+        <Image
+          height={40}
+          sx={{ minWidth: "100px" }}
+          fit="contain"
+          src={Logo}
+          alt="SellScale Sight"
+        />
         <Text ta={"center"} fz={22} fw={600}>
-          Glad to see you!
+          SellScale Sight
         </Text>
         <Text c="dimmed" ta="center" size="sm">
-          View your prospects, outbound analytics, and personas all in one place.
+          Work with your Sales AGI to access your contacts, campaigns,
+          analytics, and more.
         </Text>
         <Divider w={"100%"} />
         <Box>
@@ -99,7 +124,12 @@ export default function LoginPage() {
               </Text>
               <LoadingOverlay visible={loading} overlayBlur={2} />
 
-              <TextInput required placeholder={`Enter your email address`} {...form.getInputProps("email")} mt={"sm"} />
+              <TextInput
+                required
+                placeholder={`Enter your email address`}
+                {...form.getInputProps("email")}
+                mt={"sm"}
+              />
 
               {error && (
                 <Text color="red" size="sm" mt="sm">
@@ -123,8 +153,8 @@ export default function LoginPage() {
             </>
           )}
         </Box>
-        <Text size={"sm"} color="gray" align="center">
-          SellScale, 2024
+        <Text size={"xs"} color="gray" align="center">
+          SellScale Inc., 2024
         </Text>
       </Flex>
     </Modal>

@@ -1,16 +1,4 @@
-import {
-  LoadingOverlay,
-  Modal,
-  Text,
-  Divider,
-  Button,
-  TextInput,
-  Center,
-  Container,
-  Box,
-  Flex,
-  Image,
-} from "@mantine/core";
+import { LoadingOverlay, Modal, Text, Divider, Button, TextInput, Center, Container, Box, Flex, Image, BackgroundImage } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { IconAt } from "@tabler/icons";
@@ -22,6 +10,7 @@ import { LogoFull } from "@nav/Logo";
 import { API_URL, EMAIL_REGEX } from "@constants/data";
 import { setPageTitle } from "@utils/documentChange";
 import Logo from "@assets/images/logo.png";
+import Background from "@assets/images/login_bg.png";
 
 async function sendLogin(email: string) {
   const response = await fetch(`${API_URL}/client/send_magic_link_login`, {
@@ -93,70 +82,56 @@ export default function LoginPage() {
   };
 
   return (
-    <Modal
-      opened={true}
-      centered
-      withCloseButton={false}
-      onClose={() => {}}
-      size="md"
-    >
-      <Flex px={"md"} py={"md"} gap={"md"} direction={"column"}>
-        <Image
-          height={40}
-          sx={{ minWidth: "100px" }}
-          fit="contain"
-          src={Logo}
-          alt="SellScale Sight"
-        />
-        <Text ta={"center"} fz={22} fw={600}>
-          SellScale Sight
-        </Text>
-        <Text c="dimmed" ta="center" size="sm">
-          Work with your Sales AGI to access your contacts, campaigns,
-          analytics, and more.
-        </Text>
-        <Divider w={"100%"} />
-        <Box>
-          {!checkEmail && (
-            <form onSubmit={form.onSubmit(handleSubmit)}>
-              <Text fw={600} align="center">
-                Log in to get started
-              </Text>
-              <LoadingOverlay visible={loading} overlayBlur={2} />
+    <Box maw={"100%"} h={"100%"}>
+      <BackgroundImage h={"100%"} src={Background}>
+        <Modal opened={true} centered withCloseButton={false} onClose={() => {}} size="md">
+          <Flex px={"md"} py={"md"} gap={"md"} direction={"column"}>
+            <Image height={40} sx={{ minWidth: "100px" }} fit="contain" src={Logo} alt="SellScale Sight" />
+            <Text ta={"center"} fz={22} fw={600}>
+              SellScale Sight
+            </Text>
+            <Text c="dimmed" ta="center" size="sm">
+              Work with your Sales AGI to access your contacts, campaigns, analytics, and more.
+            </Text>
+            <Divider w={"100%"} />
+            <Box>
+              {!checkEmail && (
+                <form onSubmit={form.onSubmit(handleSubmit)}>
+                  <Text fw={600} align="center">
+                    Log in to get started
+                  </Text>
+                  <LoadingOverlay visible={loading} overlayBlur={2} />
 
-              <TextInput
-                required
-                placeholder={`Enter your email address`}
-                {...form.getInputProps("email")}
-                mt={"sm"}
-              />
+                  <TextInput required placeholder={`Enter your email address`} {...form.getInputProps("email")} mt={"sm"} />
 
-              {error && (
-                <Text color="red" size="sm" mt="sm">
-                  {error}
-                </Text>
+                  {error && (
+                    <Text color="red" size="sm" mt="sm">
+                      {error}
+                    </Text>
+                  )}
+
+                  <Button mt={"sm"} radius="md" type="submit" fullWidth>
+                    Next
+                  </Button>
+                </form>
               )}
-
-              <Button mt={"sm"} radius="md" type="submit" fullWidth>
-                Next
-              </Button>
-            </form>
-          )}
-          {checkEmail && (
-            <>
-              <Text ta="center" fw={500}>
-                A login link has been sent to your email.
-              </Text>
-              <Text ta="center" c="dimmed">
-                You may close this tab now.
-              </Text>
-            </>
-          )}
-        </Box>
-        <Text size={"xs"} color="gray" align="center">
-          SellScale Inc., 2024
-        </Text>
-      </Flex>
-    </Modal>
+              {checkEmail && (
+                <>
+                  <Text ta="center" fw={500}>
+                    A login link has been sent to your email.
+                  </Text>
+                  <Text ta="center" c="dimmed">
+                    You may close this tab now.
+                  </Text>
+                </>
+              )}
+            </Box>
+            <Text size={"xs"} color="gray" align="center">
+              SellScale Inc., 2024
+            </Text>
+          </Flex>
+        </Modal>
+      </BackgroundImage>
+    </Box>
   );
 }

@@ -959,7 +959,7 @@ export default function CampaignLandingV2() {
                       </Tooltip>
                     </Flex>
                     <Text size={"xs"} fw={500}>
-                      {testingVolume === MAX_CONTACTS || testingVolume === totalContacts || (testingVolume === 1000 && totalContacts < 1000) ? "Max/week" : `${testingVolume}/week`}{" "}
+                      {testingVolume === MAX_CONTACTS || (testingVolume === 1000 && totalContacts < 1000) ? "Max/week" : `${testingVolume}/week`}{" "}
                       {cycleStatus && (
                         <Text component="span" color="red" size="xs" fw={700} ml={4}>
                           (Unsaved)

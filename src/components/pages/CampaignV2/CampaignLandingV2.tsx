@@ -1025,10 +1025,29 @@ export default function CampaignLandingV2() {
               <Flex w={"60%"}>
                 <Paper p="md" withBorder w={"100%"}>
                   <Flex justify={"space-between"}>
-                    <Text size={"xs"} fw={totalContacts}>
-                      Weekly Outreach Volume
-                    </Text>
-                    <Text size={"xs"} fw={totalContacts}>
+                    <Flex justify={"space-between"}>
+                      <Text size={"xs"} fw={500}>
+                        Outreach Volume
+                      </Text>
+                      <Tooltip
+                        multiline
+                        label={
+                          <Text size="sm">
+                            SellScale will initiate weekly interactions<br/>
+                            with this specified number of contacts,<br/>
+                            determined by the imported contacts<br/> and the capacity of your account.
+                            <br></br>
+                          </Text>
+                        }
+                        withArrow
+                        position="right"
+                      >
+                        <Text color="#37414E" size="xs">
+                          <IconQuestionMark size={"0.75rem"} color="#37414E" />
+                        </Text>
+                      </Tooltip>
+                    </Flex>
+                    <Text size={"xs"} fw={500}>
                       {(testingVolume === MAX_CONTACTS || testingVolume === totalContacts) ? 'Max/week' : `${testingVolume}/week`}{" "}
                       {cycleStatus && (
                         <Text
@@ -1061,11 +1080,11 @@ export default function CampaignLandingV2() {
                         setCycleStatus(true);
                         setTestingVolume(value);
                       }}
-                      max={totalContacts}
+                      max={totalContacts || 1}
                       marks={[
                         { value: 0, label: "0" },
                         {
-                          value: totalContacts,
+                          value: (totalContacts || 1),
                           label: (
                             <div
                               style={{
@@ -1077,8 +1096,8 @@ export default function CampaignLandingV2() {
                           ),
                         },
                       ]}
-                      label={(value) => (value === 500 ? 'Max' : value)}
-                    />
+                      label={(value) => (totalContacts === 0 ? 'N/A' : (value === totalContacts ? 'Max' : value))}
+                      ></Slider>
                     <Button
                       disabled={!cycleStatus}
                       onClick={async () => {
@@ -1086,7 +1105,7 @@ export default function CampaignLandingV2() {
                         const response = await patchTestingVolume(
                           userToken,
                           clientArchetypeId,
-                          (testingVolume === totalContacts) ? 2147483647 : testingVolume
+                          (testingVolume === totalContacts || (totalContacts === 0) ? MAX_CONTACTS : testingVolume)
                         );
                         if (response) {
                           console.log(

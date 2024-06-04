@@ -99,6 +99,7 @@ interface StatsData {
   num_pos_replies: number;
   num_sent: number;
   sdr_name: string;
+  is_ai_research_personalization_enabled: boolean;
 }
 
 export default function CampaignLandingV2() {
@@ -143,7 +144,8 @@ export default function CampaignLandingV2() {
       email_active: statsData.email_active,
       email_open_tracking_enabled: false,
       email_link_tracking_enabled: false,
-      is_ai_research_personalization_enabled: false,
+      is_ai_research_personalization_enabled:
+        statsData.is_ai_research_personalization_enabled,
     };
   };
   const userData = useRecoilValue(userDataState);
@@ -197,7 +199,6 @@ export default function CampaignLandingV2() {
   const [personalizersEnabled, setPersonalizersEnabled] = useState(
     currentProject?.is_ai_research_personalization_enabled
   );
-  console.log("personalizersEnabled", personalizersEnabled);
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
   const [status, setStatus] = useState("SETUP");
 
@@ -249,13 +250,14 @@ export default function CampaignLandingV2() {
     setSelectStep(key);
   };
 
-  useEffect(
-    () =>
+  useEffect(() => {
+    console.log("CURRENT PROJECT", currentProject);
+    if (currentProject) {
       setPersonalizersEnabled(
         currentProject?.is_ai_research_personalization_enabled
-      ),
-    [currentProject]
-  );
+      );
+    }
+  }, [currentProject]);
 
   const updatePersonalizersEnabled = (enabled: boolean) => {
     fetch(`${API_URL}/client/archetype/${id}/update_personalizers_enabled`, {

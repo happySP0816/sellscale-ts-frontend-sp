@@ -68,9 +68,10 @@ interface EmailBankItem {
   total_sent_count: number;
 }
 
-const MultiEmails = () => {
+const MultiEmails = (props: {hideAnchor?: boolean}) => {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
+  const [allEmails, setAllEmails] = useState<EmailBankItem[]>([]);
   const [emails, setEmails] = useState<EmailBankItem[]>([]);
   const [currentEmailSla, setCurrentEmailSla] = useState<number>(0);
 
@@ -80,16 +81,32 @@ const MultiEmails = () => {
     columnAccessor: "email_address",
     direction: "asc",
   });
-  useEffect(() => {
-    const data = sortBy(emails, sortStatus.columnAccessor);
+  const sortEmails = (manualEmails?: EmailBankItem[]) => {
+    if (!manualEmails) manualEmails = emails;
+    const data = sortBy(manualEmails, sortStatus.columnAccessor);
     setEmails(sortStatus.direction === "desc" ? data.reverse() : data);
+  }
+  useEffect(() => {
+    sortEmails();
   }, [sortStatus]);
+
 
   const triggerGetEmailBanks = async () => {
     const result = await getEmailBanks(userToken);
     if (result.status == "success") {
       const data = result.data.emails;
-      setEmails(data);
+
+      if (props.hideAnchor) {
+        const nonAnchorMail = data.filter((email: any) => email.email_type !== "ANCHOR");
+        setEmails(nonAnchorMail);
+        setAllEmails(nonAnchorMail);
+        sortEmails(nonAnchorMail);
+      } else {
+        setEmails(data);
+        setAllEmails(data);
+        sortEmails(data);
+      }
+
     }
   };
   useEffect(() => {
@@ -112,7 +129,7 @@ const MultiEmails = () => {
 
   return (
     <>
-      <Paper withBorder m="xs" p="md" radius="md" bg={"gray.0"}>
+      <Paper withBorder p="md" radius="md" bg={"gray.0"}>
         <Title order={3}>{userData?.sdr_name}'s Email</Title>
 
         <Flex direction="row" mt={"xs"} w="100%">
@@ -121,7 +138,21 @@ const MultiEmails = () => {
             w={"80%"}
             maw={400}
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value === "" && searchInput === "") return;
+
+              if (e.target.value == "") {
+                setEmails(allEmails);
+              } else {
+                setEmails(
+                  allEmails.filter((email) =>
+                    email.email_address.toLowerCase().includes(e.target.value.toLowerCase())
+                  )
+                );
+              }
+
+              setSearchInput(e.target.value)
+            }}
           />
           <Box
             ml='md'

@@ -178,6 +178,7 @@ const AllCampaign = (props: PropsType) => {
         <div className="w-full overflow-auto">
           <div className="min-w-[1280px]">
             <PersonCampaignTable
+              showAvatar={true}
               campaignViewMode="node-view"
               showCycles={campaignViewMode === "cycle-view"}
               filteredProjects={filteredCampaigns}

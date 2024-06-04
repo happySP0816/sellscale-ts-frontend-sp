@@ -64,7 +64,13 @@ const ContactOverview = () => {
             />
             Ongoing Scrapes
           </Tabs.Tab> */}
-          <Tabs.Tab value="segments_v3">Segments v3</Tabs.Tab>
+          <Tabs.Tab value="segments_v3" mt={6}>
+            <IconWallpaper
+              size="0.8rem"
+              style={{ marginRight: "8px", marginTop: "4px" }}
+            />
+            Segments v3
+          </Tabs.Tab>
         </Tabs.List>
 
         {/* <Tabs.Panel value="personas">

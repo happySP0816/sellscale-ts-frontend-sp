@@ -1202,7 +1202,7 @@ export function PersonCampaignCard(props: {
                       {(props.persona.active && props.persona.total_prospects > 0 ? "Active" : props.persona.active ? "Setup" : "Inactive") || "Inactive"}
                     </Badge>
                     {!!props.persona.smartlead_campaign_id && (
-                      <Tooltip label="Synced with Email Sequence" withArrow>
+                      <Tooltip label="This email campaign is set up correctly." withArrow>
                         <Badge size="xs" color={"violet"} ml="4px">
                           {"🔗"}
                         </Badge>

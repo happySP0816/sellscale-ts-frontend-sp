@@ -651,30 +651,25 @@ export default function CampaignLandingV2() {
         >
       <Flex direction="column" align="center" gap="md">
         <Title size="lg" align="center" color="blue">
-          Hold your horses!
+          Just a sec!
         </Title>
         <Text size="md" align="center">
-          To activate this campaign, please ensure the following:
+          Before you can activate this campaign, please ensure the following:
         </Text>
         <List spacing="sm" size="md" center>
           {(!statsData?.email_active && !statsData?.linkedin_active) && (
             <List.Item>
-              <Text color="red">Enable either Email or LinkedIn.</Text>
+              <Text color="black">Enable either Email or LinkedIn Sequences.</Text>
             </List.Item>
           )}
           {statsData?.email_active && emailSequenceData.length === 0 && (
             <List.Item>
-              <Text color="black">Please add an email sequence.</Text>
+              <Text color="black">Add an email sequence.</Text>
             </List.Item>
           )}
           {statsData?.linkedin_active && linkedinSequenceData.length === 0 && (
             <List.Item>
-              <Text color="black">Please add a LinkedIn sequence.</Text>
-            </List.Item>
-          )}
-          {totalContacts === 0 && (
-            <List.Item>
-              <Text color="black">Please add a LinkedIn sequence.</Text>
+              <Text color="black">Add a LinkedIn sequence.</Text>
             </List.Item>
           )}
         </List>

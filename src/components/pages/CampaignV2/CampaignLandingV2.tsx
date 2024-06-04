@@ -58,11 +58,11 @@ import {
 import { IconMessageCheck } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import {
-  fetchCampaignContacts,
   fetchCampaignPersonalizers,
   patchTestingVolume,
   fetchCampaignSequences,
   fetchCampaignStats,
+  fetchTotalContacts
 } from "@utils/requests/campaignOverview";
 import { proxyURL } from "@utils/general";
 import {
@@ -208,6 +208,10 @@ export default function CampaignLandingV2() {
   //contact variable
   const [contacts, setContacts] = useState<any[]>([]);
   const [contactPercent, setContactPercent] = useState(40);
+  const [totalContacts, setTotalContacts] = useState(0);
+  const [loadingTotalContacts, setLoadingTotalContacts] = useState(true);
+
+  const MAX_CONTACTS = 2147483647;
 
   // Loading states
   const [loadingContacts, setLoadingContacts] = useState(false);
@@ -307,6 +311,15 @@ export default function CampaignLandingV2() {
     setSequences(newSequences);
   };
 
+  const getTotalContacts = async () => {
+    setLoadingTotalContacts(true);
+    const response = await fetchTotalContacts(userToken, id);
+    if (response) {
+      setTotalContacts(response);
+    } 
+    setLoadingTotalContacts(false);
+  }
+
   const getPersonalizers = async () => {
     setLoadingPersonalizers(true);
     const clientArchetypeId = Number(id);
@@ -383,7 +396,7 @@ export default function CampaignLandingV2() {
         setLoadingStats(false);
       })
       .catch((error) => {
-        console.error("Error fetching stats", error);
+        console.error("Error fetching stats or contacts", error);
         setLoadingStats(false);
       });
   };
@@ -487,11 +500,12 @@ export default function CampaignLandingV2() {
       setLoadingStats(true);
 
       const statsPromise = fetchCampaignStats(userToken, clientArchetypeId);
+      const totalContactsPromise = fetchTotalContacts(userToken, clientArchetypeId);
       getPersonalizers();
       refetchSequenceData(clientArchetypeId);
 
-      statsPromise
-        .then((stats) => {
+      Promise.all([statsPromise, totalContactsPromise])
+        .then(([stats, totalContacts]) => {
           const loadedStats = stats as StatsData;
           console.log("stats", loadedStats);
           setStatsData(loadedStats);
@@ -500,6 +514,9 @@ export default function CampaignLandingV2() {
           );
           if (loadedStats && loadedStats.testing_volume) {
             setTestingVolume(loadedStats.testing_volume);
+          }
+          if (totalContacts) {
+            setTotalContacts(totalContacts);
           }
           //set the setup status
           if (loadedStats.active && loadedStats.num_sent > 0) {
@@ -510,9 +527,10 @@ export default function CampaignLandingV2() {
             setStatus("INACTIVE");
           }
           setLoadingStats(false);
+          setLoadingTotalContacts(false);
         })
         .catch((error) => {
-          console.error("Error fetching stats", error);
+          console.error("Error fetching data", error);
           setLoadingStats(false);
         });
     };
@@ -1007,11 +1025,11 @@ export default function CampaignLandingV2() {
               <Flex w={"60%"}>
                 <Paper p="md" withBorder w={"100%"}>
                   <Flex justify={"space-between"}>
-                    <Text size={"xs"} fw={500}>
+                    <Text size={"xs"} fw={totalContacts}>
                       Weekly Outreach Volume
                     </Text>
-                    <Text size={"xs"} fw={500}>
-                      {testingVolume}/week{" "}
+                    <Text size={"xs"} fw={totalContacts}>
+                      {(testingVolume === MAX_CONTACTS || testingVolume === totalContacts) ? 'Max/week' : `${testingVolume}/week`}{" "}
                       {cycleStatus && (
                         <Text
                           component="span"
@@ -1038,18 +1056,16 @@ export default function CampaignLandingV2() {
                   <Flex w={"100%"} align={"start"} gap={"sm"} mt={"md"}>
                     <Slider
                       w={"100%"}
-                      // defaultValue={statsData.testing_volume}
                       value={testingVolume}
                       onChange={(value) => {
                         setCycleStatus(true);
                         setTestingVolume(value);
-                        // statsData.testing_volume = value;
                       }}
-                      max={500}
+                      max={totalContacts}
                       marks={[
                         { value: 0, label: "0" },
                         {
-                          value: 500,
+                          value: totalContacts,
                           label: (
                             <div
                               style={{
@@ -1061,6 +1077,7 @@ export default function CampaignLandingV2() {
                           ),
                         },
                       ]}
+                      label={(value) => (value === 500 ? 'Max' : value)}
                     />
                     <Button
                       disabled={!cycleStatus}
@@ -1069,7 +1086,7 @@ export default function CampaignLandingV2() {
                         const response = await patchTestingVolume(
                           userToken,
                           clientArchetypeId,
-                          testingVolume
+                          (testingVolume === totalContacts) ? 2147483647 : testingVolume
                         );
                         if (response) {
                           console.log(
@@ -2088,7 +2105,9 @@ export default function CampaignLandingV2() {
           <Paper withBorder w={"100%"}>
             <ContactsInfiniteScroll
               campaignId={Number(id)}
-              setContactsData={setContactsData}
+              getTotalContacts={getTotalContacts}
+              totalContacts={totalContacts}
+              loadingTotalContacts={loadingTotalContacts}
             />
           </Paper>
         </Flex>

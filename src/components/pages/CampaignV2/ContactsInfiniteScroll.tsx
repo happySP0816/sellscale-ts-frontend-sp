@@ -38,10 +38,14 @@ const batchSize = 20; // Adjust batch size as needed
 
 export function ContactsInfiniteScroll({
   campaignId,
-  setContactsData,
+  getTotalContacts,
+  totalContacts,
+  loadingTotalContacts
 }: {
   campaignId: number;
-  setContactsData: any;
+  getTotalContacts: any;
+  totalContacts: number;
+  loadingTotalContacts: boolean;
 }) {
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -117,14 +121,12 @@ export function ContactsInfiniteScroll({
       if (newContacts.sample_contacts.length === 0) {
         setHasMoreContacts(false); // No more contacts to load
       } else {
-        setContacts((prevContacts) => [
-          ...prevContacts,
-          ...newContacts.sample_contacts,
-        ]);
-        setContactsData((prevContacts: any) => [
-          ...prevContacts,
-          ...newContacts.sample_contacts,
-        ]);
+        setContacts((prevContacts) => {
+          const uniqueContacts = new Set([...prevContacts, ...newContacts.sample_contacts]);
+          return Array.from(uniqueContacts);
+        });
+        //refetch total contacts to update the count
+        await getTotalContacts();
         offsetRef.current += batchSize;
       }
     } catch (error) {
@@ -145,8 +147,7 @@ export function ContactsInfiniteScroll({
         searchTerm,
         false,
       );
-      setContacts(initialContacts.sample_contacts);
-      setContactsData(initialContacts.sample_contacts);
+      setContacts(Array.from(new Set(initialContacts.sample_contacts)));
       offsetRef.current = batchSize;
       setHasMoreContacts(initialContacts.sample_contacts.length === batchSize);
     } catch (error) {
@@ -176,6 +177,7 @@ export function ContactsInfiniteScroll({
         opened={modalOpened}
         onClose={() => {
           setModalOpened(false);
+          getTotalContacts();
           fetchInitialContacts(searchTerm);
         }}
       >
@@ -312,8 +314,12 @@ export function ContactsInfiniteScroll({
               <>
                 <Loader size="xs" variant="dots" />
               </>
+            ) : loadingTotalContacts ? (
+              <>
+               <Text>Showing {contacts?.length} contacts of <Loader size="xs" variant="dots" /></Text>
+              </>
             ) : (
-              `Showing ${contacts?.length} contacts`
+              `Showing ${contacts?.length} contacts of ${totalContacts}`
             )}
           </Text>
           {/* <Button variant="light" onClick={resetContacts}>

@@ -44,6 +44,10 @@ const generateTextWithBadges = (text: string) => {
   const [selectedProspect, setSelectedProspect] = useState<any>(null);
   const [researching, setResearching] = useState(false);
 
+  //deep copy
+  const sequences = [...innerProps.sequences];
+  console.log('sequences are', sequences)
+
   const userToken = useRecoilValue(userTokenState);
 
   useEffect(() => {
@@ -305,7 +309,7 @@ const generateTextWithBadges = (text: string) => {
                   ),
                   innerProps: {
                     edit: false,
-                    sequences: innerProps.sequences,
+                    sequences: sequences,
                     ai_researcher_id: innerProps.ai_researcher_id,
                     campaign_id: innerProps.id,
                     setPersonalizers: innerProps.setPersonalizers,
@@ -341,7 +345,7 @@ const generateTextWithBadges = (text: string) => {
                               ),
                               innerProps: {
                                 edit: true,
-                                sequences: innerProps.sequences,
+                                sequences: sequences,
                                 question_id: item.id,
                                 currentTab: item.type,
                                 relevancy: item.content,
@@ -482,7 +486,7 @@ const generateTextWithBadges = (text: string) => {
                       <span className=" text-gray-500"></span> Personalizers
                     </Title>
                   ),
-                  innerProps: {prospectId: selectedProspect, sequences: innerProps.sequences},
+                  innerProps: {prospectId: selectedProspect, sequences: sequences},
                   centered: true,
                   styles: {
                     content: {

@@ -28,8 +28,9 @@ import {
   Popover,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { ContextModalProps, openContextModal } from "@mantine/modals";
+import { ContextModalProps, openContextModal, closeAllModals } from "@mantine/modals";
 import { MantineStyleSystemProps } from "@mantine/styles";
+import { showNotification } from '@mantine/notifications';
 
 import {
   IconArrowRight,
@@ -45,7 +46,7 @@ import {
 } from "@tabler/icons";
 import { addSequence } from "@utils/requests/generateSequence";
 import { deterministicMantineColor } from "@utils/requests/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRecoilValue } from "recoil";
 
 interface SwitchStyle extends Partial<MantineStyleSystemProps> {
@@ -72,45 +73,38 @@ export default function CampaignTemplateEditModal({
   context,
   id,
 }: ContextModalProps<{
+  stagingData: any;
+  refetchSequenceData: Function;
+  emailSequenceData: any;
+  linkedinSequenceData: any;
+  emailSubjectLines: any;
+  addedTemplate: any;
+  currentStepNum: any;
   createTemplateBuilder: boolean;
   setCreateTemplateBuilder: Function;
   // setSequences: Function;
   campaignId: number;
   cType?: string;
 }>) {
+  console.log('email subject lines are', innerProps.emailSubjectLines)
   const [templateType, setTemplateType] = useState("template" || "generate");
   const [sequenceType, setSequenceType]: any = useState<string>("email");
-  const [steps, setSteps] = useState(3);
-  const [currentStepNum, setCurrentStepNum] = useState(1 || null);
+  const [steps, setSteps] = useState(sequenceType==='email'? (innerProps.emailSequenceData.length || 3) : (innerProps.linkedinSequenceData.length || 3));
+  const [currentStepNum, setCurrentStepNum] = useState(innerProps.currentStepNum || 1 || null);
   const [generateSequence, setGenerateSequence] = useState(false);
   const [openid, setOpenId] = useState<number>(0);
   const [opened, setOpened] = useState(false);
   const [selectStep, setSelectStep] = useState<number | null>(null);
+  //////handlers for the saved variants
+  const [opened2, setOpened2] = useState(false);
+  const [selectStep2, setSelectStep2] = useState<number | null>(null);
+  ////////////////////////////////
   const [assets, setAssets] = useState<AssetType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [addedTemplate, setAddedTemplate] = useState<AssetType | null>(innerProps.addedTemplate || null);
 
-  const [stagingData, setStagingData]: any = useState({
-    linkedin: [
-      // {
-      //   angle: "",
-      //   text: "",
-      //   step_num: 1,
-      //   assets: [],
-      // },
-    ],
-    email: [
-      // {
-      //   angle: "",
-      //   text: "",
-      //   step_num: 1,
-      //   assets: [],
-      // },
-    ],
-  });
-
-  const addToStagingData = (asset: AssetType, step_num: number) => {
-    console.log("Adding to " + sequenceType + " staging data");
+  const addToStagingData = (asset: AssetType, step_num: number, stagingData: any, setStagingData: any) => {
     const type = sequenceType;
     const angle = asset.asset_key;
     const text = asset.asset_raw_value;
@@ -125,7 +119,7 @@ export default function CampaignTemplateEditModal({
       id: randomId,
     };
 
-    const newStagingDataArray = [...stagingData[type]];
+    const newStagingDataArray = Array.isArray(stagingData[type]) ? [...stagingData[type]] : [];
     newStagingDataArray.push(newStagingData);
 
     setStagingData({
@@ -136,7 +130,7 @@ export default function CampaignTemplateEditModal({
     console.log(stagingData);
   };
 
-  const removeFromStagingData = (randomId: number) => {
+  const removeFromStagingData = (randomId: number, stagingData: any, setStagingData: any) => {
     console.log("Removing from " + sequenceType + " staging data");
     const type = sequenceType;
 
@@ -157,42 +151,7 @@ export default function CampaignTemplateEditModal({
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const campaignId = innerProps.campaignId;
-
-  const data = [
-    {
-      title: "Personalized Opener",
-      avatar: "",
-      name: "Ishan Sharma",
-      message:
-        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
-      point_used: 14,
-      asset_used: 14,
-      opened: 12,
-      replied: 4.6,
-    },
-    {
-      title: "Personalized Opener",
-      avatar: "",
-      name: "Ishan Sharma",
-      message:
-        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
-      point_used: 14,
-      asset_used: 14,
-      opened: 12,
-      replied: 4.6,
-    },
-    {
-      title: "Personalized Opener",
-      avatar: "",
-      name: "Ishan Sharma",
-      message:
-        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
-      point_used: 14,
-      asset_used: 14,
-      opened: 12,
-      replied: 4.6,
-    },
-  ];
+  const [stagingData, setStagingData] = useState(innerProps.stagingData || {'email':[]});
 
   const handleToggle = (key: number) => {
     if (selectStep === key) {
@@ -202,6 +161,17 @@ export default function CampaignTemplateEditModal({
       setSelectStep(key);
     }
     setSelectStep(key);
+  };
+
+  //handler for the saved variants
+  const handleToggle2 = (key: number) => {
+    if (selectStep2 === key) {
+      setOpened2(!opened2);
+    } else {
+      setOpened2(true);
+      setSelectStep2(key);
+    }
+    setSelectStep2(key);
   };
 
   const getAllAssets = async () => {
@@ -227,6 +197,21 @@ export default function CampaignTemplateEditModal({
   useEffect(() => {
     getAllAssets();
   }, []);
+
+  const viewport = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (viewport.current !== null) {
+      viewport.current.scrollTo({ top: viewport.current.scrollHeight, behavior: 'smooth' });
+    }
+  }
+
+  useEffect(() => {
+    setTimeout(() => {
+      scrollToBottom();
+    }, 50);
+  }, [stagingData]);
+
 
   const [isBuilder, setIsBuilder] = useState(innerProps.createTemplateBuilder);
   useEffect(() => {
@@ -389,7 +374,7 @@ export default function CampaignTemplateEditModal({
             style={{ gap: "16px", flexDirection: "column" }}
           >
             <Flex align={"center"} justify={"space-between"}>
-              <Text fw={600}>Library</Text>
+              <Text size={'xs'} fw={600}>{userData.client_name}'s Templates</Text>
               <SegmentedControl
                 value={templateType}
                 onChange={(value: any) => {
@@ -423,15 +408,92 @@ export default function CampaignTemplateEditModal({
               onChange={(event) => setSearchQuery(event.currentTarget.value)}
             />
             {templateType === "template" ? (
+              <>
+              <Button
+                variant="light"
+                leftIcon={<IconPlus size={"0.9rem"} />}
+                onClick={() =>
+                  openContextModal({
+                    modal: "campaignTemplates",
+                    title: (
+                      <Title order={3}>
+                        Add Template
+                      </Title>
+                    ),
+                    innerProps: {
+                      stagingData,
+                        emailSubjectLines: innerProps.emailSubjectLines,
+                        linkedinTemplates: innerProps.linkedinSequenceData,
+                        emailSequenceData: innerProps.emailSequenceData,
+                        refetchSequenceData: innerProps.refetchSequenceData,
+                        currentStepNum,
+                        createTemplateBuilder: innerProps.createTemplateBuilder,
+                        setCreateTemplateBuilder: innerProps.setCreateTemplateBuilder,
+                        // setSequences: innerProps.setSequences,
+                        campaignId: innerProps.campaignId,
+                        cType: innerProps.cType,
+                        setStagingData: setStagingData,
+                        addToStagingData: addToStagingData,
+                        setAddedTemplate: setAddedTemplate,
+                    },
+                    centered: true,
+                    styles: {
+                      content: {
+                        minWidth: "800px",
+                      },
+                    },
+                    onClose: () => {
+                      closeAllModals();
+                      //nasty hack to preserve the added templates
+                      console.log('previous assets are', assets)
+                      console.log('added template is', addedTemplate)
+                      openContextModal({
+                        modal: "campaignTemplateEditModal",
+                        title: <Title order={3}>Sequence Builder</Title>,
+                        innerProps: {
+                          stagingData,
+                            emailSubjectLines: innerProps.emailSubjectLines,
+                            linkedinSequenceData: innerProps.linkedinSequenceData,
+                            emailSequenceData: innerProps.emailSequenceData,
+                            refetchSequenceData: innerProps.refetchSequenceData,
+                            currentStepNum,
+                            createTemplateBuilder: innerProps.createTemplateBuilder,
+                            setCreateTemplateBuilder: innerProps.setCreateTemplateBuilder,
+                            // setSequences: innerProps.setSequences,
+                            campaignId: innerProps.campaignId,
+                            cType: innerProps.cType,
+                            setAddedTemplate: setAddedTemplate,
+                        },
+                        centered: true,
+                        styles: {
+                          content: {
+                            minWidth: "1100px",
+                          },
+                        },
+                        onClose: () => {
+                          const clientArchetypeId = Number(id);
+                          innerProps.refetchSequenceData(clientArchetypeId);
+                        },
+                      });
+                    },
+                  })
+                }
+              >
+                Create New
+              </Button>
               <Templates
+                steps={steps}
                 readyToGenerate={readyToGenerate}
                 assets={filteredAssets}
                 searchQuery={searchQuery}
                 addToStagingData={addToStagingData}
                 removeFromStagingData={removeFromStagingData}
+                stagingData={stagingData}
+                setStagingData={setStagingData}
                 currentStepNum={currentStepNum}
                 setCurrentStepNum={setCurrentStepNum}
               />
+              </>
             ) : (
               <Generates />
             )}
@@ -487,7 +549,7 @@ export default function CampaignTemplateEditModal({
               </Alert>
             )}
             <Tabs
-              defaultValue="1"
+              defaultValue={currentStepNum.toString() || 1}
               onTabChange={(value) => setCurrentStepNum(Number(value))}
               styles={{
                 tabsList: {
@@ -502,32 +564,213 @@ export default function CampaignTemplateEditModal({
                     return (
                       <Tabs.Tab value={(index + 1).toString()}>
                         Step {index + 1} (
-                        {stagingData[sequenceType].filter(
-                          (asset: any) => asset.step_num === index + 1
-                        ).length == 0
+                        {(
+                          (stagingData[sequenceType]?.filter(
+                            (asset: any) => asset.step_num === index + 1
+                          ).length || 0) +
+                          (sequenceType === "email"
+                            ? innerProps.emailSequenceData[index]?.length || 0
+                            : innerProps.linkedinSequenceData[index]?.length || 0)
+                        ) === 0
                           ? "🔴 "
                           : "🟢 "}
-                        {
-                          stagingData[sequenceType].filter(
+                        {(
+                          (stagingData[sequenceType]?.filter(
                             (asset: any) => asset.step_num === index + 1
-                          ).length
-                        }
+                          ).length || 0) +
+                          (sequenceType === "email"
+                            ? innerProps.emailSequenceData[index]?.length || 0
+                            : innerProps.linkedinSequenceData[index]?.length || 0)
+                        )}
                         )
                       </Tabs.Tab>
                     );
                   })}
+                {sequenceType === "email" && (
+                  <Tabs.Tab value={(steps + 1).toString()}>
+                    Subject Lines
+                  </Tabs.Tab>
+                )}
               </Tabs.List>
+              {currentStepNum === steps + 1 && sequenceType === 'email' && 
+              
+              <ScrollArea viewportRef={viewport} h={350}>
+                          <Flex p={"lg"} h={"100%"} direction={"column"}>
+                            {innerProps.emailSubjectLines.map((subjectLine: any, index: number) => {
+                              return <Box
+                              mb={"sm"}
+                              style={{
+                                border:
+                                  selectStep2 === index
+                                    ? "1px solid #228be6"
+                                    : "1px solid #ced4da",
+                                borderRadius: "8px",
+                              }}
+                            >
+                                <Flex
+                              align={"center"}
+                              justify={"space-between"}
+                              px={"sm"}
+                              py={"xs"}
+                            >
+                              <Flex align={"center"} gap={"xs"}>
+                                <IconMessages
+                                  color="#228be6"
+                                  size={"0.9rem"}
+                                />
+                                <Text color="gray" fw={500} size={"xs"}>
+                                  Variant #{index + 1}:
+                                </Text>
+                                <Text fw={600} size={"xs"} ml={"-5px"}>
+                                  {subjectLine.subject_line}
+                                  </Text>
+                              </Flex>
+                              <Flex gap={1} align={"center"}>
+                                <Badge color="teal" size="xs" mr="6px">
+                                  Saved
+                                </Badge>
+                                <Tooltip
+                                  label="Editing coming soon"
+                                  position="top"
+                                >
+                                  <ActionIcon disabled>
+                                    <IconEdit size={"0.9rem"} />
+                                  </ActionIcon>
+                                </Tooltip>
+                                <ActionIcon disabled>
+                                  <IconTrash size={"0.9rem"} />
+                                </ActionIcon>
+                                {/* <ActionIcon
+                                  onClick={() => {
+                                    handleToggle2(index);
+                                  }}
+                                >
+                                  {selectStep2 === index && opened ? (
+                                    <IconChevronUp size={"0.9rem"} />
+                                  ) : (
+                                    <IconChevronDown size={"0.9rem"} />
+                                  )}
+                                </ActionIcon> */}
+                              </Flex>
+                            </Flex>
+                              </Box>
 
+                            })}
+                          </Flex>
+
+              </ScrollArea>
+              
+              
+              }
               {steps &&
                 Array.from({ length: Number(steps) }, (_, index) => {
                   return (
                     <Tabs.Panel value={(index + 1).toString()}>
                       {" "}
-                      <ScrollArea h={350}>
+                      <ScrollArea viewportRef={viewport} h={350}>
+                          <Flex p={"lg"} h={"100%"} direction={"column"}>
+                          {/* existing assets */}
+                          {(sequenceType === "email" ? innerProps.emailSequenceData[index] : innerProps.linkedinSequenceData[index])?.map((existingAsset: any, index2: number) => {
+                            return <Box
+                            mb={"sm"}
+                            style={{
+                              border:
+                                selectStep2 === index2
+                                  ? "1px solid #228be6"
+                                  : "1px solid #ced4da",
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <Flex
+                              align={"center"}
+                              justify={"space-between"}
+                              px={"sm"}
+                              py={"xs"}
+                            >
+                              <Flex align={"center"} gap={"xs"}>
+                                <IconMessages
+                                  color="#228be6"
+                                  size={"0.9rem"}
+                                />
+                                <Text color="gray" fw={500} size={"xs"}>
+                                  Variant #{index2 + 1}:
+                                </Text>
+                                <Text fw={600} size={"xs"} ml={"-5px"}>
+                                  {currentStepNum === steps + 1 ? existingAsset.subject_line: sequenceType === "email" ? existingAsset.assets?.[0]?.asset_key : existingAsset.title}
+                                  </Text>
+                              </Flex>
+                              <Flex gap={1} align={"center"}>
+                                <Badge color="teal" size="xs" mr="6px">
+                                  Saved
+                                </Badge>
+                                <Tooltip
+                                  label="Editing coming soon"
+                                  position="top"
+                                >
+                                  <ActionIcon disabled>
+                                    <IconEdit size={"0.9rem"} />
+                                  </ActionIcon>
+                                </Tooltip>
+                                <ActionIcon disabled>
+                                  <IconTrash size={"0.9rem"} />
+                                </ActionIcon>
+                                <ActionIcon
+                                  onClick={() => {
+                                    handleToggle2(index2);
+                                  }}
+                                >
+                                  {selectStep2 === index2 && opened2 ? (
+                                    <IconChevronUp size={"0.9rem"} />
+                                  ) : (
+                                    <IconChevronDown size={"0.9rem"} />
+                                  )}
+                                </ActionIcon>
+                              </Flex>
+                            </Flex>
+                            <Collapse
+                              in={selectStep2 === index2 && opened2}
+                              key={index2}
+                            >
+                              <Flex
+                                gap={"sm"}
+                                p={"sm"}
+                                style={{
+                                  borderTop: "1px solid #ced4da",
+                                }}
+                              >
+                                <Avatar size={"md"} radius={"xl"} />
+                                <Box>
+                                  {/* <Text fw={600} size={"sm"}>
+                                    {"Ishan Sharma"}
+                                  </Text> */}
+                                  <div
+                                    style={{
+                                      fontSize: "11px",
+                                    }}
+                                    dangerouslySetInnerHTML={{
+                                      __html: existingAsset.description,
+                                    }}
+                                  />
+                                </Box>
+                              </Flex>
+                            </Collapse>
+                          </Box>
+                          })}
+                          </Flex>
+                        {stagingData[sequenceType]?.filter(
+                            (asset: any) => asset.step_num === currentStepNum
+                          ).length > 0 && (
+                          <Flex justify="center" align="center">
+                            <Divider orientation="horizontal" color="salmon" size={'2px'} style={{margin: '0 25px', flex: 1}} />
+                            <Text color="salmon" size="xs" fw={500}>
+                              New
+                            </Text>
+                            <Divider orientation="horizontal" color="salmon" size={'2px'} style={{margin: '0 25px', flex: 1}} />
+                          </Flex>
+                        )}
                         <Flex p={"lg"} h={"100%"} direction={"column"}>
                           <>
-                            {stagingData[sequenceType]
-                              .filter(
+                            {stagingData[sequenceType]?.filter(
                                 (asset: any) => asset.step_num === index + 1
                               )
                               .map((asset: any, index: number) => {
@@ -571,7 +814,7 @@ export default function CampaignTemplateEditModal({
                                         </Tooltip>
                                         <ActionIcon
                                           onClick={() =>
-                                            removeFromStagingData(asset.id)
+                                            removeFromStagingData(asset.id, stagingData, setStagingData)
                                           }
                                         >
                                           <IconTrash size={"0.9rem"} />
@@ -632,7 +875,7 @@ export default function CampaignTemplateEditModal({
               p={"lg"}
               style={{ borderTop: "1px solid #dee2e6" }}
             >
-              <Button fullWidth variant="outline">
+              <Button fullWidth variant="outline" onClick={() => setStagingData({'email':[]})}>
                 Reset
               </Button>
               <Button
@@ -667,7 +910,7 @@ export default function CampaignTemplateEditModal({
                   });
                 }}
               >
-                Add to Sequence
+                Save to Sequence
               </Button>
             </Flex>
           </Paper>
@@ -682,15 +925,21 @@ export const Templates = ({
   assets,
   searchQuery,
   addToStagingData,
+  stagingData,
+  steps,
+  setStagingData,
   removeFromStagingData,
   currentStepNum,
   setCurrentStepNum,
 }: {
   readyToGenerate: boolean;
   assets: AssetType[];
+  steps: number;
   searchQuery: string;
   addToStagingData: Function;
   removeFromStagingData: Function;
+  stagingData: any;
+  setStagingData: Function;
   currentStepNum: number;
   setCurrentStepNum: Function;
 }) => {
@@ -707,32 +956,9 @@ export const Templates = ({
       width: "100%",
     },
   };
+
   return (
     <>
-      <Button
-        variant="light"
-        leftIcon={<IconPlus size={"0.9rem"} />}
-        onClick={() =>
-          openContextModal({
-            modal: "campaignTemplates",
-            title: (
-              <Title order={3}>
-                <span className=" text-gray-500">Go back to</span> Sequence
-                Builder
-              </Title>
-            ),
-            innerProps: {},
-            centered: true,
-            styles: {
-              content: {
-                minWidth: "800px",
-              },
-            },
-          })
-        }
-      >
-        Create New
-      </Button>
       <Flex
         direction={"column"}
         gap={"xs"}
@@ -747,10 +973,20 @@ export const Templates = ({
           )
           .map((asset) => {
             return (
-              <Card withBorder mih={"75px"}>
+              <Card withBorder mih={"90px"}>
                 <Flex>
                   <Popover withinPortal>
                     <Popover.Dropdown>
+                      <div
+                        style={{
+                          maxWidth: "300px",
+                          fontSize: "14px", // Increased font size for bigger text
+                          fontWeight: "bold", // Make the text bold
+                        }}
+                        dangerouslySetInnerHTML={{
+                          __html: asset.asset_key, // Display the asset in bigger text
+                        }}
+                      />
                       <div
                         style={{
                           maxWidth: "300px",
@@ -783,6 +1019,10 @@ export const Templates = ({
                           {asset.asset_key.substring(0, 30)}
                           {asset.asset_key.length > 30 ? "..." : ""}
                         </Text>
+                        <Text color="gray" mt={3} size={"xs"} fw={400} className="truncate" sx={{ cursor: 'pointer' }}>
+                          {asset.asset_value.replace(/<[^>]*>/g, "").substring(0, 40)}
+                          {asset.asset_value.replace(/<[^>]*>/g, "").length > 40 ? "..." : ""}
+                        </Text>
                       </Box>
                     </Popover.Target>
                   </Popover>
@@ -793,7 +1033,11 @@ export const Templates = ({
                     color="blue"
                     disabled={readyToGenerate}
                     onClick={() => {
-                      addToStagingData(asset, currentStepNum);
+                      if(currentStepNum !== steps + 1) {
+                        addToStagingData(asset, currentStepNum, stagingData, setStagingData)
+                      } else {
+                        showNotification({title: 'Error', message: 'Cannot add a template variant to a subject step', color: 'red'});
+                      }
                     }}
                   >
                     Add

@@ -23,6 +23,7 @@ import {
   Title,
   Tooltip,
   Modal,
+  List,
   Stepper,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
@@ -76,9 +77,11 @@ import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
 import { PersonaOverview } from "src";
+import { link } from "fs";
 
 interface StatsData {
   id: number;
+  is_setting_up: boolean;
   archetype_name: string;
   created_at: string;
   emoji: string;
@@ -217,10 +220,12 @@ export default function CampaignLandingV2() {
   const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
   const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>([]);
+  const [emailSubjectLines, setEmailSubjectLines] = useState<any[]>([]);
   const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] = useState<any>(0);
   const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<any[]>([]);
   const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] = useState<any[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
+  const [showActivateWarningModal, setShowActivateWarningModal] = useState(false);
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
   const [testingVolume, setTestingVolume] = useState(0);
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
@@ -362,12 +367,14 @@ export default function CampaignLandingV2() {
           setTestingVolume(loadedStats.testing_volume);
         }
         //set the setup status
-        if (loadedStats.active && loadedStats.num_sent > 0) {
-          setStatus("ACTIVE");
-        } else if (loadedStats.active && loadedStats.num_sent === 0) {
+        if (loadedStats.is_setting_up) {
           setStatus("SETUP");
-        } else if (loadedStats.active === false) {
-          setStatus("INACTIVE");
+        }
+        else if (loadedStats.active && loadedStats.num_sent > 0) {
+          setStatus("ACTIVE");
+        }
+        else if (loadedStats.active === false) {
+        setStatus("INACTIVE");
         }
         setLoadingStats(false);
       })
@@ -383,8 +390,9 @@ export default function CampaignLandingV2() {
     sequencesPromise
       .then((sequencesData) => {
         console.log("sequencesData", sequencesData);
+        setEmailSubjectLines(sequencesData.email_subject_lines);
         setLinkedinInitialMessages(sequencesData.initial_message_templates);
-        setLinkedinInitialMessageViewing(sequencesData.initial_message_templates[0]?.title);
+        setLinkedinInitialMessageViewing(sequencesData.initial_message_templates?.[0]?.title);
         const groupSequencesByBumpedCount = (sequences: any[]) =>
           sequences.reduce((acc: any, sequence: any) => {
             let bumpedCount = sequence.bumped_count || 0;
@@ -489,10 +497,10 @@ export default function CampaignLandingV2() {
             setTotalContacts(totalContacts);
           }
           //set the setup status
-          if (loadedStats.active && loadedStats.num_sent > 0) {
-            setStatus("ACTIVE");
-          } else if (loadedStats.active && loadedStats.num_sent === 0) {
+          if (loadedStats.is_setting_up) {
             setStatus("SETUP");
+          } else if (loadedStats.active) {
+            setStatus("ACTIVE");
           } else if (loadedStats.active === false) {
             setStatus("INACTIVE");
           }
@@ -601,6 +609,37 @@ export default function CampaignLandingV2() {
           </Button>
         </Flex>
       </Modal>
+      {/* <Modal
+        opened={showActivateWarningModal}
+        size="600px"
+        onClose={() => setShowActivateWarningModal(false)}
+        >
+      <Flex direction="column" align="center" gap="md">
+        <Title size="lg" align="center" color="blue">
+          Just a sec!
+        </Title>
+        <Text size="md" align="center">
+          Before you can activate this campaign, please ensure the following:
+        </Text>
+        <List spacing="sm" size="md" center>
+          {(!statsData?.email_active && !statsData?.linkedin_active) && (
+            <List.Item>
+              <Text color="black">Enable either Email or LinkedIn Sequences.</Text>
+            </List.Item>
+          )}
+          {statsData?.email_active && emailSequenceData.length === 0 && (
+            <List.Item>
+              <Text color="black">Add an email sequence.</Text>
+            </List.Item>
+          )}
+          {statsData?.linkedin_active && linkedinSequenceData.length === 0 && (
+            <List.Item>
+              <Text color="black">Add a LinkedIn sequence.</Text>
+            </List.Item>
+          )}
+        </List>
+      </Flex>
+      </Modal> */}
       <Modal
         opened={showCampaignTemplateModal}
         onClose={() => {
@@ -1128,8 +1167,12 @@ export default function CampaignLandingV2() {
                         modal: "campaignTemplateEditModal",
                         title: <Title order={3}>Sequence Builder</Title>,
                         innerProps: {
+                          emailSubjectLines,
+                          linkedinSequenceData,
+                          emailSequenceData,
                           campaignId: id,
                           createTemplateBuilder,
+                          refetchSequenceData,
                           setCreateTemplateBuilder,
                           // setSequences,
                         },
@@ -1159,7 +1202,7 @@ export default function CampaignLandingV2() {
                       window.open(`/setup/${type}/${id}`, "_blank");
                     }}
                   >
-                    Simulate
+                    Edit & Simulate
                   </Button>
                   {/* )} */}
                   {/* <Button
@@ -1610,6 +1653,9 @@ export default function CampaignLandingV2() {
                       modal: "campaignTemplateEditModal",
                       title: <Title order={3}>Sequence Builder</Title>,
                       innerProps: {
+                        emailSubjectLines,
+                        linkedinSequenceData,
+                        emailSequenceData,
                         campaignId: id,
                         createTemplateBuilder,
                         setCreateTemplateBuilder,

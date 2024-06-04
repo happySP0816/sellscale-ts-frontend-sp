@@ -2,6 +2,8 @@ import { userTokenState } from "@atoms/userAtoms";
 import RichTextArea from "@common/library/RichTextArea";
 import CustomSelect from "@common/persona/ICPFilter/CustomSelect";
 import { API_URL } from "@constants/data";
+import {Title} from "@mantine/core";
+
 import {
   Box,
   Button,
@@ -15,7 +17,7 @@ import {
   TextInput,
   Textarea,
 } from "@mantine/core";
-import { ContextModalProps } from "@mantine/modals";
+import { ContextModalProps, closeAllModals, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconBrandLinkedin, IconMailOpened } from "@tabler/icons";
 import { useEffect, useState } from "react";
@@ -25,37 +27,82 @@ export default function CampaignTemplatesModal({
   innerProps,
   context,
   id,
-}: ContextModalProps) {
+}: ContextModalProps<{
+  stagingData: any;
+  refetchSequenceData: Function;
+  setAddedTemplate: Function;
+  currentStepNum: any;
+  createTemplateBuilder: boolean;
+  setCreateTemplateBuilder: Function;
+  setSequences: Function;
+  campaignId: number;
+  cType?: string;
+  setStagingData: Function;
+  addToStagingData?: any;
+  emailSequenceData: any;
+  emailSubjectLines: any;
+  linkedinSequenceData: any;
+}>) {
   const userToken = useRecoilValue(userTokenState);
 
   const [type, setType]: any = useState("email template");
   const [tags, setTags]: any = useState([]);
-  const [title, setTitle]: any = useState("Template #X");
   const [template, setTemplate]: any = useState("");
   const [loading, setLoading] = useState(false);
 
   const createClientAsset = async () => {
     setLoading(true);
     const tempTags = tags.concat(type);
+    const asset = {
+      client_archetype_ids: [],
+      asset_key: "",
+      asset_value: template,
+      asset_type: "TEXT",
+      asset_tags: tempTags,
+      asset_raw_value: template,
+    };
     fetch(`${API_URL}/client/create_archetype_asset`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
-      body: JSON.stringify({
-        client_archetype_ids: [],
-        asset_key: title,
-        asset_value: template,
-        asset_type: "TEXT",
-        asset_tags: tempTags,
-        asset_raw_value: template,
-      }),
+      body: JSON.stringify(asset),
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        context.closeModal(id);
+        console.log('data is', data);
+        innerProps.setAddedTemplate(data.data);
+        closeAllModals();
+        openContextModal({
+          modal: "campaignTemplateEditModal",
+          title: <Title order={3}>Sequence Builder</Title>,
+          innerProps: {
+              emailSubjectLines: innerProps.emailSubjectLines,
+              emailSequenceData: innerProps.emailSequenceData,
+              linkedinSequenceData: innerProps.linkedinSequenceData,
+              addedTemplate: asset,
+              stagingData: innerProps.stagingData,
+              refetchSequenceData: innerProps.refetchSequenceData,
+              currentStepNum: innerProps.currentStepNum,
+              createTemplateBuilder: innerProps.createTemplateBuilder,
+              setCreateTemplateBuilder: innerProps.setCreateTemplateBuilder,
+              setSequences: innerProps.setSequences,
+              campaignId: innerProps.campaignId,
+              cType: innerProps.cType,
+              addToStagingData: innerProps.addToStagingData,
+          },
+          centered: true,
+          styles: {
+            content: {
+              minWidth: "1100px",
+            },
+          },
+          onClose: () => {
+            const clientArchetypeId = Number(id);
+            innerProps.refetchSequenceData(clientArchetypeId);
+          },
+        });
         showNotification({
           title: "Template Created",
           message: "Template has been created successfully",
@@ -77,7 +124,6 @@ export default function CampaignTemplatesModal({
               setType(value);
               setTemplate("");
               setTags([]);
-              setTitle("");
             }}
             data={[
               {
@@ -109,16 +155,6 @@ export default function CampaignTemplatesModal({
             ]}
           />
           <Box>
-            <Text size={"sm"} color="gray" fw={500} mt={"md"}>
-              Title
-            </Text>
-            <Box mt={4}>
-              <TextInput
-                placeholder="Title"
-                value={title}
-                onChange={(event) => setTitle(event.currentTarget.value)}
-              />
-            </Box>
             <Text size={"sm"} color="gray" fw={500} mt={"md"}>
               Template
             </Text>
@@ -163,7 +199,7 @@ export default function CampaignTemplatesModal({
             onClick={() => {
               createClientAsset();
             }}
-            disabled={!title || !template || !type}
+            disabled={!template || !type}
             loading={loading}
           >
             Create Template

@@ -20,7 +20,16 @@ export default function SimulatepersonalizerModal({
   const [emailBody, setEmailBody] = useState("");
   const [overrideEmailBody, setOverrideEmailBody] = useState<string | undefined>(undefined); 
   const [rawEmailBody, setRawEmailBody] = useState<JSONContent | undefined>(undefined);
-  const sequences = innerProps?.sequences?.map((sequence: any) => sequence.description);
+  const sequences = innerProps?.sequences?.flatMap((sequenceGroup: any[]) => {
+    const descriptions = new Set();
+    return sequenceGroup.filter((sequence: any) => {
+      if (!descriptions.has(sequence.description)) {
+        descriptions.add(sequence.description);
+        return true;
+      }
+      return false;
+    }).map((sequence: any) => sequence.description);
+  });
   const [originalEmailBody, setOriginalEmailBody] = useState<string | undefined>(undefined);
 
   const handleSimulate = async () => {

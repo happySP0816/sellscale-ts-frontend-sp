@@ -220,6 +220,10 @@ export default function CampaignLandingV2() {
   const [contactsData, setContactsData] = useState<any[]>([]);
   const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
   const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
+  const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>([]);
+  const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] = useState<any>(0);
+  const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<any[]>([]);
+  const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] = useState<any[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(
     false
@@ -391,33 +395,57 @@ export default function CampaignLandingV2() {
     sequencesPromise
       .then((sequencesData) => {
         console.log("sequencesData", sequencesData);
-        if (
-          sequencesData.linkedin_sequence.length > 0 &&
-          sequencesData.email_sequence.length === 0
-        ) {
-          setSequences(sequencesData.linkedin_sequence);
-          setType("linkedin");
-        } else if (
-          sequencesData.email_sequence.length > 0 &&
-          sequencesData.linkedin_sequence.length === 0
-        ) {
-          setSequences(sequencesData.email_sequence);
-          setType("email");
-        } else if (
-          sequencesData.email_sequence.length > 0 &&
-          sequencesData.linkedin_sequence.length > 0
-        ) {
-          // Both sequences are available, prioritize email sequence
-          setSequences(sequencesData.email_sequence);
-          setType("email");
-          setEmailSequenceData(sequencesData.email_sequence);
-          setLinkedinSequenceData(sequencesData.linkedin_sequence);
+        setLinkedinInitialMessages(sequencesData.initial_message_templates);
+        setLinkedinInitialMessageViewing(sequencesData.initial_message_templates[0]?.title);
+        const groupSequencesByBumpedCount = (sequences: any[]) => 
+          sequences.reduce((acc: any, sequence: any) => {
+            let bumpedCount = sequence.bumped_count || 0;
+            const statusAdjustment = sequence.overall_status === "PROSPECTED" ? 0 :
+                                     sequence.overall_status === "ACCEPTED" ? 10 :
+                                     sequence.overall_status === "BUMPED" ? 20 : 0;
+            bumpedCount += statusAdjustment;
+            if (!acc[bumpedCount]) acc[bumpedCount] = [];
+            acc[bumpedCount].push(sequence);
+            return acc;
+          }, {});
+
+        const orderGroupedSequences = (groupedSequences: any) => 
+          Object.keys(groupedSequences)
+            .sort((a, b) => Number(a) - Number(b))
+            .map(key => groupedSequences[key]);
+
+        const handleSequences = (sequences: any[], type: string) => {
+          const groupedSequences = groupSequencesByBumpedCount(sequences);
+          const orderedGroupedSequences = orderGroupedSequences(groupedSequences);
+          setSequences(orderedGroupedSequences);
+          console.log("orderedGroupedSequences", orderedGroupedSequences);
+          setType(type);
+          if (type === "linkedin") {
+            setLinkedinSequenceViewingArray(orderedGroupedSequences.map(group => group[0].title));
+            setLinkedinSequenceData(orderedGroupedSequences);
+          } else {
+            setEmailSequenceViewingArray(orderedGroupedSequences.map(group => group[0].title));
+            setEmailSequenceData(orderedGroupedSequences);
+          }
+        };
+
+        if (sequencesData.linkedin_sequence.length > 0 && sequencesData.email_sequence.length === 0) {
+          handleSequences(sequencesData.linkedin_sequence, "linkedin");
+        } else if (sequencesData.email_sequence.length > 0 && sequencesData.linkedin_sequence.length === 0) {
+          handleSequences(sequencesData.email_sequence, "email");
+        } else if (sequencesData.email_sequence.length > 0 && sequencesData.linkedin_sequence.length > 0) {
+          handleSequences(sequencesData.email_sequence, "email");
+          setLinkedinSequenceViewingArray(orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.linkedin_sequence)).map(group => group[0].title));
+          setLinkedinSequenceData(orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.linkedin_sequence)));
+          console.log('linkedin is', orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.linkedin_sequence)));
+          console.log("emailSequenceData", orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.email_sequence)));
         } else {
-          // No sequences available
           setSequences([]);
-          setType("none");
+          setType("email");
           setEmailSequenceData([]);
           setLinkedinSequenceData([]);
+          setEmailSequenceViewingArray([]);
+          setLinkedinSequenceViewingArray([]);
         }
         setLoadingSequences(false);
       })
@@ -1146,7 +1174,7 @@ export default function CampaignLandingV2() {
                           campaignId: id,
                           createTemplateBuilder,
                           setCreateTemplateBuilder,
-                          setSequences,
+                          // setSequences,
                         },
                         centered: true,
                         styles: {
@@ -1414,10 +1442,70 @@ export default function CampaignLandingV2() {
               ) : sequences && sequences.length > 0 ? (
                 <Flex direction={"column"} h={"fit-content"} w={"100%"}>
                   <Flex w={"100%"} gap={"md"} direction={"column"} p={"lg"}>
+                    {type === "linkedin" && linkedinInitialMessages && linkedinInitialMessages.length > 0 && (
+                      <Box
+                        style={{
+                          border: "1px solid #ced4da",
+                          borderRadius: "8px",
+                          marginBottom: "1rem",
+                        }}
+                      >
+                        <Flex
+                          align={"center"}
+                          justify={"space-between"}
+                          px={"sm"}
+                          py={"xs"}
+                        >
+                          <Flex mx="lg" align={"center"} gap={"xs"}>
+                            <IconMessages color="#228be6" size={"0.9rem"} />
+                            <Text color="gray" fw={500} size={"xs"}>
+                              Initial Message:
+                            </Text>
+                            <Select
+                              defaultValue={linkedinInitialMessages[0].title}
+                              onChange={(value) => setLinkedinInitialMessageViewing(value)}
+                              data={linkedinInitialMessages.map((option: any) => ({
+                                value: option.title,
+                                label: option.title,
+                              }))}
+                              size="xs"
+                              styles={{ root: { marginLeft: '-5px' }, input: { fontWeight: 600 } }}
+                            />
+                          </Flex>
+                        </Flex>
+                        <Collapse in={true}>
+                          <Flex
+                            gap={"sm"}
+                            p={"sm"}
+                            style={{ borderTop: "1px solid #ced4da" }}
+                          >
+                            <Avatar
+                              size={"md"}
+                              radius={"xl"}
+                              src={linkedinInitialMessages[0]?.avatar}
+                            />
+                            <Box>
+                              <Text fw={600} size={"sm"}>
+                                {linkedinInitialMessages[0]?.name}
+                              </Text>
+                              <Text fw={500} size={"xs"}>
+                                <div
+                                  dangerouslySetInnerHTML={{
+                                    __html: linkedinInitialMessages.find(
+                                      (msg: any) => msg.title === linkedinInitialMessageViewing
+                                    )?.message.replace(/\n/g, '<br/>')
+                                  }}
+                                />
+                              </Text>
+                            </Box>
+                          </Flex>
+                        </Collapse>
+                      </Box>
+                    )}
                     {sequences.map((item: any, index: number) => {
                       return (
                         <>
-                          {index !== 0 && (
+                          {/* {index !== 0 && (
                             <Divider
                               variant="dashed"
                               labelPosition="center"
@@ -1488,7 +1576,7 @@ export default function CampaignLandingV2() {
                                 </Flex>
                               }
                             />
-                          )}
+                          )} */}
                           <Box
                             style={{
                               border:
@@ -1507,41 +1595,36 @@ export default function CampaignLandingV2() {
                               <Flex mx="lg" align={"center"} gap={"xs"}>
                                 <IconMessages color="#228be6" size={"0.9rem"} />
                                 <Text color="gray" fw={500} size={"xs"}>
-                                  Example Message #{index + 1}:
+                                  {`Step #${index + 1}:`}
                                 </Text>
-                                <Text fw={600} size={"xs"} ml={"-5px"}>
-                                  {item?.title}
-                                </Text>
+                                <Select
+                                  value={type === "email" ? emailSequenceViewingArray[index] : linkedinSequenceViewingArray[index]}
+                                  onChange={(value) => {
+                                    if (type === "email") {
+                                      setEmailSequenceViewingArray((prevArray) => {
+                                        const newArray = [...prevArray];
+                                        newArray[index] = value;
+                                        console.log(newArray);
+                                        return newArray;
+                                      });
+                                    } else if (type === "linkedin") {
+                                      setLinkedinSequenceViewingArray((prevArray) => {
+                                        const newArray = [...prevArray];
+                                        newArray[index] = value;
+                                        console.log(newArray);
+                                        return newArray;
+                                      });
+                                    }
+                                  }}
+                                  data={Array.isArray(item) ? item.map((option: any) => ({
+                                    value: option.title,
+                                    label: option.title,
+                                  })) : []}
+                                  size="xs"
+                                  styles={{ root: { marginLeft: '-5px' }, input: { fontWeight: 600 } }}
+                                />
                               </Flex>
                               <Flex gap={1} align={"center"}>
-                                {/* <ActionIcon
-                                  onClick={() => {
-                                    openContextModal({
-                                      modal: "campaignTemplateModal",
-                                      title: <Title order={3}>{createTemplateBuilder ? "Template Builder" : "Template"}</Title>,
-                                      innerProps: {
-                                        campaignId: id,
-                                        createTemplateBuilder,
-                                        setCreateTemplateBuilder,
-                                        setSequences,
-                                      },
-                                      centered: true,
-                                      styles: {
-                                        content: {
-                                          minWidth: "1100px",
-                                        },
-                                      },
-                                    });
-                                  }}
-                                >
-                                  <IconEdit size={"0.9rem"} />
-                                </ActionIcon> */}
-                                {/* <ActionIcon>
-                                  <IconRefresh size={"0.9rem"} />
-                                </ActionIcon>
-                                <ActionIcon>
-                                  <IconTrash size={"0.9rem"} />
-                                </ActionIcon> */}
                                 <Badge
                                   variant="outline"
                                   leftSection={
@@ -1589,11 +1672,13 @@ export default function CampaignLandingV2() {
                                     {type === "email" ? (
                                       <div
                                         dangerouslySetInnerHTML={{
-                                          __html: item?.description,
-                                        }}
-                                      />
+                                          __html: Array.isArray(item) && item.find((i: any) => i.title === emailSequenceViewingArray[index])?.description,
+                                        }}/>
                                     ) : (
-                                      item?.description
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: Array.isArray(item) && item.find((i: any) => i.title === linkedinSequenceViewingArray[index])?.description.replace(/\n/g, '<br/>'),
+                                        }}/>
                                     )}
                                   </Text>
                                 </Box>

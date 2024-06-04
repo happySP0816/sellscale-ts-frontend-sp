@@ -1026,7 +1026,7 @@ export default function CampaignLandingV2() {
                 <Paper p="md" withBorder w={"100%"}>
                   <Flex justify={"space-between"}>
                     <Flex justify={"space-between"}>
-                      <Text size={"xs"} fw={totalContacts}>
+                      <Text size={"xs"} fw={500}>
                         Outreach Volume
                       </Text>
                       <Tooltip
@@ -1047,7 +1047,7 @@ export default function CampaignLandingV2() {
                         </Text>
                       </Tooltip>
                     </Flex>
-                    <Text size={"xs"} fw={totalContacts}>
+                    <Text size={"xs"} fw={500}>
                       {(testingVolume === MAX_CONTACTS || testingVolume === totalContacts) ? 'Max/week' : `${testingVolume}/week`}{" "}
                       {cycleStatus && (
                         <Text

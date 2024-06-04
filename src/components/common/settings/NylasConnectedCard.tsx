@@ -386,7 +386,6 @@ export default function NylasConnectedCard(props: { connected: boolean; showSmar
       )}
 
       <ScheduleSetting />
-      <MultiEmails />
     </Box>
   );
 }

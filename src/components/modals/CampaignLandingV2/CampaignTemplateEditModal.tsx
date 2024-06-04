@@ -78,7 +78,7 @@ export default function CampaignTemplateEditModal({
   currentStepNum: any;
   createTemplateBuilder: boolean;
   setCreateTemplateBuilder: Function;
-  setSequences: Function;
+  // setSequences: Function;
   campaignId: number;
   cType?: string;
 }>) {
@@ -698,7 +698,7 @@ export default function CampaignTemplateEditModal({
                 fullWidth
                 loading={loading}
                 onClick={() => {
-                  innerProps.setSequences(data);
+                  // innerProps.setSequences(data);
                   console.log(stagingData[sequenceType]);
                   // context.closeModal(id);
                   setLoading(true);

@@ -12,6 +12,7 @@ interface ICustomSelect {
   allowExclude?: boolean;
   color?: "green" | "red";
   maxWidth?: string;
+  minHeight?: string;
   setData: React.Dispatch<React.SetStateAction<string[]>>;
   value: string[];
   setValue: React.Dispatch<React.SetStateAction<string[]>>;
@@ -29,6 +30,7 @@ const CustomSelect = ({
   allowExclude = false,
   color = "green",
   maxWidth = "100%",
+  minHeight = "",
   setData,
 }: ICustomSelect) => {
   const [searchValue, onSearchChange] = useState("");
@@ -93,55 +95,24 @@ const CustomSelect = ({
           rightSection: { pointerEvents: "none" },
           label: { width: "100%" },
           value: {
-            backgroundColor:
-              color === "red"
-                ? "rgba(231, 95, 89, 0.1)"
-                : "rgba(0, 149, 18, 0.1)",
-            border:
-              color === "red" ? "0.6px solid #E75F59" : "0.6px solid #009512",
+            backgroundColor: color === "red" ? "rgba(231, 95, 89, 0.1)" : "rgba(0, 149, 18, 0.1)",
+            border: color === "red" ? "0.6px solid #E75F59" : "0.6px solid #009512",
+          },
+          input: {
+            minHeight: minHeight ? minHeight : "",
           },
         }}
       />
       {allowInclude && (
         <>
-          <Checkbox
-            label={`Include related`}
-            checked={isIncludeSelected}
-            onChange={(event) =>
-              setIsIncludeSelected(event.currentTarget.checked)
-            }
-          />
-          {isIncludeSelected && (
-            <CustomSelect
-              value={value}
-              setValue={setValue}
-              data={data}
-              placeholder="e.g data analyst"
-              setData={setData}
-              color={"green"}
-            />
-          )}
+          <Checkbox label={`Include related`} checked={isIncludeSelected} onChange={(event) => setIsIncludeSelected(event.currentTarget.checked)} />
+          {isIncludeSelected && <CustomSelect value={value} setValue={setValue} data={data} placeholder="e.g data analyst" setData={setData} color={"green"} />}
         </>
       )}
       {allowExclude && (
         <>
-          <Checkbox
-            label={`Exclude related`}
-            checked={isExcludeSelected}
-            onChange={(event) =>
-              setIsExcludeSelected(event.currentTarget.checked)
-            }
-          />
-          {isExcludeSelected && (
-            <CustomSelect
-              value={value}
-              setValue={setValue}
-              data={data}
-              placeholder="e.g data analyst"
-              setData={setData}
-              color={"red"}
-            />
-          )}
+          <Checkbox label={`Exclude related`} checked={isExcludeSelected} onChange={(event) => setIsExcludeSelected(event.currentTarget.checked)} />
+          {isExcludeSelected && <CustomSelect value={value} setValue={setValue} data={data} placeholder="e.g data analyst" setData={setData} color={"red"} />}
         </>
       )}
     </>

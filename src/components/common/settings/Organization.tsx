@@ -13,14 +13,17 @@ import {
   Title,
   Text,
   useMantineTheme,
+  Modal,
+  TextInput,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { IconAdjustments, IconDots } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { proxyURL, valueToColor, nameToInitials } from '@utils/general';
+import addSDR from '@utils/requests/addSDR';
 import { getClientSDRs } from '@utils/requests/client';
 import { MRT_ColumnDef, MantineReactTable, useMantineReactTable } from 'mantine-react-table';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ClientSDR } from 'src';
 
@@ -182,15 +185,69 @@ export default function Organization(props: {}) {
     data: data ?? [],
   });
 
+  // SDR Seat
+  const [openedSeatModal, setOpenedSeatModal] = useState(false);
+  const [sdrName, setSdrName] = useState('');
+  const [sdrLinkedIn, setSdrLinkedIn] = useState('');
+  const [sdrEmail, setSdrEmail] = useState('');
+
+  const handleAddSDR = async () => {
+    await addSDR(userToken, sdrName, sdrLinkedIn, sdrEmail);
+
+    // Close & reset
+    setOpenedSeatModal(false);
+    setSdrName('');
+    setSdrLinkedIn('');
+    setSdrEmail('');
+
+    refetch();
+  };
+
   return (
     <Box>
       <Stack>
         <Group noWrap position='apart'>
           <Title order={3}>Your Organization</Title>
-          <Button>Add Seat</Button>
+          <Button
+            onClick={() => {
+              setOpenedSeatModal(true);
+            }}
+          >
+            Add Seat
+          </Button>
         </Group>
         <MantineReactTable table={table} />
       </Stack>
+      <Modal
+        opened={openedSeatModal}
+        onClose={() => {
+          setOpenedSeatModal(false);
+        }}
+        title={<Text>Add SDR Seat</Text>}
+        centered
+      >
+        <Stack>
+          <TextInput
+            description='Name'
+            placeholder='Name'
+            value={sdrName}
+            onChange={(e) => setSdrName(e.currentTarget.value)}
+          />
+          <TextInput
+            description='LinkedIn URL'
+            placeholder='LinkedIn URL'
+            value={sdrLinkedIn}
+            onChange={(e) => setSdrLinkedIn(e.currentTarget.value)}
+          />
+          <TextInput
+            description='Email'
+            placeholder='Email'
+            value={sdrEmail}
+            onChange={(e) => setSdrEmail(e.currentTarget.value)}
+          />
+          <Button onClick={handleAddSDR}>Add Seat</Button>
+        </Stack>
+      </Modal>
     </Box>
   );
 }

@@ -41,6 +41,7 @@ import ContactRecycling from "@common/settings/ContactRecycling";
 import WebhookConnectionPage from "./WebhookConnectionPage";
 import AccountSettings from "./AccountSettings";
 import Organization from "@common/settings/Organization";
+import { InboxesManagementPage } from "@common/settings/InboxesManagementPage";
 
 export default function SettingsPage() {
   setPageTitle("Settings");
@@ -81,7 +82,7 @@ export default function SettingsPage() {
   });
 
   return (
-    <Box p={20}>
+    <Box p={20} w="100%">
       <PageTitle title="Settings" />
       <Tabs
         value={currentTab}
@@ -158,6 +159,9 @@ export default function SettingsPage() {
           </Tabs.Tab>
           <Tabs.Tab value="contactRecycling" icon={<IconRefresh size="0.8rem" />}>
             Contact Recycling
+          </Tabs.Tab>
+          <Tabs.Tab value="inboxes" icon={<IconInbox size="0.8rem" />}>
+            Inboxes
           </Tabs.Tab>
 
           {/* <Divider /> */}
@@ -253,6 +257,10 @@ export default function SettingsPage() {
         <Tabs.Panel value="contactRecycling" pl="xs">
           <Group noWrap>{currentTab === "contactRecycling" && <ContactRecycling />}</Group>
         </Tabs.Panel>
+        <Tabs.Panel value="inboxes" pl="xs">
+          <Group noWrap>{currentTab === "inboxes" && <InboxesManagementPage />}</Group>
+        </Tabs.Panel>
+
 
         <Tabs.Panel value="webhooks" pl="xs">
           <WebhookConnectionPage />

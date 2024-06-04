@@ -5,6 +5,7 @@ import {
   IconChartArcs,
   IconList,
   IconMap,
+  IconRadar,
   IconTarget,
   IconUser,
   IconWallpaper,
@@ -19,6 +20,7 @@ import ProspectUploadHistory from "@common/settings/History/ProspectUploadHistor
 import Personas from "./Personas";
 import SegmentV2 from "@pages/SegmentV2/SegmentV2";
 import { useState } from "react";
+import SellScaleSonar from "@common/settings/Sonar/SellscaleSonar";
 
 const ContactOverview = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -46,6 +48,13 @@ const ContactOverview = () => {
               style={{ marginRight: "8px", marginTop: "4px" }}
             />
             History
+          </Tabs.Tab>
+          <Tabs.Tab value="sonar" mt={6} ml="auto">
+            <IconRadar
+              size="0.8rem"
+              style={{ marginRight: "8px", marginTop: "4px" }}
+            />
+            Sonar
           </Tabs.Tab>
           {/* <Tabs.Tab value="ongoing_scrapes">
             <IconWallpaper
@@ -87,6 +96,10 @@ const ContactOverview = () => {
               setTabValue("history");
             }}
           />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="sonar">
+          <SellScaleSonar />
         </Tabs.Panel>
       </Tabs>
     </Box>

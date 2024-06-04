@@ -547,7 +547,7 @@ export default function CampaignTemplateEditModal({
               </Alert>
             )}
             <Tabs
-              defaultValue="1"
+              defaultValue={currentStepNum.toString() || 1}
               onTabChange={(value) => setCurrentStepNum(Number(value))}
               styles={{
                 tabsList: {
@@ -564,7 +564,7 @@ export default function CampaignTemplateEditModal({
                         Step {index + 1} (
                         {stagingData[sequenceType]?.filter(
                           (asset: any) => asset.step_num === index + 1
-                        ).length == 0
+                        ).length == 0 || stagingData[sequenceType] === undefined
                           ? "🔴 "
                           : "🟢 "}
                         {

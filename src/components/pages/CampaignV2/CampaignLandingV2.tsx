@@ -231,7 +231,7 @@ export default function CampaignLandingV2() {
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(
     false
   );
-  const [showActivateWarningModal, setShowActivateWarningModal] = useState(true);
+  const [showActivateWarningModal, setShowActivateWarningModal] = useState(false);
   const [testingVolume, setTestingVolume] = useState(0);
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
   const [showPersonalizerModal, setShowPersonalizerModal] = useState(false);
@@ -403,7 +403,7 @@ export default function CampaignLandingV2() {
       .then((sequencesData) => {
         console.log("sequencesData", sequencesData);
         setLinkedinInitialMessages(sequencesData.initial_message_templates);
-        setLinkedinInitialMessageViewing(sequencesData.initial_message_templates[0]?.title);
+        setLinkedinInitialMessageViewing(sequencesData.initial_message_templates?.[0]?.title);
         const groupSequencesByBumpedCount = (sequences: any[]) => 
           sequences.reduce((acc: any, sequence: any) => {
             let bumpedCount = sequence.bumped_count || 0;
@@ -644,7 +644,7 @@ export default function CampaignLandingV2() {
           </Button>
         </Flex>
       </Modal>
-      <Modal
+      {/* <Modal
         opened={showActivateWarningModal}
         size="600px"
         onClose={() => setShowActivateWarningModal(false)}
@@ -674,7 +674,7 @@ export default function CampaignLandingV2() {
           )}
         </List>
       </Flex>
-      </Modal>
+      </Modal> */}
       <Modal
         opened={showCampaignTemplateModal}
         onClose={() => {

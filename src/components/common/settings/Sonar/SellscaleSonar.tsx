@@ -1,11 +1,22 @@
-import { ActionIcon, Box, Button, Divider, Flex, Paper, SimpleGrid, Text, TextInput } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Paper,
+  SimpleGrid,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import { IconEdit, IconPlus, IconSearch } from "@tabler/icons";
 
 export default function SellScaleSonar() {
   const data = [
     {
       title: "Hiring Clinical Scribe",
-      content: "Look for CTOs, COOs, CIOs, and Clinical Directors at companies that are hiring Clinical Scribes",
+      content:
+        "Look for CTOs, COOs, CIOs, and Clinical Directors at companies that are hiring Clinical Scribes",
       accounts: 32,
       prospects: 183,
       connected: true,
@@ -13,7 +24,8 @@ export default function SellScaleSonar() {
     },
     {
       title: "Posted about healthcare problems",
-      content: "Look doctors and Clinical leaders who recently posted about healthcare issues in their clinic.",
+      content:
+        "Look doctors and Clinical leaders who recently posted about healthcare issues in their clinic.",
       accounts: 22,
       prospects: 104,
       connected: false,
@@ -24,10 +36,14 @@ export default function SellScaleSonar() {
     <Box>
       <Flex align={"center"} justify={"space-between"} mt={"sm"}>
         <Text size={"xl"} fw={500}>
-          Sonar
+          Sonar (Coming soon ⚠️)
         </Text>
         <Flex gap={"md"}>
-          <TextInput w={300} placeholder="Search" rightSection={<IconSearch size={"0.9rem"} />} />
+          <TextInput
+            w={300}
+            placeholder="Search"
+            rightSection={<IconSearch size={"0.9rem"} />}
+          />
           <Button leftIcon={<IconPlus size={"0.9rem"} />}>New Sonar</Button>
         </Flex>
       </Flex>

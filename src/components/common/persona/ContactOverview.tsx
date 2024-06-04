@@ -1,7 +1,15 @@
 import { Box, Button, Flex, Tabs, Text } from "@mantine/core";
 import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { IconChartArcs, IconList, IconMap, IconTarget, IconUser, IconWallpaper } from "@tabler/icons";
+import {
+  IconChartArcs,
+  IconList,
+  IconMap,
+  IconRadar,
+  IconTarget,
+  IconUser,
+  IconWallpaper,
+} from "@tabler/icons";
 import GlobalContacts from "./GlobalContacts";
 import DoNotContactList from "@common/settings/DoNotContactList";
 import UploadOverviewV2 from "./UploadOverviewV2";
@@ -28,14 +36,24 @@ const ContactOverview = () => {
       <Tabs value={tabValue} onTabChange={(e: any) => setTabValue(e)}>
         <Tabs.List>
           <Tabs.Tab value="segments">
-            <IconChartArcs size="0.8rem" style={{ marginRight: "8px", marginTop: "4px" }} />
+            <IconChartArcs
+              size="0.8rem"
+              style={{ marginRight: "8px", marginTop: "4px" }}
+            />
             Segments
           </Tabs.Tab>{" "}
           <Tabs.Tab value="history">
-            <IconChartArcs size="0.8rem" style={{ marginRight: "8px", marginTop: "4px" }} />
+            <IconChartArcs
+              size="0.8rem"
+              style={{ marginRight: "8px", marginTop: "4px" }}
+            />
             History
           </Tabs.Tab>
-          <Tabs.Tab value="sonar" mt={6}>
+          <Tabs.Tab value="sonar" mt={6} ml="auto">
+            <IconRadar
+              size="0.8rem"
+              style={{ marginRight: "8px", marginTop: "4px" }}
+            />
             Sonar
           </Tabs.Tab>
           {/* <Tabs.Tab value="ongoing_scrapes">

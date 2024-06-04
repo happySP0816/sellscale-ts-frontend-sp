@@ -89,7 +89,7 @@ export default function CampaignTemplateEditModal({
   console.log('email subject lines are', innerProps.emailSubjectLines)
   const [templateType, setTemplateType] = useState("template" || "generate");
   const [sequenceType, setSequenceType]: any = useState<string>("email");
-  const [steps, setSteps] = useState(3);
+  const [steps, setSteps] = useState(sequenceType==='email'? (innerProps.emailSequenceData.length || 3) : (innerProps.linkedinSequenceData.length || 3));
   const [currentStepNum, setCurrentStepNum] = useState(innerProps.currentStepNum || 1 || null);
   const [generateSequence, setGenerateSequence] = useState(false);
   const [openid, setOpenId] = useState<number>(0);

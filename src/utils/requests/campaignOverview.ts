@@ -61,6 +61,33 @@ export const patchTestingVolume = async (
   }
 };
 
+export const fetchTotalContacts = async (
+  userToken: string,
+  client_archetype_id: number
+) => {
+  try {
+    const response = await fetch(
+      `${API_URL}/client/total_contacts?client_archetype_id=${client_archetype_id}`,
+      {
+        headers: {
+          Authorization: "Bearer " + userToken,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.total_contacts.num_prospects;
+  } catch (error) {
+    console.error("Error fetching total contacts", error);
+  } finally {
+    console.log("Total contacts API call completed");
+  }
+};
 
 
 export const fetchCampaignContacts = async (

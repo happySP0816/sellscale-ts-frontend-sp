@@ -79,6 +79,7 @@ import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
 import { PersonaOverview } from "src";
+import { link } from "fs";
 
 interface StatsData {
   id: number;
@@ -228,6 +229,7 @@ export default function CampaignLandingV2() {
   const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
   const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>([]);
+  const [emailSubjectLines, setEmailSubjectLines] = useState<any[]>([]);
   const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] = useState<any>(0);
   const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<any[]>([]);
   const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] = useState<any[]>([]);
@@ -415,6 +417,7 @@ export default function CampaignLandingV2() {
     sequencesPromise
       .then((sequencesData) => {
         console.log("sequencesData", sequencesData);
+        setEmailSubjectLines(sequencesData.email_subject_lines);
         setLinkedinInitialMessages(sequencesData.initial_message_templates);
         setLinkedinInitialMessageViewing(sequencesData.initial_message_templates?.[0]?.title);
         const groupSequencesByBumpedCount = (sequences: any[]) => 
@@ -1245,6 +1248,9 @@ export default function CampaignLandingV2() {
                         modal: "campaignTemplateEditModal",
                         title: <Title order={3}>Sequence Builder</Title>,
                         innerProps: {
+                          emailSubjectLines,
+                          linkedinSequenceData,
+                          emailSequenceData,
                           campaignId: id,
                           createTemplateBuilder,
                           refetchSequenceData,
@@ -1815,6 +1821,9 @@ export default function CampaignLandingV2() {
                       modal: "campaignTemplateEditModal",
                       title: <Title order={3}>Sequence Builder</Title>,
                       innerProps: {
+                        emailSubjectLines,
+                        linkedinSequenceData,
+                        emailSequenceData,
                         campaignId: id,
                         createTemplateBuilder,
                         setCreateTemplateBuilder,

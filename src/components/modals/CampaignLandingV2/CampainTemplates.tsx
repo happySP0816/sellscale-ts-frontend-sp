@@ -39,6 +39,9 @@ export default function CampaignTemplatesModal({
   cType?: string;
   setStagingData: Function;
   addToStagingData?: any;
+  emailSequenceData: any;
+  emailSubjectLines: any;
+  linkedinSequenceData: any;
 }>) {
   const userToken = useRecoilValue(userTokenState);
 
@@ -75,6 +78,9 @@ export default function CampaignTemplatesModal({
           modal: "campaignTemplateEditModal",
           title: <Title order={3}>Sequence Builder</Title>,
           innerProps: {
+              emailSubjectLines: innerProps.emailSubjectLines,
+              emailSequenceData: innerProps.emailSequenceData,
+              linkedinSequenceData: innerProps.linkedinSequenceData,
               addedTemplate: asset,
               stagingData: innerProps.stagingData,
               refetchSequenceData: innerProps.refetchSequenceData,

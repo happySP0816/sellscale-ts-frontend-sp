@@ -30,6 +30,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { ContextModalProps, openContextModal, closeAllModals } from "@mantine/modals";
 import { MantineStyleSystemProps } from "@mantine/styles";
+import { showNotification } from '@mantine/notifications';
 
 import {
   IconArrowRight,
@@ -45,7 +46,7 @@ import {
 } from "@tabler/icons";
 import { addSequence } from "@utils/requests/generateSequence";
 import { deterministicMantineColor } from "@utils/requests/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRecoilValue } from "recoil";
 
 interface SwitchStyle extends Partial<MantineStyleSystemProps> {
@@ -74,7 +75,10 @@ export default function CampaignTemplateEditModal({
 }: ContextModalProps<{
   stagingData: any;
   refetchSequenceData: Function;
-  addedTemplate?: AssetType | null;
+  emailSequenceData: any;
+  linkedinSequenceData: any;
+  emailSubjectLines: any;
+  addedTemplate: any;
   currentStepNum: any;
   createTemplateBuilder: boolean;
   setCreateTemplateBuilder: Function;
@@ -82,24 +86,25 @@ export default function CampaignTemplateEditModal({
   campaignId: number;
   cType?: string;
 }>) {
+  console.log('email subject lines are', innerProps.emailSubjectLines)
   const [templateType, setTemplateType] = useState("template" || "generate");
   const [sequenceType, setSequenceType]: any = useState<string>("email");
   const [steps, setSteps] = useState(3);
-  console.log('innerProps are', innerProps)
   const [currentStepNum, setCurrentStepNum] = useState(innerProps.currentStepNum || 1 || null);
   const [generateSequence, setGenerateSequence] = useState(false);
   const [openid, setOpenId] = useState<number>(0);
   const [opened, setOpened] = useState(false);
   const [selectStep, setSelectStep] = useState<number | null>(null);
+  //////handlers for the saved variants
+  const [opened2, setOpened2] = useState(false);
+  const [selectStep2, setSelectStep2] = useState<number | null>(null);
+  ////////////////////////////////
   const [assets, setAssets] = useState<AssetType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  console.log('template added was', innerProps.addedTemplate)
   const [addedTemplate, setAddedTemplate] = useState<AssetType | null>(innerProps.addedTemplate || null);
 
   const addToStagingData = (asset: AssetType, step_num: number, stagingData: any, setStagingData: any) => {
-    console.log("Adding to " + sequenceType + " staging data");
-    console.log('params are', asset, step_num, stagingData, setStagingData)
     const type = sequenceType;
     const angle = asset.asset_key;
     const text = asset.asset_raw_value;
@@ -146,43 +151,7 @@ export default function CampaignTemplateEditModal({
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const campaignId = innerProps.campaignId;
-  const [stagingData, setStagingData] = useState(innerProps.stagingData || {'TEXT':[]});
-
-  const data = [
-    {
-      title: "Personalized Opener",
-      avatar: "",
-      name: "Ishan Sharma",
-      message:
-        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
-      point_used: 14,
-      asset_used: 14,
-      opened: 12,
-      replied: 4.6,
-    },
-    {
-      title: "Personalized Opener",
-      avatar: "",
-      name: "Ishan Sharma",
-      message:
-        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
-      point_used: 14,
-      asset_used: 14,
-      opened: 12,
-      replied: 4.6,
-    },
-    {
-      title: "Personalized Opener",
-      avatar: "",
-      name: "Ishan Sharma",
-      message:
-        "Hey Shadi! Impressed by your track record of scaling businesses and building strong teams, not to mention your transformative approach to customer conversations. Given your experience as an executive leader in Saas and laas, I'm curious if you'd be interested in exploring opportunities at SellScale? Let's  connect and chat more about it!",
-      point_used: 14,
-      asset_used: 14,
-      opened: 12,
-      replied: 4.6,
-    },
-  ];
+  const [stagingData, setStagingData] = useState(innerProps.stagingData || {'email':[]});
 
   const handleToggle = (key: number) => {
     if (selectStep === key) {
@@ -192,6 +161,17 @@ export default function CampaignTemplateEditModal({
       setSelectStep(key);
     }
     setSelectStep(key);
+  };
+
+  //handler for the saved variants
+  const handleToggle2 = (key: number) => {
+    if (selectStep2 === key) {
+      setOpened2(!opened2);
+    } else {
+      setOpened2(true);
+      setSelectStep2(key);
+    }
+    setSelectStep2(key);
   };
 
   const getAllAssets = async () => {
@@ -217,6 +197,21 @@ export default function CampaignTemplateEditModal({
   useEffect(() => {
     getAllAssets();
   }, []);
+
+  const viewport = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (viewport.current !== null) {
+      viewport.current.scrollTo({ top: viewport.current.scrollHeight, behavior: 'smooth' });
+    }
+  }
+
+  useEffect(() => {
+    setTimeout(() => {
+      scrollToBottom();
+    }, 50);
+  }, [stagingData]);
+
 
   const [isBuilder, setIsBuilder] = useState(innerProps.createTemplateBuilder);
   useEffect(() => {
@@ -427,11 +422,14 @@ export default function CampaignTemplateEditModal({
                     ),
                     innerProps: {
                       stagingData,
+                        emailSubjectLines: innerProps.emailSubjectLines,
+                        linkedinTemplates: innerProps.linkedinSequenceData,
+                        emailSequenceData: innerProps.emailSequenceData,
                         refetchSequenceData: innerProps.refetchSequenceData,
                         currentStepNum,
                         createTemplateBuilder: innerProps.createTemplateBuilder,
                         setCreateTemplateBuilder: innerProps.setCreateTemplateBuilder,
-                        setSequences: innerProps.setSequences,
+                        // setSequences: innerProps.setSequences,
                         campaignId: innerProps.campaignId,
                         cType: innerProps.cType,
                         setStagingData: setStagingData,
@@ -454,11 +452,14 @@ export default function CampaignTemplateEditModal({
                         title: <Title order={3}>Sequence Builder</Title>,
                         innerProps: {
                           stagingData,
+                            emailSubjectLines: innerProps.emailSubjectLines,
+                            linkedinSequenceData: innerProps.linkedinSequenceData,
+                            emailSequenceData: innerProps.emailSequenceData,
                             refetchSequenceData: innerProps.refetchSequenceData,
                             currentStepNum,
                             createTemplateBuilder: innerProps.createTemplateBuilder,
                             setCreateTemplateBuilder: innerProps.setCreateTemplateBuilder,
-                            setSequences: innerProps.setSequences,
+                            // setSequences: innerProps.setSequences,
                             campaignId: innerProps.campaignId,
                             cType: innerProps.cType,
                             setAddedTemplate: setAddedTemplate,
@@ -481,6 +482,7 @@ export default function CampaignTemplateEditModal({
                 Create New
               </Button>
               <Templates
+                steps={steps}
                 readyToGenerate={readyToGenerate}
                 assets={filteredAssets}
                 searchQuery={searchQuery}
@@ -562,28 +564,210 @@ export default function CampaignTemplateEditModal({
                     return (
                       <Tabs.Tab value={(index + 1).toString()}>
                         Step {index + 1} (
-                        {stagingData[sequenceType]?.filter(
-                          (asset: any) => asset.step_num === index + 1
-                        ).length == 0 || stagingData[sequenceType] === undefined
+                        {(
+                          (stagingData[sequenceType]?.filter(
+                            (asset: any) => asset.step_num === index + 1
+                          ).length || 0) +
+                          (sequenceType === "email"
+                            ? innerProps.emailSequenceData[index]?.length || 0
+                            : innerProps.linkedinSequenceData[index]?.length || 0)
+                        ) === 0
                           ? "🔴 "
                           : "🟢 "}
-                        {
-                          stagingData[sequenceType]?.filter(
+                        {(
+                          (stagingData[sequenceType]?.filter(
                             (asset: any) => asset.step_num === index + 1
-                          ).length
-                        }
+                          ).length || 0) +
+                          (sequenceType === "email"
+                            ? innerProps.emailSequenceData[index]?.length || 0
+                            : innerProps.linkedinSequenceData[index]?.length || 0)
+                        )}
                         )
                       </Tabs.Tab>
                     );
                   })}
+                {sequenceType === "email" && (
+                  <Tabs.Tab value={(steps + 1).toString()}>
+                    Subject Lines
+                  </Tabs.Tab>
+                )}
               </Tabs.List>
+              {currentStepNum === steps + 1 && sequenceType === 'email' && 
+              
+              <ScrollArea viewportRef={viewport} h={350}>
+                          <Flex p={"lg"} h={"100%"} direction={"column"}>
+                            {innerProps.emailSubjectLines.map((subjectLine: any, index: number) => {
+                              return <Box
+                              mb={"sm"}
+                              style={{
+                                border:
+                                  selectStep2 === index
+                                    ? "1px solid #228be6"
+                                    : "1px solid #ced4da",
+                                borderRadius: "8px",
+                              }}
+                            >
+                                <Flex
+                              align={"center"}
+                              justify={"space-between"}
+                              px={"sm"}
+                              py={"xs"}
+                            >
+                              <Flex align={"center"} gap={"xs"}>
+                                <IconMessages
+                                  color="#228be6"
+                                  size={"0.9rem"}
+                                />
+                                <Text color="gray" fw={500} size={"xs"}>
+                                  Variant #{index + 1}:
+                                </Text>
+                                <Text fw={600} size={"xs"} ml={"-5px"}>
+                                  {subjectLine.subject_line}
+                                  </Text>
+                              </Flex>
+                              <Flex gap={1} align={"center"}>
+                                <Badge color="teal" size="xs" mr="6px">
+                                  Saved
+                                </Badge>
+                                <Tooltip
+                                  label="Editing coming soon"
+                                  position="top"
+                                >
+                                  <ActionIcon disabled>
+                                    <IconEdit size={"0.9rem"} />
+                                  </ActionIcon>
+                                </Tooltip>
+                                <ActionIcon disabled>
+                                  <IconTrash size={"0.9rem"} />
+                                </ActionIcon>
+                                {/* <ActionIcon
+                                  onClick={() => {
+                                    handleToggle2(index);
+                                  }}
+                                >
+                                  {selectStep2 === index && opened ? (
+                                    <IconChevronUp size={"0.9rem"} />
+                                  ) : (
+                                    <IconChevronDown size={"0.9rem"} />
+                                  )}
+                                </ActionIcon> */}
+                              </Flex>
+                            </Flex>
+                              </Box>
 
+                            })}
+                          </Flex>
+
+              </ScrollArea>
+              
+              
+              }
               {steps &&
                 Array.from({ length: Number(steps) }, (_, index) => {
                   return (
                     <Tabs.Panel value={(index + 1).toString()}>
                       {" "}
-                      <ScrollArea h={350}>
+                      <ScrollArea viewportRef={viewport} h={350}>
+                          <Flex p={"lg"} h={"100%"} direction={"column"}>
+                          {/* existing assets */}
+                          {(sequenceType === "email" ? innerProps.emailSequenceData[index] : innerProps.linkedinSequenceData[index])?.map((existingAsset: any, index2: number) => {
+                            return <Box
+                            mb={"sm"}
+                            style={{
+                              border:
+                                selectStep2 === index2
+                                  ? "1px solid #228be6"
+                                  : "1px solid #ced4da",
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <Flex
+                              align={"center"}
+                              justify={"space-between"}
+                              px={"sm"}
+                              py={"xs"}
+                            >
+                              <Flex align={"center"} gap={"xs"}>
+                                <IconMessages
+                                  color="#228be6"
+                                  size={"0.9rem"}
+                                />
+                                <Text color="gray" fw={500} size={"xs"}>
+                                  Variant #{index2 + 1}:
+                                </Text>
+                                <Text fw={600} size={"xs"} ml={"-5px"}>
+                                  {currentStepNum === steps + 1 ? existingAsset.subject_line: sequenceType === "email" ? existingAsset.assets?.[0]?.asset_key : existingAsset.title}
+                                  </Text>
+                              </Flex>
+                              <Flex gap={1} align={"center"}>
+                                <Badge color="teal" size="xs" mr="6px">
+                                  Saved
+                                </Badge>
+                                <Tooltip
+                                  label="Editing coming soon"
+                                  position="top"
+                                >
+                                  <ActionIcon disabled>
+                                    <IconEdit size={"0.9rem"} />
+                                  </ActionIcon>
+                                </Tooltip>
+                                <ActionIcon disabled>
+                                  <IconTrash size={"0.9rem"} />
+                                </ActionIcon>
+                                <ActionIcon
+                                  onClick={() => {
+                                    handleToggle2(index2);
+                                  }}
+                                >
+                                  {selectStep2 === index2 && opened2 ? (
+                                    <IconChevronUp size={"0.9rem"} />
+                                  ) : (
+                                    <IconChevronDown size={"0.9rem"} />
+                                  )}
+                                </ActionIcon>
+                              </Flex>
+                            </Flex>
+                            <Collapse
+                              in={selectStep2 === index2 && opened2}
+                              key={index2}
+                            >
+                              <Flex
+                                gap={"sm"}
+                                p={"sm"}
+                                style={{
+                                  borderTop: "1px solid #ced4da",
+                                }}
+                              >
+                                <Avatar size={"md"} radius={"xl"} />
+                                <Box>
+                                  {/* <Text fw={600} size={"sm"}>
+                                    {"Ishan Sharma"}
+                                  </Text> */}
+                                  <div
+                                    style={{
+                                      fontSize: "11px",
+                                    }}
+                                    dangerouslySetInnerHTML={{
+                                      __html: existingAsset.description,
+                                    }}
+                                  />
+                                </Box>
+                              </Flex>
+                            </Collapse>
+                          </Box>
+                          })}
+                          </Flex>
+                        {stagingData[sequenceType]?.filter(
+                            (asset: any) => asset.step_num === currentStepNum
+                          ).length > 0 && (
+                          <Flex justify="center" align="center">
+                            <Divider orientation="horizontal" color="salmon" size={'2px'} style={{margin: '0 25px', flex: 1}} />
+                            <Text color="salmon" size="xs" fw={500}>
+                              New
+                            </Text>
+                            <Divider orientation="horizontal" color="salmon" size={'2px'} style={{margin: '0 25px', flex: 1}} />
+                          </Flex>
+                        )}
                         <Flex p={"lg"} h={"100%"} direction={"column"}>
                           <>
                             {stagingData[sequenceType]?.filter(
@@ -691,7 +875,7 @@ export default function CampaignTemplateEditModal({
               p={"lg"}
               style={{ borderTop: "1px solid #dee2e6" }}
             >
-              <Button fullWidth variant="outline">
+              <Button fullWidth variant="outline" onClick={() => setStagingData({'email':[]})}>
                 Reset
               </Button>
               <Button
@@ -726,7 +910,7 @@ export default function CampaignTemplateEditModal({
                   });
                 }}
               >
-                Add to Sequence
+                Save to Sequence
               </Button>
             </Flex>
           </Paper>
@@ -742,6 +926,7 @@ export const Templates = ({
   searchQuery,
   addToStagingData,
   stagingData,
+  steps,
   setStagingData,
   removeFromStagingData,
   currentStepNum,
@@ -749,6 +934,7 @@ export const Templates = ({
 }: {
   readyToGenerate: boolean;
   assets: AssetType[];
+  steps: number;
   searchQuery: string;
   addToStagingData: Function;
   removeFromStagingData: Function;
@@ -847,7 +1033,11 @@ export const Templates = ({
                     color="blue"
                     disabled={readyToGenerate}
                     onClick={() => {
-                      addToStagingData(asset, currentStepNum, stagingData, setStagingData);
+                      if(currentStepNum !== steps + 1) {
+                        addToStagingData(asset, currentStepNum, stagingData, setStagingData)
+                      } else {
+                        showNotification({title: 'Error', message: 'Cannot add a template variant to a subject step', color: 'red'});
+                      }
                     }}
                   >
                     Add

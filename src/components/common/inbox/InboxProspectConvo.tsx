@@ -254,6 +254,13 @@ export default function InboxProspectConvo(props: Props) {
 
   const [hasGeneratedMessage, setHasGeneratedMessage] = useState(false);
   const [openedConvoBox, setOpenedConvoBox] = useState<any>(props.openConvoBox || true);
+  useEffect(() => {
+    // This is a hacky way to make sure that the inbox "pushes" the scroll area upwards
+    // What we hope to achieve is to reset the viewref
+    if (openedConvoBox) {
+      scrollToBottom();
+    }
+  }, [openedConvoBox])
 
   // This is used to fix a bug with the hacky way we're doing message loading now
   const currentMessagesProspectId = useRef(-1);

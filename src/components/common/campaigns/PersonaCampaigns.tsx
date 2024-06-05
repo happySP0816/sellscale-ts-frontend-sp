@@ -622,6 +622,7 @@ type ChannelSection = {
 };
 
 export function PersonCampaignCard(props: {
+  showAvatar?: boolean;
   persona: CampaignPersona;
   project?: PersonaOverview;
   viewMode: "node-view" | "list-view";
@@ -649,6 +650,8 @@ export function PersonCampaignCard(props: {
   const [value, setValue] = useState<string>("");
   const [campaignList, setCampaignList] = useState<Record<string, any>[]>([]);
   const [campaignName, setCampaignName] = useState("");
+
+  const isMyCampaign = (userData.id === props.persona.sdr_id);
 
   const setEmoji = (emoji: string) => {
     setEmojiState(emoji);
@@ -1084,7 +1087,7 @@ export function PersonCampaignCard(props: {
         <Group
           // position="apart"
           sx={(theme) => ({
-            backgroundColor: "white", //props.persona.active ? theme.colors.blue[6] : 'white',
+            backgroundColor: (isMyCampaign ? '' : theme.colors.gray[1]),
             borderRadius: "0.5rem 0.5rem 0 0",
             border: "solid 1px " + theme.colors.gray[2],
             position: "relative",
@@ -1343,6 +1346,16 @@ export function PersonCampaignCard(props: {
                       >
                         {props.persona.name}
                       </Text>
+                      {props.showAvatar && <Flex align="center">
+                      <Avatar radius='xl' size='sm' src={props.persona.sdr_img_url}></Avatar>
+                        <Text
+                          mt={2}
+                          fz={"xs"}
+                          c={"gray.5"}
+                        >
+                          &nbsp; {props.persona.sdr_name}
+                        </Text>
+                      </Flex>}
                     </Box>
                   </Tooltip>
                 </Flex>
@@ -2045,6 +2058,7 @@ function StatDisplay(props: {
 }
 
 export const PersonCampaignTable = (props: {
+  showAvatar?: boolean;
   filteredProjects: CampaignPersona[];
   projects?: PersonaOverview[];
   campaignViewMode: "node-view" | "list-view";
@@ -2298,6 +2312,7 @@ export const PersonCampaignTable = (props: {
                 (!persona.cycle ||
                   (cycleModeShowCycleIds.includes(persona.cycle) && (
                     <PersonCampaignCard
+                      showAvatar={props.showAvatar}
                       key={index}
                       persona={persona}
                       project={props.projects?.find((project) => project.id == persona.id)}
@@ -2312,6 +2327,7 @@ export const PersonCampaignTable = (props: {
       {!props.showCycles &&
         data.map((persona, index) => (
           <PersonCampaignCard
+            showAvatar={props.showAvatar}
             key={index}
             persona={persona}
             project={props.projects?.find((project) => project.id == persona.id)}

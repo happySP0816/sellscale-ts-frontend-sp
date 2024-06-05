@@ -144,6 +144,7 @@ const QuestionModal: React.FC<any> = ({ innerProps }) => {
             modal: "campaignPersonalizersModal",
             title: <Title order={3}>Personalizers</Title>,
             innerProps: {
+              sequences: innerProps.sequences,
               ai_researcher_id: innerProps.ai_researcher_id,
               id: innerProps.campaign_id,
               setPersonalizers: innerProps.setPersonalizers,
@@ -182,6 +183,7 @@ const QuestionModal: React.FC<any> = ({ innerProps }) => {
               modal: "campaignPersonalizersModal",
               title: <Title order={3}>Personalizers</Title>,
               innerProps: {
+                sequences: innerProps.sequences,
                 ai_researcher_id: innerProps.ai_researcher_id,
                 id: innerProps.campaign_id,
                 setPersonalizers: innerProps.setPersonalizers,

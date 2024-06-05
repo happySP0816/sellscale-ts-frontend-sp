@@ -86,7 +86,6 @@ export default function CampaignTemplateEditModal({
   campaignId: number;
   cType?: string;
 }>) {
-  console.log('email subject lines are', innerProps.emailSubjectLines)
   const [templateType, setTemplateType] = useState("template" || "generate");
   const [sequenceType, setSequenceType]: any = useState<string>("email");
   const [steps, setSteps] = useState(sequenceType==='email'? (innerProps.emailSequenceData.length || 3) : (innerProps.linkedinSequenceData.length || 3));
@@ -596,7 +595,7 @@ export default function CampaignTemplateEditModal({
               
               <ScrollArea viewportRef={viewport} h={350}>
                           <Flex p={"lg"} h={"100%"} direction={"column"}>
-                            {innerProps.emailSubjectLines.map((subjectLine: any, index: number) => {
+                            {innerProps.emailSubjectLines?.map((subjectLine: any, index: number) => {
                               return <Box
                               mb={"sm"}
                               style={{

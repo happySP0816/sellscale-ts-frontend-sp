@@ -76,7 +76,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
-import { PersonaOverview } from "src";
+import { PersonaOverview, SubjectLineTemplate } from "src";
 import { link } from "fs";
 
 interface StatsData {
@@ -220,7 +220,7 @@ export default function CampaignLandingV2() {
   const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
   const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>([]);
-  const [emailSubjectLines, setEmailSubjectLines] = useState<any[]>([]);
+  const [emailSubjectLines, setEmailSubjectLines] = useState<SubjectLineTemplate[]>([]);
   const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] = useState<any>(0);
   const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<any[]>([]);
   const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] = useState<any[]>([]);

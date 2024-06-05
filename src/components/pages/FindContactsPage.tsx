@@ -461,7 +461,9 @@ export default function FindContactsPage() {
             <iframe
               src={
                 "https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=" +
-                userToken
+                userToken +
+                "&campaign_id=" +
+                activePersona
               }
               style={{ width: "100%", height: window.innerHeight + 120 }}
               frameBorder={0}

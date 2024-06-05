@@ -389,7 +389,6 @@ export default function CampaignLandingV2() {
     const sequencesPromise = fetchCampaignSequences(userToken, clientArchetypeId);
     sequencesPromise
       .then((sequencesData) => {
-        console.log("sequencesData", sequencesData);
         setEmailSubjectLines(sequencesData.email_subject_lines);
         setLinkedinInitialMessages(sequencesData.initial_message_templates);
         setLinkedinInitialMessageViewing(sequencesData.initial_message_templates?.[0]?.title);
@@ -408,6 +407,8 @@ export default function CampaignLandingV2() {
           Object.keys(groupedSequences)
             .sort((a, b) => Number(a) - Number(b))
             .map((key) => groupedSequences[key]);
+
+        console.log('sequences are', sequencesData.email_sequence, sequencesData.linkedin_sequence)
 
         const handleSequences = (sequences: any[], type: string) => {
           const groupedSequences = groupSequencesByBumpedCount(sequences);

@@ -45,7 +45,7 @@ const generateTextWithBadges = (text: string) => {
   const [researching, setResearching] = useState(false);
 
   //deep copy
-  const sequences = [...innerProps.sequences];
+  const sequences = innerProps?.sequences ? [...innerProps.sequences] : [];
   console.log('sequences are', sequences)
 
   const userToken = useRecoilValue(userTokenState);

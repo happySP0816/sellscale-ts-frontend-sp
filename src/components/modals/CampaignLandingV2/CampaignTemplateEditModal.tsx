@@ -591,7 +591,7 @@ export default function CampaignTemplateEditModal({
                   </Tabs.Tab>
                 )}
               </Tabs.List>
-              {currentStepNum === steps + 1 && sequenceType === 'email' && 
+              {(currentStepNum === steps + 1) && (sequenceType === 'email') && 
               
               <ScrollArea viewportRef={viewport} h={350}>
                           <Flex p={"lg"} h={"100%"} direction={"column"}>
@@ -669,7 +669,7 @@ export default function CampaignTemplateEditModal({
                       <ScrollArea viewportRef={viewport} h={350}>
                           <Flex p={"lg"} h={"100%"} direction={"column"}>
                           {/* existing assets */}
-                          {(sequenceType === "email" ? innerProps.emailSequenceData[index] : innerProps.linkedinSequenceData[index])?.map((existingAsset: any, index2: number) => {
+                          {(sequenceType === "email" ? innerProps?.emailSequenceData[index] : innerProps.linkedinSequenceData[index])?.map((existingAsset: any, index2: number) => {
                             return <Box
                             mb={"sm"}
                             style={{
@@ -695,7 +695,7 @@ export default function CampaignTemplateEditModal({
                                   Variant #{index2 + 1}:
                                 </Text>
                                 <Text fw={600} size={"xs"} ml={"-5px"}>
-                                  {currentStepNum === steps + 1 ? existingAsset.subject_line: sequenceType === "email" ? existingAsset.assets?.[0]?.asset_key : existingAsset.title}
+                                  {existingAsset.assets?.[0]?.asset_key || existingAsset.title}
                                   </Text>
                               </Flex>
                               <Flex gap={1} align={"center"}>

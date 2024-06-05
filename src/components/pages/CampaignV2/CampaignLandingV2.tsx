@@ -959,7 +959,7 @@ export default function CampaignLandingV2() {
                       </Tooltip>
                     </Flex>
                     <Text size={"xs"} fw={500}>
-                      {testingVolume === MAX_CONTACTS || testingVolume === totalContacts ? "Max/week" : `${testingVolume}/week`}{" "}
+                      {testingVolume === MAX_CONTACTS || (testingVolume === 1000 && totalContacts < 1000) ? "Max/week" : `${testingVolume}/week`}{" "}
                       {cycleStatus && (
                         <Text component="span" color="red" size="xs" fw={700} ml={4}>
                           (Unsaved)
@@ -978,11 +978,11 @@ export default function CampaignLandingV2() {
                         setCycleStatus(true);
                         setTestingVolume(value);
                       }}
-                      max={totalContacts || 1}
+                      max={totalContacts > 1000 ? totalContacts : 1000}
                       marks={[
                         { value: 0, label: "0" },
                         {
-                          value: totalContacts || 1,
+                          value: totalContacts > 1000 ? totalContacts : 1000,
                           label: (
                             <div
                               style={{
@@ -994,7 +994,7 @@ export default function CampaignLandingV2() {
                           ),
                         },
                       ]}
-                      label={(value) => (totalContacts === 0 ? "N/A" : value === totalContacts ? "Max" : value)}
+                      label={(value) => (totalContacts < 1000 && value === 1000 ? "Max" : value)}
                     ></Slider>
                     <Button
                       disabled={!cycleStatus}
@@ -1003,7 +1003,7 @@ export default function CampaignLandingV2() {
                         const response = await patchTestingVolume(
                           userToken,
                           clientArchetypeId,
-                          testingVolume === totalContacts || totalContacts === 0 ? MAX_CONTACTS : testingVolume
+                          testingVolume
                         );
                         if (response) {
                           console.log("Testing volume updated successfully", response);

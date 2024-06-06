@@ -75,6 +75,7 @@ import CampaingCurator from "@common/campaigns/CampaignCurator";
 import CampaignWizard from "./components/CampaignWizard/CampaignWizard";
 import CampaignLandingV2 from "@pages/CampaignV2/CampaignLandingV2";
 import B2BSearch from "@pages/B2BSearch/B2bSearch";
+import Costs from "@common/internal_tools/Costs";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -317,6 +318,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "prospects/:prospectId",
         element: <RestrictedRoute page={<ProspectDetailPage />} />,
+      },
+      {
+        path: "costs",
+        element: <Costs />,
       },
       {
         path: "all/contacts/:prospectId?",

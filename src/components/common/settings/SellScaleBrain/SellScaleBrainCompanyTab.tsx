@@ -16,7 +16,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import DoNotContactList from "../DoNotContactList";
-import { IconWashMachine } from '@tabler/icons';
+import { IconWashMachine } from "@tabler/icons";
 
 export default function SellScaleBrainCompanyTab(props: { siteUrl?: String }) {
   const [userToken] = useRecoilState(userTokenState);
@@ -111,10 +111,7 @@ export default function SellScaleBrainCompanyTab(props: { siteUrl?: String }) {
         redirect: "follow",
       };
 
-      fetch(
-        `${API_URL}/research/generate_website_metadata`,
-        requestOptions
-      )
+      fetch(`${API_URL}/research/generate_website_metadata`, requestOptions)
         .then((response) => response.text())
         .then(async (result) => {
           const data = await JSON.parse(result);
@@ -224,8 +221,8 @@ export default function SellScaleBrainCompanyTab(props: { siteUrl?: String }) {
 
             <NumberInput
               label="Annual Contract Value (ACV)"
-              value={contractSize}
-              parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+              value={contractSize || 0}
+              parser={(value) => value?.replace(/\$\s?|(,*)/g, "")}
               formatter={(value) =>
                 !Number.isNaN(parseFloat(value))
                   ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
@@ -237,8 +234,15 @@ export default function SellScaleBrainCompanyTab(props: { siteUrl?: String }) {
               }}
             />
           </Collapse>
-          <Button w='100%' mt='xs' variant='outline' color='gray' onClick={() => setShowAdvanced(!showAdvanced)} leftIcon={<IconWashMachine />}>
-            {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
+          <Button
+            w="100%"
+            mt="xs"
+            variant="outline"
+            color="gray"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            leftIcon={<IconWashMachine />}
+          >
+            {showAdvanced ? "Hide Advanced" : "Show Advanced"}
           </Button>
 
           <Button

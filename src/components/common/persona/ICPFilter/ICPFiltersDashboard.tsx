@@ -146,6 +146,7 @@ const csvHeaders = [
   { label: "Linkedin URL", key: "linkedin_url" },
   { label: "Full name", key: "full_name" },
   { label: "ID", key: "id" },
+  { label: "Email", key: "email" },
 ];
 
 type ICPFiltersDashboardPropsType = {
@@ -556,6 +557,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
         linkedin_url: i.linkedin_url,
         full_name: i.full_name,
         id: i.id,
+        email: i.email,
       };
     });
 

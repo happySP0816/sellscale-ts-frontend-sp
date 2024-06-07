@@ -24,6 +24,7 @@ import getResearchPointTypes from "@utils/requests/getResearchPointTypes";
 import { ResearchPointType } from "src";
 import { IconBrandLinkedin, IconMailOpened } from "@tabler/icons";
 import Hook from "@pages/channels/components/Hook";
+import { closeAllModals } from "@mantine/modals";
 
 type PropsType = {
   createPersona: {
@@ -43,7 +44,9 @@ export default function CreatePersona(props: PropsType) {
   const [currentProject, setCurrentProject] = useRecoilState(
     currentProjectState
   );
-  const [connectionType, setConnectionType] = useState<string | undefined>(undefined); // ["RANDOM", "ALL_PROSPECTS", "OPENED_EMAIL_PROSPECTS_ONLY", "CLICKED_LINK_PROSPECTS_ONLY"
+  const [connectionType, setConnectionType] = useState<string | undefined>(
+    undefined
+  ); // ["RANDOM", "ALL_PROSPECTS", "OPENED_EMAIL_PROSPECTS_ONLY", "CLICKED_LINK_PROSPECTS_ONLY"
   const navigate = useNavigate();
 
   const [emailChecked, setEmailChecked] = useState(false);
@@ -60,7 +63,10 @@ export default function CreatePersona(props: PropsType) {
     refetchOnWindowFocus: false,
   });
 
-  const createPersonaHandler = async (linkedinChecked?: boolean, emailChecked?: boolean) => {
+  const createPersonaHandler = async (
+    linkedinChecked?: boolean,
+    emailChecked?: boolean
+  ) => {
     setCreatingPersona(true);
     const result = await createPersona(
       userToken,
@@ -107,7 +113,7 @@ export default function CreatePersona(props: PropsType) {
     // }, 3000);
 
     //short circuit to enter the user into the campaign shell.
-    if (result.data){
+    if (result.data) {
       window.location.href = `/campaign_v2/${result.data as number}`;
       return result.data as number;
     }
@@ -116,20 +122,21 @@ export default function CreatePersona(props: PropsType) {
 
     setCurrentProject(result.data);
 
-    
-
     return result.data as number;
   };
 
   return (
     <Card>
-      <Flex direction={"column"} mb="md">
-      </Flex>
+      <Flex direction={"column"} mb="md"></Flex>
       <Flex align={"center"} justify={"space-between"} gap={"lg"}>
         <Button
           // disabled={!props.createPersona?.name || !props.createPersona.contactObjective}
           // onClick={() => createPersonaHandler()}
           // loading={creatingPersona}
+          onClick={() => {
+            closeAllModals();
+            alert("Campaign created!");
+          }}
           fullWidth
           variant="outline"
           color="gray"

@@ -6,7 +6,12 @@ import PageFrame from "@common/PageFrame";
 import EmailQueuedMessages from "@common/emails/EmailQueuedMessages";
 import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
 import EmojiPicker from "emoji-picker-react";
-import { IconFlagCancel, IconMessage, IconPencil, IconPointerCancel } from "@tabler/icons-react";
+import {
+  IconFlagCancel,
+  IconMessage,
+  IconPencil,
+  IconPointerCancel,
+} from "@tabler/icons-react";
 
 import posthog from "posthog-js";
 
@@ -45,6 +50,7 @@ import {
   SegmentedControl,
   Card,
   Indicator,
+  ColorSwatch,
 } from "@mantine/core";
 import { useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
@@ -81,10 +87,22 @@ import {
   IconToggleRight,
   IconX,
 } from "@tabler/icons";
-import { IconArrowDown, IconArrowUp, IconClipboard, IconMessageCheck } from "@tabler/icons-react";
+import {
+  IconArrowDown,
+  IconArrowUp,
+  IconClipboard,
+  IconMessageCheck,
+} from "@tabler/icons-react";
 import { navigateToPage } from "@utils/documentChange";
-import { convertDateToShortFormatWithoutTime, formatToLabel } from "@utils/general";
-import { getPersonasActivity, getPersonasCampaignView, getPersonasOverview } from "@utils/requests/getPersonas";
+import {
+  convertDateToShortFormatWithoutTime,
+  formatToLabel,
+} from "@utils/general";
+import {
+  getPersonasActivity,
+  getPersonasCampaignView,
+  getPersonasOverview,
+} from "@utils/requests/getPersonas";
 import _ from "lodash";
 import moment from "moment";
 import { ReactNode, useEffect, useMemo, useState } from "react";
@@ -152,6 +170,7 @@ export type CampaignPersona = {
   first_message_delay_days?: number;
   email_to_linkedin_connection?: string;
   cycle?: number;
+  setup_status?: string;
 };
 
 export default function PersonaCampaigns() {
@@ -165,10 +184,15 @@ export default function PersonaCampaigns() {
 
   const [search, setSearch] = useState<string>("");
 
-  let filteredProjects = personas.filter((personas) => personas.name.toLowerCase().includes(search.toLowerCase()));
+  let filteredProjects = personas.filter((personas) =>
+    personas.name.toLowerCase().includes(search.toLowerCase())
+  );
   let allProjects = personas;
 
-  const [campaignAnalyticData, setCampaignAnalyticData] = useState<CampaignAnalyticsData>({
+  const [
+    campaignAnalyticData,
+    setCampaignAnalyticData,
+  ] = useState<CampaignAnalyticsData>({
     sentOutreach: 0,
     accepted: 0,
     activeConvos: 0,
@@ -182,12 +206,21 @@ export default function PersonaCampaigns() {
   });
   const [currentEmailSla, setCurrentEmailSla] = useState<number>(0);
   const [currentLinkedInSLA, setCurrentLinkedInSLA] = useState<number>(0);
-  const [showInactivePersonas, setShowInactivePersonas] = useState<boolean>(false);
+  const [showInactivePersonas, setShowInactivePersonas] = useState<boolean>(
+    false
+  );
   const [showAdvancedTabs, setShowAdvancedTabs] = useState<boolean>(false);
+  const [showActiveCampaigns, setShowActiveCampaigns] = useState<boolean>(true);
+  const [showInactiveCampaigns, setShowInactiveCampaigns] = useState<boolean>(
+    false
+  );
+  const [showSetupCampaigns, setShowSetupCampaigns] = useState<boolean>(true);
 
   let [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
 
-  const [campaignViewMode, setCampaignViewMode] = useState<"node-view" | "list-view" | "cycle-view">("list-view");
+  const [campaignViewMode, setCampaignViewMode] = useState<
+    "node-view" | "list-view" | "cycle-view"
+  >("list-view");
 
   const fetchCampaignPersonas = async () => {
     if (!isLoggedIn()) return;
@@ -195,7 +228,8 @@ export default function PersonaCampaigns() {
 
     // Get Personas Campaign View
     const response = await getPersonasCampaignView(userToken);
-    const result = response.status === "success" ? (response.data as CampaignPersona[]) : [];
+    const result =
+      response.status === "success" ? (response.data as CampaignPersona[]) : [];
 
     // Aggregate campaign analytics
     let analytics = {
@@ -215,7 +249,10 @@ export default function PersonaCampaigns() {
     // Get LinkedIn SLA
     if (userData.sla_schedules) {
       for (const schedule of userData.sla_schedules) {
-        if (moment(schedule.start_date) < moment() && moment() <= moment(schedule.start_date).add(7, "days")) {
+        if (
+          moment(schedule.start_date) < moment() &&
+          moment() <= moment(schedule.start_date).add(7, "days")
+        ) {
           setCurrentEmailSla(schedule.email_volume);
           setCurrentLinkedInSLA(schedule.linkedin_volume);
         }
@@ -228,7 +265,10 @@ export default function PersonaCampaigns() {
 
     // Get Personas Overview
     const response2 = await getPersonasOverview(userToken);
-    const result2 = response2.status === "success" ? (response2.data as PersonaOverview[]) : [];
+    const result2 =
+      response2.status === "success"
+        ? (response2.data as PersonaOverview[])
+        : [];
     setProjects(result2);
 
     // Get AI Activity
@@ -279,20 +319,32 @@ export default function PersonaCampaigns() {
         <Group>
           {userData?.warmup_linkedin_complete ? (
             <Button
-              leftIcon={<IconBrandLinkedin size="1.4rem" color="white" fill="#228be6" />}
+              leftIcon={
+                <IconBrandLinkedin size="1.4rem" color="white" fill="#228be6" />
+              }
               variant="outline"
               radius="md"
               onClick={() => {
                 navigateToPage(navigate, `/settings/linkedin`);
               }}
             >
-              Linkedin Send Rate (per week):
+              Weekly LinkedIn Vol:
               {currentLinkedInSLA}
             </Button>
           ) : (
-            <Tooltip label="Your LinkedIn account is in a warmup phase. Explore more." withArrow withinPortal>
+            <Tooltip
+              label="Your LinkedIn account is in a warmup phase. Explore more."
+              withArrow
+              withinPortal
+            >
               <Button
-                leftIcon={<IconBrandLinkedin size="1.4rem" color="white" fill="#228be6" />}
+                leftIcon={
+                  <IconBrandLinkedin
+                    size="1.4rem"
+                    color="white"
+                    fill="#228be6"
+                  />
+                }
                 variant="outline"
                 radius="md"
                 onClick={() => {
@@ -316,7 +368,7 @@ export default function PersonaCampaigns() {
               navigateToPage(navigate, `/settings/email`);
             }}
           >
-            Linkedin Send Rate (per week): {currentEmailSla}
+            Weekly Email Vol: {currentEmailSla}
           </Button>
 
           {/* <SegmentedControl
@@ -353,7 +405,10 @@ export default function PersonaCampaigns() {
                 openContextModal({
                   modal: "uploadProspects",
                   title: (
-                    <Title order={3} sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                    <Title
+                      order={3}
+                      sx={{ display: "flex", alignItems: "center", gap: "5px" }}
+                    >
                       {/* <IconTargetArrow color="#228be6" /> Request Campaign */}
                       <IconTargetArrow color="#228be6" /> Create Campaign
                     </Title>
@@ -410,29 +465,58 @@ export default function PersonaCampaigns() {
       <Stack>
         <Tabs defaultValue="overview">
           <Tabs.List mb="md">
-            <Tabs.Tab value="overview" icon={<IconClipboard size="0.8rem" />} fz="xs">
+            <Tabs.Tab
+              value="overview"
+              icon={<IconClipboard size="0.8rem" />}
+              fz="xs"
+            >
               {userData?.sdr_name.split(" ")[0]}'s Campaigns
             </Tabs.Tab>
-            <Tabs.Tab value="all-campaigns" icon={<IconClipboard size="0.8rem" />} fz="xs">
+            <Tabs.Tab
+              value="all-campaigns"
+              icon={<IconClipboard size="0.8rem" />}
+              fz="xs"
+            >
               {userData?.client?.company}'s Campaigns
             </Tabs.Tab>
             {showAdvancedTabs && (
               <>
-                <Tabs.Tab value="triggers" icon={<IconTarget size="0.8rem" />} fz="xs">
+                <Tabs.Tab
+                  value="triggers"
+                  icon={<IconTarget size="0.8rem" />}
+                  fz="xs"
+                >
                   Triggers
                 </Tabs.Tab>
-                <Tabs.Tab value="website-intent" icon={<IconBrandLinkedin size="0.8rem" />} fz="xs">
+                <Tabs.Tab
+                  value="website-intent"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
                   Website Intent
                 </Tabs.Tab>
-                <Tabs.Tab value="champion-change" icon={<IconBrandLinkedin size="0.8rem" />} fz="xs">
+                <Tabs.Tab
+                  value="champion-change"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
                   Champion Change
                 </Tabs.Tab>
-                <Tabs.Tab value="account-based" icon={<IconBrandLinkedin size="0.8rem" />} fz="xs">
+                <Tabs.Tab
+                  value="account-based"
+                  icon={<IconBrandLinkedin size="0.8rem" />}
+                  fz="xs"
+                >
                   Account Based
                 </Tabs.Tab>
               </>
             )}
-            <Tabs.Tab value="linkedin" icon={<IconBrandLinkedin size="0.8rem" />} ml="auto" fz="xs">
+            <Tabs.Tab
+              value="linkedin"
+              icon={<IconBrandLinkedin size="0.8rem" />}
+              ml="auto"
+              fz="xs"
+            >
               Queued LinkedIns
             </Tabs.Tab>
             <Tabs.Tab value="email" icon={<IconMail size="0.8rem" />} fz="xs">
@@ -480,7 +564,10 @@ export default function PersonaCampaigns() {
                       campaignViewMode={"node-view"}
                       projects={projects}
                       filteredProjects={filteredProjects
-                        .filter((persona: CampaignPersona) => persona.sdr_id === userData?.id)
+                        .filter(
+                          (persona: CampaignPersona) =>
+                            persona.sdr_id === userData?.id
+                        )
                         .sort((a, b) => {
                           if (a.cycle && b.cycle) {
                             return a.cycle - b.cycle;
@@ -492,7 +579,10 @@ export default function PersonaCampaigns() {
                             return 0;
                           }
                         })}
-                      onPersonaActiveStatusUpdate={async (id: number, active: boolean) => {
+                      onPersonaActiveStatusUpdate={async (
+                        id: number,
+                        active: boolean
+                      ) => {
                         setProjects((cur) => {
                           const temp = [...cur].map((e) => {
                             if (e.id === id) {
@@ -508,38 +598,61 @@ export default function PersonaCampaigns() {
                     />
                   )}
 
-                  {!loadingPersonas && campaignViewMode === "list-view" && (
-                    <PersonCampaignTable
-                      campaignViewMode={"node-view"}
-                      projects={projects}
-                      filteredProjects={filteredProjects
-                        .filter((persona: CampaignPersona) => persona.sdr_id === userData?.id)
-                        .filter((persona) => persona.active)}
-                      onPersonaActiveStatusUpdate={async (id: number, active: boolean) => {
-                        setProjects((cur) => {
-                          const temp = [...cur].map((e) => {
-                            if (e.id === id) {
-                              e.active = active;
-                              return e;
-                            }
-                            return e;
-                          });
-                          return temp;
-                        });
-                        await fetchCampaignPersonas();
-                      }}
-                    />
-                  )}
-                  {showInactivePersonas && !loadingPersonas && campaignViewMode === "list-view" && (
-                    <>
+                  {/* ACTIVE CAMPAIGNS */}
+                  <Card withBorder mb="md" p={0}>
+                    <Flex p="md">
+                      <ColorSwatch color="#238BE6" mr="md" />
+                      <Box>
+                        <Title order={4} mb="0">
+                          {
+                            filteredProjects
+                              .filter(
+                                (persona: CampaignPersona) =>
+                                  persona.sdr_id === userData?.id
+                              )
+                              .filter(
+                                (persona: CampaignPersona) =>
+                                  persona.setup_status == "ACTIVE"
+                              ).length
+                          }{" "}
+                          Active Campaigns
+                        </Title>
+                        <Text size="sm" color="gray" mt={0}>
+                          These campaigns are currently active and sending
+                          messages.
+                        </Text>
+                      </Box>
+                      <ActionIcon ml="auto" mr="xs" mt="xs">
+                        <IconChevronDown
+                          size="2rem"
+                          onClick={() =>
+                            setShowActiveCampaigns(!showActiveCampaigns)
+                          }
+                          style={{
+                            transform: showActiveCampaigns
+                              ? "rotate(180deg)"
+                              : "",
+                          }}
+                        />
+                      </ActionIcon>
+                    </Flex>
+                    {showActiveCampaigns && (
                       <PersonCampaignTable
-                        hideHeader
-                        campaignViewMode={campaignViewMode}
+                        campaignViewMode={"node-view"}
                         projects={projects}
                         filteredProjects={filteredProjects
-                          .filter((persona) => !persona.active)
-                          .filter((persona: CampaignPersona) => persona.sdr_id === userData?.id)}
-                        onPersonaActiveStatusUpdate={async (id: number, active: boolean) => {
+                          .filter(
+                            (persona: CampaignPersona) =>
+                              persona.sdr_id === userData?.id
+                          )
+                          .filter(
+                            (persona: CampaignPersona) =>
+                              persona.setup_status == "ACTIVE"
+                          )}
+                        onPersonaActiveStatusUpdate={async (
+                          id: number,
+                          active: boolean
+                        ) => {
                           setProjects((cur) => {
                             const temp = [...cur].map((e) => {
                               if (e.id === id) {
@@ -553,33 +666,262 @@ export default function PersonaCampaigns() {
                           await fetchCampaignPersonas();
                         }}
                       />
-                    </>
+                    )}
+                  </Card>
+
+                  {/* SETUP CAMPAIGNS */}
+                  <Card withBorder mb="md" p={0}>
+                    <Flex p="md">
+                      <ColorSwatch color="#FAB007" mr="md" />
+                      <Box>
+                        <Title order={4} mb="0">
+                          {
+                            filteredProjects
+                              .filter(
+                                (persona: CampaignPersona) =>
+                                  persona.sdr_id === userData?.id
+                              )
+                              .filter(
+                                (persona: CampaignPersona) =>
+                                  persona.setup_status == "SETUP"
+                              ).length
+                          }{" "}
+                          Setup Campaigns
+                        </Title>
+                        <Text size="sm" color="gray" mt={0}>
+                          These campaigns are currently being set up.
+                        </Text>
+                      </Box>
+                      <ActionIcon ml="auto" mr="xs" mt="xs">
+                        <IconChevronDown
+                          size="2rem"
+                          onClick={() =>
+                            setShowSetupCampaigns(!showSetupCampaigns)
+                          }
+                          style={{
+                            transform: showSetupCampaigns
+                              ? "rotate(180deg)"
+                              : "",
+                          }}
+                        />
+                      </ActionIcon>
+                    </Flex>
+                    {showSetupCampaigns && (
+                      <PersonCampaignTable
+                        campaignViewMode={"node-view"}
+                        projects={projects}
+                        filteredProjects={filteredProjects
+                          .filter(
+                            (persona: CampaignPersona) =>
+                              persona.sdr_id === userData?.id
+                          )
+                          .filter(
+                            (persona: CampaignPersona) =>
+                              persona.setup_status == "SETUP"
+                          )}
+                        onPersonaActiveStatusUpdate={async (
+                          id: number,
+                          active: boolean
+                        ) => {
+                          setProjects((cur) => {
+                            const temp = [...cur].map((e) => {
+                              if (e.id === id) {
+                                e.active = active;
+                                return e;
+                              }
+                              return e;
+                            });
+                            return temp;
+                          });
+                          await fetchCampaignPersonas();
+                        }}
+                      />
+                    )}
+                  </Card>
+
+                  {/* INACTIVE CAMPAIGNS */}
+                  <Card withBorder mb="md" p={0}>
+                    <Flex p="md">
+                      <ColorSwatch color="#FA5352" mr="md" />
+                      <Box>
+                        <Title order={4} mb="0">
+                          {
+                            filteredProjects
+                              .filter(
+                                (persona: CampaignPersona) =>
+                                  persona.sdr_id === userData?.id
+                              )
+                              .filter(
+                                (persona: CampaignPersona) =>
+                                  persona.setup_status == "INACTIVE"
+                              ).length
+                          }{" "}
+                          Inactive Campaigns
+                        </Title>
+                        <Text size="sm" color="gray" mt={0}>
+                          These campaigns are not currently sending messages.
+                        </Text>
+                      </Box>
+                      <ActionIcon ml="auto" mr="xs" mt="xs">
+                        <IconChevronDown
+                          size="2rem"
+                          onClick={() =>
+                            setShowInactiveCampaigns(!showInactiveCampaigns)
+                          }
+                          style={{
+                            transform: showInactiveCampaigns
+                              ? "rotate(180deg)"
+                              : "",
+                          }}
+                        />
+                      </ActionIcon>
+                    </Flex>
+                    {showInactiveCampaigns && (
+                      <PersonCampaignTable
+                        campaignViewMode={"node-view"}
+                        projects={projects}
+                        filteredProjects={filteredProjects
+                          .filter(
+                            (persona: CampaignPersona) =>
+                              persona.sdr_id === userData?.id
+                          )
+                          .filter(
+                            (persona: CampaignPersona) =>
+                              persona.setup_status == "INACTIVE"
+                          )}
+                        onPersonaActiveStatusUpdate={async (
+                          id: number,
+                          active: boolean
+                        ) => {
+                          setProjects((cur) => {
+                            const temp = [...cur].map((e) => {
+                              if (e.id === id) {
+                                e.active = active;
+                                return e;
+                              }
+                              return e;
+                            });
+                            return temp;
+                          });
+                          await fetchCampaignPersonas();
+                        }}
+                      />
+                    )}
+                  </Card>
+
+                  {/* OLD VIEW START */}
+                  {/* {!loadingPersonas && campaignViewMode === "list-view" && (
+                    <PersonCampaignTable
+                      campaignViewMode={"node-view"}
+                      projects={projects}
+                      filteredProjects={filteredProjects
+                        .filter(
+                          (persona: CampaignPersona) =>
+                            persona.sdr_id === userData?.id
+                        )
+                        .filter((persona) => persona.active)}
+                      onPersonaActiveStatusUpdate={async (
+                        id: number,
+                        active: boolean
+                      ) => {
+                        setProjects((cur) => {
+                          const temp = [...cur].map((e) => {
+                            if (e.id === id) {
+                              e.active = active;
+                              return e;
+                            }
+                            return e;
+                          });
+                          return temp;
+                        });
+                        await fetchCampaignPersonas();
+                      }}
+                    />
                   )}
+                  {showInactivePersonas &&
+                    !loadingPersonas &&
+                    campaignViewMode === "list-view" && (
+                      <>
+                        <PersonCampaignTable
+                          hideHeader
+                          campaignViewMode={"node-view"}
+                          projects={projects}
+                          filteredProjects={filteredProjects
+                            .filter((persona) => !persona.active)
+                            .filter(
+                              (persona: CampaignPersona) =>
+                                persona.sdr_id === userData?.id
+                            )}
+                          onPersonaActiveStatusUpdate={async (
+                            id: number,
+                            active: boolean
+                          ) => {
+                            setProjects((cur) => {
+                              const temp = [...cur].map((e) => {
+                                if (e.id === id) {
+                                  e.active = active;
+                                  return e;
+                                }
+                                return e;
+                              });
+                              return temp;
+                            });
+                            await fetchCampaignPersonas();
+                          }}
+                        />
+                      </>
+                    )}
 
                   {campaignViewMode === "list-view" &&
-                    filteredProjects.filter((persona) => !persona.active).filter((persona: CampaignPersona) => persona.sdr_id === userData?.id).length > 0 && (
+                    filteredProjects
+                      .filter((persona) => !persona.active)
+                      .filter(
+                        (persona: CampaignPersona) =>
+                          persona.sdr_id === userData?.id
+                      ).length > 0 && (
                       <Button
                         color="gray"
                         // leftIcon={<IconCalendar color="gray" size="0.8rem"></IconCalendar>}
-                        rightIcon={showInactivePersonas ? <IconChevronUp size={"0.8rem"} /> : <IconChevronDown size={"0.8rem"} />}
+                        rightIcon={
+                          showInactivePersonas ? (
+                            <IconChevronUp size={"0.8rem"} />
+                          ) : (
+                            <IconChevronDown size={"0.8rem"} />
+                          )
+                        }
                         variant="outline"
                         size="xs"
                         w="300px"
                         ml="auto"
                         mr="auto"
                         sx={{ borderRadius: "0.5rem" }}
-                        onClick={() => setShowInactivePersonas(!showInactivePersonas)}
+                        onClick={() =>
+                          setShowInactivePersonas(!showInactivePersonas)
+                        }
                         mt="md"
                         mb="md"
                       >
                         {showInactivePersonas ? "Hide" : "Show"}{" "}
-                        {filteredProjects.filter((persona) => !persona.active).filter((persona: CampaignPersona) => persona.sdr_id === userData?.id).length}{" "}
+                        {
+                          filteredProjects
+                            .filter((persona) => !persona.active)
+                            .filter(
+                              (persona: CampaignPersona) =>
+                                persona.sdr_id === userData?.id
+                            ).length
+                        }{" "}
                         Inactive Campaign
-                        {filteredProjects.filter((persona) => !persona.active).filter((persona: CampaignPersona) => persona.sdr_id === userData?.id).length > 1
+                        {filteredProjects
+                          .filter((persona) => !persona.active)
+                          .filter(
+                            (persona: CampaignPersona) =>
+                              persona.sdr_id === userData?.id
+                          ).length > 1
                           ? "s"
                           : ""}
                       </Button>
-                    )}
+                    )} */}
+                  {/* OLD VIEW END */}
 
                   {!loadingPersonas && filteredProjects.length === 0 && (
                     <Center h={200}>
@@ -630,8 +972,12 @@ export function PersonCampaignCard(props: {
   onPersonaActiveStatusUpdate?: (id: number, active: boolean) => void;
 }) {
   const navigate = useNavigate();
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
-  const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
+  const [openedProspectId, setOpenedProspectId] = useRecoilState(
+    openedProspectIdState
+  );
   const [opened, { open, close, toggle }] = useDisclosure(false); //props.persona.active
   const [inactiveChannelsOpened, setInactiveChannelsOpened] = useState(false);
   const [emoji, setEmojiState] = useState<string>(props.persona.emoji || "⬜️");
@@ -651,7 +997,7 @@ export function PersonCampaignCard(props: {
   const [campaignList, setCampaignList] = useState<Record<string, any>[]>([]);
   const [campaignName, setCampaignName] = useState("");
 
-  const isMyCampaign = (userData.id === props.persona.sdr_id);
+  const isMyCampaign = userData.id === props.persona.sdr_id;
 
   const setEmoji = (emoji: string) => {
     setEmojiState(emoji);
@@ -700,11 +1046,20 @@ export function PersonCampaignCard(props: {
       date: props.persona.created_at,
     },
   ];
-  const [popoverOpened, { close: closePopover, open: openPopover }] = useDisclosure(false);
+  const [
+    popoverOpened,
+    { close: closePopover, open: openPopover },
+  ] = useDisclosure(false);
 
-  const [statuspopoverOpened, { close: statusclosePopover, open: statusopenPopover }] = useDisclosure(false);
+  const [
+    statuspopoverOpened,
+    { close: statusclosePopover, open: statusopenPopover },
+  ] = useDisclosure(false);
 
-  const [channelOpened, { open: channelOpen, close: channelClose }] = useDisclosure(false);
+  const [
+    channelOpened,
+    { open: channelOpen, close: channelClose },
+  ] = useDisclosure(false);
 
   const ChannelModal = () => {
     return (
@@ -736,9 +1091,21 @@ export function PersonCampaignCard(props: {
               : ""
           }
         >
-          <Flex justify={"space-between"} w={"100%"} align={"center"} px={43} py={25}>
+          <Flex
+            justify={"space-between"}
+            w={"100%"}
+            align={"center"}
+            px={43}
+            py={25}
+          >
             <Text size={"lg"} color="white">
-              Outreach for: <span className=" font-semibold text-[20px]"> {campaignName ? campaignName : "Coming soon! ⚠️ - This is all mock data..."}</span>
+              Outreach for:{" "}
+              <span className=" font-semibold text-[20px]">
+                {" "}
+                {campaignName
+                  ? campaignName
+                  : "Coming soon! ⚠️ - This is all mock data..."}
+              </span>
             </Text>
             <CloseButton
               aria-label="Close modal"
@@ -773,7 +1140,9 @@ export function PersonCampaignCard(props: {
                 percentcolor="#e7f5ff"
                 total={total_sent ?? 0}
                 border={value === "sent" ? "#228be6" : ""}
-                percentage={Math.floor(((total_sent ?? 0) / (total_sent || 1)) * 100)}
+                percentage={Math.floor(
+                  ((total_sent ?? 0) / (total_sent || 1)) * 100
+                )}
               />
             </Box>
             <Box
@@ -789,7 +1158,9 @@ export function PersonCampaignCard(props: {
                 percentcolor="#ffedff"
                 border={value === "open" ? "#fd4efe" : ""}
                 total={total_opened ?? 0}
-                percentage={Math.floor(((total_opened ?? 0) / (total_sent || 1)) * 100)}
+                percentage={Math.floor(
+                  ((total_opened ?? 0) / (total_sent || 1)) * 100
+                )}
               />
             </Box>
             <Box
@@ -805,7 +1176,9 @@ export function PersonCampaignCard(props: {
                 percentcolor="#fff5ee"
                 border={value === "reply" ? "#fd7e14" : ""}
                 total={total_replied ?? 0}
-                percentage={Math.floor(((total_replied ?? 0) / (total_opened || 1)) * 100)}
+                percentage={Math.floor(
+                  ((total_replied ?? 0) / (total_opened || 1)) * 100
+                )}
               />
             </Box>
             <Box
@@ -821,7 +1194,9 @@ export function PersonCampaignCard(props: {
                 percentcolor="#E8F6F2"
                 border={value === "total_pos_replied" ? "#CFF1E7" : ""}
                 total={total_pos_replied ?? 0}
-                percentage={Math.floor(((total_pos_replied ?? 0) / (total_replied || 1)) * 100)}
+                percentage={Math.floor(
+                  ((total_pos_replied ?? 0) / (total_replied || 1)) * 100
+                )}
               />
             </Box>
             <Box
@@ -837,7 +1212,10 @@ export function PersonCampaignCard(props: {
                 percentcolor="#e2f6e7"
                 border={value === "demo" ? "#40c057" : ""}
                 total={props.persona.total_demo ?? 0}
-                percentage={Math.floor(((props.persona.total_demo ?? 0) / (total_pos_replied || 1)) * 100)}
+                percentage={Math.floor(
+                  ((props.persona.total_demo ?? 0) / (total_pos_replied || 1)) *
+                    100
+                )}
               />
             </Box>
           </Group>
@@ -944,7 +1322,9 @@ export function PersonCampaignCard(props: {
                           <Text color="#817e7e" fw={600}>
                             Last Message From Prospect:
                           </Text>
-                          <Text color="#817e7e">{item.last_message_timestamp}</Text>
+                          <Text color="#817e7e">
+                            {item.last_message_timestamp}
+                          </Text>
                         </Flex>
                         <Box
                           bg={
@@ -964,7 +1344,9 @@ export function PersonCampaignCard(props: {
                             borderRadius: "10px",
                           }}
                         >
-                          <Text fw={500}>{item?.last_message_from_prospect}</Text>
+                          <Text fw={500}>
+                            {item?.last_message_from_prospect}
+                          </Text>
                         </Box>
                       </Box>
                     </Flex>
@@ -978,7 +1360,11 @@ export function PersonCampaignCard(props: {
     );
   };
 
-  const handleChannelOpen = async (type: string, id: number, campaign_name: string) => {
+  const handleChannelOpen = async (
+    type: string,
+    id: number,
+    campaign_name: string
+  ) => {
     setValue(type);
     setCampaignName(campaign_name);
     var myHeaders = new Headers();
@@ -990,7 +1376,10 @@ export function PersonCampaignCard(props: {
       redirect: "follow",
     };
 
-    await fetch(`${API_URL}/analytics/get_campaign_drilldown/${id}`, requestOptions)
+    await fetch(
+      `${API_URL}/analytics/get_campaign_drilldown/${id}`,
+      requestOptions
+    )
       .then((response) => response.text())
       .then((result) => {
         channelOpen();
@@ -1001,19 +1390,34 @@ export function PersonCampaignCard(props: {
 
   const filteredCampaignList = useMemo(() => {
     if (value === "sent") {
-      return campaignList?.filter((item: any) => item.to_status === "SENT_OUTREACH");
+      return campaignList?.filter(
+        (item: any) => item.to_status === "SENT_OUTREACH"
+      );
     } else if (value === "open") {
-      return campaignList?.filter((item: any) => item.to_status === "ACCEPTED" || item.to_status === "EMAIL_OPENED");
+      return campaignList?.filter(
+        (item: any) =>
+          item.to_status === "ACCEPTED" || item.to_status === "EMAIL_OPENED"
+      );
     } else if (value === "reply") {
-      return campaignList?.filter((item: any) => item.to_status === "ACTIVE_CONVO");
+      return campaignList?.filter(
+        (item: any) => item.to_status === "ACTIVE_CONVO"
+      );
     } else if (value === "demo") {
       return campaignList?.filter((item: any) => item.to_status === "DEMO_SET");
     } else if (value === "pos_reply") {
-      return campaignList?.filter((item: any) => ["ACTIVE_CONVO_SCHEDULING", "ACTIVE_CONVO_NEXT_STEPS", "ACTIVE_CONVO_QUESTION"].includes(item.to_status));
+      return campaignList?.filter((item: any) =>
+        [
+          "ACTIVE_CONVO_SCHEDULING",
+          "ACTIVE_CONVO_NEXT_STEPS",
+          "ACTIVE_CONVO_QUESTION",
+        ].includes(item.to_status)
+      );
     }
   }, [value, campaignList]);
 
-  const unusedProspects = (props.project?.num_unused_email_prospects ?? 0) + (props.project?.num_unused_li_prospects ?? 0);
+  const unusedProspects =
+    (props.project?.num_unused_email_prospects ?? 0) +
+    (props.project?.num_unused_li_prospects ?? 0);
 
   // Calculate the completion percentage as following:
   // Numerator: Number of successful sends to prospects on active channels
@@ -1022,37 +1426,51 @@ export function PersonCampaignCard(props: {
   let liDenominator = 0;
   let linkedinCompletionPercentage;
   console.log(props.persona.name, props.persona);
-  if (props.persona.total_prospects_left_linkedin == 0 && props.persona.li_sent > 0) {
+  if (
+    props.persona.total_prospects_left_linkedin == 0 &&
+    props.persona.li_sent > 0
+  ) {
     // LI: If we have no more eligible prospects and we've sent some messages, then we can assume LI is complete
     liNumerator += props.persona.li_used;
     liDenominator += props.persona.li_used;
   } else if (props.persona.li_sent) {
     // LI: Otherwise if we have prospects left and have sent messages, then we calculate the completion percentage
     liNumerator += props.persona.li_used;
-    liDenominator += props.persona.li_used + props.persona.total_prospects_left_linkedin;
+    liDenominator +=
+      props.persona.li_used + props.persona.total_prospects_left_linkedin;
   } else if (props.persona.li_queued && props.persona.linkedin_active) {
     liNumerator += props.persona.li_sent ? props.persona.li_used : 0; // This is weird logic. It checks to make sure that we don't count the LI used if we haven't sent any messages yet. Usually happens at the beginning of campaigns.
-    liDenominator += props.persona.li_used + props.persona.total_prospects_left_linkedin;
+    liDenominator +=
+      props.persona.li_used + props.persona.total_prospects_left_linkedin;
   }
-  linkedinCompletionPercentage = Math.min(100, Math.floor((liNumerator / liDenominator) * 100)) || 0;
+  linkedinCompletionPercentage =
+    Math.min(100, Math.floor((liNumerator / liDenominator) * 100)) || 0;
 
   let emailNumerator = 0;
   let emailDenominator = 0;
   let emailCompletionPercentage;
-  if (props.persona.total_prospects_left_email == 0 && props.persona.email_sent > 0) {
+  if (
+    props.persona.total_prospects_left_email == 0 &&
+    props.persona.email_sent > 0
+  ) {
     // Email: If we have no more eligible prospects and we've sent some messages, then we can assume Email is complete
     emailNumerator += props.persona.email_used;
     emailDenominator += props.persona.email_used;
   } else if (props.persona.email_sent) {
     // Email: Otherwise if we have prospects left and have sent messages, then we calculate the completion percentage
     emailNumerator += props.persona.email_used;
-    emailDenominator += props.persona.email_used + props.persona.total_prospects_left_email;
+    emailDenominator +=
+      props.persona.email_used + props.persona.total_prospects_left_email;
   }
-  emailCompletionPercentage = Math.min(100, Math.floor((emailNumerator / emailDenominator) * 100)) || 0;
+  emailCompletionPercentage =
+    Math.min(100, Math.floor((emailNumerator / emailDenominator) * 100)) || 0;
 
   let completionNumerator = 0;
   let completionDenominator = 0;
-  if (props.persona.linkedin_active || props.persona.total_prospects_left_linkedin == 0) {
+  if (
+    props.persona.linkedin_active ||
+    props.persona.total_prospects_left_linkedin == 0
+  ) {
     // LI: If this channel is active or we have no more prospects left, then we include it in the completion percentage
     completionNumerator += liNumerator;
     completionDenominator += liDenominator;
@@ -1065,10 +1483,16 @@ export function PersonCampaignCard(props: {
     completionNumerator += emailNumerator;
     completionDenominator += emailDenominator;
   }
-  const completionPercentage = Math.min(100, Math.floor((completionNumerator / completionDenominator) * 100)) || 0;
+  const completionPercentage =
+    Math.min(
+      100,
+      Math.floor((completionNumerator / completionDenominator) * 100)
+    ) || 0;
   let numberOfRings = 0;
-  if (linkedinCompletionPercentage > 0 || props.persona.linkedin_active) numberOfRings++;
-  if (emailCompletionPercentage > 0 || props.persona.email_active) numberOfRings++;
+  if (linkedinCompletionPercentage > 0 || props.persona.linkedin_active)
+    numberOfRings++;
+  if (emailCompletionPercentage > 0 || props.persona.email_active)
+    numberOfRings++;
   if (numberOfRings === 0) numberOfRings = 1;
   let completionsActiveSpan = 12;
   if (linkedinCompletionPercentage > 0 && emailCompletionPercentage > 0) {
@@ -1087,7 +1511,7 @@ export function PersonCampaignCard(props: {
         <Group
           // position="apart"
           sx={(theme) => ({
-            backgroundColor: (isMyCampaign ? '' : theme.colors.gray[1]),
+            backgroundColor: isMyCampaign ? "" : theme.colors.gray[1],
             borderRadius: "0.5rem 0.5rem 0 0",
             border: "solid 1px " + theme.colors.gray[2],
             position: "relative",
@@ -1101,7 +1525,11 @@ export function PersonCampaignCard(props: {
           <Group sx={{ width: "200px", padding: "0 4px" }}>
             <Flex
               onClick={() => {
-                navigateToPage(navigate, `/contacts`, new URLSearchParams(`?campaign_id=${props.persona.id}`));
+                navigateToPage(
+                  navigate,
+                  `/contacts`,
+                  new URLSearchParams(`?campaign_id=${props.persona.id}`)
+                );
               }}
               mt={5}
               w={"100%"}
@@ -1138,7 +1566,11 @@ export function PersonCampaignCard(props: {
                         // <Text size="xs" align="center">
                         //   {completionPercentage}%
                         // </Text>
-                        <IconPoint color="white" fill="#F1F3F5" className="mt-2" />
+                        <IconPoint
+                          color="white"
+                          fill="#F1F3F5"
+                          className="mt-2"
+                        />
                       }
                       variant="animated"
                       sections={[
@@ -1157,16 +1589,20 @@ export function PersonCampaignCard(props: {
                 <Popover.Dropdown>
                   <Flex gap={"lg"} align={"center"}>
                     {/* Empty State */}
-                    {linkedinCompletionPercentage === 0 && emailCompletionPercentage === 0 && !props.persona.linkedin_active && !props.persona.email_active && (
-                      <Flex align="center" justify={"center"} w="100%">
-                        <Text size="sm" color="gray">
-                          No channels have been activated yet
-                        </Text>
-                      </Flex>
-                    )}
+                    {linkedinCompletionPercentage === 0 &&
+                      emailCompletionPercentage === 0 &&
+                      !props.persona.linkedin_active &&
+                      !props.persona.email_active && (
+                        <Flex align="center" justify={"center"} w="100%">
+                          <Text size="sm" color="gray">
+                            No channels have been activated yet
+                          </Text>
+                        </Flex>
+                      )}
 
                     {/* LinkedIn */}
-                    {(linkedinCompletionPercentage > 0 || props.persona.linkedin_active) && (
+                    {(linkedinCompletionPercentage > 0 ||
+                      props.persona.linkedin_active) && (
                       <CampaignProgressDropdown
                         persona={props.persona}
                         numerator={liNumerator}
@@ -1175,12 +1611,16 @@ export function PersonCampaignCard(props: {
                         channel="LINKEDIN"
                       />
                     )}
-                    {(linkedinCompletionPercentage > 0 || props.persona.linkedin_active) && (emailCompletionPercentage > 0 || props.persona.email_active) && (
-                      <Divider orientation="vertical" />
-                    )}
+                    {(linkedinCompletionPercentage > 0 ||
+                      props.persona.linkedin_active) &&
+                      (emailCompletionPercentage > 0 ||
+                        props.persona.email_active) && (
+                        <Divider orientation="vertical" />
+                      )}
 
                     {/* Email */}
-                    {(emailCompletionPercentage > 0 || props.persona.email_active) && (
+                    {(emailCompletionPercentage > 0 ||
+                      props.persona.email_active) && (
                       <CampaignProgressDropdown
                         persona={props.persona}
                         numerator={emailNumerator}
@@ -1192,20 +1632,35 @@ export function PersonCampaignCard(props: {
                   </Flex>
                 </Popover.Dropdown>
               </Popover>
-              <Popover width={350} position="bottom" shadow="lg" opened={statuspopoverOpened}>
+              <Popover
+                width={350}
+                position="bottom"
+                shadow="lg"
+                opened={statuspopoverOpened}
+              >
                 <Popover.Target>
                   <Box>
                     <Badge
                       size="xs"
-                      color={(props.persona.active && props.persona.total_prospects > 0 ? "blue" : props.persona.active ? "yellow" : "red") || "yellow"}
+                      color={
+                        props.persona.setup_status == "SETUP"
+                          ? "yellow"
+                          : props.persona.setup_status == "ACTIVE"
+                          ? "blue"
+                          : props.persona.setup_status == "INACTIVE"
+                          ? "red"
+                          : "gray"
+                      }
                       onMouseEnter={statusopenPopover}
                       onMouseLeave={statusclosePopover}
                     >
-                      {/* If props.persona.active and num_prospects > 0 then 'Active' else if props.persona.active then "Setup" else "Inactive" */}
-                      {(props.persona.active && props.persona.total_prospects > 0 ? "Active" : props.persona.active ? "Setup" : "Inactive") || "Inactive"}
+                      {props.persona.setup_status}
                     </Badge>
                     {!!props.persona.smartlead_campaign_id && (
-                      <Tooltip label="This email campaign is set up correctly." withArrow>
+                      <Tooltip
+                        label="This email campaign is set up correctly."
+                        withArrow
+                      >
                         <Badge size="xs" color={"violet"} ml="4px">
                           {"🔗"}
                         </Badge>
@@ -1229,7 +1684,11 @@ export function PersonCampaignCard(props: {
                       </Flex>
                       <Divider w={"100%"} />
                       <Flex w={"fit-content"}>
-                        <IconCircleCheck color="white" size={"1.2rem"} fill="green" />
+                        <IconCircleCheck
+                          color="white"
+                          size={"1.2rem"}
+                          fill="green"
+                        />
                       </Flex>
                     </Flex>
                     <Text color="gray" size={"xs"}>
@@ -1245,7 +1704,11 @@ export function PersonCampaignCard(props: {
                       </Flex>
                       <Divider w={"100%"} />
                       <Flex w={"fit-content"}>
-                        <IconCircleCheck color="white" size={"1.2rem"} fill="green" />
+                        <IconCircleCheck
+                          color="white"
+                          size={"1.2rem"}
+                          fill="green"
+                        />
                       </Flex>
                     </Flex>
                     <Text color="gray" size={"xs"}>
@@ -1261,7 +1724,11 @@ export function PersonCampaignCard(props: {
                       </Flex>
                       <Divider w={"100%"} />
                       <Flex w={"fit-content"}>
-                        <IconCircleCheck color="white" size={"1.2rem"} fill="green" />
+                        <IconCircleCheck
+                          color="white"
+                          size={"1.2rem"}
+                          fill="green"
+                        />
                       </Flex>
                     </Flex>
                     <Text color="gray" size={"xs"}>
@@ -1277,7 +1744,11 @@ export function PersonCampaignCard(props: {
                       </Flex>
                       <Divider w={"100%"} />
                       <Flex w={"fit-content"}>
-                        <IconCircleCheck color="white" size={"1.2rem"} fill="green" />
+                        <IconCircleCheck
+                          color="white"
+                          size={"1.2rem"}
+                          fill="green"
+                        />
                       </Flex>
                     </Flex>
                     <Text color="gray" size={"xs"}>
@@ -1318,10 +1789,26 @@ export function PersonCampaignCard(props: {
                       />
                     </Popover.Dropdown>
                   </Popover>
-                  <Tooltip label={props.persona.name + " - " + +total_sent + " / " + props.persona.total_prospects + " prospects sent"} withArrow>
+                  <Tooltip
+                    label={
+                      props.persona.name +
+                      " - " +
+                      +total_sent +
+                      " / " +
+                      props.persona.total_prospects +
+                      " prospects sent"
+                    }
+                    withArrow
+                  >
                     <Box>
                       {props.persona.cycle && props.showCycles && (
-                        <Badge size="xs" mt="xs" color={deterministicMantineColor(props.persona.cycle + "")}>
+                        <Badge
+                          size="xs"
+                          mt="xs"
+                          color={deterministicMantineColor(
+                            props.persona.cycle + ""
+                          )}
+                        >
                           Cycle #{props.persona.cycle}
                         </Badge>
                       )}
@@ -1337,7 +1824,9 @@ export function PersonCampaignCard(props: {
                             setCurrentProject(props.project);
                           }
 
-                          if (props.persona.email_sent > props.persona.li_sent) {
+                          if (
+                            props.persona.email_sent > props.persona.li_sent
+                          ) {
                             window.location.href = `/campaign_v2/${props.persona.id}`;
                           } else {
                             window.location.href = `/campaign_v2/${props.persona.id}`;
@@ -1346,16 +1835,18 @@ export function PersonCampaignCard(props: {
                       >
                         {props.persona.name}
                       </Text>
-                      {props.showAvatar && <Flex align="center">
-                      <Avatar radius='xl' size='sm' src={props.persona.sdr_img_url}></Avatar>
-                        <Text
-                          mt={2}
-                          fz={"xs"}
-                          c={"gray.5"}
-                        >
-                          &nbsp; {props.persona.sdr_name}
-                        </Text>
-                      </Flex>}
+                      {props.showAvatar && (
+                        <Flex align="center">
+                          <Avatar
+                            radius="xl"
+                            size="sm"
+                            src={props.persona.sdr_img_url}
+                          ></Avatar>
+                          <Text mt={2} fz={"xs"} c={"gray.5"}>
+                            &nbsp; {props.persona.sdr_name}
+                          </Text>
+                        </Flex>
+                      )}
                     </Box>
                   </Tooltip>
                 </Flex>
@@ -1450,7 +1941,9 @@ export function PersonCampaignCard(props: {
                   icon={<IconSend color={theme.colors.blue[6]} size="0.9rem" />}
                   label="Sent"
                   total={total_sent ?? 0}
-                  percentage={Math.floor(((total_sent ?? 0) / (total_sent || 1)) * 100)}
+                  percentage={Math.floor(
+                    ((total_sent ?? 0) / (total_sent || 1)) * 100
+                  )}
                   percentColor="#eaf3ff"
                   hoverColor="hover:bg-[#cadef9]"
                 />
@@ -1469,10 +1962,14 @@ export function PersonCampaignCard(props: {
                 <StatDisplay
                   color="pink"
                   width="w-[93px]"
-                  icon={<IconChecks color={theme.colors.pink[6]} size="0.9rem" />}
+                  icon={
+                    <IconChecks color={theme.colors.pink[6]} size="0.9rem" />
+                  }
                   label="Open"
                   total={total_opened ?? 0}
-                  percentage={Math.floor(((total_opened ?? 0) / (total_sent || 1)) * 100)}
+                  percentage={Math.floor(
+                    ((total_opened ?? 0) / (total_sent || 1)) * 100
+                  )}
                   percentColor="#ffeeff"
                   hoverColor="hover:bg-[#fbdefb]"
                 />
@@ -1483,7 +1980,11 @@ export function PersonCampaignCard(props: {
               // w={'12%'}
               w={"100%"}
               onClick={() => {
-                handleChannelOpen("reply", props.persona.id, props.persona.name);
+                handleChannelOpen(
+                  "reply",
+                  props.persona.id,
+                  props.persona.name
+                );
               }}
               bg={"#fffbf8"}
               p={0}
@@ -1492,10 +1993,14 @@ export function PersonCampaignCard(props: {
                 <StatDisplay
                   color="orange"
                   width="w-[93px]"
-                  icon={<IconMessage color={theme.colors.orange[6]} size="0.9rem" />}
+                  icon={
+                    <IconMessage color={theme.colors.orange[6]} size="0.9rem" />
+                  }
                   label="Reply"
                   total={total_replied ?? 0}
-                  percentage={Math.floor(((total_replied ?? 0) / (total_opened || 1)) * 100)}
+                  percentage={Math.floor(
+                    ((total_replied ?? 0) / (total_opened || 1)) * 100
+                  )}
                   percentColor="#f9e7dc"
                   hoverColor="hover:bg-[#f8f3f0]"
                 />
@@ -1506,7 +2011,11 @@ export function PersonCampaignCard(props: {
               // w={'12%'}
               w={"100%"}
               onClick={() => {
-                handleChannelOpen("pos_reply", props.persona.id, props.persona.name);
+                handleChannelOpen(
+                  "pos_reply",
+                  props.persona.id,
+                  props.persona.name
+                );
               }}
               bg={"#f8fbf9"}
             >
@@ -1514,10 +2023,14 @@ export function PersonCampaignCard(props: {
                 <StatDisplay
                   color="#14B887"
                   width="w-[93px]"
-                  icon={<IconMessage color={theme.colors.teal[6]} size="0.9rem" />}
+                  icon={
+                    <IconMessage color={theme.colors.teal[6]} size="0.9rem" />
+                  }
                   label="(+)Reply"
                   total={total_pos_replied ?? 0}
-                  percentage={Math.floor(((total_pos_replied ?? 0) / (total_replied || 1)) * 100)}
+                  percentage={Math.floor(
+                    ((total_pos_replied ?? 0) / (total_replied || 1)) * 100
+                  )}
                   percentColor="#CFF1E7"
                   hoverColor="hover:bg-[#E8F6F2]"
                 />
@@ -1536,10 +2049,16 @@ export function PersonCampaignCard(props: {
                 <StatDisplay
                   color="green"
                   width="w-[93px]"
-                  icon={<IconCalendar color={theme.colors.green[6]} size="0.9rem" />}
+                  icon={
+                    <IconCalendar color={theme.colors.green[6]} size="0.9rem" />
+                  }
                   label="Demo"
                   total={props.persona.total_demo ?? 0}
-                  percentage={Math.floor(((props.persona.total_demo ?? 0) / (total_pos_replied || 1)) * 100)}
+                  percentage={Math.floor(
+                    ((props.persona.total_demo ?? 0) /
+                      (total_pos_replied || 1)) *
+                      100
+                  )}
                   percentColor="#e2f6e7"
                   hoverColor="hover:bg-[#d9f5e0]"
                 />
@@ -1571,7 +2090,10 @@ export function PersonCampaignCard(props: {
             <Group noWrap>
               <Stack spacing={5}>
                 <Center>
-                  <ThemeIcon size="xs" color={props.persona.email_active ? undefined : "gray.4"}>
+                  <ThemeIcon
+                    size="xs"
+                    color={props.persona.email_active ? undefined : "gray.4"}
+                  >
                     <IconMail style={{ width: "90%", height: "90%" }} />
                   </ThemeIcon>
                 </Center>
@@ -1579,26 +2101,47 @@ export function PersonCampaignCard(props: {
                   projectId={props.persona.id}
                   isActive={props.persona.email_active}
                   onChangeUserStatusSuccess={(status: boolean) => {
-                    const result = postTogglePersonaActive(userToken, props.persona.id, "email", !props.persona.email_active).then((res) => {
+                    const result = postTogglePersonaActive(
+                      userToken,
+                      props.persona.id,
+                      "email",
+                      !props.persona.email_active
+                    ).then((res) => {
                       // setPersonaActive(status);
-                      props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
+                      props.onPersonaActiveStatusUpdate?.(
+                        props.persona?.id ?? 0,
+                        status
+                      );
                     });
                   }}
                 />
               </Stack>
               <Stack spacing={5}>
                 <Center>
-                  <ThemeIcon size="xs" color={props.persona.linkedin_active ? undefined : "gray.4"}>
-                    <IconBrandLinkedin style={{ width: "90%", height: "90%" }} />
+                  <ThemeIcon
+                    size="xs"
+                    color={props.persona.linkedin_active ? undefined : "gray.4"}
+                  >
+                    <IconBrandLinkedin
+                      style={{ width: "90%", height: "90%" }}
+                    />
                   </ThemeIcon>
                 </Center>
                 <UserStatusToggle
                   projectId={props.persona.id}
                   isActive={props.persona.linkedin_active}
                   onChangeUserStatusSuccess={(status: boolean) => {
-                    const result = postTogglePersonaActive(userToken, props.persona.id, "linkedin", !props.persona.linkedin_active).then((res) => {
+                    const result = postTogglePersonaActive(
+                      userToken,
+                      props.persona.id,
+                      "linkedin",
+                      !props.persona.linkedin_active
+                    ).then((res) => {
                       // setPersonaActive(status);
-                      props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
+                      props.onPersonaActiveStatusUpdate?.(
+                        props.persona?.id ?? 0,
+                        status
+                      );
                     });
                   }}
                 />
@@ -1606,7 +2149,12 @@ export function PersonCampaignCard(props: {
             </Group>
           </Flex>
           <Divider orientation="vertical" ml="xs" mr="xs" />
-          <Flex w={"5%"} align={"center"} direction={"column"} justify={"center"}>
+          <Flex
+            w={"5%"}
+            align={"center"}
+            direction={"column"}
+            justify={"center"}
+          >
             {/* <Box
             sx={{
               position: 'absolute',
@@ -1634,7 +2182,9 @@ export function PersonCampaignCard(props: {
             <Stack>
               <Center>
                 <ActionIcon
-                  color={props.persona?.sdr_id === userData?.id ? "blue" : "gray"}
+                  color={
+                    props.persona?.sdr_id === userData?.id ? "blue" : "gray"
+                  }
                   sx={{
                     opacity: props.persona?.sdr_id === userData?.id ? 1 : 0.5,
                   }}
@@ -1653,7 +2203,11 @@ export function PersonCampaignCard(props: {
                     }
                   }}
                 >
-                  {opened ? <IconChevronUp size="1.1rem" /> : <IconChevronDown size="1.1rem" />}
+                  {opened ? (
+                    <IconChevronUp size="1.1rem" />
+                  ) : (
+                    <IconChevronDown size="1.1rem" />
+                  )}
                 </ActionIcon>
               </Center>
             </Stack>
@@ -1663,15 +2217,24 @@ export function PersonCampaignCard(props: {
           {props.viewMode === "node-view" && (
             <Box>
               <CampaignGraph
-                emailToLinkedinConnectionType={props.persona.email_to_linkedin_connection}
+                emailToLinkedinConnectionType={
+                  props.persona.email_to_linkedin_connection
+                }
                 personaId={props.persona.id}
-                unusedProspects={`${unusedProspects}/${props.project?.num_prospects ?? 0}`}
+                unusedProspects={`${unusedProspects}/${
+                  props.project?.num_prospects ?? 0
+                }`}
                 sections={types}
                 onChannelClick={(sectionType: string) => {
                   if (props.project == undefined) return;
                   setOpenedProspectId(-1);
                   setCurrentProject(props.project);
-                  navigateToPage(navigate, `/campaign_v2/${sectionType.toLowerCase()}/${props.persona.id}`);
+                  navigateToPage(
+                    navigate,
+                    `/campaign_v2/${sectionType.toLowerCase()}/${
+                      props.persona.id
+                    }`
+                  );
                 }}
               />
             </Box>
@@ -1690,7 +2253,12 @@ export function PersonCampaignCard(props: {
                         if (props.project == undefined) return;
                         setOpenedProspectId(-1);
                         setCurrentProject(props.project);
-                        navigateToPage(navigate, `/campaign_v2/${section.type.toLowerCase()}/${props.persona.id}`);
+                        navigateToPage(
+                          navigate,
+                          `/campaign_v2/${section.type.toLowerCase()}/${
+                            props.persona.id
+                          }`
+                        );
                       }}
                     />
                   </Box>
@@ -1711,7 +2279,12 @@ export function PersonCampaignCard(props: {
                               if (props.project == undefined) return;
                               setOpenedProspectId(-1);
                               setCurrentProject(props.project);
-                              navigateToPage(navigate, `/campaign_v2/${section.type.toLowerCase()}/${props.persona.id}`);
+                              navigateToPage(
+                                navigate,
+                                `/campaign_v2/${section.type.toLowerCase()}/${
+                                  props.persona.id
+                                }`
+                              );
                             }}
                           />
                         </Box>
@@ -1724,10 +2297,19 @@ export function PersonCampaignCard(props: {
                     variant="subtle"
                     size="xs"
                     color="gray"
-                    onClick={() => setInactiveChannelsOpened(!inactiveChannelsOpened)}
-                    leftIcon={inactiveChannelsOpened ? <IconArrowUp size="0.7rem" /> : <IconArrowDown size="0.7rem" />}
+                    onClick={() =>
+                      setInactiveChannelsOpened(!inactiveChannelsOpened)
+                    }
+                    leftIcon={
+                      inactiveChannelsOpened ? (
+                        <IconArrowUp size="0.7rem" />
+                      ) : (
+                        <IconArrowDown size="0.7rem" />
+                      )
+                    }
                   >
-                    {inactiveChannelsOpened ? "Hide" : "Show"} {types.filter((x) => !x.active).length} Inactive Channel
+                    {inactiveChannelsOpened ? "Hide" : "Show"}{" "}
+                    {types.filter((x) => !x.active).length} Inactive Channel
                     {types.filter((x) => !x.active).length > 1 ? "s" : ""}
                   </Button>
                 </>
@@ -1791,19 +2373,37 @@ function CampaignProgressDropdown(props: {
       <Box mt={"2px"}>
         <Flex align={"center"} gap={"sm"}>
           {props.channel === "EMAIL" ? (
-            <IconMail fill="orange" color="white" size={"1.2rem"} style={{ marginBottom: "1px" }} />
+            <IconMail
+              fill="orange"
+              color="white"
+              size={"1.2rem"}
+              style={{ marginBottom: "1px" }}
+            />
           ) : (
-            <IconBrandLinkedin fill="#228be6" color="white" size={"1.2rem"} style={{ marginBottom: "1px" }} />
+            <IconBrandLinkedin
+              fill="#228be6"
+              color="white"
+              size={"1.2rem"}
+              style={{ marginBottom: "1px" }}
+            />
           )}
           <Text fw={700}>{channel} Summary</Text>
         </Flex>
         <Flex align={"center"} gap={"sm"} mt={"sm"}>
-          <Progress w={"100%"} color={props.completionPercentage === 100 ? "green" : "blue"} value={props.completionPercentage} />
+          <Progress
+            w={"100%"}
+            color={props.completionPercentage === 100 ? "green" : "blue"}
+            value={props.completionPercentage}
+          />
           <Text fw={500} sx={{ whiteSpace: "nowrap" }}>
             {props.completionPercentage}%
           </Text>
         </Flex>
-        <Text fw={500} size={"sm"} sx={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <Text
+          fw={500}
+          size={"sm"}
+          sx={{ display: "flex", alignItems: "center", gap: "6px" }}
+        >
           {props.numerator} / {props.denominator}
           <span style={{ color: "gray" }}>Sent</span>
         </Text>
@@ -1817,19 +2417,25 @@ function CampaignProgressDropdown(props: {
 
       <List mt={"xs"}>
         <Flex align={"center"} justify={"space-between"}>
-          <List.Item sx={{ color: "gray", fontSize: "14px" }}>{channel} Sourced:</List.Item>
+          <List.Item sx={{ color: "gray", fontSize: "14px" }}>
+            {channel} Sourced:
+          </List.Item>
           <Text fw={600} size={"sm"}>
             {channel_total_prospect}
           </Text>
         </Flex>
         <Flex align={"center"} justify={"space-between"}>
-          <List.Item sx={{ color: "gray", fontSize: "14px" }}>{channel} Usable:</List.Item>
+          <List.Item sx={{ color: "gray", fontSize: "14px" }}>
+            {channel} Usable:
+          </List.Item>
           <Text fw={600} size={"sm"}>
             {total_usabled}
           </Text>
         </Flex>
         <Flex align={"center"} justify={"space-between"}>
-          <List.Item sx={{ color: "gray", fontSize: "14px" }}>Total Used:</List.Item>
+          <List.Item sx={{ color: "gray", fontSize: "14px" }}>
+            Total Used:
+          </List.Item>
           <Text fw={600} size={"sm"}>
             {total_used}
           </Text>
@@ -1912,7 +2518,10 @@ function CampaignProgressDropdown(props: {
   );
 }
 
-function PersonCampaignCardSection(props: { section: ChannelSection; onClick?: () => void }) {
+function PersonCampaignCardSection(props: {
+  section: ChannelSection;
+  onClick?: () => void;
+}) {
   const theme = useMantineTheme();
   const [checked, setChecked] = useState(props.section.active);
 
@@ -1939,19 +2548,23 @@ function PersonCampaignCardSection(props: { section: ChannelSection; onClick?: (
         <Box sx={{ flexBasis: "30%" }}>
           <Group>
             <Text fz="xs" color="gray" w="90px">
-              <IconSend size="0.8rem" /> Sent: <span style={{ color: "black" }}>{props.section.sends}</span>
+              <IconSend size="0.8rem" /> Sent:{" "}
+              <span style={{ color: "black" }}>{props.section.sends}</span>
             </Text>
             <Text fz="xs" color="gray" w="90px">
-              <IconChecks size="0.8rem" /> Opens: <span style={{ color: "black" }}>{props.section.opens}</span>
+              <IconChecks size="0.8rem" /> Opens:{" "}
+              <span style={{ color: "black" }}>{props.section.opens}</span>
             </Text>
             <Text fz="xs" color="gray" w="90px">
-              <IconMessageCheck size="0.8rem" /> Replies: <span style={{ color: "black" }}>{props.section.replies}</span>
+              <IconMessageCheck size="0.8rem" /> Replies:{" "}
+              <span style={{ color: "black" }}>{props.section.replies}</span>
             </Text>
           </Group>
         </Box>
         <Box sx={{ flexBasis: "20%", color: "gray" }}>
           <Text fz="xs" span>
-            <IconCalendar size="0.8rem" /> {convertDateToShortFormatWithoutTime(new Date(props.section.date))}
+            <IconCalendar size="0.8rem" />{" "}
+            {convertDateToShortFormatWithoutTime(new Date(props.section.date))}
           </Text>
         </Box>
         <Box sx={{ flexBasis: "10%" }}>
@@ -1965,9 +2578,17 @@ function PersonCampaignCardSection(props: { section: ChannelSection; onClick?: (
               size="xs"
               thumbIcon={
                 checked ? (
-                  <IconCheck size="0.6rem" color={theme.colors.teal[theme.fn.primaryShade()]} stroke={3} />
+                  <IconCheck
+                    size="0.6rem"
+                    color={theme.colors.teal[theme.fn.primaryShade()]}
+                    stroke={3}
+                  />
                 ) : (
-                  <IconX size="0.6rem" color={theme.colors.red[theme.fn.primaryShade()]} stroke={3} />
+                  <IconX
+                    size="0.6rem"
+                    color={theme.colors.red[theme.fn.primaryShade()]}
+                    stroke={3}
+                  />
                 )
               }
             />
@@ -1995,12 +2616,18 @@ function StatModalDisplay(props: {
       spacing={0}
       py={10}
       style={{
-        border: props.border ? `2.8px solid ${props.color}` : "2px solid #e9ecef",
+        border: props.border
+          ? `2.8px solid ${props.color}`
+          : "2px solid #e9ecef",
         borderRadius: props.border ? "5px" : "0px",
       }}
     >
       <Group spacing={5} sx={{ justifyContent: "center" }}>
-        <Tooltip label={props.percentage + "% conversion"} withArrow withinPortal>
+        <Tooltip
+          label={props.percentage + "% conversion"}
+          withArrow
+          withinPortal
+        >
           <Flex gap={8} align={"center"}>
             {props.icon}
             <Text c="gray.7" fz={"16px"}>
@@ -2009,7 +2636,13 @@ function StatModalDisplay(props: {
             <Text color={props.color} fz={"16px"} fw={500}>
               {props.total.toLocaleString()}
             </Text>
-            <Text fz={"12px"} color={props.color} bg={props.percentcolor} style={{ borderRadius: "20px" }} px={"10px"}>
+            <Text
+              fz={"12px"}
+              color={props.color}
+              bg={props.percentcolor}
+              style={{ borderRadius: "20px" }}
+              px={"10px"}
+            >
               {/* percentage */}
               {props.percentage}%
             </Text>
@@ -2031,15 +2664,28 @@ function StatDisplay(props: {
   hoverColor: string;
 }) {
   return (
-    <div className={`${props.hoverColor} ${props.width} rounded-md px-2 py-1 h-full`}>
+    <div
+      className={`${props.hoverColor} ${props.width} rounded-md px-2 py-1 h-full`}
+    >
       <Stack spacing={0} h={"100%"}>
         <Flex justify="center" gap="xl" align={"center"} h={"100%"}>
-          <Tooltip label={props.percentage + "% conversion"} withArrow withinPortal>
+          <Tooltip
+            label={props.percentage + "% conversion"}
+            withArrow
+            withinPortal
+          >
             <Flex align={"center"} gap={4}>
               <Text color={props.color} fz="md" fw={500}>
                 {props.total.toLocaleString()}
               </Text>
-              <Text size="8px" color={props.color} bg={props.percentColor} py={2} px={4} style={{ borderRadius: "8px" }}>
+              <Text
+                size="8px"
+                color={props.color}
+                bg={props.percentColor}
+                py={2}
+                px={4}
+                style={{ borderRadius: "8px" }}
+              >
                 {/* percentage */}
                 {props.percentage}%
               </Text>
@@ -2076,9 +2722,13 @@ export const PersonCampaignTable = (props: {
   const [sort, setSort] = useState<"asc" | "desc">("desc");
   let tempData = useMemo(() => {
     if (sort === "asc") {
-      return props.filteredProjects.sort((a, b) => (moment(a.created_at).isAfter(moment(b.created_at)) ? 1 : -1));
+      return props.filteredProjects.sort((a, b) =>
+        moment(a.created_at).isAfter(moment(b.created_at)) ? 1 : -1
+      );
     } else {
-      return props.filteredProjects.sort((a, b) => (moment(a.created_at).isAfter(moment(b.created_at)) ? -1 : 1));
+      return props.filteredProjects.sort((a, b) =>
+        moment(a.created_at).isAfter(moment(b.created_at)) ? -1 : 1
+      );
     }
   }, [sort]);
 
@@ -2099,11 +2749,19 @@ export const PersonCampaignTable = (props: {
 
   return (
     <>
-      <Modal opened={showAnalyticsModal} onClose={() => setShowAnalyticsModal(false)} title="Campaign Analytics" size="1000px">
+      <Modal
+        opened={showAnalyticsModal}
+        onClose={() => setShowAnalyticsModal(false)}
+        title="Campaign Analytics"
+        size="1000px"
+      >
         <iframe
           src={
             // Retool Editor Link: https://sellscale.retool.com/editor/dad1b002-118a-11ef-a07e-3b006f65cecb/SellScale%20Sight%20Components/Cycle%20Analytics%20Popup#authToken=[token]&cycle=[cycle_id]
-            "https://sellscale.retool.com/embedded/public/3e03c40e-b862-4bda-a4d1-ecfade8bcfd2#authToken=" + userToken + "&cycle=" + selectedCycleId
+            "https://sellscale.retool.com/embedded/public/3e03c40e-b862-4bda-a4d1-ecfade8bcfd2#authToken=" +
+            userToken +
+            "&cycle=" +
+            selectedCycleId
           }
           width="100%"
           height="600px"
@@ -2130,7 +2788,12 @@ export const PersonCampaignTable = (props: {
             <Flex>
               <IconLoader size={"0.9rem"} color="gray" />
             </Flex>
-            <Text fw={600} color="gray.8" fz="sm" style={{ display: "flex", justifyContent: "center" }}>
+            <Text
+              fw={600}
+              color="gray.8"
+              fz="sm"
+              style={{ display: "flex", justifyContent: "center" }}
+            >
               Contacts
             </Text>
           </Flex>
@@ -2155,14 +2818,28 @@ export const PersonCampaignTable = (props: {
 
           <Flex>
             <Box w={"100%"} bg={"#f9fbfe"}>
-              <Flex align={"center"} h={"100%"} justify={"center"} gap={4} mb={"xl"} w={"92px"}>
+              <Flex
+                align={"center"}
+                h={"100%"}
+                justify={"center"}
+                gap={4}
+                mb={"xl"}
+                w={"92px"}
+              >
                 <IconSend color={theme.colors.blue[6]} size="0.9rem" />
                 <Text size={"sm"}>Sent</Text>
               </Flex>
             </Box>
             <Divider orientation="vertical" />
             <Box w={"100%"} bg={"#fdf9fe"}>
-              <Flex align={"center"} h={"100%"} justify={"center"} gap={4} mb={"xl"} w={"93px"}>
+              <Flex
+                align={"center"}
+                h={"100%"}
+                justify={"center"}
+                gap={4}
+                mb={"xl"}
+                w={"93px"}
+              >
                 <IconChecks color={theme.colors.pink[6]} size="0.9rem" />
                 <Text size={"sm"}>Open</Text>
               </Flex>
@@ -2173,7 +2850,14 @@ export const PersonCampaignTable = (props: {
               w={"100%"}
               bg={"#fffbf8"}
             >
-              <Flex align={"center"} h={"100%"} justify={"center"} gap={4} mb={"xl"} w={"93px"}>
+              <Flex
+                align={"center"}
+                h={"100%"}
+                justify={"center"}
+                gap={4}
+                mb={"xl"}
+                w={"93px"}
+              >
                 <IconMessage color={theme.colors.orange[6]} size="0.9rem" />
                 <Text size={"sm"}>Reply</Text>
               </Flex>
@@ -2184,7 +2868,14 @@ export const PersonCampaignTable = (props: {
               w={"100%"}
               bg={"#f8fbf9"}
             >
-              <Flex align={"center"} h={"100%"} justify={"center"} gap={4} mb={"xl"} w={"93px"}>
+              <Flex
+                align={"center"}
+                h={"100%"}
+                justify={"center"}
+                gap={4}
+                mb={"xl"}
+                w={"93px"}
+              >
                 <IconMessage color={theme.colors.teal[6]} size="0.9rem" />
                 <Text size={"sm"}>(+)Reply</Text>
               </Flex>
@@ -2195,7 +2886,14 @@ export const PersonCampaignTable = (props: {
               w={"100%"}
               bg={"#f8fbf9"}
             >
-              <Flex align={"center"} h={"100%"} justify={"center"} gap={4} mb={"xl"} w={"93px"}>
+              <Flex
+                align={"center"}
+                h={"100%"}
+                justify={"center"}
+                gap={4}
+                mb={"xl"}
+                w={"93px"}
+              >
                 <IconCalendar color={theme.colors.green[6]} size="0.9rem" />
                 <Text size={"sm"}>Demo</Text>
               </Flex>
@@ -2233,7 +2931,11 @@ export const PersonCampaignTable = (props: {
         })
         .map((persona: any, index) => (
           <>
-            {props.showCycles && ((persona.cycle && index === 0) || (index > 0 && data[index - 1].cycle && data[index - 1].cycle !== persona.cycle))
+            {props.showCycles &&
+            ((persona.cycle && index === 0) ||
+              (index > 0 &&
+                data[index - 1].cycle &&
+                data[index - 1].cycle !== persona.cycle))
               ? [
                   <Card
                     withBorder
@@ -2241,15 +2943,25 @@ export const PersonCampaignTable = (props: {
                     onClick={() => {
                       if (persona.cycle) {
                         if (cycleModeShowCycleIds.includes(persona.cycle)) {
-                          setCycleModeShowCycleIds(cycleModeShowCycleIds.filter((id: any) => id !== persona.cycle));
+                          setCycleModeShowCycleIds(
+                            cycleModeShowCycleIds.filter(
+                              (id: any) => id !== persona.cycle
+                            )
+                          );
                         } else {
-                          setCycleModeShowCycleIds([...cycleModeShowCycleIds, persona.cycle]);
+                          setCycleModeShowCycleIds([
+                            ...cycleModeShowCycleIds,
+                            persona.cycle,
+                          ]);
                         }
                       }
                     }}
                   >
                     <Flex>
-                      <Indicator size={6} color={deterministicMantineColor(persona.cycle + "")}>
+                      <Indicator
+                        size={6}
+                        color={deterministicMantineColor(persona.cycle + "")}
+                      >
                         <Title order={4}>Cycle {persona.cycle}</Title>
                       </Indicator>
                       <Avatar.Group ml="20px">
@@ -2259,13 +2971,25 @@ export const PersonCampaignTable = (props: {
                             .filter((p) => p.cycle === persona.cycle)
                             .slice(0, 4)
                             .map((p, i) => (
-                              <Avatar key={i} src={"https://ui-avatars.com/api/?background=efefef&name=" + p.emoji} sx={{ borderRadius: "100%" }} />
+                              <Avatar
+                                key={i}
+                                src={
+                                  "https://ui-avatars.com/api/?background=efefef&name=" +
+                                  p.emoji
+                                }
+                                sx={{ borderRadius: "100%" }}
+                              />
                             ))
                         }
                         {
                           // if list > 4 then add a +1 avatar
-                          data.filter((p) => p.cycle === persona.cycle).length > 4 ? (
-                            <Avatar>+{data.filter((p) => p.cycle === persona.cycle).length - 4}</Avatar>
+                          data.filter((p) => p.cycle === persona.cycle).length >
+                          4 ? (
+                            <Avatar>
+                              +
+                              {data.filter((p) => p.cycle === persona.cycle)
+                                .length - 4}
+                            </Avatar>
                           ) : null
                         }
                       </Avatar.Group>
@@ -2288,18 +3012,31 @@ export const PersonCampaignTable = (props: {
                       <Badge
                         color={
                           // if active campaigns > 0 then green else gray
-                          data.filter((p) => p.cycle === persona.cycle && p.active).length > 0 ? "green" : "gray"
+                          data.filter(
+                            (p) => p.cycle === persona.cycle && p.active
+                          ).length > 0
+                            ? "green"
+                            : "gray"
                         }
                         variant="outline"
                         mr="xs"
                       >
-                        {data.filter((p) => p.cycle === persona.cycle && p.active).length} / {data.filter((p) => p.cycle === persona.cycle).length} Active
-                        Campaigns
+                        {
+                          data.filter(
+                            (p) => p.cycle === persona.cycle && p.active
+                          ).length
+                        }{" "}
+                        / {data.filter((p) => p.cycle === persona.cycle).length}{" "}
+                        Active Campaigns
                       </Badge>
                       <IconChevronDown
                         size="1.5rem"
                         style={{
-                          transform: cycleModeShowCycleIds.includes(persona.cycle) ? "rotate(180deg)" : "rotate(0deg)",
+                          transform: cycleModeShowCycleIds.includes(
+                            persona.cycle
+                          )
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
                         }}
                       />
                     </Flex>
@@ -2315,9 +3052,13 @@ export const PersonCampaignTable = (props: {
                       showAvatar={props.showAvatar}
                       key={index}
                       persona={persona}
-                      project={props.projects?.find((project) => project.id == persona.id)}
+                      project={props.projects?.find(
+                        (project) => project.id == persona.id
+                      )}
                       viewMode={props.campaignViewMode}
-                      onPersonaActiveStatusUpdate={props.onPersonaActiveStatusUpdate}
+                      onPersonaActiveStatusUpdate={
+                        props.onPersonaActiveStatusUpdate
+                      }
                       showCycles={props.showCycles}
                     />
                   )))
@@ -2330,7 +3071,9 @@ export const PersonCampaignTable = (props: {
             showAvatar={props.showAvatar}
             key={index}
             persona={persona}
-            project={props.projects?.find((project) => project.id == persona.id)}
+            project={props.projects?.find(
+              (project) => project.id == persona.id
+            )}
             viewMode={props.campaignViewMode}
             onPersonaActiveStatusUpdate={props.onPersonaActiveStatusUpdate}
             showCycles={props.showCycles}

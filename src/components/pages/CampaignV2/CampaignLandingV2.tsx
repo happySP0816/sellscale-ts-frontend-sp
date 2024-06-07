@@ -29,6 +29,7 @@ import {
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import Hook from "@pages/channels/components/Hook";
+import Tour from 'reactour'
 import { API_URL } from "@constants/data";
 import {
   IconArrowRight,
@@ -103,8 +104,55 @@ interface StatsData {
   is_ai_research_personalization_enabled: boolean;
 }
 
+const steps = [
+  {
+    selector: '[data-tour="campaign-status"]',
+    content: 'This is the campaign status. You can see if the campaign is active or inactive here.',
+  },
+  {
+    selector: '[data-tour="campaign-stats"]',
+    content: 'Here you can see various statistics about your campaign, such as the number of emails sent, opened, and replied to.',
+  },
+  {
+    selector: '[data-tour="outreach-volume"]',
+    content: 'This slider allows you to set the outreach volume for your campaign.',
+  },
+  {
+    selector: '[data-tour="campaign-progress"]',
+    content: 'This section shows the progress of your campaign setup.',
+  },
+  {
+    selector: '[data-tour="sequences"]',
+    content: 'Here you can manage and organize the sequences of emails and LinkedIn messages that will be sent out as part of your campaign.',
+  },
+  {
+    selector: '[data-tour="personalizers"]',
+    content: 'This section allows you to manage your personalizers for the campaign.',
+  },
+  {
+    selector: '[data-tour="personalizer-enabled"]',
+    content: 'Activate SellScale AI for deep prospect research and dynamic personalized engagement!',
+  },
+  {
+    selector: '[data-tour="contacts"]',
+    content: 'This section allows you to add and manage your contacts. You can import contacts and view their details',
+  }
+];
+
 export default function CampaignLandingV2() {
-  //todo: just change statsData to personaOverview.
+
+  useEffect(() => {
+    const tourSeen = localStorage.getItem('campaignTourSeen');
+    if (!tourSeen) {
+      setIsTourOpen(true);
+    }
+  }, []);
+
+  const closeTour = () => {
+    setIsTourOpen(false);
+    localStorage.setItem('campaignTourSeen', 'true');
+  };
+
   const convertStatsDataToPersonaOverview = (statsData: StatsData): PersonaOverview => {
     return {
       active: statsData.active,
@@ -195,6 +243,7 @@ export default function CampaignLandingV2() {
   const [personalizersEnabled, setPersonalizersEnabled] = useState(currentProject?.is_ai_research_personalization_enabled);
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
   const [status, setStatus] = useState("SETUP");
+  const [isTourOpen, setIsTourOpen] = useState(false);
 
   //testing per cycle value
   const [cycleStatus, setCycleStatus] = useState(false);
@@ -711,6 +760,10 @@ export default function CampaignLandingV2() {
             borderRadius: "6px",
           }}
         >
+        <Tour
+        steps={steps}
+        isOpen={isTourOpen}
+        onRequestClose={closeTour} />
           <Flex direction={"column"} w={"100%"}>
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
             <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
@@ -721,6 +774,7 @@ export default function CampaignLandingV2() {
                     {statsData?.archetype_name}
                   </Text>
                   <Button
+                    data-tour="campaign-status"
                     tt={"uppercase"}
                     variant="light"
                     size="xs"
@@ -780,7 +834,7 @@ export default function CampaignLandingV2() {
                     </Flex>
                   </Flex>
                 ) : (
-                  <Flex align={"center"} justify={"space-between"} h={"100%"} w="100%">
+                  <Flex data-tour="campaign-stats" align={"center"} justify={"space-between"} h={"100%"} w="100%">
                     <Box
                       p={"lg"}
                       w={"100%"}
@@ -931,7 +985,7 @@ export default function CampaignLandingV2() {
                   </Flex>
                 )}
               </Paper>
-              <Flex w={"60%"}>
+              <Flex data-tour="outreach-volume" w={"60%"}>
                 <Paper p="md" withBorder w={"100%"}>
                   <Flex justify={"space-between"}>
                     <Flex justify={"space-between"}>
@@ -1021,7 +1075,7 @@ export default function CampaignLandingV2() {
                 </Paper>
               </Flex>
             </Flex>
-            <Box px={"xl"} py={"md"} bg={"#ECECEC"}>
+            <Box data-tour="campaign-progress" px={"xl"} py={"md"} bg={"#ECECEC"}>
               <Stepper active={active} onStepClick={setActive} size="xs" iconSize={28}>
                 <Stepper.Step label="Add Contacts" />
                 <Stepper.Step label="Setup Templates" />
@@ -1093,7 +1147,7 @@ export default function CampaignLandingV2() {
               </Paper>
             )
           )}
-          <Paper withBorder w={"100%"}>
+          <Paper data-tour="contacts" withBorder w={"100%"}>
             <ContactsInfiniteScroll
               campaignId={Number(id)}
               getTotalContacts={getTotalContacts}
@@ -1103,7 +1157,7 @@ export default function CampaignLandingV2() {
           </Paper>
         </Flex>
         <Flex direction={"column"} gap={"md"} w={"80%"}>
-          <Paper withBorder>
+          <Paper data-tour="sequences"  withBorder>
             <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
               <Flex align="center" gap="xs">
                 <Text fw={600} size={20} color="#37414E">
@@ -1687,7 +1741,7 @@ export default function CampaignLandingV2() {
               )}
             </Flex>
           </Paper>
-          <Paper withBorder>
+          <Paper data-tour="personalizers" withBorder>
             <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
               <Flex gap={"sm"} align={"center"}>
                 <Flex align="center" gap="xs">
@@ -1709,7 +1763,7 @@ export default function CampaignLandingV2() {
                   </Tooltip>
                 </Flex>
               </Flex>
-              <Flex gap={"sm"} align={"center"}>
+              <Flex data-tour="personalizer-enabled" gap={"sm"} align={"center"}>
                 <Switch
                   labelPosition="left"
                   label={

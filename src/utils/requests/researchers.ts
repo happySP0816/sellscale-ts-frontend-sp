@@ -98,14 +98,14 @@ export async function deleteResearcherQuestion(userToken: string, questionNumber
   return response.json();
 }
 
-export async function createResearcherAnswer(userToken: string, prospectId: Number): Promise<any> {
+export async function createResearcherAnswer(userToken: string, prospectId: Number, room_id: String): Promise<any> {
   const response = await fetch(`${API_URL}/ml/researchers/answers/create`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${userToken}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ prospect_id: prospectId }),
+    body: JSON.stringify({ prospect_id: prospectId, room_id: room_id }),
   });
   return response;
 }

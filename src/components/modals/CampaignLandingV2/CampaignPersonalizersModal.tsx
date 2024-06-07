@@ -1,7 +1,7 @@
 import { ActionIcon, Avatar, Badge, Box, Button, Checkbox, Divider, Title, Flex, Paper, ScrollArea, Select, Text, Textarea, Tooltip, Loader, Modal, Center, SegmentedControl, TextInput, Popover } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { IconBrandLinkedin, IconBuilding, IconBulb, IconEdit, IconEye, IconPlus, IconPoint, IconQuestionMark, IconSearch, IconTrash } from "@tabler/icons";
-import { IconSparkles } from "@tabler/icons-react";
+import { IconLayoutSidebarRightCollapseFilled, IconSparkles } from "@tabler/icons-react";
 import {useRecoilState, useRecoilValue} from "recoil";
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
@@ -40,6 +40,8 @@ const generateTextWithBadges = (text: string) => {
 
   const [loadingProspects, setLoadingProspects] = useState(false);
   const [loadingResearchData, setLoadingResearchData] = useState(false);
+  const [generatingResearchPoints, setGeneratingResearchPoints] = useState(false);
+  const [generatedResearchData, setGeneratedResearchData] = useState<any[]>([]);
   const [prospectData, setProspectData] = useState([]);
   const [selectedProspect, setSelectedProspect] = useState<any>(null);
   const [researching, setResearching] = useState(false);
@@ -49,24 +51,30 @@ const generateTextWithBadges = (text: string) => {
 
   const userToken = useRecoilValue(userTokenState);
 
-  useEffect(() => {
-    setLoadingProspects(true);
-    fetchCampaignContacts(userToken, Number(innerProps.id), 0, 10, '', false).then((data) => {
+
+
+  const fetchProspects = async () => {
+    try {
+      setLoadingProspects(true);
+      const data = await fetchCampaignContacts(userToken, Number(innerProps.id), 0, 10, '', false);
       const newProspectData = data.sample_contacts.map((contact: { id: any; full_name: any; }) => ({
         value: contact.id,
         label: contact.full_name,
       }));
       setProspectData(newProspectData);
-      if (newProspectData[0]?.value){
+      if (newProspectData[0]?.value) {
         setSelectedProspect(newProspectData[0].value);
         fetchResearcherAnswers(newProspectData[0].value);
       }
-      
+    } finally {
       setLoadingProspects(false);
     }
-    );
+  };
+
+  const fetchResearchData = async () => {
     setLoadingResearchData(true);
-    researchers.getArchetypeQuestions(userToken, Number(innerProps.id)).then((data: any) => {
+    try {
+      const data = await researchers.getArchetypeQuestions(userToken, Number(innerProps.id)) as any;
       const newResearchData = data.questions.map((item: { id: any; key: any; type: any; relevancy: any; }) => ({
         id: item.id,
         title: item.key,
@@ -76,10 +84,47 @@ const generateTextWithBadges = (text: string) => {
         status: '',
       }));
       setResearchData(newResearchData);
-    }).finally(() => {
+    } finally {
       setLoadingResearchData(false);
-    });
-  } ,[]);
+    }
+  };
+
+
+  const addGeneratedResearchPoint = async (item: any) => {
+    try {
+      setLoadingResearchData(true);
+      console.log('data is', item);
+      const response = await researchers.createResearcherQuestion(userToken, 'QUESTION', item.Question, item.RelevanceReason, innerProps.ai_researcher_id);
+      if (!response) {
+        throw new Error(`Error creating researcher question}`);
+      }
+      await fetchResearchData();
+    } catch (error) {
+      console.error("Error creating researcher question:", error);
+    } finally {
+      setLoadingResearchData(false);
+      // Call useEffect logic again
+      fetchProspects();
+      fetchResearchData();
+    }
+  };
+
+  useEffect(() => {
+    fetchProspects();
+    fetchResearchData();
+  }, []);
+
+  const generateResearchPoints = async () => {
+    setGeneratingResearchPoints(true);
+    const data = await researchers.aiGenerateResearchPoints(userToken, Number(innerProps.id));
+    //filter only relevant questions into this.
+    const relevantQuestions = data.filter((item: any) => item.Relevant === "Yes").map((item: any) => ({
+        Question: item.Question,
+        RelevanceReason: item.RelevanceReason
+    }));
+    setGeneratedResearchData(relevantQuestions);
+    setGeneratingResearchPoints(false);
+  }
 
   const fetchResearcherAnswers = async (prospectId: Number) => {
     setResearching(true);
@@ -318,13 +363,28 @@ const generateTextWithBadges = (text: string) => {
             >
               Research point
             </Button>
+            <Button
+              color="grape"
+              fullWidth
+              leftIcon={<IconSparkles size={"0.9rem"} />}
+              mr={"md"}
+              onClick={() => {
+                generateResearchPoints();
+              }}
+            >
+              AI Suggest
+            </Button>
           </Flex>
+          {generatingResearchPoints && <Text size={"sm"} color="grape" mt={"sm"} align="center">
+          <Loader size="xs" color="grape" mr="sm"/> Generating research points
+          </Text>}
           <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
             {loadingResearchData ? (
               <Center h={"100%"}>
                 <Loader size="lg" />
               </Center>
             ) : (
+              <>
               <Flex h={"100%"} gap={"xs"} direction={"column"}>
                 {researchData.map((item: any, index: Key | null | undefined) => {
                   return (
@@ -381,6 +441,35 @@ const generateTextWithBadges = (text: string) => {
                   );
                 })}
               </Flex>
+              {generatedResearchData.length > 0 && <Divider my="sm" label="AI Generated Research Points" labelPosition="center" color="salmon" />}
+              <Flex h="100%" gap="xs" direction="column" style={{ color: "salmon" }}>
+                {generatedResearchData.map((item: any, index: Key | null | undefined) => {
+                  return (
+                    <Paper withBorder p={"md"} key={index}>
+                      <Flex align={"start"} justify={"space-between"}>
+                        <Text size={"sm"} fw={600} pt={4}>
+                          {generateTextWithBadges(item.Question)}
+                        </Text>
+                        <Flex gap={3} align={"center"}>
+                          <Badge size="sm" radius={"sm"} color="blue">
+                            AI Generated
+                          </Badge>
+                          <Button size="xs" color="grape" onClick={() => {
+                            setGeneratedResearchData(prevData => prevData.filter(researchItem => researchItem !== item));
+                            addGeneratedResearchPoint(item);
+                          }}>
+                            Add
+                          </Button>
+                        </Flex>
+                      </Flex>
+                      <Text size={"sm"} mt={2}>
+                        {item.RelevanceReason}
+                      </Text>
+                    </Paper>
+                  );
+                })}
+              </Flex>
+              </>
             )}
           </ScrollArea>
         </Paper>

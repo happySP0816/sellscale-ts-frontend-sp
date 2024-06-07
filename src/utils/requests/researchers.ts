@@ -135,6 +135,22 @@ export async function getResearcherAnswers(userToken: string, prospectId: number
 
   return response.json();
 }
+
+export async function aiGenerateResearchPoints(userToken: string, researcherId: number): Promise<any> {
+  try {
+    const response = await fetch(`${API_URL}/ml/researchers/questions/generate`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ researcher_id: researcherId }),
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error generating research points:', error);
+  }
+};
 export async function connectResearcher(
   userToken: string,
   clientArchetypeId: number,

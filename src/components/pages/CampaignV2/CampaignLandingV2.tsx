@@ -78,8 +78,6 @@ import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
 import { PersonaOverview, SubjectLineTemplate } from "src";
-import { link } from "fs";
-import { set } from "lodash";
 
 interface StatsData {
   id: number;

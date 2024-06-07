@@ -9,7 +9,7 @@ import { modals } from '@mantine/modals';
 import * as researchers from "@utils/requests/researchers";
 import { useState, useEffect, useRef, Key } from "react";
 import { deterministicMantineColor } from "@utils/requests/utils";
-import postEditStackRankedConfigurationName from "@utils/requests/postEditStackRankedConfigurationName";
+import { socket } from '../../App';
 
 export default function CampaignPersonalizersModal({
   innerProps,
@@ -51,7 +51,29 @@ const generateTextWithBadges = (text: string) => {
 
   const userToken = useRecoilValue(userTokenState);
 
-
+  socket.on('stream-answers', (data) => {
+    if (data.message === "done") {
+      setResearching(false);
+      return;
+    }
+    const newSimulateData = {
+      title: data.question,
+      type: data.type,
+      content: data.cleaned_research,
+      raw_response: data.raw_response,
+      ai_response: data.relevancy_explanation,
+      status: data.is_yes_response,
+    };
+    setSimulateData((prevData: any) => {
+      const dataSet = new Set(prevData.map((item: any) => JSON.stringify(item)));
+      const newDataString = JSON.stringify(newSimulateData);
+      if (dataSet.has(newDataString)) {
+        return prevData;
+      }
+      const updatedData = [newSimulateData, ...prevData];
+      return updatedData.sort((a, b) => b.status - a.status);
+    });
+  });
 
   const fetchProspects = async () => {
     try {
@@ -145,8 +167,15 @@ const generateTextWithBadges = (text: string) => {
 
   const simulateResearch = async (prospectId: Number) => {
     setResearching(true);
-    await researchers.createResearcherAnswer(userToken, prospectId);
-    fetchResearcherAnswers(prospectId);
+    const room_id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    if (socket){
+      setSimulateData([])
+      socket.emit('join-room', {
+        payload: { room_id: room_id },
+      });
+      await researchers.createResearcherAnswer(userToken, prospectId, room_id);
+    }
+    // fetchResearcherAnswers(prospectId);
   };
 
   const [researchData, setResearchData] = useState<any>([]);
@@ -506,7 +535,7 @@ const generateTextWithBadges = (text: string) => {
             )}
           </Flex>
           <ScrollArea h={500} scrollbarSize={8} px={"md"}>
-            {researching ? (
+            {false ? (
               <Loader size="sm" />
             ) : (
               <Flex gap={"xs"} direction={"column"}>

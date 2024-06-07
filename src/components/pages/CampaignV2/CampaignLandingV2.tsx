@@ -106,6 +106,10 @@ interface StatsData {
 
 const steps = [
   {
+    selector: '[data-tour="campaign-tutorial"]',
+    content: 'Welcome to the campaign page! This tutorial will guide you through the key features and functionalities of the campaign management system.',
+  },
+  {
     selector: '[data-tour="campaign-status"]',
     content: 'This is the campaign status. You can see if the campaign is active or inactive here.',
   },

@@ -321,7 +321,7 @@ const router = sentryCreateBrowserRouter([
       },
       {
         path: "costs",
-        element: <Costs />,
+        element: <RestrictedRoute page={<Costs />} />,
       },
       {
         path: "all/contacts/:prospectId?",

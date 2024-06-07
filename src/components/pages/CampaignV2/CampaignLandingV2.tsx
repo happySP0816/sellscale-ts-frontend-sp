@@ -79,6 +79,7 @@ import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
 import { PersonaOverview, SubjectLineTemplate } from "src";
 import { link } from "fs";
+import { set } from "lodash";
 
 interface StatsData {
   id: number;
@@ -126,6 +127,10 @@ const steps = [
     content: 'This section shows the progress of your campaign setup.',
   },
   {
+    selector: '[data-tour="contacts"]',
+    content: 'This section allows you to add and manage your contacts. You can import contacts and view their details',
+  },
+  {
     selector: '[data-tour="sequences"]',
     content: 'Here you can manage and organize the sequences of emails and LinkedIn messages that will be sent out as part of your campaign.',
   },
@@ -136,10 +141,6 @@ const steps = [
   {
     selector: '[data-tour="personalizer-enabled"]',
     content: 'Activate SellScale AI for deep prospect research and dynamic personalized engagement!',
-  },
-  {
-    selector: '[data-tour="contacts"]',
-    content: 'This section allows you to add and manage your contacts. You can import contacts and view their details',
   }
 ];
 
@@ -504,19 +505,18 @@ export default function CampaignLandingV2() {
       });
   };
 
-  useEffect(() => {
-    if (!loadingContacts && !loadingSequences && !loadingStats) {
-      //data fetching is complete.
-
-      if (!sequences || sequences.length === 0) {
-        setActiveStep(0);
-      } else if (personalizers.length === 0) {
-        setActiveStep(1);
-      } else {
-        setActiveStep(3);
-      }
+useEffect(() => {
+    //data fetching is complete.
+    if (totalContacts === 0) {
+      setActiveStep(0);
+    } else if (sequences.length === 0) {
+      setActiveStep(1);
+    } else if (personalizers.length === 0) {
+      setActiveStep(2);
+    } else {
+      setActiveStep(3);
     }
-  }, [loadingSequences, loadingStats]);
+}, [totalContacts, sequences, loadingSequences, linkedinSequenceData, personalizers]);
 
   // This useEffect hook runs on page load and whenever the 'id' or 'userToken' changes.
   // It fetches campaign-related data (contacts, sequences, and stats) for a specific client archetype.
@@ -1079,13 +1079,13 @@ export default function CampaignLandingV2() {
                 </Paper>
               </Flex>
             </Flex>
-            <Box data-tour="campaign-progress" px={"xl"} py={"md"} bg={"#ECECEC"}>
-              <Stepper active={active} onStepClick={setActive} size="xs" iconSize={28}>
+            {(!loadingContacts && activeStep !== 3) && <Box data-tour="campaign-progress" px={"xl"} py={"md"} bg={"#ECECEC"}>
+              <Stepper active={activeStep} size="xs" iconSize={28}>
                 <Stepper.Step label="Add Contacts" />
                 <Stepper.Step label="Setup Templates" />
                 <Stepper.Step label="Add Personalizers" />
               </Stepper>
-            </Box>
+            </Box>}
           </Flex>
         </Flex>
       )}
@@ -1099,57 +1099,7 @@ export default function CampaignLandingV2() {
               <Skeleton height={20} radius="xl" width="60%" mt="sm" />
             </Paper>
           ) : (
-            activeStep !== 3 && (
-              <Paper withBorder>
-                <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
-                  <Text fw={600} size={15} color="#37414E">
-                    Campaign Progress
-                  </Text>
-                </Flex>
-                <Box p={"sm"}>
-                  <Timeline
-                    active={activeStep}
-                    bulletSize={20}
-                    lineWidth={2}
-                    mt={"lg"}
-                    styles={{
-                      itemTitle: {
-                        fontWeight: 600,
-                        fontSize: "0.875rem", // Slightly lower the font size
-                      },
-                      itemBody: {
-                        paddingTop: "4px",
-                        fontSize: "0.875rem", // Slightly lower the font size
-                      },
-                      itemBullet: {
-                        fontSize: "12px", // Slightly lower the font size
-                      },
-                      item: {
-                        marginBottom: "8px", // Reduce space between bullets
-                      },
-                    }}
-                  >
-                    <Timeline.Item bullet={1} title="Add Contacts" lineVariant="dashed">
-                      <Text c="dimmed" size="xs">
-                        Add contacts to get them scored & researched.
-                      </Text>
-                    </Timeline.Item>
-
-                    <Timeline.Item bullet={2} title="Setup Templates" lineVariant="dashed">
-                      <Text c="dimmed" size="xs">
-                        Create email & LinkedIn templates.
-                      </Text>
-                    </Timeline.Item>
-
-                    <Timeline.Item bullet={3} title="Add Personalizers">
-                      <Text c="dimmed" size="xs">
-                        Create hyper-relevant outreach strategies to guide your personalizations.
-                      </Text>
-                    </Timeline.Item>
-                  </Timeline>
-                </Box>
-              </Paper>
-            )
+              <></>
           )}
           <Paper data-tour="contacts" withBorder w={"100%"}>
             <ContactsInfiniteScroll

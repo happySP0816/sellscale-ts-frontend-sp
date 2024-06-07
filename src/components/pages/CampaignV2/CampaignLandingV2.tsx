@@ -29,6 +29,7 @@ import {
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import Hook from "@pages/channels/components/Hook";
+import Tour from 'reactour'
 import { API_URL } from "@constants/data";
 import {
   IconArrowRight,
@@ -77,7 +78,6 @@ import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
 import { PersonaOverview, SubjectLineTemplate } from "src";
-import { link } from "fs";
 
 interface StatsData {
   id: number;
@@ -103,8 +103,59 @@ interface StatsData {
   is_ai_research_personalization_enabled: boolean;
 }
 
+const steps = [
+  {
+    selector: '[data-tour="campaign-tutorial"]',
+    content: 'Welcome to the campaign page! This tutorial will guide you through the key features and functionalities of the campaign management system.',
+  },
+  {
+    selector: '[data-tour="campaign-status"]',
+    content: 'This is the campaign status. You can see if the campaign is active or inactive here.',
+  },
+  {
+    selector: '[data-tour="campaign-stats"]',
+    content: 'Here you can see various statistics about your campaign, such as the number of emails sent, opened, and replied to.',
+  },
+  {
+    selector: '[data-tour="outreach-volume"]',
+    content: 'This slider allows you to set the outreach volume for your campaign.',
+  },
+  {
+    selector: '[data-tour="campaign-progress"]',
+    content: 'This section shows the progress of your campaign setup.',
+  },
+  {
+    selector: '[data-tour="contacts"]',
+    content: 'This section allows you to add and manage your contacts. You can import contacts and view their details',
+  },
+  {
+    selector: '[data-tour="sequences"]',
+    content: 'Here you can manage and organize the sequences of emails and LinkedIn messages that will be sent out as part of your campaign.',
+  },
+  {
+    selector: '[data-tour="personalizers"]',
+    content: 'This section allows you to manage your personalizers for the campaign.',
+  },
+  {
+    selector: '[data-tour="personalizer-enabled"]',
+    content: 'Activate SellScale AI for deep prospect research and dynamic personalized engagement!',
+  }
+];
+
 export default function CampaignLandingV2() {
-  //todo: just change statsData to personaOverview.
+
+  useEffect(() => {
+    const tourSeen = localStorage.getItem('campaignTourSeen');
+    if (!tourSeen) {
+      setIsTourOpen(true);
+    }
+  }, []);
+
+  const closeTour = () => {
+    setIsTourOpen(false);
+    localStorage.setItem('campaignTourSeen', 'true');
+  };
+
   const convertStatsDataToPersonaOverview = (statsData: StatsData): PersonaOverview => {
     return {
       active: statsData.active,
@@ -195,6 +246,7 @@ export default function CampaignLandingV2() {
   const [personalizersEnabled, setPersonalizersEnabled] = useState(currentProject?.is_ai_research_personalization_enabled);
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
   const [status, setStatus] = useState("SETUP");
+  const [isTourOpen, setIsTourOpen] = useState(false);
 
   //testing per cycle value
   const [cycleStatus, setCycleStatus] = useState(false);
@@ -451,19 +503,18 @@ export default function CampaignLandingV2() {
       });
   };
 
-  useEffect(() => {
-    if (!loadingContacts && !loadingSequences && !loadingStats) {
-      //data fetching is complete.
-
-      if (!sequences || sequences.length === 0) {
-        setActiveStep(0);
-      } else if (personalizers.length === 0) {
-        setActiveStep(1);
-      } else {
-        setActiveStep(3);
-      }
+useEffect(() => {
+    //data fetching is complete.
+    if (totalContacts === 0) {
+      setActiveStep(0);
+    } else if (sequences.length === 0) {
+      setActiveStep(1);
+    } else if (personalizers.length === 0) {
+      setActiveStep(2);
+    } else {
+      setActiveStep(3);
     }
-  }, [loadingSequences, loadingStats]);
+}, [totalContacts, sequences, loadingSequences, linkedinSequenceData, personalizers]);
 
   // This useEffect hook runs on page load and whenever the 'id' or 'userToken' changes.
   // It fetches campaign-related data (contacts, sequences, and stats) for a specific client archetype.
@@ -711,6 +762,10 @@ export default function CampaignLandingV2() {
             borderRadius: "6px",
           }}
         >
+        <Tour
+        steps={steps}
+        isOpen={isTourOpen}
+        onRequestClose={closeTour} />
           <Flex direction={"column"} w={"100%"}>
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
             <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
@@ -721,6 +776,7 @@ export default function CampaignLandingV2() {
                     {statsData?.archetype_name}
                   </Text>
                   <Button
+                    data-tour="campaign-status"
                     tt={"uppercase"}
                     variant="light"
                     size="xs"
@@ -780,7 +836,7 @@ export default function CampaignLandingV2() {
                     </Flex>
                   </Flex>
                 ) : (
-                  <Flex align={"center"} justify={"space-between"} h={"100%"} w="100%">
+                  <Flex data-tour="campaign-stats" align={"center"} justify={"space-between"} h={"100%"} w="100%">
                     <Box
                       p={"lg"}
                       w={"100%"}
@@ -931,7 +987,7 @@ export default function CampaignLandingV2() {
                   </Flex>
                 )}
               </Paper>
-              <Flex w={"60%"}>
+              <Flex data-tour="outreach-volume" w={"60%"}>
                 <Paper p="md" withBorder w={"100%"}>
                   <Flex justify={"space-between"}>
                     <Flex justify={"space-between"}>
@@ -1021,13 +1077,13 @@ export default function CampaignLandingV2() {
                 </Paper>
               </Flex>
             </Flex>
-            <Box px={"xl"} py={"md"} bg={"#ECECEC"}>
-              <Stepper active={active} onStepClick={setActive} size="xs" iconSize={28}>
+            {(!loadingContacts && activeStep !== 3) && <Box data-tour="campaign-progress" px={"xl"} py={"md"} bg={"#ECECEC"}>
+              <Stepper active={activeStep} size="xs" iconSize={28}>
                 <Stepper.Step label="Add Contacts" />
                 <Stepper.Step label="Setup Templates" />
                 <Stepper.Step label="Add Personalizers" />
               </Stepper>
-            </Box>
+            </Box>}
           </Flex>
         </Flex>
       )}
@@ -1041,59 +1097,9 @@ export default function CampaignLandingV2() {
               <Skeleton height={20} radius="xl" width="60%" mt="sm" />
             </Paper>
           ) : (
-            activeStep !== 3 && (
-              <Paper withBorder>
-                <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
-                  <Text fw={600} size={15} color="#37414E">
-                    Campaign Progress
-                  </Text>
-                </Flex>
-                <Box p={"sm"}>
-                  <Timeline
-                    active={activeStep}
-                    bulletSize={20}
-                    lineWidth={2}
-                    mt={"lg"}
-                    styles={{
-                      itemTitle: {
-                        fontWeight: 600,
-                        fontSize: "0.875rem", // Slightly lower the font size
-                      },
-                      itemBody: {
-                        paddingTop: "4px",
-                        fontSize: "0.875rem", // Slightly lower the font size
-                      },
-                      itemBullet: {
-                        fontSize: "12px", // Slightly lower the font size
-                      },
-                      item: {
-                        marginBottom: "8px", // Reduce space between bullets
-                      },
-                    }}
-                  >
-                    <Timeline.Item bullet={1} title="Add Contacts" lineVariant="dashed">
-                      <Text c="dimmed" size="xs">
-                        Add contacts to get them scored & researched.
-                      </Text>
-                    </Timeline.Item>
-
-                    <Timeline.Item bullet={2} title="Setup Templates" lineVariant="dashed">
-                      <Text c="dimmed" size="xs">
-                        Create email & LinkedIn templates.
-                      </Text>
-                    </Timeline.Item>
-
-                    <Timeline.Item bullet={3} title="Add Personalizers">
-                      <Text c="dimmed" size="xs">
-                        Create hyper-relevant outreach strategies to guide your personalizations.
-                      </Text>
-                    </Timeline.Item>
-                  </Timeline>
-                </Box>
-              </Paper>
-            )
+              <></>
           )}
-          <Paper withBorder w={"100%"}>
+          <Paper data-tour="contacts" withBorder w={"100%"}>
             <ContactsInfiniteScroll
               campaignId={Number(id)}
               getTotalContacts={getTotalContacts}
@@ -1103,7 +1109,7 @@ export default function CampaignLandingV2() {
           </Paper>
         </Flex>
         <Flex direction={"column"} gap={"md"} w={"80%"}>
-          <Paper withBorder>
+          <Paper data-tour="sequences"  withBorder>
             <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
               <Flex align="center" gap="xs">
                 <Text fw={600} size={20} color="#37414E">
@@ -1687,7 +1693,7 @@ export default function CampaignLandingV2() {
               )}
             </Flex>
           </Paper>
-          <Paper withBorder>
+          <Paper data-tour="personalizers" withBorder>
             <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
               <Flex gap={"sm"} align={"center"}>
                 <Flex align="center" gap="xs">
@@ -1709,7 +1715,7 @@ export default function CampaignLandingV2() {
                   </Tooltip>
                 </Flex>
               </Flex>
-              <Flex gap={"sm"} align={"center"}>
+              <Flex data-tour="personalizer-enabled" gap={"sm"} align={"center"}>
                 <Switch
                   labelPosition="left"
                   label={

@@ -76,6 +76,7 @@ import CampaignWizard from "./components/CampaignWizard/CampaignWizard";
 import CampaignLandingV2 from "@pages/CampaignV2/CampaignLandingV2";
 import B2BSearch from "@pages/B2BSearch/B2bSearch";
 import Costs from "@common/internal_tools/Costs";
+import InboxPurchasing from "@pages/InboxPurchasing";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -549,6 +550,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/b2b_search",
         element: <B2BSearch />,
+      },
+      {
+        path: "/inboxpurchase",
+        element: <InboxPurchasing />,
       },
     ],
   },

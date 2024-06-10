@@ -1,19 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, Flex, Text, Select, Badge, Popover } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 import { IconAlertCircle, IconDice5 } from "@tabler/icons";
 
 const SubjectDropdown = ({ subjects }: { subjects: string[] }) => {
   const [selectedSubject, setSelectedSubject] = useState(subjects?.[0]);
-  const [popoverOpened, { close, open }] = useDisclosure(false);
-  const popoverRef = useRef<HTMLDivElement>(null);
+  const [popoverOpenedArray, setPopoverOpenedArray] = useState<boolean[]>(subjects.map(() => false));
+  const popoverRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    if (popoverRef.current) {
-      const rect = popoverRef.current.getBoundingClientRect();
-      console.log('Popover position:', rect);
-    }
-  }, [selectedSubject, popoverOpened]);
+    popoverRefs.current.forEach((ref, index) => {
+      if (ref && popoverOpenedArray[index]) {
+        const rect = ref.getBoundingClientRect();
+        console.log(`Popover position for subject ${index}:`, rect);
+      }
+    });
+  }, [selectedSubject, popoverOpenedArray]);
+
+  const handlePopoverOpen = (index: number) => {
+    setPopoverOpenedArray(popoverOpenedArray.map((opened, i) => i === index));
+  };
+
+  const handlePopoverClose = () => {
+    setPopoverOpenedArray(popoverOpenedArray.map(() => false));
+  };
 
   return (
     <Box
@@ -31,11 +40,12 @@ const SubjectDropdown = ({ subjects }: { subjects: string[] }) => {
             onChange={(value: string) => {
               setSelectedSubject(value);
             }}
-            data={subjects.map((subject) => ({
+            data={subjects.map((subject, index) => ({
               value: subject,
               label: subject,
+              index: index,
             }))}
-            itemComponent={({ value, label, ...others }) => (
+            itemComponent={({ value, label, index, ...others }) => (
               <div {...others}>
                 <Flex align="center" gap="xs">
                   <Popover 
@@ -43,12 +53,12 @@ const SubjectDropdown = ({ subjects }: { subjects: string[] }) => {
                     withinPortal 
                     withArrow 
                     shadow="md" 
-                    opened={popoverOpened}
+                    opened={popoverOpenedArray[index]}
                     offset={10}
                     onPositionChange={(position) => console.log('Popover position:', position)}
                     positionDependencies={[selectedSubject]}
-                    onClose={close}
-                    onOpen={open}
+                    onClose={handlePopoverClose}
+                    onOpen={() => handlePopoverOpen(index)}
                     keepMounted
                     transitionProps={{ duration: 150, transition: 'fade' }}
                     width="auto" 
@@ -61,8 +71,8 @@ const SubjectDropdown = ({ subjects }: { subjects: string[] }) => {
                     radius="md"
                   >
                     <Popover.Target>
-                      <div ref={popoverRef}>
-                        <IconDice5 size={25} onMouseEnter={open} onMouseLeave={close} />
+                      <div ref={(el) => (popoverRefs.current[index] = el)}>
+                        <IconDice5 size={25} onMouseEnter={() => handlePopoverOpen(index)} onMouseLeave={handlePopoverClose} />
                       </div>
                     </Popover.Target>
                     <Popover.Dropdown sx={{ pointerEvents: 'none' }}>

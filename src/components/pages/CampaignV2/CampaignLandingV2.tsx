@@ -78,6 +78,7 @@ import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
 import { PersonaOverview, SubjectLineTemplate } from "src";
+import SubjectDropdown from "@common/campaigns/SubjectDropdown";
 
 interface StatsData {
   id: number;
@@ -1453,78 +1454,6 @@ useEffect(() => {
                     {sequences.map((item: any, index: number) => {
                       return (
                         <>
-                          {/* {index !== 0 && (
-                            <Divider
-                              variant="dashed"
-                              labelPosition="center"
-                              label={
-                                <Flex gap={1} align={"center"}>
-                                  {editableIndex === index ? (
-                                    <>
-                                      <Text color="gray" fw={500} size={"xs"}>
-                                        Wait for
-                                      </Text>
-                                      <input
-                                        type="number"
-                                        defaultValue={item.bumped_count}
-                                        onKeyDown={(e) => {
-                                          if (e.key === "Enter") {
-                                            console.log(
-                                              (e.target as HTMLInputElement)
-                                                .value
-                                            );
-                                            editSequenceBumpCount(
-                                              index,
-                                              (e.target as HTMLInputElement)
-                                                .value
-                                            );
-                                            setEditableIndex(null);
-                                          }
-                                        }}
-                                        onFocus={(e) => e.target.select()}
-                                        style={{
-                                          width: "50px",
-                                          fontSize: "0.75rem",
-                                          borderRadius: "8px",
-                                        }}
-                                        autoFocus
-                                      />
-                                      <Text color="gray" fw={500} size={"xs"}>
-                                        {item.bumped_count === 1
-                                          ? "day"
-                                          : "days"}
-                                      </Text>
-                                      <ActionIcon
-                                        onClick={(e) => {
-                                          editSequenceBumpCount(
-                                            index,
-                                            (e.target as HTMLInputElement).value
-                                          );
-                                          setEditableIndex(null);
-                                        }}
-                                      >
-                                        <IconCheck size={"0.9rem"} />
-                                      </ActionIcon>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Text color="gray" fw={500} size={"xs"}>
-                                        Wait for {item.bumped_count}{" "}
-                                        {item.bumped_count === 1
-                                          ? "day"
-                                          : "days"}
-                                      </Text>
-                                      <ActionIcon
-                                        onClick={() => setEditableIndex(index)}
-                                      >
-                                        <IconEdit size={"0.9rem"} />
-                                      </ActionIcon>
-                                    </>
-                                  )}
-                                </Flex>
-                              }
-                            />
-                          )} */}
                           <Box
                             style={{
                               border: selectStep === index ? "1px solid #228be6" : "1px solid #ced4da",
@@ -1585,6 +1514,7 @@ useEffect(() => {
                               <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
                                 <Avatar size={"md"} radius={"xl"} src={item?.avatar} />
                                 <Box>
+                                {type === "email" && index === 0 && <SubjectDropdown subjects={emailSubjectLines.map((line: any) => line.subject_line)}/>}
                                   <Text fw={600} size={"sm"}>
                                     {item?.name}
                                   </Text>

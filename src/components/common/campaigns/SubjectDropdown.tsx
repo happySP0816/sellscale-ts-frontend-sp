@@ -65,7 +65,7 @@ const SubjectDropdown = ({ subjects }: { subjects: string[] }) => {
                     </div>
                   </Popover.Target>
                   <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
-                    <Text size="sm">These subject lines will be randomly sampled when sending outbound to identify the most effective one for engaging your audience.</Text>
+                    <Text size="sm">These subject lines will be randomly sampled when sending outbound <br/> to identify the most effective one for engaging your audience.</Text>
                    </Popover.Dropdown>
                   <Badge>{label}</Badge>
                 </Popover>

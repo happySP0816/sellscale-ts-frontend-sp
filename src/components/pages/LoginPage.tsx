@@ -112,14 +112,21 @@ export default function LoginPage() {
               Welcome back! Please enter your details.
             </Text>
           </Box>
-          <TextInput size="md" mt={"xl"} placeholder="name@xyz.com" label="Enter your Email" />
-          <TextInput size="md" label="Enter your Password" />
-          <Text size={"sm"} color="gray" fw={500} align="end">
-            Forgot Password?
-          </Text>
-          <Button size="lg" className="bg-[#e25dee]">
-            Login
-          </Button>
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <TextInput size="md" mt={"xl"} placeholder="name@xyz.com" label="Enter your Email" {...form.getInputProps("email")} required />
+            {error && (
+              <Text color="red" size="sm" mt="sm">
+                {error}
+              </Text>
+            )}
+            <TextInput size="md" label="Enter your Password" />
+            <Text size={"sm"} color="gray" fw={500} align="end">
+              Forgot Password?
+            </Text>
+            <Button size="lg" className="bg-[#e25dee]" type="submit" loading={loading}>
+              Login
+            </Button>
+          </form>
           <Divider label="Or" labelPosition="center" />
           <Flex align={"center"} justify={"center"} gap={"sm"}>
             <Text color="gray" size={"sm"} fw={500}>

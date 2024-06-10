@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Flex, Text, Select, Badge, Popover } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconDice5 } from "@tabler/icons";
@@ -6,6 +6,14 @@ import { IconDice5 } from "@tabler/icons";
 const SubjectDropdown = ({ subjects }: { subjects: string[] }) => {
   const [selectedSubject, setSelectedSubject] = useState(subjects?.[0]);
   const [popoverOpened, { close, open }] = useDisclosure(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (popoverRef.current) {
+      const rect = popoverRef.current.getBoundingClientRect();
+      console.log('Popover position:', rect);
+    }
+  }, [selectedSubject, popoverOpened]);
 
   return (
     <Box
@@ -29,13 +37,36 @@ const SubjectDropdown = ({ subjects }: { subjects: string[] }) => {
           itemComponent={({ value, label, ...others }) => (
             <div {...others}>
               <Flex align="center" gap="xs">
-                <Popover width={200} position="bottom" withArrow shadow="md" opened={popoverOpened}>
+                <Popover 
+                  position="bottom" 
+                  withinPortal 
+                  withArrow 
+                  shadow="md" 
+                  opened={popoverOpened}
+                  offset={10}
+                  onPositionChange={(position) => console.log('Popover position:', position)}
+                  positionDependencies={[selectedSubject]}
+                  onClose={close}
+                  onOpen={open}
+                  keepMounted
+                  transitionProps={{ duration: 150, transition: 'fade' }}
+                  width="auto" 
+                  middlewares={{ shift: true, flip: true }}
+                  arrowSize={10}
+                  arrowOffset={5}
+                  arrowRadius={2}
+                  arrowPosition="center"
+                  zIndex={1000}
+                  radius="md"
+                >
                   <Popover.Target>
-                    <IconDice5 size={25} onMouseEnter={open} onMouseLeave={close} />
+                    <div ref={popoverRef}>
+                      <IconDice5 size={25} onMouseEnter={open} onMouseLeave={close} />
+                    </div>
                   </Popover.Target>
                   <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
-                    <Text size="sm">These subject lines will be randomly sampled.</Text>
-                  </Popover.Dropdown>
+                    <Text size="sm">These subject lines will be randomly sampled when sending outbound to identify the most effective one for engaging your audience.</Text>
+                   </Popover.Dropdown>
                   <Badge>{label}</Badge>
                 </Popover>
               </Flex>

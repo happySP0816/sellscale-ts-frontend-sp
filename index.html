@@ -16,7 +16,10 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito&display=swap"
+      rel="stylesheet"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
       rel="stylesheet"
@@ -51,5 +54,35 @@
         console.log('Received message from the server:', data);
       });
     </script> -->
+    <script>
+      (function () {
+        var e = window;
+        var t = document;
+        var n = function () {
+          n.e(arguments);
+        };
+        n.q = [];
+        n.e = function (e) {
+          n.q.push(e);
+        };
+        e.Pylon = n;
+        var r = function () {
+          var e = t.createElement("script");
+          e.setAttribute("type", "text/javascript");
+          e.setAttribute("async", "true");
+          e.setAttribute(
+            "src",
+            "https://widget.usepylon.com/widget/e816a937-d49b-46b8-8fa4-8796031cdc15"
+          );
+          var n = t.getElementsByTagName("script")[0];
+          n.parentNode.insertBefore(e, n);
+        };
+        if (t.readyState === "complete") {
+          r();
+        } else if (e.addEventListener) {
+          e.addEventListener("load", r, false);
+        }
+      })();
+    </script>
   </body>
 </html>

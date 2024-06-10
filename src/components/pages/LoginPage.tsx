@@ -15,8 +15,8 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { showNotification } from "@mantine/notifications";
-import { IconAt } from "@tabler/icons";
+import { notifications, showNotification } from "@mantine/notifications";
+import { IconAt, IconInfoCircle } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import { login } from "@auth/core";
 import { useRecoilState } from "recoil";
@@ -91,48 +91,113 @@ export default function LoginPage() {
 
     if (res?.status === 200) {
       login(values.email, setUserData);
+      showNotification({
+        color: "green",
+        title: "Successful logging in",
+        message: "Please check your email",
+      });
       setCheckEmail(true);
     } else if (res?.status === 404) {
       setError(res.message);
+      showNotification({
+        color: "red",
+        title: "Error logging in",
+        message: res.message,
+      });
     } else {
       setError("Error logging in");
+      showNotification({
+        color: "red",
+        title: "Error logging in",
+        message: "Please ensure this is a valid SellScale account email",
+      });
     }
   };
 
   return (
     <Flex h={"100%"}>
-      <Flex className="absolute z-10" w={"50%"} h={"100%"} bg={"white"} style={{ borderTopRightRadius: "16px", borderBottomRightRadius: "16px" }}>
-        <Flex direction={"column"} gap={"md"} mx={100} justify={"center"} w={"100%"} h={"100%"}>
+      <Flex
+        className="absolute z-10"
+        w={"50%"}
+        h={"100%"}
+        bg={"white"}
+        style={{
+          borderTopRightRadius: "16px",
+          borderBottomRightRadius: "16px",
+        }}
+      >
+        <Flex
+          direction={"column"}
+          gap={"md"}
+          mx={100}
+          justify={"center"}
+          w={"100%"}
+          h={"100%"}
+        >
           <img src={WhiteLogo} className="bg-[#e25dee] w-10 p-2 rounded-full" />
           <Box>
             <Text fw={700} fz={22}>
               Login to your SellScale account
             </Text>
             <Text size={"xs"} color="gray" fw={500}>
-              Welcome back! Please enter your details.
+              Welcome back! Please enter your email.
             </Text>
           </Box>
-          <form onSubmit={form.onSubmit(handleSubmit)}>
-            <TextInput size="md" mt={"xl"} placeholder="name@xyz.com" label="Enter your Email" {...form.getInputProps("email")} required />
-            {error && (
-              <Text color="red" size="sm" mt="sm">
-                {error}
+          {!checkEmail && (
+            <form onSubmit={form.onSubmit(handleSubmit)}>
+              <TextInput
+                size="md"
+                mt={"xl"}
+                placeholder="name@xyz.com"
+                label="Enter your Email"
+                {...form.getInputProps("email")}
+                required
+              />
+              {error && (
+                <Text color="red" size="sm" mt="sm">
+                  {error}
+                </Text>
+              )}
+              {/* <TextInput size="md" label="Enter your Password" /> */}
+
+              {/* <Text size={"sm"} color="gray" fw={500} align="end">
+                Forgot Password?
+              </Text> */}
+              <Button
+                mt="md"
+                size="lg"
+                className="bg-[#e25dee]"
+                type="submit"
+                loading={loading}
+              >
+                Login
+              </Button>
+            </form>
+          )}
+          {checkEmail && (
+            <>
+              <Text fw={500} mt={"lg"}>
+                A login link has been sent to your email.
               </Text>
-            )}
-            <TextInput size="md" label="Enter your Password" />
-            <Text size={"sm"} color="gray" fw={500} align="end">
-              Forgot Password?
-            </Text>
-            <Button size="lg" className="bg-[#e25dee]" type="submit" loading={loading}>
-              Login
-            </Button>
-          </form>
+              <Text c="dimmed" mb={"lg"}>
+                You may close this tab now.
+              </Text>
+            </>
+          )}
           <Divider label="Or" labelPosition="center" />
           <Flex align={"center"} justify={"center"} gap={"sm"}>
             <Text color="gray" size={"sm"} fw={500}>
               Don't have an account?
             </Text>
-            <Text size={"sm"} fw={500} className="text-[#e25dee]">
+            <Text
+              size={"sm"}
+              fw={500}
+              className="text-[#e25dee]"
+              sx={{ cursor: "pointer" }}
+              onClick={() => {
+                window.open("https://www.sellscale.com/get-started", "_blank");
+              }}
+            >
               Register
             </Text>
           </Flex>

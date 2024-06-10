@@ -1,7 +1,22 @@
-import { LoadingOverlay, Modal, Text, Divider, Button, TextInput, Center, Container, Box, Flex, Image, BackgroundImage } from "@mantine/core";
+import {
+  LoadingOverlay,
+  Modal,
+  Text,
+  Divider,
+  Button,
+  TextInput,
+  Center,
+  Container,
+  Box,
+  Flex,
+  Image,
+  BackgroundImage,
+  Paper,
+  useMantineTheme,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { showNotification } from "@mantine/notifications";
-import { IconAt } from "@tabler/icons";
+import { notifications, showNotification } from "@mantine/notifications";
+import { IconAt, IconInfoCircle } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import { login } from "@auth/core";
 import { useRecoilState } from "recoil";
@@ -10,6 +25,8 @@ import { LogoFull } from "@nav/Logo";
 import { API_URL, EMAIL_REGEX } from "@constants/data";
 import { setPageTitle } from "@utils/documentChange";
 import Logo from "@assets/images/logo.png";
+import LoginAsset from "@assets/images/login_asset.png";
+import WhiteLogo from "@assets/images/whitelogo.png";
 import Background from "@assets/images/login_bg.png";
 
 async function sendLogin(email: string) {
@@ -40,6 +57,7 @@ async function sendLogin(email: string) {
 
 export default function LoginPage() {
   setPageTitle(`Login`);
+  const theme = useMantineTheme();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,65 +91,172 @@ export default function LoginPage() {
 
     if (res?.status === 200) {
       login(values.email, setUserData);
+      showNotification({
+        color: "green",
+        title: "Successful logging in",
+        message: "Please check your email",
+      });
       setCheckEmail(true);
     } else if (res?.status === 404) {
       setError(res.message);
+      showNotification({
+        color: "red",
+        title: "Error logging in",
+        message: res.message,
+      });
     } else {
       setError("Error logging in");
+      showNotification({
+        color: "red",
+        title: "Error logging in",
+        message: "Please ensure this is a valid SellScale account email",
+      });
     }
   };
 
   return (
-    <Box maw={"100%"} h={"100%"}>
-      <BackgroundImage h={"100%"} src={Background}>
-        <Modal opened={true} centered withCloseButton={false} onClose={() => {}} size="md">
-          <Flex px={"md"} py={"md"} gap={"md"} direction={"column"}>
-            <Image height={40} sx={{ minWidth: "100px" }} fit="contain" src={Logo} alt="SellScale Sight" />
-            <Text ta={"center"} fz={22} fw={600}>
-              SellScale Sight
+    <Flex h={"100%"}>
+      <Flex
+        className="absolute z-10"
+        w={"50%"}
+        h={"100%"}
+        bg={"white"}
+        style={{
+          borderTopRightRadius: "16px",
+          borderBottomRightRadius: "16px",
+        }}
+      >
+        <Flex
+          direction={"column"}
+          gap={"md"}
+          mx={100}
+          justify={"center"}
+          w={"100%"}
+          h={"100%"}
+        >
+          <img src={WhiteLogo} className="bg-[#e25dee] w-10 p-2 rounded-full" />
+          <Box>
+            <Text fw={700} fz={22}>
+              Login to your SellScale account
             </Text>
-            <Text c="dimmed" ta="center" size="sm">
-              Work with your Sales AGI to access your contacts, campaigns, analytics, and more.
+            <Text size={"xs"} color="gray" fw={500}>
+              Welcome back! Please enter your email.
             </Text>
-            <Divider w={"100%"} />
-            <Box>
-              {!checkEmail && (
-                <form onSubmit={form.onSubmit(handleSubmit)}>
-                  <Text fw={600} align="center">
-                    Log in to get started
-                  </Text>
-                  <LoadingOverlay visible={loading} overlayBlur={2} />
-
-                  <TextInput required placeholder={`Enter your email address`} {...form.getInputProps("email")} mt={"sm"} />
-
-                  {error && (
-                    <Text color="red" size="sm" mt="sm">
-                      {error}
-                    </Text>
-                  )}
-
-                  <Button mt={"sm"} radius="md" type="submit" fullWidth>
-                    Next
-                  </Button>
-                </form>
+          </Box>
+          {!checkEmail && (
+            <form onSubmit={form.onSubmit(handleSubmit)}>
+              <TextInput
+                size="md"
+                mt={"xl"}
+                placeholder="name@xyz.com"
+                label="Enter your Email"
+                {...form.getInputProps("email")}
+                required
+              />
+              {error && (
+                <Text color="red" size="sm" mt="sm">
+                  {error}
+                </Text>
               )}
-              {checkEmail && (
-                <>
-                  <Text ta="center" fw={500}>
-                    A login link has been sent to your email.
-                  </Text>
-                  <Text ta="center" c="dimmed">
-                    You may close this tab now.
-                  </Text>
-                </>
-              )}
-            </Box>
-            <Text size={"xs"} color="gray" align="center">
-              SellScale Inc., 2024
+              {/* <TextInput size="md" label="Enter your Password" /> */}
+
+              {/* <Text size={"sm"} color="gray" fw={500} align="end">
+                Forgot Password?
+              </Text> */}
+              <Button
+                mt="md"
+                size="lg"
+                className="bg-[#e25dee]"
+                type="submit"
+                loading={loading}
+              >
+                Login
+              </Button>
+            </form>
+          )}
+          {checkEmail && (
+            <>
+              <Text fw={500} mt={"lg"}>
+                A login link has been sent to your email.
+              </Text>
+              <Text c="dimmed" mb={"lg"}>
+                You may close this tab now.
+              </Text>
+            </>
+          )}
+          <Divider label="Or" labelPosition="center" />
+          <Flex align={"center"} justify={"center"} gap={"sm"}>
+            <Text color="gray" size={"sm"} fw={500}>
+              Don't have an account?
+            </Text>
+            <Text
+              size={"sm"}
+              fw={500}
+              className="text-[#e25dee]"
+              sx={{ cursor: "pointer" }}
+              onClick={() => {
+                window.open("https://www.sellscale.com/get-started", "_blank");
+              }}
+            >
+              Register
             </Text>
           </Flex>
-        </Modal>
-      </BackgroundImage>
-    </Box>
+        </Flex>
+      </Flex>
+      <Flex w={"51%"} className="absolute top-0 bottom-0 right-0">
+        <BackgroundImage h={"100%"} src={LoginAsset} />
+      </Flex>
+    </Flex>
+    // <Box maw={"100%"} h={"100%"}>
+    //   <BackgroundImage h={"100%"} src={Background}>
+    //     <Modal opened={true} centered withCloseButton={false} onClose={() => {}} size="md">
+    //       <Flex px={"md"} py={"md"} gap={"md"} direction={"column"}>
+    //         <Image height={40} sx={{ minWidth: "100px" }} fit="contain" src={Logo} alt="SellScale Sight" />
+    //         <Text ta={"center"} fz={22} fw={600}>
+    //           SellScale Sight
+    //         </Text>
+    //         <Text c="dimmed" ta="center" size="sm">
+    //           Work with your Sales AGI to access your contacts, campaigns, analytics, and more.
+    //         </Text>
+    //         <Divider w={"100%"} />
+    //         <Box>
+    //           {!checkEmail && (
+    //             <form onSubmit={form.onSubmit(handleSubmit)}>
+    //               <Text fw={600} align="center">
+    //                 Log in to get started
+    //               </Text>
+    //               <LoadingOverlay visible={loading} overlayBlur={2} />
+
+    //               <TextInput required placeholder={`Enter your email address`} {...form.getInputProps("email")} mt={"sm"} />
+
+    //               {error && (
+    //                 <Text color="red" size="sm" mt="sm">
+    //                   {error}
+    //                 </Text>
+    //               )}
+
+    //               <Button mt={"sm"} radius="md" type="submit" fullWidth>
+    //                 Next
+    //               </Button>
+    //             </form>
+    //           )}
+    //           {checkEmail && (
+    //             <>
+    //               <Text ta="center" fw={500}>
+    //                 A login link has been sent to your email.
+    //               </Text>
+    //               <Text ta="center" c="dimmed">
+    //                 You may close this tab now.
+    //               </Text>
+    //             </>
+    //           )}
+    //         </Box>
+    //         <Text size={"xs"} color="gray" align="center">
+    //           SellScale Inc., 2024
+    //         </Text>
+    //       </Flex>
+    //     </Modal>
+    //   </BackgroundImage>
+    // </Box>
   );
 }

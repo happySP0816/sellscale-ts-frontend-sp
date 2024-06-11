@@ -469,7 +469,7 @@ export default function CampaignLandingV2() {
         //set the setup status
         if (loadedStats.is_setting_up) {
           setStatus("SETUP");
-        } else if (loadedStats.active && loadedStats.num_sent > 0) {
+        } else if (loadedStats.active && analyticsData.num_sent > 0) {
           setStatus("ACTIVE");
         } else if (loadedStats.active === false) {
           setStatus("INACTIVE");
@@ -710,9 +710,9 @@ const refetchCampaignOtherStats = async () => {
       });
       if (persona.active) {
         setStatus("INACTIVE");
-      } else if (!persona.active && persona.num_sent > 0) {
+      } else if (!persona.active && analyticsData.num_sent > 0) {
         setStatus("ACTIVE");
-      } else if (!persona.active && persona.num_sent === 0) {
+      } else if (!persona.active && analyticsData.num_sent === 0) {
         setStatus("SETUP");
       }
     }

@@ -25,6 +25,7 @@ import {
   Modal,
   List,
   Stepper,
+  Checkbox,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -282,8 +283,6 @@ export default function CampaignLandingV2() {
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
   const [testingVolume, setTestingVolume] = useState(0);
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
-  const [showPersonalizerModal, setShowPersonalizerModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showLinkedInConvoSimulatorModal, setShowLinkedInConvoSimulatorModal] = useState(false);
 
   const [value, setValue] = useState("");
@@ -600,6 +599,30 @@ useEffect(() => {
   };
 
   const togglePersonaChannel = async (campaignId: number, channel: "email" | "linkedin", userToken: string, active: boolean) => {
+    if (channel === "email") {
+      //check if there are email sequences and subject lines.
+      //if not, show a notification that the channel cannot be activated.
+      if (emailSequenceData.length === 0 || emailSubjectLines.length === 0) {
+        showNotification({
+          color: "red",
+          title: "Email Channel",
+          message: "Email channel cannot be activated without email sequences and subject lines.",
+        });
+        return;
+      }
+    }
+
+    //show a warning that for email channel, if they activate, the number of sequence steps will always stay the same.
+    //check localStorage if they have set the warning to not show again.
+    //if not, show the warning.
+    if (!localStorage.getItem("emailChannelWarning") && active === true) {
+      localStorage.setItem("emailChannelWarning", "true");
+    }
+    if ((channel === "email") && (localStorage.getItem("emailChannelWarning") === 'true') && (active === true)) {
+      setShowActivateWarningModal(true);
+      return;
+    }
+    
     setLoadingStats(true);
     const result = postTogglePersonaActive(userToken, campaignId, channel, active).then((res) => {
       refetchCampaignStatsData();
@@ -631,68 +654,57 @@ useEffect(() => {
 
   return (
     <Paper p={"lg"} maw={1150} h="100%" ml="auto" mr="auto" style={{ backgroundColor: "transparent" }}>
-      <Modal opened={showSettingsModal} onClose={() => setShowSettingsModal(false)} size="350px">
-        <Title mb="xl" size={"sm"} align="center">
-          Campaign Settings
-        </Title>
-        <Flex direction="column" align="center" gap="md">
-          <Flex justify="center" align="center" gap="xs" w="100%">
-            <Flex align="center" gap="xs">
-              <Text>Campaign Status:</Text>
-              <Text>{statsData?.active ? "Active" : "Inactive"}</Text>
-              <Switch
-                checked={statsData?.active}
-                onChange={() => {
-                  togglePersona(statsData as StatsData, userToken);
-                  setShowSettingsModal(false);
-                }}
-                color={statsData?.active ? "green" : "red"}
-              />
-            </Flex>
-          </Flex>
-          <Button
-            variant="light"
-            color="blue"
-            onClick={() => {
-              // Duplicate Campaign logic here
-              setShowSettingsModal(false);
-            }}
-          >
-            Duplicate Campaign
-          </Button>
-        </Flex>
-      </Modal>
-      {/* <Modal
+      <Modal
         opened={showActivateWarningModal}
-        size="600px"
         onClose={() => setShowActivateWarningModal(false)}
-        >
-      <Flex direction="column" align="center" gap="md">
-        <Title size="lg" align="center" color="blue">
-          Just a sec!
-        </Title>
-        <Text size="md" align="center">
-          Before you can activate this campaign, please ensure the following:
-        </Text>
-        <List spacing="sm" size="md" center>
-          {(!statsData?.email_active && !statsData?.linkedin_active) && (
-            <List.Item>
-              <Text color="black">Enable either Email or LinkedIn Sequences.</Text>
-            </List.Item>
-          )}
-          {statsData?.email_active && emailSequenceData.length === 0 && (
-            <List.Item>
-              <Text color="black">Add an email sequence.</Text>
-            </List.Item>
-          )}
-          {statsData?.linkedin_active && linkedinSequenceData.length === 0 && (
-            <List.Item>
-              <Text color="black">Add a LinkedIn sequence.</Text>
-            </List.Item>
-          )}
-        </List>
-      </Flex>
-      </Modal> */}
+        size="md"
+        centered
+        withCloseButton={false}
+      >
+        <Paper p="lg">
+          <Flex align="center" mb="md">
+            <IconMailOpened size={24} color="gray" />
+            <Text size="lg" fw={700} ml="xs">
+              Email Activation Notice
+            </Text>
+          </Flex>
+          <Text size="sm" color="dimmed" mb="lg">
+            • Activating the email channel will lock the number of email sequence steps.<br />
+            • Once activated, the email sequence steps will be set.<br />
+            • You will still have the ability to edit the content of the templates.
+          </Text>
+          <Flex justify="space-between" align="center" mt="lg">
+            <Checkbox
+              defaultChecked
+              label="Remind me in the future"
+              onChange={(event) => {
+                const currentValue = localStorage.getItem("emailChannelWarning");
+                localStorage.setItem('emailChannelWarning', currentValue === 'false' ? "true" : "false");
+              }}
+            />
+            <Button
+              onClick={() => {
+                setShowActivateWarningModal(false);
+                setLoadingStats(true);
+                postTogglePersonaActive(userToken, id, "email", true)
+                  .then((res) => {
+                    refetchCampaignStatsData();
+                  })
+                  .catch((error) => {
+                    console.error("Error toggling persona active", error);
+                  })
+                  .finally(() => {
+                    setLoadingStats(false);
+                  });
+              }}
+              variant="filled"
+              color="grape"
+            >
+              Activate!
+            </Button>
+          </Flex>
+        </Paper>
+      </Modal>
       <Modal
         opened={showCampaignTemplateModal}
         onClose={() => {
@@ -714,21 +726,6 @@ useEffect(() => {
         size="1100px"
       >
         <LinkedInConvoSimulator personaId={id as number} sequenceSetUpMode={true} />
-      </Modal>
-      <Modal
-        opened={showPersonalizerModal}
-        onClose={() => {
-          getPersonalizers();
-          setShowPersonalizerModal(false);
-        }}
-        size="1100px"
-      >
-        <iframe
-          src={`https://sellscale.retool.com/embedded/public/46e04a30-838d-4dcb-872c-1d3bca6e6757#authToken=${userToken}&campaignId=${id}&embedMode=true`}
-          width="100%"
-          height="800px"
-          style={{ border: "none" }}
-        ></iframe>
       </Modal>
       {loadingStats || !statsData ? (
         <Flex
@@ -793,9 +790,6 @@ useEffect(() => {
                     {status}
                   </Button>
                 </Flex>
-                <ActionIcon variant="light" color="gray" onClick={() => setShowSettingsModal(true)}>
-                  <IconSettings size={"1.2rem"} />
-                </ActionIcon>
               </Flex>
               <Flex align={"center"} gap={"xs"}>
                 <Text color="gray" size={"xs"} fw={600}>
@@ -814,6 +808,128 @@ useEffect(() => {
                     dateStyle: "full",
                   })}
                 </Text>
+                  <Flex>
+                  <Paper
+                    p="md"
+                    sx={{
+                      flex: 1,
+                      justifyContent: "space-between",
+                      textAlign: "center",
+                      // make background a grid of dots
+                      backgroundSize: "20px 20px",
+                    }}
+                    // withBorder
+                  >
+                    {/* <Flex justify="flex-end">
+                      <Tooltip
+                        label={
+                          <Text>
+                            Omnichannel outbound allows you to control the order of personalized outbound messages. <br></br>
+                            If both email and LinkedIn are enabled, an email is sent first, followed by a LinkedIn message after a few days. <br></br>
+                            Otherwise, only one channel is used.
+                          </Text>
+                        }
+                        withArrow
+                        position="bottom"
+                      >
+                        <ActionIcon>
+                          <IconCircleLetterI size={"1rem"} color="#3B85EF" />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Flex> */}
+                    <Group noWrap spacing={"sm"} w={"100%"}>
+                      <Switch
+                        onChange={() => togglePersonaChannel(id, "email", userToken, !statsData?.email_active)}
+                        checked={statsData?.email_active}
+                        labelPosition="left"
+                        label={
+                          <Flex gap={1} align={"center"} className="hover:cursor-pointer">
+                            <IconMailOpened size={"1.2rem"} fill="#3B85EF" color="white" />
+                            <Text color="#3B85EF" fw={500}>
+                              Email
+                            </Text>
+                          </Flex>
+                        }
+                        w={"100%"}
+                        // miw={160}
+                        styles={{
+                          root: {
+                            minWidth: "9rem !important",
+                            border: "1px solid #D9DEE5",
+                            padding: "7px",
+                            borderRadius: "4px",
+                            background: "white",
+                          },
+                          body: {
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "space-between",
+                          },
+                        }}
+                      />
+                      <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
+                      <Select
+                        onChange={(value) => {
+                          if (typeof value === "string") {
+                            updateConnectionType(value, id);
+                          }
+                        }}
+                        size="sm"
+                        value={statsData?.email_to_linkedin_connection}
+                        w={"100%"}
+                        data={[
+                          {
+                            label: "[❌] No Connection",
+                            value: "RANDOM",
+                          },
+                          {
+                            label: "[📧 → 🤝] Sent Only - ",
+                            value: "ALL_PROSPECTS",
+                          },
+                          {
+                            label: "[👀 → 🤝] Opened Only - ",
+                            value: "OPENED_EMAIL_PROSPECTS_ONLY",
+                          },
+                          {
+                            label: "[⚡️ → 🤝] Clicked Only - ",
+                            value: "CLICKED_LINK_PROSPECTS_ONLY",
+                          },
+                        ]}
+                        placeholder="Select an event"
+                      />
+                      <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
+                      <Switch
+                        onChange={() => togglePersonaChannel(id, "linkedin", userToken, !statsData?.linkedin_active)}
+                        checked={statsData?.linkedin_active}
+                        labelPosition="left"
+                        label={
+                          <Flex gap={2} align={"center"}>
+                            <IconBrandLinkedin size={"1.4rem"} fill="#3B85EF" color="white" />
+                            <Text color="#3B85EF" fw={500}>
+                              Linkedin
+                            </Text>
+                          </Flex>
+                        }
+                        w={"100%"}
+                        // miw={160}
+                        styles={{
+                          root: {
+                            minWidth: "9rem !important",
+                            border: "1px solid #D9DEE5",
+                            padding: "7px",
+                            borderRadius: "4px",
+                            background: "white",
+                          },
+                          body: {
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "space-between",
+                          },
+                        }}
+                      />
+                    </Group>
+                  </Paper>
+                </Flex>
               </Flex>
             </Flex>
             <Flex gap={"sm"} w={"100%"} justify={"center"} p={"lg"}>
@@ -1266,128 +1382,6 @@ useEffect(() => {
                 </Button>
               )}
             </Flex>
-            <Flex>
-              <Paper
-                p="md"
-                sx={{
-                  flex: 1,
-                  justifyContent: "space-between",
-                  textAlign: "center",
-                  // make background a grid of dots
-                  backgroundSize: "20px 20px",
-                }}
-                // withBorder
-              >
-                {/* <Flex justify="flex-end">
-                  <Tooltip
-                    label={
-                      <Text>
-                        Omnichannel outbound allows you to control the order of personalized outbound messages. <br></br>
-                        If both email and LinkedIn are enabled, an email is sent first, followed by a LinkedIn message after a few days. <br></br>
-                        Otherwise, only one channel is used.
-                      </Text>
-                    }
-                    withArrow
-                    position="bottom"
-                  >
-                    <ActionIcon>
-                      <IconCircleLetterI size={"1rem"} color="#3B85EF" />
-                    </ActionIcon>
-                  </Tooltip>
-                </Flex> */}
-                <Group noWrap spacing={"sm"} w={"100%"}>
-                  <Switch
-                    onChange={() => togglePersonaChannel(id, "email", userToken, !statsData?.email_active)}
-                    checked={statsData?.email_active}
-                    labelPosition="left"
-                    label={
-                      <Flex gap={1} align={"center"} className="hover:cursor-pointer">
-                        <IconMailOpened size={"1.2rem"} fill="#3B85EF" color="white" />
-                        <Text color="#3B85EF" fw={500}>
-                          Email
-                        </Text>
-                      </Flex>
-                    }
-                    w={"100%"}
-                    // miw={160}
-                    styles={{
-                      root: {
-                        minWidth: "9rem !important",
-                        border: "1px solid #D9DEE5",
-                        padding: "7px",
-                        borderRadius: "4px",
-                        background: "white",
-                      },
-                      body: {
-                        width: "100%",
-                        display: "flex",
-                        justifyContent: "space-between",
-                      },
-                    }}
-                  />
-                  <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
-                  <Select
-                    onChange={(value) => {
-                      if (typeof value === "string") {
-                        updateConnectionType(value, id);
-                      }
-                    }}
-                    size="sm"
-                    value={statsData?.email_to_linkedin_connection}
-                    w={"100%"}
-                    data={[
-                      {
-                        label: "[❌] No Connection",
-                        value: "RANDOM",
-                      },
-                      {
-                        label: "[📧 → 🤝] Sent Only - ",
-                        value: "ALL_PROSPECTS",
-                      },
-                      {
-                        label: "[👀 → 🤝] Opened Only - ",
-                        value: "OPENED_EMAIL_PROSPECTS_ONLY",
-                      },
-                      {
-                        label: "[⚡️ → 🤝] Clicked Only - ",
-                        value: "CLICKED_LINK_PROSPECTS_ONLY",
-                      },
-                    ]}
-                    placeholder="Select an event"
-                  />
-                  <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
-                  <Switch
-                    onChange={() => togglePersonaChannel(id, "linkedin", userToken, !statsData?.linkedin_active)}
-                    checked={statsData?.linkedin_active}
-                    labelPosition="left"
-                    label={
-                      <Flex gap={2} align={"center"}>
-                        <IconBrandLinkedin size={"1.4rem"} fill="#3B85EF" color="white" />
-                        <Text color="#3B85EF" fw={500}>
-                          Linkedin
-                        </Text>
-                      </Flex>
-                    }
-                    w={"100%"}
-                    // miw={160}
-                    styles={{
-                      root: {
-                        minWidth: "9rem !important",
-                        border: "1px solid #D9DEE5",
-                        padding: "7px",
-                        borderRadius: "4px",
-                        background: "white",
-                      },
-                      body: {
-                        width: "100%",
-                        display: "flex",
-                        justifyContent: "space-between",
-                      },
-                    }}
-                  />
-                </Group>
-              </Paper>
-            </Flex>
             <Flex h={"20%"} mt={"md"}>
               {loadingSequences ? (
                 <Flex direction="column" align="center" justify="center" m="auto" mt="sm">
@@ -1701,9 +1695,6 @@ useEffect(() => {
                 >
                   Add
                 </Button>
-                <ActionIcon color="gray" onClick={() => setShowPersonalizerModal(true)}>
-                  <IconSettings size={"1.2rem"} />
-                </ActionIcon>
               </Flex>
             </Flex>
             <Flex sx={{ display: personalizersEnabled ? "block" : "none" }}>

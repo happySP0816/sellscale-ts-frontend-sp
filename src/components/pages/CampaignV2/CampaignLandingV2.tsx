@@ -1677,7 +1677,7 @@ const refetchCampaignOtherStats = async () => {
                     </Text>
                   </Flex>
                 </Flex>
-              ) : sequences && sequences.length > 0 || (linkedinInitialMessages.length > 0 && type === 'linkedin') ? (
+              ) : sequences && sequences.length > 0 || (linkedinInitialMessages?.length > 0 && type === 'linkedin') ? (
                 <Flex direction={"column"} h={"fit-content"} w={"100%"}>
                   <Flex w={"100%"} gap={"md"} direction={"column"} p={"lg"}>
                     {type === "linkedin" &&

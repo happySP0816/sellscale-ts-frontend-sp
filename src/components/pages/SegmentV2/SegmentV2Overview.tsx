@@ -160,7 +160,7 @@ export default function SegmentV2Overview(props: any) {
         <Flex align={'center'} gap={'sm'}>
           {!editModeACV ? (
             <Text size={30} fw={500}>
-              ${parseInt(`${editableACV}`).toLocaleString()}
+              ${isNaN(parseInt(`${editableACV}`)) ? '0' : parseInt(`${editableACV}`).toLocaleString()}
             </Text>
           ) : (
             <TextInput

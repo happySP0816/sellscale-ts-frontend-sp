@@ -1,4 +1,9 @@
-import { MantineProvider, ColorSchemeProvider, LoadingOverlay, ColorScheme } from "@mantine/core";
+import {
+  MantineProvider,
+  ColorSchemeProvider,
+  LoadingOverlay,
+  ColorScheme,
+} from "@mantine/core";
 
 import Layout from "./nav/Layout";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
@@ -39,12 +44,19 @@ import PatchEmailSubjectLineModal from "@modals/PatchEmailSubjectLineModal";
 import { CreateBumpFrameworkContextModal } from "@modals/CreateBumpFrameworkModal";
 import { CloneBumpFrameworkContextModal } from "@modals/CloneBumpFrameworkModal";
 import { currentProjectState } from "@atoms/personaAtoms";
-import { getFreshCurrentProject, getCurrentPersonaId, isLoggedIn } from "@auth/core";
+import {
+  getFreshCurrentProject,
+  getCurrentPersonaId,
+  isLoggedIn,
+} from "@auth/core";
 import { removeQueryParam } from "@utils/documentChange";
 import { getPersonasOverview } from "@utils/requests/getPersonas";
 import { PersonaOverview } from "src";
 import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
-import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import {
+  prospectDrawerIdState,
+  prospectDrawerOpenState,
+} from "@atoms/prospectAtoms";
 import { useViewportSize } from "@mantine/hooks";
 import Confetti from "react-confetti";
 import LiTemplateModal from "@modals/LiTemplateModal";
@@ -96,9 +108,18 @@ export default function App() {
   // Site light or dark mode
   const isSystemDarkMode = false; // window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   const savedSiteTheme = localStorage.getItem("site-theme");
-  const currentColorScheme: ColorScheme = savedSiteTheme != null ? (savedSiteTheme === "dark" ? "dark" : "light") : isSystemDarkMode ? "dark" : "light";
+  const currentColorScheme: ColorScheme =
+    savedSiteTheme != null
+      ? savedSiteTheme === "dark"
+        ? "dark"
+        : "light"
+      : isSystemDarkMode
+      ? "dark"
+      : "light";
 
-  const [colorScheme, setColorScheme] = useState<ColorScheme>(currentColorScheme);
+  const [colorScheme, setColorScheme] = useState<ColorScheme>(
+    currentColorScheme
+  );
   const toggleColorScheme = (value?: ColorScheme) => {
     let nextColorScheme = value || (colorScheme === "dark" ? "light" : "dark");
     setColorScheme(nextColorScheme);
@@ -133,17 +154,37 @@ export default function App() {
   //   }
   // }, [userData]);
 
+  useEffect(() => {
+    if (userData.sdr_name) {
+      // @ts-ignore
+      window.pylon = {
+        chat_settings: {
+          app_id: "e816a937-d49b-46b8-8fa4-8796031cdc15",
+          email: userData.sdr_email,
+          name: userData.sdr_name,
+          avatar_url: userData.img_url,
+        },
+      };
+    }
+  }, [userData]);
+
   const loading = useRecoilValue(navLoadingState);
   const [confetti, setConfetti] = useRecoilState(navConfettiState);
 
   const { height, width } = useViewportSize();
 
-  const [drawerProspectId, setDrawerProspectId] = useRecoilState(prospectDrawerIdState);
-  const [drawerOpened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
+  const [drawerProspectId, setDrawerProspectId] = useRecoilState(
+    prospectDrawerIdState
+  );
+  const [drawerOpened, setDrawerOpened] = useRecoilState(
+    prospectDrawerOpenState
+  );
 
   // Select the last used project
   const userToken = useRecoilValue(userTokenState);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
 
   useEffect(() => {
     posthog.setPersonPropertiesForFlags({ distinct_id: userData?.id }, false);
@@ -176,12 +217,18 @@ export default function App() {
         // Set to last used persona
         const currentPersonaId = getCurrentPersonaId();
         if (!currentProject && currentPersonaId) {
-          const project = await getFreshCurrentProject(userToken, +currentPersonaId);
+          const project = await getFreshCurrentProject(
+            userToken,
+            +currentPersonaId
+          );
           setCurrentProject(project);
         } else if (!currentPersonaId) {
           // Set to first persona
           const response = await getPersonasOverview(userToken);
-          const result = response.status === "success" ? (response.data as PersonaOverview[]) : [];
+          const result =
+            response.status === "success"
+              ? (response.data as PersonaOverview[])
+              : [];
           if (result.length > 0) {
             setCurrentProject(result[0]);
           }
@@ -191,7 +238,10 @@ export default function App() {
   }, [location]);
 
   return (
-    <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
+    <ColorSchemeProvider
+      colorScheme={colorScheme}
+      toggleColorScheme={toggleColorScheme}
+    >
       <MantineProvider
         theme={{
           colorScheme: colorScheme,
@@ -204,7 +254,8 @@ export default function App() {
             },
           },
           fontFamily: "Poppins, sans-serif",
-          fontFamilyMonospace: "source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace",
+          fontFamilyMonospace:
+            "source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace",
         }}
         withGlobalStyles
         withNormalizeCSS

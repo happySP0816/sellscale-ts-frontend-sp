@@ -138,7 +138,7 @@ const generateTextWithBadges = (text: string) => {
 
   const generateResearchPoints = async () => {
     setGeneratingResearchPoints(true);
-    const data = await researchers.aiGenerateResearchPoints(userToken, Number(innerProps.id));
+    const data = await researchers.aiGenerateResearchPoints(userToken, Number(innerProps.id), Number(innerProps.id) );
     //filter only relevant questions into this.
     const relevantQuestions = data.filter((item: any) => item.Relevant === "Yes").map((item: any) => ({
         Question: item.Question,

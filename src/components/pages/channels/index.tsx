@@ -200,7 +200,7 @@ const ChannelsSetupSelector = (props: {
                         mt={3}
                         ml={5}
                         onClickCapture={() => {
-                          navigateToPage(navigate, "/campaigns");
+                          navigateToPage(navigate, `/campaign_v2/${props.campaign?.id}`);
                         }}
                       >
                         <IconArrowLeft size={"0.5rem"} /> Go back to campaigns

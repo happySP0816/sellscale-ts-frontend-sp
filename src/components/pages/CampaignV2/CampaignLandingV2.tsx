@@ -67,6 +67,7 @@ import {
   fetchCampaignSequences,
   fetchCampaignStats,
   fetchTotalContacts,
+  fetchCampaignAnalytics,
 } from "@utils/requests/campaignOverview";
 import { proxyURL } from "@utils/general";
 import {
@@ -91,19 +92,14 @@ interface StatsData {
   created_at: string;
   emoji: string;
   testing_volume: number;
-  num_demos: number;
   active: boolean;
   email_to_linkedin_connection?: string;
   ai_researcher_id?: number;
   sdr_img_url: string;
-  num_opens: number;
   num_prospects: number;
   num_prospects_with_emails: number;
   email_active: boolean;
   linkedin_active: boolean;
-  num_replies: number;
-  num_pos_replies: number;
-  num_sent: number;
   sdr_name: string;
   is_ai_research_personalization_enabled: boolean;
 }
@@ -282,6 +278,7 @@ export default function CampaignLandingV2() {
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [loadingSequences, setLoadingSequences] = useState(true);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
   const [loadingPersonalizers, setLoadingPersonalizers] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
 
@@ -290,6 +287,7 @@ export default function CampaignLandingV2() {
   const [contactsData, setContactsData] = useState<any[]>([]);
   const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
   const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
+  const [analyticsData, setAnalyticsData] = useState<any>([]);
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>(
     []
   );
@@ -469,7 +467,7 @@ export default function CampaignLandingV2() {
         //set the setup status
         if (loadedStats.is_setting_up) {
           setStatus("SETUP");
-        } else if (loadedStats.active && loadedStats.num_sent > 0) {
+        } else if (loadedStats.active && analyticsData.num_sent > 0) {
           setStatus("ACTIVE");
         } else if (loadedStats.active === false) {
           setStatus("INACTIVE");
@@ -481,6 +479,21 @@ export default function CampaignLandingV2() {
         setLoadingStats(false);
       });
   };
+
+const refetchCampaignOtherStats = async () => {
+  setLoadingAnalytics(true);
+  const otherStatsPromise = fetchCampaignAnalytics(userToken, id);
+  otherStatsPromise
+    .then((analyticsData) => {
+      const loadedAnalytics = analyticsData as any;
+      setAnalyticsData(loadedAnalytics);
+      setLoadingAnalytics(false);
+    })
+    .catch((error) => {
+      console.error("Error fetching other stats", error);
+      setLoadingAnalytics(false);
+    });
+};
 
   const refetchSequenceData = async (clientArchetypeId: number) => {
     setLoadingSequences(true);
@@ -638,6 +651,7 @@ export default function CampaignLandingV2() {
       );
       getPersonalizers();
       refetchSequenceData(clientArchetypeId);
+      refetchCampaignOtherStats();
 
       Promise.all([statsPromise, totalContactsPromise])
         .then(([stats, totalContacts]) => {
@@ -694,9 +708,9 @@ export default function CampaignLandingV2() {
       });
       if (persona.active) {
         setStatus("INACTIVE");
-      } else if (!persona.active && persona.num_sent > 0) {
+      } else if (!persona.active && analyticsData.num_sent > 0) {
         setStatus("ACTIVE");
-      } else if (!persona.active && persona.num_sent === 0) {
+      } else if (!persona.active && analyticsData.num_sent === 0) {
         setStatus("SETUP");
       }
     }
@@ -1129,10 +1143,16 @@ export default function CampaignLandingV2() {
                         </Text>
                       </Flex>
                       <Flex align={"center"} gap={"sm"}>
-                        <Text fz={24}>{statsData.num_sent}</Text>
-                        <Badge color={"#3B85EF"} size="xs">
-                          {`${(100).toFixed(0)}%`}
-                        </Badge>
+                        {loadingAnalytics ? (
+                          <Loader color="gray" variant="oval" size="sm" />
+                        ) : (
+                          <>
+                            <Text fz={24}>{analyticsData.num_sent}</Text>
+                            <Badge color={"#3B85EF"} size="xs">
+                              {`${(100).toFixed(0)}%`}
+                            </Badge>
+                          </>
+                        )}
                       </Flex>
                     </Box>
                     <Divider orientation="vertical" />
@@ -1163,14 +1183,20 @@ export default function CampaignLandingV2() {
                         </Text>
                       </Flex>
                       <Flex align={"center"} gap={"sm"}>
-                        <Text fz={24}>{statsData.num_opens}</Text>
-                        <Badge color="pink" size="xs">
-                          {`${(
-                            (statsData.num_opens /
-                              (statsData.num_sent + 0.0001)) *
-                            100
-                          ).toFixed(0)}%`}
-                        </Badge>
+                        {loadingAnalytics ? (
+                          <Loader color="gray" variant="oval" size="sm" />
+                        ) : (
+                          <>
+                            <Text fz={24}>{analyticsData.num_opens}</Text>
+                            <Badge color="pink" size="xs">
+                              {`${(
+                                (analyticsData.num_opens /
+                                  (analyticsData.num_sent + 0.0001)) *
+                                100
+                              ).toFixed(0)}%`}
+                            </Badge>
+                          </>
+                        )}
                       </Flex>
                     </Box>
                     <Divider orientation="vertical" />
@@ -1201,14 +1227,20 @@ export default function CampaignLandingV2() {
                         </Text>
                       </Flex>
                       <Flex align={"center"} gap={"sm"}>
-                        <Text fz={24}>{statsData.num_replies}</Text>
-                        <Badge color="orange" size="xs">
-                          {`${(
-                            (statsData.num_replies /
-                              (statsData.num_opens + 0.0001)) *
-                            100
-                          ).toFixed(0)}%`}
-                        </Badge>
+                        {loadingAnalytics ? (
+                          <Loader color="gray" variant="oval" size="sm" />
+                        ) : (
+                          <>
+                            <Text fz={24}>{analyticsData.num_replies}</Text>
+                            <Badge color="orange" size="xs">
+                              {`${(
+                                (analyticsData.num_replies /
+                                  (analyticsData.num_opens + 0.0001)) *
+                                100
+                              ).toFixed(0)}%`}
+                            </Badge>
+                          </>
+                        )}
                       </Flex>
                     </Box>
                     <Divider orientation="vertical" />
@@ -1239,14 +1271,20 @@ export default function CampaignLandingV2() {
                         </Text>
                       </Flex>
                       <Flex align={"center"} gap={"sm"}>
-                        <Text fz={24}>{statsData.num_pos_replies}</Text>
-                        <Badge color="green" size="xs">
-                          {`${(
-                            (statsData.num_pos_replies /
-                              (statsData.num_replies + 0.0001)) *
-                            100
-                          ).toFixed(0)}%`}
-                        </Badge>
+                        {loadingAnalytics ? (
+                          <Loader color="gray" variant="oval" size="sm" />
+                        ) : (
+                          <>
+                            <Text fz={24}>{analyticsData.num_pos_replies}</Text>
+                            <Badge color="green" size="xs">
+                              {`${(
+                                (analyticsData.num_pos_replies /
+                                  (analyticsData.num_replies + 0.0001)) *
+                                100
+                              ).toFixed(0)}%`}
+                            </Badge>
+                          </>
+                        )}
                       </Flex>
                     </Box>
                     <Divider orientation="vertical" />
@@ -1275,14 +1313,20 @@ export default function CampaignLandingV2() {
                         <Text fw={400}>Demo</Text>
                       </Flex>
                       <Flex align={"center"} gap={"sm"}>
-                        <Text fz={24}>{statsData.num_demos}</Text>
-                        <Badge color="blue" size="xs">
-                          {`${(
-                            (statsData.num_demos /
-                              (statsData.num_pos_replies + 0.0001)) *
-                            100
-                          ).toFixed(0)}%`}
-                        </Badge>
+                        {loadingAnalytics ? (
+                          <Loader color="gray" variant="oval" size="sm" />
+                        ) : (
+                          <>
+                            <Text fz={24}>{analyticsData.num_demos}</Text>
+                            <Badge color="blue" size="xs">
+                              {`${(
+                                (analyticsData.num_demos /
+                                  (analyticsData.num_pos_replies + 0.0001)) *
+                                100
+                              ).toFixed(0)}%`}
+                            </Badge>
+                          </>
+                        )}
                       </Flex>
                     </Box>
                   </Flex>

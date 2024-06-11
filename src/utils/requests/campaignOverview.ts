@@ -150,6 +150,36 @@ export const fetchCampaignSequences = async (
   }
 };
 
+export const fetchCampaignAnalytics = async (
+  userToken: string,
+  client_archetype_id: number
+) => {
+  try {
+    const response = await fetch(
+      `${API_URL}/client/campaign_analytics?client_archetype_id=${client_archetype_id}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        mode: "cors",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching campaign analytics", error);
+  } finally {
+    console.log("Campaign analytics API call completed");
+  }
+};
+
 export const fetchCampaignStats = async (
   userToken: string,
   client_archetype_id: number

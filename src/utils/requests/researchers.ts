@@ -136,7 +136,7 @@ export async function getResearcherAnswers(userToken: string, prospectId: number
   return response.json();
 }
 
-export async function aiGenerateResearchPoints(userToken: string, researcherId: number): Promise<any> {
+export async function aiGenerateResearchPoints(userToken: string, researcherId: number, campaignId: number): Promise<any> {
   try {
     const response = await fetch(`${API_URL}/ml/researchers/questions/generate`, {
       method: 'POST',
@@ -144,7 +144,7 @@ export async function aiGenerateResearchPoints(userToken: string, researcherId: 
         Authorization: `Bearer ${userToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ researcher_id: researcherId }),
+      body: JSON.stringify({ researcher_id: researcherId, campaign_id: campaignId }),
     });
     return response.json();
   } catch (error) {

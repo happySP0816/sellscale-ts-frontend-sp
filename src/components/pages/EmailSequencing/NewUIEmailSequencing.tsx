@@ -409,7 +409,7 @@ const NewUIEmailSequencing: FC<{
         setSelectedTemplates(sequenceBucket.templates);
       }
     }
-  }, [templateBuckets]);
+  }, [templateBuckets, archetypeID]);
 
   return (
     <Flex gap="1rem">

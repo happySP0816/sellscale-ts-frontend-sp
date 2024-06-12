@@ -13,7 +13,8 @@ export async function getResearchers(userToken: string): Promise<MsgResponse> {
 
 export async function createResearcher(
   userToken: string,
-  name: string
+  name: string,
+  archetype_id: number
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/ml/researchers/create`, {
     method: "POST",
@@ -21,7 +22,7 @@ export async function createResearcher(
       Authorization: `Bearer ${userToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, archetype_id }),
   });
   return response.json();
 }

@@ -45,7 +45,6 @@ const generateTextWithBadges = (text: string) => {
   const [prospectData, setProspectData] = useState([]);
   const [selectedProspect, setSelectedProspect] = useState<any>(null);
   const [researching, setResearching] = useState(false);
-
   //deep copy
   const sequences = innerProps?.sequences ? [...innerProps.sequences] : [];
 

@@ -1,4 +1,5 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { currentProjectState } from "@atoms/personaAtoms";
 import RichTextArea from "@common/library/RichTextArea";
 import { API_URL } from "@constants/data";
 import {
@@ -81,6 +82,8 @@ export default function CampaignTemplateEditModal({
   context,
   id,
 }: ContextModalProps<{
+  sequenceType?: string;
+  linkedinInitialMessages?: any;
   stagingData: any;
   refetchSequenceData: (clientArchetypeId: number) => void;
   emailSequenceData: any;
@@ -95,7 +98,8 @@ export default function CampaignTemplateEditModal({
   cType?: string;
 }>) {
   const [templateType, setTemplateType] = useState("template" || "generate");
-  const [sequenceType, setSequenceType]: any = useState<string>("email");
+  console.log('initial messages are', innerProps.linkedinInitialMessages)
+  const [sequenceType, setSequenceType]: any = useState<string>(innerProps.sequenceType || "email");
   const [steps, setSteps] = useState(
     sequenceType === "email"
       ? innerProps.emailSequenceData.length || 3
@@ -177,6 +181,7 @@ export default function CampaignTemplateEditModal({
 
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
+  const currentProject = useRecoilValue(currentProjectState);
   const campaignId = innerProps.campaignId;
   const [stagingData, setStagingData] = useState(
     innerProps.stagingData || { email: [] }
@@ -450,6 +455,7 @@ export default function CampaignTemplateEditModal({
                       modal: "campaignTemplates",
                       title: <Title order={3}>Add Template</Title>,
                       innerProps: {
+                        sequenceType,
                         stagingData,
                         emailSubjectLines: innerProps.emailSubjectLines,
                         linkedinTemplates: innerProps.linkedinSequenceData,
@@ -481,6 +487,7 @@ export default function CampaignTemplateEditModal({
                           modal: "campaignTemplateEditModal",
                           title: <Title order={3}>Sequence Builder</Title>,
                           innerProps: {
+                            sequenceType,
                             stagingData,
                             emailSubjectLines: innerProps.emailSubjectLines,
                             linkedinSequenceData:
@@ -504,8 +511,7 @@ export default function CampaignTemplateEditModal({
                             },
                           },
                           onClose: () => {
-                            const clientArchetypeId = Number(id);
-                            innerProps.refetchSequenceData(clientArchetypeId);
+                            innerProps.refetchSequenceData(Number(currentProject.id));
                           },
                         });
                       },
@@ -592,10 +598,14 @@ export default function CampaignTemplateEditModal({
               }}
             >
               <Tabs.List>
+                {sequenceType === "linkedin" && (
+                  <Tabs.Tab value={'0'}>Initial Messages</Tabs.Tab>
+                )}
                 {steps &&
                   Array.from({ length: Number(steps) }, (_, index) => {
+                    const tabValue = (index + 1).toString();
                     return (
-                      <Tabs.Tab value={(index + 1).toString()}>
+                      <Tabs.Tab value={tabValue}>
                         Step {index + 1} (
                         {(stagingData[sequenceType]?.filter(
                           (asset: any) => asset.step_num === index + 1
@@ -605,7 +615,7 @@ export default function CampaignTemplateEditModal({
                             : innerProps.linkedinSequenceData[index]?.length ||
                               0) ===
                         0
-                          ? "� "
+                          ? "🔴 "
                           : "🟢 "}
                         {(stagingData[sequenceType]?.filter(
                           (asset: any) => asset.step_num === index + 1
@@ -622,6 +632,158 @@ export default function CampaignTemplateEditModal({
                   <Tabs.Tab value={"subjectLines"}>Subject Lines</Tabs.Tab>
                 )}
               </Tabs.List>
+              {currentStepNum === 0 && sequenceType === "linkedin" && (
+                <ScrollArea viewportRef={viewport} h={350}>
+                  <Flex p={"lg"} h={"100%"} direction={"column"}>
+                    {innerProps.linkedinInitialMessages.map((template: any, index4: number) => (
+                      <Box
+                        mb={"sm"}
+                        style={{
+                          border:
+                            selectStep === index4
+                              ? "1px solid #228be6"
+                              : "1px solid #ced4da",
+                          borderRadius: "8px",
+                        }}
+                      >
+                        <Flex
+                          align={"center"}
+                          justify={"space-between"}
+                          px={"sm"}
+                          py={"xs"}
+                        >
+                          <Flex align={"center"} gap={"xs"}>
+                            <IconMessages
+                              color="#228be6"
+                              size={"0.9rem"}
+                            />
+                            <Text color="gray" fw={500} size={"xs"}>
+                              Variant #{index4 + 1}:
+                            </Text>
+                            <Text fw={600} size={"xs"} ml={"-5px"}>
+                              {template.message}
+                            </Text>
+                          </Flex>
+                          <Flex gap={1} align={"center"}>
+                            <Tooltip
+                              label="Editing coming soon"
+                              position="top"
+                            >
+                              <ActionIcon disabled>
+                                <IconEdit size={"0.9rem"} />
+                              </ActionIcon>
+                            </Tooltip>
+                            <ActionIcon
+                              disabled
+                            >
+                              <IconTrash size={"0.9rem"} />
+                            </ActionIcon>
+                            <ActionIcon
+                              onClick={() => {
+                                handleToggle(index4);
+                              }}
+                            >
+                              {selectStep === index4 && opened ? (
+                                <IconChevronUp size={"0.9rem"} />
+                              ) : (
+                                <IconChevronDown size={"0.9rem"} />
+                              )}
+                            </ActionIcon>
+                          </Flex>
+                        </Flex>
+                        <Collapse
+                          in={selectStep === index4 && opened}
+                          key={index4}
+                        >
+                          <Flex
+                            gap={"sm"}
+                            p={"sm"}
+                            style={{
+                              borderTop: "1px solid #ced4da",
+                            }}
+                          >
+                            <Avatar size={"md"} radius={"xl"} />
+                            <Box>
+                              <div
+                                style={{
+                                  fontSize: "11px",
+                                }}
+                                dangerouslySetInnerHTML={{
+                                  __html: template.message.replaceAll(
+                                    "\n",
+                                    "<br/>"
+                                  ),
+                                }}
+                              />
+                            </Box>
+                          </Flex>
+                        </Collapse>
+                      </Box>
+                    ))}
+                    {/* <Textarea
+                      minRows={3}
+                      placeholder="Prefer to create your own message? Write direct in here ..."
+                      value={manuallyAddedTemplate}
+                      onChange={(event) =>
+                        setManuallyAddedTemplate(
+                          event.currentTarget.value
+                        )
+                      }
+                    />
+                    <Button
+                      size="sm"
+                      ml="auto"
+                      mt="xs"
+                      mb="xs"
+                      rightIcon={<IconArrowRight size={"0.9rem"} />}
+                      onClick={() => {
+                        //create new asset 
+                        const newAsset = {
+                          asset_key:
+                            "New Template (" +
+                            Math.random()
+                              .toString(36)
+                              .substring(2, 8)
+                              .toUpperCase() +
+                            ")",
+                          asset_raw_value: manuallyAddedTemplate,
+                          asset_tags: ["linkedin template"],
+                          asset_type: "TEXT",
+                          asset_value: manuallyAddedTemplate,
+                          client_archetype_ids: [userData.client.id],
+                          client_id: userData.client.id,
+                          num_opens: null,
+                          num_replies: null,
+                          num_sends: null,
+                        };
+                        fetch(`${API_URL}/client/create_archetype_asset`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${userToken}`,
+                          },
+                          body: JSON.stringify(newAsset),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                          addToStagingData(
+                            data.data,
+                            currentStepNum,
+                            stagingData,
+                            setStagingData
+                          );
+                        })
+                        .catch(error => {
+                          console.error('Error creating new asset:', error);
+                        });
+                        setManuallyAddedTemplate("");
+                      }}
+                    >
+                      Add Message
+                    </Button> */}
+                  </Flex>
+                </ScrollArea>
+              )}
               {currentStepNum === steps + 1 && sequenceType === "email" && (
                 <ScrollArea viewportRef={viewport} h={350}>
                   <Flex p={"lg"} h={"100%"} direction={"column"}>
@@ -928,6 +1090,7 @@ export default function CampaignTemplateEditModal({
                             mb="xs"
                             rightIcon={<IconArrowRight size={"0.9rem"} />}
                             onClick={() => {
+                              //create new asset 
                               const newAsset = {
                                 asset_key:
                                   "New Template (" +
@@ -941,7 +1104,7 @@ export default function CampaignTemplateEditModal({
                                   sequenceType === "email"
                                     ? ["email template"]
                                     : ["linkedin template"],
-                                asset_type: "text",
+                                asset_type: "TEXT",
                                 asset_value:
                                   sequenceType === "email"
                                     ? manuallyAddedTemplate.replaceAll(
@@ -951,20 +1114,45 @@ export default function CampaignTemplateEditModal({
                                     : manuallyAddedTemplate,
                                 client_archetype_ids: [userData.client.id],
                                 client_id: userData.client.id,
-                                id: Math.floor(Math.random() * 1000000),
+                                // id: Math.floor(Math.random() * 1000000),
                                 num_opens: null,
                                 num_replies: null,
                                 num_sends: null,
                               };
-                              addToStagingData(
-                                newAsset,
-                                currentStepNum,
-                                stagingData,
-                                setStagingData
-                              );
-                              setManuallyAddedTemplate("");
-                            }}
-                          >
+                              if (sequenceType === "linkedin") {
+                                fetch(`${API_URL}/client/create_archetype_asset`, {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: `Bearer ${userToken}`,
+                                  },
+                                  body: JSON.stringify(newAsset),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                  addToStagingData(
+                                    data.data,
+                                    currentStepNum,
+                                    stagingData,
+                                    setStagingData
+                                  );
+                                })
+                                .catch(error => {
+                                  console.error('Error creating new asset:', error);
+                                });
+                                setManuallyAddedTemplate("");
+                              } else {
+                                addToStagingData(
+                                  { ...newAsset, id: Math.floor(Math.random() * 1000000) },
+                                  currentStepNum,
+                                  stagingData,
+                                  setStagingData
+                                );
+                                setManuallyAddedTemplate("");
+                              }
+                            }
+                            }>
+                          
                             Add Message
                           </Button>
                         </Flex>
@@ -1022,7 +1210,6 @@ export default function CampaignTemplateEditModal({
                   } else {
                     addType = "EMAIL";
                   }
-
                   console.log(stagingData[sequenceType]);
                   console.log(addType);
                   addSequence(
@@ -1031,8 +1218,12 @@ export default function CampaignTemplateEditModal({
                     campaignId,
                     addType,
                     [],
-                    stagingData[sequenceType]
+                    //since we have initial messages, we need to increment step num by 1 here. todo: inline adding messages for initial messages.
+                    sequenceType === "linkedin" ? stagingData[sequenceType].map((item: any) => ({ ...item, step_num: item.step_num + 1 })) : stagingData[sequenceType]
                   ).finally(() => {
+                    if (currentProject && currentProject.id !== null) {
+                      innerProps.refetchSequenceData(Number(currentProject.id));
+                    }
                     setLoading(false);
                     context.closeModal(id);
                   });

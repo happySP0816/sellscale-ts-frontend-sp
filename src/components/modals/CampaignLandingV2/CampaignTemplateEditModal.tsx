@@ -98,7 +98,6 @@ export default function CampaignTemplateEditModal({
   cType?: string;
 }>) {
   const [templateType, setTemplateType] = useState("template" || "generate");
-  console.log('initial messages are', innerProps.linkedinInitialMessages)
   const [sequenceType, setSequenceType]: any = useState<string>(innerProps.sequenceType || "email");
   const [steps, setSteps] = useState(
     sequenceType === "email"

@@ -1599,6 +1599,8 @@ export default function CampaignLandingV2() {
                         modal: "campaignTemplateEditModal",
                         title: <Title order={3}>Sequence Builder</Title>,
                         innerProps: {
+                          sequenceType: type,
+                          linkedinInitialMessages,
                           emailSubjectLines,
                           linkedinSequenceData,
                           emailSequenceData,
@@ -2001,6 +2003,8 @@ export default function CampaignLandingV2() {
                       modal: "campaignTemplateEditModal",
                       title: <Title order={3}>Sequence Builder</Title>,
                       innerProps: {
+                        sequenceType: type,
+                        linkedinInitialMessages,
                         emailSubjectLines,
                         linkedinSequenceData,
                         emailSequenceData,

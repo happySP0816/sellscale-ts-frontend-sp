@@ -1,4 +1,5 @@
 import { userTokenState } from "@atoms/userAtoms";
+import { currentProjectState } from "@atoms/personaAtoms";
 import RichTextArea from "@common/library/RichTextArea";
 import CustomSelect from "@common/persona/ICPFilter/CustomSelect";
 import { API_URL } from "@constants/data";
@@ -29,6 +30,7 @@ export default function CampaignTemplatesModal({
   id,
 }: ContextModalProps<{
   stagingData: any;
+  sequenceType: string;
   refetchSequenceData: Function;
   setAddedTemplate: Function;
   currentStepNum: any;
@@ -44,8 +46,9 @@ export default function CampaignTemplatesModal({
   linkedinSequenceData: any;
 }>) {
   const userToken = useRecoilValue(userTokenState);
+  const currentProject = useRecoilValue(currentProjectState);
 
-  const [type, setType]: any = useState("email template");
+  const [type, setType]: any = useState(innerProps.sequenceType || "email");
   const [tags, setTags]: any = useState([]);
   const [template, setTemplate]: any = useState("");
   const [loading, setLoading] = useState(false);
@@ -78,6 +81,7 @@ export default function CampaignTemplatesModal({
           modal: "campaignTemplateEditModal",
           title: <Title order={3}>Sequence Builder</Title>,
           innerProps: {
+              sequenceType: innerProps.sequenceType,
               emailSubjectLines: innerProps.emailSubjectLines,
               emailSequenceData: innerProps.emailSequenceData,
               linkedinSequenceData: innerProps.linkedinSequenceData,
@@ -99,8 +103,13 @@ export default function CampaignTemplatesModal({
             },
           },
           onClose: () => {
-            const clientArchetypeId = Number(id);
-            innerProps.refetchSequenceData(clientArchetypeId);
+            try{
+            console.log('refetching sequence data');
+            innerProps.refetchSequenceData(currentProject?.id);
+            }
+            catch(e){
+              console.log('error is', e);
+            }
           },
         });
         showNotification({
@@ -127,7 +136,7 @@ export default function CampaignTemplatesModal({
             }}
             data={[
               {
-                value: "email template",
+                value: "email",
                 label: (
                   <Center style={{ gap: 10 }}>
                     <IconMailOpened
@@ -140,7 +149,7 @@ export default function CampaignTemplatesModal({
                 ),
               },
               {
-                value: "linkedin template",
+                value: "linkedin",
                 label: (
                   <Center style={{ gap: 10 }}>
                     <IconBrandLinkedin

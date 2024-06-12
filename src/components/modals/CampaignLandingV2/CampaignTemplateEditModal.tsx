@@ -511,7 +511,9 @@ export default function CampaignTemplateEditModal({
                             },
                           },
                           onClose: () => {
-                            innerProps.refetchSequenceData(Number(currentProject.id));
+                            if (currentProject && currentProject.id !== null) {
+                              innerProps.refetchSequenceData(Number(currentProject.id));
+                            }
                           },
                         });
                       },

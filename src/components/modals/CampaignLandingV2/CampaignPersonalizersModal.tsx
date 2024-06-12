@@ -50,6 +50,7 @@ import { socket } from "../../App";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { getFreshCurrentProject } from "@auth/core";
 import { showNotification } from "@mantine/notifications";
+import { get } from "lodash";
 
 export default function CampaignPersonalizersModal({
   innerProps,
@@ -96,6 +97,7 @@ export default function CampaignPersonalizersModal({
   const [selectedProspect, setSelectedProspect] = useState<any>(null);
   const [researching, setResearching] = useState(false);
   const [aiResearchers, setAiResearchers] = useState<any>([]);
+  const [currentAiResearcherId, setCurrentAiResearcherId] = useState("");
   //deep copy
   const sequences = innerProps?.sequences ? [...innerProps.sequences] : [];
 
@@ -207,6 +209,26 @@ export default function CampaignPersonalizersModal({
     }
   };
 
+  const createAiResearcher = async (name: string) => {
+    setAiResearcherLoading(true);
+    researchers
+      .createResearcher(userToken, name, Number(innerProps.id))
+      .then((res) => {
+        getAiResearchers().then(() => {
+          showNotification({
+            title: "AI Researcher Created",
+            message: "You need to connect it to this campaign.",
+            color: "blue",
+          });
+        });
+      })
+      .finally(() => {
+        setAiResearcherLoading(false);
+      });
+
+    return currentProject?.ai_researcher_id;
+  };
+
   const connectAiResearcher = async (researcherId: number) => {
     setAiResearcherLoading(true);
     researchers
@@ -232,9 +254,13 @@ export default function CampaignPersonalizersModal({
     getAiResearchers();
   }, []);
 
+  useEffect(() => {
+    setCurrentAiResearcherId(currentProject?.ai_researcher_id + "");
+  }, [currentProject?.ai_researcher_id]);
+
   const getAiResearchers = async () => {
     const data: any = await researchers.getAiResearchers(userToken);
-    if (data) setAiResearchers(data["researchers"]);
+    setAiResearchers(data ? data["researchers"] : []);
   };
 
   const generateResearchPoints = async () => {
@@ -324,7 +350,7 @@ export default function CampaignPersonalizersModal({
             <Select
               w="100%"
               label="AI Researcher:"
-              defaultValue={"" + currentProject?.ai_researcher_id}
+              value={currentAiResearcherId}
               data={aiResearchers.map((x: any) => {
                 return { value: "" + x.id, label: x.name };
               })}
@@ -335,8 +361,9 @@ export default function CampaignPersonalizersModal({
               searchable
               getCreateLabel={(query) => `+ Create ${query}`}
               onCreate={(query) => {
-                alert("Creating new AI Researcher: " + query);
-                return "";
+                createAiResearcher(query);
+                window.location.reload();
+                return currentAiResearcherId;
               }}
             />
           </Flex>

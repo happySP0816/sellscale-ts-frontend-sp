@@ -1522,7 +1522,7 @@ export function PersonCampaignCard(props: {
           pr="xs"
           spacing={0}
         >
-          <Group sx={{ width: "200px", padding: "0 4px" }}>
+          <Group sx={{ width: "130px", padding: "0 4px" }}>
             <Flex
               onClick={() => {
                 navigateToPage(
@@ -1760,7 +1760,7 @@ export function PersonCampaignCard(props: {
             </Flex>
           </Group>
           <Divider orientation="vertical" ml="xs" mr="xs" />
-          <Group w={"380px"}>
+          <Group w={"350px"}>
             <Flex direction={"column"} w={"100%"}>
               <Flex gap={"xs"} justify={"space-between"}>
                 <Flex gap={"xs"}>
@@ -1814,7 +1814,7 @@ export function PersonCampaignCard(props: {
                       )}
                       <Text
                         mt={4}
-                        fz={"sm"}
+                        fz={"xs"}
                         c={"gray.7"}
                         fw={600}
                         onClick={() => {
@@ -1833,7 +1833,8 @@ export function PersonCampaignCard(props: {
                           }
                         }}
                       >
-                        {props.persona.name}
+                        {props.persona.name.substring(0, 38)}{" "}
+                        {props.persona.name.length > 38 ? "..." : ""}
                       </Text>
                       {props.showAvatar && (
                         <Flex align="center">
@@ -1937,7 +1938,7 @@ export function PersonCampaignCard(props: {
               <Flex w={"100%"} justify={"center"} h={"100%"} align={"center"}>
                 <StatDisplay
                   color="blue"
-                  width="w-[92px]"
+                  width="w-[93px]"
                   icon={<IconSend color={theme.colors.blue[6]} size="0.9rem" />}
                   label="Sent"
                   total={total_sent ?? 0}
@@ -2547,15 +2548,15 @@ function PersonCampaignCardSection(props: {
 
         <Box sx={{ flexBasis: "30%" }}>
           <Group>
-            <Text fz="xs" color="gray" w="90px">
+            <Text fz="xs" color="gray" w="93px">
               <IconSend size="0.8rem" /> Sent:{" "}
               <span style={{ color: "black" }}>{props.section.sends}</span>
             </Text>
-            <Text fz="xs" color="gray" w="90px">
+            <Text fz="xs" color="gray" w="93px">
               <IconChecks size="0.8rem" /> Opens:{" "}
               <span style={{ color: "black" }}>{props.section.opens}</span>
             </Text>
-            <Text fz="xs" color="gray" w="90px">
+            <Text fz="xs" color="gray" w="93px">
               <IconMessageCheck size="0.8rem" /> Replies:{" "}
               <span style={{ color: "black" }}>{props.section.replies}</span>
             </Text>
@@ -2748,7 +2749,7 @@ export const PersonCampaignTable = (props: {
   }
 
   return (
-    <>
+    <Box miw={1200} sx={{ overflow: "scroll" }}>
       <Modal
         opened={showAnalyticsModal}
         onClose={() => setShowAnalyticsModal(false)}
@@ -2784,7 +2785,7 @@ export const PersonCampaignTable = (props: {
           pr="xs"
           spacing={0}
         >
-          <Flex w={"200px"} justify={"center"} align={"center"} gap={"xs"}>
+          <Flex w={"130px"} justify={"center"} align={"center"} gap={"xs"}>
             <Flex>
               <IconLoader size={"0.9rem"} color="gray" />
             </Flex>
@@ -2800,7 +2801,7 @@ export const PersonCampaignTable = (props: {
           <Divider orientation="vertical" ml="xs" mr="xs" />
           <Flex
             style={{ cursor: "pointer" }}
-            w={"380px"}
+            w={"350px"}
             align={"center"}
             justify={"center"}
             gap={"xs"}
@@ -2824,7 +2825,7 @@ export const PersonCampaignTable = (props: {
                 justify={"center"}
                 gap={4}
                 mb={"xl"}
-                w={"92px"}
+                w={"93px"}
               >
                 <IconSend color={theme.colors.blue[6]} size="0.9rem" />
                 <Text size={"sm"}>Sent</Text>
@@ -2901,7 +2902,7 @@ export const PersonCampaignTable = (props: {
             <Divider orientation="vertical" />
           </Flex>
 
-          <Flex w={"113px"} align={"center"} justify={"center"} gap={"sm"}>
+          <Flex w={"112px"} align={"center"} justify={"center"} gap={"sm"}>
             {/* <Text fw={600} color='gray.8' fz='sm'>
               Details
             </Text> */}
@@ -3079,6 +3080,6 @@ export const PersonCampaignTable = (props: {
             showCycles={props.showCycles}
           />
         ))}
-    </>
+    </Box>
   );
 };

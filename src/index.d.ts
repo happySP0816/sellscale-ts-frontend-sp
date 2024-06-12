@@ -407,6 +407,7 @@ export interface Archetype {
 
 export interface PersonaOverview {
   active: boolean;
+  ai_researcher_id?: number;
   id: number;
   name: string;
   num_prospects: number;

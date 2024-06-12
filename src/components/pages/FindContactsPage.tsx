@@ -57,7 +57,7 @@ import {
   prospectUploadDrawerIdState,
   prospectUploadDrawerOpenState,
 } from "@atoms/uploadAtoms";
-import { getAllUploads } from "@utils/requests/getPersonas";
+// import { getAllUploads } from "@utils/requests/getPersonas";
 import { useQuery } from "@tanstack/react-query";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import _ from "lodash";
@@ -221,19 +221,19 @@ export default function FindContactsPage() {
     setSortStatus(status);
   };
 
-  const { data: uploads } = useQuery({
-    queryKey: [`query-get-persona-uploads`],
-    queryFn: async () => {
-      const response = await getAllUploads(userToken, activePersona!);
-      return response.status === "success" ? response.data : [];
-    },
-    enabled: !!activePersona,
-  });
-  const [tab, setTab] = useState("");
+  // const { data: uploads } = useQuery({
+  //   queryKey: [`query-get-persona-uploads`],
+  //   queryFn: async () => {
+  //     const response = await getAllUploads(userToken, activePersona!);
+  //     return response.status === "success" ? response.data : [];
+  //   },
+  //   enabled: !!activePersona,
+  // });
+  // const [tab, setTab] = useState("");
 
-  useEffect(() => {
-    fetchSegments();
-  }, []);
+  // useEffect(() => {
+  //   fetchSegments();
+  // }, []);
 
   return (
     <Flex p="lg" direction="column" h="100%">
@@ -428,7 +428,7 @@ export default function FindContactsPage() {
             />
           </Card>
 
-          {uploads && uploads.length > 0 && (
+          {/* {uploads && uploads.length > 0 && (
             <Select
               style={{
                 position: "absolute",
@@ -449,7 +449,7 @@ export default function FindContactsPage() {
                 }
               }}
             />
-          )}
+          )} */}
         </Tabs.Panel>
 
         <Tabs.Panel

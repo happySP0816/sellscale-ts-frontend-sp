@@ -463,7 +463,7 @@ export default function PersonaCampaigns() {
   return (
     <PageFrame>
       <Stack>
-        <Tabs defaultValue="overview">
+        <Tabs keepMounted={false} defaultValue="overview">
           <Tabs.List mb="md">
             <Tabs.Tab
               value="overview"

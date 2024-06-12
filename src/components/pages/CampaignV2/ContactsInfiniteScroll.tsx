@@ -17,6 +17,7 @@ import {
 } from "@mantine/core";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { IconSearch, IconFilter } from "@tabler/icons-react";
+import { API_URL } from '@constants/data';
 import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -52,6 +53,7 @@ export function ContactsInfiniteScroll({
   const [searchTerm, setSearchTerm] = useState("");
   const [hasMoreContacts, setHasMoreContacts] = useState(true);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const [isArchetypeUploading, setIsArchetypeUploading] = useState(false);
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(
     false
   );
@@ -162,8 +164,34 @@ export function ContactsInfiniteScroll({
     []
   );
 
+  const fetchIsArchetypeUploading = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/client/upload_in_progres?client_archetype_id=${campaignId}`,
+        {
+          headers: {
+            Authorization: "Bearer " + userToken,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setIsArchetypeUploading(data.upload_in_progress);
+    } catch (error) {
+      console.error("Error fetching archetype uploading status", error);
+    } finally {
+      console.log("Archetype uploading status API call completed");
+    }
+  }
+
   useEffect(() => {
     fetchInitialContacts(searchTerm);
+    fetchIsArchetypeUploading();
   }, [campaignId]);
 
   useEffect(() => {
@@ -319,7 +347,15 @@ export function ContactsInfiniteScroll({
                <Text>Showing {contacts?.length} contacts of <Loader size="xs" variant="dots" /></Text>
               </>
             ) : (
-              `Showing ${contacts?.length} contacts of ${totalContacts < contacts?.length ? contacts?.length : totalContacts}`
+              <>
+                {`Showing ${contacts?.length} contacts of ${totalContacts < contacts?.length ? contacts?.length : totalContacts}`}
+                {isArchetypeUploading && (
+                  <Flex direction="column" align="center" mt="xs">
+                    <Text>Upload in progress <Loader size="xs" variant="dots" />
+                    </Text>
+                  </Flex>
+                )}
+              </>
             )}
           </Text>
           {/* <Button variant="light" onClick={resetContacts}>

@@ -119,6 +119,7 @@ export default function CampaignTemplateEditModal({
   const [searchQuery, setSearchQuery] = useState("");
   const [manuallyAddedTemplate, setManuallyAddedTemplate] = useState("");
   const [loading, setLoading] = useState(false);
+  const [addingLinkedinAsset, setAddingLinkedinAsset] = useState(false);
   const [addedTemplate, setAddedTemplate] = useState<AssetType | null>(
     innerProps.addedTemplate || null
   );
@@ -1083,6 +1084,7 @@ export default function CampaignTemplateEditModal({
                             }
                           />
                           <Button
+                            loading={addingLinkedinAsset}
                             size="sm"
                             ml="auto"
                             mt="xs"
@@ -1119,6 +1121,7 @@ export default function CampaignTemplateEditModal({
                                 num_sends: null,
                               };
                               if (sequenceType === "linkedin") {
+                                setAddingLinkedinAsset(true);
                                 fetch(`${API_URL}/client/create_archetype_asset`, {
                                   method: 'POST',
                                   headers: {
@@ -1138,8 +1141,11 @@ export default function CampaignTemplateEditModal({
                                 })
                                 .catch(error => {
                                   console.error('Error creating new asset:', error);
-                                });
-                                setManuallyAddedTemplate("");
+                                }).finally(() => {
+                                  setAddingLinkedinAsset(false);
+                                  setManuallyAddedTemplate("");
+                                }
+                                );
                               } else {
                                 addToStagingData(
                                   { ...newAsset, id: Math.floor(Math.random() * 1000000) },

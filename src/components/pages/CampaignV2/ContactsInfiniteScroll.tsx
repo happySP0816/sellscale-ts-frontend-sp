@@ -319,7 +319,7 @@ export function ContactsInfiniteScroll({
                <Text>Showing {contacts?.length} contacts of <Loader size="xs" variant="dots" /></Text>
               </>
             ) : (
-              `Showing ${contacts?.length} contacts of ${totalContacts}`
+              `Showing ${contacts?.length} contacts of ${totalContacts < contacts?.length ? contacts?.length : totalContacts}`
             )}
           </Text>
           {/* <Button variant="light" onClick={resetContacts}>

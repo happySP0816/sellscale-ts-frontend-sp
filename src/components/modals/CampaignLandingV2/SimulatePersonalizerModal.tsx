@@ -30,6 +30,12 @@ export default function SimulatepersonalizerModal({
       return false;
     }).map((sequence: any) => sequence.description);
   });
+  console.log('sequences are', innerProps.sequences)
+  //get the titels of the sequences
+  const sequenceTitles = innerProps?.sequences?.flatMap((sequenceGroup: any[]) => {
+    return sequenceGroup.map((sequence: any) => sequence.title);
+  });
+  console.log('sequence titles are', sequenceTitles)
   const [originalEmailBody, setOriginalEmailBody] = useState<string | undefined>(undefined);
 
   const handleSimulate = async () => {
@@ -85,7 +91,7 @@ export default function SimulatepersonalizerModal({
             {sequences?.length > 0 && !simulate && (
               <Select
                 placeholder="Select template"
-                data={sequences.map((sequence: any, index: any) => ({ value: index, label: `Sequence ${index + 1}` }))}
+                data={sequences.map((sequence: any, index: any) => ({ value: index, label: sequenceTitles[index] }))}
                 onChange={(value: any) => {
                   setOverrideEmailBody(sequences[value]);
                   setEmailBody(sequences[value]);

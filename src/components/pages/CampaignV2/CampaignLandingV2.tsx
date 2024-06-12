@@ -27,7 +27,7 @@ import {
   Stepper,
   Checkbox,
 } from "@mantine/core";
-import { openContextModal } from "@mantine/modals";
+import { modals, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import Hook from "@pages/channels/components/Hook";
 import Tour from "reactour";
@@ -210,9 +210,8 @@ export default function CampaignLandingV2() {
     };
   };
   const userData = useRecoilValue(userDataState);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
 
   console.log("======", userData);
 
@@ -295,30 +294,22 @@ export default function CampaignLandingV2() {
   const [emailSubjectLines, setEmailSubjectLines] = useState<
     SubjectLineTemplate[]
   >([]);
-  const [
-    linkedinInitialMessageViewing,
-    setLinkedinInitialMessageViewing,
-  ] = useState<any>(0);
+  const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] =
+    useState<any>(0);
   const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<
     any[]
   >([]);
-  const [
-    linkedinSequenceViewingArray,
-    setLinkedinSequenceViewingArray,
-  ] = useState<any[]>([]);
+  const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] =
+    useState<any[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
-  const [showActivateWarningModal, setShowActivateWarningModal] = useState(
-    false
-  );
-  const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(
-    false
-  );
+  const [showActivateWarningModal, setShowActivateWarningModal] =
+    useState(false);
+  const [showCampaignTemplateModal, setShowCampaignTemplateModal] =
+    useState(false);
   const [testingVolume, setTestingVolume] = useState(0);
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
-  const [
-    showLinkedInConvoSimulatorModal,
-    setShowLinkedInConvoSimulatorModal,
-  ] = useState(false);
+  const [showLinkedInConvoSimulatorModal, setShowLinkedInConvoSimulatorModal] =
+    useState(false);
   const [showPersonalizerModal, setShowPersonalizerModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
@@ -535,9 +526,8 @@ export default function CampaignLandingV2() {
 
         const handleSequences = (sequences: any[], type: string) => {
           const groupedSequences = groupSequencesByBumpedCount(sequences);
-          const orderedGroupedSequences = orderGroupedSequences(
-            groupedSequences
-          );
+          const orderedGroupedSequences =
+            orderGroupedSequences(groupedSequences);
           setSequences(orderedGroupedSequences);
           console.log("orderedGroupedSequences", orderedGroupedSequences);
           setType(type);
@@ -773,6 +763,42 @@ export default function CampaignLandingV2() {
         },
       },
     });
+  };
+
+  const deletePersonalizer = (id: number) => {
+    setLoadingPersonalizers(true);
+    fetch(`${API_URL}/ml/researchers/questions/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          showNotification({
+            title: "Personalizer Deleted",
+            message: "Personalizer has been deleted.",
+            color: "green",
+          });
+          getPersonalizers();
+        } else {
+          showNotification({
+            title: "Error Deleting Personalizer",
+            message: "An error occurred while deleting the personalizer.",
+            color: "red",
+          });
+        }
+      })
+      .catch((error) => {
+        showNotification({
+          title: "Error Deleting Personalizer",
+          message: "An error occurred while deleting the personalizer.",
+          color: "red",
+        });
+      })
+      .finally(() => {
+        setLoadingPersonalizers(false);
+      });
   };
 
   return (
@@ -2160,31 +2186,74 @@ export default function CampaignLandingV2() {
                       personalizers.length > 0 &&
                       personalizers.map((item: any, index: number) => {
                         return (
-                          <Switch
-                            labelPosition="left"
-                            label={
-                              <Flex key={index} gap={"md"} align={"center"}>
-                                <Text fw={600} size="12px" miw="200px">
-                                  {item.key}
-                                </Text>
-                              </Flex>
-                            }
-                            checked={true}
-                            miw={190}
-                            styles={{
-                              root: {
-                                border: "1px solid #D9DEE5",
-                                padding: "7px",
-                                borderRadius: "4px",
-                                background: "white",
-                              },
-                              body: {
-                                width: "100%",
-                                display: "flex",
-                                justifyContent: "space-between",
-                              },
+                          <Flex
+                            w="100%"
+                            justify="space-between"
+                            key={index}
+                            style={{
+                              border: "1px solid #D9DEE5",
+                              padding: "7px",
+                              borderRadius: "4px",
+                              background: "white",
                             }}
-                          />
+                          >
+                            <Flex gap={"md"} align={"center"}>
+                              <Text fw={600} size="12px" miw="200px">
+                                {item.key}
+                              </Text>
+                            </Flex>
+                            <Button
+                              size="compact-sm"
+                              fw={600}
+                              fz="12px"
+                              color="red"
+                              variant="outline"
+                              onClick={() =>
+                                modals.openConfirmModal({
+                                  title: (
+                                    <Title order={4}>Delete Personalizer</Title>
+                                  ),
+                                  children: (
+                                    <>
+                                      <Text>
+                                        Deleting this personalizer will remove
+                                        it from all sequences and templates. Are
+                                        you sure you want to delete it?
+                                      </Text>
+                                      <Flex
+                                        style={{
+                                          fontFamily: "monospace, monospace", // Monospaced font
+                                          backgroundColor: "#f5f5f5", // Light grey background
+                                          padding: "10px", // Padding inside the block
+                                          border: "1px solid #ddd", // Light border
+                                          borderRadius: "4px", // Rounded corners
+                                          display: "inline-block", // Make sure it wraps content properly
+                                          whiteSpace: "pre-wrap", // Preserve whitespace and wrapping
+                                          overflowX: "auto", // Horizontal scroll for long lines
+                                        }}
+                                        mt="md"
+                                      >
+                                        <Text color="red" fz="sm">
+                                          {item.key}
+                                        </Text>
+                                      </Flex>
+                                    </>
+                                  ),
+                                  labels: {
+                                    confirm: "Delete",
+                                    cancel: "Cancel",
+                                  },
+                                  confirmProps: { color: "red" },
+                                  onCancel: () => {},
+                                  onConfirm: async () => {
+                                    await deletePersonalizer(item.id);
+                                  },
+                                })
+                              }
+                            >
+                              Delete
+                            </Button>
+                          </Flex>
                         );
                       })}
                   </Flex>

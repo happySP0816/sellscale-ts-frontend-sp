@@ -135,7 +135,6 @@ export default function CreatePersona(props: PropsType) {
           // loading={creatingPersona}
           onClick={() => {
             closeAllModals();
-            alert("Campaign created!");
           }}
           fullWidth
           variant="outline"

@@ -102,6 +102,7 @@ interface StatsData {
   linkedin_active: boolean;
   sdr_name: string;
   is_ai_research_personalization_enabled: boolean;
+  setup_status: string;
 }
 
 const steps = [
@@ -314,7 +315,10 @@ export default function CampaignLandingV2() {
   );
   const [testingVolume, setTestingVolume] = useState(0);
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
-  const [showLinkedInConvoSimulatorModal, setShowLinkedInConvoSimulatorModal] = useState(false);
+  const [
+    showLinkedInConvoSimulatorModal,
+    setShowLinkedInConvoSimulatorModal,
+  ] = useState(false);
   const [showPersonalizerModal, setShowPersonalizerModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
@@ -464,14 +468,7 @@ export default function CampaignLandingV2() {
         if (loadedStats && loadedStats.testing_volume) {
           setTestingVolume(loadedStats.testing_volume);
         }
-        //set the setup status
-        if (loadedStats.is_setting_up) {
-          setStatus("SETUP");
-        } else if (loadedStats.active && analyticsData.num_sent > 0) {
-          setStatus("ACTIVE");
-        } else if (loadedStats.active === false) {
-          setStatus("INACTIVE");
-        }
+        setStatus(loadedStats.setup_status);
         setLoadingStats(false);
       })
       .catch((error) => {
@@ -480,20 +477,20 @@ export default function CampaignLandingV2() {
       });
   };
 
-const refetchCampaignOtherStats = async () => {
-  setLoadingAnalytics(true);
-  const otherStatsPromise = fetchCampaignAnalytics(userToken, id);
-  otherStatsPromise
-    .then((analyticsData) => {
-      const loadedAnalytics = analyticsData as any;
-      setAnalyticsData(loadedAnalytics);
-      setLoadingAnalytics(false);
-    })
-    .catch((error) => {
-      console.error("Error fetching other stats", error);
-      setLoadingAnalytics(false);
-    });
-};
+  const refetchCampaignOtherStats = async () => {
+    setLoadingAnalytics(true);
+    const otherStatsPromise = fetchCampaignAnalytics(userToken, id);
+    otherStatsPromise
+      .then((analyticsData) => {
+        const loadedAnalytics = analyticsData as any;
+        setAnalyticsData(loadedAnalytics);
+        setLoadingAnalytics(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching other stats", error);
+        setLoadingAnalytics(false);
+      });
+  };
 
   const refetchSequenceData = async (clientArchetypeId: number) => {
     setLoadingSequences(true);
@@ -667,14 +664,7 @@ const refetchCampaignOtherStats = async () => {
           if (totalContacts) {
             setTotalContacts(totalContacts);
           }
-          //set the setup status
-          if (loadedStats.is_setting_up) {
-            setStatus("SETUP");
-          } else if (loadedStats.active) {
-            setStatus("ACTIVE");
-          } else if (loadedStats.active === false) {
-            setStatus("INACTIVE");
-          }
+          setStatus(loadedStats.setup_status);
           setLoadingStats(false);
           setLoadingTotalContacts(false);
         })
@@ -706,18 +696,17 @@ const refetchCampaignOtherStats = async () => {
         }
         return prev;
       });
-      if (persona.active) {
-        setStatus("INACTIVE");
-      } else if (!persona.active && analyticsData.num_sent > 0) {
-        setStatus("ACTIVE");
-      } else if (!persona.active && analyticsData.num_sent === 0) {
-        setStatus("SETUP");
-      }
+      setStatus(persona.setup_status);
     }
     setLoadingStats(false);
   };
 
-  const togglePersonaChannel = async (campaignId: number, channel: "email" | "linkedin", userToken: string, active: boolean) => {
+  const togglePersonaChannel = async (
+    campaignId: number,
+    channel: "email" | "linkedin",
+    userToken: string,
+    active: boolean
+  ) => {
     if (channel === "email") {
       //check if there are email sequences and subject lines.
       //if not, show a notification that the channel cannot be activated.
@@ -725,7 +714,8 @@ const refetchCampaignOtherStats = async () => {
         showNotification({
           color: "red",
           title: "Email Channel",
-          message: "Email channel cannot be activated without email sequences and subject lines.",
+          message:
+            "Email channel cannot be activated without email sequences and subject lines.",
         });
         return;
       }
@@ -737,11 +727,15 @@ const refetchCampaignOtherStats = async () => {
     if (!localStorage.getItem("emailChannelWarning") && active === true) {
       localStorage.setItem("emailChannelWarning", "true");
     }
-    if ((channel === "email") && (localStorage.getItem("emailChannelWarning") === 'true') && (active === true)) {
+    if (
+      channel === "email" &&
+      localStorage.getItem("emailChannelWarning") === "true" &&
+      active === true
+    ) {
       setShowActivateWarningModal(true);
       return;
     }
-    
+
     setLoadingStats(true);
     const result = postTogglePersonaActive(
       userToken,
@@ -782,7 +776,14 @@ const refetchCampaignOtherStats = async () => {
   };
 
   return (
-    <Paper p={"lg"} maw={1150} h="100%" ml="auto" mr="auto" style={{ backgroundColor: "transparent" }}>
+    <Paper
+      p={"lg"}
+      maw={1150}
+      h="100%"
+      ml="auto"
+      mr="auto"
+      style={{ backgroundColor: "transparent" }}
+    >
       <Modal
         opened={showActivateWarningModal}
         onClose={() => setShowActivateWarningModal(false)}
@@ -798,17 +799,25 @@ const refetchCampaignOtherStats = async () => {
             </Text>
           </Flex>
           <Text size="sm" color="dimmed" mb="lg">
-            • Activating the email channel will lock the number of email sequence steps.<br />
-            • Once activated, the email sequence steps will be set.<br />
-            • You will still have the ability to edit the content of the templates.
+            • Activating the email channel will lock the number of email
+            sequence steps.
+            <br />
+            • Once activated, the email sequence steps will be set.
+            <br />• You will still have the ability to edit the content of the
+            templates.
           </Text>
           <Flex justify="space-between" align="center" mt="lg">
             <Checkbox
               defaultChecked
               label="Remind me in the future"
               onChange={(event) => {
-                const currentValue = localStorage.getItem("emailChannelWarning");
-                localStorage.setItem('emailChannelWarning', currentValue === 'false' ? "true" : "false");
+                const currentValue = localStorage.getItem(
+                  "emailChannelWarning"
+                );
+                localStorage.setItem(
+                  "emailChannelWarning",
+                  currentValue === "false" ? "true" : "false"
+                );
               }}
             />
             <Button
@@ -919,28 +928,23 @@ const refetchCampaignOtherStats = async () => {
                   <Text fw={600} size={20}>
                     {statsData?.archetype_name}
                   </Text>
-                  <Button
+                  <Badge
                     data-tour="campaign-status"
                     tt={"uppercase"}
-                    variant="light"
-                    size="xs"
-                    disabled={status === "INACTIVE" && true}
+                    variant="outline"
+                    size="lg"
                     color={
                       status === "SETUP"
                         ? "orange"
                         : status === "ACTIVE"
                         ? "green"
-                        : ""
+                        : status === "INACTIVE"
+                        ? "red"
+                        : "gray"
                     }
-                    // onClick={() => {
-                    //   if (status === "SETUP")
-                    //   else if (status === "ACTIVE") {
-                    //     setStatus("ACTIVE");
-                    //   }
-                    // }}
                   >
                     {status}
-                  </Button>
+                  </Badge>
                 </Flex>
               </Flex>
               <Flex align={"center"} gap={"xs"}>
@@ -964,7 +968,7 @@ const refetchCampaignOtherStats = async () => {
                     dateStyle: "full",
                   })}
                 </Text>
-                  <Flex>
+                <Flex w="60%" ml="auto">
                   <Paper
                     p="md"
                     sx={{
@@ -995,12 +999,27 @@ const refetchCampaignOtherStats = async () => {
                     </Flex> */}
                     <Group noWrap spacing={"sm"} w={"100%"}>
                       <Switch
-                        onChange={() => togglePersonaChannel(id, "email", userToken, !statsData?.email_active)}
+                        onChange={() =>
+                          togglePersonaChannel(
+                            id,
+                            "email",
+                            userToken,
+                            !statsData?.email_active
+                          )
+                        }
                         checked={statsData?.email_active}
                         labelPosition="left"
                         label={
-                          <Flex gap={1} align={"center"} className="hover:cursor-pointer">
-                            <IconMailOpened size={"1.2rem"} fill="#3B85EF" color="white" />
+                          <Flex
+                            gap={1}
+                            align={"center"}
+                            className="hover:cursor-pointer"
+                          >
+                            <IconMailOpened
+                              size={"1.2rem"}
+                              fill="#3B85EF"
+                              color="white"
+                            />
                             <Text color="#3B85EF" fw={500}>
                               Email
                             </Text>
@@ -1023,7 +1042,11 @@ const refetchCampaignOtherStats = async () => {
                           },
                         }}
                       />
-                      <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
+                      <Divider
+                        variant="dashed"
+                        labelPosition="center"
+                        label={<Hook linkedLeft={false} linkedRight={false} />}
+                      />
                       <Select
                         onChange={(value) => {
                           if (typeof value === "string") {
@@ -1035,32 +1058,47 @@ const refetchCampaignOtherStats = async () => {
                         w={"100%"}
                         data={[
                           {
-                            label: "[❌] No Connection",
+                            label: "Parallel",
                             value: "RANDOM",
                           },
                           {
-                            label: "[📧 → 🤝] Sent Only - ",
+                            label: "📧 Sent-Only",
                             value: "ALL_PROSPECTS",
                           },
                           {
-                            label: "[👀 → 🤝] Opened Only - ",
+                            label: "👀 Open-Only",
                             value: "OPENED_EMAIL_PROSPECTS_ONLY",
                           },
                           {
-                            label: "[⚡️ → 🤝] Clicked Only - ",
+                            label: "⚡️ Click-Only",
                             value: "CLICKED_LINK_PROSPECTS_ONLY",
                           },
                         ]}
                         placeholder="Select an event"
                       />
-                      <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
+                      <Divider
+                        variant="dashed"
+                        labelPosition="center"
+                        label={<Hook linkedLeft={false} linkedRight={false} />}
+                      />
                       <Switch
-                        onChange={() => togglePersonaChannel(id, "linkedin", userToken, !statsData?.linkedin_active)}
+                        onChange={() =>
+                          togglePersonaChannel(
+                            id,
+                            "linkedin",
+                            userToken,
+                            !statsData?.linkedin_active
+                          )
+                        }
                         checked={statsData?.linkedin_active}
                         labelPosition="left"
                         label={
                           <Flex gap={2} align={"center"}>
-                            <IconBrandLinkedin size={"1.4rem"} fill="#3B85EF" color="white" />
+                            <IconBrandLinkedin
+                              size={"1.4rem"}
+                              fill="#3B85EF"
+                              color="white"
+                            />
                             <Text color="#3B85EF" fw={500}>
                               Linkedin
                             </Text>
@@ -1677,7 +1715,8 @@ const refetchCampaignOtherStats = async () => {
                     </Text>
                   </Flex>
                 </Flex>
-              ) : sequences && sequences.length > 0 || (linkedinInitialMessages?.length > 0 && type === 'linkedin') ? (
+              ) : (sequences && sequences.length > 0) ||
+                (linkedinInitialMessages?.length > 0 && type === "linkedin") ? (
                 <Flex direction={"column"} h={"fit-content"} w={"100%"}>
                   <Flex w={"100%"} gap={"md"} direction={"column"} p={"lg"}>
                     {type === "linkedin" &&

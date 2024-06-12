@@ -26,6 +26,7 @@ import {
   Card,
   Alert,
   Popover,
+  Textarea,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -113,6 +114,7 @@ export default function CampaignTemplateEditModal({
   ////////////////////////////////
   const [assets, setAssets] = useState<AssetType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [manuallyAddedTemplate, setManuallyAddedTemplate] = useState("");
   const [loading, setLoading] = useState(false);
   const [addedTemplate, setAddedTemplate] = useState<AssetType | null>(
     innerProps.addedTemplate || null
@@ -908,6 +910,63 @@ export default function CampaignTemplateEditModal({
                                 );
                               })}
                           </>
+                          {/* Add new template */}
+                          <Textarea
+                            minRows={3}
+                            placeholder="Prefer to create your own message? Write direct in here ..."
+                            value={manuallyAddedTemplate}
+                            onChange={(event) =>
+                              setManuallyAddedTemplate(
+                                event.currentTarget.value
+                              )
+                            }
+                          />
+                          <Button
+                            size="sm"
+                            ml="auto"
+                            mt="xs"
+                            mb="xs"
+                            rightIcon={<IconArrowRight size={"0.9rem"} />}
+                            onClick={() => {
+                              const newAsset = {
+                                asset_key:
+                                  "New Template (" +
+                                  Math.random()
+                                    .toString(36)
+                                    .substring(2, 8)
+                                    .toUpperCase() +
+                                  ")",
+                                asset_raw_value: manuallyAddedTemplate,
+                                asset_tags:
+                                  sequenceType === "email"
+                                    ? ["email template"]
+                                    : ["linkedin template"],
+                                asset_type: "text",
+                                asset_value:
+                                  sequenceType === "email"
+                                    ? manuallyAddedTemplate.replaceAll(
+                                        "\n",
+                                        "<br/>"
+                                      )
+                                    : manuallyAddedTemplate,
+                                client_archetype_ids: [userData.client.id],
+                                client_id: userData.client.id,
+                                id: Math.floor(Math.random() * 1000000),
+                                num_opens: null,
+                                num_replies: null,
+                                num_sends: null,
+                              };
+                              addToStagingData(
+                                newAsset,
+                                currentStepNum,
+                                stagingData,
+                                setStagingData
+                              );
+                              setManuallyAddedTemplate("");
+                            }}
+                          >
+                            Add Message
+                          </Button>
                         </Flex>
                       </ScrollArea>
                     </Tabs.Panel>

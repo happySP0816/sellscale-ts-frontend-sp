@@ -18,7 +18,11 @@ import {
   TextInput,
   ActionIcon,
 } from "@mantine/core";
-import { ContextModalProps, closeModal, openContextModal } from "@mantine/modals";
+import {
+  ContextModalProps,
+  closeModal,
+  openContextModal,
+} from "@mantine/modals";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
@@ -30,13 +34,27 @@ import createCTA, { updateCTA } from "@utils/requests/createCTA";
 import { DateInput } from "@mantine/dates";
 import CreditsCard from "@common/credits/CreditsCard";
 import { valueToColor, nameToInitials, proxyURL } from "@utils/general";
-import { IconArrowRight, IconBrandLinkedin, IconCheck, IconCircleCheck, IconLogout, IconMail, IconPencil, IconX } from "@tabler/icons";
+import {
+  IconArrowRight,
+  IconBrandLinkedin,
+  IconCheck,
+  IconCircleCheck,
+  IconLogout,
+  IconMail,
+  IconPencil,
+  IconSettings,
+  IconX,
+} from "@tabler/icons";
 import { logout } from "@auth/core";
 import getEmailBanks from "@utils/requests/getEmailBanks";
 import { API_URL } from "@constants/data";
 import { useNavigate } from "react-router-dom";
 
-export default function AccountModal({ context, id, innerProps }: ContextModalProps<{}>) {
+export default function AccountModal({
+  context,
+  id,
+  innerProps,
+}: ContextModalProps<{}>) {
   const theme = useMantineTheme();
   const navigate = useNavigate();
 
@@ -75,6 +93,7 @@ export default function AccountModal({ context, id, innerProps }: ContextModalPr
     const json = await response.json();
 
     setLoading(false);
+    setEdit(false);
 
     showNotification({
       title: "Account Info Updated",
@@ -227,38 +246,78 @@ export default function AccountModal({ context, id, innerProps }: ContextModalPr
           )}
         </Flex>
       </Flex>
-      <Paper mt={"md"} withBorder px={"sm"} py={"xs"} className="flex items-center justify-between">
+      <Paper
+        mt={"md"}
+        withBorder
+        px={"sm"}
+        py={"xs"}
+        className="flex items-center justify-between"
+      >
         <Flex gap={5} align={"center"}>
           <IconBrandLinkedin fill="#228be6" color="white" size={"2rem"} />
           <Text fw={500}>Linkedin Connected</Text>
         </Flex>
         <Flex align={"center"} gap={"sm"}>
-          {userData?.li_connected && (
-            <Text underline color="red" fw={600} size={"sm"} onClick={() => (window.location.href = `/settings/linkedin`)} className="hover:cursor-pointer">
+          {userData?.li_voyager_connected && (
+            <Text
+              underline
+              color="red"
+              fw={600}
+              size={"sm"}
+              onClick={() => (window.location.href = `/settings/linkedin`)}
+              className="hover:cursor-pointer"
+            >
               Disconnect
             </Text>
           )}
 
           <Button
-            color={userData?.li_connected ? "green" : "red"}
+            color={userData?.li_voyager_connected ? "green" : "red"}
             variant="outline"
-            leftIcon={userData?.li_connected && <IconCircleCheck size={"1.4rem"} fill="#40c057" color="white" />}
+            leftIcon={
+              userData?.li_voyager_connected && (
+                <IconCircleCheck size={"1.4rem"} fill="#40c057" color="white" />
+              )
+            }
+            onClick={() => {
+              window.location.href = `/settings/linkedin`;
+            }}
           >
-            {userData?.li_connected ? "Connected" : "Disconnected"}
+            {userData?.li_voyager_connected ? "Connected" : "Disconnected"}
           </Button>
         </Flex>
       </Paper>
-      <Paper mt={"md"} withBorder px={"sm"} py={"xs"} className="flex items-center justify-between">
+      <Paper mt={"md"} withBorder px={"sm"} py={"xs"} className="flex">
         <Flex gap={5} align={"center"}>
           <IconMail fill="orange" color="white" size={"2rem"} />
-          <Text fw={500}>{domains.length} domains active</Text>
+          <Text fw={500}>{Math.max(0, domains.length - 1)} inboxes active</Text>
         </Flex>
-        <Button variant="outline" rightIcon={<IconArrowRight size={"1.2rem"} />} onClick={() => (window.location.href = `/settings/email`)}>
-          Modify
+        <Button
+          ml="auto"
+          variant="outline"
+          rightIcon={<IconMail size={"1.2rem"} />}
+          onClick={() => (window.location.href = `/settings/inboxes`)}
+        >
+          Inboxes
+        </Button>
+        <Button
+          ml="xs"
+          variant="outline"
+          color="gray"
+          rightIcon={<IconSettings size={"1.2rem"} />}
+          onClick={() => (window.location.href = `/settings/email`)}
+        >
+          Settings
         </Button>
       </Paper>
       <Flex mt={"lg"} gap={"md"}>
-        <Button size="md" color="gray" variant="outline" fullWidth onClick={() => closeModal(id)}>
+        <Button
+          size="md"
+          color="gray"
+          variant="outline"
+          fullWidth
+          onClick={() => closeModal(id)}
+        >
           Cancel
         </Button>
         <Button

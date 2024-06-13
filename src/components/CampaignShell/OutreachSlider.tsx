@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Slider, Button, Flex, Text, Tooltip, Paper } from '@mantine/core';
+import React, { useState, useEffect} from 'react';
+import { Slider, Button, Flex, Text, Tooltip, Paper, Badge } from '@mantine/core';
 import { IconQuestionMark } from '@tabler/icons-react';
 
 const MAX_CONTACTS = 2147483647;
@@ -16,6 +16,7 @@ interface OutreachSliderProps {
 
 import {
     patchTestingVolume,
+    getSentVolumeDuringPeriod,
 } from "@utils/requests/campaignOverview";
 
 const OutreachSlider: React.FC<OutreachSliderProps> = ({
@@ -28,13 +29,47 @@ const OutreachSlider: React.FC<OutreachSliderProps> = ({
     setLoadingStats,
 }) => {
     const [isUnsaved, setIsUnsaved] = useState(false);
+    const [totalSentThisWeek, setTotalSentThisWeek] = useState(0);
+
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const startOfWeek = new Date(today);
+
+    if (dayOfWeek === 6) { // If today is Saturday
+        startOfWeek.setDate(today.getDate() + 2); // Set to next Monday
+    } else if (dayOfWeek === 0) { // If today is Sunday
+        startOfWeek.setDate(today.getDate() + 1); // Set to next Monday
+    } else {
+        startOfWeek.setDate(today.getDate() - dayOfWeek + 1); // Set to this week's Monday
+    }
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 4); // Set to Friday of the same week
+
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    };
+
+    useEffect(() => {
+        const fetchSentVolume = async () => {
+            const sentVolume = await getSentVolumeDuringPeriod(userToken, startOfWeek, endOfWeek);
+            setTotalSentThisWeek(sentVolume);
+        };
+
+        fetchSentVolume();
+    }, [userToken]);
 
     return (
         <Paper p="md" withBorder w={"100%"}>
             <Flex justify={"space-between"}>
                 <Flex justify={"space-between"}>
+
+
                     <Text size={"xs"} fw={500}>
-                        Outreach Volume
+                        Outreach Volume { }
+                        <Text component="span" color="gray" size="xs" fw={500}>
+                            ({formatDate(startOfWeek)} - {formatDate(endOfWeek)})
+                        </Text>
                     </Text>
                     <Tooltip
                         multiline
@@ -60,8 +95,8 @@ const OutreachSlider: React.FC<OutreachSliderProps> = ({
                 <Text size={"xs"} fw={500}>
                     {testingVolume === MAX_CONTACTS ||
                         (testingVolume === 1000 && totalContacts < 1000)
-                        ? "Max/week"
-                        : `${testingVolume}/week`}{" "}
+                        ? "Max/Week"
+                        : `${testingVolume}/Week`}{" "}
                     {isUnsaved && (
                         <Text
                             component="span"
@@ -114,17 +149,17 @@ const OutreachSlider: React.FC<OutreachSliderProps> = ({
                             totalContacts < 1000 && value === 1000 ? "Max" : value
                         }
                     ></Slider>
-                    <Text
+                    <Badge
+                        color="green"
                         size="sm"
                         style={{
                             whiteSpace: "nowrap",
-                            color: "gray",
                             position: "relative",
                             top: "3px",
                         }}
                     >
-                        20/400 Sent
-                    </Text>
+                        {totalSentThisWeek}/{testingVolume === MAX_CONTACTS ? 1000 : testingVolume} Sent
+                    </Badge>
                 </Flex>
                 <Button
                     onClick={async () => {

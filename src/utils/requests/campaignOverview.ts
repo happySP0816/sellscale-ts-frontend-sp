@@ -61,6 +61,38 @@ export const patchTestingVolume = async (
   }
 };
 
+export const getSentVolumeDuringPeriod = async (
+  userToken: string,
+  startDate: Date,
+  endDate: Date
+): Promise<number> => {
+  try {
+    const response = await fetch(
+      `${API_URL}/client/sent_volume_during_period`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + userToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ start_date: startDate.toISOString(), end_date: endDate.toISOString() }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.sent_emails_count;
+  } catch (error) {
+    console.error("Error fetching sent volume during period", error);
+    return 0;
+  } finally {
+    console.log("Sent volume during period API call completed");
+  }
+};
+
 export const fetchTotalContacts = async (
   userToken: string,
   client_archetype_id: number

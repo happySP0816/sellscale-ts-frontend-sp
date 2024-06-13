@@ -86,33 +86,46 @@ const OutreachSlider: React.FC<OutreachSliderProps> = ({
                 </Text>
             </Flex>
             <Flex w={"100%"} align={"start"} gap={"sm"} mt={"md"}>
-                <Slider
-                    w={"100%"}
-                    value={testingVolume}
-                    onChange={(value) => {
-                        setTestingVolume(value);
-                        setIsUnsaved(true);
-                    }}
-                    max={totalContacts > 1000 ? totalContacts : 1000}
-                    marks={[
-                        { value: 0, label: "0" },
-                        {
-                            value: totalContacts > 1000 ? totalContacts : 1000,
-                            label: (
-                                <div
-                                    style={{
-                                        whiteSpace: "nowrap",
-                                    }}
-                                >
-                                    Max
-                                </div>
-                            ),
-                        },
-                    ]}
-                    label={(value) =>
-                        totalContacts < 1000 && value === 1000 ? "Max" : value
-                    }
-                ></Slider>
+                <Flex direction="column" align="center" w="100%">
+                    <Slider
+                        w={"100%"}
+                        value={testingVolume}
+                        onChange={(value) => {
+                            setTestingVolume(value);
+                            setIsUnsaved(true);
+                        }}
+                        max={totalContacts > 1000 ? totalContacts : 1000}
+                        marks={[
+                            { value: 0, label: "0" },
+                            {
+                                value: totalContacts > 1000 ? totalContacts : 1000,
+                                label: (
+                                    <div
+                                        style={{
+                                            whiteSpace: "nowrap",
+                                        }}
+                                    >
+                                        Max
+                                    </div>
+                                ),
+                            },
+                        ]}
+                        label={(value) =>
+                            totalContacts < 1000 && value === 1000 ? "Max" : value
+                        }
+                    ></Slider>
+                    <Text
+                        size="sm"
+                        style={{
+                            whiteSpace: "nowrap",
+                            color: "gray",
+                            position: "relative",
+                            top: "3px",
+                        }}
+                    >
+                        20/400 Sent
+                    </Text>
+                </Flex>
                 <Button
                     onClick={async () => {
                         const clientArchetypeId = Number(id);

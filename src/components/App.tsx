@@ -83,6 +83,8 @@ import AddQuestionModal from "@modals/CampaignLandingV2/QuestionModal";
 import CreateSegmentV3Modal from "@modals/SegmentV3/CreateSemgentV3Modal";
 import SelectSonarModal from "@modals/SelectSonarModal";
 import CreateFundraiseSonarmodal from "@modals/Sonarmodal/CreateFundraiseSonarModal";
+import AnalyticsModal from "@modals/AnalyticsModal";
+import CycleAnalyticsModal from "@modals/CycleAnalyticsModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -284,6 +286,8 @@ export default function App() {
               createsegmentV3: CreateSegmentV3Modal,
               selectsonarModal: SelectSonarModal,
               createfundraiseModal: CreateFundraiseSonarmodal,
+              analyticModal: AnalyticsModal,
+              cycleanalyticModal: CycleAnalyticsModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

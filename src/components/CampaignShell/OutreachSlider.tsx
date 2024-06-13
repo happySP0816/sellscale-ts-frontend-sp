@@ -1,6 +1,7 @@
 import React, { useState, useEffect} from 'react';
 import { Slider, Button, Flex, Text, Tooltip, Paper, Badge } from '@mantine/core';
 import { IconQuestionMark } from '@tabler/icons-react';
+import { useRecoilValue } from 'recoil';
 
 const MAX_CONTACTS = 2147483647;
 
@@ -18,6 +19,7 @@ import {
     patchTestingVolume,
     getSentVolumeDuringPeriod,
 } from "@utils/requests/campaignOverview";
+import { currentProjectState } from '@atoms/personaAtoms';
 
 const OutreachSlider: React.FC<OutreachSliderProps> = ({
     testingVolume,
@@ -30,6 +32,7 @@ const OutreachSlider: React.FC<OutreachSliderProps> = ({
 }) => {
     const [isUnsaved, setIsUnsaved] = useState(false);
     const [totalSentThisWeek, setTotalSentThisWeek] = useState(0);
+    const currentProject = useRecoilValue(currentProjectState);
 
     const today = new Date();
     const dayOfWeek = today.getDay();
@@ -43,16 +46,18 @@ const OutreachSlider: React.FC<OutreachSliderProps> = ({
         startOfWeek.setDate(today.getDate() - dayOfWeek + 1); // Set to this week's Monday
     }
 
+    startOfWeek.setHours(0, 0, 0, 0); // Set to 12:00 AM on Monday
+
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 4); // Set to Friday of the same week
+    endOfWeek.setHours(23, 59, 59, 999); // Set to 11:59:59.999 PM on Friday
 
     const formatDate = (date: Date) => {
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
-
     useEffect(() => {
         const fetchSentVolume = async () => {
-            const sentVolume = await getSentVolumeDuringPeriod(userToken, startOfWeek, endOfWeek);
+            const sentVolume = await getSentVolumeDuringPeriod(userToken, startOfWeek, endOfWeek, currentProject?.id);
             setTotalSentThisWeek(sentVolume);
         };
 

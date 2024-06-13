@@ -64,7 +64,8 @@ export const patchTestingVolume = async (
 export const getSentVolumeDuringPeriod = async (
   userToken: string,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
+  campaignId?: number
 ): Promise<number> => {
   try {
     const response = await fetch(
@@ -75,7 +76,7 @@ export const getSentVolumeDuringPeriod = async (
           Authorization: "Bearer " + userToken,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ start_date: startDate.toISOString(), end_date: endDate.toISOString() }),
+        body: JSON.stringify({ start_date: startDate.toISOString(), end_date: endDate.toISOString(), campaign_id: campaignId}),
       }
     );
 

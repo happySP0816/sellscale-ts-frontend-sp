@@ -63,7 +63,6 @@ import { IconMessageCheck } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import {
   fetchCampaignPersonalizers,
-  patchTestingVolume,
   fetchCampaignSequences,
   fetchCampaignStats,
   fetchTotalContacts,
@@ -84,6 +83,7 @@ import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
 import { PersonaOverview, SubjectLineTemplate } from "src";
 import SubjectDropdown from "@common/campaigns/SubjectDropdown";
+import OutreachSlider from "../../../components/CampaignShell/outreachSlider";
 
 interface StatsData {
   id: number;
@@ -271,8 +271,6 @@ export default function CampaignLandingV2() {
   const [contactPercent, setContactPercent] = useState(40);
   const [totalContacts, setTotalContacts] = useState(0);
   const [loadingTotalContacts, setLoadingTotalContacts] = useState(true);
-
-  const MAX_CONTACTS = 2147483647;
 
   // Loading states
   const [loadingContacts, setLoadingContacts] = useState(false);
@@ -1397,114 +1395,15 @@ export default function CampaignLandingV2() {
                 )}
               </Paper>
               <Flex data-tour="outreach-volume" w={"60%"}>
-                <Paper p="md" withBorder w={"100%"}>
-                  <Flex justify={"space-between"}>
-                    <Flex justify={"space-between"}>
-                      <Text size={"xs"} fw={500}>
-                        Outreach Volume
-                      </Text>
-                      <Tooltip
-                        multiline
-                        label={
-                          <Text size="sm">
-                            SellScale will initiate weekly interactions
-                            <br />
-                            with this specified number of contacts,
-                            <br />
-                            determined by the imported contacts
-                            <br /> and the capacity of your account.
-                            <br></br>
-                          </Text>
-                        }
-                        withArrow
-                        position="right"
-                      >
-                        <Text color="#37414E" size="xs">
-                          <IconQuestionMark size={"0.75rem"} color="#37414E" />
-                        </Text>
-                      </Tooltip>
-                    </Flex>
-                    <Text size={"xs"} fw={500}>
-                      {testingVolume === MAX_CONTACTS ||
-                      (testingVolume === 1000 && totalContacts < 1000)
-                        ? "Max/week"
-                        : `${testingVolume}/week`}{" "}
-                      {cycleStatus && (
-                        <Text
-                          component="span"
-                          color="red"
-                          size="xs"
-                          fw={700}
-                          ml={4}
-                        >
-                          (Unsaved)
-                        </Text>
-                      )}
-                      <Text
-                        component="span"
-                        underline
-                        color="#228be6"
-                        size="xs"
-                        fw={700}
-                        ml={4}
-                      >
-                        Analytics
-                      </Text>
-                    </Text>
-                  </Flex>
-                  <Flex w={"100%"} align={"start"} gap={"sm"} mt={"md"}>
-                    <Slider
-                      w={"100%"}
-                      value={testingVolume}
-                      onChange={(value) => {
-                        setCycleStatus(true);
-                        setTestingVolume(value);
-                      }}
-                      max={totalContacts > 1000 ? totalContacts : 1000}
-                      marks={[
-                        { value: 0, label: "0" },
-                        {
-                          value: totalContacts > 1000 ? totalContacts : 1000,
-                          label: (
-                            <div
-                              style={{
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              Max
-                            </div>
-                          ),
-                        },
-                      ]}
-                      label={(value) =>
-                        totalContacts < 1000 && value === 1000 ? "Max" : value
-                      }
-                    ></Slider>
-                    <Button
-                      disabled={!cycleStatus}
-                      onClick={async () => {
-                        const clientArchetypeId = Number(id);
-                        const response = await patchTestingVolume(
-                          userToken,
-                          clientArchetypeId,
-                          testingVolume
-                        );
-                        if (response) {
-                          console.log(
-                            "Testing volume updated successfully",
-                            response
-                          );
-                        }
-                        setLoadingStats(true);
-                        await fetchCampaignStats(userToken, clientArchetypeId);
-                        setLoadingStats(false);
-                        setCycleStatus(false);
-                      }}
-                    >
-                      Save
-                    </Button>
-                  </Flex>
-                </Paper>
+                <OutreachSlider
+                  testingVolume={testingVolume}
+                  setTestingVolume={setTestingVolume}
+                  totalContacts={totalContacts}
+                  userToken={userToken}
+                  id={id}
+                  fetchCampaignStats={fetchCampaignStats}
+                  setLoadingStats={setLoadingStats}
+                />
               </Flex>
             </Flex>
             {!loadingContacts && activeStep !== 3 && (

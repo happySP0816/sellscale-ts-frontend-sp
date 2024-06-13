@@ -252,7 +252,8 @@ export default function CampaignPersonalizersModal({
     fetchProspects();
     fetchResearchData();
     getAiResearchers();
-  }, []);
+    fetchCurrentProject();
+  }, [innerProps.id]);
 
   useEffect(() => {
     setCurrentAiResearcherId(currentProject?.ai_researcher_id + "");

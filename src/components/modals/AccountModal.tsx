@@ -18,8 +18,8 @@ import {
   TextInput,
   ActionIcon,
 } from "@mantine/core";
-import { ContextModalProps, openContextModal } from "@mantine/modals";
-import { useState } from "react";
+import { ContextModalProps, closeModal, openContextModal } from "@mantine/modals";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
@@ -32,14 +32,59 @@ import CreditsCard from "@common/credits/CreditsCard";
 import { valueToColor, nameToInitials, proxyURL } from "@utils/general";
 import { IconArrowRight, IconBrandLinkedin, IconCheck, IconCircleCheck, IconLogout, IconMail, IconPencil, IconX } from "@tabler/icons";
 import { logout } from "@auth/core";
+import getEmailBanks from "@utils/requests/getEmailBanks";
+import { API_URL } from "@constants/data";
+import { useNavigate } from "react-router-dom";
 
 export default function AccountModal({ context, id, innerProps }: ContextModalProps<{}>) {
   const theme = useMantineTheme();
+  const navigate = useNavigate();
 
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
 
-  console.log(userData);
+  const [domains, setDomains] = useState<any>([]);
+
+  const [editAccount, setEditAccount] = useState({
+    name: userData.sdr_name,
+    title: userData.sdr_title,
+    email: userData.sdr_email,
+  });
+  const [edit, setEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const triggerGetEmailBanks = async () => {
+    const result = await getEmailBanks(userToken);
+    if (result.status === "success") {
+      setDomains(result.data?.emails);
+    }
+  };
+
+  const handleSave = async () => {
+    console.log("=======");
+    setLoading(true);
+    const response = await fetch(`${API_URL}/client/sdr`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(editAccount),
+    });
+
+    const json = await response.json();
+
+    setLoading(false);
+
+    showNotification({
+      title: "Account Info Updated",
+      message: "Your account info has been updated successfully",
+    });
+  };
+
+  useEffect(() => {
+    triggerGetEmailBanks();
+  }, []);
 
   const enabledIcon = (
     <Avatar color="blue" radius="sm">
@@ -121,7 +166,8 @@ export default function AccountModal({ context, id, innerProps }: ContextModalPr
   return (
     <Paper>
       <Flex gap={30}>
-        <div className="relative">
+        {/* <div className="relative"> */}
+        <Flex>
           <Card shadow="xl" p={2} h={"fit-content"} withBorder>
             <Avatar
               size={120}
@@ -131,17 +177,55 @@ export default function AccountModal({ context, id, innerProps }: ContextModalPr
               color={valueToColor(theme, userData?.sdr_name)}
             />
           </Card>
-          <ActionIcon radius={"xl"} bg="black" className="absolute z-10 bottom-2 right-[-4px] hover:bg-black">
+        </Flex>
+        {/* <ActionIcon radius={"xl"} bg="black" className="absolute z-10 bottom-2 right-[-4px] hover:bg-black/0">
             <IconPencil color="white" size={"1.2rem"} />
           </ActionIcon>
-        </div>
-        <Box>
-          <Flex gap={"md"}>
-            <TextInput label="First Name" value={userData?.sdr_name.split(" ")[0]} />
-            <TextInput label="Last Name" value={userData?.sdr_name.split(" ")[1]} />
-          </Flex>
-          <TextInput mt={"md"} label="Primary Email" value={userData?.sdr_email} />
-        </Box>
+        </div> */}
+        <Flex direction={"column"} w={"100%"}>
+          <TextInput
+            label="Full Name"
+            value={editAccount.name}
+            w={"100%"}
+            onChange={(e) => {
+              setEditAccount({ ...editAccount, name: e.target.value });
+              setEdit(true);
+            }}
+          />
+          <TextInput
+            mt={"md"}
+            label="Primary Email"
+            value={editAccount.email}
+            w={"100%"}
+            onChange={(e) => {
+              setEditAccount({ ...editAccount, email: e.target.value });
+              setEdit(true);
+            }}
+          />
+
+          {edit && (
+            <Flex gap={"md"} align={"center"} mt={"md"}>
+              <Button onClick={handleSave} fullWidth loading={loading}>
+                Save Account Info
+              </Button>
+              <Button
+                fullWidth
+                onClick={() => {
+                  setEdit(true);
+                  setEditAccount({
+                    name: userData.sdr_name,
+                    title: userData.sdr_title,
+                    email: userData.sdr_email,
+                  });
+                }}
+                color="red"
+                variant="outline"
+              >
+                Cancel Edit
+              </Button>
+            </Flex>
+          )}
+        </Flex>
       </Flex>
       <Paper mt={"md"} withBorder px={"sm"} py={"xs"} className="flex items-center justify-between">
         <Flex gap={5} align={"center"}>
@@ -150,7 +234,7 @@ export default function AccountModal({ context, id, innerProps }: ContextModalPr
         </Flex>
         <Flex align={"center"} gap={"sm"}>
           {userData?.li_connected && (
-            <Text underline color="red" fw={600} size={"sm"}>
+            <Text underline color="red" fw={600} size={"sm"} onClick={() => (window.location.href = `/settings/linkedin`)} className="hover:cursor-pointer">
               Disconnect
             </Text>
           )}
@@ -167,15 +251,15 @@ export default function AccountModal({ context, id, innerProps }: ContextModalPr
       <Paper mt={"md"} withBorder px={"sm"} py={"xs"} className="flex items-center justify-between">
         <Flex gap={5} align={"center"}>
           <IconMail fill="orange" color="white" size={"2rem"} />
-          <Text fw={500}>{5} domains active</Text>
+          <Text fw={500}>{domains.length} domains active</Text>
         </Flex>
-        <Button variant="outline" rightIcon={<IconArrowRight size={"1.2rem"} />}>
+        <Button variant="outline" rightIcon={<IconArrowRight size={"1.2rem"} />} onClick={() => (window.location.href = `/settings/email`)}>
           Modify
         </Button>
       </Paper>
-      <Flex mt={30} gap={"md"}>
-        <Button size="md" color="red" variant="outline" fullWidth>
-          Deactivate Account
+      <Flex mt={"lg"} gap={"md"}>
+        <Button size="md" color="gray" variant="outline" fullWidth onClick={() => closeModal(id)}>
+          Cancel
         </Button>
         <Button
           color="red"

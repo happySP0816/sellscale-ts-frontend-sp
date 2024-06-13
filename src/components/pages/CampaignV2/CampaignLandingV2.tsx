@@ -1193,7 +1193,7 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("sent");
-                        handleModal("sent", id, "aaaa", statsData);
+                        handleModal("sent", id, currentProject?.name || '', statsData);
                       }}
                     >
                       <Flex align={"center"} gap={"xs"}>
@@ -1233,7 +1233,7 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("open");
-                        handleModal("open", id, "aaaa", statsData);
+                        handleModal("open", id, currentProject?.name || '', statsData);
                       }}
                     >
                       <Flex align={"center"} gap={6}>
@@ -1277,7 +1277,7 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("reply");
-                        handleModal("reply", id, "aaaa", statsData);
+                        handleModal("reply", id, currentProject?.name || '', statsData);
                       }}
                     >
                       <Flex align={"center"} gap={6}>
@@ -1321,7 +1321,7 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("pos_reply");
-                        handleModal("pos_reply", id, "aaaa", statsData);
+                        handleModal("pos_reply", id, currentProject?.name || '', statsData);
                       }}
                     >
                       <Flex align={"center"} gap={6}>

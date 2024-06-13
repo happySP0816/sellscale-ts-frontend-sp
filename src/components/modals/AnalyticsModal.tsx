@@ -275,7 +275,20 @@ export default function AnalyticsModal() {
   ]);
 
   const spendingData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    labels: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ],
     datasets: [
       {
         label: "Send",
@@ -366,11 +379,19 @@ export default function AnalyticsModal() {
           <Box
             mb={"sm"}
             style={{
-              border: selectStep === index ? "1px solid #228be6" : "1px solid #ced4da",
+              border:
+                selectStep === index
+                  ? "1px solid #228be6"
+                  : "1px solid #ced4da",
               borderRadius: "8px",
             }}
           >
-            <Flex align={"center"} justify={"space-between"} px={"sm"} py={"xs"}>
+            <Flex
+              align={"center"}
+              justify={"space-between"}
+              px={"sm"}
+              py={"xs"}
+            >
               <Flex align={"center"} gap={"xs"}>
                 <Text size={"sm"} fw={600} color="gray">
                   Cycle {index + 1}:
@@ -386,7 +407,11 @@ export default function AnalyticsModal() {
                     handleToggle(index);
                   }}
                 >
-                  {selectStep === index && opened ? <IconChevronUp size={"0.9rem"} /> : <IconChevronDown size={"0.9rem"} />}
+                  {selectStep === index && opened ? (
+                    <IconChevronUp size={"0.9rem"} />
+                  ) : (
+                    <IconChevronDown size={"0.9rem"} />
+                  )}
                 </ActionIcon>
               </Flex>
             </Flex>
@@ -412,7 +437,11 @@ export default function AnalyticsModal() {
                       onClick={() =>
                         openContextModal({
                           modal: "cycleanalyticModal",
-                          title: <Title order={3}>Continue via Email</Title>,
+                          title: (
+                            <Title order={3}>
+                              Cycle Analytics (Coming Soon ⚠️)
+                            </Title>
+                          ),
                           innerProps: {},
                           styles: {
                             content: {
@@ -427,11 +456,20 @@ export default function AnalyticsModal() {
                   </Flex>
                   <Flex gap={"sm"}>
                     <Paper w={"40%"} h={300} withBorder radius={"md"}>
-                      <Line typeof="linear" data={spendingData} options={Spendingoptions} />
+                      <Line
+                        typeof="linear"
+                        data={spendingData}
+                        options={Spendingoptions}
+                      />
                     </Paper>
                     <Box w={"60%"}>
                       <Paper w={"100%"} withBorder>
-                        <Flex align={"center"} justify={"space-between"} h={"100%"} w="100%">
+                        <Flex
+                          align={"center"}
+                          justify={"space-between"}
+                          h={"100%"}
+                          w="100%"
+                        >
                           <Box
                             py={"sm"}
                             px={"xs"}
@@ -446,7 +484,11 @@ export default function AnalyticsModal() {
                             }}
                           >
                             <Flex align={"center"} gap={"xs"}>
-                              <IconSend size={"0.9rem"} color="#3B85EF" className="mb-[2px]" />
+                              <IconSend
+                                size={"0.9rem"}
+                                color="#3B85EF"
+                                className="mb-[2px]"
+                              />
                               <Text fw={400} size={"sm"}>
                                 Sent
                               </Text>
@@ -471,7 +513,11 @@ export default function AnalyticsModal() {
                             }}
                           >
                             <Flex align={"center"} gap={6}>
-                              <IconChecks size={"0.9rem"} color="pink" className="mb-[2px]" />
+                              <IconChecks
+                                size={"0.9rem"}
+                                color="pink"
+                                className="mb-[2px]"
+                              />
                               <Text fw={400} size={"sm"}>
                                 Open
                               </Text>
@@ -495,7 +541,11 @@ export default function AnalyticsModal() {
                             }}
                           >
                             <Flex align={"center"} gap={6}>
-                              <IconMessageCheck size={"0.9rem"} color="orange" className="mb-[2px]" />
+                              <IconMessageCheck
+                                size={"0.9rem"}
+                                color="orange"
+                                className="mb-[2px]"
+                              />
                               <Text fw={400} size={"sm"}>
                                 Reply
                               </Text>
@@ -519,7 +569,11 @@ export default function AnalyticsModal() {
                             }}
                           >
                             <Flex align={"center"} gap={6}>
-                              <IconMessageCheck size={"0.9rem"} color="green" className="mb-[2px]" />
+                              <IconMessageCheck
+                                size={"0.9rem"}
+                                color="green"
+                                className="mb-[2px]"
+                              />
                               <Text fw={400} size={"sm"}>
                                 (+) Reply
                               </Text>
@@ -543,7 +597,11 @@ export default function AnalyticsModal() {
                             }}
                           >
                             <Flex align={"center"} gap={6}>
-                              <IconCalendar size={"0.9rem"} color={"#3B85EF"} className="mb-[2px]" />
+                              <IconCalendar
+                                size={"0.9rem"}
+                                color={"#3B85EF"}
+                                className="mb-[2px]"
+                              />
                               <Text fw={400}>Demo</Text>
                             </Flex>
                             <Flex align={"center"} gap={"sm"}>
@@ -570,14 +628,21 @@ export default function AnalyticsModal() {
                           <Flex>
                             <ActionIcon
                               onClick={() => {
-                                if (sentimentPage > 0 || selectStep === index) setSentimentPage((page) => (page = page - 1));
+                                if (sentimentPage > 0 || selectStep === index)
+                                  setSentimentPage((page) => (page = page - 1));
                               }}
                             >
                               <IconChevronLeft />
                             </ActionIcon>
                             <ActionIcon
                               onClick={() => {
-                                if (item && item.sentimentData && sentimentPage < Math.ceil(item?.sentimentData?.length / 2) - 1)
+                                if (
+                                  item &&
+                                  item.sentimentData &&
+                                  sentimentPage <
+                                    Math.ceil(item?.sentimentData?.length / 2) -
+                                      1
+                                )
                                   setSentimentPage((page) => (page = page + 1));
                               }}
                             >
@@ -586,7 +651,10 @@ export default function AnalyticsModal() {
                           </Flex>
                         </Flex>
                         <DataGrid
-                          data={item?.sentimentData?.slice(sentimentPage * 2, sentimentPage * 2 + 2)}
+                          data={item?.sentimentData?.slice(
+                            sentimentPage * 2,
+                            sentimentPage * 2 + 2
+                          )}
                           highlightOnHover
                           withSorting
                           withColumnBorders
@@ -616,7 +684,14 @@ export default function AnalyticsModal() {
                                 let { reply } = cell.row.original;
 
                                 return (
-                                  <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
+                                  <Flex
+                                    gap={"xs"}
+                                    w={"100%"}
+                                    h={"100%"}
+                                    px={"sm"}
+                                    align={"center"}
+                                    justify={"space-between"}
+                                  >
                                     <Text color="gray" size={"sm"}>
                                       {reply}
                                     </Text>
@@ -638,8 +713,19 @@ export default function AnalyticsModal() {
                                 let { intent }: any = cell.row.original;
 
                                 return (
-                                  <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
-                                    <Badge color={intent === "Positive" ? "green" : "red"} tt={"initial"}>
+                                  <Flex
+                                    gap={"sm"}
+                                    w={"100%"}
+                                    h={"100%"}
+                                    px={"sm"}
+                                    align={"center"}
+                                  >
+                                    <Badge
+                                      color={
+                                        intent === "Positive" ? "green" : "red"
+                                      }
+                                      tt={"initial"}
+                                    >
                                       {intent}
                                     </Badge>
                                   </Flex>
@@ -650,7 +736,10 @@ export default function AnalyticsModal() {
                               accessorKey: "action",
                               header: () => (
                                 <Flex align={"center"} gap={"3px"}>
-                                  <IconToggleRight color="gray" size={"0.9rem"} />
+                                  <IconToggleRight
+                                    color="gray"
+                                    size={"0.9rem"}
+                                  />
                                   <Text color="gray">Action</Text>
                                 </Flex>
                               ),
@@ -659,11 +748,24 @@ export default function AnalyticsModal() {
                               enableResizing: true,
                               cell: (cell) => {
                                 return (
-                                  <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
+                                  <Flex
+                                    align={"center"}
+                                    justify={"center"}
+                                    gap={"xs"}
+                                    py={"sm"}
+                                    px={"lg"}
+                                    w={"100%"}
+                                    h={"100%"}
+                                  >
                                     <Badge
                                       tt={"initial"}
                                       variant="filled"
-                                      rightSection={<IconExternalLink size={"0.9rem"} style={{ marginTop: "5px" }} />}
+                                      rightSection={
+                                        <IconExternalLink
+                                          size={"0.9rem"}
+                                          style={{ marginTop: "5px" }}
+                                        />
+                                      }
                                       styles={{
                                         root: {
                                           fontWeight: 400,
@@ -699,14 +801,19 @@ export default function AnalyticsModal() {
                       <Flex>
                         <ActionIcon
                           onClick={() => {
-                            if (icpPage > 0) setIcpPage((page) => (page = page - 1));
+                            if (icpPage > 0)
+                              setIcpPage((page) => (page = page - 1));
                           }}
                         >
                           <IconChevronLeft />
                         </ActionIcon>
                         <ActionIcon
                           onClick={() => {
-                            if (icpPage < Math.ceil(item?.icpData?.length / 5) - 1) setIcpPage((page) => (page = page + 1));
+                            if (
+                              icpPage <
+                              Math.ceil(item?.icpData?.length / 5) - 1
+                            )
+                              setIcpPage((page) => (page = page + 1));
                           }}
                         >
                           <IconChevronRight />
@@ -714,35 +821,61 @@ export default function AnalyticsModal() {
                       </Flex>
                     </Flex>
                     <SimpleGrid cols={5} mt={"sm"}>
-                      {item?.icpData.slice(icpPage * 5, icpPage * 5 + 5).map((icpItem: any, icpIndex: number) => {
-                        return (
-                          <Paper withBorder radius={"md"} key={icpIndex}>
-                            <div className={`${icpIndex % 2 === 0 ? "bg-[#98a3b4]" : "bg-[#eceef1]"} h-8 flex justify-center rounded-t-lg`}>
-                              <Avatar src={icpItem.avatar} size={"sm"} radius={"xl"} mt={18} color={valueToColor(theme, icpItem?.name)}>
-                                {nameToInitials(icpItem?.name)}
-                              </Avatar>
-                            </div>
-                            <Flex direction={"column"} mt={4} align={"center"} p={"sm"} justify={"space-between"} gap={4}>
-                              <Text size={"sm"} align="center" fw={600}>
-                                {icpItem.name}
-                              </Text>
-                              <Text color="gray" size={"xs"} align="center" fw={600}>
-                                {icpItem.job}
-                              </Text>
-                              <Flex align={"center"} gap={"xs"}>
-                                <Text size={"sm"} color="gray">
-                                  ICP:
+                      {item?.icpData
+                        .slice(icpPage * 5, icpPage * 5 + 5)
+                        .map((icpItem: any, icpIndex: number) => {
+                          return (
+                            <Paper withBorder radius={"md"} key={icpIndex}>
+                              <div
+                                className={`${
+                                  icpIndex % 2 === 0
+                                    ? "bg-[#98a3b4]"
+                                    : "bg-[#eceef1]"
+                                } h-8 flex justify-center rounded-t-lg`}
+                              >
+                                <Avatar
+                                  src={icpItem.avatar}
+                                  size={"sm"}
+                                  radius={"xl"}
+                                  mt={18}
+                                  color={valueToColor(theme, icpItem?.name)}
+                                >
+                                  {nameToInitials(icpItem?.name)}
+                                </Avatar>
+                              </div>
+                              <Flex
+                                direction={"column"}
+                                mt={4}
+                                align={"center"}
+                                p={"sm"}
+                                justify={"space-between"}
+                                gap={4}
+                              >
+                                <Text size={"sm"} align="center" fw={600}>
+                                  {icpItem.name}
                                 </Text>
-                                <Badge>{"High"}</Badge>
-                                <Text size={"sm"} color="gray">
-                                  Clicks:
+                                <Text
+                                  color="gray"
+                                  size={"xs"}
+                                  align="center"
+                                  fw={600}
+                                >
+                                  {icpItem.job}
                                 </Text>
-                                <Badge color="grape">{icpItem.clicks}</Badge>
+                                <Flex align={"center"} gap={"xs"}>
+                                  <Text size={"sm"} color="gray">
+                                    ICP:
+                                  </Text>
+                                  <Badge>{"High"}</Badge>
+                                  <Text size={"sm"} color="gray">
+                                    Clicks:
+                                  </Text>
+                                  <Badge color="grape">{icpItem.clicks}</Badge>
+                                </Flex>
                               </Flex>
-                            </Flex>
-                          </Paper>
-                        );
-                      })}
+                            </Paper>
+                          );
+                        })}
                     </SimpleGrid>
                   </Paper>
                   <Box mt={"sm"}>
@@ -763,14 +896,19 @@ export default function AnalyticsModal() {
                       <Flex>
                         <ActionIcon
                           onClick={() => {
-                            if (actionsPage > 0) setActionsPage((page) => (page = page - 1));
+                            if (actionsPage > 0)
+                              setActionsPage((page) => (page = page - 1));
                           }}
                         >
                           <IconChevronLeft />
                         </ActionIcon>
                         <ActionIcon
                           onClick={() => {
-                            if (actionsPage < Math.ceil(item?.actionsData.length / 2) - 1) setActionsPage((page) => (page = page + 1));
+                            if (
+                              actionsPage <
+                              Math.ceil(item?.actionsData.length / 2) - 1
+                            )
+                              setActionsPage((page) => (page = page + 1));
                           }}
                         >
                           <IconChevronRight />
@@ -778,7 +916,10 @@ export default function AnalyticsModal() {
                       </Flex>
                     </Flex>
                     <DataGrid
-                      data={item?.actionsData.slice(actionsPage * 2, actionsPage * 2 + 2)}
+                      data={item?.actionsData.slice(
+                        actionsPage * 2,
+                        actionsPage * 2 + 2
+                      )}
                       highlightOnHover
                       withSorting
                       withColumnBorders
@@ -807,7 +948,14 @@ export default function AnalyticsModal() {
                             let { template } = cell.row.original;
 
                             return (
-                              <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
+                              <Flex
+                                gap={"xs"}
+                                w={"100%"}
+                                h={"100%"}
+                                px={"sm"}
+                                align={"center"}
+                                justify={"space-between"}
+                              >
                                 <Flex>
                                   <Text color="gray" size={"sm"} w={"100%"}>
                                     {template}
@@ -817,7 +965,11 @@ export default function AnalyticsModal() {
                                   <Button variant="light" size="xs">
                                     Intro
                                   </Button>
-                                  <Button variant="light" color="grape" size="xs">
+                                  <Button
+                                    variant="light"
+                                    color="grape"
+                                    size="xs"
+                                  >
                                     Gift
                                   </Button>
                                 </Flex>
@@ -839,7 +991,13 @@ export default function AnalyticsModal() {
                             let { open_rate }: any = cell.row.original;
 
                             return (
-                              <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                              <Flex
+                                gap={"sm"}
+                                w={"100%"}
+                                h={"100%"}
+                                px={"sm"}
+                                align={"center"}
+                              >
                                 <Badge color="green">{open_rate}%</Badge>
                               </Flex>
                             );
@@ -859,7 +1017,13 @@ export default function AnalyticsModal() {
                             let { reply_rate }: any = cell.row.original;
 
                             return (
-                              <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                              <Flex
+                                gap={"sm"}
+                                w={"100%"}
+                                h={"100%"}
+                                px={"sm"}
+                                align={"center"}
+                              >
                                 <Badge color="green">{reply_rate}%</Badge>
                               </Flex>
                             );
@@ -880,7 +1044,15 @@ export default function AnalyticsModal() {
                             let { action }: any = cell.row.original;
 
                             return (
-                              <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
+                              <Flex
+                                align={"center"}
+                                justify={"center"}
+                                gap={"xs"}
+                                py={"sm"}
+                                px={"lg"}
+                                w={"100%"}
+                                h={"100%"}
+                              >
                                 <Switch defaultChecked={action} />
                               </Flex>
                             );

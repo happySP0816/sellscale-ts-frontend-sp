@@ -1,4 +1,18 @@
-import { Paper, Text, Group, Box, Grid, Flex, Badge, useMantineTheme, Tooltip, Progress, Button, RingProgress, ActionIcon } from "@mantine/core";
+import {
+  Paper,
+  Text,
+  Group,
+  Box,
+  Grid,
+  Flex,
+  Badge,
+  useMantineTheme,
+  Tooltip,
+  Progress,
+  Button,
+  RingProgress,
+  ActionIcon,
+} from "@mantine/core";
 
 import {
   IconArrowUp,
@@ -13,7 +27,18 @@ import {
   IconSettings,
 } from "@tabler/icons";
 import { Bar, Doughnut, Line, Pie } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Legend, DoughnutController, ArcElement, Chart, scales } from "chart.js";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Legend,
+  DoughnutController,
+  ArcElement,
+  Chart,
+  scales,
+} from "chart.js";
 
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -107,17 +132,30 @@ export default function SettingUsage() {
     update();
   }, []);
   const spendingData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    labels: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ],
     datasets: [
       {
-        label: "Apollo",
+        label: "Prospect Credits",
         data: [65, 59, 80, 81, 56, 55, 40, 20, 230, 402, 201, 115, 20],
         fill: false,
         borderColor: "#55c2c1",
         backgroundColor: "#55c2c1",
       },
       {
-        label: "Domains",
+        label: "Domains + Inboxes",
         data: [230, 402, 201, 45, 39, 60, 71, 46, 35, 50, 55, 40, 20],
         fill: false,
         borderColor: "#e9be4d",
@@ -138,7 +176,7 @@ export default function SettingUsage() {
         backgroundColor: "#228be6",
       },
       {
-        label: "Phantom Buster",
+        label: "LinkedIn Connection",
         data: [24, 257, 311, 563, 424, 22, 14, 6, 241, 112, 55, 40, 20],
         fill: false,
         borderColor: "#ec8a0a",
@@ -286,8 +324,19 @@ export default function SettingUsage() {
     datasets: [
       {
         data: [
-          Math.min(100, Math.floor(((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100)),
-          100 - Math.min(100, Math.floor(((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100)),
+          Math.min(
+            100,
+            Math.floor(
+              ((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100
+            )
+          ),
+          100 -
+            Math.min(
+              100,
+              Math.floor(
+                ((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100
+              )
+            ),
         ],
         backgroundColor: ["#fa5352", "#eaecf0"],
         borderWidth: 0,
@@ -314,25 +363,45 @@ export default function SettingUsage() {
           <Grid.Col span={9}>
             <Flex direction={"column"} w={"100%"} gap={"xl"}>
               <Group grow>
-                <Box py={20} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+                <Box
+                  py={20}
+                  px={20}
+                  style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+                >
                   <Flex justify={"space-between"} w={"100%"} align={"center"}>
                     <Text color="gray" size={12} fw={600}>
                       Prospects Created
                     </Text>
-                    <Tooltip label="Total prospects added on SellScale." withinPortal>
+                    <Tooltip
+                      label="Total prospects added on SellScale."
+                      withinPortal
+                    >
                       <ActionIcon>
                         <IconInfoCircle size={14} color="gray" />
                       </ActionIcon>
                     </Tooltip>
                   </Flex>
-                  <Text fw={600} size={20} style={{ display: "flex", alignItems: "center" }} mt={5}>
+                  <Text
+                    fw={600}
+                    size={20}
+                    style={{ display: "flex", alignItems: "center" }}
+                    mt={5}
+                  >
                     {prospectingData?.prospect_created?.toLocaleString()}{" "}
-                    <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
+                    <Badge
+                      color="green"
+                      ml={10}
+                      leftSection={<IconArrowUp size={10} stroke={3} />}
+                    >
                       100%
                     </Badge>
                   </Text>
                 </Box>
-                <Box py={20} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+                <Box
+                  py={20}
+                  px={20}
+                  style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+                >
                   <Flex justify={"space-between"} w={"100%"} align={"center"}>
                     <Text color="gray" size={12} fw={600}>
                       # Prospects Enriched
@@ -346,84 +415,202 @@ export default function SettingUsage() {
                       </ActionIcon>
                     </Tooltip>
                   </Flex>
-                  <Text fw={600} size={20} style={{ display: "flex", alignItems: "center" }} mt={5}>
+                  <Text
+                    fw={600}
+                    size={20}
+                    style={{ display: "flex", alignItems: "center" }}
+                    mt={5}
+                  >
                     {prospectingData?.prospect_enriched.toLocaleString()}{" "}
-                    <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                      {Math.min(100, Math.floor((prospectingData?.prospect_enriched / prospectingData?.prospect_created + 0.0001) * 100))}%
+                    <Badge
+                      color="green"
+                      ml={10}
+                      leftSection={<IconArrowUp size={10} stroke={3} />}
+                    >
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          (prospectingData?.prospect_enriched /
+                            prospectingData?.prospect_created +
+                            0.0001) *
+                            100
+                        )
+                      )}
+                      %
                     </Badge>
                   </Text>
                 </Box>
-                <Box py={20} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+                <Box
+                  py={20}
+                  px={20}
+                  style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+                >
                   <Flex justify={"space-between"} w={"100%"} align={"center"}>
                     <Text color="gray" size={12} fw={600}>
                       Total Outreach Sent
                     </Text>
-                    <Tooltip label="SellScale sends through LinkedIn or email." withinPortal>
+                    <Tooltip
+                      label="SellScale sends through LinkedIn or email."
+                      withinPortal
+                    >
                       <ActionIcon>
                         <IconInfoCircle size={14} color="gray" />
                       </ActionIcon>
                     </Tooltip>
                   </Flex>
-                  <Text fw={600} size={20} style={{ display: "flex", alignItems: "center" }} mt={5}>
+                  <Text
+                    fw={600}
+                    size={20}
+                    style={{ display: "flex", alignItems: "center" }}
+                    mt={5}
+                  >
                     {prospectingData?.total_outreach_sent.toLocaleString()}{" "}
-                    <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                      {Math.min(100, Math.floor((prospectingData?.total_outreach_sent / prospectingData?.prospect_created + 0.0001) * 100))}%
+                    <Badge
+                      color="green"
+                      ml={10}
+                      leftSection={<IconArrowUp size={10} stroke={3} />}
+                    >
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          (prospectingData?.total_outreach_sent /
+                            prospectingData?.prospect_created +
+                            0.0001) *
+                            100
+                        )
+                      )}
+                      %
                     </Badge>
                   </Text>
                 </Box>
               </Group>
               <Group grow>
-                <Box py={30} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+                <Box
+                  py={30}
+                  px={20}
+                  style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+                >
                   <Flex justify={"space-between"} w={"100%"} align={"center"}>
                     <Text color="gray" size={12} fw={600}>
                       AI Replies
                     </Text>
-                    <Tooltip label="Replies conducted through the SellScale platform by our AI." withinPortal>
+                    <Tooltip
+                      label="Replies conducted through the SellScale platform by our AI."
+                      withinPortal
+                    >
                       <ActionIcon>
                         <IconInfoCircle size={14} color="gray" />
                       </ActionIcon>
                     </Tooltip>
                   </Flex>
-                  <Text fw={600} size={20} style={{ display: "flex", alignItems: "center" }} mt={5}>
+                  <Text
+                    fw={600}
+                    size={20}
+                    style={{ display: "flex", alignItems: "center" }}
+                    mt={5}
+                  >
                     {prospectingData?.ai_replies.toLocaleString()}{" "}
-                    <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                      {Math.min(100, Math.floor((prospectingData?.ai_replies / prospectingData?.total_outreach_sent + 0.0001) * 100))}%
+                    <Badge
+                      color="green"
+                      ml={10}
+                      leftSection={<IconArrowUp size={10} stroke={3} />}
+                    >
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          (prospectingData?.ai_replies /
+                            prospectingData?.total_outreach_sent +
+                            0.0001) *
+                            100
+                        )
+                      )}
+                      %
                     </Badge>
                   </Text>
                 </Box>
-                <Box py={30} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+                <Box
+                  py={30}
+                  px={20}
+                  style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+                >
                   <Flex justify={"space-between"} w={"100%"} align={"center"}>
                     <Text color="gray" size={12} fw={600}>
                       Prospects Snoozed
                     </Text>
-                    <Tooltip label="Prospects the AI will engage, but we’re waiting until the next sequence step for." withinPortal>
+                    <Tooltip
+                      label="Prospects the AI will engage, but we’re waiting until the next sequence step for."
+                      withinPortal
+                    >
                       <ActionIcon>
                         <IconInfoCircle size={14} color="gray" />
                       </ActionIcon>
                     </Tooltip>
                   </Flex>
-                  <Text fw={600} size={20} style={{ display: "flex", alignItems: "center" }} mt={5}>
+                  <Text
+                    fw={600}
+                    size={20}
+                    style={{ display: "flex", alignItems: "center" }}
+                    mt={5}
+                  >
                     {prospectingData?.prospects_snoozed.toLocaleString()}{" "}
-                    <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                      {Math.min(100, Math.floor((prospectingData?.prospects_snoozed / prospectingData?.total_outreach_sent + 0.0001) * 100))}%
+                    <Badge
+                      color="green"
+                      ml={10}
+                      leftSection={<IconArrowUp size={10} stroke={3} />}
+                    >
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          (prospectingData?.prospects_snoozed /
+                            prospectingData?.total_outreach_sent +
+                            0.0001) *
+                            100
+                        )
+                      )}
+                      %
                     </Badge>
                   </Text>
                 </Box>
-                <Box py={30} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+                <Box
+                  py={30}
+                  px={20}
+                  style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+                >
                   <Flex justify={"space-between"} w={"100%"} align={"center"}>
                     <Text color="gray" size={12} fw={600}>
                       Prospects removed
                     </Text>
-                    <Tooltip label="Prospects who were marked as not interested or not qualified. " withinPortal>
+                    <Tooltip
+                      label="Prospects who were marked as not interested or not qualified. "
+                      withinPortal
+                    >
                       <ActionIcon>
                         <IconInfoCircle size={14} color="gray" />
                       </ActionIcon>
                     </Tooltip>
                   </Flex>
-                  <Text fw={600} size={20} style={{ display: "flex", alignItems: "center" }} mt={5}>
+                  <Text
+                    fw={600}
+                    size={20}
+                    style={{ display: "flex", alignItems: "center" }}
+                    mt={5}
+                  >
                     {prospectingData?.prospects_removed.toLocaleString()}{" "}
-                    <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                      {Math.min(100, Math.floor((prospectingData?.prospects_removed / prospectingData?.total_outreach_sent + 0.0001) * 100))}%
+                    <Badge
+                      color="green"
+                      ml={10}
+                      leftSection={<IconArrowUp size={10} stroke={3} />}
+                    >
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          (prospectingData?.prospects_removed /
+                            prospectingData?.total_outreach_sent +
+                            0.0001) *
+                            100
+                        )
+                      )}
+                      %
                     </Badge>
                   </Text>
                 </Box>
@@ -440,7 +627,13 @@ export default function SettingUsage() {
                 height: "100%",
               }}
             >
-              <Flex direction={"column"} justify={"space-between"} align={"center"} gap={"sm"} h={"100%"}>
+              <Flex
+                direction={"column"}
+                justify={"space-between"}
+                align={"center"}
+                gap={"sm"}
+                h={"100%"}
+              >
                 <div className="w-[140px] m-[-30px] relative">
                   <Doughnut data={data} options={piechartOptions} />
                   <Flex
@@ -452,15 +645,32 @@ export default function SettingUsage() {
                     }}
                     direction={"column"}
                   >
-                    <Text fw={600}>{Math.min(100, Math.floor(((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100))}%</Text>{" "}
+                    <Text fw={600}>
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          ((prospectingData?.monthly_touchpoints_used || 1) /
+                            2000) *
+                            100
+                        )
+                      )}
+                      %
+                    </Text>{" "}
                     <Text size={12} fw={600}>
                       Limit Utilized
                     </Text>
                   </Flex>
                 </div>
                 <Text size={12} fw={600} color="gray" align="center">
-                  You have used <span style={{ color: "#54a4f9" }}>{prospectingData?.monthly_touchpoints_used.toLocaleString()}</span> out of{" "}
-                  <span style={{ fontWeight: "700", color: "black" }}>2000</span> monthly first touches.
+                  You have used{" "}
+                  <span style={{ color: "#54a4f9" }}>
+                    {prospectingData?.monthly_touchpoints_used.toLocaleString()}
+                  </span>{" "}
+                  out of{" "}
+                  <span style={{ fontWeight: "700", color: "black" }}>
+                    2000
+                  </span>{" "}
+                  monthly first touches.
                 </Text>
                 <Button
                   w={"100%"}
@@ -480,7 +690,14 @@ export default function SettingUsage() {
             </Box>
           </Grid.Col>
           <Grid.Col>
-            <Box py={30} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+            <Box
+              py={15}
+              px={20}
+              style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+            >
+              <Text align="center" color="gray" size="sm" mb="md">
+                ⚠️ Note: This is sample data. Live data coming soon. ⚠️
+              </Text>
               <Flex align={"center"} gap={"sm"}>
                 {/* <Text color="gray" fw={600}>
                   # Prospects Created:{" "}
@@ -491,7 +708,14 @@ export default function SettingUsage() {
                     {Math.min(100, Math.floor((prospectingData?.prospect_created / prospectingData?.prospect_created + 0.0001) * 100))}%
                   </Badge>
                 </Text> */}
-                <Paper withBorder radius={"md"} px={"md"} py={4} w={"100%"} className="flex items-center justify-between">
+                <Paper
+                  withBorder
+                  radius={"md"}
+                  px={"md"}
+                  py={4}
+                  w={"100%"}
+                  className="flex items-center justify-between"
+                >
                   <Flex align={"center"} gap={3}>
                     <IconPoint fill="#228be6" color="white" size={"2rem"} />
                     <Text color="gray" fw={600}>
@@ -502,7 +726,14 @@ export default function SettingUsage() {
                     ${2331.57}
                   </Text>
                 </Paper>
-                <Paper withBorder radius={"md"} px={"md"} py={4} w={"100%"} className="flex items-center justify-between">
+                <Paper
+                  withBorder
+                  radius={"md"}
+                  px={"md"}
+                  py={4}
+                  w={"100%"}
+                  className="flex items-center justify-between"
+                >
                   <Flex align={"center"} gap={3}>
                     <IconPoint fill="#228be6" color="white" size={"2rem"} />
                     <Text color="gray" fw={600}>
@@ -510,7 +741,7 @@ export default function SettingUsage() {
                     </Text>
                   </Flex>
                   <Text fw={600} mr={"sm"}>
-                    ${481.4}
+                    ${481.42}
                   </Text>
                 </Paper>
               </Flex>
@@ -520,15 +751,35 @@ export default function SettingUsage() {
             </Box>
           </Grid.Col>
           <Grid.Col>
-            <Box py={30} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+            <Box
+              py={30}
+              px={20}
+              style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+            >
               <Flex align={"center"} gap={"sm"}>
                 <Text color="gray" fw={600}>
                   # Prospects Created:{" "}
                 </Text>
-                <Text fw={600} style={{ display: "flex", alignItems: "center" }}>
+                <Text
+                  fw={600}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
                   {prospectingData?.prospect_created}{" "}
-                  <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(100, Math.floor((prospectingData?.prospect_created / prospectingData?.prospect_created + 0.0001) * 100))}%
+                  <Badge
+                    color="green"
+                    ml={10}
+                    leftSection={<IconArrowUp size={10} stroke={3} />}
+                  >
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.prospect_created /
+                          prospectingData?.prospect_created +
+                          0.0001) *
+                          100
+                      )
+                    )}
+                    %
                   </Badge>
                 </Text>
               </Flex>
@@ -538,15 +789,35 @@ export default function SettingUsage() {
             </Box>
           </Grid.Col>
           <Grid.Col span={6}>
-            <Box py={30} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+            <Box
+              py={30}
+              px={20}
+              style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+            >
               <Flex align={"center"} gap={"sm"}>
                 <Text color="gray" fw={600}>
                   Prospects Enriched:{" "}
                 </Text>
-                <Text fw={600} style={{ display: "flex", alignItems: "center" }}>
+                <Text
+                  fw={600}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
                   {prospectingData?.prospect_enriched}{" "}
-                  <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(100, Math.floor((prospectingData?.prospect_enriched / prospectingData?.prospect_created + 0.0001) * 100))}%
+                  <Badge
+                    color="green"
+                    ml={10}
+                    leftSection={<IconArrowUp size={10} stroke={3} />}
+                  >
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.prospect_enriched /
+                          prospectingData?.prospect_created +
+                          0.0001) *
+                          100
+                      )
+                    )}
+                    %
                   </Badge>
                 </Text>
               </Flex>
@@ -556,15 +827,35 @@ export default function SettingUsage() {
             </Box>
           </Grid.Col>
           <Grid.Col span={6}>
-            <Box py={30} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+            <Box
+              py={30}
+              px={20}
+              style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+            >
               <Flex align={"center"} gap={"sm"}>
                 <Text color="gray" fw={600}>
                   # First Touches Sent:{" "}
                 </Text>
-                <Text fw={600} style={{ display: "flex", alignItems: "center" }}>
+                <Text
+                  fw={600}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
                   {prospectingData?.total_outreach_sent}{" "}
-                  <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(100, Math.floor((prospectingData?.total_outreach_sent / prospectingData?.prospect_created + 0.0001) * 100))}%
+                  <Badge
+                    color="green"
+                    ml={10}
+                    leftSection={<IconArrowUp size={10} stroke={3} />}
+                  >
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.total_outreach_sent /
+                          prospectingData?.prospect_created +
+                          0.0001) *
+                          100
+                      )
+                    )}
+                    %
                   </Badge>
                 </Text>
               </Flex>
@@ -574,15 +865,35 @@ export default function SettingUsage() {
             </Box>
           </Grid.Col>
           <Grid.Col span={6}>
-            <Box py={30} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+            <Box
+              py={30}
+              px={20}
+              style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+            >
               <Flex align={"center"} gap={"sm"}>
                 <Text color="gray" fw={600}>
                   # Outreach Sent:{" "}
                 </Text>
-                <Text fw={600} style={{ display: "flex", alignItems: "center" }}>
+                <Text
+                  fw={600}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
                   {prospectingData?.total_outreach_sent}{" "}
-                  <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(100, Math.floor((prospectingData?.total_outreach_sent / prospectingData?.prospect_created + 0.0001) * 100))}%
+                  <Badge
+                    color="green"
+                    ml={10}
+                    leftSection={<IconArrowUp size={10} stroke={3} />}
+                  >
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.total_outreach_sent /
+                          prospectingData?.prospect_created +
+                          0.0001) *
+                          100
+                      )
+                    )}
+                    %
                   </Badge>
                 </Text>
               </Flex>
@@ -592,15 +903,35 @@ export default function SettingUsage() {
             </Box>
           </Grid.Col>
           <Grid.Col span={6}>
-            <Box py={30} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+            <Box
+              py={30}
+              px={20}
+              style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+            >
               <Flex align={"center"} gap={"sm"}>
                 <Text color="gray" fw={600}>
                   AI Replies:{" "}
                 </Text>
-                <Text fw={600} style={{ display: "flex", alignItems: "center" }}>
+                <Text
+                  fw={600}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
                   {prospectingData?.ai_replies}{" "}
-                  <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(100, Math.floor((prospectingData?.ai_replies / prospectingData?.total_outreach_sent + 0.0001) * 100))}%
+                  <Badge
+                    color="green"
+                    ml={10}
+                    leftSection={<IconArrowUp size={10} stroke={3} />}
+                  >
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.ai_replies /
+                          prospectingData?.total_outreach_sent +
+                          0.0001) *
+                          100
+                      )
+                    )}
+                    %
                   </Badge>
                 </Text>
               </Flex>
@@ -610,15 +941,35 @@ export default function SettingUsage() {
             </Box>
           </Grid.Col>
           <Grid.Col span={6}>
-            <Box py={30} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+            <Box
+              py={30}
+              px={20}
+              style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+            >
               <Flex align={"center"} gap={"sm"}>
                 <Text color="gray" fw={600}>
                   # Prospects Snoozed:{" "}
                 </Text>
-                <Text fw={600} style={{ display: "flex", alignItems: "center" }}>
+                <Text
+                  fw={600}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
                   {prospectingData?.prospects_snoozed}{" "}
-                  <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(100, Math.floor((prospectingData?.prospects_snoozed / prospectingData?.ai_replies + 0.0001) * 100))}%
+                  <Badge
+                    color="green"
+                    ml={10}
+                    leftSection={<IconArrowUp size={10} stroke={3} />}
+                  >
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.prospects_snoozed /
+                          prospectingData?.ai_replies +
+                          0.0001) *
+                          100
+                      )
+                    )}
+                    %
                   </Badge>
                 </Text>
               </Flex>
@@ -628,15 +979,35 @@ export default function SettingUsage() {
             </Box>
           </Grid.Col>
           <Grid.Col span={6}>
-            <Box py={30} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}>
+            <Box
+              py={30}
+              px={20}
+              style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+            >
               <Flex align={"center"} gap={"sm"}>
                 <Text color="gray" fw={600}>
                   # Prospects Removed:{" "}
                 </Text>
-                <Text fw={600} style={{ display: "flex", alignItems: "center" }}>
+                <Text
+                  fw={600}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
                   {prospectingData?.prospects_removed}{" "}
-                  <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(100, Math.floor((prospectingData?.prospects_removed / prospectingData?.ai_replies + 0.0001) * 100))}%
+                  <Badge
+                    color="green"
+                    ml={10}
+                    leftSection={<IconArrowUp size={10} stroke={3} />}
+                  >
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.prospects_removed /
+                          prospectingData?.ai_replies +
+                          0.0001) *
+                          100
+                      )
+                    )}
+                    %
                   </Badge>
                 </Text>
               </Flex>

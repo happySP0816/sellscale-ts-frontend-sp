@@ -210,8 +210,9 @@ export default function CampaignLandingV2() {
     };
   };
   const userData = useRecoilValue(userDataState);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
 
   console.log("======", userData);
 
@@ -294,22 +295,30 @@ export default function CampaignLandingV2() {
   const [emailSubjectLines, setEmailSubjectLines] = useState<
     SubjectLineTemplate[]
   >([]);
-  const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] =
-    useState<any>(0);
+  const [
+    linkedinInitialMessageViewing,
+    setLinkedinInitialMessageViewing,
+  ] = useState<any>(0);
   const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<
     any[]
   >([]);
-  const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] =
-    useState<any[]>([]);
+  const [
+    linkedinSequenceViewingArray,
+    setLinkedinSequenceViewingArray,
+  ] = useState<any[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
-  const [showActivateWarningModal, setShowActivateWarningModal] =
-    useState(false);
-  const [showCampaignTemplateModal, setShowCampaignTemplateModal] =
-    useState(false);
+  const [showActivateWarningModal, setShowActivateWarningModal] = useState(
+    false
+  );
+  const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(
+    false
+  );
   const [testingVolume, setTestingVolume] = useState(0);
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
-  const [showLinkedInConvoSimulatorModal, setShowLinkedInConvoSimulatorModal] =
-    useState(false);
+  const [
+    showLinkedInConvoSimulatorModal,
+    setShowLinkedInConvoSimulatorModal,
+  ] = useState(false);
   const [showPersonalizerModal, setShowPersonalizerModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
@@ -526,8 +535,9 @@ export default function CampaignLandingV2() {
 
         const handleSequences = (sequences: any[], type: string) => {
           const groupedSequences = groupSequencesByBumpedCount(sequences);
-          const orderedGroupedSequences =
-            orderGroupedSequences(groupedSequences);
+          const orderedGroupedSequences = orderGroupedSequences(
+            groupedSequences
+          );
           setSequences(orderedGroupedSequences);
           console.log("orderedGroupedSequences", orderedGroupedSequences);
           setType(type);
@@ -1193,7 +1203,12 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("sent");
-                        handleModal("sent", id, currentProject?.name || '', statsData);
+                        handleModal(
+                          "sent",
+                          id,
+                          currentProject?.name || "",
+                          statsData
+                        );
                       }}
                     >
                       <Flex align={"center"} gap={"xs"}>
@@ -1233,7 +1248,12 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("open");
-                        handleModal("open", id, currentProject?.name || '', statsData);
+                        handleModal(
+                          "open",
+                          id,
+                          currentProject?.name || "",
+                          statsData
+                        );
                       }}
                     >
                       <Flex align={"center"} gap={6}>
@@ -1277,7 +1297,12 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("reply");
-                        handleModal("reply", id, currentProject?.name || '', statsData);
+                        handleModal(
+                          "reply",
+                          id,
+                          currentProject?.name || "",
+                          statsData
+                        );
                       }}
                     >
                       <Flex align={"center"} gap={6}>
@@ -1321,7 +1346,12 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("pos_reply");
-                        handleModal("pos_reply", id, currentProject?.name || '', statsData);
+                        handleModal(
+                          "pos_reply",
+                          id,
+                          currentProject?.name || "",
+                          statsData
+                        );
                       }}
                     >
                       <Flex align={"center"} gap={6}>
@@ -1447,6 +1477,19 @@ export default function CampaignLandingV2() {
                         size="xs"
                         fw={700}
                         ml={4}
+                        className="hover:cursor-pointer"
+                        onClick={() => {
+                          openContextModal({
+                            modal: "analyticModal",
+                            title: <Title order={3}>Campaign Analytics</Title>,
+                            innerProps: {},
+                            styles: {
+                              content: {
+                                minWidth: "1100px",
+                              },
+                            },
+                          });
+                        }}
                       >
                         Analytics
                       </Text>

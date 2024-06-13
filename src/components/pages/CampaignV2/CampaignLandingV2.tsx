@@ -83,7 +83,7 @@ import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
 import { PersonaOverview, SubjectLineTemplate } from "src";
 import SubjectDropdown from "@common/campaigns/SubjectDropdown";
-import OutreachSlider from "../../../components/CampaignShell/outreachSlider";
+import OutreachSlider from "../../CampaignShell/OutreachSlider";
 
 interface StatsData {
   id: number;

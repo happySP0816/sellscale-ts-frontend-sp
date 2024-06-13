@@ -126,14 +126,7 @@ export default function LoginPage() {
           borderBottomRightRadius: "16px",
         }}
       >
-        <Flex
-          direction={"column"}
-          gap={"md"}
-          mx={100}
-          justify={"center"}
-          w={"100%"}
-          h={"100%"}
-        >
+        <Flex direction={"column"} gap={"md"} mx={100} justify={"center"} w={"100%"} h={"100%"}>
           <img src={WhiteLogo} className="bg-[#e25dee] w-10 p-2 rounded-full" />
           <Box>
             <Text fw={700} fz={22}>
@@ -145,14 +138,7 @@ export default function LoginPage() {
           </Box>
           {!checkEmail && (
             <form onSubmit={form.onSubmit(handleSubmit)}>
-              <TextInput
-                size="md"
-                mt={"xl"}
-                placeholder="name@xyz.com"
-                label="Enter your Email"
-                {...form.getInputProps("email")}
-                required
-              />
+              <TextInput size="md" mt={"xl"} placeholder="name@xyz.com" label="Enter your Email" {...form.getInputProps("email")} required />
               {error && (
                 <Text color="red" size="sm" mt="sm">
                   {error}
@@ -163,13 +149,7 @@ export default function LoginPage() {
               {/* <Text size={"sm"} color="gray" fw={500} align="end">
                 Forgot Password?
               </Text> */}
-              <Button
-                mt="md"
-                size="lg"
-                className="bg-[#e25dee]"
-                type="submit"
-                loading={loading}
-              >
+              <Button mt="md" size="lg" fullWidth className="bg-[#e25dee]" type="submit" loading={loading}>
                 Login
               </Button>
             </form>
@@ -184,10 +164,9 @@ export default function LoginPage() {
               </Text>
             </>
           )}
-          <Divider label="Or" labelPosition="center" />
-          <Flex align={"center"} justify={"center"} gap={"sm"}>
+          <Flex align={"center"} justify={"start"} gap={"sm"}>
             <Text color="gray" size={"sm"} fw={500}>
-              Don't have an account?
+              Interested?
             </Text>
             <Text
               size={"sm"}
@@ -198,7 +177,7 @@ export default function LoginPage() {
                 window.open("https://www.sellscale.com/get-started", "_blank");
               }}
             >
-              Register
+              Talk to sales
             </Text>
           </Flex>
         </Flex>

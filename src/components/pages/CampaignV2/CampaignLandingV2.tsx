@@ -84,6 +84,8 @@ import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
 import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
 import { PersonaOverview, SubjectLineTemplate } from "src";
 import SubjectDropdown from "@common/campaigns/SubjectDropdown";
+import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
+import { link } from "fs";
 
 interface StatsData {
   id: number;
@@ -1625,6 +1627,8 @@ export default function CampaignLandingV2() {
                         modal: "campaignTemplateEditModal",
                         title: <Title order={3}>Sequence Builder</Title>,
                         innerProps: {
+                          sequenceType: type,
+                          linkedinInitialMessages,
                           emailSubjectLines,
                           linkedinSequenceData,
                           emailSequenceData,
@@ -1801,17 +1805,15 @@ export default function CampaignLandingV2() {
                                   {linkedinInitialMessages[0]?.name}
                                 </Text>
                                 <Text fw={500} size={"xs"}>
-                                  <div
-                                    dangerouslySetInnerHTML={{
-                                      __html: linkedinInitialMessages
-                                        .find(
-                                          (msg: any) =>
-                                            msg.title ===
-                                            linkedinInitialMessageViewing
-                                        )
-                                        ?.message.replace(/\n/g, "<br/>"),
-                                    }}
-                                  />
+                                  <BracketGradientWrapper>
+                                    {linkedinInitialMessages
+                                      .find(
+                                        (msg: any) =>
+                                          msg.title ===
+                                          linkedinInitialMessageViewing
+                                      )
+                                      ?.message.replace(/\n/g, "<br/>")}
+                                  </BracketGradientWrapper>
                                 </Text>
                               </Box>
                             </Flex>
@@ -1936,36 +1938,30 @@ export default function CampaignLandingV2() {
                                   </Text>
                                   <Text fw={500} size={"xs"}>
                                     {type === "email" ? (
-                                      <div
-                                        dangerouslySetInnerHTML={{
-                                          __html:
-                                            Array.isArray(item) &&
-                                            item.find(
+                                      <BracketGradientWrapper>
+                                        {Array.isArray(item) &&
+                                          item.find(
+                                            (i: any) =>
+                                              i.title ===
+                                              emailSequenceViewingArray[index]
+                                          )?.description}
+                                      </BracketGradientWrapper>
+                                    ) : (
+                                      <BracketGradientWrapper>
+                                        {Array.isArray(item) &&
+                                          item
+                                            .find(
                                               (i: any) =>
                                                 i.title ===
-                                                emailSequenceViewingArray[index]
-                                            )?.description,
-                                        }}
-                                      />
-                                    ) : (
-                                      <div
-                                        dangerouslySetInnerHTML={{
-                                          __html:
-                                            Array.isArray(item) &&
-                                            item
-                                              .find(
-                                                (i: any) =>
-                                                  i.title ===
-                                                  linkedinSequenceViewingArray[
-                                                    index
-                                                  ]
-                                              )
-                                              ?.description.replace(
-                                                /\n/g,
-                                                "<br/>"
-                                              ),
-                                        }}
-                                      />
+                                                linkedinSequenceViewingArray[
+                                                  index
+                                                ]
+                                            )
+                                            ?.description.replace(
+                                              /\n/g,
+                                              "<br/>"
+                                            )}
+                                      </BracketGradientWrapper>
                                     )}
                                   </Text>
                                 </Box>
@@ -2027,6 +2023,8 @@ export default function CampaignLandingV2() {
                       modal: "campaignTemplateEditModal",
                       title: <Title order={3}>Sequence Builder</Title>,
                       innerProps: {
+                        sequenceType: type,
+                        linkedinInitialMessages,
                         emailSubjectLines,
                         linkedinSequenceData,
                         emailSequenceData,
@@ -2195,7 +2193,7 @@ export default function CampaignLandingV2() {
                           >
                             <Flex gap={"md"} align={"center"}>
                               <Text fw={600} size="12px" miw="200px">
-                                {item.key}
+                                <BracketGradientWrapper>{item.key}</BracketGradientWrapper>
                               </Text>
                             </Flex>
                             <Button

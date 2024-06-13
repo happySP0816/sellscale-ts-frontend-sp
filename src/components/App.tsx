@@ -81,6 +81,8 @@ import SimulatepersonalizerModal from "@modals/CampaignLandingV2/SimulatePersona
 import CampaignDrilldownModal from "@modals/CampaignLandingV2/CampaignDrilldownModal";
 import AddQuestionModal from "@modals/CampaignLandingV2/QuestionModal";
 import CreateSegmentV3Modal from "@modals/SegmentV3/CreateSemgentV3Modal";
+import SelectSonarModal from "@modals/SelectSonarModal";
+import CreateFundraiseSonarmodal from "@modals/Sonarmodal/CreateFundraiseSonarModal";
 import AnalyticsModal from "@modals/AnalyticsModal";
 import CycleAnalyticsModal from "@modals/CycleAnalyticsModal";
 
@@ -282,6 +284,8 @@ export default function App() {
               campaignDrilldownModal: CampaignDrilldownModal,
               addQuestionModal: AddQuestionModal,
               createsegmentV3: CreateSegmentV3Modal,
+              selectsonarModal: SelectSonarModal,
+              createfundraiseModal: CreateFundraiseSonarmodal,
               analyticModal: AnalyticsModal,
               cycleanalyticModal: CycleAnalyticsModal,
             }}

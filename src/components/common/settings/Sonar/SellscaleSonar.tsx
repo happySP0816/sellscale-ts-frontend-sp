@@ -1,22 +1,12 @@
-import {
-  ActionIcon,
-  Box,
-  Button,
-  Divider,
-  Flex,
-  Paper,
-  SimpleGrid,
-  Text,
-  TextInput,
-} from "@mantine/core";
-import { IconEdit, IconPlus, IconSearch } from "@tabler/icons";
+import { ActionIcon, Box, Button, Divider, Flex, Paper, SimpleGrid, Text, TextInput, Title } from "@mantine/core";
+import { openContextModal } from "@mantine/modals";
+import { IconEdit, IconPlus, IconSearch, IconTarget } from "@tabler/icons";
 
 export default function SellScaleSonar() {
   const data = [
     {
       title: "Hiring Clinical Scribe",
-      content:
-        "Look for CTOs, COOs, CIOs, and Clinical Directors at companies that are hiring Clinical Scribes",
+      content: "Look for CTOs, COOs, CIOs, and Clinical Directors at companies that are hiring Clinical Scribes",
       accounts: 32,
       prospects: 183,
       connected: true,
@@ -24,8 +14,7 @@ export default function SellScaleSonar() {
     },
     {
       title: "Posted about healthcare problems",
-      content:
-        "Look doctors and Clinical leaders who recently posted about healthcare issues in their clinic.",
+      content: "Look doctors and Clinical leaders who recently posted about healthcare issues in their clinic.",
       accounts: 22,
       prospects: 104,
       connected: false,
@@ -39,12 +28,29 @@ export default function SellScaleSonar() {
           Sonar (Coming soon ⚠️)
         </Text>
         <Flex gap={"md"}>
-          <TextInput
-            w={300}
-            placeholder="Search"
-            rightSection={<IconSearch size={"0.9rem"} />}
-          />
-          <Button leftIcon={<IconPlus size={"0.9rem"} />}>New Sonar</Button>
+          <TextInput w={300} placeholder="Search" rightSection={<IconSearch size={"0.9rem"} />} />
+          <Button
+            leftIcon={<IconPlus size={"0.9rem"} />}
+            onClick={() => {
+              openContextModal({
+                modal: "selectsonarModal",
+                title: (
+                  <Title order={3} className="flex items-center gap-2">
+                    <IconTarget size={"1.5rem"} color="#228be6" /> Select Sonar type
+                  </Title>
+                ),
+                innerProps: {},
+                centered: true,
+                styles: {
+                  content: {
+                    minWidth: "800px",
+                  },
+                },
+              });
+            }}
+          >
+            New Sonar
+          </Button>
         </Flex>
       </Flex>
       <SimpleGrid cols={3} mt={"md"}>

@@ -37,10 +37,7 @@ const useStyles = createStyles((theme) => ({
     borderRadius: theme.radius.sm,
 
     "&:hover": {
-      backgroundColor: theme.fn.lighten(
-        theme.fn.variant({ variant: "filled", color: "dark" }).background!,
-        0.1
-      ),
+      backgroundColor: theme.fn.lighten(theme.fn.variant({ variant: "filled", color: "dark" }).background!, 0.1),
     },
   },
 }));
@@ -57,7 +54,7 @@ export default function ProfileIcon() {
       onClick={() => {
         openContextModal({
           modal: "account",
-          title: <></>,
+          title: <Title order={3}>User Settings</Title>,
           innerProps: {},
         });
       }}
@@ -93,65 +90,65 @@ export default function ProfileIcon() {
         </HoverCard.Target>
         <HoverCard.Dropdown>
           <Group>
-                {userData?.weekly_li_outbound_target ? (
-                  <Button
-                    color={userData?.li_voyager_connected ? "blue" : "red"}
-                    variant="light"
-                    radius="xl"
-                    compact
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      navigateToPage(navigate, '/settings/linkedin');
-                    }}
-                  >
-                    LinkedIn is {userData?.li_voyager_connected ? 'Connected' : 'Disconnected'}
-                  </Button>
-                ) : (
-                  <Button
-                    color="gray"
-                    variant="light"
-                    radius="xl"
-                    compact
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      navigateToPage(navigate, '/settings/linkedin');
-                    }}
-                  >
-                    LinkedIn Not Setup
-                  </Button>
-                )}
-                {userData?.weekly_email_outbound_target ? (
-                  <Button
-                    color={userData?.nylas_connected ? "blue" : "red"}
-                    variant="light"
-                    radius="xl"
-                    compact
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      navigateToPage(navigate, '/settings/emailConnection');
-                    }}
-                  >
-                    Email is {userData?.nylas_connected ? 'Connected' : 'Disconnected'}
-                  </Button>
-                ) : (
-                  <Button
-                    color="gray"
-                    variant="light"
-                    radius="xl"
-                    compact
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      navigateToPage(navigate, '/settings/emailConnection');
-                    }}
-                  >
-                    Email Not Setup
-                  </Button>
-                )}
-              </Group>
+            {userData?.weekly_li_outbound_target ? (
+              <Button
+                color={userData?.li_voyager_connected ? "blue" : "red"}
+                variant="light"
+                radius="xl"
+                compact
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigateToPage(navigate, "/settings/linkedin");
+                }}
+              >
+                LinkedIn is {userData?.li_voyager_connected ? "Connected" : "Disconnected"}
+              </Button>
+            ) : (
+              <Button
+                color="gray"
+                variant="light"
+                radius="xl"
+                compact
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigateToPage(navigate, "/settings/linkedin");
+                }}
+              >
+                LinkedIn Not Setup
+              </Button>
+            )}
+            {userData?.weekly_email_outbound_target ? (
+              <Button
+                color={userData?.nylas_connected ? "blue" : "red"}
+                variant="light"
+                radius="xl"
+                compact
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigateToPage(navigate, "/settings/emailConnection");
+                }}
+              >
+                Email is {userData?.nylas_connected ? "Connected" : "Disconnected"}
+              </Button>
+            ) : (
+              <Button
+                color="gray"
+                variant="light"
+                radius="xl"
+                compact
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigateToPage(navigate, "/settings/emailConnection");
+                }}
+              >
+                Email Not Setup
+              </Button>
+            )}
+          </Group>
         </HoverCard.Dropdown>
       </HoverCard>
     </Center>
@@ -165,17 +162,8 @@ function ChannelBadge(props: { channel: string; isConnected: boolean }) {
       variant="outline"
       color={props.isConnected ? "blue" : "red"}
       leftSection={
-        <ActionIcon
-          size="xs"
-          color={props.isConnected ? "blue" : "red"}
-          radius="xl"
-          variant="transparent"
-        >
-          {props.isConnected ? (
-            <IconCheck size={rem(10)} />
-          ) : (
-            <IconX size={rem(10)} />
-          )}
+        <ActionIcon size="xs" color={props.isConnected ? "blue" : "red"} radius="xl" variant="transparent">
+          {props.isConnected ? <IconCheck size={rem(10)} /> : <IconX size={rem(10)} />}
         </ActionIcon>
       }
     >
@@ -194,12 +182,7 @@ export function ProfileCard() {
       <Popover.Target>
         <UnstyledButton className={classes.user}>
           <Group>
-            <Avatar
-              src={proxyURL(userData?.img_url)}
-              alt={`${name}'s Profile Picture`}
-              color={valueToColor(theme, userData?.sdr_name)}
-              radius="xl"
-            >
+            <Avatar src={proxyURL(userData?.img_url)} alt={`${name}'s Profile Picture`} color={valueToColor(theme, userData?.sdr_name)} radius="xl">
               {nameToInitials(userData?.sdr_name)}
             </Avatar>
 
@@ -214,18 +197,8 @@ export function ProfileCard() {
                 </Text>
               </div>
               <Group>
-                {userData?.weekly_li_outbound_target && (
-                  <ChannelBadge
-                    channel="LinkedIn"
-                    isConnected={userData?.li_voyager_connected}
-                  />
-                )}
-                {userData?.weekly_email_outbound_target && (
-                  <ChannelBadge
-                    channel="Email"
-                    isConnected={userData?.nylas_connected}
-                  />
-                )}
+                {userData?.weekly_li_outbound_target && <ChannelBadge channel="LinkedIn" isConnected={userData?.li_voyager_connected} />}
+                {userData?.weekly_email_outbound_target && <ChannelBadge channel="Email" isConnected={userData?.nylas_connected} />}
               </Group>
             </Stack>
           </Group>

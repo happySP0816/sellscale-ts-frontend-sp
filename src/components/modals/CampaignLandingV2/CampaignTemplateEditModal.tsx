@@ -57,6 +57,7 @@ import { useRecoilValue } from "recoil";
 import { getEmailSubjectLineTemplates } from "@utils/requests/emailSubjectLines";
 import { SubjectLineTemplate } from "src";
 import { SubjectLineItem } from "@pages/EmailSequencing/DetailEmailSequencing";
+import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
 
 interface SwitchStyle extends Partial<MantineStyleSystemProps> {
   label?: React.CSSProperties;
@@ -637,7 +638,7 @@ export default function CampaignTemplateEditModal({
               {currentStepNum === 0 && sequenceType === "linkedin" && (
                 <ScrollArea viewportRef={viewport} h={350}>
                   <Flex p={"lg"} h={"100%"} direction={"column"}>
-                    {innerProps.linkedinInitialMessages.map((template: any, index4: number) => (
+                    {innerProps.linkedinInitialMessages?.map((template: any, index4: number) => (
                       <Box
                         mb={"sm"}
                         style={{
@@ -663,7 +664,9 @@ export default function CampaignTemplateEditModal({
                               Variant #{index4 + 1}:
                             </Text>
                             <Text fw={600} size={"xs"} ml={"-5px"}>
-                              {template.message}
+                              <BracketGradientWrapper>
+                                {template.message}
+                              </BracketGradientWrapper>
                             </Text>
                           </Flex>
                           <Flex gap={1} align={"center"}>
@@ -704,19 +707,17 @@ export default function CampaignTemplateEditModal({
                               borderTop: "1px solid #ced4da",
                             }}
                           >
-                            <Avatar size={"md"} radius={"xl"} />
+                            <Avatar src={userData.img_url} size={"md"} radius={"xl"} />
                             <Box>
                               <div
                                 style={{
                                   fontSize: "11px",
                                 }}
-                                dangerouslySetInnerHTML={{
-                                  __html: template.message.replaceAll(
-                                    "\n",
-                                    "<br/>"
-                                  ),
-                                }}
-                              />
+                              >
+                                <BracketGradientWrapper>
+                                  {template.message.replaceAll("\n", "<br/>")}
+                                </BracketGradientWrapper>
+                              </div>
                             </Box>
                           </Flex>
                         </Collapse>
@@ -933,19 +934,16 @@ export default function CampaignTemplateEditModal({
                                       borderTop: "1px solid #ced4da",
                                     }}
                                   >
-                                    <Avatar size={"md"} radius={"xl"} />
+                                    <Avatar src={userData.img_url} size={"md"} radius={"xl"} />
                                     <Box>
                                       {/* <Text fw={600} size={"sm"}>
                                     {"Ishan Sharma"}
                                   </Text> */}
-                                      <div
-                                        style={{
-                                          fontSize: "11px",
-                                        }}
-                                        dangerouslySetInnerHTML={{
-                                          __html: existingAsset.description,
-                                        }}
-                                      />
+                                  <div style={{ fontSize: "11px" }}>
+                                      <BracketGradientWrapper>
+                                        {existingAsset.description}
+                                      </BracketGradientWrapper>
+                                  </div>
                                     </Box>
                                   </Flex>
                                 </Collapse>
@@ -1054,19 +1052,16 @@ export default function CampaignTemplateEditModal({
                                           borderTop: "1px solid #ced4da",
                                         }}
                                       >
-                                        <Avatar size={"md"} radius={"xl"} />
+                                        <Avatar src={userData.img_url} size={"md"} radius={"xl"} />
                                         <Box>
                                           {/* <Text fw={600} size={"sm"}>
                                             {"Ishan Sharma"}
                                           </Text> */}
-                                          <div
-                                            style={{
-                                              fontSize: "11px",
-                                            }}
-                                            dangerouslySetInnerHTML={{
-                                              __html: asset.text,
-                                            }}
-                                          />
+                                          <div style={{ fontSize: "11px" }}>
+                                              <BracketGradientWrapper>
+                                                {asset.text}
+                                              </BracketGradientWrapper>
+                                          </div>
                                         </Box>
                                       </Flex>
                                     </Collapse>
@@ -1079,11 +1074,13 @@ export default function CampaignTemplateEditModal({
                             minRows={3}
                             placeholder="Prefer to create your own message? Write direct in here ..."
                             value={manuallyAddedTemplate}
-                            onChange={(event) =>
-                              setManuallyAddedTemplate(
-                                event.currentTarget.value
-                              )
-                            }
+                            onChange={(event) => {
+                              const value = event.currentTarget.value;
+                              setManuallyAddedTemplate(value);
+                            }}
+                            style={{
+                              outline: (manuallyAddedTemplate.match(/\[\[/g)?.length || 0) !== (manuallyAddedTemplate.match(/\]\]/g)?.length || 0) ? '2px solid red' : 'none'
+                            }}
                           />
                           <Button
                             loading={addingLinkedinAsset}

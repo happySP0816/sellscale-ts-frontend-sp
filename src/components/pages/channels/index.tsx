@@ -195,7 +195,7 @@ const ChannelsSetupSelector = (props: {
                   <Box>
                     <Flex align={"center"} gap={"0.5rem"} mb="xs">
                       <Anchor
-                        fz={"0.8rem"}
+                        fz={"1rem"}
                         color="gray.6"
                         mt={3}
                         ml={5}
@@ -203,7 +203,10 @@ const ChannelsSetupSelector = (props: {
                           navigateToPage(navigate, `/campaign_v2/${props.campaign?.id}`);
                         }}
                       >
-                        <IconArrowLeft size={"0.5rem"} /> Go back to campaigns
+                        <Flex align="center" gap="0.5rem">
+                          <IconArrowLeft size={"1.5rem"} />
+                          <Text fz={"1rem"}>Go back to campaigns</Text>
+                        </Flex>
                       </Anchor>
                     </Flex>
                   </Box>

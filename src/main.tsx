@@ -77,6 +77,7 @@ import CampaignLandingV2 from "@pages/CampaignV2/CampaignLandingV2";
 import B2BSearch from "@pages/B2BSearch/B2bSearch";
 import Costs from "@common/internal_tools/Costs";
 import InboxPurchasing from "@pages/InboxPurchasing";
+import HomePageV2 from "@pages/Overview/HomePageV2";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -554,6 +555,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/inboxpurchase",
         element: <InboxPurchasing />,
+      },
+      {
+        path: "/home2",
+        element: <HomePageV2 />,
       },
     ],
   },

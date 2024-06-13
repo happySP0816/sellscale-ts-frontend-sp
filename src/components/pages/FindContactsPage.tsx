@@ -229,11 +229,11 @@ export default function FindContactsPage() {
   //   },
   //   enabled: !!activePersona,
   // });
-  // const [tab, setTab] = useState("");
+  const [tab, setTab] = useState("");
 
-  // useEffect(() => {
-  //   fetchSegments();
-  // }, []);
+  useEffect(() => {
+    fetchSegments();
+  }, []);
 
   return (
     <Flex p="lg" direction="column" h="100%">

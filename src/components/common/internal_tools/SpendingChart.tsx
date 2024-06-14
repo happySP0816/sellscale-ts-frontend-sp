@@ -159,7 +159,7 @@ const ClientSpending: React.FC<{ isInternal?: boolean, selectedClient?: number }
         labels,
         datasets: clientSpending ? [
             {
-                label: 'Apollo',
+                label: 'Prospect Credits',
                 data: fillMissingMonths(createMonthlyData(clientSpending.apollo), labels),
                 borderColor: 'rgba(75, 192, 192, 1)',
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -199,7 +199,7 @@ const ClientSpending: React.FC<{ isInternal?: boolean, selectedClient?: number }
                 pointHoverBorderColor: 'rgba(54, 162, 235, 1)',
             },
             {
-                label: 'PhantomBuster',
+                label: 'Linkedin Connections',
                 data: fillMissingMonths(createMonthlyData(clientSpending.phantombuster), labels),
                 borderColor: 'rgba(255, 159, 64, 1)',
                 backgroundColor: 'rgba(255, 159, 64, 0.2)',

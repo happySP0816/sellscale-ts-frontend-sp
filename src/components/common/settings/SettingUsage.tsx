@@ -47,6 +47,7 @@ import { getUsageConnectResponse } from "@utils/requests/usageConnect";
 import { useEffect, useState } from "react";
 import moment from "moment";
 import { showNotification } from "@mantine/notifications";
+import SpendingChart from "@common/internal_tools/SpendingChart";
 
 Chart.register(ArcElement);
 
@@ -690,65 +691,7 @@ export default function SettingUsage() {
             </Box>
           </Grid.Col>
           <Grid.Col>
-            <Box
-              py={15}
-              px={20}
-              style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
-            >
-              <Text align="center" color="gray" size="sm" mb="md">
-                ⚠️ Note: This is sample data. Live data coming soon. ⚠️
-              </Text>
-              <Flex align={"center"} gap={"sm"}>
-                {/* <Text color="gray" fw={600}>
-                  # Prospects Created:{" "}
-                </Text>
-                <Text fw={600} style={{ display: "flex", alignItems: "center" }}>
-                  {prospectingData?.prospect_created}{" "}
-                  <Badge color="green" ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(100, Math.floor((prospectingData?.prospect_created / prospectingData?.prospect_created + 0.0001) * 100))}%
-                  </Badge>
-                </Text> */}
-                <Paper
-                  withBorder
-                  radius={"md"}
-                  px={"md"}
-                  py={4}
-                  w={"100%"}
-                  className="flex items-center justify-between"
-                >
-                  <Flex align={"center"} gap={3}>
-                    <IconPoint fill="#228be6" color="white" size={"2rem"} />
-                    <Text color="gray" fw={600}>
-                      Total Spending:
-                    </Text>
-                  </Flex>
-                  <Text fw={600} mr={"sm"}>
-                    ${2331.57}
-                  </Text>
-                </Paper>
-                <Paper
-                  withBorder
-                  radius={"md"}
-                  px={"md"}
-                  py={4}
-                  w={"100%"}
-                  className="flex items-center justify-between"
-                >
-                  <Flex align={"center"} gap={3}>
-                    <IconPoint fill="#228be6" color="white" size={"2rem"} />
-                    <Text color="gray" fw={600}>
-                      Estimated Spend This Month:
-                    </Text>
-                  </Flex>
-                  <Text fw={600} mr={"sm"}>
-                    ${481.42}
-                  </Text>
-                </Paper>
-              </Flex>
-              <Box h={300} mt={"sm"}>
-                <Line data={spendingData} options={Spendingoptions} />
-              </Box>
-            </Box>
+          <SpendingChart />
           </Grid.Col>
           <Grid.Col>
             <Box

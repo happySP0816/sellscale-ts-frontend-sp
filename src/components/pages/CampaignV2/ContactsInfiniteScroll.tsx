@@ -17,7 +17,7 @@ import {
 } from "@mantine/core";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { IconSearch, IconFilter } from "@tabler/icons-react";
-import { API_URL } from '@constants/data';
+import { API_URL } from "@constants/data";
 import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -41,7 +41,7 @@ export function ContactsInfiniteScroll({
   campaignId,
   getTotalContacts,
   totalContacts,
-  loadingTotalContacts
+  loadingTotalContacts,
 }: {
   campaignId: number;
   getTotalContacts: any;
@@ -124,7 +124,10 @@ export function ContactsInfiniteScroll({
         setHasMoreContacts(false); // No more contacts to load
       } else {
         setContacts((prevContacts) => {
-          const uniqueContacts = new Set([...prevContacts, ...newContacts.sample_contacts]);
+          const uniqueContacts = new Set([
+            ...prevContacts,
+            ...newContacts.sample_contacts,
+          ]);
           return Array.from(uniqueContacts);
         });
         //refetch total contacts to update the count
@@ -147,7 +150,7 @@ export function ContactsInfiniteScroll({
         0,
         batchSize,
         searchTerm,
-        false,
+        false
       );
       setContacts(Array.from(new Set(initialContacts.sample_contacts)));
       offsetRef.current = batchSize;
@@ -187,7 +190,7 @@ export function ContactsInfiniteScroll({
     } finally {
       console.log("Archetype uploading status API call completed");
     }
-  }
+  };
 
   useEffect(() => {
     fetchInitialContacts(searchTerm);
@@ -218,7 +221,7 @@ export function ContactsInfiniteScroll({
         onClose={() => {
           setShowCampaignTemplateModal(false);
         }}
-        size="1100px"
+        size="1150px"
       >
         <CampaignChannelPage
           campaignId={campaignId}
@@ -260,13 +263,16 @@ export function ContactsInfiniteScroll({
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.currentTarget.value)}
             />
-            <ActionIcon
+            <Button
               variant="outline"
-              size={"md"}
               onClick={() => setShowCampaignTemplateModal(true)}
+              size="sm"
+              compact
+              mt="2px"
+              leftIcon={<IconFilter size={16} />}
             >
-              <IconFilter size={"0.9rem"} color="gray" />
-            </ActionIcon>
+              Filter
+            </Button>
           </Flex>
         </Flex>
       </Flex>
@@ -344,14 +350,22 @@ export function ContactsInfiniteScroll({
               </>
             ) : loadingTotalContacts ? (
               <>
-               <Text>Showing {contacts?.length} contacts of <Loader size="xs" variant="dots" /></Text>
+                <Text>
+                  Showing {contacts?.length} contacts of{" "}
+                  <Loader size="xs" variant="dots" />
+                </Text>
               </>
             ) : (
               <>
-                {`Showing ${contacts?.length} contacts of ${totalContacts < contacts?.length ? contacts?.length : totalContacts}`}
+                {`Showing ${contacts?.length} contacts of ${
+                  totalContacts < contacts?.length
+                    ? contacts?.length
+                    : totalContacts
+                }`}
                 {isArchetypeUploading && (
                   <Flex direction="column" align="center" mt="xs">
-                    <Text>Upload in progress <Loader size="xs" variant="dots" />
+                    <Text>
+                      Upload in progress <Loader size="xs" variant="dots" />
                     </Text>
                   </Flex>
                 )}

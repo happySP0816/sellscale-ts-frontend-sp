@@ -50,7 +50,7 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons";
-import { addSequence } from "@utils/requests/generateSequence";
+import { addSequence, getTemplateSuggestion } from "@utils/requests/generateSequence";
 import { deterministicMantineColor } from "@utils/requests/utils";
 import { useEffect, useState, useRef } from "react";
 import { useRecoilValue } from "recoil";
@@ -58,6 +58,7 @@ import { getEmailSubjectLineTemplates } from "@utils/requests/emailSubjectLines"
 import { SubjectLineTemplate } from "src";
 import { SubjectLineItem } from "@pages/EmailSequencing/DetailEmailSequencing";
 import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
+import { set } from "lodash";
 
 interface SwitchStyle extends Partial<MantineStyleSystemProps> {
   label?: React.CSSProperties;
@@ -124,6 +125,7 @@ export default function CampaignTemplateEditModal({
   const [addedTemplate, setAddedTemplate] = useState<AssetType | null>(
     innerProps.addedTemplate || null
   );
+  const [templateSuggestions, setTemplateSuggestions] = useState<any>([]);
 
   const addToStagingData = (
     asset: AssetType,
@@ -187,6 +189,11 @@ export default function CampaignTemplateEditModal({
   const [stagingData, setStagingData] = useState(
     innerProps.stagingData || { email: [] }
   );
+
+  const getTemplateSuggestions = async (manuallyAddedTemplate: string) => {
+    const response = await getTemplateSuggestion(userToken, manuallyAddedTemplate, currentProject?.id || -1);
+    setTemplateSuggestions(response.data);
+  }
 
   const handleToggle = (key: number) => {
     if (selectStep === key) {
@@ -858,7 +865,7 @@ export default function CampaignTemplateEditModal({
                   return (
                     <Tabs.Panel value={(index + 1).toString()}>
                       {" "}
-                      <ScrollArea viewportRef={viewport} h={350}>
+                      <ScrollArea viewportRef={viewport} h={"100%"}>
                         <Flex p={"lg"} h={"100%"} direction={"column"}>
                           {/* existing assets */}
                           {(sequenceType === "email"
@@ -1090,7 +1097,8 @@ export default function CampaignTemplateEditModal({
                             mb="xs"
                             rightIcon={<IconArrowRight size={"0.9rem"} />}
                             onClick={() => {
-                              //create new asset 
+                              //create new asset
+                              getTemplateSuggestions(manuallyAddedTemplate);
                               const newAsset = {
                                 asset_key:
                                   "New Template (" +

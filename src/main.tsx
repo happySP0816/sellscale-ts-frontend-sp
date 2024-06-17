@@ -127,7 +127,7 @@ const router = sentryCreateBrowserRouter([
     children: [
       {
         path: "",
-        element: <RestrictedRoute page={<OverviewPage />} />,
+        element: <RestrictedRoute page={<HomePageV2 />} />,
         loader: async ({ params }: { params: any }) => {
           return { prospectId: "" };
         },
@@ -150,7 +150,7 @@ const router = sentryCreateBrowserRouter([
       },
       {
         path: "Overview",
-        element: <RestrictedRoute page={<OverviewPage />} />,
+        element: <RestrictedRoute page={<HomePageV2 />} />,
       },
       {
         path: "teach",

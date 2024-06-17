@@ -1,67 +1,32 @@
 import { ActionIcon, Avatar, Badge, Box, Divider, Flex, Grid, Paper, Text, useMantineTheme } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons";
 import { nameToInitials, valueToColor } from "@utils/general";
-import { useState } from "react";
+import { getPositiveResponses } from "@utils/requests/getPersonas";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
 
 export default function PositiveResponses() {
   const theme = useMantineTheme();
+  const userToken = useRecoilValue(userTokenState);
   const [page, setPage] = useState(0);
-  const [data, setData] = useState([
-    {
-      avatar: "",
-      name: "Adam Meehan",
-      message: "Hey Ishan, Sounds great! Thanks for reaching out. I'm interested in learning more.",
-      date: "2024-05-22 04:45",
-    },
-    {
-      avatar: "",
-      name: "Hristina Bell",
-      message: "Hey Ishan, Sounds great! Thanks for reaching out. I'm interested in learning more.",
-      date: "2024-05-22 04:45",
-    },
-    {
-      avatar: "",
-      name: "Adam Meehan",
-      message: "Hey Ishan, Sounds great! Thanks for reaching out. I'm interested in learning more.",
-      date: "2024-05-22 04:45",
-    },
-    {
-      avatar: "",
-      name: "Hristina Bell",
-      message: "Hey Ishan, Sounds great! Thanks for reaching out. I'm interested in learning more.",
-      date: "2024-05-22 04:45",
-    },
-    {
-      avatar: "",
-      name: "Hristina Bell",
-      message: "Hey Ishan, Sounds great! Thanks for reaching out. I'm interested in learning more.",
-      date: "2024-05-22 04:45",
-    },
-    {
-      avatar: "",
-      name: "Adam Meehan",
-      message: "Hey Ishan, Sounds great! Thanks for reaching out. I'm interested in learning more.",
-      date: "2024-05-22 04:45",
-    },
-    {
-      avatar: "",
-      name: "Hristina Bell",
-      message: "Hey Ishan, Sounds great! Thanks for reaching out. I'm interested in learning more.",
-      date: "2024-05-22 04:45",
-    },
-    {
-      avatar: "",
-      name: "Adam Meehan",
-      message: "Hey Ishan, Sounds great! Thanks for reaching out. I'm interested in learning more.",
-      date: "2024-05-22 04:45",
-    },
-    {
-      avatar: "",
-      name: "Adam Meehan",
-      message: "Hey Ishan, Sounds great! Thanks for reaching out. I'm interested in learning more.",
-      date: "2024-05-22 04:45",
-    },
-  ]);
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getPositiveResponses(userToken);
+        if (response.status === "success") {
+          setData(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch positive responses:", error);
+      }
+    };
+
+    fetchData();
+  }, [userToken]);
+  
   return (
     <Box>
       <Flex align={"center"} gap={"5px"}>

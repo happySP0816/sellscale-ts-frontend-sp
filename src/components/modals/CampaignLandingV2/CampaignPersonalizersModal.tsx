@@ -193,7 +193,7 @@ export default function CampaignPersonalizersModal({
         "QUESTION",
         item.Question,
         item.RelevanceReason,
-        innerProps.ai_researcher_id
+        Number(currentAiResearcherId)
       );
       if (!response) {
         throw new Error(`Error creating researcher question}`);

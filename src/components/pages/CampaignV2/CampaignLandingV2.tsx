@@ -810,6 +810,8 @@ export default function CampaignLandingV2() {
       });
   };
 
+  console.log("-----------", statsData?.archetype_name?.split(" ")[0]);
+
   return (
     <Paper
       p={"lg"}
@@ -958,10 +960,11 @@ export default function CampaignLandingV2() {
                 justify="space-between"
                 w="100%"
               >
-                <Flex gap={"sm"} align={"center"}>
-                  {statsData?.emoji}
+                <Flex>
                   <Text fw={600} size={20}>
-                    {statsData?.archetype_name}
+                    {statsData?.emoji}{" "}
+                    {statsData?.archetype_name?.substring(0, 70)}
+                    {statsData?.archetype_name?.length > 70 && "..."}
                   </Text>
                   <Badge
                     data-tour="campaign-status"
@@ -977,32 +980,40 @@ export default function CampaignLandingV2() {
                         ? "red"
                         : "gray"
                     }
+                    ml={"sm"}
                   >
                     {status}
                   </Badge>
                 </Flex>
               </Flex>
               <Flex align={"center"} gap={"xs"}>
-                <Text color="gray" size={"xs"} fw={600}>
-                  Created by:
-                </Text>
-                <Avatar
-                  size={"sm"}
-                  src={proxyURL(statsData.sdr_img_url)}
-                  sx={{ borderRadius: "50%" }}
-                />
-                <Text fw={600} size={"xs"}>
-                  {statsData?.sdr_name}
-                </Text>
-                <Divider orientation="vertical" h={"70%"} my={"auto"} />
-                <Text color="gray" size={"xs"} fw={600}>
-                  Created:
-                </Text>
-                <Text fw={600} size={"xs"}>
-                  {new Date(statsData.created_at).toLocaleString("en-US", {
-                    dateStyle: "full",
-                  })}
-                </Text>
+                <Paper
+                  className="flex items-center gap-3"
+                  withBorder
+                  px={"sm"}
+                  py={5}
+                >
+                  <Text color="gray" size={"xs"} fw={600}>
+                    Created by:
+                  </Text>
+                  <Avatar
+                    size={"sm"}
+                    src={proxyURL(statsData.sdr_img_url)}
+                    sx={{ borderRadius: "50%" }}
+                  />
+                  <Text fw={600} size={"xs"}>
+                    {statsData?.sdr_name?.split(" ")[0]}
+                  </Text>
+                  <Divider orientation="vertical" />
+                  <Text color="gray" size={"xs"} fw={600}>
+                    Created:
+                  </Text>
+                  <Text fw={600} size={"xs"}>
+                    {new Date(statsData.created_at).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                    })}
+                  </Text>
+                </Paper>
                 <Flex w="60%" ml="auto">
                   <Paper
                     p="md"
@@ -2121,7 +2132,9 @@ export default function CampaignLandingV2() {
                           >
                             <Flex gap={"md"} align={"center"}>
                               <Text fw={600} size="12px" miw="200px">
-                                <BracketGradientWrapper>{item.key}</BracketGradientWrapper>
+                                <BracketGradientWrapper>
+                                  {item.key}
+                                </BracketGradientWrapper>
                               </Text>
                             </Flex>
                             <Button

@@ -78,6 +78,7 @@ import B2BSearch from "@pages/B2BSearch/B2bSearch";
 import Costs from "@common/internal_tools/Costs";
 import InboxPurchasing from "@pages/InboxPurchasing";
 import HomePageV2 from "@pages/Overview/HomePageV2";
+import LinkedinSequenceSectionV2 from "@common/sequence/LinkedinSequenceSectionV2";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -559,6 +560,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/home2",
         element: <HomePageV2 />,
+      },
+      {
+        path: "/sequencevoice",
+        element: <LinkedinSequenceSectionV2 />,
       },
     ],
   },

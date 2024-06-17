@@ -62,7 +62,7 @@ export default function PositiveResponses() {
         </Flex>
       </Flex>
       <Grid>
-        {data.slice(page * 4, page * 4 + 4).map((item, index) => {
+        {data?.slice(page * 4, page * 4 + 4).map((item, index) => {
           return (
             <Grid.Col span={3}>
               <Paper bg={"white"} my={"xs"} withBorder p={"sm"}>

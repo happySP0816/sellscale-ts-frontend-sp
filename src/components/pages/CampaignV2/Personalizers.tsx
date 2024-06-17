@@ -19,7 +19,7 @@ export default function Personalizers(props: any) {
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   const [loadingPersonalizers, setLoadingPersonalizers] = useState(false);
-  const [sequences, setSequences] = useState<any[]>([]);
+  const [sequences, setSequences] = useState<any[]>(props.sequences || []);
   const [personalizersEnabled, setPersonalizersEnabled] = useState(currentProject?.is_ai_research_personalization_enabled);
   const [personalizers, setPersonalizers] = useState([]);
 
@@ -36,7 +36,7 @@ export default function Personalizers(props: any) {
     })
       .then((response) => {
         showNotification({
-          title: "Personalizers Enabled",
+          title: "Personalizers Updated",
           message: `Personalizers have been ${enabled ? "enabled" : "disabled"}`,
         });
         setPersonalizersEnabled(enabled);
@@ -183,7 +183,7 @@ export default function Personalizers(props: any) {
           </Button>
         </Flex>
       </Flex>
-      <Flex sx={{ display: personalizersEnabled ? "block" : "none" }}>
+      <Flex>
         {loadingPersonalizers ? (
           <Flex direction="column" align="center" justify="center" m="auto" mt="sm">
             <Skeleton height={30} radius="xl" width="80%" />

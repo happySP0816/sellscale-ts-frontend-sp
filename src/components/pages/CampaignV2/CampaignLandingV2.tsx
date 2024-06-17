@@ -917,7 +917,7 @@ export default function CampaignLandingV2() {
         </Flex>
         <Flex direction={"column"} gap={"md"} w={"80%"}>
           <Sequences />
-          <Personalizers data={statsData} />
+          <Personalizers data={statsData} sequences={sequences}/>
         </Flex>
       </Flex>
     </Paper>

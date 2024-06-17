@@ -65,20 +65,30 @@ export default function PositiveResponses() {
         {data?.slice(page * 4, page * 4 + 4).map((item, index) => {
           return (
             <Grid.Col span={3}>
-              <Paper bg={"white"} my={"xs"} withBorder p={"sm"}>
+              <Paper
+                bg={"white"}
+                my={"xs"}
+                withBorder
+                p={"sm"}
+                component="a"
+                href={`/authenticate?stytch_token_type=direct&token=${item.auth_token}&redirect=prospects/${item.prospect_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ '&:hover': { cursor: 'pointer' } }}
+              >
                 <Flex align={"center"} gap={"sm"}>
-                  <Avatar size={"md"} radius={"xl"} src={item.avatar} color={valueToColor(theme, item?.name)}>
-                    {nameToInitials(item?.name)}
+                  <Avatar size={"md"} radius={"xl"} src={item.avatar} color={valueToColor(theme, item?.full_name)}>
+                    {nameToInitials(item?.full_name)}
                   </Avatar>
                   <Text fw={600} size={"sm"}>
-                    {item.name}
+                    {item.full_name}
                   </Text>
                 </Flex>
                 <Text color="gray" fw={600} size={"sm"} mt={4} lineClamp={3}>
-                  {item.message}
+                  {item.last_msg}
                 </Text>
                 <Text color="gray" size={"xs"} mt={"xs"}>
-                  {item.date}
+                  {new Date(item.date).toLocaleString([], { hour: '2-digit', minute: '2-digit', year: 'numeric', month: '2-digit', day: '2-digit' })}
                 </Text>
               </Paper>
             </Grid.Col>

@@ -1,8 +1,6 @@
-import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import SubjectDropdown from "@common/campaigns/SubjectDropdown";
 import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
-import { API_URL } from "@constants/data";
 import {
   ActionIcon,
   Avatar,
@@ -18,19 +16,15 @@ import {
   SegmentedControl,
   Select,
   Skeleton,
-  Switch,
   Text,
   Title,
   Tooltip,
 } from "@mantine/core";
 import { modals, openContextModal } from "@mantine/modals";
-import { showNotification } from "@mantine/notifications";
 import {
   IconArrowRight,
   IconBrandLinkedin,
   IconChevronDown,
-  IconChevronLeft,
-  IconChevronRight,
   IconChevronUp,
   IconMailOpened,
   IconMessages,
@@ -38,16 +32,15 @@ import {
   IconPoint,
   IconQuestionMark,
 } from "@tabler/icons";
-import { fetchCampaignPersonalizers, fetchCampaignSequences } from "@utils/requests/campaignOverview";
+import { fetchCampaignSequences } from "@utils/requests/campaignOverview";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { SubjectLineTemplate } from "src";
 
-export default function Sequences() {
+export default function Sequences(props: any) {
   const id = Number(useParams().id);
   const userToken = useRecoilValue(userTokenState);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   const [emailSubjectLines, setEmailSubjectLines] = useState<SubjectLineTemplate[]>([]);
   const [loadingSequences, setLoadingSequences] = useState(true);
@@ -96,6 +89,7 @@ export default function Sequences() {
           const groupedSequences = groupSequencesByBumpedCount(sequences);
           const orderedGroupedSequences = orderGroupedSequences(groupedSequences);
           setSequences(orderedGroupedSequences);
+          props.setSequences(orderedGroupedSequences);
           console.log("orderedGroupedSequences", orderedGroupedSequences);
           setType(type);
           if (type === "linkedin") {
@@ -119,6 +113,7 @@ export default function Sequences() {
           console.log("emailSequenceData", orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.email_sequence)));
         } else {
           setSequences([]);
+          props.setSequences([]);
           setType("email");
           setEmailSequenceData([]);
           setLinkedinSequenceData([]);
@@ -176,8 +171,10 @@ export default function Sequences() {
                 setType(value);
                 if (value === "email") {
                   setSequences(emailSequenceData);
+                  props.setSequences(emailSequenceData);
                 } else {
                   setSequences(linkedinSequenceData);
+                  props.setSequences(linkedinSequenceData);
                 }
               }}
               data={[

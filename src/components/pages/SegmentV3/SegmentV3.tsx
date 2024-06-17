@@ -455,51 +455,13 @@ export default function SegmentV3() {
   }, [false, showAllSegments, currentTime, type]);
 
   return (
-    <Paper>
-      <Flex direction={"column"} w={"90%"} mx={"auto"} pt={"lg"}>
+    <Box>
+      <Flex direction={"column"} w={"100%"} mx={"auto"} pt={"lg"}>
         <Flex align={"center"} justify={"space-between"} mb={"md"}>
           <Flex gap={"sm"} align={"center"}>
             <Text size={"xl"} fw={600}>
               Segments
             </Text>
-          </Flex>
-          <Flex gap={"sm"} align={"center"}>
-            <SegmentedControl
-              value={type}
-              onChange={(value: any) => {
-                setType(value);
-              }}
-              data={[
-                {
-                  value: "user",
-                  label: (
-                    <Center style={{ gap: 4 }}>
-                      <Text fw={500}>Your Segments</Text>
-                    </Center>
-                  ),
-                },
-                {
-                  value: "company",
-                  label: (
-                    <Center style={{ gap: 4 }}>
-                      <Text fw={500}>Company Segments</Text>
-                    </Center>
-                  ),
-                },
-              ]}
-            />
-            {/* <Button ml="auto" onClick={() => (window.location.href = "/contacts/find?campaign_id=" + userData?.unassigned_persona_id)}>
-              Add Contacts
-            </Button> */}
-            <Button ml="auto" variant="outline" onClick={() => (window.location.href = "/contacts/find?campaign_id=" + userData?.unassigned_persona_id)}>
-              View Unassigned Contacts
-            </Button>
-            {/* <Button onClick={() => setModalOpened(true)} leftIcon={<IconPlus />}>
-              Create Segment
-            </Button> */}
-            <Button onClick={() => getAllSegments(true)} leftIcon={<IconRefresh size={"0.9rem"} />}>
-              Refresh
-            </Button>
           </Flex>
         </Flex>
         {/* <Text color="gray" fw={500} size={"sm"} mb={"xl"}>
@@ -514,14 +476,35 @@ export default function SegmentV3() {
         />
         <Box>
           <Flex align={"center"} justify={"space-between"}>
-            <TextInput
-              w={200}
-              placeholder="Search"
-              rightSection={<IconSearch size={"0.9rem"} color="gray" />}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <Flex gap={"sm"} align={"center"}>
+              <SegmentedControl
+                value={type}
+                onChange={(value: any) => {
+                  setType(value);
+                }}
+                data={[
+                  {
+                    value: "user",
+                    label: (
+                      <Center style={{ gap: 4 }}>
+                        <Text fw={500}>Your Segments</Text>
+                      </Center>
+                    ),
+                  },
+                  {
+                    value: "company",
+                    label: (
+                      <Center style={{ gap: 4 }}>
+                        <Text fw={500}>Company Segments</Text>
+                      </Center>
+                    ),
+                  },
+                ]}
+              />
+            </Flex>
+
             <Flex gap={"sm"}>
-              <Select
+              {/* <Select
                 w={200}
                 data={["test1", "test2", "test3", "Q1 STRATEGY"]}
                 value={seletedTag}
@@ -539,6 +522,12 @@ export default function SegmentV3() {
                   }
                   getNestedRows(newFilteredByTagData);
                 }}
+              /> */}
+              <TextInput
+                w={200}
+                placeholder="Search"
+                rightSection={<IconSearch size={"0.9rem"} color="gray" />}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <Button
                 leftIcon={<IconPlus size={"0.9rem"} />}
@@ -562,7 +551,7 @@ export default function SegmentV3() {
                   });
                 }}
               >
-                Segment
+                Add Contacts
               </Button>
             </Flex>
           </Flex>
@@ -940,7 +929,7 @@ export default function SegmentV3() {
           </SimpleGrid>
         </Box>
       </Flex>
-    </Paper>
+    </Box>
   );
 }
 

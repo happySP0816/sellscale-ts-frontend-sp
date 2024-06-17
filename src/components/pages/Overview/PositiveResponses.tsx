@@ -75,7 +75,7 @@ export default function PositiveResponses() {
           fw={700}
           size={"lg"}
         >
-          <span>Unread Inboxes</span>
+          <span>Positive Responses</span>
           <Badge sx={{ background: "#228be6", color: "white" }}>{data?.length}</Badge>
         </Text>
         <Divider w={"100%"} />

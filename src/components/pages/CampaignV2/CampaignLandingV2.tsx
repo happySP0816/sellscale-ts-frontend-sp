@@ -69,10 +69,7 @@ import {
   fetchCampaignAnalytics,
 } from "@utils/requests/campaignOverview";
 import { proxyURL } from "@utils/general";
-import {
-  activatePersona,
-  deactivatePersona,
-} from "@utils/requests/postPersonaActivation";
+import { activatePersona, deactivatePersona } from "@utils/requests/postPersonaActivation";
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { useParams } from "react-router-dom";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
@@ -109,23 +106,19 @@ interface StatsData {
 const steps = [
   {
     selector: '[data-tour="campaign-tutorial"]',
-    content:
-      "Welcome to the campaign page! This tutorial will guide you through the key features and functionalities of the campaign management system.",
+    content: "Welcome to the campaign page! This tutorial will guide you through the key features and functionalities of the campaign management system.",
   },
   {
     selector: '[data-tour="campaign-status"]',
-    content:
-      "This is the campaign status. You can see if the campaign is active or inactive here.",
+    content: "This is the campaign status. You can see if the campaign is active or inactive here.",
   },
   {
     selector: '[data-tour="campaign-stats"]',
-    content:
-      "Here you can see various statistics about your campaign, such as the number of emails sent, opened, and replied to.",
+    content: "Here you can see various statistics about your campaign, such as the number of emails sent, opened, and replied to.",
   },
   {
     selector: '[data-tour="outreach-volume"]',
-    content:
-      "This slider allows you to set the outreach volume for your campaign.",
+    content: "This slider allows you to set the outreach volume for your campaign.",
   },
   {
     selector: '[data-tour="campaign-progress"]',
@@ -133,23 +126,19 @@ const steps = [
   },
   {
     selector: '[data-tour="contacts"]',
-    content:
-      "This section allows you to add and manage your contacts. You can import contacts and view their details",
+    content: "This section allows you to add and manage your contacts. You can import contacts and view their details",
   },
   {
     selector: '[data-tour="sequences"]',
-    content:
-      "Here you can manage and organize the sequences of emails and LinkedIn messages that will be sent out as part of your campaign.",
+    content: "Here you can manage and organize the sequences of emails and LinkedIn messages that will be sent out as part of your campaign.",
   },
   {
     selector: '[data-tour="personalizers"]',
-    content:
-      "This section allows you to manage your personalizers for the campaign.",
+    content: "This section allows you to manage your personalizers for the campaign.",
   },
   {
     selector: '[data-tour="personalizer-enabled"]',
-    content:
-      "Activate SellScale AI for deep prospect research and dynamic personalized engagement!",
+    content: "Activate SellScale AI for deep prospect research and dynamic personalized engagement!",
   },
 ];
 
@@ -166,9 +155,7 @@ export default function CampaignLandingV2() {
     localStorage.setItem("campaignTourSeen", "true");
   };
 
-  const convertStatsDataToPersonaOverview = (
-    statsData: StatsData
-  ): PersonaOverview => {
+  const convertStatsDataToPersonaOverview = (statsData: StatsData): PersonaOverview => {
     return {
       active: statsData.active,
       id: statsData.id,
@@ -206,14 +193,11 @@ export default function CampaignLandingV2() {
       email_active: statsData.email_active,
       email_open_tracking_enabled: false,
       email_link_tracking_enabled: false,
-      is_ai_research_personalization_enabled:
-        statsData.is_ai_research_personalization_enabled,
+      is_ai_research_personalization_enabled: statsData.is_ai_research_personalization_enabled,
     };
   };
   const userData = useRecoilValue(userDataState);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   console.log("======", userData);
 
@@ -258,9 +242,7 @@ export default function CampaignLandingV2() {
   const id = Number(useParams().id);
   const [templates, setTemplates] = useState([]);
   const [personalizers, setPersonalizers] = useState([]);
-  const [personalizersEnabled, setPersonalizersEnabled] = useState(
-    currentProject?.is_ai_research_personalization_enabled
-  );
+  const [personalizersEnabled, setPersonalizersEnabled] = useState(currentProject?.is_ai_research_personalization_enabled);
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
   const [status, setStatus] = useState("SETUP");
   const [isTourOpen, setIsTourOpen] = useState(false);
@@ -288,36 +270,17 @@ export default function CampaignLandingV2() {
   const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
   const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [analyticsData, setAnalyticsData] = useState<any>([]);
-  const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>(
-    []
-  );
-  const [emailSubjectLines, setEmailSubjectLines] = useState<
-    SubjectLineTemplate[]
-  >([]);
-  const [
-    linkedinInitialMessageViewing,
-    setLinkedinInitialMessageViewing,
-  ] = useState<any>(0);
-  const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<
-    any[]
-  >([]);
-  const [
-    linkedinSequenceViewingArray,
-    setLinkedinSequenceViewingArray,
-  ] = useState<any[]>([]);
+  const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>([]);
+  const [emailSubjectLines, setEmailSubjectLines] = useState<SubjectLineTemplate[]>([]);
+  const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] = useState<any>(0);
+  const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<any[]>([]);
+  const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] = useState<any[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
-  const [showActivateWarningModal, setShowActivateWarningModal] = useState(
-    false
-  );
-  const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(
-    false
-  );
+  const [showActivateWarningModal, setShowActivateWarningModal] = useState(false);
+  const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
   const [testingVolume, setTestingVolume] = useState(0);
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
-  const [
-    showLinkedInConvoSimulatorModal,
-    setShowLinkedInConvoSimulatorModal,
-  ] = useState(false);
+  const [showLinkedInConvoSimulatorModal, setShowLinkedInConvoSimulatorModal] = useState(false);
   const [showPersonalizerModal, setShowPersonalizerModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
@@ -343,9 +306,7 @@ export default function CampaignLandingV2() {
   useEffect(() => {
     console.log("CURRENT PROJECT", currentProject);
     if (currentProject) {
-      setPersonalizersEnabled(
-        currentProject?.is_ai_research_personalization_enabled
-      );
+      setPersonalizersEnabled(currentProject?.is_ai_research_personalization_enabled);
     }
   }, [currentProject]);
 
@@ -363,9 +324,7 @@ export default function CampaignLandingV2() {
       .then((response) => {
         showNotification({
           title: "Personalizers Enabled",
-          message: `Personalizers have been ${
-            enabled ? "enabled" : "disabled"
-          }`,
+          message: `Personalizers have been ${enabled ? "enabled" : "disabled"}`,
         });
         setPersonalizersEnabled(enabled);
       })
@@ -405,34 +364,25 @@ export default function CampaignLandingV2() {
   const getPersonalizers = async () => {
     setLoadingPersonalizers(true);
     const clientArchetypeId = Number(id);
-    const response = await fetchCampaignPersonalizers(
-      userToken,
-      clientArchetypeId
-    );
+    const response = await fetchCampaignPersonalizers(userToken, clientArchetypeId);
     if (response) {
       setPersonalizers(response.questions);
     }
     setLoadingPersonalizers(false);
   };
 
-  const updateConnectionType = (
-    newConnectionType: string,
-    campaignId: number
-  ) => {
+  const updateConnectionType = (newConnectionType: string, campaignId: number) => {
     setLoadingStats(true);
-    fetch(
-      `${API_URL}/client/archetype/${campaignId}/update_email_to_linkedin_connection`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          email_to_linkedin_connection: newConnectionType,
-        }),
-      }
-    )
+    fetch(`${API_URL}/client/archetype/${campaignId}/update_email_to_linkedin_connection`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        email_to_linkedin_connection: newConnectionType,
+      }),
+    })
       .then((response) => {
         if (response.ok) {
           console.log("Connection type updated");
@@ -493,28 +443,17 @@ export default function CampaignLandingV2() {
 
   const refetchSequenceData = async (clientArchetypeId: number) => {
     setLoadingSequences(true);
-    const sequencesPromise = fetchCampaignSequences(
-      userToken,
-      clientArchetypeId
-    );
+    const sequencesPromise = fetchCampaignSequences(userToken, clientArchetypeId);
     sequencesPromise
       .then((sequencesData) => {
         setEmailSubjectLines(sequencesData.email_subject_lines);
         setLinkedinInitialMessages(sequencesData.initial_message_templates);
-        setLinkedinInitialMessageViewing(
-          sequencesData.initial_message_templates?.[0]?.title
-        );
+        setLinkedinInitialMessageViewing(sequencesData.initial_message_templates?.[0]?.title);
         const groupSequencesByBumpedCount = (sequences: any[]) =>
           sequences.reduce((acc: any, sequence: any) => {
             let bumpedCount = sequence.bumped_count || 0;
             const statusAdjustment =
-              sequence.overall_status === "PROSPECTED"
-                ? 0
-                : sequence.overall_status === "ACCEPTED"
-                ? 10
-                : sequence.overall_status === "BUMPED"
-                ? 20
-                : 0;
+              sequence.overall_status === "PROSPECTED" ? 0 : sequence.overall_status === "ACCEPTED" ? 10 : sequence.overall_status === "BUMPED" ? 20 : 0;
             bumpedCount += statusAdjustment;
             if (!acc[bumpedCount]) acc[bumpedCount] = [];
             acc[bumpedCount].push(sequence);
@@ -526,70 +465,33 @@ export default function CampaignLandingV2() {
             .sort((a, b) => Number(a) - Number(b))
             .map((key) => groupedSequences[key]);
 
-        console.log(
-          "sequences are",
-          sequencesData.email_sequence,
-          sequencesData.linkedin_sequence
-        );
+        console.log("sequences are", sequencesData.email_sequence, sequencesData.linkedin_sequence);
 
         const handleSequences = (sequences: any[], type: string) => {
           const groupedSequences = groupSequencesByBumpedCount(sequences);
-          const orderedGroupedSequences = orderGroupedSequences(
-            groupedSequences
-          );
+          const orderedGroupedSequences = orderGroupedSequences(groupedSequences);
           setSequences(orderedGroupedSequences);
           console.log("orderedGroupedSequences", orderedGroupedSequences);
           setType(type);
           if (type === "linkedin") {
-            setLinkedinSequenceViewingArray(
-              orderedGroupedSequences.map((group) => group[0].title)
-            );
+            setLinkedinSequenceViewingArray(orderedGroupedSequences.map((group) => group[0].title));
             setLinkedinSequenceData(orderedGroupedSequences);
           } else {
-            setEmailSequenceViewingArray(
-              orderedGroupedSequences.map((group) => group[0].title)
-            );
+            setEmailSequenceViewingArray(orderedGroupedSequences.map((group) => group[0].title));
             setEmailSequenceData(orderedGroupedSequences);
           }
         };
 
-        if (
-          sequencesData.linkedin_sequence.length > 0 &&
-          sequencesData.email_sequence.length === 0
-        ) {
+        if (sequencesData.linkedin_sequence.length > 0 && sequencesData.email_sequence.length === 0) {
           handleSequences(sequencesData.linkedin_sequence, "linkedin");
-        } else if (
-          sequencesData.email_sequence.length > 0 &&
-          sequencesData.linkedin_sequence.length === 0
-        ) {
+        } else if (sequencesData.email_sequence.length > 0 && sequencesData.linkedin_sequence.length === 0) {
           handleSequences(sequencesData.email_sequence, "email");
-        } else if (
-          sequencesData.email_sequence.length > 0 &&
-          sequencesData.linkedin_sequence.length > 0
-        ) {
+        } else if (sequencesData.email_sequence.length > 0 && sequencesData.linkedin_sequence.length > 0) {
           handleSequences(sequencesData.email_sequence, "email");
-          setLinkedinSequenceViewingArray(
-            orderGroupedSequences(
-              groupSequencesByBumpedCount(sequencesData.linkedin_sequence)
-            ).map((group) => group[0].title)
-          );
-          setLinkedinSequenceData(
-            orderGroupedSequences(
-              groupSequencesByBumpedCount(sequencesData.linkedin_sequence)
-            )
-          );
-          console.log(
-            "linkedin is",
-            orderGroupedSequences(
-              groupSequencesByBumpedCount(sequencesData.linkedin_sequence)
-            )
-          );
-          console.log(
-            "emailSequenceData",
-            orderGroupedSequences(
-              groupSequencesByBumpedCount(sequencesData.email_sequence)
-            )
-          );
+          setLinkedinSequenceViewingArray(orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.linkedin_sequence)).map((group) => group[0].title));
+          setLinkedinSequenceData(orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.linkedin_sequence)));
+          console.log("linkedin is", orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.linkedin_sequence)));
+          console.log("emailSequenceData", orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.email_sequence)));
         } else {
           setSequences([]);
           setType("email");
@@ -617,13 +519,7 @@ export default function CampaignLandingV2() {
     } else {
       setActiveStep(3);
     }
-  }, [
-    totalContacts,
-    sequences,
-    loadingSequences,
-    linkedinSequenceData,
-    personalizers,
-  ]);
+  }, [totalContacts, sequences, loadingSequences, linkedinSequenceData, personalizers]);
 
   // This useEffect hook runs on page load and whenever the 'id' or 'userToken' changes.
   // It fetches campaign-related data (contacts, sequences, and stats) for a specific client archetype.
@@ -641,10 +537,7 @@ export default function CampaignLandingV2() {
       setLoadingStats(true);
 
       const statsPromise = fetchCampaignStats(userToken, clientArchetypeId);
-      const totalContactsPromise = fetchTotalContacts(
-        userToken,
-        clientArchetypeId
-      );
+      const totalContactsPromise = fetchTotalContacts(userToken, clientArchetypeId);
       getPersonalizers();
       refetchSequenceData(clientArchetypeId);
       refetchCampaignOtherStats();
@@ -654,9 +547,7 @@ export default function CampaignLandingV2() {
           const loadedStats = stats as StatsData;
           console.log("stats", loadedStats);
           setStatsData(loadedStats);
-          setCurrentProject(
-            convertStatsDataToPersonaOverview(loadedStats as StatsData)
-          );
+          setCurrentProject(convertStatsDataToPersonaOverview(loadedStats as StatsData));
           if (loadedStats && loadedStats.testing_volume) {
             setTestingVolume(loadedStats.testing_volume);
           }
@@ -700,12 +591,7 @@ export default function CampaignLandingV2() {
     setLoadingStats(false);
   };
 
-  const togglePersonaChannel = async (
-    campaignId: number,
-    channel: "email" | "linkedin",
-    userToken: string,
-    active: boolean
-  ) => {
+  const togglePersonaChannel = async (campaignId: number, channel: "email" | "linkedin", userToken: string, active: boolean) => {
     if (channel === "email") {
       //check if there are email sequences and subject lines.
       //if not, show a notification that the channel cannot be activated.
@@ -713,8 +599,7 @@ export default function CampaignLandingV2() {
         showNotification({
           color: "red",
           title: "Email Channel",
-          message:
-            "Email channel cannot be activated without email sequences and subject lines.",
+          message: "Email channel cannot be activated without email sequences and subject lines.",
         });
         return;
       }
@@ -726,32 +611,18 @@ export default function CampaignLandingV2() {
     if (!localStorage.getItem("emailChannelWarning") && active === true) {
       localStorage.setItem("emailChannelWarning", "true");
     }
-    if (
-      channel === "email" &&
-      localStorage.getItem("emailChannelWarning") === "true" &&
-      active === true
-    ) {
+    if (channel === "email" && localStorage.getItem("emailChannelWarning") === "true" && active === true) {
       setShowActivateWarningModal(true);
       return;
     }
 
     setLoadingStats(true);
-    const result = postTogglePersonaActive(
-      userToken,
-      campaignId,
-      channel,
-      active
-    ).then((res) => {
+    const result = postTogglePersonaActive(userToken, campaignId, channel, active).then((res) => {
       refetchCampaignStatsData();
     });
   };
 
-  const handleModal = (
-    type: string,
-    id: number,
-    campaign_name: string,
-    statsData: any
-  ) => {
+  const handleModal = (type: string, id: number, campaign_name: string, statsData: any) => {
     openContextModal({
       modal: "campaignDrilldownModal",
       withCloseButton: false,
@@ -810,22 +681,11 @@ export default function CampaignLandingV2() {
       });
   };
 
+  console.log("-----------", statsData?.archetype_name?.split(" ")[0]);
+
   return (
-    <Paper
-      p={"lg"}
-      maw={1150}
-      h="100%"
-      ml="auto"
-      mr="auto"
-      style={{ backgroundColor: "transparent" }}
-    >
-      <Modal
-        opened={showActivateWarningModal}
-        onClose={() => setShowActivateWarningModal(false)}
-        size="md"
-        centered
-        withCloseButton={false}
-      >
+    <Paper p={"lg"} maw={1150} h="100%" ml="auto" mr="auto" style={{ backgroundColor: "transparent" }}>
+      <Modal opened={showActivateWarningModal} onClose={() => setShowActivateWarningModal(false)} size="md" centered withCloseButton={false}>
         <Paper p="lg">
           <Flex align="center" mb="md">
             <IconMailOpened size={24} color="gray" />
@@ -834,25 +694,18 @@ export default function CampaignLandingV2() {
             </Text>
           </Flex>
           <Text size="sm" color="dimmed" mb="lg">
-            • Activating the email channel will lock the number of email
-            sequence steps.
+            • Activating the email channel will lock the number of email sequence steps.
             <br />
             • Once activated, the email sequence steps will be set.
-            <br />• You will still have the ability to edit the content of the
-            templates.
+            <br />• You will still have the ability to edit the content of the templates.
           </Text>
           <Flex justify="space-between" align="center" mt="lg">
             <Checkbox
               defaultChecked
               label="Remind me in the future"
               onChange={(event) => {
-                const currentValue = localStorage.getItem(
-                  "emailChannelWarning"
-                );
-                localStorage.setItem(
-                  "emailChannelWarning",
-                  currentValue === "false" ? "true" : "false"
-                );
+                const currentValue = localStorage.getItem("emailChannelWarning");
+                localStorage.setItem("emailChannelWarning", currentValue === "false" ? "true" : "false");
               }}
             />
             <Button
@@ -887,14 +740,7 @@ export default function CampaignLandingV2() {
         }}
         size="1100px"
       >
-        <CampaignChannelPage
-          campaignId={Number(id)}
-          cType={"linkedin"}
-          hideHeader={true}
-          hideEmail={false}
-          hideLinkedIn={false}
-          hideAssets={true}
-        />
+        <CampaignChannelPage campaignId={Number(id)} cType={"linkedin"} hideHeader={true} hideEmail={false} hideLinkedIn={false} hideAssets={true} />
       </Modal>
       <Modal
         opened={showLinkedInConvoSimulatorModal}
@@ -905,10 +751,7 @@ export default function CampaignLandingV2() {
         }}
         size="1100px"
       >
-        <LinkedInConvoSimulator
-          personaId={id as number}
-          sequenceSetUpMode={true}
-        />
+        <LinkedInConvoSimulator personaId={id as number} sequenceSetUpMode={true} />
       </Modal>
       {loadingStats || !statsData ? (
         <Flex
@@ -946,18 +789,8 @@ export default function CampaignLandingV2() {
           <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour} />
           <Flex direction={"column"} w={"100%"}>
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
-            <Flex
-              justify={"space-between"}
-              p={"lg"}
-              pb={0}
-              direction={"column"}
-            >
-              <Flex
-                gap={"sm"}
-                align={"center"}
-                justify="space-between"
-                w="100%"
-              >
+            <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
+              <Flex gap={"sm"} align={"center"} justify="space-between" w="100%">
                 <Flex gap={"sm"} align={"center"}>
                   {statsData?.emoji}
                   <Text fw={600} size={20}>
@@ -968,41 +801,31 @@ export default function CampaignLandingV2() {
                     tt={"uppercase"}
                     variant="outline"
                     size="lg"
-                    color={
-                      status === "SETUP"
-                        ? "orange"
-                        : status === "ACTIVE"
-                        ? "green"
-                        : status === "INACTIVE"
-                        ? "red"
-                        : "gray"
-                    }
+                    color={status === "SETUP" ? "orange" : status === "ACTIVE" ? "green" : status === "INACTIVE" ? "red" : "gray"}
                   >
                     {status}
                   </Badge>
                 </Flex>
               </Flex>
               <Flex align={"center"} gap={"xs"}>
-                <Text color="gray" size={"xs"} fw={600}>
-                  Created by:
-                </Text>
-                <Avatar
-                  size={"sm"}
-                  src={proxyURL(statsData.sdr_img_url)}
-                  sx={{ borderRadius: "50%" }}
-                />
-                <Text fw={600} size={"xs"}>
-                  {statsData?.sdr_name}
-                </Text>
-                <Divider orientation="vertical" h={"70%"} my={"auto"} />
-                <Text color="gray" size={"xs"} fw={600}>
-                  Created:
-                </Text>
-                <Text fw={600} size={"xs"}>
-                  {new Date(statsData.created_at).toLocaleString("en-US", {
-                    dateStyle: "full",
-                  })}
-                </Text>
+                <Paper className="flex items-center gap-3" withBorder px={"sm"} py={5}>
+                  <Text color="gray" size={"xs"} fw={600}>
+                    Created by:
+                  </Text>
+                  <Avatar size={"sm"} src={proxyURL(statsData.sdr_img_url)} sx={{ borderRadius: "50%" }} />
+                  <Text fw={600} size={"xs"}>
+                    {statsData?.sdr_name?.split(" ")[0]}
+                  </Text>
+                  <Divider orientation="vertical" />
+                  <Text color="gray" size={"xs"} fw={600}>
+                    Created:
+                  </Text>
+                  <Text fw={600} size={"xs"}>
+                    {new Date(statsData.created_at).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                    })}
+                  </Text>
+                </Paper>
                 <Flex w="60%" ml="auto">
                   <Paper
                     p="md"
@@ -1034,27 +857,12 @@ export default function CampaignLandingV2() {
                     </Flex> */}
                     <Group noWrap spacing={"sm"} w={"100%"}>
                       <Switch
-                        onChange={() =>
-                          togglePersonaChannel(
-                            id,
-                            "email",
-                            userToken,
-                            !statsData?.email_active
-                          )
-                        }
+                        onChange={() => togglePersonaChannel(id, "email", userToken, !statsData?.email_active)}
                         checked={statsData?.email_active}
                         labelPosition="left"
                         label={
-                          <Flex
-                            gap={1}
-                            align={"center"}
-                            className="hover:cursor-pointer"
-                          >
-                            <IconMailOpened
-                              size={"1.2rem"}
-                              fill="#3B85EF"
-                              color="white"
-                            />
+                          <Flex gap={1} align={"center"} className="hover:cursor-pointer">
+                            <IconMailOpened size={"1.2rem"} fill="#3B85EF" color="white" />
                             <Text color="#3B85EF" fw={500}>
                               Email
                             </Text>
@@ -1077,11 +885,7 @@ export default function CampaignLandingV2() {
                           },
                         }}
                       />
-                      <Divider
-                        variant="dashed"
-                        labelPosition="center"
-                        label={<Hook linkedLeft={false} linkedRight={false} />}
-                      />
+                      <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
                       <Select
                         onChange={(value) => {
                           if (typeof value === "string") {
@@ -1111,29 +915,14 @@ export default function CampaignLandingV2() {
                         ]}
                         placeholder="Select an event"
                       />
-                      <Divider
-                        variant="dashed"
-                        labelPosition="center"
-                        label={<Hook linkedLeft={false} linkedRight={false} />}
-                      />
+                      <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
                       <Switch
-                        onChange={() =>
-                          togglePersonaChannel(
-                            id,
-                            "linkedin",
-                            userToken,
-                            !statsData?.linkedin_active
-                          )
-                        }
+                        onChange={() => togglePersonaChannel(id, "linkedin", userToken, !statsData?.linkedin_active)}
                         checked={statsData?.linkedin_active}
                         labelPosition="left"
                         label={
                           <Flex gap={2} align={"center"}>
-                            <IconBrandLinkedin
-                              size={"1.4rem"}
-                              fill="#3B85EF"
-                              color="white"
-                            />
+                            <IconBrandLinkedin size={"1.4rem"} fill="#3B85EF" color="white" />
                             <Text color="#3B85EF" fw={500}>
                               Linkedin
                             </Text>
@@ -1182,13 +971,7 @@ export default function CampaignLandingV2() {
                     </Flex>
                   </Flex>
                 ) : (
-                  <Flex
-                    data-tour="campaign-stats"
-                    align={"center"}
-                    justify={"space-between"}
-                    h={"100%"}
-                    w="100%"
-                  >
+                  <Flex data-tour="campaign-stats" align={"center"} justify={"space-between"} h={"100%"} w="100%">
                     <Box
                       p={"lg"}
                       w={"100%"}
@@ -1202,20 +985,11 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("sent");
-                        handleModal(
-                          "sent",
-                          id,
-                          currentProject?.name || "",
-                          statsData
-                        );
+                        handleModal("sent", id, currentProject?.name || "", statsData);
                       }}
                     >
                       <Flex align={"center"} gap={"xs"}>
-                        <IconSend
-                          size={"0.9rem"}
-                          color="#3B85EF"
-                          className="mb-[2px]"
-                        />
+                        <IconSend size={"0.9rem"} color="#3B85EF" className="mb-[2px]" />
                         <Text fw={400} size={"sm"}>
                           Sent
                         </Text>
@@ -1247,20 +1021,11 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("open");
-                        handleModal(
-                          "open",
-                          id,
-                          currentProject?.name || "",
-                          statsData
-                        );
+                        handleModal("open", id, currentProject?.name || "", statsData);
                       }}
                     >
                       <Flex align={"center"} gap={6}>
-                        <IconChecks
-                          size={"0.9rem"}
-                          color="pink"
-                          className="mb-[2px]"
-                        />
+                        <IconChecks size={"0.9rem"} color="pink" className="mb-[2px]" />
                         <Text fw={400} size={"sm"}>
                           Open
                         </Text>
@@ -1272,11 +1037,7 @@ export default function CampaignLandingV2() {
                           <>
                             <Text fz={24}>{analyticsData.num_opens}</Text>
                             <Badge color="pink" size="xs">
-                              {`${(
-                                (analyticsData.num_opens /
-                                  (analyticsData.num_sent + 0.0001)) *
-                                100
-                              ).toFixed(0)}%`}
+                              {`${((analyticsData.num_opens / (analyticsData.num_sent + 0.0001)) * 100).toFixed(0)}%`}
                             </Badge>
                           </>
                         )}
@@ -1296,20 +1057,11 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("reply");
-                        handleModal(
-                          "reply",
-                          id,
-                          currentProject?.name || "",
-                          statsData
-                        );
+                        handleModal("reply", id, currentProject?.name || "", statsData);
                       }}
                     >
                       <Flex align={"center"} gap={6}>
-                        <IconMessageCheck
-                          size={"0.9rem"}
-                          color="orange"
-                          className="mb-[2px]"
-                        />
+                        <IconMessageCheck size={"0.9rem"} color="orange" className="mb-[2px]" />
                         <Text fw={400} size={"sm"}>
                           Reply
                         </Text>
@@ -1321,11 +1073,7 @@ export default function CampaignLandingV2() {
                           <>
                             <Text fz={24}>{analyticsData.num_replies}</Text>
                             <Badge color="orange" size="xs">
-                              {`${(
-                                (analyticsData.num_replies /
-                                  (analyticsData.num_opens + 0.0001)) *
-                                100
-                              ).toFixed(0)}%`}
+                              {`${((analyticsData.num_replies / (analyticsData.num_opens + 0.0001)) * 100).toFixed(0)}%`}
                             </Badge>
                           </>
                         )}
@@ -1345,20 +1093,11 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("pos_reply");
-                        handleModal(
-                          "pos_reply",
-                          id,
-                          currentProject?.name || "",
-                          statsData
-                        );
+                        handleModal("pos_reply", id, currentProject?.name || "", statsData);
                       }}
                     >
                       <Flex align={"center"} gap={6}>
-                        <IconMessageCheck
-                          size={"0.9rem"}
-                          color="green"
-                          className="mb-[2px]"
-                        />
+                        <IconMessageCheck size={"0.9rem"} color="green" className="mb-[2px]" />
                         <Text fw={400} size={"sm"}>
                           (+) Reply
                         </Text>
@@ -1370,11 +1109,7 @@ export default function CampaignLandingV2() {
                           <>
                             <Text fz={24}>{analyticsData.num_pos_replies}</Text>
                             <Badge color="green" size="xs">
-                              {`${(
-                                (analyticsData.num_pos_replies /
-                                  (analyticsData.num_replies + 0.0001)) *
-                                100
-                              ).toFixed(0)}%`}
+                              {`${((analyticsData.num_pos_replies / (analyticsData.num_replies + 0.0001)) * 100).toFixed(0)}%`}
                             </Badge>
                           </>
                         )}
@@ -1398,11 +1133,7 @@ export default function CampaignLandingV2() {
                       }}
                     >
                       <Flex align={"center"} gap={6}>
-                        <IconCalendar
-                          size={"0.9rem"}
-                          color={"#3B85EF"}
-                          className="mb-[2px]"
-                        />
+                        <IconCalendar size={"0.9rem"} color={"#3B85EF"} className="mb-[2px]" />
                         <Text fw={400}>Demo</Text>
                       </Flex>
                       <Flex align={"center"} gap={"sm"}>
@@ -1412,11 +1143,7 @@ export default function CampaignLandingV2() {
                           <>
                             <Text fz={24}>{analyticsData.num_demos}</Text>
                             <Badge color="blue" size="xs">
-                              {`${(
-                                (analyticsData.num_demos /
-                                  (analyticsData.num_pos_replies + 0.0001)) *
-                                100
-                              ).toFixed(0)}%`}
+                              {`${((analyticsData.num_demos / (analyticsData.num_pos_replies + 0.0001)) * 100).toFixed(0)}%`}
                             </Badge>
                           </>
                         )}
@@ -1438,12 +1165,7 @@ export default function CampaignLandingV2() {
               </Flex>
             </Flex>
             {!loadingContacts && activeStep !== 3 && (
-              <Box
-                data-tour="campaign-progress"
-                px={"xl"}
-                py={"md"}
-                bg={"#ECECEC"}
-              >
+              <Box data-tour="campaign-progress" px={"xl"} py={"md"} bg={"#ECECEC"}>
                 <Stepper active={activeStep} size="xs" iconSize={28}>
                   <Stepper.Step label="Add Contacts" />
                   <Stepper.Step label="Setup Templates" />
@@ -1477,12 +1199,7 @@ export default function CampaignLandingV2() {
         </Flex>
         <Flex direction={"column"} gap={"md"} w={"80%"}>
           <Paper data-tour="sequences" withBorder>
-            <Flex
-              align={"center"}
-              justify={"space-between"}
-              p={"md"}
-              style={{ borderBottom: "1px solid #ECEEF1" }}
-            >
+            <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
               <Flex align="center" gap="xs">
                 <Text fw={600} size={20} color="#37414E">
                   Sequences
@@ -1490,8 +1207,7 @@ export default function CampaignLandingV2() {
                 <Tooltip
                   label={
                     <Text size="sm">
-                      Generate or manually create custom sequences to guide your
-                      outreach strategy.
+                      Generate or manually create custom sequences to guide your outreach strategy.
                       <br></br>
                     </Text>
                   }
@@ -1519,11 +1235,7 @@ export default function CampaignLandingV2() {
                         value: "email",
                         label: (
                           <Center style={{ gap: 4 }}>
-                            <IconMailOpened
-                              size={"1.2rem"}
-                              fill="orange"
-                              color="white"
-                            />
+                            <IconMailOpened size={"1.2rem"} fill="orange" color="white" />
                             <Text fw={500}>Email</Text>
                           </Center>
                         ),
@@ -1532,11 +1244,7 @@ export default function CampaignLandingV2() {
                         value: "linkedin",
                         label: (
                           <Center style={{ gap: 4 }}>
-                            <IconBrandLinkedin
-                              size={"1.4rem"}
-                              fill="#3B85EF"
-                              color="white"
-                            />
+                            <IconBrandLinkedin size={"1.4rem"} fill="#3B85EF" color="white" />
                             <Text fw={500}>Linkedin</Text>
                           </Center>
                         ),
@@ -1628,13 +1336,7 @@ export default function CampaignLandingV2() {
                   onClick={() => {
                     openContextModal({
                       modal: "campaignTemplateModal",
-                      title: (
-                        <Title order={3}>
-                          {createTemplateBuilder
-                            ? "Template Builder"
-                            : "Template"}
-                        </Title>
-                      ),
+                      title: <Title order={3}>{createTemplateBuilder ? "Template Builder" : "Template"}</Title>,
                       innerProps: {
                         campaignId: id,
                         createTemplateBuilder,
@@ -1656,13 +1358,7 @@ export default function CampaignLandingV2() {
             </Flex>
             <Flex h={"20%"} mt={"md"}>
               {loadingSequences ? (
-                <Flex
-                  direction="column"
-                  align="center"
-                  justify="center"
-                  m="auto"
-                  mt="sm"
-                >
+                <Flex direction="column" align="center" justify="center" m="auto" mt="sm">
                   <Skeleton height={30} radius="xl" width="80%" />
                   <Skeleton height={20} radius="xl" width="60%" mt="sm" />
                   <Skeleton height={20} radius="xl" width="60%" mt="sm" />
@@ -1673,129 +1369,87 @@ export default function CampaignLandingV2() {
                     </Text>
                   </Flex>
                 </Flex>
-              ) : (sequences && sequences.length > 0) ||
-                (linkedinInitialMessages?.length > 0 && type === "linkedin") ? (
+              ) : (sequences && sequences.length > 0) || (linkedinInitialMessages?.length > 0 && type === "linkedin") ? (
                 <Flex direction={"column"} h={"fit-content"} w={"100%"}>
                   <Flex w={"100%"} gap={"md"} direction={"column"} p={"lg"}>
-                    {type === "linkedin" &&
-                      linkedinInitialMessages &&
-                      linkedinInitialMessages.length > 0 && (
-                        <Box
-                          style={{
-                            border: "1px solid #ced4da",
-                            borderRadius: "8px",
-                            marginBottom: "1rem",
-                          }}
-                        >
-                          <Flex
-                            align={"center"}
-                            justify={"space-between"}
-                            px={"sm"}
-                            py={"xs"}
-                          >
-                            <Flex mx="lg" align={"center"} gap={"xs"}>
-                              <IconMessages color="#228be6" size={"0.9rem"} />
-                              <Text color="gray" fw={500} size={"xs"}>
-                                Initial Message:
-                              </Text>
-                              <Select
-                                defaultValue={linkedinInitialMessages[0].title}
-                                onChange={(value) =>
-                                  setLinkedinInitialMessageViewing(value)
-                                }
-                                data={linkedinInitialMessages.map(
-                                  (option: any) => ({
-                                    value: option.title,
-                                    label: option.title,
-                                  })
-                                )}
-                                size="xs"
-                                styles={{
-                                  root: { marginLeft: "-5px" },
-                                  input: { fontWeight: 600 },
-                                }}
-                              />
-                            </Flex>
+                    {type === "linkedin" && linkedinInitialMessages && linkedinInitialMessages.length > 0 && (
+                      <Box
+                        style={{
+                          border: "1px solid #ced4da",
+                          borderRadius: "8px",
+                          marginBottom: "1rem",
+                        }}
+                      >
+                        <Flex align={"center"} justify={"space-between"} px={"sm"} py={"xs"}>
+                          <Flex mx="lg" align={"center"} gap={"xs"}>
+                            <IconMessages color="#228be6" size={"0.9rem"} />
+                            <Text color="gray" fw={500} size={"xs"}>
+                              Initial Message:
+                            </Text>
+                            <Select
+                              defaultValue={linkedinInitialMessages[0].title}
+                              onChange={(value) => setLinkedinInitialMessageViewing(value)}
+                              data={linkedinInitialMessages.map((option: any) => ({
+                                value: option.title,
+                                label: option.title,
+                              }))}
+                              size="xs"
+                              styles={{
+                                root: { marginLeft: "-5px" },
+                                input: { fontWeight: 600 },
+                              }}
+                            />
                           </Flex>
-                          <Collapse in={true}>
-                            <Flex
-                              gap={"sm"}
-                              p={"sm"}
-                              style={{ borderTop: "1px solid #ced4da" }}
-                            >
-                              <Avatar
-                                size={"md"}
-                                radius={"xl"}
-                                src={linkedinInitialMessages[0]?.avatar}
-                              />
-                              <Box>
-                                <Text fw={600} size={"sm"}>
-                                  {linkedinInitialMessages[0]?.name}
-                                </Text>
-                                <Text fw={500} size={"xs"}>
-                                  <BracketGradientWrapper>
-                                    {linkedinInitialMessages
-                                      .find(
-                                        (msg: any) =>
-                                          msg.title ===
-                                          linkedinInitialMessageViewing
-                                      )
-                                      ?.message.replace(/\n/g, "<br/>")}
-                                  </BracketGradientWrapper>
-                                </Text>
-                              </Box>
-                            </Flex>
-                          </Collapse>
-                        </Box>
-                      )}
+                        </Flex>
+                        <Collapse in={true}>
+                          <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
+                            <Avatar size={"md"} radius={"xl"} src={linkedinInitialMessages[0]?.avatar} />
+                            <Box>
+                              <Text fw={600} size={"sm"}>
+                                {linkedinInitialMessages[0]?.name}
+                              </Text>
+                              <Text fw={500} size={"xs"}>
+                                <BracketGradientWrapper>
+                                  {linkedinInitialMessages.find((msg: any) => msg.title === linkedinInitialMessageViewing)?.message.replace(/\n/g, "<br/>")}
+                                </BracketGradientWrapper>
+                              </Text>
+                            </Box>
+                          </Flex>
+                        </Collapse>
+                      </Box>
+                    )}
                     {sequences.map((item: any, index: number) => {
                       return (
                         <>
                           <Box
                             style={{
-                              border:
-                                selectStep === index
-                                  ? "1px solid #228be6"
-                                  : "1px solid #ced4da",
+                              border: selectStep === index ? "1px solid #228be6" : "1px solid #ced4da",
                               borderRadius: "8px",
                             }}
                           >
-                            <Flex
-                              align={"center"}
-                              justify={"space-between"}
-                              px={"sm"}
-                              py={"xs"}
-                            >
+                            <Flex align={"center"} justify={"space-between"} px={"sm"} py={"xs"}>
                               <Flex mx="lg" align={"center"} gap={"xs"}>
                                 <IconMessages color="#228be6" size={"0.9rem"} />
                                 <Text color="gray" fw={500} size={"xs"}>
                                   {`Step #${index + 1}:`}
                                 </Text>
                                 <Select
-                                  value={
-                                    type === "email"
-                                      ? emailSequenceViewingArray[index]
-                                      : linkedinSequenceViewingArray[index]
-                                  }
+                                  value={type === "email" ? emailSequenceViewingArray[index] : linkedinSequenceViewingArray[index]}
                                   onChange={(value) => {
                                     if (type === "email") {
-                                      setEmailSequenceViewingArray(
-                                        (prevArray) => {
-                                          const newArray = [...prevArray];
-                                          newArray[index] = value;
-                                          console.log(newArray);
-                                          return newArray;
-                                        }
-                                      );
+                                      setEmailSequenceViewingArray((prevArray) => {
+                                        const newArray = [...prevArray];
+                                        newArray[index] = value;
+                                        console.log(newArray);
+                                        return newArray;
+                                      });
                                     } else if (type === "linkedin") {
-                                      setLinkedinSequenceViewingArray(
-                                        (prevArray) => {
-                                          const newArray = [...prevArray];
-                                          newArray[index] = value;
-                                          console.log(newArray);
-                                          return newArray;
-                                        }
-                                      );
+                                      setLinkedinSequenceViewingArray((prevArray) => {
+                                        const newArray = [...prevArray];
+                                        newArray[index] = value;
+                                        console.log(newArray);
+                                        return newArray;
+                                      });
                                     }
                                   }}
                                   data={
@@ -1814,16 +1468,7 @@ export default function CampaignLandingV2() {
                                 />
                               </Flex>
                               <Flex gap={1} align={"center"}>
-                                <Badge
-                                  variant="outline"
-                                  leftSection={
-                                    <IconPoint
-                                      fill="green"
-                                      color="white"
-                                      className="mt-1"
-                                    />
-                                  }
-                                >
+                                <Badge variant="outline" leftSection={<IconPoint fill="green" color="white" className="mt-1" />}>
                                   active
                                 </Badge>
                                 <ActionIcon
@@ -1831,64 +1476,27 @@ export default function CampaignLandingV2() {
                                     handleToggle(index);
                                   }}
                                 >
-                                  {selectStep === index && opened ? (
-                                    <IconChevronUp size={"0.9rem"} />
-                                  ) : (
-                                    <IconChevronDown size={"0.9rem"} />
-                                  )}
+                                  {selectStep === index && opened ? <IconChevronUp size={"0.9rem"} /> : <IconChevronDown size={"0.9rem"} />}
                                 </ActionIcon>
                               </Flex>
                             </Flex>
-                            <Collapse
-                              in={selectStep === index && opened}
-                              key={index}
-                            >
-                              <Flex
-                                gap={"sm"}
-                                p={"sm"}
-                                style={{ borderTop: "1px solid #ced4da" }}
-                              >
-                                <Avatar
-                                  size={"md"}
-                                  radius={"xl"}
-                                  src={item?.avatar}
-                                />
+                            <Collapse in={selectStep === index && opened} key={index}>
+                              <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
+                                <Avatar size={"md"} radius={"xl"} src={item?.avatar} />
                                 <Box>
-                                  {type === "email" && index === 0 && (
-                                    <SubjectDropdown
-                                      subjects={emailSubjectLines.map(
-                                        (line: any) => line.subject_line
-                                      )}
-                                    />
-                                  )}
+                                  {type === "email" && index === 0 && <SubjectDropdown subjects={emailSubjectLines.map((line: any) => line.subject_line)} />}
                                   <Text fw={600} size={"sm"}>
                                     {item?.name}
                                   </Text>
                                   <Text fw={500} size={"xs"}>
                                     {type === "email" ? (
                                       <BracketGradientWrapper>
-                                        {Array.isArray(item) &&
-                                          item.find(
-                                            (i: any) =>
-                                              i.title ===
-                                              emailSequenceViewingArray[index]
-                                          )?.description}
+                                        {Array.isArray(item) && item.find((i: any) => i.title === emailSequenceViewingArray[index])?.description}
                                       </BracketGradientWrapper>
                                     ) : (
                                       <BracketGradientWrapper>
                                         {Array.isArray(item) &&
-                                          item
-                                            .find(
-                                              (i: any) =>
-                                                i.title ===
-                                                linkedinSequenceViewingArray[
-                                                  index
-                                                ]
-                                            )
-                                            ?.description.replace(
-                                              /\n/g,
-                                              "<br/>"
-                                            )}
+                                          item.find((i: any) => i.title === linkedinSequenceViewingArray[index])?.description.replace(/\n/g, "<br/>")}
                                       </BracketGradientWrapper>
                                     )}
                                   </Text>
@@ -1898,11 +1506,7 @@ export default function CampaignLandingV2() {
                               <Flex p={"lg"} justify={"space-between"}>
                                 <Flex gap={"sm"}>
                                   {/* <Badge color="grape">{item.point_used} Research Points Used</Badge> */}
-                                  {item.assets && item.assets.length > 0 && (
-                                    <Badge color="grape">
-                                      {item.assets.length} Assets Used
-                                    </Badge>
-                                  )}
+                                  {item.assets && item.assets.length > 0 && <Badge color="grape">{item.assets.length} Assets Used</Badge>}
                                 </Flex>
                                 {/* <Flex gap={"sm"}>
                                   <Badge
@@ -1987,12 +1591,7 @@ export default function CampaignLandingV2() {
             </Flex>
           </Paper>
           <Paper data-tour="personalizers" withBorder>
-            <Flex
-              align={"center"}
-              justify={"space-between"}
-              p={"md"}
-              style={{ borderBottom: "1px solid #ECEEF1" }}
-            >
+            <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
               <Flex gap={"sm"} align={"center"}>
                 <Flex align="center" gap="xs">
                   <Text fw={600} size={20} color="#37414E">
@@ -2001,8 +1600,7 @@ export default function CampaignLandingV2() {
                   <Tooltip
                     label={
                       <Text size="sm">
-                        Create hyper-relevant outreach strategies <br></br>using
-                        AI-powered research for personalized engagement.
+                        Create hyper-relevant outreach strategies <br></br>using AI-powered research for personalized engagement.
                       </Text>
                     }
                     withArrow
@@ -2014,11 +1612,7 @@ export default function CampaignLandingV2() {
                   </Tooltip>
                 </Flex>
               </Flex>
-              <Flex
-                data-tour="personalizer-enabled"
-                gap={"sm"}
-                align={"center"}
-              >
+              <Flex data-tour="personalizer-enabled" gap={"sm"} align={"center"}>
                 <Switch
                   labelPosition="left"
                   label={
@@ -2078,13 +1672,7 @@ export default function CampaignLandingV2() {
             </Flex>
             <Flex sx={{ display: personalizersEnabled ? "block" : "none" }}>
               {loadingPersonalizers ? (
-                <Flex
-                  direction="column"
-                  align="center"
-                  justify="center"
-                  m="auto"
-                  mt="sm"
-                >
+                <Flex direction="column" align="center" justify="center" m="auto" mt="sm">
                   <Skeleton height={30} radius="xl" width="80%" />
                   <Skeleton height={20} radius="xl" width="60%" mt="sm" />
                   <Skeleton height={20} radius="xl" width="60%" mt="sm" />
@@ -2097,13 +1685,7 @@ export default function CampaignLandingV2() {
                 </Flex>
               ) : personalizers && personalizers.length > 0 ? (
                 <Flex direction={"column"} w={"100%"}>
-                  <Flex
-                    w={"100%"}
-                    mah={300}
-                    gap={"md"}
-                    p={"lg"}
-                    direction="column"
-                  >
+                  <Flex w={"100%"} mah={300} gap={"md"} p={"lg"} direction="column">
                     {personalizers &&
                       personalizers.length > 0 &&
                       personalizers.map((item: any, index: number) => {
@@ -2132,15 +1714,11 @@ export default function CampaignLandingV2() {
                               variant="outline"
                               onClick={() =>
                                 modals.openConfirmModal({
-                                  title: (
-                                    <Title order={4}>Delete Personalizer</Title>
-                                  ),
+                                  title: <Title order={4}>Delete Personalizer</Title>,
                                   children: (
                                     <>
                                       <Text>
-                                        Deleting this personalizer will remove
-                                        it from all sequences and templates. Are
-                                        you sure you want to delete it?
+                                        Deleting this personalizer will remove it from all sequences and templates. Are you sure you want to delete it?
                                       </Text>
                                       <Flex
                                         style={{
@@ -2179,30 +1757,10 @@ export default function CampaignLandingV2() {
                         );
                       })}
                   </Flex>
-                  <Flex
-                    align={"center"}
-                    w={"100%"}
-                    justify={"space-between"}
-                    p={"md"}
-                    style={{ borderTop: "1px solid #ECEEF1" }}
-                  >
-                    <Flex
-                      w={"100%"}
-                      align={"center"}
-                      justify={"space-between"}
-                      style={{ border: "1px solid #ced4da" }}
-                    >
-                      <Text
-                        w={"100%"}
-                        align="center"
-                        color="gray"
-                        size={"sm"}
-                        fw={500}
-                      >
-                        {personalizers.length}{" "}
-                        {personalizers.length === 1
-                          ? "Personalizer"
-                          : "Personalizers"}
+                  <Flex align={"center"} w={"100%"} justify={"space-between"} p={"md"} style={{ borderTop: "1px solid #ECEEF1" }}>
+                    <Flex w={"100%"} align={"center"} justify={"space-between"} style={{ border: "1px solid #ced4da" }}>
+                      <Text w={"100%"} align="center" color="gray" size={"sm"} fw={500}>
+                        {personalizers.length} {personalizers.length === 1 ? "Personalizer" : "Personalizers"}
                       </Text>
                       <Divider orientation="vertical" />
                       <ActionIcon h={"100%"} mx={3}>

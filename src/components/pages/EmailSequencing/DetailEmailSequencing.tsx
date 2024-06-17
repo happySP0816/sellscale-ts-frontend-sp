@@ -1197,6 +1197,7 @@ export const SubjectLineItem: React.FC<{
       setLoading(false);
       return;
     } else {
+      subjectLine.active = !subjectLine.active;
       showNotification({
         title: "Success",
         message: `Successfully ${

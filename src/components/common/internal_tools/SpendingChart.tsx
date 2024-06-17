@@ -259,7 +259,7 @@ const ClientSpending: React.FC<{ isInternal?: boolean, selectedClient?: number }
                     style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
                 >
                     <Flex align={"center"} gap={"sm"} mb="sm">
-                        <Paper
+                        {isInternal && <Paper
                             withBorder
                             radius={"md"}
                             px={"md"}
@@ -276,7 +276,7 @@ const ClientSpending: React.FC<{ isInternal?: boolean, selectedClient?: number }
                             <Text fw={600} mr={"sm"}>
                                 ${totalSpending.toFixed(2)}
                             </Text>
-                        </Paper>
+                        </Paper>}
                         <Paper
                             withBorder
                             radius={"md"}

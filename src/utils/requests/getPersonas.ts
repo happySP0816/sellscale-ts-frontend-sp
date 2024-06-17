@@ -234,6 +234,5 @@ export async function getPositiveResponses(
       },
     }
   );
-  console.log('response is', response)
   return await processResponse(response, "positive_responses");
 }

@@ -34,6 +34,7 @@ const OperatorDashboardV2 = (props: PropsType) => {
   const [highPriorityTasks, setHighPriorityTasks] = useState<Task[]>([]);
   const [mediumPriorityTasks, setMediumPriorityTasks] = useState<Task[]>([]);
   const [lowPriorityTasks, setLowPriorityTasks] = useState<Task[]>([]);
+  const [noItems, setNoItems] = useState<boolean>(false);
   const [priorityTasks, setPriorityTasks] = useState<Task[]>([]);
   const [oldTasks, setOldTasks] = useState<Task[]>([]);
   const navigate = useNavigate();
@@ -64,6 +65,7 @@ const OperatorDashboardV2 = (props: PropsType) => {
         setPriorityTasks(tasks.filter((data: any) => data.status === "PENDING" && data.urgency === "HIGH"));
 
         const incompleteTasks = tasks.filter((task: Task) => task.status === "PENDING");
+        if (incompleteTasks.length === 0) setNoItems(true);
         props.onOperatorDashboardEntriesChange(incompleteTasks);
       } catch (error) {
         console.error("Error fetching tasks", error);
@@ -119,7 +121,8 @@ const OperatorDashboardV2 = (props: PropsType) => {
     if (tasks.length === 0) return null;
 
     return (
-      <Box>
+      <>
+      {!noItems && <Box>
         <Flex align={"center"} gap={"sm"} justify={"space-between"}>
           <Flex align={"center"} gap={6}>
             <Title order={4} sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -221,7 +224,8 @@ const OperatorDashboardV2 = (props: PropsType) => {
             );
           })}
         </SimpleGrid>
-      </Box>
+      </Box>}
+      </>
     );
   };
 

@@ -29,6 +29,7 @@ export default function PositiveResponses() {
   
   return (
     <Box>
+      {data.length > 0 && <>
       <Flex align={"center"} gap={"5px"}>
         <Text
           style={{
@@ -62,9 +63,16 @@ export default function PositiveResponses() {
         </Flex>
       </Flex>
       <Grid>
-        {data?.slice(page * 4, page * 4 + 4).map((item, index) => {
+        {data?.slice(page * 4, page * 4 + 4).map((item: {
+          auth_token: string;
+          prospect_id: string;
+          avatar: string;
+          full_name: string;
+          last_msg: string;
+          date: string;
+        }, index) => {
           return (
-            <Grid.Col span={3}>
+            <Grid.Col span={3} key={index}>
               <Paper
                 bg={"white"}
                 my={"xs"}
@@ -95,6 +103,7 @@ export default function PositiveResponses() {
           );
         })}
       </Grid>
+      </>}
     </Box>
   );
 }

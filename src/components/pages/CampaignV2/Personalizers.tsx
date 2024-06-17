@@ -19,9 +19,7 @@ export default function Personalizers(props: any) {
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   const [loadingPersonalizers, setLoadingPersonalizers] = useState(false);
-  const [sequences, setSequences] = useState<any[]>(props.sequences || []);
   const [personalizersEnabled, setPersonalizersEnabled] = useState(currentProject?.is_ai_research_personalization_enabled);
-  const [personalizers, setPersonalizers] = useState([]);
 
   const updatePersonalizersEnabled = (enabled: boolean) => {
     fetch(`${API_URL}/client/archetype/${id}/update_personalizers_enabled`, {
@@ -51,7 +49,7 @@ export default function Personalizers(props: any) {
     const clientArchetypeId = Number(id);
     const response = await fetchCampaignPersonalizers(userToken, clientArchetypeId);
     if (response) {
-      setPersonalizers(response.questions);
+      props.setPersonalizers(response.questions);
     }
     setLoadingPersonalizers(false);
   };
@@ -162,10 +160,10 @@ export default function Personalizers(props: any) {
                 modal: "campaignPersonalizersModal",
                 title: <Title order={3}>Personalizers</Title>,
                 innerProps: {
-                  sequences: sequences,
+                  sequences: props.sequences,
                   ai_researcher_id: statsData?.ai_researcher_id,
                   id,
-                  setPersonalizers,
+                  setPersonalizers: props.setPersonalizers
                 },
                 centered: true,
                 styles: {
@@ -196,12 +194,12 @@ export default function Personalizers(props: any) {
               </Text>
             </Flex>
           </Flex>
-        ) : personalizers && personalizers.length > 0 ? (
+        ) : props.personalizers && props.personalizers.length > 0 ? (
           <Flex direction={"column"} w={"100%"}>
             <Flex w={"100%"} mah={300} gap={"md"} p={"lg"} direction="column">
-              {personalizers &&
-                personalizers.length > 0 &&
-                personalizers.map((item: any, index: number) => {
+              {props.personalizers &&
+                props.personalizers.length > 0 &&
+                props.personalizers.map((item: any, index: number) => {
                   return (
                     <Flex
                       w="100%"
@@ -271,7 +269,7 @@ export default function Personalizers(props: any) {
             <Flex align={"center"} w={"100%"} justify={"space-between"} p={"md"} style={{ borderTop: "1px solid #ECEEF1" }}>
               <Flex w={"100%"} align={"center"} justify={"space-between"} style={{ border: "1px solid #ced4da" }}>
                 <Text w={"100%"} align="center" color="gray" size={"sm"} fw={500}>
-                  {personalizers.length} {personalizers.length === 1 ? "Personalizer" : "Personalizers"}
+                  {props.personalizers.length} {props.personalizers.length === 1 ? "Personalizer" : "Personalizers"}
                 </Text>
                 <Divider orientation="vertical" />
                 <ActionIcon h={"100%"} mx={3}>
@@ -310,7 +308,7 @@ export default function Personalizers(props: any) {
                 innerProps: {
                   ai_researcher_id: statsData?.ai_researcher_id,
                   id,
-                  setPersonalizers,
+                  setPersonalizers: props.setPersonalizers,
                 },
                 centered: true,
                 styles: {

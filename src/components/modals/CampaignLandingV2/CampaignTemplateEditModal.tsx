@@ -58,6 +58,8 @@ import { getEmailSubjectLineTemplates } from "@utils/requests/emailSubjectLines"
 import { SubjectLineTemplate } from "src";
 import { SubjectLineItem } from "@pages/EmailSequencing/DetailEmailSequencing";
 import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
+import InlineAdder from "@pages/Sequence/InlineTemplateAdder";
+import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
 
 interface SwitchStyle extends Partial<MantineStyleSystemProps> {
   label?: React.CSSProperties;
@@ -120,6 +122,7 @@ export default function CampaignTemplateEditModal({
   const [searchQuery, setSearchQuery] = useState("");
   const [manuallyAddedTemplate, setManuallyAddedTemplate] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailSubjectLineModalOpened, setEmailSubjectLineModalOpened] = useState(false);
   const [addingLinkedinAsset, setAddingLinkedinAsset] = useState(false);
   const [addedTemplate, setAddedTemplate] = useState<AssetType | null>(
     innerProps.addedTemplate || null
@@ -1070,95 +1073,20 @@ export default function CampaignTemplateEditModal({
                               })}
                           </>
                           {/* Add new template */}
-                          <Textarea
-                            minRows={3}
-                            placeholder="Prefer to create your own message? Write direct in here ..."
-                            value={manuallyAddedTemplate}
-                            onChange={(event) => {
-                              const value = event.currentTarget.value;
-                              setManuallyAddedTemplate(value);
-                            }}
-                            style={{
-                              outline: (manuallyAddedTemplate.match(/\[\[/g)?.length || 0) !== (manuallyAddedTemplate.match(/\]\]/g)?.length || 0) ? '2px solid red' : 'none'
-                            }}
+                          <InlineAdder
+                            manuallyAddedTemplate={manuallyAddedTemplate}
+                            setManuallyAddedTemplate={setManuallyAddedTemplate}
+                            addingLinkedinAsset={addingLinkedinAsset}
+                            setAddingLinkedinAsset={setAddingLinkedinAsset}
+                            sequenceType={sequenceType}
+                            userData={userData}
+                            userToken={userToken}
+                            API_URL={API_URL}
+                            addToStagingData={addToStagingData}
+                            currentStepNum={currentStepNum}
+                            stagingData={stagingData}
+                            setStagingData={setStagingData}
                           />
-                          <Button
-                            loading={addingLinkedinAsset}
-                            size="sm"
-                            ml="auto"
-                            mt="xs"
-                            mb="xs"
-                            rightIcon={<IconArrowRight size={"0.9rem"} />}
-                            onClick={() => {
-                              //create new asset 
-                              const newAsset = {
-                                asset_key:
-                                  "New Template (" +
-                                  Math.random()
-                                    .toString(36)
-                                    .substring(2, 8)
-                                    .toUpperCase() +
-                                  ")",
-                                asset_raw_value: manuallyAddedTemplate,
-                                asset_tags:
-                                  sequenceType === "email"
-                                    ? ["email template"]
-                                    : ["linkedin template"],
-                                asset_type: "TEXT",
-                                asset_value:
-                                  sequenceType === "email"
-                                    ? manuallyAddedTemplate.replaceAll(
-                                        "\n",
-                                        "<br/>"
-                                      )
-                                    : manuallyAddedTemplate,
-                                client_archetype_ids: [userData.client.id],
-                                client_id: userData.client.id,
-                                // id: Math.floor(Math.random() * 1000000),
-                                num_opens: null,
-                                num_replies: null,
-                                num_sends: null,
-                              };
-                              if (sequenceType === "linkedin") {
-                                setAddingLinkedinAsset(true);
-                                fetch(`${API_URL}/client/create_archetype_asset`, {
-                                  method: 'POST',
-                                  headers: {
-                                    'Content-Type': 'application/json',
-                                    Authorization: `Bearer ${userToken}`,
-                                  },
-                                  body: JSON.stringify(newAsset),
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                  addToStagingData(
-                                    data.data,
-                                    currentStepNum,
-                                    stagingData,
-                                    setStagingData
-                                  );
-                                })
-                                .catch(error => {
-                                  console.error('Error creating new asset:', error);
-                                }).finally(() => {
-                                  setAddingLinkedinAsset(false);
-                                  setManuallyAddedTemplate("");
-                                }
-                                );
-                              } else {
-                                addToStagingData(
-                                  { ...newAsset, id: Math.floor(Math.random() * 1000000) },
-                                  currentStepNum,
-                                  stagingData,
-                                  setStagingData
-                                );
-                                setManuallyAddedTemplate("");
-                              }
-                            }
-                            }>
-                          
-                            Add Message
-                          </Button>
                         </Flex>
                       </ScrollArea>
                     </Tabs.Panel>
@@ -1166,7 +1094,7 @@ export default function CampaignTemplateEditModal({
                 })}
               {sequenceType === "email" && (
                 <Tabs.Panel value={"subjectLines"}>
-                  <ScrollArea viewportRef={viewport} h={350} px="sm">
+                  <ScrollArea viewportRef={viewport} h={350} px="sm" style={{ position: 'relative' }}>
                     {innerProps.emailSubjectLines.map(
                       (subjectLine: SubjectLineTemplate) => {
                         return (
@@ -1181,6 +1109,18 @@ export default function CampaignTemplateEditModal({
                         );
                       }
                     )}
+                    <CreateEmailSubjectLineModal
+                      modalOpened={emailSubjectLineModalOpened}
+                      openModal={() => console.log("Open Modal")}
+                      closeModal={() => {setEmailSubjectLineModalOpened(false); innerProps.refetchSequenceData(Number(currentProject?.id || -1))}}
+                      backFunction={() => {setEmailSubjectLineModalOpened(false); innerProps.refetchSequenceData(Number(currentProject?.id || -1))} }
+                      archetypeID={currentProject?.id || -1}
+                    />
+                    <div style={{ position: 'sticky', bottom: 0, background: 'white', padding: '8px 0' }}>
+                      <Button color='grape' leftIcon={<IconPlus size={"0.9rem"} />} onClick={() => setEmailSubjectLineModalOpened(true)} fullWidth>
+                        Add Subject line
+                      </Button>
+                    </div>
                   </ScrollArea>
                 </Tabs.Panel>
               )}

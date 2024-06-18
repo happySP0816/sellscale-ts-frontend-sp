@@ -445,6 +445,27 @@ export default function SegmentV3() {
       });
   };
 
+  const customPullData = [
+    {
+      person_name: "Received funding in April",
+      contacts: 4918,
+      assets: 8202,
+      client_sdr: {
+        sdr_name: "David Wei",
+      },
+      process: 39,
+    },
+    {
+      person_name: "B2B AI Companies",
+      contacts: 4918,
+      assets: 8202,
+      client_sdr: {
+        sdr_name: "David Wei",
+      },
+      process: 76,
+    },
+  ];
+
   useEffect(() => {
     getAllSDRs();
     getAllSegments(true);
@@ -554,6 +575,378 @@ export default function SegmentV3() {
                 Add Contacts
               </Button>
             </Flex>
+          </Flex>
+          <Flex gap={"sm"} align={"center"} w={"100%"} mt={"sm"}>
+            <IconLoader size={"1.2rem"} color="gray" className="mb-[2px]" />
+            <Text sx={{ whiteSpace: "nowrap" }} fw={600}>
+              Custom Pulls in Progress
+            </Text>
+            <Flex>
+              <Badge variant="filled">{2}</Badge>
+            </Flex>
+            <Divider w={"100%"} />
+            {/* <ActionIcon onClick={unusedToggle}>{openedUnUsed ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon> */}
+          </Flex>
+          <SimpleGrid cols={3} mt={"lg"}>
+            {customPullData?.map((item: any, index: any) => {
+              return (
+                <Paper key={index} withBorder p={"sm"} className="flex flex-col justify-between" style={{ borderColor: "#fee8ab" }}>
+                  <Flex justify={"space-between"} align={"center"}>
+                    <Text fw={700} lineClamp={1}>
+                      {item?.person_name}
+                    </Text>
+                    {/* <ActionIcon>
+                      <IconEdit size={"1.2rem"} />
+                    </ActionIcon> */}
+                    <Flex gap={1}>
+                      <Tooltip
+                        color="white"
+                        arrowPosition="center"
+                        arrowOffset={45}
+                        arrowSize={8}
+                        position="top-start"
+                        withArrow
+                        label={
+                          <Paper withBorder shadow="sm" p={"md"}>
+                            <Flex align={"center"} gap={4}>
+                              <IconSend size={"0.9rem"} color="#228be6" className="mb-[2px]" />
+                              <Text fw={500} size={"sm"}>
+                                Outreach Summary
+                              </Text>
+                            </Flex>
+                            <Box mt={"sm"}>
+                              <Flex gap={3} align={"center"}>
+                                <Progress value={50} w={"100%"} />
+                                <Text color="#228BE6" fw={600} size={"xs"}>
+                                  {50}%
+                                </Text>
+                              </Flex>
+                              <Text fw={600} size={"xs"}>
+                                {213}/{213} <span className=" text-gray-400">in Segment</span>
+                              </Text>
+                            </Box>
+                            <Box mt={"sm"}>
+                              <Flex gap={3} align={"center"}>
+                                <Progress value={50} w={"100%"} color="grape" />
+                                <Text color="grape" fw={600} size={"xs"}>
+                                  {50}%
+                                </Text>
+                              </Flex>
+                              <Text fw={600} size={"xs"}>
+                                {106}/{213} <span className=" text-gray-400">in Children Segment(s)</span>
+                              </Text>
+                            </Box>
+                          </Paper>
+                        }
+                        styles={{
+                          tooltip: {
+                            padding: 0,
+                            boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2);",
+                          },
+                          arrow: {
+                            boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2);",
+                          },
+                        }}
+                      >
+                        <ActionIcon>
+                          <IconLoader size={"1.2rem"} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Menu
+                        shadow="md"
+                        withinPortal
+                        position="right"
+                        // disabled={isMySegment}
+                        styles={{
+                          itemLabel: {
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          },
+                        }}
+                      >
+                        <Menu.Target>
+                          <ActionIcon>
+                            <IconDotsVertical size={"1.2rem"} />
+                          </ActionIcon>
+                        </Menu.Target>
+
+                        <Menu.Dropdown>
+                          <Menu.Label>Prospects</Menu.Label>
+                          <Menu.Item
+                          // onClick={() => {
+                          //   window.location.href = `/contacts/find?segment_id=${id}`;
+                          // }}
+                          >
+                            <IconUsersPlus size={"0.9rem"} />
+                            Add Prospects
+                          </Menu.Item>
+                          <Menu.Item
+                            onClick={() => {
+                              // setShowViewProspectsModal(true);
+                              // setSelectedSegmentId(id);
+                            }}
+                          >
+                            <IconUsers size={"0.9rem"} />
+                            View Prospects
+                          </Menu.Item>
+
+                          <Menu.Divider />
+                          <Menu.Label>Change</Menu.Label>
+
+                          <Menu.Item
+                            onClick={() => {
+                              // duplicateSegment(id, true);
+                            }}
+                          >
+                            <IconCopy size={"0.9rem"} />
+                            Duplicate Segment
+                          </Menu.Item>
+                          <Menu.Item
+                          // onClick={() => {
+                          //   setSelectedSegmentId(id);
+                          //   setShowBatchModal(true);
+                          // }}
+                          >
+                            <IconArrowsSplit2 size={"0.9rem"} />
+                            Create Batches
+                          </Menu.Item>
+                          <Menu.Item
+                          // onClick={() => {
+                          //   setShowMoveSegmentModal(true);
+                          //   setSelectedSegmentId(id);
+                          // }}
+                          >
+                            <IconSwitch size={"0.9rem"} />
+                            Move Segment
+                          </Menu.Item>
+
+                          <Menu.Divider />
+                          <Menu.Label>Split</Menu.Label>
+                          <Menu.Item
+                            onClick={() =>
+                              openContextModal({
+                                modal: "splitSegment",
+                                title: (
+                                  <Group position="apart">
+                                    <div>
+                                      <Title
+                                        order={3}
+                                        sx={{
+                                          display: "flex",
+                                          gap: "8px",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <IconButterfly color="#228be6" style={{ marginTop: "-5px" }} />
+                                        Split Segment
+                                      </Title>
+                                    </div>
+                                  </Group>
+                                ),
+                                styles: (theme) => ({
+                                  title: {
+                                    width: "100%",
+                                  },
+                                  header: {
+                                    margin: 0,
+                                  },
+                                }),
+                                innerProps: {
+                                  parentSegments: data.map((segment: any) => ({
+                                    segment_id: segment.id,
+                                    segment_title: segment.segment_title,
+                                  })),
+                                  onSplit: (segment_id: any, segment_title: any) => {
+                                    createSegment(true, segment_id, segment_title);
+                                  },
+                                },
+                              })
+                            }
+                          >
+                            <IconButterfly size={"0.9rem"} />
+                            Manually Split Segment
+                          </Menu.Item>
+                          <Menu.Item
+                            onClick={() =>
+                              openContextModal({
+                                modal: "autosplitsegment",
+                                title: (
+                                  <Group position="apart">
+                                    <div>
+                                      <Title
+                                        order={2}
+                                        sx={{
+                                          display: "flex",
+                                          gap: "8px",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <IconWand color="#228be6" />
+                                        Auto Split Segment
+                                      </Title>
+                                    </div>
+                                  </Group>
+                                ),
+                                styles: (theme) => ({
+                                  title: {
+                                    width: "100%",
+                                  },
+                                  header: {
+                                    margin: 0,
+                                  },
+                                }),
+                                innerProps: {},
+                              })
+                            }
+                          >
+                            <IconWand size={"0.9rem"} />
+                            Auto Split Segment
+                          </Menu.Item>
+
+                          <Menu.Divider />
+                          <Menu.Label color="red">Danger zone</Menu.Label>
+                          <Menu.Item
+                            color="red"
+                            // onClick={() => {
+                            //   setSelectedSegmentId(id);
+                            //   setShowTransferSegmentModal(true);
+                            // }}
+                          >
+                            <IconUsersMinus size={"0.9rem"} />
+                            Transfer to Teammate
+                          </Menu.Item>
+                          <Menu.Item
+                            color="red"
+                            onClick={() =>
+                              openContextModal({
+                                modal: "clearsegment",
+                                title: (
+                                  <Group position="apart">
+                                    <div>
+                                      <Title
+                                        order={2}
+                                        sx={{
+                                          display: "flex",
+                                          gap: "8px",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <IconTrash color="red" />
+                                        Clear Segment
+                                      </Title>
+                                    </div>
+                                  </Group>
+                                ),
+                                styles: (theme) => ({
+                                  title: {
+                                    width: "100%",
+                                  },
+                                  header: {
+                                    margin: 0,
+                                  },
+                                }),
+                                innerProps: {
+                                  // showLoader: true,
+                                  // segmentId: id,
+                                  // num_prospected: num_prospected,
+                                  // clearSegmentProspects: clearSegmentProspects,
+                                },
+                              })
+                            }
+                          >
+                            <IconBackspace size={"0.9rem"} />
+                            Clear Prospects
+                          </Menu.Item>
+                          <Menu.Item
+                            color="red"
+                            style={{ display: "flex", alignItems: "center" }}
+                            onClick={() => {
+                              openContextModal({
+                                modal: "deletesegment",
+                                title: (
+                                  <Group position="apart">
+                                    <div>
+                                      <Title
+                                        order={2}
+                                        sx={{
+                                          display: "flex",
+                                          gap: "8px",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <IconTrash color="red" />
+                                        Delete Segment
+                                      </Title>
+                                    </div>
+                                  </Group>
+                                ),
+                                styles: (theme) => ({
+                                  root: {
+                                    maxWidth: "40%",
+                                  },
+                                  title: {
+                                    width: "100%",
+                                  },
+                                  header: {
+                                    margin: 0,
+                                  },
+                                }),
+                                innerProps: {
+                                  // showLoader: true,
+                                  // segmentId: id,
+                                  // getAllSegments: getAllSegments,
+                                },
+                              });
+                            }}
+                          >
+                            <IconTrash size={"0.9rem"} />
+                            Delete Segment
+                          </Menu.Item>
+                        </Menu.Dropdown>
+                      </Menu>
+                    </Flex>
+                  </Flex>
+                  <Box mt={"sm"}>
+                    <Flex align={"center"} gap={"xs"}>
+                      <Text color="gray" size={"sm"} fw={500}>
+                        Estimates:
+                      </Text>
+                      <Text fw={600} size={"sm"}>
+                        {item.contacts} people
+                      </Text>{" "}
+                      <Divider orientation="vertical" />
+                      <Text fw={600} size={"sm"}>
+                        {item.assets} accounts
+                      </Text>
+                    </Flex>
+                    <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                      <Text color="gray" size={"sm"} fw={500}>
+                        Created by:
+                      </Text>
+                      <Avatar src={item.client_sdr.img_url} size={"sm"} radius={"xl"} />
+                      <Text size={"sm"} fw={500}>
+                        {item.client_sdr.sdr_name}
+                      </Text>
+                    </Flex>
+                    {/* <Button rightIcon={<IconArrowRight size={"0.9rem"} />} mt={"sm"}>
+                      Create Campaign
+                    </Button> */}
+                    <Progress value={item.process} mt={"sm"} />
+                  </Box>
+                </Paper>
+              );
+            })}
+          </SimpleGrid>
+          <Flex gap={"sm"} align={"center"} w={"100%"} mt={"md"}>
+            <Text sx={{ whiteSpace: "nowrap" }} fw={600}>
+              Existing Segments
+            </Text>
+            <Flex>
+              <Badge variant="filled">{getNestedRows(data).length}</Badge>
+            </Flex>
+            <Divider w={"100%"} />
+            {/* <ActionIcon onClick={unusedToggle}>{openedUnUsed ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon> */}
           </Flex>
           <SimpleGrid cols={3} mt={"lg"}>
             {getNestedRows(data)?.map((item: any, index: any) => {

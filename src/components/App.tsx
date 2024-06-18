@@ -85,6 +85,7 @@ import SelectSonarModal from "@modals/SelectSonarModal";
 import CreateFundraiseSonarmodal from "@modals/Sonarmodal/CreateFundraiseSonarModal";
 import AnalyticsModal from "@modals/AnalyticsModal";
 import CycleAnalyticsModal from "@modals/CycleAnalyticsModal";
+import AddSegmentModal from "@modals/website/AddSegmentModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -288,6 +289,7 @@ export default function App() {
               createfundraiseModal: CreateFundraiseSonarmodal,
               analyticModal: AnalyticsModal,
               cycleanalyticModal: CycleAnalyticsModal,
+              createSegmentModal: AddSegmentModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

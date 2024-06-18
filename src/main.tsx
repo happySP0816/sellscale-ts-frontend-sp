@@ -84,7 +84,6 @@ import CampaignLandingV2 from "@pages/CampaignV2/CampaignLandingV2";
 import B2BSearch from "@pages/B2BSearch/B2bSearch";
 import Costs from "@common/internal_tools/Costs";
 import DomainManagement from "@pages/DomainManagement";
-import InboxPurchasing from "@pages/InboxPurchasing";
 import HomePageV2 from "@pages/Overview/HomePageV2";
 import ProspectPuller from "@pages/ProspectPuller";
 

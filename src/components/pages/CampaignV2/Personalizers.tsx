@@ -2,10 +2,27 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
 import { API_URL } from "@constants/data";
-import { ActionIcon, Button, Divider, Flex, Loader, Paper, Skeleton, Switch, Text, Title, Tooltip } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Divider,
+  Flex,
+  Loader,
+  Paper,
+  Skeleton,
+  Switch,
+  Text,
+  Title,
+  Tooltip,
+} from "@mantine/core";
 import { modals, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconChevronLeft, IconChevronRight, IconPlus, IconQuestionMark } from "@tabler/icons";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconPlus,
+  IconQuestionMark,
+} from "@tabler/icons";
 import { fetchCampaignPersonalizers } from "@utils/requests/campaignOverview";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -16,10 +33,14 @@ export default function Personalizers(props: any) {
 
   const id = Number(useParams().id);
   const userToken = useRecoilValue(userTokenState);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
 
   const [loadingPersonalizers, setLoadingPersonalizers] = useState(false);
-  const [personalizersEnabled, setPersonalizersEnabled] = useState(currentProject?.is_ai_research_personalization_enabled);
+  const [personalizersEnabled, setPersonalizersEnabled] = useState(
+    currentProject?.is_ai_research_personalization_enabled
+  );
 
   const updatePersonalizersEnabled = (enabled: boolean) => {
     fetch(`${API_URL}/client/archetype/${id}/update_personalizers_enabled`, {
@@ -35,7 +56,9 @@ export default function Personalizers(props: any) {
       .then((response) => {
         showNotification({
           title: "Personalizers Updated",
-          message: `Personalizers have been ${enabled ? "enabled" : "disabled"}`,
+          message: `Personalizers have been ${
+            enabled ? "enabled" : "disabled"
+          }`,
         });
         setPersonalizersEnabled(enabled);
       })
@@ -47,7 +70,10 @@ export default function Personalizers(props: any) {
   const getPersonalizers = async () => {
     setLoadingPersonalizers(true);
     const clientArchetypeId = Number(id);
-    const response = await fetchCampaignPersonalizers(userToken, clientArchetypeId);
+    const response = await fetchCampaignPersonalizers(
+      userToken,
+      clientArchetypeId
+    );
     if (response) {
       props.setPersonalizers(response.questions);
     }
@@ -92,7 +118,9 @@ export default function Personalizers(props: any) {
 
   useEffect(() => {
     if (currentProject) {
-      setPersonalizersEnabled(currentProject?.is_ai_research_personalization_enabled);
+      setPersonalizersEnabled(
+        currentProject?.is_ai_research_personalization_enabled
+      );
     }
   }, [currentProject]);
 
@@ -102,7 +130,12 @@ export default function Personalizers(props: any) {
 
   return (
     <Paper data-tour="personalizers" withBorder>
-      <Flex align={"center"} justify={"space-between"} p={"md"} style={{ borderBottom: "1px solid #ECEEF1" }}>
+      <Flex
+        align={"center"}
+        justify={"space-between"}
+        p={"md"}
+        style={{ borderBottom: "1px solid #ECEEF1" }}
+      >
         <Flex gap={"sm"} align={"center"}>
           <Flex align="center" gap="xs">
             <Text fw={600} size={20} color="#37414E">
@@ -111,7 +144,8 @@ export default function Personalizers(props: any) {
             <Tooltip
               label={
                 <Text size="sm">
-                  Create hyper-relevant outreach strategies <br></br>using AI-powered research for personalized engagement.
+                  Create hyper-relevant outreach strategies <br></br>using
+                  AI-powered research for personalized engagement.
                 </Text>
               }
               withArrow
@@ -163,7 +197,7 @@ export default function Personalizers(props: any) {
                   sequences: props.sequences,
                   ai_researcher_id: statsData?.ai_researcher_id,
                   id,
-                  setPersonalizers: props.setPersonalizers
+                  setPersonalizers: props.setPersonalizers,
                 },
                 centered: true,
                 styles: {
@@ -183,7 +217,13 @@ export default function Personalizers(props: any) {
       </Flex>
       <Flex>
         {loadingPersonalizers ? (
-          <Flex direction="column" align="center" justify="center" m="auto" mt="sm">
+          <Flex
+            direction="column"
+            align="center"
+            justify="center"
+            m="auto"
+            mt="sm"
+          >
             <Skeleton height={30} radius="xl" width="80%" />
             <Skeleton height={20} radius="xl" width="60%" mt="sm" />
             <Skeleton height={20} radius="xl" width="60%" mt="sm" />
@@ -196,7 +236,14 @@ export default function Personalizers(props: any) {
           </Flex>
         ) : props.personalizers && props.personalizers.length > 0 ? (
           <Flex direction={"column"} w={"100%"}>
-            <Flex w={"100%"} mah={300} gap={"md"} p={"lg"} direction="column">
+            <Flex
+              w={"100%"}
+              mah={300}
+              gap={"md"}
+              p={"lg"}
+              direction="column"
+              sx={{ overflowY: "auto" }}
+            >
               {props.personalizers &&
                 props.personalizers.length > 0 &&
                 props.personalizers.map((item: any, index: number) => {
@@ -214,7 +261,9 @@ export default function Personalizers(props: any) {
                     >
                       <Flex gap={"md"} align={"center"}>
                         <Text fw={600} size="12px" miw="200px">
-                          <BracketGradientWrapper>{item.key}</BracketGradientWrapper>
+                          <BracketGradientWrapper>
+                            {item.key}
+                          </BracketGradientWrapper>
                         </Text>
                       </Flex>
                       <Button
@@ -228,7 +277,11 @@ export default function Personalizers(props: any) {
                             title: <Title order={4}>Delete Personalizer</Title>,
                             children: (
                               <>
-                                <Text>Deleting this personalizer will remove it from all sequences and templates. Are you sure you want to delete it?</Text>
+                                <Text>
+                                  Deleting this personalizer will remove it from
+                                  all sequences and templates. Are you sure you
+                                  want to delete it?
+                                </Text>
                                 <Flex
                                   style={{
                                     fontFamily: "monospace, monospace", // Monospaced font
@@ -266,10 +319,30 @@ export default function Personalizers(props: any) {
                   );
                 })}
             </Flex>
-            <Flex align={"center"} w={"100%"} justify={"space-between"} p={"md"} style={{ borderTop: "1px solid #ECEEF1" }}>
-              <Flex w={"100%"} align={"center"} justify={"space-between"} style={{ border: "1px solid #ced4da" }}>
-                <Text w={"100%"} align="center" color="gray" size={"sm"} fw={500}>
-                  {props.personalizers.length} {props.personalizers.length === 1 ? "Personalizer" : "Personalizers"}
+            <Flex
+              align={"center"}
+              w={"100%"}
+              justify={"space-between"}
+              p={"md"}
+              style={{ borderTop: "1px solid #ECEEF1" }}
+            >
+              <Flex
+                w={"100%"}
+                align={"center"}
+                justify={"space-between"}
+                style={{ border: "1px solid #ced4da" }}
+              >
+                <Text
+                  w={"100%"}
+                  align="center"
+                  color="gray"
+                  size={"sm"}
+                  fw={500}
+                >
+                  {props.personalizers.length}{" "}
+                  {props.personalizers.length === 1
+                    ? "Personalizer"
+                    : "Personalizers"}
                 </Text>
                 <Divider orientation="vertical" />
                 <ActionIcon h={"100%"} mx={3}>

@@ -132,6 +132,7 @@ export default function CampaignPersonalizersModal({
   const fetchCurrentProject = async () => {
     const project = await getFreshCurrentProject(userToken, +innerProps.id);
     setCurrentProject(project);
+    setCurrentAiResearcherId(project?.ai_researcher_id + "");
   };
 
   const fetchProspects = async () => {
@@ -254,10 +255,6 @@ export default function CampaignPersonalizersModal({
     getAiResearchers();
     fetchCurrentProject();
   }, [innerProps.id]);
-
-  useEffect(() => {
-    setCurrentAiResearcherId(currentProject?.ai_researcher_id + "");
-  }, [currentProject?.ai_researcher_id]);
 
   const getAiResearchers = async () => {
     const data: any = await researchers.getAiResearchers(userToken);
@@ -384,7 +381,7 @@ export default function CampaignPersonalizersModal({
                   innerProps: {
                     edit: false,
                     sequences: sequences,
-                    ai_researcher_id: innerProps.ai_researcher_id,
+                    ai_researcher_id: currentAiResearcherId,
                     campaign_id: innerProps.id,
                     setPersonalizers: innerProps.setPersonalizers,
                   },
@@ -429,7 +426,7 @@ export default function CampaignPersonalizersModal({
                             </Text>
                             <Flex gap={3} align={"center"}>
                               <ActionIcon
-                                onClick={() =>
+                                onClick={() => {
                                   openContextModal({
                                     modal: "addQuestionModal",
                                     title: (
@@ -447,8 +444,7 @@ export default function CampaignPersonalizersModal({
                                       currentTab: item.type,
                                       relevancy: item.content,
                                       question: item.title,
-                                      ai_researcher_id:
-                                        innerProps.ai_researcher_id,
+                                      ai_researcher_id: currentAiResearcherId,
                                       campaign_id: innerProps.id,
                                       setPersonalizers:
                                         innerProps.setPersonalizers,
@@ -459,8 +455,8 @@ export default function CampaignPersonalizersModal({
                                         minWidth: "500px",
                                       },
                                     },
-                                  })
-                                }
+                                  });
+                                }}
                               >
                                 <IconEdit color="gray" size={"0.9rem"} />
                               </ActionIcon>

@@ -1,6 +1,6 @@
 import { ActionIcon, Avatar, Box, Button, Collapse, Flex, Paper, ScrollArea, Switch, Tabs, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconBrandLinkedin, IconChevronDown, IconChevronUp, IconGlobe } from "@tabler/icons";
+import { IconBrandLinkedin, IconChevronDown, IconChevronUp, IconGlobe, IconWorld } from "@tabler/icons";
 import { useState } from "react";
 
 export default function ProspectPuller() {
@@ -178,23 +178,21 @@ export default function ProspectPuller() {
               {searchResult.map((item, index) => {
                 return (
                   <Paper withBorder radius={"sm"} mb={"md"} p={"sm"} key={index}>
-                    <Flex justify={"space-between"} align={"end"}>
+                    <Flex justify={"space-between"}>
                       <Flex align={"start"} gap={"sm"}>
                         <Avatar size={60} radius={"xl"} src={item.avatar} />
                         <Box>
                           <Text size={"lg"} fw={700}>
                             {item.name}
                           </Text>
-                          <Text color="gray" fw={500} size={"sm"} mt={4}>
+                          <Text color="gray" fw={500} size={"sm"} mt={4} lineClamp={1}>
                             {item.job}
                           </Text>
-                          <Button mt={"sm"}>
-                            <IconBrandLinkedin size={"1rem"} />
-                          </Button>
+                          <Button mt={"sm"}>in</Button>
                         </Box>
                       </Flex>
-                      <Box>
-                        <Flex gap={"sm"}>
+                      <Flex direction={"column"} h={"100%"} align={"end"} justify={"space-between"}>
+                        <Flex gap={"sm"} mt={"xs"}>
                           <Box>
                             <Text size={"sm"} fw={700}>
                               {item.company_name}
@@ -206,14 +204,12 @@ export default function ProspectPuller() {
                           <Avatar src={item.company_avatar} size={44} radius={"xl"} />
                         </Flex>
                         <Flex mt={"sm"} gap={"sm"}>
-                          <Button>
-                            <IconBrandLinkedin size={"1rem"} />
-                          </Button>
-                          <Button>
-                            <IconGlobe size={"1rem"} />
+                          <Button>in</Button>
+                          <Button color="violet">
+                            <IconWorld size={"1rem"} />
                           </Button>
                         </Flex>
-                      </Box>
+                      </Flex>
                     </Flex>
                   </Paper>
                 );

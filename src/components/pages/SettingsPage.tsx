@@ -19,12 +19,13 @@ import {
   IconBrandSlack,
   IconCalendar,
   IconCloud,
+  IconExternalLink,
+  IconGlobe,
   IconFilter,
   IconFishHook,
   IconInbox,
   IconRefresh,
   IconSausage,
-  IconTrophy,
   IconWebhook,
 } from "@tabler/icons";
 import PageTitle from "@nav/PageTitle";
@@ -52,13 +53,11 @@ import SettingsConversion from "@common/settings/SettingsConversion";
 import SlackSettings from "@common/slack/SlackSettings";
 import SettingUsage from "@common/settings/SettingUsage";
 import exchangeSlackAuthCode from "@utils/requests/exchangeSlackAuthCode";
-import ComingSoonCard from "@common/library/ComingSoonCard";
 import CRMConnectionPage from "./CRMConnectionPage";
 import ContactRecycling from "@common/settings/ContactRecycling";
 import WebhookConnectionPage from "./WebhookConnectionPage";
 import AccountSettings from "./AccountSettings";
 import Organization from "@common/settings/Organization";
-import { InboxesManagementPage } from "@common/settings/InboxesManagementPage";
 
 export default function SettingsPage() {
   setPageTitle("Settings");
@@ -194,8 +193,15 @@ export default function SettingsPage() {
           >
             Contact Recycling
           </Tabs.Tab>
-          <Tabs.Tab value="inboxes" icon={<IconInbox size="0.8rem" />}>
-            Inboxes
+          <Tabs.Tab
+            value="domains"
+            icon={<IconGlobe size="0.8rem" />}
+            onClick={() => {
+              // Redirect to /domains
+              navigate("/domains");
+            }}
+          >
+            Domains <IconExternalLink size="0.8rem" />
           </Tabs.Tab>
 
           {/* <Divider /> */}
@@ -314,11 +320,6 @@ export default function SettingsPage() {
         <Tabs.Panel value="contactRecycling" pl="xs">
           <Group noWrap>
             {currentTab === "contactRecycling" && <ContactRecycling />}
-          </Group>
-        </Tabs.Panel>
-        <Tabs.Panel value="inboxes" pl="xs">
-          <Group noWrap>
-            {currentTab === "inboxes" && <InboxesManagementPage />}
           </Group>
         </Tabs.Panel>
 

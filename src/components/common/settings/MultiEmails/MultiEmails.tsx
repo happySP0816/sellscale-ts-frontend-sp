@@ -4,71 +4,34 @@ import {
   Text,
   Stack,
   Badge,
-  Card,
-  Button,
-  Modal,
-  TextInput,
-  Select,
   Tooltip,
   Flex,
-  Avatar,
   Group,
-  CheckIcon,
-  useMantineColorScheme,
   useMantineTheme,
   Divider,
   Input,
   Box,
 } from "@mantine/core";
-import { FC, useEffect, useMemo, useState } from "react";
-import { NylasData } from "./MutlEmails.types";
+import { useEffect, useState } from "react";
 import {
   Icon123,
   IconCircleCheck,
   IconCircleX,
   IconLetterT,
-  IconLink,
   IconPercentage,
-  IconPlus,
   IconSearch,
-  IconSend,
   IconWorld,
 } from "@tabler/icons";
-import { useDisclosure } from "@mantine/hooks";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { getSmartleadWarmup } from "@utils/requests/getSmartleadWarmup";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
-import ICPFitPill from "@common/pipeline/ICPFitAndReason";
-import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { sortBy } from "lodash";
 import getEmailBanks from "@utils/requests/getEmailBanks";
 import { IconGrid4x4 } from "@tabler/icons-react";
 import moment from "moment";
+import { EmailBankItem } from "src";
 
-interface EmailBankItem {
-  active: boolean;
-  daily_limit: number;
-  daily_sent_count: number;
-  domain_details: {
-    dkim_record_valid: boolean;
-    dmarc_record_valid: boolean;
-    forwarding_enabled: boolean;
-    id: number;
-    spf_record_valid: boolean;
-  };
-  email_address: string;
-  email_type: "ANCHOR" | "SELLSCALE" | "ALIAS";
-  id: number;
-  nylas_account_id: string;
-  nylas_active: boolean;
-  nylas_auth_code: string;
-  smartlead_reputation: number;
-  smartlead_warmup_enabled: boolean;
-  total_sent_count: number;
-}
-
-const MultiEmails = (props: {hideAnchor?: boolean}) => {
+const MultiEmails = (props: { hideAnchor?: boolean }) => {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const [allEmails, setAllEmails] = useState<EmailBankItem[]>([]);
@@ -85,11 +48,10 @@ const MultiEmails = (props: {hideAnchor?: boolean}) => {
     if (!manualEmails) manualEmails = emails;
     const data = sortBy(manualEmails, sortStatus.columnAccessor);
     setEmails(sortStatus.direction === "desc" ? data.reverse() : data);
-  }
+  };
   useEffect(() => {
     sortEmails();
   }, [sortStatus]);
-
 
   const triggerGetEmailBanks = async () => {
     const result = await getEmailBanks(userToken);
@@ -97,7 +59,9 @@ const MultiEmails = (props: {hideAnchor?: boolean}) => {
       const data = result.data.emails;
 
       if (props.hideAnchor) {
-        const nonAnchorMail = data.filter((email: any) => email.email_type !== "ANCHOR");
+        const nonAnchorMail = data.filter(
+          (email: any) => email.email_type !== "ANCHOR"
+        );
         setEmails(nonAnchorMail);
         setAllEmails(nonAnchorMail);
         sortEmails(nonAnchorMail);
@@ -106,7 +70,6 @@ const MultiEmails = (props: {hideAnchor?: boolean}) => {
         setAllEmails(data);
         sortEmails(data);
       }
-
     }
   };
   useEffect(() => {
@@ -146,16 +109,18 @@ const MultiEmails = (props: {hideAnchor?: boolean}) => {
               } else {
                 setEmails(
                   allEmails.filter((email) =>
-                    email.email_address.toLowerCase().includes(e.target.value.toLowerCase())
+                    email.email_address
+                      .toLowerCase()
+                      .includes(e.target.value.toLowerCase())
                   )
                 );
               }
 
-              setSearchInput(e.target.value)
+              setSearchInput(e.target.value);
             }}
           />
           <Box
-            ml='md'
+            ml="md"
             style={{
               border: "1px solid",
               borderColor: theme.colors.gray[5],
@@ -163,7 +128,7 @@ const MultiEmails = (props: {hideAnchor?: boolean}) => {
               display: "flex",
               justifyContent: "center",
             }}
-            px={'sm'}
+            px={"sm"}
           >
             <Flex w="100%" justify={"center"} align={"center"}>
               <Text size="12px">

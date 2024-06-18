@@ -7,10 +7,12 @@ import { API_URL } from "@constants/data";
  * @param userToken
  * @returns - MsgResponse
  */
-export default async function getDomainDetails(userToken: string): Promise<MsgResponse> {
-
+export default async function getDomainDetails(
+  userToken: string,
+  includeClientEmailBanks: boolean = false
+): Promise<MsgResponse> {
   const response = await fetch(
-    `${API_URL}/domains/all`,
+    `${API_URL}/domains/all?include_client_email_banks=${includeClientEmailBanks}`,
     {
       method: "GET",
       headers: {
@@ -19,5 +21,5 @@ export default async function getDomainDetails(userToken: string): Promise<MsgRe
     }
   );
 
-  return await processResponse(response, 'data');
+  return await processResponse(response, "data");
 }

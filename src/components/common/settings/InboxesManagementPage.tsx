@@ -60,7 +60,10 @@ export const InboxesManagementPage = () => {
   );
 };
 
-const InboxRequestModal = (props: { opened: boolean; close: () => void }) => {
+export const InboxRequestModal = (props: {
+  opened: boolean;
+  close: () => void;
+}) => {
   const userToken = useRecoilValue(userTokenState);
 
   const form = useForm({

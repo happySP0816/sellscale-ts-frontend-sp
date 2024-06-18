@@ -896,3 +896,47 @@ export type ClientSyncCRM = {
   account_sync: boolean;
   opportunity_sync: boolean;
 };
+
+export interface Domain {
+  aws: boolean;
+  aws_amplify_app_id: string;
+  aws_autorenew_enabled: boolean;
+  aws_domain_registration_job_id: string;
+  aws_domain_registration_status: string;
+  aws_hosted_zone_id: string;
+  dkim_record: string;
+  dkim_record_valid: boolean;
+  dmarc_record: string;
+  dmarc_record_valid: boolean;
+  domain: string;
+  domain_setup_tracker: any;
+  email_banks: EmailBankItem[] | null;
+  forward_to: string;
+  forwarding_enabled: boolean;
+  id: number;
+  last_refreshed: string;
+  spf_record: string;
+  spf_record_valid: boolean;
+}
+
+export interface EmailBankItem {
+  active: boolean;
+  daily_limit: number;
+  daily_sent_count: number;
+  domain_details: {
+    dkim_record_valid: boolean;
+    dmarc_record_valid: boolean;
+    forwarding_enabled: boolean;
+    id: number;
+    spf_record_valid: boolean;
+  };
+  email_address: string;
+  email_type: "ANCHOR" | "SELLSCALE" | "ALIAS";
+  id: number;
+  nylas_account_id: string;
+  nylas_active: boolean;
+  nylas_auth_code: string;
+  smartlead_reputation: number;
+  smartlead_warmup_enabled: boolean;
+  total_sent_count: number;
+}

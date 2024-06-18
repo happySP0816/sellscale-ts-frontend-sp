@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import SubjectDropdown from "@common/campaigns/SubjectDropdown";
 import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
 import {
@@ -58,6 +58,7 @@ export default function Sequences(props: any) {
   const [opened, setOpened] = useState(false);
 
   const clientArchetypeId = Number(id);
+  const userData = useRecoilValue(userDataState);
 
   const refetchSequenceData = async (clientArchetypeId: number) => {
     setLoadingSequences(true);
@@ -350,7 +351,7 @@ export default function Sequences(props: any) {
                   </Flex>
                   <Collapse in={true}>
                     <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
-                      <Avatar size={"md"} radius={"xl"} src={linkedinInitialMessages[0]?.avatar} />
+                      <Avatar size={"md"} radius={"xl"} src={userData.img_url} />
                       <Box>
                         <Text fw={600} size={"sm"}>
                           {linkedinInitialMessages[0]?.name}
@@ -429,7 +430,7 @@ export default function Sequences(props: any) {
                       </Flex>
                       <Collapse in={selectStep === index && opened} key={index}>
                         <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
-                          <Avatar size={"md"} radius={"xl"} src={item?.avatar} />
+                          <Avatar size={"md"} radius={"xl"} src={userData.img_url} />
                           <Box>
                             {type === "email" && index === 0 && <SubjectDropdown subjects={emailSubjectLines.map((line: any) => line.subject_line)} />}
                             <Text fw={600} size={"sm"}>

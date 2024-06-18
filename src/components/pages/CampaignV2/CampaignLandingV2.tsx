@@ -530,7 +530,7 @@ export default function CampaignLandingV2() {
                   <Text color="gray" size={"xs"} fw={600}>
                     Created by:
                   </Text>
-                  <Avatar size={"sm"} src={proxyURL(statsData.sdr_img_url)} sx={{ borderRadius: "50%" }} />
+                  <Avatar size={"sm"} src={userData.img_url} sx={{ borderRadius: "50%" }} />
                   <Text fw={600} size={"xs"}>
                     {statsData?.sdr_name?.split(" ")[0]}
                   </Text>

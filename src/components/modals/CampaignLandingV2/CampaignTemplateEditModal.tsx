@@ -4,7 +4,6 @@ import RichTextArea from "@common/library/RichTextArea";
 import { API_URL } from "@constants/data";
 import {
   ActionIcon,
-  Avatar,
   Box,
   Button,
   Center,
@@ -61,6 +60,7 @@ import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
 import { set } from "lodash";
 import InlineAdder from "@pages/Sequence/InlineTemplateAdder";
 import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
+import SequenceVariant from "./SequenceVariant";
 
 interface SwitchStyle extends Partial<MantineStyleSystemProps> {
   label?: React.CSSProperties;
@@ -117,6 +117,8 @@ export default function CampaignTemplateEditModal({
   const [selectStep, setSelectStep] = useState<number | null>(null);
   //////handlers for the saved variants
   const [opened2, setOpened2] = useState(false);
+  //handler for the suggestions
+  const [selectStep3, setSelectStep3] = useState<number | null>(null);
   const [selectStep2, setSelectStep2] = useState<number | null>(null);
   ////////////////////////////////
   const [assets, setAssets] = useState<AssetType[]>([]);
@@ -128,8 +130,7 @@ export default function CampaignTemplateEditModal({
   const [addedTemplate, setAddedTemplate] = useState<AssetType | null>(
     innerProps.addedTemplate || null
   );
-  const [templateSuggestions, setTemplateSuggestions] = useState<any>([]);
-
+  
   const addToStagingData = (
     asset: AssetType,
     step_num: number,
@@ -192,11 +193,7 @@ export default function CampaignTemplateEditModal({
   const [stagingData, setStagingData] = useState(
     innerProps.stagingData || { email: [] }
   );
-
-  const getTemplateSuggestions = async (manuallyAddedTemplate: string) => {
-    const response = await getTemplateSuggestion(userToken, manuallyAddedTemplate, currentProject?.id || -1);
-    setTemplateSuggestions(response.data);
-  }
+  const [suggestionData, setSuggestionData] = useState<any>([]);
 
   const handleToggle = (key: number) => {
     if (selectStep === key) {
@@ -649,153 +646,25 @@ export default function CampaignTemplateEditModal({
                 <ScrollArea viewportRef={viewport} h={350}>
                   <Flex p={"lg"} h={"100%"} direction={"column"}>
                     {innerProps.linkedinInitialMessages?.map((template: any, index4: number) => (
-                      <Box
-                        mb={"sm"}
-                        style={{
-                          border:
-                            selectStep === index4
-                              ? "1px solid #228be6"
-                              : "1px solid #ced4da",
-                          borderRadius: "8px",
-                        }}
-                      >
-                        <Flex
-                          align={"center"}
-                          justify={"space-between"}
-                          px={"sm"}
-                          py={"xs"}
-                        >
-                          <Flex align={"center"} gap={"xs"}>
-                            <IconMessages
-                              color="#228be6"
-                              size={"0.9rem"}
-                            />
-                            <Text color="gray" fw={500} size={"xs"}>
-                              Variant #{index4 + 1}:
-                            </Text>
-                            <Text fw={600} size={"xs"} ml={"-5px"}>
-                              <BracketGradientWrapper>
-                                {template.message}
-                              </BracketGradientWrapper>
-                            </Text>
-                          </Flex>
-                          <Flex gap={1} align={"center"}>
-                            <Tooltip
-                              label="Editing coming soon"
-                              position="top"
-                            >
-                              <ActionIcon disabled>
-                                <IconEdit size={"0.9rem"} />
-                              </ActionIcon>
-                            </Tooltip>
-                            <ActionIcon
-                              disabled
-                            >
-                              <IconTrash size={"0.9rem"} />
-                            </ActionIcon>
-                            <ActionIcon
-                              onClick={() => {
-                                handleToggle(index4);
-                              }}
-                            >
-                              {selectStep === index4 && opened ? (
-                                <IconChevronUp size={"0.9rem"} />
-                              ) : (
-                                <IconChevronDown size={"0.9rem"} />
-                              )}
-                            </ActionIcon>
-                          </Flex>
-                        </Flex>
-                        <Collapse
-                          in={selectStep === index4 && opened}
-                          key={index4}
-                        >
-                          <Flex
-                            gap={"sm"}
-                            p={"sm"}
-                            style={{
-                              borderTop: "1px solid #ced4da",
-                            }}
-                          >
-                            <Avatar src={userData.img_url} size={"md"} radius={"xl"} />
-                            <Box>
-                              <div
-                                style={{
-                                  fontSize: "11px",
-                                }}
-                              >
-                                <BracketGradientWrapper>
-                                  {template.message.replaceAll("\n", "<br/>")}
-                                </BracketGradientWrapper>
-                              </div>
-                            </Box>
-                          </Flex>
-                        </Collapse>
-                      </Box>
+                      <SequenceVariant
+                        angle={template.message}
+                        text={template.message}
+                        assetId={template.id}
+                        index={index4}
+                        isSaved={true}
+                        selectStep={selectStep ?? 0}
+                        opened={opened}
+                        userImgUrl={userData.img_url}
+                        removeFromStagingData={removeFromStagingData}
+                        handleToggle={handleToggle}
+                        stagingData={stagingData}
+                        setStagingData={setStagingData}
+                      />
                     ))}
-                    {/* <Textarea
-                      minRows={3}
-                      placeholder="Prefer to create your own message? Write direct in here ..."
-                      value={manuallyAddedTemplate}
-                      onChange={(event) =>
-                        setManuallyAddedTemplate(
-                          event.currentTarget.value
-                        )
-                      }
-                    />
-                    <Button
-                      size="sm"
-                      ml="auto"
-                      mt="xs"
-                      mb="xs"
-                      rightIcon={<IconArrowRight size={"0.9rem"} />}
-                      onClick={() => {
-                        //create new asset 
-                        const newAsset = {
-                          asset_key:
-                            "New Template (" +
-                            Math.random()
-                              .toString(36)
-                              .substring(2, 8)
-                              .toUpperCase() +
-                            ")",
-                          asset_raw_value: manuallyAddedTemplate,
-                          asset_tags: ["linkedin template"],
-                          asset_type: "TEXT",
-                          asset_value: manuallyAddedTemplate,
-                          client_archetype_ids: [userData.client.id],
-                          client_id: userData.client.id,
-                          num_opens: null,
-                          num_replies: null,
-                          num_sends: null,
-                        };
-                        fetch(`${API_URL}/client/create_archetype_asset`, {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${userToken}`,
-                          },
-                          body: JSON.stringify(newAsset),
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                          addToStagingData(
-                            data.data,
-                            currentStepNum,
-                            stagingData,
-                            setStagingData
-                          );
-                        })
-                        .catch(error => {
-                          console.error('Error creating new asset:', error);
-                        });
-                        setManuallyAddedTemplate("");
-                      }}
-                    >
-                      Add Message
-                    </Button> */}
                   </Flex>
                 </ScrollArea>
+
+
               )}
               {currentStepNum === steps + 1 && sequenceType === "email" && (
                 <ScrollArea viewportRef={viewport} h={350}>
@@ -876,91 +745,24 @@ export default function CampaignTemplateEditModal({
                             : innerProps.linkedinSequenceData[index]
                           )?.map((existingAsset: any, index2: number) => {
                             return (
-                              <Box
-                                mb={"sm"}
-                                style={{
-                                  border:
-                                    selectStep2 === index2
-                                      ? "1px solid #228be6"
-                                      : "1px solid #ced4da",
-                                  borderRadius: "8px",
-                                }}
-                              >
-                                <Flex
-                                  align={"center"}
-                                  justify={"space-between"}
-                                  px={"sm"}
-                                  py={"xs"}
-                                >
-                                  <Flex align={"center"} gap={"xs"}>
-                                    <IconMessages
-                                      color="#228be6"
-                                      size={"0.9rem"}
-                                    />
-                                    <Text color="gray" fw={500} size={"xs"}>
-                                      Variant #{index2 + 1}:
-                                    </Text>
-                                    <Text fw={600} size={"xs"} ml={"-5px"}>
-                                      {existingAsset.assets?.[0]?.asset_key ||
-                                        existingAsset.title}
-                                    </Text>
-                                  </Flex>
-                                  <Flex gap={1} align={"center"}>
-                                    <Badge color="teal" size="xs" mr="6px">
-                                      Saved
-                                    </Badge>
-                                    <Tooltip
-                                      label="Editing coming soon"
-                                      position="top"
-                                    >
-                                      <ActionIcon disabled>
-                                        <IconEdit size={"0.9rem"} />
-                                      </ActionIcon>
-                                    </Tooltip>
-                                    <ActionIcon disabled>
-                                      <IconTrash size={"0.9rem"} />
-                                    </ActionIcon>
-                                    <ActionIcon
-                                      onClick={() => {
-                                        handleToggle2(index2);
-                                      }}
-                                    >
-                                      {selectStep2 === index2 && opened2 ? (
-                                        <IconChevronUp size={"0.9rem"} />
-                                      ) : (
-                                        <IconChevronDown size={"0.9rem"} />
-                                      )}
-                                    </ActionIcon>
-                                  </Flex>
-                                </Flex>
-                                <Collapse
-                                  in={selectStep2 === index2 && opened2}
-                                  key={index2}
-                                >
-                                  <Flex
-                                    gap={"sm"}
-                                    p={"sm"}
-                                    style={{
-                                      borderTop: "1px solid #ced4da",
-                                    }}
-                                  >
-                                    <Avatar src={userData.img_url} size={"md"} radius={"xl"} />
-                                    <Box>
-                                      {/* <Text fw={600} size={"sm"}>
-                                    {"Ishan Sharma"}
-                                  </Text> */}
-                                  <div style={{ fontSize: "11px" }}>
-                                      <BracketGradientWrapper>
-                                        {existingAsset.description}
-                                      </BracketGradientWrapper>
-                                  </div>
-                                    </Box>
-                                  </Flex>
-                                </Collapse>
-                              </Box>
+                              <SequenceVariant
+                                angle={existingAsset.title}
+                                text={existingAsset.description}
+                                assetId={existingAsset.id}
+                                isSaved={true}
+                                index={index2}
+                                selectStep={selectStep2 ?? 0}
+                                opened={opened2}
+                                userImgUrl={userData.img_url}
+                                removeFromStagingData={removeFromStagingData}
+                                handleToggle={handleToggle2}
+                                stagingData={stagingData}
+                                setStagingData={setStagingData}
+                              />
                             );
                           })}
                         </Flex>
+                        {/* STAGING DATA DIVIDER */}
                         {stagingData[sequenceType]?.filter(
                           (asset: any) => asset.step_num === currentStepNum
                         ).length > 0 && (
@@ -982,6 +784,7 @@ export default function CampaignTemplateEditModal({
                             />
                           </Flex>
                         )}
+                        {/* STAGING DATA */}
                         <Flex p={"lg"} h={"100%"} direction={"column"}>
                           <>
                             {stagingData[sequenceType]
@@ -990,92 +793,19 @@ export default function CampaignTemplateEditModal({
                               )
                               .map((asset: any, index: number) => {
                                 return (
-                                  <Box
-                                    mb={"sm"}
-                                    style={{
-                                      border:
-                                        selectStep === index
-                                          ? "1px solid #228be6"
-                                          : "1px solid #ced4da",
-                                      borderRadius: "8px",
-                                    }}
-                                  >
-                                    <Flex
-                                      align={"center"}
-                                      justify={"space-between"}
-                                      px={"sm"}
-                                      py={"xs"}
-                                    >
-                                      <Flex align={"center"} gap={"xs"}>
-                                        <IconMessages
-                                          color="#228be6"
-                                          size={"0.9rem"}
-                                        />
-                                        <Text color="gray" fw={500} size={"xs"}>
-                                          Variant #{index + 1}:
-                                        </Text>
-                                        <Text fw={600} size={"xs"} ml={"-5px"}>
-                                          {asset.angle}
-                                        </Text>
-                                      </Flex>
-                                      <Flex gap={1} align={"center"}>
-                                        <Tooltip
-                                          label="Editing coming soon"
-                                          position="top"
-                                        >
-                                          <ActionIcon disabled>
-                                            <IconEdit size={"0.9rem"} />
-                                          </ActionIcon>
-                                        </Tooltip>
-                                        <ActionIcon
-                                          onClick={() =>
-                                            removeFromStagingData(
-                                              asset.id,
-                                              stagingData,
-                                              setStagingData
-                                            )
-                                          }
-                                        >
-                                          <IconTrash size={"0.9rem"} />
-                                        </ActionIcon>
-                                        <ActionIcon
-                                          onClick={() => {
-                                            handleToggle(index);
-                                          }}
-                                        >
-                                          {selectStep === index && opened ? (
-                                            <IconChevronUp size={"0.9rem"} />
-                                          ) : (
-                                            <IconChevronDown size={"0.9rem"} />
-                                          )}
-                                        </ActionIcon>
-                                      </Flex>
-                                    </Flex>
-                                    <Collapse
-                                      in={selectStep === index && opened}
-                                      key={index}
-                                    >
-                                      <Flex
-                                        gap={"sm"}
-                                        p={"sm"}
-                                        style={{
-                                          borderTop: "1px solid #ced4da",
-                                        }}
-                                      >
-                                        <Avatar src={userData.img_url} size={"md"} radius={"xl"} />
-                                        <Box>
-                                          {/* <Text fw={600} size={"sm"}>
-                                            {"Ishan Sharma"}
-                                          </Text> */}
-                                          <div style={{ fontSize: "11px" }}>
-                                              <BracketGradientWrapper>
-                                                {asset.text}
-                                              </BracketGradientWrapper>
-                                          </div>
-                                        </Box>
-                                      </Flex>
-                                    </Collapse>
-                                  </Box>
+                                  <SequenceVariant
+                                    angle={asset.angle}
+                                    text={asset.text}
+                                    assetId={asset.id}
+                                    index={index}
+                                    selectStep={selectStep ?? 0}
+                                    opened={opened}
+                                    userImgUrl={userData.img_url}
+                                    removeFromStagingData={removeFromStagingData}
+                                    handleToggle={handleToggle}
+                                    stagingData={stagingData}
+                                    setStagingData={setStagingData}
+                                  />
                                 );
                               })}
                           </>
@@ -1088,12 +818,61 @@ export default function CampaignTemplateEditModal({
                             sequenceType={sequenceType}
                             userData={userData}
                             userToken={userToken}
-                            API_URL={API_URL}
                             addToStagingData={addToStagingData}
                             currentStepNum={currentStepNum}
                             stagingData={stagingData}
                             setStagingData={setStagingData}
+                            setSuggestionData={setSuggestionData}
                           />
+                          {suggestionData?.length > 0 && (
+                          <Flex mb="md" justify="center" align="center">
+                            <Divider
+                              orientation="horizontal"
+                              color="grape"
+                              size={"2px"}
+                              style={{ margin: "0 25px", flex: 1 }}
+                            />
+                            <Text color="grape" size="xs" fw={500}>
+                              Suggestions
+                            </Text>
+                            <Divider
+                              orientation="horizontal"
+                              color="grape"
+                              size={"2px"}
+                              style={{ margin: "0 25px", flex: 1 }}
+                            />
+                          </Flex>
+                        
+                        )}
+                        <Paper style={{ backgroundColor: '#f8f8ff', padding: '8px', borderRadius: '8px' }}>
+                          {suggestionData?.map((suggestion: any, index6: number) => {
+                            return (
+                              <SequenceVariant
+                                angle={suggestion.style}
+                                text={suggestion.content}
+                                assetId={suggestion.id}
+                                index={index6}
+                                addToStagingData={addToStagingData}
+                                selectStep={selectStep3 ?? 0}
+                                opened={true}
+                                userImgUrl={userData.img_url}
+                                removeFromStagingData={removeFromStagingData}
+                                handleToggle={() => {}}
+                                showAll={true}
+                                stagingData={stagingData}
+                                setStagingData={setStagingData}
+                                sequenceType={sequenceType}
+                                currentStepNum={currentStepNum}
+                                setSuggestionData={setSuggestionData}
+                                setAddingLinkedinAsset={setAddingLinkedinAsset}
+                                setManuallyAddedTemplate={setManuallyAddedTemplate}
+                              />
+                            );
+                          
+                          }
+                          )}
+
+                        </Paper>
                         </Flex>
                       </ScrollArea>
                     </Tabs.Panel>

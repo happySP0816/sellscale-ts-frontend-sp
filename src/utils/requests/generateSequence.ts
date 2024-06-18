@@ -38,7 +38,7 @@ export async function getTemplateSuggestion(
   userToken: string,
   templateContent: string,
   archetype_id: number
-): Promise<MsgResponse> {
+): Promise<any> {
   const response = await fetch(`${API_URL}/ml/template_suggestion`, {
     method: 'POST',
     headers: {
@@ -50,7 +50,7 @@ export async function getTemplateSuggestion(
       archetype_id: archetype_id
     }),
   });
-  return await processResponse(response, 'data');
+  return response.json();
 }
 
 export async function generateDraft(

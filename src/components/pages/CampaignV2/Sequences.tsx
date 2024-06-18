@@ -384,6 +384,8 @@ export default function Sequences(props: any) {
                     emailSubjectLines={emailSubjectLines}
                     emailSequenceViewingArray={emailSequenceViewingArray}
                     linkedinSequenceViewingArray={linkedinSequenceViewingArray}
+                    setLinkedinSequenceViewingArray={setLinkedinSequenceViewingArray}
+                    setEmailSequenceViewingArray={setEmailSequenceViewingArray}
                   />
                 );
               })}
@@ -451,8 +453,39 @@ export default function Sequences(props: any) {
 }
 
 const VariantSelect = (props: any) => {
-  const { item, index, selectStep, handleToggle, opened, userData, type, emailSubjectLines, emailSequenceViewingArray, linkedinSequenceViewingArray } = props;
+  const {
+    item,
+    index,
+    selectStep,
+    handleToggle,
+    opened,
+    userData,
+    type,
+    emailSubjectLines,
+    emailSequenceViewingArray,
+    linkedinSequenceViewingArray,
+    setEmailSequenceViewingArray,
+    setLinkedinSequenceViewingArray,
+  } = props;
   const [variant, setVariant] = useState<number>(1);
+
+  const updateSequenceArray = (value: string) => {
+    if (type === "email") {
+      setEmailSequenceViewingArray((prevArray: any) => {
+        const newArray = [...prevArray];
+        newArray[index] = value;
+        console.log(newArray);
+        return newArray;
+      });
+    } else if (type === "linkedin") {
+      setLinkedinSequenceViewingArray((prevArray: any) => {
+        const newArray = [...prevArray];
+        newArray[index] = value;
+        console.log(newArray);
+        return newArray;
+      });
+    }
+  };
 
   return (
     <Box
@@ -470,38 +503,38 @@ const VariantSelect = (props: any) => {
           {type === "email" ? <IconBrandLinkedin size={"0.9rem"} color="#228be6" /> : <IconMail size={"0.9rem"} color="#228be6" />}
         </Flex>
         {/* <Select
-                            value={type === "email" ? emailSequenceViewingArray[index] : linkedinSequenceViewingArray[index]}
-                            onChange={(value) => {
-                              if (type === "email") {
-                                setEmailSequenceViewingArray((prevArray) => {
-                                  const newArray = [...prevArray];
-                                  newArray[index] = value;
-                                  console.log(newArray);
-                                  return newArray;
-                                });
-                              } else if (type === "linkedin") {
-                                setLinkedinSequenceViewingArray((prevArray) => {
-                                  const newArray = [...prevArray];
-                                  newArray[index] = value;
-                                  console.log(newArray);
-                                  return newArray;
-                                });
-                              }
-                            }}
-                            data={
-                              Array.isArray(item)
-                                ? item.map((option: any) => ({
-                                    value: option.title,
-                                    label: option.title,
-                                  }))
-                                : []
-                            }
-                            size="xs"
-                            styles={{
-                              root: { marginLeft: "-5px" },
-                              input: { fontWeight: 600 },
-                            }}
-                          /> */}
+          value={type === "email" ? emailSequenceViewingArray[index] : linkedinSequenceViewingArray[index]}
+          onChange={(value) => {
+            if (type === "email") {
+              setEmailSequenceViewingArray((prevArray: any) => {
+                const newArray = [...prevArray];
+                newArray[index] = value;
+                console.log(newArray);
+                return newArray;
+              });
+            } else if (type === "linkedin") {
+              setLinkedinSequenceViewingArray((prevArray: any) => {
+                const newArray = [...prevArray];
+                newArray[index] = value;
+                console.log(newArray);
+                return newArray;
+              });
+            }
+          }}
+          data={
+            Array.isArray(item)
+              ? item.map((option: any) => ({
+                  value: option.title,
+                  label: option.title,
+                }))
+              : []
+          }
+          size="xs"
+          styles={{
+            root: { marginLeft: "-5px" },
+            input: { fontWeight: 600 },
+          }}
+        /> */}
         <Flex align={"center"} gap={"sm"}>
           <ActionIcon
             variant="filled"
@@ -510,11 +543,9 @@ const VariantSelect = (props: any) => {
             className="hover:bg-[#dee2e6]"
             radius={"xl"}
             onClick={() => {
-              if (variant === 1) {
-                setVariant(item.length);
-              } else {
-                setVariant((variant: any) => (variant = variant - 1));
-              }
+              const newVariant = variant === 1 ? item.length : variant - 1;
+              setVariant(newVariant);
+              updateSequenceArray(item[newVariant - 1].title);
             }}
           >
             <IconChevronLeft size={"0.9rem"} color="gray" />
@@ -532,11 +563,9 @@ const VariantSelect = (props: any) => {
             bg={"#dee2e6"}
             className="hover:bg-[#dee2e6]"
             onClick={() => {
-              if (variant === item.length) {
-                setVariant(1);
-              } else {
-                setVariant((variant: any) => (variant = variant + 1));
-              }
+              const newVariant = variant === item.length ? 1 : variant + 1;
+              setVariant(newVariant);
+              updateSequenceArray(item[newVariant - 1].title);
             }}
           >
             <IconChevronRight size={"0.9rem"} color="gray" />

@@ -3,8 +3,8 @@ import { useMantineTheme } from '@mantine/core';
 
 const BracketGradientWrapper: React.FC<{ children: string }> = ({ children }) => {
   const theme = useMantineTheme();
-  const highlightedText = children.replace(/\[\[(.*?)\]\]/g, (match, p1) => {
-    return `<span style="background-image: linear-gradient(45deg, ${theme.colors.cyan[5]}, purple); font-weight: 700; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">[[${p1}]]</span>`;
+  const highlightedText = children?.replace(/\[\[(.*?)\]\]/g, (match, p1) => {
+    return `<span style="background-image: linear-gradient(45deg, ${theme.colors.cyan[5]}, purple); font-weight: 700; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">[[${p1.replace(/\n/g, '<br/>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')}]]</span>`;
   });
 
   return (

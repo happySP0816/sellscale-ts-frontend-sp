@@ -34,6 +34,25 @@ export async function generateValueProps(
   return await processResponse(response, 'data');
 }
 
+export async function getTemplateSuggestion(
+  userToken: string,
+  templateContent: string,
+  archetype_id: number
+): Promise<any> {
+  const response = await fetch(`${API_URL}/ml/template_suggestion`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      template_content: templateContent,
+      archetype_id: archetype_id
+    }),
+  });
+  return response.json();
+}
+
 export async function generateDraft(
   userToken: string,
   valueProps: string[],

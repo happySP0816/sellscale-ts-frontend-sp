@@ -147,16 +147,21 @@ export default function DomainManagement() {
                 <Button
                   fullWidth
                   onClick={() => {
-                    allDomains.length < 55 ? openAddMore() : openRequestMore();
+                    allDomains.length < MAX_DOMAINS
+                      ? openAddMore()
+                      : openRequestMore();
                   }}
                   rightIcon={<IconPlus size="1rem" />}
                 >
-                  {allDomains.length < 55 ? "Get More" : "Request More"}
+                  {allDomains.length < MAX_DOMAINS
+                    ? "Get More"
+                    : "Request More"}
                 </Button>
               </Flex>
               <InboxAddModal
                 opened={addMoreOpened}
                 close={closeAddMore}
+                refresh={() => triggerGetDomains()}
                 inboxQuotaRemaining={Math.max(
                   MAX_INBOXES - allDomains.length * 2,
                   0
@@ -628,6 +633,7 @@ export default function DomainManagement() {
 const InboxAddModal = (props: {
   opened: boolean;
   close: () => void;
+  refresh: () => void;
   inboxQuotaRemaining: number;
 }) => {
   const userToken = useRecoilValue(userTokenState);
@@ -636,6 +642,8 @@ const InboxAddModal = (props: {
   const [allSDRs, setAllSDRs] = useState<ClientSDR[]>([]);
   const [selectedSDR, setSelectedSDR] = useState<ClientSDR | null>(null);
   const [sellscaleManaged, setSellscaleManaged] = useState(true);
+
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const getAllSDRs = async () => {
     fetch(`${API_URL}/client/sdrs`, {
@@ -677,6 +685,7 @@ const InboxAddModal = (props: {
   });
 
   const addInboxes = async () => {
+    setSubmitLoading(true);
     const formValues = sellscaleManagedForm.values;
     const response = await fetch(
       `${API_URL}/domains/workflow/domain_and_inbox`,
@@ -699,6 +708,7 @@ const InboxAddModal = (props: {
           "Inboxes are being added, please allow up to 1 hour for the inboxes to be setup.",
         color: "green",
       });
+      props.refresh();
       props.close();
     } else {
       showNotification({
@@ -869,8 +879,10 @@ const InboxAddModal = (props: {
         </Button>
         <Button
           fullWidth
+          loading={submitLoading}
           disabled={
-            sellscaleManaged
+            submitLoading ||
+            (sellscaleManaged
               ? !(
                   selectedSDR &&
                   sellscaleManagedForm.getInputProps("numberInboxes").value > 0
@@ -879,7 +891,7 @@ const InboxAddModal = (props: {
                   selectedSDR &&
                   manualForm.getInputProps("domain").value &&
                   manualForm.getInputProps("numberInboxes").value > 0
-                )
+                ))
           }
           onClick={() => {
             sellscaleManaged ? addInboxes() : console.log("manual add");

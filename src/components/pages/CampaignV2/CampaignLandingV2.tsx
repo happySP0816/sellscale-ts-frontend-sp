@@ -16,6 +16,7 @@ import {
   Modal,
   Stepper,
   Checkbox,
+  Tooltip,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -509,10 +510,36 @@ export default function CampaignLandingV2() {
             <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
               <Flex gap={"sm"} align={"center"} justify="space-between" w="100%">
                 <Flex>
-                  <Text fw={600} size={20}>
-                    {statsData?.emoji} {statsData?.archetype_name?.substring(0, 70)}
-                    {statsData?.archetype_name?.length > 70 && "..."}
-                  </Text>
+                  <Tooltip
+                    arrowPosition="center"
+                    position="top-start"
+                    withArrow
+                    label={
+                      <Flex align={"center"} gap={"sm"} px={"sm"} py={5}>
+                        <Text color="gray" size={"xs"} fw={600}>
+                          Created by:
+                        </Text>
+                        <Avatar size={"sm"} src={userData.img_url} sx={{ borderRadius: "50%" }} />
+                        <Text fw={600} size={"xs"}>
+                          {statsData?.sdr_name}
+                        </Text>
+                        <Divider orientation="vertical" />
+                        <Text color="gray" size={"xs"} fw={600}>
+                          Created:
+                        </Text>
+                        <Text fw={600} size={"xs"}>
+                          {new Date(statsData.created_at).toLocaleString("en-US", {
+                            dateStyle: "full",
+                          })}
+                        </Text>
+                      </Flex>
+                    }
+                  >
+                    <Text fw={600} size={20}>
+                      {statsData?.emoji} {statsData?.archetype_name?.substring(0, 70)}
+                      {statsData?.archetype_name?.length > 70 && "..."}
+                    </Text>
+                  </Tooltip>
                   <Badge
                     data-tour="campaign-status"
                     tt={"uppercase"}
@@ -525,26 +552,11 @@ export default function CampaignLandingV2() {
                   </Badge>
                 </Flex>
               </Flex>
-              <Flex align={"center"} gap={"xs"}>
-                <Paper className="flex items-center gap-3" withBorder px={"sm"} py={5}>
-                  <Text color="gray" size={"xs"} fw={600}>
-                    Created by:
+              <Flex align={"center"} w={"100%"} gap={"xs"}>
+                <Flex w={"100%"} align={"center"} gap={"sm"}>
+                  <Text size={"sm"} color="gray" fw={500}>
+                    Sequence Structure:{" "}
                   </Text>
-                  <Avatar size={"sm"} src={userData.img_url} sx={{ borderRadius: "50%" }} />
-                  <Text fw={600} size={"xs"}>
-                    {statsData?.sdr_name?.split(" ")[0]}
-                  </Text>
-                  <Divider orientation="vertical" />
-                  <Text color="gray" size={"xs"} fw={600}>
-                    Created:
-                  </Text>
-                  <Text fw={600} size={"xs"}>
-                    {new Date(statsData.created_at).toLocaleString("en-US", {
-                      dateStyle: "medium",
-                    })}
-                  </Text>
-                </Paper>
-                <Flex w="60%" ml="auto">
                   <Paper
                     p="md"
                     sx={{
@@ -883,7 +895,7 @@ export default function CampaignLandingV2() {
               </Flex>
             </Flex>
             {!loadingContacts && activeStep !== 3 && (
-              <Box data-tour="campaign-progress" px={"xl"} py={"md"} bg={"#ECECEC"}>
+              <Box data-tour="campaign-progress" px={"xl"} py={"md"} bg={"#FAFAFA"}>
                 <Stepper active={activeStep} size="xs" iconSize={28}>
                   <Stepper.Step label="Add Contacts" />
                   <Stepper.Step label="Setup Templates" />
@@ -917,7 +929,7 @@ export default function CampaignLandingV2() {
         </Flex>
         <Flex direction={"column"} gap={"md"} w={"80%"}>
           <Sequences setSequences={setSequences} />
-          <Personalizers data={statsData} sequences={sequences} setPersonalizers={setPersonalizers} personalizers={personalizers}/>
+          <Personalizers data={statsData} sequences={sequences} setPersonalizers={setPersonalizers} personalizers={personalizers} />
         </Flex>
       </Flex>
     </Paper>

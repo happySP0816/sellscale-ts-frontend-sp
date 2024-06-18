@@ -192,7 +192,7 @@ export function LineChart() {
       py={15}
       px={20}
       style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
-      w={"75%"}
+      w={"100%"}
     >
       <Flex align={"center"} gap={"sm"} justify={"space-between"}>
         <Text fw={700} size={"lg"}>
@@ -203,7 +203,7 @@ export function LineChart() {
             size="xs"
             color="blue"
             labelPosition="left"
-            label="Show Comulative:"
+            label="Show Cumulative:"
             checked={isCumulativeMode}
             onChange={(event) =>
               setIsCumulativeMode(event.currentTarget.checked)
@@ -222,7 +222,7 @@ export function LineChart() {
           />
           <Flex>
             <Box style={{ border: "1px solid #e9ecef" }}>
-              {["week", "month", "year"].map((mode) => (
+              {["Week", "Month", "Year"].map((mode) => (
                 <Button
                   onClick={() => setCurrentMode(mode)}
                   size="sm"
@@ -342,13 +342,11 @@ export default function HomePageV2() {
       <TodayActivityV2 aiActivityData={aiActivityData} />
       <Flex gap={"lg"}>
         <LineChart />
-        <Box w={"25%"}>
           <OperatorDashboardV2
             onOperatorDashboardEntriesChange={(task: Task[]) => {
               setNumOperatorDashItems(task.length);
             }}
           />
-        </Box>
       </Flex>
       <PipelineOverviewV2 />
       <CampaignUtilization />

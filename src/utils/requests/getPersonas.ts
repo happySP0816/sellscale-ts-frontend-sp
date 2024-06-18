@@ -221,3 +221,18 @@ export async function getUploadDetails(
   );
   return await processResponse(response, "data");
 }
+
+export async function getPositiveResponses(
+  userToken: string,
+): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/daily_notifications/engagement/positive-responses`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  return await processResponse(response, "positive_responses");
+}

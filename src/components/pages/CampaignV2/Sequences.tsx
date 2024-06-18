@@ -1,6 +1,7 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import SubjectDropdown from "@common/campaigns/SubjectDropdown";
 import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
+import { constrainPoint } from "@fullcalendar/core/internal";
 import {
   ActionIcon,
   Avatar,
@@ -22,10 +23,14 @@ import {
 } from "@mantine/core";
 import { modals, openContextModal } from "@mantine/modals";
 import {
+  IconArrowLeft,
   IconArrowRight,
   IconBrandLinkedin,
   IconChevronDown,
+  IconChevronLeft,
+  IconChevronRight,
   IconChevronUp,
+  IconMail,
   IconMailOpened,
   IconMessages,
   IconPlus,
@@ -368,114 +373,20 @@ export default function Sequences(props: any) {
               )}
               {sequences.map((item: any, index: number) => {
                 return (
-                  <>
-                    <Box
-                      style={{
-                        border: selectStep === index ? "1px solid #228be6" : "1px solid #ced4da",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      <Flex align={"center"} justify={"space-between"} px={"sm"} py={"xs"}>
-                        <Flex mx="lg" align={"center"} gap={"xs"}>
-                          <IconMessages color="#228be6" size={"0.9rem"} />
-                          <Text color="gray" fw={500} size={"xs"}>
-                            {`Step #${index + 1}:`}
-                          </Text>
-                          <Select
-                            value={type === "email" ? emailSequenceViewingArray[index] : linkedinSequenceViewingArray[index]}
-                            onChange={(value) => {
-                              if (type === "email") {
-                                setEmailSequenceViewingArray((prevArray) => {
-                                  const newArray = [...prevArray];
-                                  newArray[index] = value;
-                                  console.log(newArray);
-                                  return newArray;
-                                });
-                              } else if (type === "linkedin") {
-                                setLinkedinSequenceViewingArray((prevArray) => {
-                                  const newArray = [...prevArray];
-                                  newArray[index] = value;
-                                  console.log(newArray);
-                                  return newArray;
-                                });
-                              }
-                            }}
-                            data={
-                              Array.isArray(item)
-                                ? item.map((option: any) => ({
-                                    value: option.title,
-                                    label: option.title,
-                                  }))
-                                : []
-                            }
-                            size="xs"
-                            styles={{
-                              root: { marginLeft: "-5px" },
-                              input: { fontWeight: 600 },
-                            }}
-                          />
-                        </Flex>
-                        <Flex gap={1} align={"center"}>
-                          <Badge variant="outline" leftSection={<IconPoint fill="green" color="white" className="mt-1" />}>
-                            active
-                          </Badge>
-                          <ActionIcon
-                            onClick={() => {
-                              handleToggle(index);
-                            }}
-                          >
-                            {selectStep === index && opened ? <IconChevronUp size={"0.9rem"} /> : <IconChevronDown size={"0.9rem"} />}
-                          </ActionIcon>
-                        </Flex>
-                      </Flex>
-                      <Collapse in={selectStep === index && opened} key={index}>
-                        <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
-                          <Avatar size={"md"} radius={"xl"} src={userData.img_url} />
-                          <Box>
-                            {type === "email" && index === 0 && <SubjectDropdown subjects={emailSubjectLines.map((line: any) => line.subject_line)} />}
-                            <Text fw={600} size={"sm"}>
-                              {item?.name}
-                            </Text>
-                            <Text fw={500} size={"xs"}>
-                              {type === "email" ? (
-                                <BracketGradientWrapper>
-                                  {Array.isArray(item) && item.find((i: any) => i.title === emailSequenceViewingArray[index])?.description}
-                                </BracketGradientWrapper>
-                              ) : (
-                                <BracketGradientWrapper>
-                                  {Array.isArray(item) &&
-                                    item.find((i: any) => i.title === linkedinSequenceViewingArray[index])?.description.replace(/\n/g, "<br/>")}
-                                </BracketGradientWrapper>
-                              )}
-                            </Text>
-                          </Box>
-                        </Flex>
-                        <Divider variant="dashed" w={"100%"} />
-                        <Flex p={"lg"} justify={"space-between"}>
-                          <Flex gap={"sm"}>
-                            {/* <Badge color="grape">{item.point_used} Research Points Used</Badge> */}
-                            {item.assets && item.assets.length > 0 && <Badge color="grape">{item.assets.length} Assets Used</Badge>}
-                          </Flex>
-                          {/* <Flex gap={"sm"}>
-                                  <Badge
-                                    variant="outline"
-                                    color="gray"
-                                    leftSection={<IconCircleCheck size={"0.9rem"} fill="green" color="white" className="mt-1" />}
-                                  >
-                                    Opened: {item.opened}%
-                                  </Badge>
-                                  <Badge
-                                    variant="outline"
-                                    color="gray"
-                                    leftSection={<IconCircleCheck size={"0.9rem"} fill="green" color="white" className="mt-1" />}
-                                  >
-                                    Replied: {item.replied}%
-                                  </Badge>
-                                </Flex> */}
-                        </Flex>
-                      </Collapse>
-                    </Box>
-                  </>
+                  <VariantSelect
+                    item={item}
+                    index={index}
+                    selectStep={selectStep}
+                    handleToggle={handleToggle}
+                    opened={opened}
+                    type={type}
+                    userData={userData}
+                    emailSubjectLines={emailSubjectLines}
+                    emailSequenceViewingArray={emailSequenceViewingArray}
+                    linkedinSequenceViewingArray={linkedinSequenceViewingArray}
+                    setLinkedinSequenceViewingArray={setLinkedinSequenceViewingArray}
+                    setEmailSequenceViewingArray={setEmailSequenceViewingArray}
+                  />
                 );
               })}
             </Flex>
@@ -540,3 +451,184 @@ export default function Sequences(props: any) {
     </Paper>
   );
 }
+
+const VariantSelect = (props: any) => {
+  const {
+    item,
+    index,
+    selectStep,
+    handleToggle,
+    opened,
+    userData,
+    type,
+    emailSubjectLines,
+    emailSequenceViewingArray,
+    linkedinSequenceViewingArray,
+    setEmailSequenceViewingArray,
+    setLinkedinSequenceViewingArray,
+  } = props;
+  const [variant, setVariant] = useState<number>(1);
+
+  const updateSequenceArray = (value: string) => {
+    if (type === "email") {
+      setEmailSequenceViewingArray((prevArray: any) => {
+        const newArray = [...prevArray];
+        newArray[index] = value;
+        console.log(newArray);
+        return newArray;
+      });
+    } else if (type === "linkedin") {
+      setLinkedinSequenceViewingArray((prevArray: any) => {
+        const newArray = [...prevArray];
+        newArray[index] = value;
+        console.log(newArray);
+        return newArray;
+      });
+    }
+  };
+
+  return (
+    <Box
+      style={{
+        border: selectStep === index ? "1px solid #228be6" : "1px solid #ced4da",
+        borderRadius: "8px",
+      }}
+    >
+      <Flex align={"center"} justify={"space-between"} px={"sm"} py={"xs"}>
+        <Flex mx="lg" align={"center"} gap={"xs"}>
+          <IconMessages color="#228be6" size={"0.9rem"} />
+          <Text color="gray" fw={500} size={"xs"}>
+            {`Step #${index + 1}:`}
+          </Text>
+          {type === "email" ? <IconBrandLinkedin size={"0.9rem"} color="#228be6" /> : <IconMail size={"0.9rem"} color="#228be6" />}
+        </Flex>
+        {/* <Select
+          value={type === "email" ? emailSequenceViewingArray[index] : linkedinSequenceViewingArray[index]}
+          onChange={(value) => {
+            if (type === "email") {
+              setEmailSequenceViewingArray((prevArray: any) => {
+                const newArray = [...prevArray];
+                newArray[index] = value;
+                console.log(newArray);
+                return newArray;
+              });
+            } else if (type === "linkedin") {
+              setLinkedinSequenceViewingArray((prevArray: any) => {
+                const newArray = [...prevArray];
+                newArray[index] = value;
+                console.log(newArray);
+                return newArray;
+              });
+            }
+          }}
+          data={
+            Array.isArray(item)
+              ? item.map((option: any) => ({
+                  value: option.title,
+                  label: option.title,
+                }))
+              : []
+          }
+          size="xs"
+          styles={{
+            root: { marginLeft: "-5px" },
+            input: { fontWeight: 600 },
+          }}
+        /> */}
+        <Flex align={"center"} gap={"sm"}>
+          <ActionIcon
+            variant="filled"
+            size={"sm"}
+            bg={"#dee2e6"}
+            className="hover:bg-[#dee2e6]"
+            radius={"xl"}
+            onClick={() => {
+              const newVariant = variant === 1 ? item.length : variant - 1;
+              setVariant(newVariant);
+              updateSequenceArray(item[newVariant - 1].title);
+            }}
+          >
+            <IconChevronLeft size={"0.9rem"} color="gray" />
+          </ActionIcon>
+          <Text fw={500} size={"sm"}>
+            <span className="text-gray-400 mr-2">
+              Variant {variant}/{item.length}:
+            </span>
+            {variant ? item[variant - 1].title : 0}
+          </Text>
+          <ActionIcon
+            variant="filled"
+            size={"sm"}
+            radius={"xl"}
+            bg={"#dee2e6"}
+            className="hover:bg-[#dee2e6]"
+            onClick={() => {
+              const newVariant = variant === item.length ? 1 : variant + 1;
+              setVariant(newVariant);
+              updateSequenceArray(item[newVariant - 1].title);
+            }}
+          >
+            <IconChevronRight size={"0.9rem"} color="gray" />
+          </ActionIcon>
+        </Flex>
+        <Flex gap={1} align={"center"}>
+          <Badge variant="outline" leftSection={<IconPoint fill="green" color="white" className="mt-1" />}>
+            active
+          </Badge>
+          <ActionIcon
+            onClick={() => {
+              handleToggle(index);
+            }}
+          >
+            {selectStep === index && opened ? <IconChevronUp size={"0.9rem"} /> : <IconChevronDown size={"0.9rem"} />}
+          </ActionIcon>
+        </Flex>
+      </Flex>
+      <Collapse in={selectStep === index && opened} key={index}>
+        <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
+          <Avatar size={"md"} radius={"xl"} src={userData.img_url} />
+          <Box>
+            {type === "email" && index === 0 && <SubjectDropdown subjects={emailSubjectLines.map((line: any) => line.subject_line)} />}
+            <Text fw={600} size={"sm"}>
+              {item?.name}
+            </Text>
+            <Text fw={500} size={"xs"}>
+              {type === "email" ? (
+                <BracketGradientWrapper>
+                  {Array.isArray(item) && item.find((i: any) => i.title === emailSequenceViewingArray[index])?.description}
+                </BracketGradientWrapper>
+              ) : (
+                <BracketGradientWrapper>
+                  {Array.isArray(item) && item.find((i: any) => i.title === linkedinSequenceViewingArray[index])?.description.replace(/\n/g, "<br/>")}
+                </BracketGradientWrapper>
+              )}
+            </Text>
+          </Box>
+        </Flex>
+        <Divider variant="dashed" w={"100%"} />
+        <Flex p={"lg"} justify={"space-between"}>
+          <Flex gap={"sm"}>
+            {/* <Badge color="grape">{item.point_used} Research Points Used</Badge> */}
+            {item.assets && item.assets.length > 0 && <Badge color="grape">{item.assets.length} Assets Used</Badge>}
+          </Flex>
+          {/* <Flex gap={"sm"}>
+                                  <Badge
+                                    variant="outline"
+                                    color="gray"
+                                    leftSection={<IconCircleCheck size={"0.9rem"} fill="green" color="white" className="mt-1" />}
+                                  >
+                                    Opened: {item.opened}%
+                                  </Badge>
+                                  <Badge
+                                    variant="outline"
+                                    color="gray"
+                                    leftSection={<IconCircleCheck size={"0.9rem"} fill="green" color="white" className="mt-1" />}
+                                  >
+                                    Replied: {item.replied}%
+                                  </Badge>
+                                </Flex> */}
+        </Flex>
+      </Collapse>
+    </Box>
+  );
+};

@@ -14,7 +14,7 @@ interface ToneAdjusterProps {
 const ToneAdjuster: React.FC<ToneAdjusterProps> = ({ xAxisLabel, yAxisLabel, voiceParam, setVoiceParam }) => {
   const [dragging, setDragging] = useState(false);
   const [rotationSpeed, setRotationSpeed] = useState(0.005);
-  const [toneEnabled, setToneEnabled] = useState(true);
+  const [toneEnabled, setToneEnabled] = useState(false);
   const dotRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const colorRef = useRef(new THREE.Color('gray'));

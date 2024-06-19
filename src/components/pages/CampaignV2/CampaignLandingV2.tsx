@@ -227,19 +227,19 @@ export default function CampaignLandingV2() {
     setLoadingVoiceSimulation(true);
 
     const voiceParams = {
-      emotion_formality: {
+      warmth_confidence: {
         x: ((voiceParam1.x / 280) * 100).toFixed(2),
         y: (100 - (voiceParam1.y / 280) * 100).toFixed(2),
       },
-      professionalism_friendliness: {
+      humor_seriousness: {
         x: ((voiceParam2.x / 280) * 100).toFixed(2),
         y: (100 - (voiceParam2.y / 280) * 100).toFixed(2),
       },
-      directness_politeness: {
+      assertiveness_empathy: {
         x: ((voiceParam3.x / 280) * 100).toFixed(2),
         y: (100 - (voiceParam3.y / 280) * 100).toFixed(2),
       },
-      urgency_calmness: {
+      optimism_professionalism: {
         x: ((voiceParam4.x / 280) * 100).toFixed(2),
         y: (100 - (voiceParam4.y / 280) * 100).toFixed(2),
       },
@@ -472,22 +472,22 @@ export default function CampaignLandingV2() {
         <Grid gutter="md">
           <Grid.Col span={6}>
             <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <ToneAdjuster xAxisLabel="Emotion" setVoiceParam={setVoiceParam1} voiceParam={voiceParam1} yAxisLabel="Formality"/>
+              <ToneAdjuster xAxisLabel="Warmth" setVoiceParam={setVoiceParam1} voiceParam={voiceParam1} yAxisLabel="Confidence"/>
             </Paper>
           </Grid.Col>
           <Grid.Col span={6}>
             <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <ToneAdjuster xAxisLabel="Professionalism" setVoiceParam={setVoiceParam2} voiceParam={voiceParam2} yAxisLabel="Friendliness"/>
+              <ToneAdjuster xAxisLabel="Humor" setVoiceParam={setVoiceParam2} voiceParam={voiceParam2} yAxisLabel="Seriousness"/>
             </Paper>
           </Grid.Col>
           <Grid.Col span={6}>
             <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <ToneAdjuster xAxisLabel="Directness" setVoiceParam={setVoiceParam3} voiceParam={voiceParam3} yAxisLabel="Politeness"/>
+              <ToneAdjuster xAxisLabel="Assertiveness" setVoiceParam={setVoiceParam3} voiceParam={voiceParam3} yAxisLabel="Empathy"/>
             </Paper>
           </Grid.Col>
           <Grid.Col span={6}>
             <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <ToneAdjuster xAxisLabel="Urgency" setVoiceParam={setVoiceParam4} voiceParam={voiceParam4} yAxisLabel="Calmness"/>
+              <ToneAdjuster xAxisLabel="Optimism" setVoiceParam={setVoiceParam4} voiceParam={voiceParam4} yAxisLabel="Professionalism"/>
             </Paper>
           </Grid.Col>
         </Grid>

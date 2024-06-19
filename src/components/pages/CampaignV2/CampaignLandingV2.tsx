@@ -17,14 +17,17 @@ import {
   Stepper,
   Checkbox,
   Tooltip,
+  Grid,
+  Textarea,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
+import posthog from "posthog-js";
 import Hook from "@pages/channels/components/Hook";
 import Tour from "reactour";
 import { API_URL } from "@constants/data";
-import { IconBrandLinkedin, IconCalendar, IconChecks, IconMailOpened, IconSend } from "@tabler/icons";
-import { IconMessageCheck } from "@tabler/icons-react";
+import { IconBrandLinkedin, IconCalendar, IconChecks, IconEdit, IconMailOpened, IconSend, IconSettings, IconTrash } from "@tabler/icons";
+import { IconMessageCheck, IconSparkles } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import {
   fetchCampaignPersonalizers,
@@ -47,6 +50,7 @@ import { PersonaOverview, SubjectLineTemplate } from "src";
 import OutreachSlider from "../../CampaignShell/OutreachSlider";
 import Personalizers from "./Personalizers";
 import Sequences from "./Sequences";
+import ToneAdjuster from "./ToneAdjuster";
 
 interface StatsData {
   id: number;
@@ -113,6 +117,11 @@ export default function CampaignLandingV2() {
     if (!tourSeen) {
       setIsTourOpen(true);
     }
+    posthog.onFeatureFlags(function () {
+      if (posthog.isFeatureEnabled("show_voice_builder")) {
+        setShowVoiceBuilder(true);
+      }
+    });
   }, []);
 
   const closeTour = () => {
@@ -195,6 +204,15 @@ export default function CampaignLandingV2() {
   const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] = useState<any[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
   const [showActivateWarningModal, setShowActivateWarningModal] = useState(false);
+  const [showToneArea,setShowToneArea] = useState(false);
+  const [selectedVoiceSequence, setSelectedVoiceSequence] = useState<any>(null);
+  const [voiceBuilderOpened, setVoiceBuilderOpened] = useState(false);
+  const [showVoiceBuilder, setShowVoiceBuilder] = useState(false);
+  const [voiceParam1, setVoiceParam1] = useState({ x: 140, y: 140 });
+  const [voiceParam2, setVoiceParam2] = useState({ x: 140, y: 140 });
+  const [voiceParam3, setVoiceParam3] = useState({ x: 140, y: 140 });
+  const [voiceParam4, setVoiceParam4] = useState({ x: 140, y: 140 });
+  const [loadingVoiceSimulation, setLoadingVoiceSimulation] = useState(false);
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
   const [testingVolume, setTestingVolume] = useState(0);
   const [showLinkedInConvoSimulatorModal, setShowLinkedInConvoSimulatorModal] = useState(false);
@@ -204,6 +222,53 @@ export default function CampaignLandingV2() {
   //sequence variable
   const [sequences, setSequences] = useState<any[]>([]);
 
+  const simulateVoice = async (sequenceText: string) => {
+    setValue('');
+    setLoadingVoiceSimulation(true);
+
+    const voiceParams = {
+      emotion_formality: {
+        x: ((voiceParam1.x / 280) * 100).toFixed(2),
+        y: (100 - (voiceParam1.y / 280) * 100).toFixed(2),
+      },
+      professionalism_friendliness: {
+        x: ((voiceParam2.x / 280) * 100).toFixed(2),
+        y: (100 - (voiceParam2.y / 280) * 100).toFixed(2),
+      },
+      directness_politeness: {
+        x: ((voiceParam3.x / 280) * 100).toFixed(2),
+        y: (100 - (voiceParam3.y / 280) * 100).toFixed(2),
+      },
+      urgency_calmness: {
+        x: ((voiceParam4.x / 280) * 100).toFixed(2),
+        y: (100 - (voiceParam4.y / 280) * 100).toFixed(2),
+      },
+    };
+
+    await fetch(`${API_URL}/ml/simulate_voice`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({ 
+        text: sequenceText,
+        voiceParams: voiceParams
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('data is', data);
+        setValue(data.simulated_voice)
+        setVoiceBuilderOpened(true);
+      })
+      .catch((error) => {
+        console.error("Error simulating voice", error);
+      })
+      .finally(() => {
+        setLoadingVoiceSimulation(false);
+      });
+  }
   useEffect(() => {
     console.log("CURRENT PROJECT", currentProject);
     if (currentProject) {
@@ -403,6 +468,62 @@ export default function CampaignLandingV2() {
 
   return (
     <Paper p={"lg"} maw={1150} h="100%" ml="auto" mr="auto" style={{ backgroundColor: "transparent" }}>
+      <Modal size={900} opened={voiceBuilderOpened} onClose={() => setVoiceBuilderOpened(false)} centered withCloseButton={false} title={<Text weight={700} size="lg">AI Voice Builder</Text>}>
+        <Grid gutter="md">
+          <Grid.Col span={6}>
+            <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <ToneAdjuster xAxisLabel="Emotion" setVoiceParam={setVoiceParam1} voiceParam={voiceParam1} yAxisLabel="Formality"/>
+            </Paper>
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <ToneAdjuster xAxisLabel="Professionalism" setVoiceParam={setVoiceParam2} voiceParam={voiceParam2} yAxisLabel="Friendliness"/>
+            </Paper>
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <ToneAdjuster xAxisLabel="Directness" setVoiceParam={setVoiceParam3} voiceParam={voiceParam3} yAxisLabel="Politeness"/>
+            </Paper>
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <ToneAdjuster xAxisLabel="Urgency" setVoiceParam={setVoiceParam4} voiceParam={voiceParam4} yAxisLabel="Calmness"/>
+            </Paper>
+          </Grid.Col>
+        </Grid>
+        <Flex justify="center" align="center" mt="md">
+        <Select
+            mr="sm"
+            data={sequences.map((sequence, index) => ({ value: index.toString(), label: sequence[0].title }))}
+            placeholder="Select Sequence"
+            style={{ marginLeft: '1rem' }}
+            onChange={(value) => {
+              setShowToneArea(true);
+              if (value !== null) {
+                const selectedSequence = sequences[parseInt(value)];
+                const parser = new DOMParser();
+                const parsedDescription = parser.parseFromString(selectedSequence[0].description, 'text/html').body.textContent || "";
+                setSelectedVoiceSequence(parsedDescription);
+                setValue(parsedDescription);
+              }
+            }}
+          />
+          <Button onClick={() => {simulateVoice(selectedVoiceSequence)}} variant="filled" color="blue">
+            Simulate Voice
+          </Button>
+          <Button onClick={() => setVoiceBuilderOpened(false)} variant="filled" color="green" ml="sm">
+            Save Voice
+          </Button>
+        </Flex>
+        {showToneArea && (
+          <Flex justify="center" mt="md">
+            {(value!=='') && <Textarea value={value} onChange={(e) => setValue(e.target.value)} placeholder="Enter your text here..." minRows={19} style={{ width: '100%' }} />}
+            {loadingVoiceSimulation && (<Loader color="grape" variant="dots" size="md" />)}
+          </Flex>
+        )}
+                 
+      </Modal>
+
       <Modal opened={showActivateWarningModal} onClose={() => setShowActivateWarningModal(false)} size="md" centered withCloseButton={false}>
         <Paper p="lg">
           <Flex align="center" mb="md">
@@ -918,6 +1039,46 @@ export default function CampaignLandingV2() {
           ) : (
             <></>
           )}
+          {showVoiceBuilder && <Paper mb="md" p="md" withBorder>
+            <Flex align="center" justify="space-between">
+              <Text weight={500} size="lg">Voice Builder</Text>
+              <Button onClick={() => setVoiceBuilderOpened(true)} variant="filled" color="grape" leftIcon={<IconSparkles size={16} />}>
+                Add Voice
+              </Button>
+            </Flex>
+            <Flex direction="column" mt="md" gap="sm">
+              <Paper p="md" withBorder>
+                <Flex align="center" justify="space-between">
+                  <Text>Voice Variant 1</Text>
+                  <Flex align="center" gap="sm">
+                    <IconEdit size={16} />
+                    <IconTrash size={16} />
+                    <Switch />
+                  </Flex>
+                </Flex>
+              </Paper>
+              <Paper p="md" withBorder>
+                <Flex align="center" justify="space-between">
+                  <Text>Voice Variant 2</Text>
+                  <Flex align="center" gap="sm">
+                    <IconEdit size={16} />
+                    <IconTrash size={16} />
+                    <Switch />
+                  </Flex>
+                </Flex>
+              </Paper>
+              <Paper p="md" withBorder>
+                <Flex align="center" justify="space-between">
+                  <Text>Voice Variant 3</Text>
+                  <Flex align="center" gap="sm">
+                    <IconEdit size={16} />
+                    <IconTrash size={16} />
+                    <Switch />
+                  </Flex>
+                </Flex>
+              </Paper>
+            </Flex>
+          </Paper>}
           <Paper data-tour="contacts" withBorder w={"100%"}>
             <ContactsInfiniteScroll
               campaignId={Number(id)}
@@ -925,6 +1086,8 @@ export default function CampaignLandingV2() {
               totalContacts={totalContacts}
               loadingTotalContacts={loadingTotalContacts}
             />
+          </Paper>
+          <Paper>
           </Paper>
         </Flex>
         <Flex direction={"column"} gap={"md"} w={"80%"}>

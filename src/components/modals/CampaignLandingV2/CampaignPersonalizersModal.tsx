@@ -103,31 +103,40 @@ export default function CampaignPersonalizersModal({
 
   const userToken = useRecoilValue(userTokenState);
 
-  socket.on("stream-answers", (data) => {
-    if (data.message === "done") {
-      setResearching(false);
-      return;
-    }
-    const newSimulateData = {
-      title: data.question,
-      type: data.type,
-      content: data.cleaned_research,
-      raw_response: data.raw_response,
-      ai_response: data.relevancy_explanation,
-      status: data.is_yes_response,
-    };
-    setSimulateData((prevData: any) => {
-      const dataSet = new Set(
-        prevData.map((item: any) => JSON.stringify(item))
-      );
-      const newDataString = JSON.stringify(newSimulateData);
-      if (dataSet.has(newDataString)) {
-        return prevData;
+  useEffect(() => {
+    const handleStreamAnswers = (data: { message: string; question: any; type: any; cleaned_research: any; raw_response: any; relevancy_explanation: any; is_yes_response: any; }) => {
+      if (data.message === "done") {
+        setResearching(false);
+        return;
       }
-      const updatedData = [newSimulateData, ...prevData];
-      return updatedData.sort((a, b) => b.status - a.status);
-    });
-  });
+      console.log('got data', data)
+      const newSimulateData = {
+        title: data.question,
+        type: data.type,
+        content: data.cleaned_research,
+        raw_response: data.raw_response,
+        ai_response: data.relevancy_explanation,
+        status: data.is_yes_response,
+      };
+      setSimulateData((prevData: any) => {
+        const dataSet = new Set(
+          prevData.map((item: any) => JSON.stringify(item))
+        );
+        const newDataString = JSON.stringify(newSimulateData);
+        if (dataSet.has(newDataString)) {
+          return prevData;
+        }
+        const updatedData = [newSimulateData, ...prevData];
+        return updatedData.sort((a, b) => b.status - a.status);
+      });
+    };
+
+    socket.on("stream-answers", handleStreamAnswers);
+
+    return () => {
+      socket.off("stream-answers", handleStreamAnswers);
+    };
+  }, []);
 
   const fetchCurrentProject = async () => {
     const project = await getFreshCurrentProject(userToken, +innerProps.id);
@@ -316,8 +325,6 @@ export default function CampaignPersonalizersModal({
     // fetchResearcherAnswers(prospectId);
   };
 
-  console.log("AAKASH ADESara");
-  console.log(currentProject);
 
   const [researchData, setResearchData] = useState<any>([]);
   const [simulateData, setSimulateData] = useState([]);

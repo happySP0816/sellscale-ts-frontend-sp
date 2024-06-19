@@ -47,17 +47,22 @@ export default function Sequences(props: any) {
   const id = Number(useParams().id);
   const userToken = useRecoilValue(userTokenState);
 
-  const [emailSubjectLines, setEmailSubjectLines] = useState<SubjectLineTemplate[]>([]);
   const [loadingSequences, setLoadingSequences] = useState(true);
-  const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>([]);
   const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] = useState<any>(0);
   const [sequences, setSequences] = useState<any[]>([]);
   const [type, setType] = useState("email");
   const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] = useState<any[]>([]);
-  const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<any[]>([]);
-  const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
+
+  const emailSequenceData = props.emailSequenceData;
+  const linkedinSequenceData = props.linkedinSequenceData;
+  const setEmailSequenceData = props.setEmailSequenceData;
+  const setLinkedinSequenceData = props.setLinkedinSequenceData;
+  const emailSubjectLines = props.emailSubjectLines;
+  const setEmailSubjectLines = props.setEmailSubjectLines;
+  const setLinkedinInitialMessages = props.setLinkedinInitialMessages;
+  const linkedinInitialMessages = props.linkedinInitialMessages;
 
   const [selectStep, setSelectStep] = useState<number | null>(null);
   const [opened, setOpened] = useState(false);
@@ -588,7 +593,7 @@ const VariantSelect = (props: any) => {
         <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
           <Avatar size={"md"} radius={"xl"} src={userData.img_url} />
           <Box>
-            {type === "email" && index === 0 && <SubjectDropdown subjects={emailSubjectLines.map((line: any) => line.subject_line)} />}
+            {type === "email" && index === 0 && emailSubjectLines && <SubjectDropdown subjects={emailSubjectLines.map((line: any) => line.subject_line)} />}
             <Text fw={600} size={"sm"}>
               {item?.name}
             </Text>

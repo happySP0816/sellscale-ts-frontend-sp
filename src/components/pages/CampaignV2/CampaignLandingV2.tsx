@@ -276,6 +276,63 @@ export default function CampaignLandingV2() {
     }
   }, [currentProject]);
 
+  const checkCanToggleLinkedin = () => {
+    if (totalContacts === 0) {
+      showNotification({
+        color: "red",
+        title: "LinkedIn Channel",
+        message: "LinkedIn channel cannot be activated without contacts.",
+      });
+      return false;
+    }
+    if (linkedinSequenceData.length === 0) {
+      showNotification({
+        color: "red",
+        title: "LinkedIn Channel",
+        message: "LinkedIn channel cannot be activated without LinkedIn sequences.",
+      });
+      return false;
+    }
+    if (linkedinInitialMessages.length === 0) {
+      showNotification({
+        color: "red",
+        title: "LinkedIn Channel",
+        message: "LinkedIn channel cannot be activated without LinkedIn initial messages.",
+      });
+      return false;
+    }
+    return true
+  }
+
+  const checkCanToggleEmail = () => {
+    if (totalContacts === 0) {
+      showNotification({
+        color: "red",
+        title: "Email Channel",
+        message: "Email channel cannot be activated without contacts.",
+      });
+      return false;
+    }
+    if (emailSequenceData.length === 0) {
+
+      showNotification({
+        color: "red",
+        title: "Email Channel",
+        message: "Email channel cannot be activated without email sequences.",
+      });
+      return false;
+    }
+    if (emailSubjectLines.length === 0) {
+
+      showNotification({
+        color: "red",
+        title: "Email Channel",
+        message: "Email channel cannot be activated without email subject lines.",
+      });
+      return false;
+    }
+    return true;
+  }
   const getTotalContacts = async () => {
     setLoadingTotalContacts(true);
     const response = await fetchTotalContacts(userToken, id);
@@ -708,7 +765,12 @@ export default function CampaignLandingV2() {
                     </Flex> */}
                     <Group noWrap spacing={"sm"} w={"100%"}>
                       <Switch
-                        onChange={() => togglePersonaChannel(id, "email", userToken, !statsData?.email_active)}
+                        onChange={() => {
+                          if (!checkCanToggleEmail()){
+                            return;
+                          }
+                          togglePersonaChannel(id, "email", userToken, !statsData?.email_active)
+                        }}
                         checked={statsData?.email_active}
                         labelPosition="left"
                         label={
@@ -768,7 +830,13 @@ export default function CampaignLandingV2() {
                       />
                       <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
                       <Switch
-                        onChange={() => togglePersonaChannel(id, "linkedin", userToken, !statsData?.linkedin_active)}
+                        onChange={() => {
+                          if (!checkCanToggleLinkedin()){
+                            return;
+                          }
+                          togglePersonaChannel(id, "linkedin", userToken, !statsData?.linkedin_active);
+                          console.log(`LinkedIn channel for persona ${id} has been toggled.`);
+                        }}
                         checked={statsData?.linkedin_active}
                         labelPosition="left"
                         label={
@@ -1091,8 +1159,22 @@ export default function CampaignLandingV2() {
           </Paper>
         </Flex>
         <Flex direction={"column"} gap={"md"} w={"80%"}>
-          <Sequences setSequences={setSequences} />
-          <Personalizers data={statsData} sequences={sequences} setPersonalizers={setPersonalizers} personalizers={personalizers} />
+          <Sequences 
+            setSequences={setSequences} 
+            emailSequenceData={emailSequenceData} 
+            linkedinSequenceData={linkedinSequenceData} 
+            setEmailSequenceData={setEmailSequenceData} 
+            setLinkedinSequenceData={setLinkedinSequenceData} 
+            setEmailSubjectLines={setEmailSubjectLines} 
+            setLinkedinInitialMessages={setLinkedinInitialMessages} 
+            linkedinInitialMessages={linkedinInitialMessages} 
+          />
+          <Personalizers 
+            data={statsData} 
+            sequences={sequences} 
+            setPersonalizers={setPersonalizers} 
+            personalizers={personalizers} 
+          />
         </Flex>
       </Flex>
     </Paper>

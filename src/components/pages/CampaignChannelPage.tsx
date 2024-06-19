@@ -60,9 +60,8 @@ export default function CampaignChannelPage(props: {
     loaderData?.channelType || props.cType || ""
   );
   const userToken = useRecoilValue(userTokenState);
-  const [_currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [_currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
 
   // Used for contact count in tab
   const icpProspects = useRecoilValue(filterProspectsState);
@@ -242,22 +241,17 @@ export default function CampaignChannelPage(props: {
   }, [loaderData?.channelType, props.cType]);
 
   useEffect(() => {
-
     posthog.onFeatureFlags(function () {
       if (posthog.isFeatureEnabled("campaign_setup_wizard")) {
-        setSetupWizardFeatureEnabled(true);    
+        setSetupWizardFeatureEnabled(true);
       }
-      // if (posthog.isFeatureEnabled('campaign_shell_v2') && campaign?.id && !window.location.href.includes('campaign_v2') ) {
-      //   window.location.href = `/campaign_v2/${campaign.id}`;
-      // }
     });
   }, [campaign?.id]);
 
   const [setupMode, setSetupMode] = useState(false);
 
-  const [setupWizardFeatureEnabled, setSetupWizardFeatureEnabled] = useState(
-    false
-  );
+  const [setupWizardFeatureEnabled, setSetupWizardFeatureEnabled] =
+    useState(false);
 
   const HEADER_HEIGHT = props.hideHeader ? 0 : 90;
   const PANEL_HEIGHT = `calc(100vh - ${HEADER_HEIGHT + 80}px)`;
@@ -320,16 +314,6 @@ export default function CampaignChannelPage(props: {
               })}
             >
               <Tabs.List>
-                <Tabs.Tab
-                  value="filter_contact"
-                  icon={<IconUser size={"0.8rem"} />}
-                  disabled={props.hideIcpFilters}
-                  style={{
-                    visibility: props.hideIcpFilters ? "hidden" : undefined,
-                  }}
-                >
-                  {`Filter ${icpProspects.length} Contacts`}
-                </Tabs.Tab>
                 <Tabs.Tab
                   value="email"
                   icon={<IconMailOpened size={"0.8rem"} />}
@@ -396,34 +380,7 @@ export default function CampaignChannelPage(props: {
                     </Tooltip>
                   </Flex>
                 </Tabs.Tab>
-
-                <Tabs.Tab
-                  value="assets"
-                  icon={<IconBooks size={"0.8rem"} />}
-                  ml="auto"
-                  disabled={props.hideAssets}
-                  style={{
-                    visibility: props.hideAssets ? "hidden" : undefined,
-                  }}
-                >
-                  <Flex align={"center"} gap={"md"}>
-                    <Text>{`${assets.length} Used Assets`}</Text>
-                  </Flex>
-                </Tabs.Tab>
               </Tabs.List>
-
-              <Tabs.Panel value="filter_contact">
-                <ScrollArea h={PANEL_HEIGHT}>
-                  {campaign && <ICPFiltersDashboard hideTitleBar />}
-                </ScrollArea>
-              </Tabs.Panel>
-              <Tabs.Panel value="assets">
-                <ScrollArea h={PANEL_HEIGHT}>
-                  {selectedChannel === "assets" && campaign && (
-                    <AssetLibraryRetool />
-                  )}
-                </ScrollArea>
-              </Tabs.Panel>
               <Tabs.Panel value="linkedin">
                 <Box
                   sx={(theme) => ({

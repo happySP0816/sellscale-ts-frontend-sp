@@ -114,15 +114,12 @@ function EmailInitialOutboundView(props: {
 }) {
   const userToken = useRecoilValue(userTokenState);
 
-  const [subjectLineTemplates, setSubjectLineTemplates] = useState<
-    SubjectLineTemplate[]
-  >();
+  const [subjectLineTemplates, setSubjectLineTemplates] =
+    useState<SubjectLineTemplate[]>();
 
   const [showAll, setShowAll] = useState(false);
-  const [
-    editSequenceStepModalOpened,
-    { open: openEdit, close: closeEdit },
-  ] = useDisclosure();
+  const [editSequenceStepModalOpened, { open: openEdit, close: closeEdit }] =
+    useDisclosure();
   const [
     createSequenceStepModalOpened,
     { open: openCreate, close: closeCreate },
@@ -381,10 +378,8 @@ function EmailSequenceStepView(props: {
   const userToken = useRecoilValue(userTokenState);
 
   const [createSequenceStepModalOpened, { open, close }] = useDisclosure();
-  const [
-    editSequenceStepModalOpened,
-    { open: openEdit, close: closeEdit },
-  ] = useDisclosure();
+  const [editSequenceStepModalOpened, { open: openEdit, close: closeEdit }] =
+    useDisclosure();
   const [showAll, setShowAll] = useState(false);
 
   return (
@@ -590,9 +585,8 @@ export default function EmailSequencingPage(props: {
   const userToken = useRecoilValue(userTokenState);
 
   const [loading, setLoading] = useState(false);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const archetypeID = currentProject?.id || -1;
   const [userData, setUserData] = useRecoilState(userDataState);
 
@@ -645,10 +639,8 @@ export default function EmailSequencingPage(props: {
       templates: [],
     },
   } as EmailSequenceStepBuckets);
-  const [
-    sequenceBucketsState,
-    setSequenceBucketsState,
-  ] = useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
+  const [sequenceBucketsState, setSequenceBucketsState] =
+    useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
 
   const { data: dataChannels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -764,40 +756,12 @@ export default function EmailSequencingPage(props: {
           orientation="horizontal"
         >
           <Tabs.List>
-            {/* <Tabs.Tab
-                value="qnolibrary"
-                icon={<IconMessages size="0.8rem" />}
-              >
-                Conversation
-              </Tabs.Tab> */}
             <Tabs.Tab value="sequence" icon={<IconMessages size="0.8rem" />}>
               Email Sequence
             </Tabs.Tab>
-            <Tabs.Tab value="replies" icon={<IconBook size="0.8rem" />}>
-              Replies
-            </Tabs.Tab>
-
-            <Tabs.Tab
-              value="email-scraper"
-              icon={<IconFingerprint size="0.8rem" />}
-              ml="auto"
-            >
-              Email Scraper
-            </Tabs.Tab>
-
             <Tabs.Tab value="settings" icon={<IconWashMachine size="0.8rem" />}>
               Settings
             </Tabs.Tab>
-
-            {/* {currentProject.smartlead_campaign_id && (
-              <Tabs.Tab
-                value="smartlead"
-                icon={<IconMessages size="0.8rem" />}
-                ml="auto"
-              >
-                Beta - Variants
-              </Tabs.Tab>
-            )} */}
           </Tabs.List>
           <Tabs.Panel value="sequence">
             <NewUIEmailSequencing
@@ -815,22 +779,10 @@ export default function EmailSequencingPage(props: {
               openSequenceStep={openSequenceStep}
             />
           </Tabs.Panel>
-          <Tabs.Panel value="replies">
-            <EmailReplyFrameworkView
-              userToken={userToken}
-              archetypeID={archetypeID}
-            />
-          </Tabs.Panel>{" "}
           <Tabs.Panel value="settings">
             <Box maw="800px" mt="md" ml="auto" mr="auto">
               <EmailSettingsView userToken={userToken} />
-              {/* <NylasConnectedCard
-                connected={userData ? userData.nylas_connected : false} showSmartlead={true}
-              /> */}
             </Box>
-          </Tabs.Panel>
-          <Tabs.Panel value="email-scraper">
-            <PullProspectEmailsCard archetype_id={archetypeID} />
           </Tabs.Panel>
         </Tabs>
       </Card.Section>
@@ -1068,10 +1020,8 @@ const EmailReplyFrameworkView = (props: {
   );
 
   const [isSellScaleFramework, setIsSellScaleFramework] = useState(false);
-  const [
-    selectedFramework,
-    _setSelectedFramework,
-  ] = useState<EmailReplyFramework>();
+  const [selectedFramework, _setSelectedFramework] =
+    useState<EmailReplyFramework>();
   const setSelectedFramework = (framework: EmailReplyFramework) => {
     _setSelectedFramework(framework);
     setIsSellScaleFramework(false);

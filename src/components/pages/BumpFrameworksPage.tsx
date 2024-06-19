@@ -123,10 +123,8 @@ function BumpBucketView(props: {
   const theme = useMantineTheme();
 
   const [createBFModalOpened, { open, close }] = useDisclosure();
-  const [
-    cloneBFModalOpened,
-    { open: openClone, close: closeClone },
-  ] = useDisclosure();
+  const [cloneBFModalOpened, { open: openClone, close: closeClone }] =
+    useDisclosure();
   const [showAll, setShowAll] = useState(false);
 
   return (
@@ -578,9 +576,8 @@ export default function BumpFrameworksPage(props: {
     { open: openQuestionObjection, close: closeQuestionObjection },
   ] = useDisclosure();
   const [maximumBumpSoftLock, setMaximumBumpSoftLock] = useState(false);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const archetypeID = currentProject?.id || -1;
   const [collapseSimulation, setCollapseSimulator] = useState(true);
   const [numActiveCTAs, setNumActiveCTAs] = useState(0);
@@ -831,7 +828,6 @@ export default function BumpFrameworksPage(props: {
   return (
     <>
       <Flex direction="column">
-        {/* <LoadingOverlay visible={loading} /> */}
         {!props.hideTitle && (
           <Flex justify="space-between">
             <Title mb="xs">LinkedIn Setup</Title>
@@ -848,14 +844,8 @@ export default function BumpFrameworksPage(props: {
               orientation="horizontal"
             >
               <Tabs.List>
-                {/* <Tabs.Tab value='ctas' icon={<IconList size='0.8rem' />}>
-                  CTAs
-                </Tabs.Tab> */}
                 <Tabs.Tab value="sequence" icon={<IconList size="0.8rem" />}>
                   Sequence
-                </Tabs.Tab>
-                <Tabs.Tab value="replies" icon={<IconBook size="0.8rem" />}>
-                  Replies
                 </Tabs.Tab>
                 <Tooltip label="Run advanced simulation">
                   <Tabs.Tab
@@ -870,10 +860,6 @@ export default function BumpFrameworksPage(props: {
                 >
                   Settings
                 </Tabs.Tab>
-
-                {/* <Tabs.Tab value='analytics' icon={<IconAnalyze size='0.8rem' />}>
-                  Analytics
-                </Tabs.Tab> */}
               </Tabs.List>
 
               <Tabs.Panel value="sequence" pt="xs">
@@ -1037,293 +1023,6 @@ export default function BumpFrameworksPage(props: {
                   sequenceSetUpMode={true}
                 />
               </Tabs.Panel>
-
-              <Tabs.Panel value="replies" pt="xs">
-                <Flex mt="md" w={"100%"} gap={"50px"}>
-                  <Flex w="40%" direction="column">
-                    {/* <Text mt='xs'>Automate your replies by editing the response frameworks below.</Text>
-                    <Button variant='outline' w='30%' mb='md' ml='auto' onClick={openQuestionObjection}>
-                      Add another reply framework
-                    </Button> */}
-                    <Button
-                      variant="outline"
-                      mb="md"
-                      leftIcon={<IconPlus />}
-                      onClick={openQuestionObjection}
-                      style={{ borderStyle: "dashed", fontSize: "16px" }}
-                      size="lg"
-                      fw={"sm"}
-                    >
-                      Create New Framework
-                    </Button>
-                    <Radio.Group value={data?.id}>
-                      <Group mt="xs">
-                        {bumpBuckets.current?.ACTIVE_CONVO.frameworks.map(
-                          (item: any, i: number) => {
-                            const splitted_substatus = item.substatus?.replace(
-                              "ACTIVE_CONVO_",
-                              ""
-                            );
-
-                            return (
-                              <>
-                                {(!bumpBuckets.current?.ACTIVE_CONVO.frameworks[
-                                  i - 1
-                                ] ||
-                                  item.substatus !==
-                                    bumpBuckets.current?.ACTIVE_CONVO
-                                      .frameworks[i - 1].substatus) && (
-                                  <Divider
-                                    label={
-                                      <Flex align={"center"} gap={4}>
-                                        <div
-                                          style={{
-                                            width: "10px",
-                                            height: "10px",
-                                            background: valueToColor(
-                                              theme,
-                                              splitted_substatus ||
-                                                "ACTIVE_CONVO"
-                                            ),
-                                            borderRadius: "100%",
-                                          }}
-                                        ></div>
-                                        <Text color="gray" fw={600}>
-                                          {splitted_substatus ||
-                                            "ACTIVE_CONVERSATION"}
-                                        </Text>
-                                      </Flex>
-                                    }
-                                    labelPosition="left"
-                                    w={"100%"}
-                                  />
-                                )}
-
-                                <label
-                                  htmlFor={item?.title}
-                                  style={{
-                                    outline: `${
-                                      data?.id === item?.id
-                                        ? " 0.125rem solid #228be6"
-                                        : " 0.0625rem solid #ced4da"
-                                    }`,
-                                    borderRadius: "8px",
-                                    padding: "10px 14px",
-                                    width: "100%",
-                                  }}
-                                >
-                                  <Flex align={"center"} gap={10}>
-                                    <Radio
-                                      value={item?.id}
-                                      id={item?.title}
-                                      size="xs"
-                                      onClick={() => {
-                                        setData(item);
-                                        setBlockList(
-                                          item?.transformer_blocklist
-                                        );
-                                      }}
-                                    />
-                                    <Text fw={600} mt={2}>
-                                      {item?.title}
-                                    </Text>
-                                  </Flex>
-                                </label>
-                              </>
-                            );
-                          }
-                        )}
-                      </Group>
-                    </Radio.Group>
-                  </Flex>
-
-                  <Flex w={"100%"} direction="column" gap={"xl"}>
-                    <Flex w={"100%"} justify={"space-between"} align={"center"}>
-                      <Text
-                        size={"24px"}
-                        fw={600}
-                        color="gray"
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                        inline
-                      >
-                        Edit Framework:{" "}
-                        {edit ? (
-                          <TextInput
-                            size="md"
-                            value={data?.title}
-                            onChange={(e) =>
-                              setData({
-                                ...data,
-                                title: e.target.value,
-                              })
-                            }
-                            w="400px"
-                          />
-                        ) : (
-                          <span style={{ color: "black" }}>{data?.title}</span>
-                        )}
-                        <IconPencil
-                          onClick={() => setEdit(!edit)}
-                          style={{ cursor: "pointer" }}
-                        />
-                      </Text>
-                      <Checkbox label="Default Framework" defaultChecked />
-                    </Flex>
-                    <Flex w="100%" justify={"space-between"} gap={"xl"}>
-                      <Flex direction="column" w="100%">
-                        <Text color="gray" fw={600}>
-                          REPLY FRAMEWORK TITLE:
-                        </Text>
-                        <TextInput
-                          description=" "
-                          placeholder="reply framework"
-                          value={data?.title}
-                          w={"100%"}
-                          size="md"
-                          // onChange={(e) =>
-                          //   setData({
-                          //     ...data,
-                          //     title: e.target.value,
-                          //   })
-                          // }
-                        />
-                      </Flex>
-                      <Flex direction="column" w="100%">
-                        <Text color="gray" fw={600}>
-                          SUB-STATUS
-                        </Text>
-                        <Select
-                          description=" "
-                          placeholder="Pick value"
-                          data={[data?.substatus || "ACTIVE_CONVO"]}
-                          defaultValue={data?.substatus || "ACTIVE_CONVO"}
-                          w={"100%"}
-                          size="md"
-                          disabled
-                        />
-                      </Flex>
-                    </Flex>
-                    <Flex direction="column">
-                      <Text color="gray" fw={600}>
-                        PROMPT INSTRUCTION
-                      </Text>
-                      <Textarea
-                        size="md"
-                        description=" "
-                        placeholder="These are instructions the AI will read to craft a personalized message."
-                        minRows={6}
-                        value={data?.description}
-                        onChange={(e) =>
-                          setData({
-                            ...data,
-                            description: e.target.value,
-                          })
-                        }
-
-                        // {...data?.getInputProps('description')}
-                      />
-                    </Flex>
-                    <Flex gap={"xl"}>
-                      <Button
-                        variant="filled"
-                        color="red"
-                        w={"100%"}
-                        size="lg"
-                        onClick={() => triggerPostBumpDeactivate()}
-                      >
-                        Deactivate
-                      </Button>
-                      <Button
-                        variant="filled"
-                        w={"100%"}
-                        size="lg"
-                        onClick={() => triggerEditBumpFramework()}
-                      >
-                        Save Framework
-                      </Button>
-                    </Flex>
-                    <label>
-                      <Flex
-                        style={{
-                          border: "0.0625rem solid #ced4da",
-                          borderRadius: "8px",
-                        }}
-                        align={"center"}
-                        px="md"
-                        py={"8px"}
-                        justify={"space-between"}
-                      >
-                        <Text color="gray" fw={600}>
-                          USER ACCOUNT RESEARCH:
-                        </Text>
-                        <Switch
-                          checked={data?.use_account_research}
-                          onChange={(e) => {
-                            setData({
-                              ...data,
-                              use_account_research: e.currentTarget.checked,
-                            });
-                          }}
-                        />
-                      </Flex>
-                    </label>
-                    {data?.use_account_research && (
-                      <PersonalizationSection
-                        blocklist={data?.transformer_blocklist}
-                        onItemsChange={async (items) => {
-                          setList(
-                            items.filter((x) => !x.checked).map((x) => x.id)
-                          );
-                          // Update transformer blocklist
-                          const result = await patchBumpFramework(
-                            userToken,
-                            data.id,
-                            data.overall_status,
-                            data.title,
-                            data.description,
-                            bumpFrameworkLengthMarks.find(
-                              (mark) => mark.value === bumpLengthValue
-                            )?.api_label as string,
-                            data.bumped_count,
-                            data.bump_delay_days,
-                            data.default,
-                            data.use_account_research,
-                            items.filter((x) => !x.checked).map((x) => x.id)
-                          );
-                        }}
-                      />
-                    )}
-                  </Flex>
-
-                  <CreateBumpFrameworkModal
-                    modalOpened={addNewQuestionObjectionOpened}
-                    openModal={openQuestionObjection}
-                    closeModal={closeQuestionObjection}
-                    backFunction={triggerGetBumpFrameworks}
-                    status="ACTIVE_CONVO"
-                    dataChannels={dataChannels}
-                    archetypeID={archetypeID}
-                  />
-                  {/* <Grid>
-                    {Object.keys(bumpBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
-                      return (
-                        <Grid.Col span={6}>
-                          <QuestionObjectionLibraryCard
-                            bumpFramework={bumpBuckets.current?.ACTIVE_CONVO.frameworks[index]}
-                            archetypeID={archetypeID}
-                            afterEdit={triggerGetBumpFrameworks}
-                          />
-                        </Grid.Col>
-                      );
-                    })}
-                  </Grid> */}
-                </Flex>
-              </Tabs.Panel>
-
               <Tabs.Panel value="analytics" pt="xs">
                 {!loading && bumpBuckets.current && (
                   <Stack mx="md">
@@ -1381,162 +1080,8 @@ export default function BumpFrameworksPage(props: {
               </Tabs.Panel>
             </Tabs>
           </Box>
-          {/* <Card withBorder ml='xs' w={collapseSimulation ? '15%' : '40%'}>
-            {!collapseSimulation ? (
-              <Button
-                variant='outline'
-                size='xs'
-                color='gray'
-                mb='xs'
-                rightIcon={<IconArrowRight />}
-                onClick={() => {
-                  setCollapseSimulator(!collapseSimulation);
-                }}
-              >
-                Hide
-              </Button>
-            ) : (
-              <Button
-                variant='outline'
-                size='xs'
-                color='gray'
-                mb='xs'
-                leftIcon={<IconArrowLeft />}
-                onClick={() => {
-                  setCollapseSimulator(!collapseSimulation);
-                }}
-              >
-                Show
-              </Button>
-            )}
-
-            {collapseSimulation && (
-              <Card withBorder>
-                <Text color='#42b9f5'>Show Conversation Simulator</Text>
-                <IconMessage color='#42b9f5' size='3rem' />
-              </Card>
-            )}
-
-            <Container opacity={collapseSimulation ? 0 : 1}>
-              <LinkedInConvoSimulator personaId={archetypeID as number} sequenceSetUpMode={true} />
-            </Container>
-          </Card> */}
         </Flex>
       </Flex>
     </>
   );
 }
-
-/*
-
-
- <ScrollArea>
-                    <Flex direction='column' ml='md'>
-                      <Card mb='md' withBorder>
-                        <Card.Section p='md'>
-                          <Flex align='center'>
-                            <Title order={5}>Connection Request</Title>
-                            <Text fz='xs' ml='sm'>
-                              300 Character Linkedin Invite
-                            </Text>
-                          </Flex>
-                        </Card.Section>
-                        <Card.Section mb='md'>
-                          <Divider />
-                        </Card.Section>
-
-                        <Accordion defaultValue="">
-                          <Accordion.Item value="ctas">
-                            <Accordion.Control>
-                              <Flex align='left' >
-                                <Container>
-                                  <IconChecklist size='2rem' />
-                                </Container>
-                                <Container w='80%'>
-                                  <Text fw='600'>Set Call-To-Actions</Text>
-                                  <Text size='xs'>These are the last 120 characters of your LinkedIn connection message.</Text>
-                                  <Badge color={numActiveCTAs == 0 ? 'red' : 'green'} mt='xs'>
-                                    {numActiveCTAs} CTAs active
-                                  </Badge>
-                                </Container>
-                              </Flex>
-                            </Accordion.Control>
-                            <Accordion.Panel>
-                                <PersonaDetailsCTAs onCTAsLoaded={(data) => setNumActiveCTAs(data.filter((x: any) => x.active).length)} />
-                            </Accordion.Panel>
-                          </Accordion.Item>
-
-                          <Accordion.Item value="voices">
-                            <Accordion.Control>
-                              <Flex align='left' >
-                                <Container>
-                                  <IconChartBubble size='2rem' />
-                                </Container>
-                                <Container  w='80%'>
-                                  <Text fw='600'>Voice (optional)</Text>
-                                  <Text size='xs'>Create 4-6 sample messages for the AI to learn from else the AI will use the default voice</Text>
-                                </Container>
-                              </Flex>
-                            </Accordion.Control>
-                            <Accordion.Panel pt='sm'>
-                              <VoicesSection />
-
-                            </Accordion.Panel>
-                          </Accordion.Item>
-                        </Accordion>
-                        
-                      </Card>
-
-                      <Divider label='After prospect accepts invite' labelPosition='center' mt='md' mb='md' />
-
-                      
-                      <BumpBucketView
-                        bumpBucket={bumpBuckets.current?.ACCEPTED}
-                        bucketViewTitle={'LinkedIn DM #1'}
-                        bucketViewDescription={'If no reply from prospect.'}
-                        status={'ACCEPTED'}
-                        dataChannels={dataChannels}
-                        archetypeID={archetypeID}
-                        afterCreate={triggerGetBumpFrameworks}
-                        afterEdit={triggerGetBumpFrameworks}
-                        afterClone={triggerGetBumpFrameworks}
-                      />
-
-                      
-                      {Object.keys(bumpBuckets.current?.BUMPED).map((bumpCount) => {
-                        const bumpCountInt = parseInt(bumpCount);
-                        const bumpBucket = bumpBuckets.current?.BUMPED[bumpCountInt];
-
-                        const bumpToFollowupMap: Record<string, string> = {
-                          '1': '2',
-                          '2': '3',
-                          '3': '4',
-                          '4': '5',
-                          '5': '6',
-                        }
-                        const followupString = bumpToFollowupMap[bumpCount];
-                        if (followupString == undefined) {
-                          return;
-                        }
-                        return (
-                          <Flex mt='md' w='100%'>
-                            <BumpBucketView
-                              bumpBucket={bumpBucket}
-                              bucketViewTitle={`LinkedIn DM #${followupString}`}
-                              bucketViewDescription={`If no reply from prospect.`}
-                              status={'BUMPED'}
-                              dataChannels={dataChannels}
-                              archetypeID={archetypeID}
-                              afterCreate={triggerGetBumpFrameworks}
-                              afterEdit={triggerGetBumpFrameworks}
-                              bumpedCount={bumpCountInt}
-                              afterClone={triggerGetBumpFrameworks}
-                            />
-                          </Flex>
-                        );
-                      })}}
-                    </Flex>
-                  </ScrollArea>
-
-
-*/

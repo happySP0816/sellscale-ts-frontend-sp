@@ -334,7 +334,7 @@ function NewDetailEmailSequencing(props: {
             <Title order={3}>Templates</Title>
           </Box>
           <Flex>
-            <Button
+            {/* <Button
               onClick={openBodyLibrary}
               variant="outline"
               radius="md"
@@ -343,7 +343,7 @@ function NewDetailEmailSequencing(props: {
               leftIcon={<IconBooks size="1.0rem" />}
             >
               Template Library
-            </Button>
+            </Button> */}
             <Button
               variant="light"
               leftIcon={<IconPlus size="1.0rem" />}
@@ -579,16 +579,6 @@ function NewDetailEmailSequencing(props: {
           </Box>
           <Flex>
             <Button
-              onClick={openSubjectLibrary}
-              variant="outline"
-              radius="md"
-              color="blue"
-              mr="xs"
-              leftIcon={<IconBooks size="1.0rem" />}
-            >
-              Template Library
-            </Button>
-            <Button
               variant="light"
               leftIcon={<IconPlus size="1.0rem" />}
               radius={"sm"}
@@ -743,20 +733,6 @@ function NewDetailEmailSequencing(props: {
                     refetch={props.refetch}
                   />
                 </Box>
-                // <Accordion.Item key={index} value={`${index}`}>
-                //   <Accordion.Control>
-                //     <Group position='apart'>
-                //       <Text fz='lg'>{subjectLine.subject_line}</Text>
-                //       <Group>
-                //         {subjectLine.active && <Badge>Active</Badge>}
-
-                //       </Group>
-                //     </Group>
-                //   </Accordion.Control>
-                //   <Accordion.Panel>
-                //     <SubjectLineItem subjectLine={subjectLine} refetch={props.refetch} />
-                //   </Accordion.Panel>
-                // </Accordion.Item>
               ))}
           </Accordion>
         </Box>
@@ -818,10 +794,8 @@ function EmailPreviewHeader(props: {
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [
-        _key,
-        { prospectId, currentTab, template, subjectLine },
-      ]: any = queryKey;
+      const [_key, { prospectId, currentTab, template, subjectLine }]: any =
+        queryKey;
 
       if (!props.subjectLine?.id || !props.template?.step.id) {
         return null;
@@ -1100,13 +1074,7 @@ function EmailPreviewHeader(props: {
                   <Text color="purple">Generating...</Text>
                 </Flex>
               ) : (
-                <Box
-                  sx={() => ({
-                    // border: "1px solid #E0E0E0",
-                    // borderRadius: "8px",
-                    // backgroundColor: "#F5F5F5",
-                  })}
-                >
+                <Box>
                   <Text color="gray.8" fw={500} size="sm">
                     <div
                       dangerouslySetInnerHTML={{
@@ -1123,7 +1091,6 @@ function EmailPreviewHeader(props: {
     </Stack>
   );
 }
-
 
 export const SubjectLineItem: React.FC<{
   subjectLine: SubjectLineTemplate;
@@ -1270,12 +1237,11 @@ export const SubjectLineItem: React.FC<{
                 size="sm"
                 onClick={(event) => {
                   if (subjectLine.times_used > 0) {
-                    event.preventDefault()
-                    return
-                  };
+                    event.preventDefault();
+                    return;
+                  }
                   setEditing(!editing);
                 }}
-                // disabled={subjectLine.times_used > 0}
               >
                 <IconPencil size="1.0rem" />
               </ActionIcon>
@@ -1399,9 +1365,6 @@ export const EmailBodyItem: React.FC<{
 
   const [loading, setLoading] = React.useState(false);
   const [editing, setEditing] = React.useState(false);
-  const [editingPersonalization, setEditingPersonalization] = React.useState(
-    false
-  );
 
   // Span magic on the template.template
   // Replace all [[ and ]] with span tags
@@ -1544,24 +1507,6 @@ export const EmailBodyItem: React.FC<{
         newText = newText?.replace(
           v,
           ReactDOMServer.renderToString(
-            // <Text
-            //   style={{
-            //     backgroundColor: theme.colors[deterministicMantineColor(content)][6],
-            //     width: 'fit-content',
-            //     color: theme.white,
-            //     borderRadius: 12,
-            //     padding: '0.25rem',
-            //     fontWeight: 700,
-            //     marginLeft: '0.25rem',
-            //     paddingLeft: '12px',
-            //     paddingRight: '12px',
-            //     cursor: 'pointer',
-            //   }}
-            //   component='span'
-            // >
-            //   <IconRobot size='1.1rem' color='white' style={{ paddingTop: '4px' }}></IconRobot>
-            //   {content}
-            // </Text>
             <Highlight
               span
               highlightStyles={(theme) => ({
@@ -1876,8 +1821,6 @@ export const EmailBodyItem: React.FC<{
 
             refreshPersonalization();
             refetch();
-            // setCurrentProject(await getFreshCurrentProject(userToken, currentProject.id));
-
             close();
           }}
         >

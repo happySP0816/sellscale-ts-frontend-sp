@@ -43,11 +43,8 @@ import ContactRecycling from "@common/settings/ContactRecycling";
 import WebhookConnectionPage from "./WebhookConnectionPage";
 import AccountSettings from "./AccountSettings";
 import Organization from "@common/settings/Organization";
-<<<<<<< Updated upstream
-=======
 import { InboxesManagementPage } from "@common/settings/InboxesManagementPage";
 import WebTrafficRouting from "@common/settings/Traffic/WebTrafficRouting";
->>>>>>> Stashed changes
 
 export default function SettingsPage() {
   setPageTitle("Settings");
@@ -282,12 +279,9 @@ export default function SettingsPage() {
         <Tabs.Panel value="contactRecycling" pl="xs">
           <Group noWrap>{currentTab === "contactRecycling" && <ContactRecycling />}</Group>
         </Tabs.Panel>
-<<<<<<< Updated upstream
-=======
         <Tabs.Panel value="inboxes" pl="xs">
           <Group noWrap>{currentTab === "inboxes" && <InboxesManagementPage />}</Group>
         </Tabs.Panel>
->>>>>>> Stashed changes
 
         <Tabs.Panel value="pre-filters" pl="xs">
           <Group noWrap>

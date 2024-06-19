@@ -144,7 +144,7 @@ const InlineTemplateAdder: React.FC<InlineAdderProps> = ({
     <>
       <Textarea
         mt={'sm'}
-        minRows={3}
+        minRows={6}
         placeholder="Prefer to create your own message? Write direct in here ..."
         value={manuallyAddedTemplate}
         onChange={(event) => {

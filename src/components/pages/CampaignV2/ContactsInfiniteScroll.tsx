@@ -8,6 +8,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import CampaignChannelPage from "@pages/CampaignChannelPage";
 import FindContactsPage from "@pages/FindContactsPage";
 import { debounce } from "lodash";
+import { currentProjectState } from "@atoms/personaAtoms";
 
 interface Contact {
   first_name: string;
@@ -42,6 +43,7 @@ export function ContactsInfiniteScroll({
   const userToken = useRecoilValue(userTokenState);
   const offsetRef = useRef(0);
   const [modalOpened, setModalOpened] = useState(false);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const getIcpFitBadge = (icp_fit_score: number, size: "sm" | "md" | "xs" = "sm") => {
     let label = "";
@@ -179,7 +181,15 @@ export function ContactsInfiniteScroll({
         }}
         size="1150px"
       >
-        <CampaignChannelPage campaignId={campaignId} cType={"filter_contact"} hideHeader={true} hideEmail={false} hideLinkedIn={false} hideAssets={true} />
+        <CampaignChannelPage
+          campaignId={currentProject?.id || -1}
+          hideIcpFilters={false}
+          hideAssets={true}
+          cType={"filter_contact"}
+          hideHeader={true}
+          hideEmail={true}
+          hideLinkedIn={true}
+        />
       </Modal>
       <Flex gap={"sm"} align={"center"}>
         <Flex direction="column" w={"100%"} gap="sm">

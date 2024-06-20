@@ -505,7 +505,7 @@ const VariantSelect = (props: any) => {
           <Text color="gray" fw={500} size={"xs"}>
             {`Step #${index + 1}:`}
           </Text>
-          {type === "email" ? <IconBrandLinkedin size={"0.9rem"} color="#228be6" /> : <IconMail size={"0.9rem"} color="#228be6" />}
+          {type === "email" ? <IconMail size={"0.9rem"} color="#228be6" /> : <IconBrandLinkedin size={"0.9rem"} color="#228be6" />}
         </Flex>
         {/* <Select
           value={type === "email" ? emailSequenceViewingArray[index] : linkedinSequenceViewingArray[index]}

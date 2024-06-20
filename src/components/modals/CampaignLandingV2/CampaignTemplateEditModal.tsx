@@ -572,7 +572,32 @@ export default function CampaignTemplateEditModal({
               <NumberInput
                 w={120}
                 label="No. of Steps"
-                onChange={(val: any) => setSteps(val)}
+                onChange={(val: any) => {
+                  if (sequenceType === 'email' && currentProject?.meta_data?.email_has_been_active){
+                    showNotification({
+                      color: "red",
+                      title: "Email Channel",
+                      message: "Email channel steps cannot be changed once it has been active."
+                    });
+                    return;
+                  }
+                  if (val <= 0) {
+                    if (
+                      (sequenceType === "linkedin" && currentProject?.meta_data?.linkedin_has_been_active) ||
+                      (sequenceType === "email" && currentProject?.meta_data?.email_has_been_active)
+                    ) {
+                      showNotification({
+                        color: "red",
+                        title: `${sequenceType.charAt(0).toUpperCase() + sequenceType.slice(1)} Channel`,
+                        message: `${sequenceType.charAt(0).toUpperCase() + sequenceType.slice(1)} channel cannot have 0 steps once it has been active.`,
+                      });
+                      setTimeout(() => setSteps(1), 1000); // Prevent steps from going to 0 with a delay
+                      return;
+                    }
+                    return
+                  }
+                  setSteps(val);
+                }}
                 value={steps || undefined}
                 max={5}
               />
@@ -881,7 +906,7 @@ export default function CampaignTemplateEditModal({
               {sequenceType === "email" && (
                 <Tabs.Panel value={"subjectLines"}>
                   <ScrollArea viewportRef={viewport} h={350} px="sm" style={{ position: 'relative' }}>
-                    {innerProps.emailSubjectLines.map(
+                    {innerProps.emailSubjectLines && innerProps.emailSubjectLines.map(
                       (subjectLine: SubjectLineTemplate) => {
                         return (
                           <SubjectLineItem

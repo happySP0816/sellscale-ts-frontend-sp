@@ -32,7 +32,7 @@ const SubjectDropdown = ({ subjects }: { subjects: string[] }) => {
         margin: "0 auto", // Center the box horizontally
       }}
     >
-      <Flex align="center" gap="xs" justify="center">
+      <Flex mb="sm" align="center" gap="xs" justify="center">
         <Text fw={600} size={"sm"}>Subject:</Text>
         {subjects && subjects.length > 0 ? (
           <Select

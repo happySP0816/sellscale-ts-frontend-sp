@@ -1,5 +1,4 @@
 import {
-  ActionIcon,
   Avatar,
   Badge,
   Box,
@@ -30,22 +29,16 @@ import { IconBrandLinkedin, IconCalendar, IconChecks, IconEdit, IconMailOpened, 
 import { IconMessageCheck, IconSparkles } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import {
-  fetchCampaignPersonalizers,
-  fetchCampaignSequences,
   fetchCampaignStats,
   fetchTotalContacts,
   fetchCampaignAnalytics,
 } from "@utils/requests/campaignOverview";
-import { proxyURL } from "@utils/general";
-import { activatePersona, deactivatePersona } from "@utils/requests/postPersonaActivation";
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { useParams } from "react-router-dom";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
-import CampaignChannelPage from "@pages/CampaignChannelPage";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
-import LinkedInConvoSimulator from "@common/simulators/linkedin/LinkedInConvoSimulator";
 import { PersonaOverview, SubjectLineTemplate } from "src";
 import OutreachSlider from "../../CampaignShell/OutreachSlider";
 import Personalizers from "./Personalizers";
@@ -54,6 +47,10 @@ import ToneAdjuster from "./ToneAdjuster";
 
 interface StatsData {
   id: number;
+  meta_data?: {
+    linkedin_has_been_active?: boolean;
+    email_has_been_active?: boolean;
+  };
   is_setting_up: boolean;
   archetype_name: string;
   created_at: string;
@@ -161,7 +158,7 @@ export default function CampaignLandingV2() {
       lookalike_profile_5: "",
       template_mode: false,
       smartlead_campaign_id: undefined,
-      meta_data: {},
+      meta_data: statsData.meta_data,
       first_message_delay_days: undefined,
       linkedin_active: statsData.linkedin_active,
       email_active: statsData.email_active,
@@ -188,20 +185,15 @@ export default function CampaignLandingV2() {
   const [loadingSequences, setLoadingSequences] = useState(true);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingAnalytics, setLoadingAnalytics] = useState(true);
-  const [loadingPersonalizers, setLoadingPersonalizers] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
 
   const userToken = useRecoilValue(userTokenState);
 
-  const [contactsData, setContactsData] = useState<any[]>([]);
   const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
   const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [analyticsData, setAnalyticsData] = useState<any>([]);
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>([]);
   const [emailSubjectLines, setEmailSubjectLines] = useState<SubjectLineTemplate[]>([]);
-  const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] = useState<any>(0);
-  const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<any[]>([]);
-  const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] = useState<any[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
   const [showActivateWarningModal, setShowActivateWarningModal] = useState(false);
   const [showToneArea,setShowToneArea] = useState(false);
@@ -213,9 +205,7 @@ export default function CampaignLandingV2() {
   const [voiceParam3, setVoiceParam3] = useState({ x: 140, y: 140 });
   const [voiceParam4, setVoiceParam4] = useState({ x: 140, y: 140 });
   const [loadingVoiceSimulation, setLoadingVoiceSimulation] = useState(false);
-  const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
   const [testingVolume, setTestingVolume] = useState(0);
-  const [showLinkedInConvoSimulatorModal, setShowLinkedInConvoSimulatorModal] = useState(false);
 
   const [value, setValue] = useState("");
 
@@ -276,6 +266,63 @@ export default function CampaignLandingV2() {
     }
   }, [currentProject]);
 
+  const checkCanToggleLinkedin = () => {
+    if (totalContacts === 0) {
+      showNotification({
+        color: "red",
+        title: "LinkedIn Channel",
+        message: "LinkedIn channel cannot be activated without contacts.",
+      });
+      return false;
+    }
+    if (linkedinSequenceData.length === 0) {
+      showNotification({
+        color: "red",
+        title: "LinkedIn Channel",
+        message: "LinkedIn channel cannot be activated without LinkedIn sequences.",
+      });
+      return false;
+    }
+    if (linkedinInitialMessages.length === 0) {
+      showNotification({
+        color: "red",
+        title: "LinkedIn Channel",
+        message: "LinkedIn channel cannot be activated without LinkedIn initial messages.",
+      });
+      return false;
+    }
+    return true
+  }
+
+  const checkCanToggleEmail = () => {
+    if (totalContacts === 0) {
+      showNotification({
+        color: "red",
+        title: "Email Channel",
+        message: "Email channel cannot be activated without contacts.",
+      });
+      return false;
+    }
+    if (emailSequenceData.length === 0) {
+
+      showNotification({
+        color: "red",
+        title: "Email Channel",
+        message: "Email channel cannot be activated without email sequences.",
+      });
+      return false;
+    }
+    if (emailSubjectLines.length === 0) {
+
+      showNotification({
+        color: "red",
+        title: "Email Channel",
+        message: "Email channel cannot be activated without email subject lines.",
+      });
+      return false;
+    }
+    return true;
+  }
   const getTotalContacts = async () => {
     setLoadingTotalContacts(true);
     const response = await fetchTotalContacts(userToken, id);
@@ -708,7 +755,12 @@ export default function CampaignLandingV2() {
                     </Flex> */}
                     <Group noWrap spacing={"sm"} w={"100%"}>
                       <Switch
-                        onChange={() => togglePersonaChannel(id, "email", userToken, !statsData?.email_active)}
+                        onChange={() => {
+                          if (!checkCanToggleEmail()){
+                            return;
+                          }
+                          togglePersonaChannel(id, "email", userToken, !statsData?.email_active)
+                        }}
                         checked={statsData?.email_active}
                         labelPosition="left"
                         label={
@@ -768,7 +820,13 @@ export default function CampaignLandingV2() {
                       />
                       <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
                       <Switch
-                        onChange={() => togglePersonaChannel(id, "linkedin", userToken, !statsData?.linkedin_active)}
+                        onChange={() => {
+                          if (!checkCanToggleLinkedin()){
+                            return;
+                          }
+                          togglePersonaChannel(id, "linkedin", userToken, !statsData?.linkedin_active);
+                          console.log(`LinkedIn channel for persona ${id} has been toggled.`);
+                        }}
                         checked={statsData?.linkedin_active}
                         labelPosition="left"
                         label={
@@ -1091,8 +1149,23 @@ export default function CampaignLandingV2() {
           </Paper>
         </Flex>
         <Flex direction={"column"} gap={"md"} w={"80%"}>
-          <Sequences setSequences={setSequences} />
-          <Personalizers data={statsData} sequences={sequences} setPersonalizers={setPersonalizers} personalizers={personalizers} />
+          <Sequences 
+            setSequences={setSequences} 
+            emailSequenceData={emailSequenceData} 
+            linkedinSequenceData={linkedinSequenceData} 
+            setEmailSequenceData={setEmailSequenceData} 
+            setLinkedinSequenceData={setLinkedinSequenceData} 
+            setEmailSubjectLines={setEmailSubjectLines} 
+            emailSubjectLines={emailSubjectLines}
+            setLinkedinInitialMessages={setLinkedinInitialMessages} 
+            linkedinInitialMessages={linkedinInitialMessages} 
+          />
+          <Personalizers 
+            data={statsData} 
+            sequences={sequences} 
+            setPersonalizers={setPersonalizers} 
+            personalizers={personalizers} 
+          />
         </Flex>
       </Flex>
     </Paper>

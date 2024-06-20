@@ -315,6 +315,16 @@ export default function CampaignChannelPage(props: {
             >
               <Tabs.List>
                 <Tabs.Tab
+                    value="filter_contact"
+                    icon={<IconUser size={"0.8rem"} />}
+                    disabled={props.hideIcpFilters}
+                    style={{
+                      visibility: props.hideIcpFilters ? "hidden" : undefined,
+                    }}
+                  >
+                    {`Filter ${icpProspects.length} Contacts`}
+                  </Tabs.Tab>
+                <Tabs.Tab
                   value="email"
                   icon={<IconMailOpened size={"0.8rem"} />}
                   ml="xs"
@@ -381,6 +391,11 @@ export default function CampaignChannelPage(props: {
                   </Flex>
                 </Tabs.Tab>
               </Tabs.List>
+              <Tabs.Panel value="filter_contact">
+                <ScrollArea h={PANEL_HEIGHT}>
+                  {campaign && <ICPFiltersDashboard hideTitleBar />}
+                </ScrollArea>
+              </Tabs.Panel>
               <Tabs.Panel value="linkedin">
                 <Box
                   sx={(theme) => ({

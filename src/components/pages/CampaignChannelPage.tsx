@@ -315,7 +315,7 @@ export default function CampaignChannelPage(props: {
             >
               <Tabs.List>
                 <Tabs.Tab
-                    value="filter_contacts"
+                    value="filter_contact"
                     icon={<IconUser size={"0.8rem"} />}
                     disabled={props.hideIcpFilters}
                     style={{

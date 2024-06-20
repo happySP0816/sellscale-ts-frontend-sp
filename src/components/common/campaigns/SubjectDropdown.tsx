@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Box, Flex, Text, Select, Badge, Popover } from '@mantine/core';
 import { IconAlertCircle, IconDice5 } from "@tabler/icons";
 
-const SubjectDropdown = ({ subjects }: { subjects: string[] }) => {
-  const [selectedSubject, setSelectedSubject] = useState(subjects?.[0]);
-  const [popoverOpenedArray, setPopoverOpenedArray] = useState<boolean[]>(subjects.map(() => false));
+const SubjectDropdown = ({ emailSubjectLines }: { emailSubjectLines: { subject_line: string, is_magic_subject_line: boolean | null }[] }) => {
+  const subjects = emailSubjectLines?.map(line => line?.subject_line);
+  const [selectedSubject, setSelectedSubject] = useState('0');
+  const [popoverOpenedArray, setPopoverOpenedArray] = useState<boolean[]>(subjects?.map(() => false));
   const popoverRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -36,13 +37,13 @@ const SubjectDropdown = ({ subjects }: { subjects: string[] }) => {
         <Text fw={600} size={"sm"}>Subject:</Text>
         {subjects && subjects.length > 0 ? (
           <Select
-            value={selectedSubject}
+            value={String(selectedSubject)}
             onChange={(value: string) => {
               setSelectedSubject(value);
             }}
-            data={subjects.map((subject, index) => ({
-              value: subject,
-              label: subject,
+            data={emailSubjectLines.map((line, index) => ({
+              value: String(index),
+              label: line.is_magic_subject_line ? '[[Magic Subject Line]]' : line.subject_line,
               index: index,
             }))}
             itemComponent={({ value, label, index, ...others }) => (

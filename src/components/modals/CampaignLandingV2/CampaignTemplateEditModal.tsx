@@ -45,6 +45,7 @@ import {
   IconMessages,
   IconPlus,
   IconPoint,
+  IconQuestionMark,
   IconRefresh,
   IconSearch,
   IconTrash,
@@ -61,6 +62,8 @@ import { set } from "lodash";
 import InlineAdder from "@pages/Sequence/InlineTemplateAdder";
 import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
 import SequenceVariant from "./SequenceVariant";
+import { IconSparkles } from "@tabler/icons-react";
+import { createEmailSubjectLineTemplate } from "@utils/requests/emailSubjectLines";
 
 interface SwitchStyle extends Partial<MantineStyleSystemProps> {
   label?: React.CSSProperties;
@@ -127,6 +130,7 @@ export default function CampaignTemplateEditModal({
   const [loading, setLoading] = useState(false);
   const [emailSubjectLineModalOpened, setEmailSubjectLineModalOpened] = useState(false);
   const [addingLinkedinAsset, setAddingLinkedinAsset] = useState(false);
+  const [loadingMagicSubjectLine, setLoadingMagicSubjectLine] = useState(false);
   const [addedTemplate, setAddedTemplate] = useState<AssetType | null>(
     innerProps.addedTemplate || null
   );
@@ -190,6 +194,7 @@ export default function CampaignTemplateEditModal({
   const userData = useRecoilValue(userDataState);
   const currentProject = useRecoilValue(currentProjectState);
   const campaignId = innerProps.campaignId;
+  const addedTheMagic = innerProps.emailSubjectLines.some((subjectLine: SubjectLineTemplate) => subjectLine.is_magic_subject_line === true)
   const [stagingData, setStagingData] = useState(
     innerProps.stagingData || { email: [] }
   );
@@ -572,32 +577,7 @@ export default function CampaignTemplateEditModal({
               <NumberInput
                 w={120}
                 label="No. of Steps"
-                onChange={(val: any) => {
-                  if (sequenceType === 'email' && currentProject?.meta_data?.email_has_been_active){
-                    showNotification({
-                      color: "red",
-                      title: "Email Channel",
-                      message: "Email channel steps cannot be changed once it has been active."
-                    });
-                    return;
-                  }
-                  if (val <= 0) {
-                    if (
-                      (sequenceType === "linkedin" && currentProject?.meta_data?.linkedin_has_been_active) ||
-                      (sequenceType === "email" && currentProject?.meta_data?.email_has_been_active)
-                    ) {
-                      showNotification({
-                        color: "red",
-                        title: `${sequenceType.charAt(0).toUpperCase() + sequenceType.slice(1)} Channel`,
-                        message: `${sequenceType.charAt(0).toUpperCase() + sequenceType.slice(1)} channel cannot have 0 steps once it has been active.`,
-                      });
-                      setTimeout(() => setSteps(1), 1000); // Prevent steps from going to 0 with a delay
-                      return;
-                    }
-                    return
-                  }
-                  setSteps(val);
-                }}
+                onChange={(val: any) => setSteps(val)}
                 value={steps || undefined}
                 max={5}
               />
@@ -906,8 +886,9 @@ export default function CampaignTemplateEditModal({
               {sequenceType === "email" && (
                 <Tabs.Panel value={"subjectLines"}>
                   <ScrollArea viewportRef={viewport} h={350} px="sm" style={{ position: 'relative' }}>
-                    {innerProps.emailSubjectLines && innerProps.emailSubjectLines.map(
+                    {innerProps.emailSubjectLines.map(
                       (subjectLine: SubjectLineTemplate) => {
+                        console.log(subjectLine);
                         return (
                           <SubjectLineItem
                             subjectLine={subjectLine}
@@ -928,9 +909,62 @@ export default function CampaignTemplateEditModal({
                       archetypeID={currentProject?.id || -1}
                     />
                     <div style={{ position: 'sticky', bottom: 0, background: 'white', padding: '8px 0' }}>
-                      <Button color='grape' leftIcon={<IconPlus size={"0.9rem"} />} onClick={() => setEmailSubjectLineModalOpened(true)} fullWidth>
+                      <Button color='blue' leftIcon={<IconPlus size={"0.9rem"} />} onClick={() => setEmailSubjectLineModalOpened(true)} fullWidth>
                         Add Subject line
                       </Button>
+                      <Flex align="center" mt="xl">
+                        {!addedTheMagic && <Button 
+                          disabled={addedTheMagic}
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))',
+                            color: 'white',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            backdropFilter: 'blur(10px)',
+                            padding: '10px 20px',
+                            transition: 'background 0.3s ease, box-shadow 0.3s ease',
+                            border: '1px solid cyan', // Added black border
+                          }}
+                          leftIcon={<IconSparkles size={"0.9rem"} />} 
+                          loading={loadingMagicSubjectLine}
+                          onClick={async () => {
+                            setLoadingMagicSubjectLine(true);
+                            try {
+                              await createEmailSubjectLineTemplate(userToken, currentProject?.id || -1, '', true);
+                              await innerProps.refetchSequenceData(Number(currentProject?.id || -1));
+                            } finally {
+                              setLoadingMagicSubjectLine(false);
+                              closeAllModals();
+                            }
+                          }} 
+                          fullWidth
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(75,0,130,1), rgba(0,255,255,1))';
+                            e.currentTarget.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.2)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))',
+                            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                          }}
+                        >
+                          Add Magic Subject Line 
+                          <Tooltip
+                          multiline
+                          label={
+                            <Text size="sm">
+                              SellScale will generate a clever subject line <br></br>
+                              using its research and contextual knowledge <br></br>
+                              about the campaign, prospect, and the chosen sequence.
+                            </Text>
+                          }
+                          withArrow
+                          position="top"
+                        >
+                          <Text color="white" size="xl" style={{ marginLeft: '30px' }}>
+                            <IconQuestionMark size={"1rem"} color="white" />
+                          </Text>
+                        </Tooltip>
+                        </Button>}
+                      </Flex>
                     </div>
                   </ScrollArea>
                 </Tabs.Panel>

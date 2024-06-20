@@ -1,4 +1,4 @@
-import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { emailSequenceState, linkedinSequenceState, userDataState, userTokenState } from "@atoms/userAtoms";
 import SubjectDropdown from "@common/campaigns/SubjectDropdown";
 import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
 import { constrainPoint } from "@fullcalendar/core/internal";
@@ -64,6 +64,9 @@ export default function Sequences(props: any) {
   const setLinkedinInitialMessages = props.setLinkedinInitialMessages;
   const linkedinInitialMessages = props.linkedinInitialMessages;
 
+  const [campaignLinkedinSequences, setCampaignLinkedinSequences] = useRecoilState(linkedinSequenceState);
+  const [campaignEmailSequences, setCampaignEmailSequences] = useRecoilState(emailSequenceState);
+
   const [selectStep, setSelectStep] = useState<number | null>(null);
   const [opened, setOpened] = useState(false);
 
@@ -93,8 +96,6 @@ export default function Sequences(props: any) {
           Object.keys(groupedSequences)
             .sort((a, b) => Number(a) - Number(b))
             .map((key) => groupedSequences[key]);
-
-        console.log("sequences are", sequencesData.email_sequence, sequencesData.linkedin_sequence);
 
         const handleSequences = (sequences: any[], type: string) => {
           const groupedSequences = groupSequencesByBumpedCount(sequences);
@@ -152,6 +153,13 @@ export default function Sequences(props: any) {
   useEffect(() => {
     refetchSequenceData(clientArchetypeId);
   }, []);
+
+  //keep the recoil state in sync with the local state
+  useEffect(() => {
+    setCampaignLinkedinSequences(linkedinSequenceData);
+    setCampaignEmailSequences(emailSequenceData);
+  }
+  , [linkedinSequenceData, emailSequenceData]);
 
   return (
     <Paper data-tour="sequences" withBorder>
@@ -593,7 +601,7 @@ const VariantSelect = (props: any) => {
         <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
           <Avatar size={"md"} radius={"xl"} src={userData.img_url} />
           <Box>
-            {type === "email" && index === 0 && emailSubjectLines && <SubjectDropdown subjects={emailSubjectLines.map((line: any) => line.subject_line)} />}
+            {type === "email" && index === 0 && emailSubjectLines && <SubjectDropdown emailSubjectLines={emailSubjectLines} />}
             <Text fw={600} size={"sm"}>
               {item?.name}
             </Text>

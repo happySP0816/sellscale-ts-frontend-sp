@@ -9,7 +9,7 @@ import { API_URL } from "@constants/data";
  * @param subjectLine
  * @returns - MsgResponse
  */
-export async function createEmailSubjectLineTemplate(userToken: string, archetypID: number, subjectLine: string): Promise<MsgResponse> {
+export async function createEmailSubjectLineTemplate(userToken: string, archetypID: number, subjectLine: string, isMagicSubjectLine = false): Promise<MsgResponse> {
 
   const response = await fetch(
     `${API_URL}/email_sequence/subject_line`,
@@ -22,6 +22,7 @@ export async function createEmailSubjectLineTemplate(userToken: string, archetyp
       body: JSON.stringify({
         subject_line: subjectLine,
         archetype_id: archetypID,
+        is_magic_subject_line: isMagicSubjectLine,
       })
     }
   );

@@ -630,6 +630,7 @@ export type SubjectLineTemplate = {
   times_used: number;
   times_accepted: number;
   sellscale_generated: boolean;
+  is_magic_subject_line: boolean | null;
 };
 
 export type SpamScoreResults = {

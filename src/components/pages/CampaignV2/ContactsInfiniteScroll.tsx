@@ -3,15 +3,16 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { IconSearch, IconFilter } from "@tabler/icons-react";
 import { API_URL } from "@constants/data";
 import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
-import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { campaignContactsState, userTokenState } from "@atoms/userAtoms";
 import CampaignChannelPage from "@pages/CampaignChannelPage";
 import FindContactsPage from "@pages/FindContactsPage";
 import { debounce } from "lodash";
 
-interface Contact {
+export interface Contact {
   first_name: string;
   last_name: string;
+  id: number;
   email: string;
   avatar: string;
   title: string;
@@ -40,6 +41,7 @@ export function ContactsInfiniteScroll({
   const [isArchetypeUploading, setIsArchetypeUploading] = useState(false);
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
   const userToken = useRecoilValue(userTokenState);
+  const [campaignContacts, setCampaignContacts] = useRecoilState(campaignContactsState)
   const offsetRef = useRef(0);
   const [modalOpened, setModalOpened] = useState(false);
 
@@ -86,6 +88,11 @@ export function ContactsInfiniteScroll({
       </Flex>
     );
   };
+
+  useEffect(() => {
+    setCampaignContacts(contacts);
+  }
+  , [contacts]);
 
   const loadMoreContacts = async () => {
     if (loading || !hasMoreContacts) return; // Prevent multiple calls while loading or if no more contacts

@@ -1,5 +1,5 @@
 // Simulate Magic Subject Line Modal Component
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { campaignContactsState, emailSequenceState, userTokenState } from "@atoms/userAtoms";
 import { LoadingOverlay, TextInput, Card, Flex, Button, Box, CloseButton, Select, Textarea, Title, Progress, ScrollArea } from "@mantine/core";
@@ -30,6 +30,7 @@ export default function SimulateMagicSubjectLineModal(props: SimulateMagicSubjec
   const campaignEmailSequences = useRecoilValue(emailSequenceState);
   const currentProject = useRecoilValue(currentProjectState);
   const [progressStep, setProgressStep] = useState<Number>(0);
+  const roomIDref = useRef<string>('');
   const [sections, setSections] = useState<{ value: number; color: string; label: string; }[]>([]);
 
   const personalizationIsEnabled = currentProject?.is_ai_research_personalization_enabled;
@@ -39,17 +40,17 @@ export default function SimulateMagicSubjectLineModal(props: SimulateMagicSubjec
 
 useEffect(() => {
   const handleData = (data: any) => {
-    if (data.step !== undefined) {
+    if (data.step !== undefined && data.room_id === roomIDref.current) {
       setProgressStep(data.step);
       setSections(prevSections => {
         const newSection = (() => {
           switch (data.step) {
             case 1:
-              return { value: 33.33, color: 'pink', label: 'Researching Prospect' };
+              return { value: 33.33, color: 'orange', label: 'Researching Prospect' };
             case 2:
               return { value: 33.33, color: 'grape', label: 'Generating Email' };
             case 3:
-              return { value: 33.33, color: 'violet', label: 'Generating Subject Line' };
+              return { value: 33.33, color: 'green', label: 'Generating Subject Line' };
             default:
               return null;
           }
@@ -82,6 +83,7 @@ useEffect(() => {
 
     try {
       const room_id = Array.from({ length: 16 }, () => Math.random().toString(36)[2]).join('');
+      roomIDref.current = room_id;
       socket.emit("join-room", {
         payload: { room_id: room_id },
       });
@@ -189,25 +191,25 @@ useEffect(() => {
             label: `${contact.first_name} ${contact.last_name} - ${contact.title} at ${contact.company}`
           }))}
           value={prospectId}
-          onChange={(value) => setProspectId(value ?? '')}
+          onChange={(value) => {setProspectId(value ?? ''); setGeneratedEmail(''); setGeneratedSubjectLine('');}}
           required
           mt="md"
         />
         {generatedSubjectLine !== '' && <TextInput
           label="Generated Subject Line"
+          mb="sm"
           placeholder="Generated subject line will appear here..."
           value={generatedSubjectLine}
           readOnly
           mt="md"
         />}
-       {generatedEmail !== '' && <Textarea
-          label="Personalized Email"
-          placeholder="Personalized email will appear here..."
-          value={generatedEmail}
-          readOnly
-          minRows={5}
-          mt="md"
-        />}
+       {generatedEmail !== '' && <ScrollArea style={{ height: '6em' }}>
+           <Box>
+             <div style={{ fontSize: "11px" }}>
+               <BracketGradientWrapper>{generatedEmail.replace(/\n/g, '<br/>')}</BracketGradientWrapper>
+            </div>
+           </Box>
+         </ScrollArea>}
         <Flex justify={'center'} mt='xl'>
           {!loading && <Button
             color='grape'

@@ -43,6 +43,26 @@ import { useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { SubjectLineTemplate } from "src";
 
+interface linkedinSequence {
+  active: boolean;
+  assets: any[];
+  bump_framework_id: number;
+  bumped_count: number;
+  description: string;
+}
+
+export type linkedinSequencesDataType = Array<Array<linkedinSequence>>;
+
+interface emailSequence {
+  active: boolean;
+  assets: any[];
+  bump_framework_id: number;
+  bumped_count: number;
+  description: string;
+}
+
+export type emailSequencesDataType = Array<Array<emailSequence>>;
+
 export default function Sequences(props: any) {
   const id = Number(useParams().id);
   const userToken = useRecoilValue(userTokenState);
@@ -55,10 +75,10 @@ export default function Sequences(props: any) {
   const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<any[]>([]);
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
 
-  const emailSequenceData = props.emailSequenceData;
-  const linkedinSequenceData = props.linkedinSequenceData;
-  const setEmailSequenceData = props.setEmailSequenceData;
-  const setLinkedinSequenceData = props.setLinkedinSequenceData;
+  // const emailSequenceData = props.emailSequenceData;
+  // const linkedinSequenceData = props.linkedinSequenceData;
+  // const setEmailSequenceData = props.setEmailSequenceData;
+  // const setLinkedinSequenceData = props.setLinkedinSequenceData;
   const emailSubjectLines = props.emailSubjectLines;
   const setEmailSubjectLines = props.setEmailSubjectLines;
   const setLinkedinInitialMessages = props.setLinkedinInitialMessages;
@@ -106,10 +126,10 @@ export default function Sequences(props: any) {
           setType(type);
           if (type === "linkedin") {
             setLinkedinSequenceViewingArray(orderedGroupedSequences.map((group) => group[0].title));
-            setLinkedinSequenceData(orderedGroupedSequences);
+            setCampaignLinkedinSequences(orderedGroupedSequences);
           } else {
             setEmailSequenceViewingArray(orderedGroupedSequences.map((group) => group[0].title));
-            setEmailSequenceData(orderedGroupedSequences);
+            setCampaignEmailSequences(orderedGroupedSequences);
           }
         };
 
@@ -120,15 +140,15 @@ export default function Sequences(props: any) {
         } else if (sequencesData.email_sequence.length > 0 && sequencesData.linkedin_sequence.length > 0) {
           handleSequences(sequencesData.email_sequence, "email");
           setLinkedinSequenceViewingArray(orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.linkedin_sequence)).map((group) => group[0].title));
-          setLinkedinSequenceData(orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.linkedin_sequence)));
+          setCampaignLinkedinSequences(orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.linkedin_sequence)));
           console.log("linkedin is", orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.linkedin_sequence)));
           console.log("emailSequenceData", orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.email_sequence)));
         } else {
           setSequences([]);
           props.setSequences([]);
           setType("email");
-          setEmailSequenceData([]);
-          setLinkedinSequenceData([]);
+          setCampaignEmailSequences([]);
+          setCampaignLinkedinSequences([]);
           setEmailSequenceViewingArray([]);
           setLinkedinSequenceViewingArray([]);
         }
@@ -155,11 +175,10 @@ export default function Sequences(props: any) {
   }, []);
 
   //keep the recoil state in sync with the local state
-  useEffect(() => {
-    setCampaignLinkedinSequences(linkedinSequenceData);
-    setCampaignEmailSequences(emailSequenceData);
-  }
-  , [linkedinSequenceData, emailSequenceData]);
+  // useEffect(() => {
+  //   setCampaignLinkedinSequences(linkedinSequenceData);
+  //   setCampaignEmailSequences(emailSequenceData);
+  // }, [linkedinSequenceData, emailSequenceData]);
 
   return (
     <Paper data-tour="sequences" withBorder>
@@ -189,11 +208,11 @@ export default function Sequences(props: any) {
               onChange={(value: any) => {
                 setType(value);
                 if (value === "email") {
-                  setSequences(emailSequenceData);
-                  props.setSequences(emailSequenceData);
+                  setSequences(campaignEmailSequences);
+                  props.setSequences(campaignEmailSequences);
                 } else {
-                  setSequences(linkedinSequenceData);
-                  props.setSequences(linkedinSequenceData);
+                  setSequences(campaignLinkedinSequences);
+                  props.setSequences(campaignLinkedinSequences);
                 }
               }}
               data={[
@@ -232,8 +251,8 @@ export default function Sequences(props: any) {
                     sequenceType: type,
                     linkedinInitialMessages,
                     emailSubjectLines,
-                    linkedinSequenceData,
-                    emailSequenceData,
+                    campaignLinkedinSequences,
+                    campaignEmailSequences,
                     campaignId: id,
                     createTemplateBuilder,
                     refetchSequenceData,
@@ -430,8 +449,8 @@ export default function Sequences(props: any) {
                   sequenceType: type,
                   linkedinInitialMessages,
                   emailSubjectLines,
-                  linkedinSequenceData,
-                  emailSequenceData,
+                  campaignLinkedinSequences,
+                  campaignEmailSequences,
                   campaignId: id,
                   createTemplateBuilder,
                   setCreateTemplateBuilder,

@@ -127,7 +127,7 @@ useEffect(() => {
     return null;
   }
 
-  const selectedSequence = sequence ? campaignEmailSequences.flat().find((seq: { title: string; }) => seq.title === sequence) : null;
+  const selectedSequence = sequence ? campaignEmailSequences.flat().find((seq) => (seq as unknown as { title: string }).title === sequence) : null;
   const sequenceContent = selectedSequence?.description || "";
   const minRows = Math.max(3, Math.ceil(sequenceContent.length / 100));
 
@@ -169,7 +169,7 @@ useEffect(() => {
         <Select
           label="Select Template"
           placeholder="Pick one"
-          data={campaignEmailSequences.flat().map((seq: { title: any; }) => ({ value: seq.title, label: seq.title }))}
+          data={campaignEmailSequences.flat().map((seq: any) => ({ value: seq.title, label: seq.title }))}
           value={sequence}
           onChange={setSequence}
           required
@@ -214,7 +214,7 @@ useEffect(() => {
           {!loading && <Button
             color='grape'
             onClick={() => triggerSimulateMagicSubjectLine(
-              selectedSequence?.id
+              selectedSequence?.id || -1
             )}
             disabled={!sequence || prospectId === '' || loading}
           >

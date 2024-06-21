@@ -56,6 +56,7 @@ export type linkedinSequencesDataType = Array<Array<linkedinSequence>>;
 interface emailSequence {
   active: boolean;
   assets: any[];
+  id?: number;
   bump_framework_id: number;
   bumped_count: number;
   description: string;

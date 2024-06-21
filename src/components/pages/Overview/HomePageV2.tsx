@@ -222,7 +222,7 @@ export function LineChart() {
           />
           <Flex>
             <Box style={{ border: "1px solid #e9ecef" }}>
-              {["Week", "Month", "Year"].map((mode) => (
+              {["week", "month", "year"].map((mode) => (
                 <Button
                   onClick={() => setCurrentMode(mode)}
                   size="sm"
@@ -230,7 +230,7 @@ export function LineChart() {
                   variant={currentMode === mode ? "outline" : "subtle"}
                   key={mode}
                 >
-                  {mode}
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
                 </Button>
               ))}
             </Box>

@@ -185,8 +185,8 @@ export default function CampaignLandingV2() {
 
   const userToken = useRecoilValue(userTokenState);
 
-  const campaignLinkedinSequences = useRecoilValue(linkedinSequenceState);
-  const campaignEmailSequences = useRecoilValue(emailSequenceState);
+  const linkedinSequenceData = useRecoilValue(linkedinSequenceState);
+  const emailSequenceData = useRecoilValue(emailSequenceState);
 
   // const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
   // const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
@@ -274,7 +274,7 @@ export default function CampaignLandingV2() {
       });
       return false;
     }
-    if (campaignLinkedinSequences.length === 0) {
+    if (linkedinSequenceData.length === 0) {
       showNotification({
         color: "red",
         title: "LinkedIn Channel",
@@ -302,7 +302,7 @@ export default function CampaignLandingV2() {
       });
       return false;
     }
-    if (campaignEmailSequences.length === 0) {
+    if (emailSequenceData.length === 0) {
       showNotification({
         color: "red",
         title: "Email Channel",
@@ -410,7 +410,7 @@ export default function CampaignLandingV2() {
     } else {
       setActiveStep(3);
     }
-  }, [totalContacts, sequences, loadingSequences, campaignLinkedinSequences, personalizers]);
+  }, [totalContacts, sequences, loadingSequences, linkedinSequenceData, personalizers]);
 
   // This useEffect hook runs on page load and whenever the 'id' or 'userToken' changes.
   // It fetches campaign-related data (contacts, sequences, and stats) for a specific client archetype.
@@ -460,7 +460,7 @@ export default function CampaignLandingV2() {
     if (channel === "email") {
       //check if there are email sequences and subject lines.
       //if not, show a notification that the channel cannot be activated.
-      if (campaignEmailSequences.length === 0 || emailSubjectLines.length === 0) {
+      if (emailSequenceData.length === 0 || emailSubjectLines.length === 0) {
         showNotification({
           color: "red",
           title: "Email Channel",

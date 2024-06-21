@@ -27,7 +27,7 @@ export default function SimulateMagicSubjectLineModal(props: SimulateMagicSubjec
   const [generatedSubjectLine, setGeneratedSubjectLine] = useState<string>("");
   const [generatedEmail, setGeneratedEmail] = useState<string>("");
   const campaignContacts = useRecoilValue(campaignContactsState);
-  const campaignEmailSequences = useRecoilValue(emailSequenceState);
+  const emailSequenceData = useRecoilValue(emailSequenceState);
   const currentProject = useRecoilValue(currentProjectState);
   const [progressStep, setProgressStep] = useState<Number>(0);
   const roomIDref = useRef<string>('');
@@ -36,7 +36,7 @@ export default function SimulateMagicSubjectLineModal(props: SimulateMagicSubjec
   const personalizationIsEnabled = currentProject?.is_ai_research_personalization_enabled;
 
   console.log('campaignContacts', campaignContacts)
-  console.log('campaignEmailSequences', campaignEmailSequences)
+  console.log('emailSequenceData', emailSequenceData)
 
 useEffect(() => {
   const handleData = (data: any) => {
@@ -127,7 +127,7 @@ useEffect(() => {
     return null;
   }
 
-  const selectedSequence = sequence ? campaignEmailSequences.flat().find((seq) => (seq as unknown as { title: string }).title === sequence) : null;
+  const selectedSequence = sequence ? emailSequenceData.flat().find((seq) => (seq as unknown as { title: string }).title === sequence) : null;
   const sequenceContent = selectedSequence?.description || "";
   const minRows = Math.max(3, Math.ceil(sequenceContent.length / 100));
 
@@ -169,7 +169,7 @@ useEffect(() => {
         <Select
           label="Select Template"
           placeholder="Pick one"
-          data={campaignEmailSequences.flat().map((seq: any) => ({ value: seq.title, label: seq.title }))}
+          data={emailSequenceData.flat().map((seq: any) => ({ value: seq.title, label: seq.title }))}
           value={sequence}
           onChange={setSequence}
           required

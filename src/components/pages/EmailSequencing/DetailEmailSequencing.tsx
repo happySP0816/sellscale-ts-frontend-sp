@@ -92,6 +92,7 @@ import _, { set } from "lodash";
 import getResearchPointTypes from "@utils/requests/getResearchPointTypes";
 import { useQuery } from "@tanstack/react-query";
 import EmailSequenceStepAssets from "./EmailSequenceStepAssets";
+import SimulateMagicSubjectLineModal from "@modals/SimulateMagicSubjectLine";
 
 const SpamScorePopover: FC<{
   subjectSpamScoreDetails?: SpamScoreResults | undefined | null;
@@ -1104,6 +1105,7 @@ export const SubjectLineItem: React.FC<{
 
   const [loading, setLoading] = React.useState(false);
   const [editing, setEditing] = React.useState(false);
+  const [magicSubjectLineSimulatorOpened, setMagicSubjectLineSimulatorOpened] = useState(false);
   const [editedSubjectLine, setEditedSubjectLine] = React.useState(
     subjectLine.subject_line
   );
@@ -1192,6 +1194,13 @@ export const SubjectLineItem: React.FC<{
           : "1px solid transparent",
       })}
     >
+      {magicSubjectLineSimulatorOpened && <SimulateMagicSubjectLineModal
+        modalOpened={magicSubjectLineSimulatorOpened}
+        openModal={() => console.log("Open Modal")}
+        closeModal={() => {setMagicSubjectLineSimulatorOpened(false)}}
+        backFunction={() => {setMagicSubjectLineSimulatorOpened(false)} }
+        archetypeID={-1}
+      />}
       <LoadingOverlay visible={loading} />
       <Flex direction={"column"} w={"100%"}>
         <Flex gap={"0.5rem"} mb={"0.5rem"} justify={"space-between"}>
@@ -1336,7 +1345,30 @@ export const SubjectLineItem: React.FC<{
           </>
         ) : (
           <Text fw={"400"} fz={"0.9rem"} color={"gray.8"}>
-            {editedSubjectLine}
+            {subjectLine.is_magic_subject_line ? (
+              <Flex justify="space-between" align="center">
+                <span
+                  style={{
+                    background: "linear-gradient(135deg, #00f, #32CD32, #00f)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  Magic Subject Line
+                </span>
+                <Button
+                  size="xs"
+                  color='grape'
+                  onClick={() => {
+                    setMagicSubjectLineSimulatorOpened(true);
+                  }}
+                >
+                  Simulate
+                </Button>
+              </Flex>
+            ) : (
+              editedSubjectLine
+            )}
           </Text>
         )}
       </Flex>

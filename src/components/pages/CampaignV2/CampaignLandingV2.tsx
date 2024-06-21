@@ -28,14 +28,10 @@ import { API_URL } from "@constants/data";
 import { IconBrandLinkedin, IconCalendar, IconChecks, IconEdit, IconMailOpened, IconSend, IconSettings, IconTrash } from "@tabler/icons";
 import { IconMessageCheck, IconSparkles } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
-import {
-  fetchCampaignStats,
-  fetchTotalContacts,
-  fetchCampaignAnalytics,
-} from "@utils/requests/campaignOverview";
+import { fetchCampaignStats, fetchTotalContacts, fetchCampaignAnalytics } from "@utils/requests/campaignOverview";
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { useParams } from "react-router-dom";
-import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { emailSequenceState, linkedinSequenceState, userDataState, userTokenState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
@@ -189,14 +185,17 @@ export default function CampaignLandingV2() {
 
   const userToken = useRecoilValue(userTokenState);
 
-  const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
-  const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
+  const linkedinSequenceData = useRecoilValue(linkedinSequenceState);
+  const emailSequenceData = useRecoilValue(emailSequenceState);
+
+  // const [emailSequenceData, setEmailSequenceData] = useState<any[]>([]);
+  // const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [analyticsData, setAnalyticsData] = useState<any>([]);
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>([]);
   const [emailSubjectLines, setEmailSubjectLines] = useState<SubjectLineTemplate[]>([]);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
   const [showActivateWarningModal, setShowActivateWarningModal] = useState(false);
-  const [showToneArea,setShowToneArea] = useState(false);
+  const [showToneArea, setShowToneArea] = useState(false);
   const [selectedVoiceSequence, setSelectedVoiceSequence] = useState<any>(null);
   const [voiceBuilderOpened, setVoiceBuilderOpened] = useState(false);
   const [showVoiceBuilder, setShowVoiceBuilder] = useState(false);
@@ -213,7 +212,7 @@ export default function CampaignLandingV2() {
   const [sequences, setSequences] = useState<any[]>([]);
 
   const simulateVoice = async (sequenceText: string) => {
-    setValue('');
+    setValue("");
     setLoadingVoiceSimulation(true);
 
     const voiceParams = {
@@ -241,15 +240,15 @@ export default function CampaignLandingV2() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         text: sequenceText,
-        voiceParams: voiceParams
+        voiceParams: voiceParams,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log('data is', data);
-        setValue(data.simulated_voice)
+        console.log("data is", data);
+        setValue(data.simulated_voice);
         setVoiceBuilderOpened(true);
       })
       .catch((error) => {
@@ -258,7 +257,7 @@ export default function CampaignLandingV2() {
       .finally(() => {
         setLoadingVoiceSimulation(false);
       });
-  }
+  };
   useEffect(() => {
     console.log("CURRENT PROJECT", currentProject);
     if (currentProject) {
@@ -291,8 +290,8 @@ export default function CampaignLandingV2() {
       });
       return false;
     }
-    return true
-  }
+    return true;
+  };
 
   const checkCanToggleEmail = () => {
     if (totalContacts === 0) {
@@ -304,7 +303,6 @@ export default function CampaignLandingV2() {
       return false;
     }
     if (emailSequenceData.length === 0) {
-
       showNotification({
         color: "red",
         title: "Email Channel",
@@ -313,7 +311,6 @@ export default function CampaignLandingV2() {
       return false;
     }
     if (emailSubjectLines.length === 0) {
-
       showNotification({
         color: "red",
         title: "Email Channel",
@@ -322,7 +319,7 @@ export default function CampaignLandingV2() {
       return false;
     }
     return true;
-  }
+  };
   const getTotalContacts = async () => {
     setLoadingTotalContacts(true);
     const response = await fetchTotalContacts(userToken, id);
@@ -515,47 +512,64 @@ export default function CampaignLandingV2() {
 
   return (
     <Paper p={"lg"} maw={1150} h="100%" ml="auto" mr="auto" style={{ backgroundColor: "transparent" }}>
-      <Modal size={900} opened={voiceBuilderOpened} onClose={() => setVoiceBuilderOpened(false)} centered withCloseButton={false} title={<Text weight={700} size="lg">AI Voice Builder</Text>}>
+      <Modal
+        size={900}
+        opened={voiceBuilderOpened}
+        onClose={() => setVoiceBuilderOpened(false)}
+        centered
+        withCloseButton={false}
+        title={
+          <Text weight={700} size="lg">
+            AI Voice Builder
+          </Text>
+        }
+      >
         <Grid gutter="md">
           <Grid.Col span={6}>
-            <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <ToneAdjuster xAxisLabel="Warmth" setVoiceParam={setVoiceParam1} voiceParam={voiceParam1} yAxisLabel="Confidence"/>
+            <Paper shadow="sm" p="md" style={{ backgroundColor: "white", display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <ToneAdjuster xAxisLabel="Warmth" setVoiceParam={setVoiceParam1} voiceParam={voiceParam1} yAxisLabel="Confidence" />
             </Paper>
           </Grid.Col>
           <Grid.Col span={6}>
-            <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <ToneAdjuster xAxisLabel="Humor" setVoiceParam={setVoiceParam2} voiceParam={voiceParam2} yAxisLabel="Seriousness"/>
+            <Paper shadow="sm" p="md" style={{ backgroundColor: "white", display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <ToneAdjuster xAxisLabel="Humor" setVoiceParam={setVoiceParam2} voiceParam={voiceParam2} yAxisLabel="Seriousness" />
             </Paper>
           </Grid.Col>
           <Grid.Col span={6}>
-            <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <ToneAdjuster xAxisLabel="Assertiveness" setVoiceParam={setVoiceParam3} voiceParam={voiceParam3} yAxisLabel="Empathy"/>
+            <Paper shadow="sm" p="md" style={{ backgroundColor: "white", display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <ToneAdjuster xAxisLabel="Assertiveness" setVoiceParam={setVoiceParam3} voiceParam={voiceParam3} yAxisLabel="Empathy" />
             </Paper>
           </Grid.Col>
           <Grid.Col span={6}>
-            <Paper shadow="sm" p="md" style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <ToneAdjuster xAxisLabel="Optimism" setVoiceParam={setVoiceParam4} voiceParam={voiceParam4} yAxisLabel="Professionalism"/>
+            <Paper shadow="sm" p="md" style={{ backgroundColor: "white", display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <ToneAdjuster xAxisLabel="Optimism" setVoiceParam={setVoiceParam4} voiceParam={voiceParam4} yAxisLabel="Professionalism" />
             </Paper>
           </Grid.Col>
         </Grid>
         <Flex justify="center" align="center" mt="md">
-        <Select
+          <Select
             mr="sm"
             data={sequences.map((sequence, index) => ({ value: index.toString(), label: sequence[0].title }))}
             placeholder="Select Sequence"
-            style={{ marginLeft: '1rem' }}
+            style={{ marginLeft: "1rem" }}
             onChange={(value) => {
               setShowToneArea(true);
               if (value !== null) {
                 const selectedSequence = sequences[parseInt(value)];
                 const parser = new DOMParser();
-                const parsedDescription = parser.parseFromString(selectedSequence[0].description, 'text/html').body.textContent || "";
+                const parsedDescription = parser.parseFromString(selectedSequence[0].description, "text/html").body.textContent || "";
                 setSelectedVoiceSequence(parsedDescription);
                 setValue(parsedDescription);
               }
             }}
           />
-          <Button onClick={() => {simulateVoice(selectedVoiceSequence)}} variant="filled" color="blue">
+          <Button
+            onClick={() => {
+              simulateVoice(selectedVoiceSequence);
+            }}
+            variant="filled"
+            color="blue"
+          >
             Simulate Voice
           </Button>
           <Button onClick={() => setVoiceBuilderOpened(false)} variant="filled" color="green" ml="sm">
@@ -564,11 +578,12 @@ export default function CampaignLandingV2() {
         </Flex>
         {showToneArea && (
           <Flex justify="center" mt="md">
-            {(value!=='') && <Textarea value={value} onChange={(e) => setValue(e.target.value)} placeholder="Enter your text here..." minRows={19} style={{ width: '100%' }} />}
-            {loadingVoiceSimulation && (<Loader color="grape" variant="dots" size="md" />)}
+            {value !== "" && (
+              <Textarea value={value} onChange={(e) => setValue(e.target.value)} placeholder="Enter your text here..." minRows={19} style={{ width: "100%" }} />
+            )}
+            {loadingVoiceSimulation && <Loader color="grape" variant="dots" size="md" />}
           </Flex>
         )}
-                 
       </Modal>
 
       <Modal opened={showActivateWarningModal} onClose={() => setShowActivateWarningModal(false)} size="md" centered withCloseButton={false}>
@@ -756,10 +771,10 @@ export default function CampaignLandingV2() {
                     <Group noWrap spacing={"sm"} w={"100%"}>
                       <Switch
                         onChange={() => {
-                          if (!checkCanToggleEmail()){
+                          if (!checkCanToggleEmail()) {
                             return;
                           }
-                          togglePersonaChannel(id, "email", userToken, !statsData?.email_active)
+                          togglePersonaChannel(id, "email", userToken, !statsData?.email_active);
                         }}
                         checked={statsData?.email_active}
                         labelPosition="left"
@@ -821,7 +836,7 @@ export default function CampaignLandingV2() {
                       <Divider variant="dashed" labelPosition="center" label={<Hook linkedLeft={false} linkedRight={false} />} />
                       <Switch
                         onChange={() => {
-                          if (!checkCanToggleLinkedin()){
+                          if (!checkCanToggleLinkedin()) {
                             return;
                           }
                           togglePersonaChannel(id, "linkedin", userToken, !statsData?.linkedin_active);
@@ -1097,46 +1112,50 @@ export default function CampaignLandingV2() {
           ) : (
             <></>
           )}
-          {showVoiceBuilder && <Paper mb="md" p="md" withBorder>
-            <Flex align="center" justify="space-between">
-              <Text weight={500} size="lg">Voice Builder</Text>
-              <Button onClick={() => setVoiceBuilderOpened(true)} variant="filled" color="grape" leftIcon={<IconSparkles size={16} />}>
-                Add Voice
-              </Button>
-            </Flex>
-            <Flex direction="column" mt="md" gap="sm">
-              <Paper p="md" withBorder>
-                <Flex align="center" justify="space-between">
-                  <Text>Voice Variant 1</Text>
-                  <Flex align="center" gap="sm">
-                    <IconEdit size={16} />
-                    <IconTrash size={16} />
-                    <Switch />
+          {showVoiceBuilder && (
+            <Paper mb="md" p="md" withBorder>
+              <Flex align="center" justify="space-between">
+                <Text weight={500} size="lg">
+                  Voice Builder
+                </Text>
+                <Button onClick={() => setVoiceBuilderOpened(true)} variant="filled" color="grape" leftIcon={<IconSparkles size={16} />}>
+                  Add Voice
+                </Button>
+              </Flex>
+              <Flex direction="column" mt="md" gap="sm">
+                <Paper p="md" withBorder>
+                  <Flex align="center" justify="space-between">
+                    <Text>Voice Variant 1</Text>
+                    <Flex align="center" gap="sm">
+                      <IconEdit size={16} />
+                      <IconTrash size={16} />
+                      <Switch />
+                    </Flex>
                   </Flex>
-                </Flex>
-              </Paper>
-              <Paper p="md" withBorder>
-                <Flex align="center" justify="space-between">
-                  <Text>Voice Variant 2</Text>
-                  <Flex align="center" gap="sm">
-                    <IconEdit size={16} />
-                    <IconTrash size={16} />
-                    <Switch />
+                </Paper>
+                <Paper p="md" withBorder>
+                  <Flex align="center" justify="space-between">
+                    <Text>Voice Variant 2</Text>
+                    <Flex align="center" gap="sm">
+                      <IconEdit size={16} />
+                      <IconTrash size={16} />
+                      <Switch />
+                    </Flex>
                   </Flex>
-                </Flex>
-              </Paper>
-              <Paper p="md" withBorder>
-                <Flex align="center" justify="space-between">
-                  <Text>Voice Variant 3</Text>
-                  <Flex align="center" gap="sm">
-                    <IconEdit size={16} />
-                    <IconTrash size={16} />
-                    <Switch />
+                </Paper>
+                <Paper p="md" withBorder>
+                  <Flex align="center" justify="space-between">
+                    <Text>Voice Variant 3</Text>
+                    <Flex align="center" gap="sm">
+                      <IconEdit size={16} />
+                      <IconTrash size={16} />
+                      <Switch />
+                    </Flex>
                   </Flex>
-                </Flex>
-              </Paper>
-            </Flex>
-          </Paper>}
+                </Paper>
+              </Flex>
+            </Paper>
+          )}
           <Paper data-tour="contacts" withBorder w={"100%"}>
             <ContactsInfiniteScroll
               campaignId={Number(id)}
@@ -1145,27 +1164,21 @@ export default function CampaignLandingV2() {
               loadingTotalContacts={loadingTotalContacts}
             />
           </Paper>
-          <Paper>
-          </Paper>
+          <Paper></Paper>
         </Flex>
         <Flex direction={"column"} gap={"md"} w={"80%"}>
-          <Sequences 
-            setSequences={setSequences} 
-            emailSequenceData={emailSequenceData} 
-            linkedinSequenceData={linkedinSequenceData} 
-            setEmailSequenceData={setEmailSequenceData} 
-            setLinkedinSequenceData={setLinkedinSequenceData} 
-            setEmailSubjectLines={setEmailSubjectLines} 
+          <Sequences
+            setSequences={setSequences}
+            // emailSequenceData={emailSequenceData}
+            // linkedinSequenceData={linkedinSequenceData}
+            // setEmailSequenceData={setEmailSequenceData}
+            // setLinkedinSequenceData={setLinkedinSequenceData}
+            setEmailSubjectLines={setEmailSubjectLines}
             emailSubjectLines={emailSubjectLines}
-            setLinkedinInitialMessages={setLinkedinInitialMessages} 
-            linkedinInitialMessages={linkedinInitialMessages} 
+            setLinkedinInitialMessages={setLinkedinInitialMessages}
+            linkedinInitialMessages={linkedinInitialMessages}
           />
-          <Personalizers 
-            data={statsData} 
-            sequences={sequences} 
-            setPersonalizers={setPersonalizers} 
-            personalizers={personalizers} 
-          />
+          <Personalizers data={statsData} sequences={sequences} setPersonalizers={setPersonalizers} personalizers={personalizers} />
         </Flex>
       </Flex>
     </Paper>

@@ -42,10 +42,12 @@ export function ContactsInfiniteScroll({
   const [isArchetypeUploading, setIsArchetypeUploading] = useState(false);
   const [showCampaignTemplateModal, setShowCampaignTemplateModal] = useState(false);
   const userToken = useRecoilValue(userTokenState);
-  const [campaignContacts, setCampaignContacts] = useRecoilState(campaignContactsState)
+  const [campaignContacts, setCampaignContacts] = useRecoilState(campaignContactsState);
   const offsetRef = useRef(0);
   const [modalOpened, setModalOpened] = useState(false);
   const currentProject = useRecoilValue(currentProjectState);
+
+  console.log("--------", campaignContacts);
 
   const getIcpFitBadge = (icp_fit_score: number, size: "sm" | "md" | "xs" = "sm") => {
     let label = "";
@@ -91,10 +93,9 @@ export function ContactsInfiniteScroll({
     );
   };
 
-  useEffect(() => {
-    setCampaignContacts(contacts);
-  }
-  , [contacts]);
+  // useEffect(() => {
+  //   setCampaignContacts(contacts);
+  // }, [contacts]);
 
   const loadMoreContacts = async () => {
     if (loading || !hasMoreContacts) return; // Prevent multiple calls while loading or if no more contacts
@@ -104,7 +105,11 @@ export function ContactsInfiniteScroll({
       if (newContacts.sample_contacts.length === 0) {
         setHasMoreContacts(false); // No more contacts to load
       } else {
-        setContacts((prevContacts) => {
+        // setContacts((prevContacts) => {
+        //   const uniqueContacts = new Set([...prevContacts, ...newContacts.sample_contacts]);
+        //   return Array.from(uniqueContacts);
+        // });
+        setCampaignContacts((prevContacts) => {
           const uniqueContacts = new Set([...prevContacts, ...newContacts.sample_contacts]);
           return Array.from(uniqueContacts);
         });
@@ -123,7 +128,8 @@ export function ContactsInfiniteScroll({
     setLoading(true);
     try {
       const initialContacts = await fetchCampaignContacts(userToken, campaignId, 0, batchSize, searchTerm, false);
-      setContacts(Array.from(new Set(initialContacts.sample_contacts)));
+      setCampaignContacts(Array.from(new Set(initialContacts.sample_contacts)));
+      // setContacts(Array.from(new Set(initialContacts.sample_contacts)));
       offsetRef.current = batchSize;
       setHasMoreContacts(initialContacts.sample_contacts.length === batchSize);
     } catch (error) {
@@ -240,28 +246,30 @@ export function ContactsInfiniteScroll({
         viewportRef={scrollViewportRef}
       >
         <Flex direction="column" gap="sm">
-          {contacts.map((contact, index) => (
-            <Flex key={index} gap="sm">
-              <Box ml="md">
-                <Flex align="center" gap="xs">
-                  <Avatar size="md" radius="xl" src={contact.avatar} />
-                  <Flex direction="column">
-                    <Flex align="center" gap="xs">
-                      <Text fw={500} size={"sm"}>
-                        {(contact.first_name + " " + contact.last_name).slice(0, 25)}
-                        {(contact.first_name + " " + contact.last_name).length > 25 ? "..." : ""}
+          {campaignContacts &&
+            campaignContacts.length > 1 &&
+            campaignContacts.map((contact, index) => (
+              <Flex key={index} gap="sm">
+                <Box ml="md">
+                  <Flex align="center" gap="xs">
+                    <Avatar size="md" radius="xl" src={contact.avatar} />
+                    <Flex direction="column">
+                      <Flex align="center" gap="xs">
+                        <Text fw={500} size={"sm"}>
+                          {(contact.first_name + " " + contact.last_name).slice(0, 25)}
+                          {(contact.first_name + " " + contact.last_name).length > 25 ? "..." : ""}
+                        </Text>
+                        {getIcpFitBadge(contact.icp_fit_score, "xs")}
+                      </Flex>
+                      <Text color="gray" fw={500} fz={10}>
+                        {(contact.title + " at " + contact.company).slice(0, 40)}
+                        {(contact.title + " at " + contact.company).length > 40 ? "..." : ""}
                       </Text>
-                      {getIcpFitBadge(contact.icp_fit_score, "xs")}
                     </Flex>
-                    <Text color="gray" fw={500} fz={10}>
-                      {(contact.title + " at " + contact.company).slice(0, 40)}
-                      {(contact.title + " at " + contact.company).length > 40 ? "..." : ""}
-                    </Text>
                   </Flex>
-                </Flex>
-              </Box>
-            </Flex>
-          ))}
+                </Box>
+              </Flex>
+            ))}
           {loading && (
             <Flex direction="column" gap="sm">
               {Array.from({ length: batchSize }).map((_, index) => (
@@ -287,12 +295,13 @@ export function ContactsInfiniteScroll({
             ) : loadingTotalContacts ? (
               <>
                 <Text>
-                  Showing {contacts?.length} contacts of <Loader size="xs" variant="dots" />
+                  Showing {campaignContacts?.length} contacts of <Loader size="xs" variant="dots" />
+                  {/* Showing {contacts?.length} contacts of <Loader size="xs" variant="dots" /> */}
                 </Text>
               </>
             ) : (
               <>
-                {`Showing ${contacts?.length} contacts of ${totalContacts < contacts?.length ? contacts?.length : totalContacts}`}
+                {`Showing ${campaignContacts?.length} contacts of ${totalContacts < campaignContacts?.length ? campaignContacts?.length : totalContacts}`}
                 {isArchetypeUploading && (
                   <Flex direction="column" align="center" mt="xs">
                     <Text>

@@ -43,6 +43,27 @@ import { useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { SubjectLineTemplate } from "src";
 
+interface linkedinSequence {
+  active: boolean;
+  assets: any[];
+  bump_framework_id: number;
+  bumped_count: number;
+  description: string;
+}
+
+export type linkedinSequencesDataType = Array<Array<linkedinSequence>>;
+
+interface emailSequence {
+  active: boolean;
+  assets: any[];
+  id?: number;
+  bump_framework_id: number;
+  bumped_count: number;
+  description: string;
+}
+
+export type emailSequencesDataType = Array<Array<emailSequence>>;
+
 export default function Sequences(props: any) {
   const id = Number(useParams().id);
   const userToken = useRecoilValue(userTokenState);
@@ -54,18 +75,13 @@ export default function Sequences(props: any) {
   const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] = useState<any[]>([]);
   const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<any[]>([]);
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
-
-  const emailSequenceData = props.emailSequenceData;
-  const linkedinSequenceData = props.linkedinSequenceData;
-  const setEmailSequenceData = props.setEmailSequenceData;
-  const setLinkedinSequenceData = props.setLinkedinSequenceData;
   const emailSubjectLines = props.emailSubjectLines;
   const setEmailSubjectLines = props.setEmailSubjectLines;
   const setLinkedinInitialMessages = props.setLinkedinInitialMessages;
   const linkedinInitialMessages = props.linkedinInitialMessages;
 
-  const [campaignLinkedinSequences, setCampaignLinkedinSequences] = useRecoilState(linkedinSequenceState);
-  const [campaignEmailSequences, setCampaignEmailSequences] = useRecoilState(emailSequenceState);
+  const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(linkedinSequenceState);
+  const [emailSequenceData, setEmailSequenceData] = useRecoilState(emailSequenceState);
 
   const [selectStep, setSelectStep] = useState<number | null>(null);
   const [opened, setOpened] = useState(false);
@@ -155,11 +171,10 @@ export default function Sequences(props: any) {
   }, []);
 
   //keep the recoil state in sync with the local state
-  useEffect(() => {
-    setCampaignLinkedinSequences(linkedinSequenceData);
-    setCampaignEmailSequences(emailSequenceData);
-  }
-  , [linkedinSequenceData, emailSequenceData]);
+  // useEffect(() => {
+  //   setLinkedinSequenceData(linkedinSequenceData);
+  //   setEmailSequenceData(emailSequenceData);
+  // }, [linkedinSequenceData, emailSequenceData]);
 
   return (
     <Paper data-tour="sequences" withBorder>
@@ -232,8 +247,8 @@ export default function Sequences(props: any) {
                     sequenceType: type,
                     linkedinInitialMessages,
                     emailSubjectLines,
-                    linkedinSequenceData,
-                    emailSequenceData,
+                    // linkedinSequenceData,
+                    // emailSequenceData,
                     campaignId: id,
                     createTemplateBuilder,
                     refetchSequenceData,
@@ -430,8 +445,8 @@ export default function Sequences(props: any) {
                   sequenceType: type,
                   linkedinInitialMessages,
                   emailSubjectLines,
-                  linkedinSequenceData,
-                  emailSequenceData,
+                  // linkedinSequenceData,
+                  // emailSequenceData,
                   campaignId: id,
                   createTemplateBuilder,
                   setCreateTemplateBuilder,

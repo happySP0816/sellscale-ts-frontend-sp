@@ -4,21 +4,9 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import RichTextArea from "@common/library/RichTextArea";
 import CustomSelect from "@common/persona/ICPFilter/CustomSelect";
 import { API_URL } from "@constants/data";
-import {Title} from "@mantine/core";
+import { Title } from "@mantine/core";
 
-import {
-  Box,
-  Button,
-  Center,
-  Flex,
-  NumberInput,
-  Paper,
-  SegmentedControl,
-  Switch,
-  Text,
-  TextInput,
-  Textarea,
-} from "@mantine/core";
+import { Box, Button, Center, Flex, NumberInput, Paper, SegmentedControl, Switch, Text, TextInput, Textarea } from "@mantine/core";
 import { ContextModalProps, closeAllModals, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconBrandLinkedin, IconMailOpened } from "@tabler/icons";
@@ -82,7 +70,7 @@ export default function CampaignTemplatesModal({
       });
 
       const data = await response.json();
-      console.log('data is', data);
+      console.log("data is", data);
       innerProps.setAddedTemplate(data.data);
       closeAllModals();
       openContextModal({
@@ -91,8 +79,8 @@ export default function CampaignTemplatesModal({
         innerProps: {
           sequenceType: innerProps.sequenceType,
           emailSubjectLines: innerProps.emailSubjectLines,
-          emailSequenceData: innerProps.emailSequenceData,
-          linkedinSequenceData: innerProps.linkedinSequenceData,
+          // emailSequenceData: innerProps.emailSequenceData,
+          // linkedinSequenceData: innerProps.linkedinSequenceData,
           addedTemplate: asset,
           stagingData: innerProps.stagingData,
           refetchSequenceData: innerProps.refetchSequenceData,
@@ -112,10 +100,10 @@ export default function CampaignTemplatesModal({
         },
         onClose: () => {
           try {
-            console.log('refetching sequence data');
+            console.log("refetching sequence data");
             innerProps.refetchSequenceData(currentProject?.id);
           } catch (e) {
-            console.log('error is', e);
+            console.log("error is", e);
           }
         },
       });
@@ -125,7 +113,7 @@ export default function CampaignTemplatesModal({
         color: "teal",
       });
     } catch (error) {
-      console.error('Error creating new asset:', error);
+      console.error("Error creating new asset:", error);
     } finally {
       setLoading(false);
     }
@@ -147,11 +135,7 @@ export default function CampaignTemplatesModal({
                 value: "email",
                 label: (
                   <Center style={{ gap: 10 }}>
-                    <IconMailOpened
-                      size={"1.2rem"}
-                      fill="orange"
-                      color="white"
-                    />
+                    <IconMailOpened size={"1.2rem"} fill="orange" color="white" />
                     <Text fw={500}>Email</Text>
                   </Center>
                 ),
@@ -160,11 +144,7 @@ export default function CampaignTemplatesModal({
                 value: "linkedin",
                 label: (
                   <Center style={{ gap: 10 }}>
-                    <IconBrandLinkedin
-                      size={"1.4rem"}
-                      fill="#3B85EF"
-                      color="white"
-                    />
+                    <IconBrandLinkedin size={"1.4rem"} fill="#3B85EF" color="white" />
                     <Text fw={500}>Linkedin</Text>
                   </Center>
                 ),
@@ -180,9 +160,7 @@ export default function CampaignTemplatesModal({
                 <RichTextArea onChange={(value) => setTemplate(value)} />
               ) : (
                 <Textarea
-                  placeholder={
-                    "ex. Hi [[first_name]], I wanted to reach out to you because..."
-                  }
+                  placeholder={"ex. Hi [[first_name]], I wanted to reach out to you because..."}
                   minRows={7}
                   value={template}
                   onChange={(event) => setTemplate(event.currentTarget.value)}
@@ -190,25 +168,12 @@ export default function CampaignTemplatesModal({
               )}
             </Box>
             <Box mt="xs">
-              <CustomSelect
-                maxWidth="100%"
-                value={tags}
-                label="Add Tags (optional)"
-                placeholder=""
-                setValue={setTags}
-                data={tags}
-                setData={setTags}
-              />
+              <CustomSelect maxWidth="100%" value={tags} label="Add Tags (optional)" placeholder="" setValue={setTags} data={tags} setData={setTags} />
             </Box>
           </Box>
         </Flex>
         <Flex justify={"end"} gap={"lg"}>
-          <Button
-            variant="outline"
-            color="gray"
-            fullWidth
-            onClick={() => context.closeModal(id)}
-          >
+          <Button variant="outline" color="gray" fullWidth onClick={() => context.closeModal(id)}>
             Cancel
           </Button>
           <Button

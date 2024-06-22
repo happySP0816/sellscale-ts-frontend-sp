@@ -106,8 +106,6 @@ export default function CampaignPersonalizersModal({
     endpoint: "/ml/researchers/questions/generate"
   });
 
-  console.log('generatedResearchData', generatedResearchData);
-
   const userToken = useRecoilValue(userTokenState);
 
   const fetchCurrentProject = async () => {
@@ -170,7 +168,6 @@ export default function CampaignPersonalizersModal({
   const addGeneratedResearchPoint = async (item: any) => {
     try {
       setLoadingResearchData(true);
-      console.log("data is", item);
       const response = await researchers.createResearcherQuestion(
         userToken,
         "QUESTION",

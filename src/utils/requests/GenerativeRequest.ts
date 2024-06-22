@@ -27,8 +27,6 @@ export default function useGenerativeRequest({ endpoint }: GenerativeRequestProp
 
   useEffect(() => {
     const handleData = (incomingData: any) => {
-      console.log('incomingData', incomingData);
-      console.log('current room id', roomID);
       if (incomingData.message === "done" && incomingData.room_id === roomID) {
         socket.off("stream-answers", handleData);
         setLoading(false);

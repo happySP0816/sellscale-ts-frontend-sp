@@ -184,31 +184,6 @@ export async function getResearcherAnswers(
   return response.json();
 }
 
-export async function aiGenerateResearchPoints(
-  userToken: string,
-  researcherId: number,
-  campaignId: number
-): Promise<any> {
-  try {
-    const response = await fetch(
-      `${API_URL}/ml/researchers/questions/generate`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          researcher_id: researcherId,
-          campaign_id: campaignId,
-        }),
-      }
-    );
-    return response.json();
-  } catch (error) {
-    console.error("Error generating research points:", error);
-  }
-}
 export async function connectResearcher(
   userToken: string,
   clientArchetypeId: number,

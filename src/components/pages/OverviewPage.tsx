@@ -1859,7 +1859,7 @@ export default function OverviewPage() {
   useEffect(() => {
     fetchCampaignPersonas();
   }, []);
-  const [activeTab, setActiveTab] = useState<string | null>("operator_dash");
+  const [activeTab, setActiveTab] = useState<string | null>("operation_overview");
   return (
     <Box p="xl" maw="1300px" ml="auto" mr="auto">
       <Tabs

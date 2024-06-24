@@ -274,11 +274,8 @@ export default function Sequences(props: any) {
             <Button
               variant="outline"
               rightIcon={<IconArrowRight size={"0.9rem"} />}
-              // onClick={() => {
-              //   setShowLinkedInConvoSimulatorModal(true);
-              // }}
               onClick={() => {
-                window.open(`/setup/${type}/${id}`, "_blank");
+                window.location.href = `/setup/${type}/${id}`;
               }}
             >
               Edit & Simulate

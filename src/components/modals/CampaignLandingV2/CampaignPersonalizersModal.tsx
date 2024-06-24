@@ -46,11 +46,11 @@ import { modals } from "@mantine/modals";
 import * as researchers from "@utils/requests/researchers";
 import { useState, useEffect, useRef, Key } from "react";
 import { deterministicMantineColor } from "@utils/requests/utils";
-import { socket } from "../../App";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { getFreshCurrentProject } from "@auth/core";
 import { showNotification } from "@mantine/notifications";
-import { get } from "lodash";
+import useGenerativeRequest from "@utils/requests/GenerativeRequest";
+import { CloneBumpFrameworkContextModal } from "@modals/CloneBumpFrameworkModal";
 
 export default function CampaignPersonalizersModal({
   innerProps,
@@ -63,8 +63,8 @@ export default function CampaignPersonalizersModal({
   setPersonalizers: Function;
 }>) {
   const generateTextWithBadges = (text: string) => {
-    const parts = text.split(/(\[\[.*?\]\])/).filter(Boolean);
-    return parts.map((part, index) => {
+    const parts = text?.split(/(\[\[.*?\]\])/)?.filter(Boolean);
+    return parts?.map((part, index) => {
       if (part.startsWith("[[") && part.endsWith("]]")) {
         let badgeText = part.slice(2, -2);
         return (
@@ -85,58 +85,28 @@ export default function CampaignPersonalizersModal({
 
   const [loadingProspects, setLoadingProspects] = useState(false);
   const [loadingResearchData, setLoadingResearchData] = useState(false);
-  const [generatingResearchPoints, setGeneratingResearchPoints] = useState(
-    false
-  );
   const [currentProject, setCurrentProject] = useRecoilState(
     currentProjectState
   );
   const [aiResearcherLoading, setAiResearcherLoading] = useState(false);
-  const [generatedResearchData, setGeneratedResearchData] = useState<any[]>([]);
   const [prospectData, setProspectData] = useState([]);
   const [selectedProspect, setSelectedProspect] = useState<any>(null);
-  const [researching, setResearching] = useState(false);
+  // const [researching, setResearching] = useState(false);
   const [aiResearchers, setAiResearchers] = useState<any>([]);
   const [currentAiResearcherId, setCurrentAiResearcherId] = useState("");
   //deep copy
   const sequences = innerProps?.sequences ? [...innerProps.sequences] : [];
 
+  //this function provides a state from the generative request, and the ability to override the data with the setter.
+  const { data: simulateData, setData: setSimulateData, loading: loadingAnswers, setLoading: setResearching, triggerGenerativeRequest: createAnswers} = useGenerativeRequest({
+    endpoint: "/ml/researchers/answers/create"
+  });
+
+  const { data: generatedResearchData, setData: setGeneratedResearchData, loading: generatingResearchPoints, setLoading: setGeneratingResearchPoints, triggerGenerativeRequest: generateResearchPoints} = useGenerativeRequest({
+    endpoint: "/ml/researchers/questions/generate"
+  });
+
   const userToken = useRecoilValue(userTokenState);
-
-  useEffect(() => {
-    const handleStreamAnswers = (data: { message: string; question: any; type: any; cleaned_research: any; raw_response: any; relevancy_explanation: any; is_yes_response: any; }) => {
-      if (data.message === "done") {
-        setResearching(false);
-        return;
-      }
-      console.log('got data', data)
-      const newSimulateData = {
-        title: data.question,
-        type: data.type,
-        content: data.cleaned_research,
-        raw_response: data.raw_response,
-        ai_response: data.relevancy_explanation,
-        status: data.is_yes_response,
-      };
-      setSimulateData((prevData: any) => {
-        const dataSet = new Set(
-          prevData.map((item: any) => JSON.stringify(item))
-        );
-        const newDataString = JSON.stringify(newSimulateData);
-        if (dataSet.has(newDataString)) {
-          return prevData;
-        }
-        const updatedData = [newSimulateData, ...prevData];
-        return updatedData.sort((a, b) => b.status - a.status);
-      });
-    };
-
-    socket.on("stream-answers", handleStreamAnswers);
-
-    return () => {
-      socket.off("stream-answers", handleStreamAnswers);
-    };
-  }, []);
 
   const fetchCurrentProject = async () => {
     const project = await getFreshCurrentProject(userToken, +innerProps.id);
@@ -156,9 +126,10 @@ export default function CampaignPersonalizersModal({
         false
       );
       const newProspectData = data.sample_contacts.map(
-        (contact: { id: any; full_name: any }) => ({
+        (contact: { id: any; full_name: any; email: any; phone: any; company: any }) => ({
           value: contact.id,
           label: contact.full_name,
+          ...contact
         })
       );
       setProspectData(newProspectData);
@@ -197,7 +168,6 @@ export default function CampaignPersonalizersModal({
   const addGeneratedResearchPoint = async (item: any) => {
     try {
       setLoadingResearchData(true);
-      console.log("data is", item);
       const response = await researchers.createResearcherQuestion(
         userToken,
         "QUESTION",
@@ -270,24 +240,6 @@ export default function CampaignPersonalizersModal({
     setAiResearchers(data ? data["researchers"] : []);
   };
 
-  const generateResearchPoints = async () => {
-    setGeneratingResearchPoints(true);
-    const data = await researchers.aiGenerateResearchPoints(
-      userToken,
-      Number(innerProps.id),
-      Number(innerProps.id)
-    );
-    //filter only relevant questions into this.
-    const relevantQuestions = data
-      .filter((item: any) => item.Relevant === "Yes")
-      .map((item: any) => ({
-        Question: item.Question,
-        RelevanceReason: item.RelevanceReason,
-      }));
-    setGeneratedResearchData(relevantQuestions);
-    setGeneratingResearchPoints(false);
-  };
-
   const fetchResearcherAnswers = async (prospectId: Number) => {
     setResearching(true);
     const data = await researchers.getResearcherAnswers(
@@ -312,22 +264,12 @@ export default function CampaignPersonalizersModal({
 
   const simulateResearch = async (prospectId: Number) => {
     setResearching(true);
-    const room_id =
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15);
-    if (socket) {
-      setSimulateData([]);
-      socket.emit("join-room", {
-        payload: { room_id: room_id },
-      });
-      await researchers.createResearcherAnswer(userToken, prospectId, room_id);
-    }
-    // fetchResearcherAnswers(prospectId);
+    createAnswers({prospect_id: Number(prospectId)});
   };
 
 
   const [researchData, setResearchData] = useState<any>([]);
-  const [simulateData, setSimulateData] = useState([]);
+
   return (
     <>
       <Flex mt={"lg"} style={{ border: "1px solid gray", borderRadius: "6px" }}>
@@ -403,7 +345,10 @@ export default function CampaignPersonalizersModal({
               leftIcon={<IconSparkles size={"0.9rem"} />}
               mr={"md"}
               onClick={() => {
-                generateResearchPoints();
+                generateResearchPoints({
+                  researcher_id: currentAiResearcherId,
+                  campaign_id: currentProject?.id,
+                });
               }}
             >
               AI Suggest
@@ -589,7 +534,7 @@ export default function CampaignPersonalizersModal({
                   }
                 ></Select>
                 {selectedProspect &&
-                  (researching ? (
+                  (loadingAnswers ? (
                     <Loader size="sm" />
                   ) : (
                     <Button

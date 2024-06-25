@@ -16,6 +16,7 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import EmailSequenceStepModal from "@modals/EmailSequenceStepModal";
 import { IconPlus } from "@tabler/icons";
 import { createEmailSequenceStep } from "@utils/requests/emailSequencing";
+import { fetchCampaignContacts, fetchCampaignSequences} from "@utils/requests/campaignOverview";
 import React, {
   FC,
   MutableRefObject,
@@ -29,7 +30,9 @@ import EmailSequenceStepCard from "./EmailSequenceStepCard";
 import { EmailSequenceStep, MsgResponse, SubjectLineTemplate } from "src";
 import EmailTemplateLibraryModal from "@modals/EmailTemplateLibraryModal";
 import { currentProjectState } from "@atoms/personaAtoms";
-import { useRecoilValue } from "recoil";
+import { useRecoilValue, useRecoilState } from "recoil";
+import { campaignContactsState, emailSequenceState } from "@atoms/userAtoms";
+
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
     total: number;
@@ -89,6 +92,9 @@ const Sidebar: React.FC<{
 
   const currentProject = useRecoilValue(currentProjectState);
 
+  const [campaignContacts, setCampaignContacts] = useRecoilState(campaignContactsState);
+  const [emailSequenceData, setEmailSequenceData] = useRecoilState(emailSequenceState);
+
   const calculateTrashAndStep = () => {
     // Go through the template buckets from ACCEPTED -> BUMPED and find the last one that has a default template
 
@@ -136,6 +142,15 @@ const Sidebar: React.FC<{
   useEffect(() => {
     calculateTrashAndStep();
   }, [templateBuckets]);
+
+  //set the recoil states of campaign contacts and email sequences, these are used for the magic subject line
+  useEffect(() => {
+    fetchCampaignContacts(userToken, currentProject?.id || -1, 0, 30, '', false).then((data) => {
+      setCampaignContacts(Array.from(new Set(data.sample_contacts)));
+    });
+    fetchCampaignSequences(userToken, currentProject?.id || -1).then((data) => {
+      setEmailSequenceData(data?.email_sequence)
+  })},[]);
 
   return (
     <Flex direction="column" mt="md" w="100%">

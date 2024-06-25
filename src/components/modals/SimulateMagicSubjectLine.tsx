@@ -35,9 +35,6 @@ export default function SimulateMagicSubjectLineModal(props: SimulateMagicSubjec
 
   const personalizationIsEnabled = currentProject?.is_ai_research_personalization_enabled;
 
-  console.log('campaignContacts', campaignContacts)
-  console.log('emailSequenceData', emailSequenceData)
-
 useEffect(() => {
   const handleData = (data: any) => {
     if (data.step !== undefined && data.room_id === roomIDref.current) {

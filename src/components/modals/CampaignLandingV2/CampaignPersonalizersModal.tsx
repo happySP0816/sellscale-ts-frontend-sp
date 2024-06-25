@@ -298,6 +298,7 @@ export default function CampaignPersonalizersModal({
               w="100%"
               label="AI Researcher:"
               value={currentAiResearcherId}
+              placeholder="+ add researcher name"
               data={aiResearchers.map((x: any) => {
                 return { value: "" + x.id, label: x.name };
               })}

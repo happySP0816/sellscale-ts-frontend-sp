@@ -32,7 +32,6 @@ import {
   Stack,
   Group,
   Highlight,
-  TabsValue,
 } from "@mantine/core";
 import {
   useDebouncedState,
@@ -47,7 +46,6 @@ import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
 import EmailSequenceStepModal from "@modals/EmailSequenceStepModal";
 import ManageEmailSubjectLineTemplatesModal from "@modals/ManageEmailSubjectLineTemplatesModal";
 import {
-  IconAlertCircle,
   IconBooks,
   IconCheck,
   IconDatabase,
@@ -251,7 +249,7 @@ function NewDetailEmailSequencing(props: {
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
-  const [activeTab, setActiveTab] = useState<TabsValue>('body');
+
   const [displayTitle, refreshTitle] = useRefresh();
 
   // Active Template States
@@ -353,7 +351,7 @@ function NewDetailEmailSequencing(props: {
               radius={"sm"}
               onClick={openCreateEmailTemplate}
             >
-              Add Email Body Template
+              Add Custom Template
             </Button>
           </Flex>
           <EmailTemplateLibraryModal
@@ -487,94 +485,87 @@ function NewDetailEmailSequencing(props: {
           />
         </Group>
         <Box>
-          {props.templates.length === 0 ? (
-            <Group position="center" mt="md">
-              <IconAlertCircle size="2rem" color="gray" />
-              <Text>Please add an email body template.</Text>
-            </Group>
-          ) : (
-            <Accordion
-              variant="contained"
-              defaultValue={`${activeTemplate?.step.id}`}
-            >
-              {props.templates
-                .sort((a, b) => {
-                  if (a.step.active && !b.step.active) {
-                    return -1;
-                  }
-                  if (!a.step.active && b.step.active) {
-                    return 1;
-                  }
-                  return 0;
-                })
-                .map((template: EmailSequenceStep, index: number) => {
-                  return (
-                    <Accordion.Item key={index} value={`${index}`}>
-                      <Accordion.Control>
-                        <Group position="apart">
-                          {displayTitle && (
-                            <Flex>
-                              <ActionIcon
-                                onClick={() => {
-                                  openModal({
-                                    title: "Edit Title",
-                                    children: (
-                                      <TextInput
-                                        defaultValue={template.step.title}
-                                        onBlur={(e) => {
-                                          debouncedTriggerPatchEmailBodyTemplateTitle(
-                                            template,
-                                            e.currentTarget.value
-                                          );
-                                        }}
-                                      />
-                                    ),
-                                    // open on top of other modals
-                                    zIndex: 100,
-                                  });
-                                }}
-                              >
-                                <IconPencil size="1.0rem" />
-                              </ActionIcon>
-                              <Text size="lg" w={300} variant="unstyled">
-                                {template.step.title}
-                              </Text>
-                            </Flex>
-                          )}
-                          <Group>
-                            {template.step.active && <Badge>Active</Badge>}
-                            <Button
-                              radius="lg"
-                              size="xs"
-                              color="violet"
-                              variant={
-                                activeTemplate?.step.id === template.step.id
-                                  ? "filled"
-                                  : "outline"
-                              }
-                              compact
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setTemplate(template);
+          <Accordion
+            variant="contained"
+            defaultValue={`${activeTemplate?.step.id}`}
+          >
+            {props.templates
+              .sort((a, b) => {
+                if (a.step.active && !b.step.active) {
+                  return -1;
+                }
+                if (!a.step.active && b.step.active) {
+                  return 1;
+                }
+                return 0;
+              })
+              .map((template: EmailSequenceStep, index: number) => {
+                return (
+                  <Accordion.Item key={index} value={`${index}`}>
+                    <Accordion.Control>
+                      <Group position="apart">
+                        {displayTitle && (
+                          <Flex>
+                            <ActionIcon
+                              onClick={() => {
+                                openModal({
+                                  title: "Edit Title",
+                                  children: (
+                                    <TextInput
+                                      defaultValue={template.step.title}
+                                      onBlur={(e) => {
+                                        debouncedTriggerPatchEmailBodyTemplateTitle(
+                                          template,
+                                          e.currentTarget.value
+                                        );
+                                      }}
+                                    />
+                                  ),
+                                  // open on top of other modals
+                                  zIndex: 100,
+                                });
                               }}
                             >
-                              Regen Example
-                            </Button>
-                          </Group>
+                              <IconPencil size="1.0rem" />
+                            </ActionIcon>
+                            <Text size="lg" w={300} variant="unstyled">
+                              {template.step.title}
+                            </Text>
+                          </Flex>
+                        )}
+                        <Group>
+                          {template.step.active && <Badge>Active</Badge>}
+                          <Button
+                            radius="lg"
+                            size="xs"
+                            color="violet"
+                            variant={
+                              activeTemplate?.step.id === template.step.id
+                                ? "filled"
+                                : "outline"
+                            }
+                            compact
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setTemplate(template);
+                            }}
+                          >
+                            Regen Example
+                          </Button>
                         </Group>
-                      </Accordion.Control>
-                      <Accordion.Panel>
-                        <EmailBodyItem
-                          template={template}
-                          refetch={props.refetch}
-                        />
-                      </Accordion.Panel>
-                    </Accordion.Item>
-                  );
-                })}
-            </Accordion>
-          )}
+                      </Group>
+                    </Accordion.Control>
+                    <Accordion.Panel>
+                      <EmailBodyItem
+                        template={template}
+                        refetch={props.refetch}
+                      />
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                );
+              })}
+          </Accordion>
         </Box>
       </Stack>
     );
@@ -594,7 +585,7 @@ function NewDetailEmailSequencing(props: {
               radius={"sm"}
               onClick={openCreateSubject}
             >
-              Add Subject Line Template
+              Add Custom Template
             </Button>
           </Flex>
           <CreateEmailSubjectLineModal
@@ -696,61 +687,54 @@ function NewDetailEmailSequencing(props: {
             variant="contained"
             defaultValue={`${activeSubjectLine?.id}`}
           >
-            {props.subjectLines.length === 0 ? (
-              <Group position="center" mt="md">
-                <IconAlertCircle size="2rem" color="gray" />
-                <Text>Please add a subject line template.</Text>
-              </Group>
-            ) : (
-              props.subjectLines
-                .sort((a, b) => {
-                  if (a.active && !b.active) {
-                    return -1;
-                  }
-                  if (!a.active && b.active) {
-                    return 1;
-                  }
-                  return 0;
-                })
-                .map((subjectLine: SubjectLineTemplate, index: number) => (
-                  <Box
-                    key={index}
+            {props.subjectLines
+              .sort((a, b) => {
+                if (a.active && !b.active) {
+                  return -1;
+                }
+                if (!a.active && b.active) {
+                  return 1;
+                }
+                return 0;
+              })
+              .map((subjectLine: SubjectLineTemplate, index: number) => (
+                <Box
+                  key={index}
+                  style={{
+                    position: "relative",
+                  }}
+                >
+                  <Button
                     style={{
-                      position: "relative",
+                      position: "absolute",
+                      top: 10,
+                      right: 150,
+                      zIndex: 100,
+                    }}
+                    size="xs"
+                    radius="lg"
+                    color="violet"
+                    variant={
+                      activeSubjectLine?.id === subjectLine.id
+                        ? "filled"
+                        : "outline"
+                    }
+                    compact
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSubjectLine(subjectLine);
                     }}
                   >
-                    <Button
-                      style={{
-                        position: "absolute",
-                        top: 10,
-                        right: 150,
-                        zIndex: 100,
-                      }}
-                      size="xs"
-                      radius="lg"
-                      color="violet"
-                      variant={
-                        activeSubjectLine?.id === subjectLine.id
-                          ? "filled"
-                          : "outline"
-                      }
-                      compact
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setSubjectLine(subjectLine);
-                      }}
-                    >
-                      Regen Example
-                    </Button>
+                    Regen Example
+                  </Button>
 
-                    <SubjectLineItem
-                      subjectLine={subjectLine}
-                      refetch={props.refetch}
-                    />
-                  </Box>
-                ))
-            )}
+                  <SubjectLineItem
+                    subjectLine={subjectLine}
+                    refetch={props.refetch}
+                  />
+                </Box>
+              ))}
           </Accordion>
         </Box>
       </Stack>
@@ -759,15 +743,17 @@ function NewDetailEmailSequencing(props: {
 
   return (
     <Stack>
+      <EmailPreviewHeader
+        currentTab={props.currentTab}
+        template={activeTemplate}
+        subjectLine={activeSubjectLine}
+      />
+
       {props.currentTab === "PROSPECTED" ? (
-        <Tabs variant="outline" value={activeTab} onTabChange={(value) => {setActiveTab(value)}}>
+        <Tabs variant="outline" defaultValue="body">
           <Tabs.List>
-            <Tabs.Tab value="subject_line" style={{ fontWeight: activeTab === "subject_line" ? "bold" : "normal" }}>
-              Subject Lines
-            </Tabs.Tab>
-            <Tabs.Tab value="body" style={{ fontWeight: activeTab === "body" ? "bold" : "normal" }}>
-              Body
-            </Tabs.Tab>
+            <Tabs.Tab value="subject_line">Subject Lines</Tabs.Tab>
+            <Tabs.Tab value="body">Body</Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="subject_line">
@@ -781,11 +767,6 @@ function NewDetailEmailSequencing(props: {
       ) : (
         <>{getEmailBodySection()}</>
       )}
-        <EmailPreviewHeader
-        currentTab={props.currentTab}
-        template={activeTemplate}
-        subjectLine={activeSubjectLine}
-      />
     </Stack>
   );
 }
@@ -1005,7 +986,7 @@ function EmailPreviewHeader(props: {
             </Text>
           </Flex>
           <Flex align="center">
-            {!isFetching ?<Button
+            <Button
               mr="sm"
               size="sm"
               variant="subtle"
@@ -1017,7 +998,7 @@ function EmailPreviewHeader(props: {
               }}
             >
               Regenerate
-            </Button> : <Loader mr="sm" size={20} color="purple" />}
+            </Button>
             <ProspectSelect
               personaId={currentProject.id}
               onChange={(prospect) => {
@@ -1032,7 +1013,7 @@ function EmailPreviewHeader(props: {
           </Flex>
         </Flex>
 
-        { data?.body && <Box
+        <Box
           mt="sm"
           px={"sm"}
           py={"md"}
@@ -1106,7 +1087,7 @@ function EmailPreviewHeader(props: {
               )}
             </Flex>
           </Flex>
-        </Box>}
+        </Box>
       </Box>
     </Stack>
   );

@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { campaignContactsState, userTokenState } from "@atoms/userAtoms";
 import {
   createStyles,
   useMantineTheme,
@@ -173,6 +173,7 @@ export default function ProspectSelect(props: {
 
   const [prospectDrawerOpened, setProspectDrawerOpened] = useRecoilState(prospectDrawerOpenState);
   const [prospectDrawerId, setProspectDrawerId] = useRecoilState(prospectDrawerIdState);
+  const [campaignContacts, setCampaignContacts] = useRecoilState(campaignContactsState);
 
   const searchProspects = async () => {
     if (lastTimeRun > Date.now() - 1000) {
@@ -187,6 +188,11 @@ export default function ProspectSelect(props: {
       searchQuery
     );
     if (result.status === "success") {
+      try{
+        setCampaignContacts(result.data);
+      } catch (e) {
+        console.error(e);
+      }
       const resultProspects = result.data as ProspectShallow[];
       resultProspects.sort((a, b) => {
         if (a.icp_fit_score === b.icp_fit_score) {

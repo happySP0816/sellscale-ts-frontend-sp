@@ -1,6 +1,29 @@
 import { ReactNode, useEffect, useState } from "react";
-import { createStyles, Group, getStylesRef, rem, Button, Box, Text, Tooltip, Stack, Divider, Center, Badge } from "@mantine/core";
-import { IconUsers, IconSettings, IconInbox, IconTargetArrow, IconChartHistogram, IconBell, IconMap, IconBooks, IconSearch } from "@tabler/icons-react";
+import {
+  createStyles,
+  Group,
+  getStylesRef,
+  rem,
+  Button,
+  Box,
+  Text,
+  Tooltip,
+  Stack,
+  Divider,
+  Center,
+  Badge,
+} from "@mantine/core";
+import {
+  IconUsers,
+  IconSettings,
+  IconInbox,
+  IconTargetArrow,
+  IconChartHistogram,
+  IconBell,
+  IconMap,
+  IconBooks,
+  IconSearch,
+} from "@tabler/icons-react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
 import ProfileIcon from "@nav/ProfileIcon";
@@ -17,26 +40,40 @@ import { LogoFull } from "./Logo";
 import { SearchBar } from "../../../legacy_code/old/SearchBar";
 import { openSpotlight } from "@mantine/spotlight";
 import { getPreOnboardingData } from "@pages/PreOnboarding";
-import { IconBrain, IconHome, IconPencil, IconTarget, IconWorld } from "@tabler/icons";
+import {
+  IconBrain,
+  IconHome,
+  IconPencil,
+  IconTarget,
+  IconWorld,
+} from "@tabler/icons";
 import { currentInboxCountState } from "@atoms/personaAtoms";
 import { getInboxCounts } from "@utils/requests/getInboxCounts";
 import { getProspectBucketsForInbox } from "@utils/requests/getProspects";
 import { ProspectBuckets } from "@pages/InboxRestructurePage";
+import posthog from "posthog-js";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
-    backgroundColor: theme.fn.variant({ variant: "filled", color: "dark" }).background,
+    backgroundColor: theme.fn.variant({ variant: "filled", color: "dark" })
+      .background,
   },
 
   header: {
     marginBottom: theme.spacing.md,
-    borderTop: `${rem(1)} solid ${theme.fn.lighten(theme.fn.variant({ variant: "filled", color: "dark" }).background!, 0.1)}`,
+    borderTop: `${rem(1)} solid ${theme.fn.lighten(
+      theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+      0.1
+    )}`,
   },
 
   footer: {
     paddingTop: theme.spacing.md,
     marginTop: theme.spacing.md,
-    borderTop: `${rem(1)} solid ${theme.fn.lighten(theme.fn.variant({ variant: "filled", color: "dark" }).background!, 0.1)}`,
+    borderTop: `${rem(1)} solid ${theme.fn.lighten(
+      theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+      0.1
+    )}`,
   },
 
   link: {
@@ -51,7 +88,10 @@ const useStyles = createStyles((theme) => ({
     fontWeight: 500,
 
     "&:hover": {
-      backgroundColor: theme.fn.lighten(theme.fn.variant({ variant: "filled", color: "dark" }).background!, 0.1),
+      backgroundColor: theme.fn.lighten(
+        theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+        0.1
+      ),
     },
   },
 
@@ -63,7 +103,10 @@ const useStyles = createStyles((theme) => ({
   },
   linkActive: {
     "&, &:hover": {
-      backgroundColor: theme.fn.lighten(theme.fn.variant({ variant: "filled", color: "dark" }).background!, 0.15),
+      backgroundColor: theme.fn.lighten(
+        theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+        0.15
+      ),
       [`& .${getStylesRef("icon")}`]: {
         opacity: 0.9,
       },
@@ -101,9 +144,15 @@ export default function SideNavbar(props: {}) {
   const { classes, cx } = useStyles();
   const userToken = useRecoilValue(userTokenState);
   const navigate = useNavigate();
-  const [fetchedPreOnboardingData, setFetchedPreOnboardingData] = useState(false);
+  const [fetchedPreOnboardingData, setFetchedPreOnboardingData] = useState(
+    false
+  );
   const [preOnboardingData, setPreOnboardingData] = useState({});
-  const [currentInboxCount, setCurrentInboxCount] = useRecoilState(currentInboxCountState);
+  const [currentInboxCount, setCurrentInboxCount] = useRecoilState(
+    currentInboxCountState
+  );
+
+  const [showWebIntent, setShowWebIntent] = useState(false);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-sdr-onboarding-completion-report`],
@@ -121,7 +170,10 @@ export default function SideNavbar(props: {}) {
       // const data = response.status === 'success' ? response.data : null;
 
       const response = await getProspectBucketsForInbox(userToken);
-      const buckets = response.status === "success" ? (response.data as ProspectBuckets) : null;
+      const buckets =
+        response.status === "success"
+          ? (response.data as ProspectBuckets)
+          : null;
 
       setCurrentInboxCount(buckets?.manual_bucket.length ?? 0);
 
@@ -129,6 +181,14 @@ export default function SideNavbar(props: {}) {
     },
     enabled: isLoggedIn(),
   });
+
+  useEffect(() => {
+    posthog.onFeatureFlags(function () {
+      if (posthog.isFeatureEnabled("web-intent-feature")) {
+        setShowWebIntent(true);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (!fetchedPreOnboardingData) {
@@ -152,7 +212,14 @@ export default function SideNavbar(props: {}) {
   // const percentage = Math.round((completedStepsCount / stepsCount) * 100); // old percentage
 
   const NUM_MANDATORY_FIELDS_IN_ONBOARDING = 27;
-  const percentage = Math.min(100, Math.round((Object.keys(preOnboardingData).length / NUM_MANDATORY_FIELDS_IN_ONBOARDING) * 100));
+  const percentage = Math.min(
+    100,
+    Math.round(
+      (Object.keys(preOnboardingData).length /
+        NUM_MANDATORY_FIELDS_IN_ONBOARDING) *
+        100
+    )
+  );
 
   return (
     <Group
@@ -168,14 +235,23 @@ export default function SideNavbar(props: {}) {
         <LogoFull />
         <Divider color="dark.4" />
         <Box m="md">
-          <SideNavbarItem icon={<IconHome size="1.0rem" />} label="Overview" tabKey={["overview", ""]} />
+          <SideNavbarItem
+            icon={<IconHome size="1.0rem" />}
+            label="Overview"
+            tabKey={["overview", ""]}
+          />
           <SideNavbarItem
             icon={<IconInbox size="1.0rem" />}
             label={
               <Group noWrap>
                 <Text>Inbox</Text>
                 {(currentInboxCount ?? "") && (
-                  <Badge sx={{ pointerEvents: "none" }} variant="filled" size="xs" color="blue">
+                  <Badge
+                    sx={{ pointerEvents: "none" }}
+                    variant="filled"
+                    size="xs"
+                    color="blue"
+                  >
                     {currentInboxCount}
                   </Badge>
                 )}
@@ -183,11 +259,29 @@ export default function SideNavbar(props: {}) {
             }
             tabKey={["inbox"]}
           />
-          <SideNavbarItem icon={<IconTargetArrow size="1.0rem" />} label="Campaigns" tabKey={["campaigns", "all/campaigns"]} />
-          <SideNavbarItem icon={<IconUsers size="1.0rem" />} label="Contacts" tabKey={["contacts/overview", "contacts", "all/contacts"]} />
+          <SideNavbarItem
+            icon={<IconTargetArrow size="1.0rem" />}
+            label="Campaigns"
+            tabKey={["campaigns", "all/campaigns"]}
+          />
+          <SideNavbarItem
+            icon={<IconUsers size="1.0rem" />}
+            label="Contacts"
+            tabKey={["contacts/overview", "contacts", "all/contacts"]}
+          />
           {/* <SideNavbarItem icon={<IconTarget size='1.0rem' />} label='Triggers' tabKey={['triggers', 'create-trigger']} /> */}
-          <SideNavbarItem icon={<IconBrain size="1.0rem" />} label="AI Brain" tabKey={["analytics"]} />
-          <SideNavbarItem icon={<IconWorld size="1.0rem" />} label="Website" tabKey={["website"]} />
+          <SideNavbarItem
+            icon={<IconBrain size="1.0rem" />}
+            label="AI Brain"
+            tabKey={["analytics"]}
+          />
+          {showWebIntent && (
+            <SideNavbarItem
+              icon={<IconWorld size="1.0rem" />}
+              label="Website"
+              tabKey={["website"]}
+            />
+          )}
           {/* <SideNavbarItem
             icon={<IconChartHistogram size="1.0rem" />}
             label="Analytics"
@@ -221,15 +315,27 @@ export default function SideNavbar(props: {}) {
           )} */}
 
           <Divider color="dark.4" mt="lg" mb="sm" />
-          <SideNavbarItem icon={<IconSearch size="1.0rem" />} label="Search" onClick={openSpotlight} />
+          <SideNavbarItem
+            icon={<IconSearch size="1.0rem" />}
+            label="Search"
+            onClick={openSpotlight}
+          />
           {/* <SideNavbarItem
             icon={<IconBell size="1.0rem" />}
             label="Notifications"
             tabKey={["notifications", "all/recent-activity"]}
           /> */}
           {/* <SideNavbarItem icon={<IconBooks size='1.0rem' />} label='Advanced' tabKey='advanced' /> */}
-          <SideNavbarItem icon={<IconSettings size="1.0rem" />} label="Settings" tabKey="settings" />
-          <SideNavbarItem icon={<IconPencil />} label="Adjust AI" tabKey="ai-request" />
+          <SideNavbarItem
+            icon={<IconSettings size="1.0rem" />}
+            label="Settings"
+            tabKey="settings"
+          />
+          <SideNavbarItem
+            icon={<IconPencil />}
+            label="Adjust AI"
+            tabKey="ai-request"
+          />
         </Box>
         <Box>
           <Divider color="dark.4" />
@@ -240,14 +346,23 @@ export default function SideNavbar(props: {}) {
   );
 }
 
-function SideNavbarItem(props: { icon: ReactNode; label: ReactNode; tabKey?: string | string[]; onClick?: () => void }) {
+function SideNavbarItem(props: {
+  icon: ReactNode;
+  label: ReactNode;
+  tabKey?: string | string[];
+  onClick?: () => void;
+}) {
   const navigate = useNavigate();
   const { hovered, ref } = useHover();
 
   const locParts = location.pathname?.split("/");
-  const activeTab = locParts.length === 2 ? locParts[1] : `${locParts[1]}/${locParts[2]}`;
+  const activeTab =
+    locParts.length === 2 ? locParts[1] : `${locParts[1]}/${locParts[2]}`;
 
-  const active = (Array.isArray(props.tabKey) ? props.tabKey.includes(activeTab) : activeTab === props.tabKey) || hovered;
+  const active =
+    (Array.isArray(props.tabKey)
+      ? props.tabKey.includes(activeTab)
+      : activeTab === props.tabKey) || hovered;
   return (
     <Box
       ref={ref}
@@ -259,7 +374,10 @@ function SideNavbarItem(props: { icon: ReactNode; label: ReactNode; tabKey?: str
       onClick={() => {
         props.onClick && props.onClick();
         if (props.tabKey) {
-          navigateToPage(navigate, "/" + (Array.isArray(props.tabKey) ? props.tabKey[0] : props.tabKey));
+          navigateToPage(
+            navigate,
+            "/" + (Array.isArray(props.tabKey) ? props.tabKey[0] : props.tabKey)
+          );
         }
       }}
     >
@@ -273,7 +391,11 @@ function SideNavbarItem(props: { icon: ReactNode; label: ReactNode; tabKey?: str
         >
           {props.icon}
         </Center>
-        <Text fz={12} fw={active ? 500 : undefined} c={active ? "gray.0" : "dark.1"}>
+        <Text
+          fz={12}
+          fw={active ? 500 : undefined}
+          c={active ? "gray.0" : "dark.1"}
+        >
           {props.label}
         </Text>
       </Group>

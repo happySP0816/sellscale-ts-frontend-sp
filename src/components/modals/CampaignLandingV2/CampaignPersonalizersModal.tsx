@@ -98,12 +98,24 @@ export default function CampaignPersonalizersModal({
   const sequences = innerProps?.sequences ? [...innerProps.sequences] : [];
 
   //this function provides a state from the generative request, and the ability to override the data with the setter.
-  const { data: simulateData, setData: setSimulateData, loading: loadingAnswers, setLoading: setResearching, triggerGenerativeRequest: createAnswers} = useGenerativeRequest({
-    endpoint: "/ml/researchers/answers/create"
+  const {
+    data: simulateData,
+    setData: setSimulateData,
+    loading: loadingAnswers,
+    setLoading: setResearching,
+    triggerGenerativeRequest: createAnswers,
+  } = useGenerativeRequest({
+    endpoint: "/ml/researchers/answers/create",
   });
 
-  const { data: generatedResearchData, setData: setGeneratedResearchData, loading: generatingResearchPoints, setLoading: setGeneratingResearchPoints, triggerGenerativeRequest: generateResearchPoints} = useGenerativeRequest({
-    endpoint: "/ml/researchers/questions/generate"
+  const {
+    data: generatedResearchData,
+    setData: setGeneratedResearchData,
+    loading: generatingResearchPoints,
+    setLoading: setGeneratingResearchPoints,
+    triggerGenerativeRequest: generateResearchPoints,
+  } = useGenerativeRequest({
+    endpoint: "/ml/researchers/questions/generate",
   });
 
   const userToken = useRecoilValue(userTokenState);
@@ -126,10 +138,16 @@ export default function CampaignPersonalizersModal({
         false
       );
       const newProspectData = data.sample_contacts.map(
-        (contact: { id: any; full_name: any; email: any; phone: any; company: any }) => ({
+        (contact: {
+          id: any;
+          full_name: any;
+          email: any;
+          phone: any;
+          company: any;
+        }) => ({
           value: contact.id,
           label: contact.full_name,
-          ...contact
+          ...contact,
         })
       );
       setProspectData(newProspectData);
@@ -264,15 +282,17 @@ export default function CampaignPersonalizersModal({
 
   const simulateResearch = async (prospectId: Number) => {
     setResearching(true);
-    createAnswers({prospect_id: Number(prospectId)});
+    createAnswers({ prospect_id: Number(prospectId) });
   };
-
 
   const [researchData, setResearchData] = useState<any>([]);
 
   return (
     <>
-      <Flex mt={"lg"} style={{ border: "1px solid gray", borderRadius: "6px" }}>
+      <Flex
+        mt={"lg"}
+        style={{ border: "1px solid #dee2e6", borderRadius: "6px" }}
+      >
         <Paper
           p={"md"}
           pr={"xs"}
@@ -300,7 +320,10 @@ export default function CampaignPersonalizersModal({
               value={currentAiResearcherId}
               placeholder="+ add researcher name"
               data={aiResearchers.map((x: any) => {
-                return { value: "" + x.id, label: x.name };
+                return {
+                  value: "" + x.id,
+                  label: `${x.name}`,
+                };
               })}
               onChange={(value) => {
                 connectAiResearcher(Number(value));
@@ -369,81 +392,95 @@ export default function CampaignPersonalizersModal({
             ) : (
               <>
                 <Flex h={"100%"} gap={"xs"} direction={"column"}>
-                  {researchData.map(
-                    (item: any, index: Key | null | undefined) => {
-                      return (
-                        <Paper withBorder p={"md"} key={index}>
-                          <Flex align={"start"} justify={"space-between"}>
-                            <Text size={"sm"} fw={600} pt={4}>
-                              {generateTextWithBadges(item.title)}
-                            </Text>
-                            <Flex gap={3} align={"center"}>
-                              <ActionIcon
-                                onClick={() => {
-                                  openContextModal({
-                                    modal: "addQuestionModal",
-                                    title: (
-                                      <Title order={3}>
-                                        <span className=" text-gray-500">
-                                          Edit
-                                        </span>{" "}
-                                        Research Point
-                                      </Title>
-                                    ),
-                                    innerProps: {
-                                      edit: true,
-                                      sequences: sequences,
-                                      question_id: item.id,
-                                      currentTab: item.type,
-                                      relevancy: item.content,
-                                      question: item.title,
-                                      ai_researcher_id: currentAiResearcherId,
-                                      campaign_id: innerProps.id,
-                                      setPersonalizers:
-                                        innerProps.setPersonalizers,
-                                    },
-                                    centered: true,
-                                    styles: {
-                                      content: {
-                                        minWidth: "500px",
+                  {researchData.length === 0 ? (
+                    <Paper
+                      withBorder
+                      px={"lg"}
+                      py={"xl"}
+                      mt={"lg"}
+                      style={{ borderStyle: "dashed" }}
+                    >
+                      <Text size={"sm"} color="gray" fw={500} align="center">
+                        No research points added yet!
+                      </Text>
+                    </Paper>
+                  ) : (
+                    researchData.map(
+                      (item: any, index: Key | null | undefined) => {
+                        return (
+                          <Paper withBorder p={"md"} key={index}>
+                            <Flex align={"start"} justify={"space-between"}>
+                              <Text size={"sm"} fw={600} pt={4}>
+                                {generateTextWithBadges(item.title)}
+                              </Text>
+                              <Flex gap={3} align={"center"}>
+                                <ActionIcon
+                                  onClick={() => {
+                                    openContextModal({
+                                      modal: "addQuestionModal",
+                                      title: (
+                                        <Title order={3}>
+                                          <span className=" text-gray-500">
+                                            Edit
+                                          </span>{" "}
+                                          Research Point
+                                        </Title>
+                                      ),
+                                      innerProps: {
+                                        edit: true,
+                                        sequences: sequences,
+                                        question_id: item.id,
+                                        currentTab: item.type,
+                                        relevancy: item.content,
+                                        question: item.title,
+                                        ai_researcher_id: currentAiResearcherId,
+                                        campaign_id: innerProps.id,
+                                        setPersonalizers:
+                                          innerProps.setPersonalizers,
                                       },
-                                    },
-                                  });
-                                }}
-                              >
-                                <IconEdit color="gray" size={"0.9rem"} />
-                              </ActionIcon>
-                              <ActionIcon
-                                onClick={async () => {
-                                  researchers.deleteResearcherQuestion(
-                                    userToken,
-                                    Number(item.id)
-                                  );
-                                  setResearchData((prevData: any[]) =>
-                                    prevData.filter(
-                                      (researchItem) =>
-                                        researchItem.id !== item.id
-                                    )
-                                  );
-                                }}
-                              >
-                                <IconTrash color="gray" size={"0.9rem"} />
-                              </ActionIcon>
-                              <Badge
-                                size="sm"
-                                radius={"sm"}
-                                color={deterministicMantineColor(item.type)}
-                              >
-                                {item.type}
-                              </Badge>
+                                      centered: true,
+                                      styles: {
+                                        content: {
+                                          minWidth: "500px",
+                                        },
+                                      },
+                                    });
+                                  }}
+                                >
+                                  <IconEdit color="gray" size={"0.9rem"} />
+                                </ActionIcon>
+                                <ActionIcon
+                                  onClick={async () => {
+                                    researchers.deleteResearcherQuestion(
+                                      userToken,
+                                      Number(item.id)
+                                    );
+                                    setResearchData((prevData: any[]) =>
+                                      prevData.filter(
+                                        (researchItem) =>
+                                          researchItem.id !== item.id
+                                      )
+                                    );
+                                  }}
+                                >
+                                  <IconTrash color="gray" size={"0.9rem"} />
+                                </ActionIcon>
+                                <Badge
+                                  size="sm"
+                                  radius={"sm"}
+                                  color={deterministicMantineColor(item.type)}
+                                >
+                                  {item.type}
+                                </Badge>
+                              </Flex>
                             </Flex>
-                          </Flex>
-                          <Text size={"sm"} mt={2}>
-                            {item.content}
-                          </Text>
-                        </Paper>
-                      );
-                    }
+                            <Text size={"sm"} mt={2}>
+                              {item.content}
+                            </Text>
+                          </Paper>
+                        );
+                      }
+                    )
                   )}
                 </Flex>
                 {generatedResearchData.length > 0 && (
@@ -500,18 +537,14 @@ export default function CampaignPersonalizersModal({
             )}
           </ScrollArea>
         </Paper>
-        <Divider orientation="vertical" />
-        <Paper
-          w={"66%"}
-          display={"flex"}
-          style={{ gap: "16px", flexDirection: "column" }}
-        >
+        <Divider orientation="vertical" color="#dee2e6" />
+        <Paper w={"66%"} display={"flex"} style={{ flexDirection: "column" }}>
           <Flex
             p={"lg"}
             justify={"space-between"}
             align={"center"}
             gap={"sm"}
-            style={{ borderBottom: "1px solid gray" }}
+            style={{ borderBottom: "1px solid #dee2e6" }}
           >
             <Text fw={600}>Simulate Research</Text>
             {loadingProspects ? (
@@ -548,122 +581,142 @@ export default function CampaignPersonalizersModal({
               </Flex>
             )}
           </Flex>
-          <ScrollArea h={500} scrollbarSize={8} px={"md"}>
+          <ScrollArea
+            h={640}
+            scrollbarSize={8}
+            px={"md"}
+            bg={simulateData.length === 0 ? "#f7f8fa" : ""}
+          >
             {false ? (
               <Loader size="sm" />
             ) : (
               <Flex gap={"xs"} direction={"column"}>
                 {simulateData.length === 0 ? (
-                  <Text size={"sm"} color="gray">
-                    No simulation run yet.
-                  </Text>
+                  <Paper
+                    withBorder
+                    px={"lg"}
+                    py={"xl"}
+                    mt={"lg"}
+                    style={{ borderStyle: "dashed" }}
+                    bg={"transparent"}
+                  >
+                    <Text size={"sm"} color="gray" fw={500} align="center">
+                      Add research points to simulate research here
+                    </Text>
+                  </Paper>
                 ) : (
                   simulateData.map((item: any, index) => {
                     return (
-                      <Paper withBorder p={"lg"} key={index}>
-                        <Flex justify={"space-between"}>
-                          <Flex>
-                            <IconPoint
-                              size={"2rem"}
-                              fill={item.status ? "#17B26A" : "red"}
-                              color="white"
-                              className="mt-[-6px] ml-[-12px]"
-                            />
-                            <Text fw={600} size={"sm"}>
-                              {generateTextWithBadges(item.title)}
-                            </Text>
-                          </Flex>
-                          <Badge
-                            radius={"sm"}
-                            size="sm"
-                            color={
-                              item.type === "GENERAL"
-                                ? "orange"
-                                : item.type === "LINKEDIN"
-                                ? ""
-                                : "green"
-                            }
-                          >
-                            {item.type}
-                          </Badge>
-                        </Flex>
-                        <Text size={"sm"} fw={500}>
-                          {item.content}
-                        </Text>
-                        <Flex
-                          p={"sm"}
-                          className="bg-[#D444F1]/5"
-                          gap={4}
-                          align={"start"}
-                        >
-                          <Flex>
-                            <IconBulb size={"0.9rem"} color="#D444F1" />
-                          </Flex>
-                          <Text color="#D444F1" size={"xs"}>
-                            {item.ai_response}
-                          </Text>
-                        </Flex>
-                        <Popover
-                          arrowPosition="center"
-                          zIndex={40000000}
-                          width={300}
-                          position="bottom"
-                          withArrow
-                          shadow="md"
-                        >
-                          <Popover.Target>
-                            <Flex align="center" style={{ cursor: "pointer" }}>
-                              <IconEye
-                                size={"1rem"}
-                                style={{ marginRight: "4px" }}
+                      <>
+                        <Paper withBorder p={"lg"} key={index}>
+                          <Flex justify={"space-between"}>
+                            <Flex>
+                              <IconPoint
+                                size={"2rem"}
+                                fill={item.status ? "#17B26A" : "red"}
+                                color="white"
+                                className="mt-[-6px] ml-[-12px]"
                               />
-                              <Text size={"xs"} fw={400}>
-                                See raw content
+                              <Text fw={600} size={"sm"}>
+                                {generateTextWithBadges(item.title)}
                               </Text>
                             </Flex>
-                          </Popover.Target>
-                          <Popover.Dropdown>
-                            <Text size="xs">{item.raw_response}</Text>
-                          </Popover.Dropdown>
-                        </Popover>
-                      </Paper>
+                            <Badge
+                              radius={"sm"}
+                              size="sm"
+                              color={
+                                item.type === "GENERAL"
+                                  ? "orange"
+                                  : item.type === "LINKEDIN"
+                                  ? ""
+                                  : "green"
+                              }
+                            >
+                              {item.type}
+                            </Badge>
+                          </Flex>
+                          <Text size={"sm"} fw={500}>
+                            {item.content}
+                          </Text>
+                          <Flex
+                            p={"sm"}
+                            className="bg-[#D444F1]/5"
+                            gap={4}
+                            align={"start"}
+                          >
+                            <Flex>
+                              <IconBulb size={"0.9rem"} color="#D444F1" />
+                            </Flex>
+                            <Text color="#D444F1" size={"xs"}>
+                              {item.ai_response}
+                            </Text>
+                          </Flex>
+                          <Popover
+                            arrowPosition="center"
+                            zIndex={40000000}
+                            width={300}
+                            position="bottom"
+                            withArrow
+                            shadow="md"
+                          >
+                            <Popover.Target>
+                              <Flex
+                                align="center"
+                                style={{ cursor: "pointer" }}
+                              >
+                                <IconEye
+                                  size={"1rem"}
+                                  style={{ marginRight: "4px" }}
+                                />
+                                <Text size={"xs"} fw={400}>
+                                  See raw content
+                                </Text>
+                              </Flex>
+                            </Popover.Target>
+                            <Popover.Dropdown>
+                              <Text size="xs">{item.raw_response}</Text>
+                            </Popover.Dropdown>
+                          </Popover>
+                        </Paper>
+                        <Flex align={"center"} gap={"md"} mt={"lg"}>
+                          <Button
+                            fullWidth
+                            disabled={!selectedProspect}
+                            color="grape"
+                            leftIcon={<IconSparkles size={"0.9rem"} />}
+                            onClick={() =>
+                              openContextModal({
+                                modal: "simulatepersonalizerModal",
+                                title: (
+                                  <Title order={3}>
+                                    <span className=" text-gray-500"></span>{" "}
+                                    Personalizers
+                                  </Title>
+                                ),
+                                innerProps: {
+                                  prospectId: selectedProspect,
+                                  sequences: sequences,
+                                },
+                                centered: true,
+                                styles: {
+                                  content: {
+                                    minWidth: "700px",
+                                  },
+                                },
+                              })
+                            }
+                            style={{ margin: "0 8px 8px 8px" }} // Added margins to make the button smaller
+                          >
+                            Personalize
+                          </Button>
+                        </Flex>
+                      </>
                     );
                   })
                 )}
               </Flex>
             )}
           </ScrollArea>
-          <Flex align={"center"} gap={"md"} mt={"lg"}>
-            <Button
-              fullWidth
-              disabled={!selectedProspect}
-              color="grape"
-              leftIcon={<IconSparkles size={"0.9rem"} />}
-              onClick={() =>
-                openContextModal({
-                  modal: "simulatepersonalizerModal",
-                  title: (
-                    <Title order={3}>
-                      <span className=" text-gray-500"></span> Personalizers
-                    </Title>
-                  ),
-                  innerProps: {
-                    prospectId: selectedProspect,
-                    sequences: sequences,
-                  },
-                  centered: true,
-                  styles: {
-                    content: {
-                      minWidth: "700px",
-                    },
-                  },
-                })
-              }
-              style={{ margin: "0 8px 8px 8px" }} // Added margins to make the button smaller
-            >
-              Personalize
-            </Button>
-          </Flex>
         </Paper>
       </Flex>
       <Flex align={"center"} gap={"md"} mt={"lg"}>

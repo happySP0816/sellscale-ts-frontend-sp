@@ -23,22 +23,8 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
-import {
-  IconBrandLinkedin,
-  IconBuilding,
-  IconBulb,
-  IconEdit,
-  IconEye,
-  IconPlus,
-  IconPoint,
-  IconQuestionMark,
-  IconSearch,
-  IconTrash,
-} from "@tabler/icons";
-import {
-  IconLayoutSidebarRightCollapseFilled,
-  IconSparkles,
-} from "@tabler/icons-react";
+import { IconBrandLinkedin, IconBuilding, IconBulb, IconEdit, IconEye, IconPlus, IconPoint, IconQuestionMark, IconSearch, IconTrash } from "@tabler/icons";
+import { IconLayoutSidebarRightCollapseFilled, IconSparkles } from "@tabler/icons-react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
@@ -75,8 +61,7 @@ export default function CampaignPersonalizersModal({
       }
       if (/^[A-Z_]+$/.test(part)) {
         let formattedText = part.toLowerCase().replace(/_/g, " ");
-        formattedText =
-          formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
+        formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
         return <span key={index}>{formattedText}</span>;
       }
       return <span key={index}>{part}</span>;
@@ -85,9 +70,7 @@ export default function CampaignPersonalizersModal({
 
   const [loadingProspects, setLoadingProspects] = useState(false);
   const [loadingResearchData, setLoadingResearchData] = useState(false);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const [aiResearcherLoading, setAiResearcherLoading] = useState(false);
   const [prospectData, setProspectData] = useState([]);
   const [selectedProspect, setSelectedProspect] = useState<any>(null);
@@ -98,12 +81,24 @@ export default function CampaignPersonalizersModal({
   const sequences = innerProps?.sequences ? [...innerProps.sequences] : [];
 
   //this function provides a state from the generative request, and the ability to override the data with the setter.
-  const { data: simulateData, setData: setSimulateData, loading: loadingAnswers, setLoading: setResearching, triggerGenerativeRequest: createAnswers} = useGenerativeRequest({
-    endpoint: "/ml/researchers/answers/create"
+  const {
+    data: simulateData,
+    setData: setSimulateData,
+    loading: loadingAnswers,
+    setLoading: setResearching,
+    triggerGenerativeRequest: createAnswers,
+  } = useGenerativeRequest({
+    endpoint: "/ml/researchers/answers/create",
   });
 
-  const { data: generatedResearchData, setData: setGeneratedResearchData, loading: generatingResearchPoints, setLoading: setGeneratingResearchPoints, triggerGenerativeRequest: generateResearchPoints} = useGenerativeRequest({
-    endpoint: "/ml/researchers/questions/generate"
+  const {
+    data: generatedResearchData,
+    setData: setGeneratedResearchData,
+    loading: generatingResearchPoints,
+    setLoading: setGeneratingResearchPoints,
+    triggerGenerativeRequest: generateResearchPoints,
+  } = useGenerativeRequest({
+    endpoint: "/ml/researchers/questions/generate",
   });
 
   const userToken = useRecoilValue(userTokenState);
@@ -117,21 +112,12 @@ export default function CampaignPersonalizersModal({
   const fetchProspects = async () => {
     try {
       setLoadingProspects(true);
-      const data = await fetchCampaignContacts(
-        userToken,
-        Number(innerProps.id),
-        0,
-        10,
-        "",
-        false
-      );
-      const newProspectData = data.sample_contacts.map(
-        (contact: { id: any; full_name: any; email: any; phone: any; company: any }) => ({
-          value: contact.id,
-          label: contact.full_name,
-          ...contact
-        })
-      );
+      const data = await fetchCampaignContacts(userToken, Number(innerProps.id), 0, 10, "", false);
+      const newProspectData = data.sample_contacts.map((contact: { id: any; full_name: any; email: any; phone: any; company: any }) => ({
+        value: contact.id,
+        label: contact.full_name,
+        ...contact,
+      }));
       setProspectData(newProspectData);
       if (newProspectData[0]?.value) {
         setSelectedProspect(newProspectData[0].value);
@@ -145,20 +131,15 @@ export default function CampaignPersonalizersModal({
   const fetchResearchData = async () => {
     setLoadingResearchData(true);
     try {
-      const data = (await researchers.getArchetypeQuestions(
-        userToken,
-        Number(innerProps.id)
-      )) as any;
-      const newResearchData = data.questions.map(
-        (item: { id: any; key: any; type: any; relevancy: any }) => ({
-          id: item.id,
-          title: item.key,
-          type: item.type,
-          content: item.relevancy,
-          ai_response: "",
-          status: "",
-        })
-      );
+      const data = (await researchers.getArchetypeQuestions(userToken, Number(innerProps.id))) as any;
+      const newResearchData = data.questions.map((item: { id: any; key: any; type: any; relevancy: any }) => ({
+        id: item.id,
+        title: item.key,
+        type: item.type,
+        content: item.relevancy,
+        ai_response: "",
+        status: "",
+      }));
       setResearchData(newResearchData);
     } finally {
       setLoadingResearchData(false);
@@ -168,13 +149,7 @@ export default function CampaignPersonalizersModal({
   const addGeneratedResearchPoint = async (item: any) => {
     try {
       setLoadingResearchData(true);
-      const response = await researchers.createResearcherQuestion(
-        userToken,
-        "QUESTION",
-        item.Question,
-        item.RelevanceReason,
-        Number(currentAiResearcherId)
-      );
+      const response = await researchers.createResearcherQuestion(userToken, "QUESTION", item.Question, item.RelevanceReason, Number(currentAiResearcherId));
       if (!response) {
         throw new Error(`Error creating researcher question}`);
       }
@@ -211,21 +186,18 @@ export default function CampaignPersonalizersModal({
 
   const connectAiResearcher = async (researcherId: number) => {
     setAiResearcherLoading(true);
-    researchers
-      .connectResearcher(userToken, Number(innerProps.id), researcherId)
-      .finally(() => {
-        showNotification({
-          title: "AI Researcher Connected",
-          message:
-            "AI Researcher has been successfully connected to this campaign",
-          color: "blue",
-          icon: "🎉",
-        });
-        fetchResearchData();
-        fetchCurrentProject().finally(() => {
-          setAiResearcherLoading(false);
-        });
+    researchers.connectResearcher(userToken, Number(innerProps.id), researcherId).finally(() => {
+      showNotification({
+        title: "AI Researcher Connected",
+        message: "AI Researcher has been successfully connected to this campaign",
+        color: "blue",
+        icon: "🎉",
       });
+      fetchResearchData();
+      fetchCurrentProject().finally(() => {
+        setAiResearcherLoading(false);
+      });
+    });
   };
 
   useEffect(() => {
@@ -242,10 +214,7 @@ export default function CampaignPersonalizersModal({
 
   const fetchResearcherAnswers = async (prospectId: Number) => {
     setResearching(true);
-    const data = await researchers.getResearcherAnswers(
-      userToken,
-      Number(prospectId)
-    );
+    const data = await researchers.getResearcherAnswers(userToken, Number(prospectId));
     const newSimulateData = data.answers
       .map((item: any) => ({
         title: item.question.key,
@@ -255,31 +224,22 @@ export default function CampaignPersonalizersModal({
         ai_response: item.relevancy_explanation,
         status: item.is_yes_response,
       }))
-      .sort(
-        (a: { status: number }, b: { status: number }) => b.status - a.status
-      ); //sort by status true first.
+      .sort((a: { status: number }, b: { status: number }) => b.status - a.status); //sort by status true first.
     setSimulateData(newSimulateData);
     setResearching(false);
   };
 
   const simulateResearch = async (prospectId: Number) => {
     setResearching(true);
-    createAnswers({prospect_id: Number(prospectId)});
+    createAnswers({ prospect_id: Number(prospectId) });
   };
-
 
   const [researchData, setResearchData] = useState<any>([]);
 
   return (
     <>
-      <Flex mt={"lg"} style={{ border: "1px solid gray", borderRadius: "6px" }}>
-        <Paper
-          p={"md"}
-          pr={"xs"}
-          w={"40%"}
-          display={"flex"}
-          style={{ gap: "16px", flexDirection: "column" }}
-        >
+      <Flex mt={"lg"} style={{ border: "1px solid #dee2e6", borderRadius: "6px" }}>
+        <Paper p={"md"} pr={"xs"} w={"40%"} display={"flex"} style={{ gap: "16px", flexDirection: "column" }}>
           <Flex align={"center"} justify={"space-between"}>
             <Text fw={600}>Researcher Questions</Text>
             <Tooltip
@@ -299,7 +259,10 @@ export default function CampaignPersonalizersModal({
               label="AI Researcher:"
               value={currentAiResearcherId}
               data={aiResearchers.map((x: any) => {
-                return { value: "" + x.id, label: x.name };
+                return {
+                  value: "" + x.id,
+                  label: `${x.name} (${x.name.split(" ").length} points)`,
+                };
               })}
               onChange={(value) => {
                 connectAiResearcher(Number(value));
@@ -356,8 +319,7 @@ export default function CampaignPersonalizersModal({
           </Flex>
           {generatingResearchPoints && (
             <Text size={"sm"} color="grape" mt={"sm"} align="center">
-              <Loader size="xs" color="grape" mr="sm" /> Generating research
-              points
+              <Loader size="xs" color="grape" mr="sm" /> Generating research points
             </Text>
           )}
           <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
@@ -368,8 +330,14 @@ export default function CampaignPersonalizersModal({
             ) : (
               <>
                 <Flex h={"100%"} gap={"xs"} direction={"column"}>
-                  {researchData.map(
-                    (item: any, index: Key | null | undefined) => {
+                  {researchData.length === 0 ? (
+                    <Paper withBorder px={"lg"} py={"xl"} mt={"lg"} style={{ borderStyle: "dashed" }}>
+                      <Text size={"sm"} color="gray" fw={500} align="center">
+                        No research points added yet!
+                      </Text>
+                    </Paper>
+                  ) : (
+                    researchData.map((item: any, index: Key | null | undefined) => {
                       return (
                         <Paper withBorder p={"md"} key={index}>
                           <Flex align={"start"} justify={"space-between"}>
@@ -383,10 +351,7 @@ export default function CampaignPersonalizersModal({
                                     modal: "addQuestionModal",
                                     title: (
                                       <Title order={3}>
-                                        <span className=" text-gray-500">
-                                          Edit
-                                        </span>{" "}
-                                        Research Point
+                                        <span className=" text-gray-500">Edit</span> Research Point
                                       </Title>
                                     ),
                                     innerProps: {
@@ -398,8 +363,7 @@ export default function CampaignPersonalizersModal({
                                       question: item.title,
                                       ai_researcher_id: currentAiResearcherId,
                                       campaign_id: innerProps.id,
-                                      setPersonalizers:
-                                        innerProps.setPersonalizers,
+                                      setPersonalizers: innerProps.setPersonalizers,
                                     },
                                     centered: true,
                                     styles: {
@@ -414,25 +378,13 @@ export default function CampaignPersonalizersModal({
                               </ActionIcon>
                               <ActionIcon
                                 onClick={async () => {
-                                  researchers.deleteResearcherQuestion(
-                                    userToken,
-                                    Number(item.id)
-                                  );
-                                  setResearchData((prevData: any[]) =>
-                                    prevData.filter(
-                                      (researchItem) =>
-                                        researchItem.id !== item.id
-                                    )
-                                  );
+                                  researchers.deleteResearcherQuestion(userToken, Number(item.id));
+                                  setResearchData((prevData: any[]) => prevData.filter((researchItem) => researchItem.id !== item.id));
                                 }}
                               >
                                 <IconTrash color="gray" size={"0.9rem"} />
                               </ActionIcon>
-                              <Badge
-                                size="sm"
-                                radius={"sm"}
-                                color={deterministicMantineColor(item.type)}
-                              >
+                              <Badge size="sm" radius={"sm"} color={deterministicMantineColor(item.type)}>
                                 {item.type}
                               </Badge>
                             </Flex>
@@ -442,76 +394,48 @@ export default function CampaignPersonalizersModal({
                           </Text>
                         </Paper>
                       );
-                    }
+                    })
                   )}
                 </Flex>
-                {generatedResearchData.length > 0 && (
-                  <Divider
-                    my="sm"
-                    label="AI Generated Research Points"
-                    labelPosition="center"
-                    color="salmon"
-                  />
-                )}
-                <Flex
-                  h="100%"
-                  gap="xs"
-                  direction="column"
-                  style={{ color: "salmon" }}
-                >
-                  {generatedResearchData.map(
-                    (item: any, index: Key | null | undefined) => {
-                      return (
-                        <Paper withBorder p={"md"} key={index}>
-                          <Flex align={"start"} justify={"space-between"}>
-                            <Text size={"sm"} fw={600} pt={4}>
-                              {generateTextWithBadges(item.Question)}
-                            </Text>
-                            <Flex gap={3} align={"center"}>
-                              <Badge size="sm" radius={"sm"} color="blue">
-                                AI Generated
-                              </Badge>
-                              <Button
-                                size="xs"
-                                color="grape"
-                                onClick={() => {
-                                  setGeneratedResearchData((prevData) =>
-                                    prevData.filter(
-                                      (researchItem) => researchItem !== item
-                                    )
-                                  );
-                                  addGeneratedResearchPoint(item);
-                                }}
-                              >
-                                Add
-                              </Button>
-                            </Flex>
-                          </Flex>
-                          <Text size={"sm"} mt={2}>
-                            {item.RelevanceReason}
+                {generatedResearchData.length > 0 && <Divider my="sm" label="AI Generated Research Points" labelPosition="center" color="salmon" />}
+                <Flex h="100%" gap="xs" direction="column" style={{ color: "salmon" }}>
+                  {generatedResearchData.map((item: any, index: Key | null | undefined) => {
+                    return (
+                      <Paper withBorder p={"md"} key={index}>
+                        <Flex align={"start"} justify={"space-between"}>
+                          <Text size={"sm"} fw={600} pt={4}>
+                            {generateTextWithBadges(item.Question)}
                           </Text>
-                        </Paper>
-                      );
-                    }
-                  )}
+                          <Flex gap={3} align={"center"}>
+                            <Badge size="sm" radius={"sm"} color="blue">
+                              AI Generated
+                            </Badge>
+                            <Button
+                              size="xs"
+                              color="grape"
+                              onClick={() => {
+                                setGeneratedResearchData((prevData) => prevData.filter((researchItem) => researchItem !== item));
+                                addGeneratedResearchPoint(item);
+                              }}
+                            >
+                              Add
+                            </Button>
+                          </Flex>
+                        </Flex>
+                        <Text size={"sm"} mt={2}>
+                          {item.RelevanceReason}
+                        </Text>
+                      </Paper>
+                    );
+                  })}
                 </Flex>
               </>
             )}
           </ScrollArea>
         </Paper>
-        <Divider orientation="vertical" />
-        <Paper
-          w={"66%"}
-          display={"flex"}
-          style={{ gap: "16px", flexDirection: "column" }}
-        >
-          <Flex
-            p={"lg"}
-            justify={"space-between"}
-            align={"center"}
-            gap={"sm"}
-            style={{ borderBottom: "1px solid gray" }}
-          >
+        <Divider orientation="vertical" color="#dee2e6" />
+        <Paper w={"66%"} display={"flex"} style={{ flexDirection: "column" }}>
+          <Flex p={"lg"} justify={"space-between"} align={"center"} gap={"sm"} style={{ borderBottom: "1px solid #dee2e6" }}>
             <Text fw={600}>Simulate Research</Text>
             {loadingProspects ? (
               <Loader size="sm" />
@@ -527,151 +451,113 @@ export default function CampaignPersonalizersModal({
                     value && fetchResearcherAnswers(Number(value));
                   }}
                   data={prospectData}
-                  defaultValue={
-                    prospectData.length > 0
-                      ? (prospectData[0] as { value: string }).value
-                      : null
-                  }
+                  defaultValue={prospectData.length > 0 ? (prospectData[0] as { value: string }).value : null}
                 ></Select>
                 {selectedProspect &&
                   (loadingAnswers ? (
                     <Loader size="sm" />
                   ) : (
-                    <Button
-                      color="grape"
-                      onClick={() => simulateResearch(selectedProspect)}
-                    >
+                    <Button color="grape" onClick={() => simulateResearch(selectedProspect)}>
                       Simulate
                     </Button>
                   ))}
               </Flex>
             )}
           </Flex>
-          <ScrollArea h={500} scrollbarSize={8} px={"md"}>
+          <ScrollArea h={640} scrollbarSize={8} px={"md"} bg={simulateData.length === 0 ? "#f7f8fa" : ""}>
             {false ? (
               <Loader size="sm" />
             ) : (
               <Flex gap={"xs"} direction={"column"}>
                 {simulateData.length === 0 ? (
-                  <Text size={"sm"} color="gray">
-                    No simulation run yet.
-                  </Text>
+                  <Paper withBorder px={"lg"} py={"xl"} mt={"lg"} style={{ borderStyle: "dashed" }} bg={"transparent"}>
+                    <Text size={"sm"} color="gray" fw={500} align="center">
+                      Add research points to simulate research here
+                    </Text>
+                  </Paper>
                 ) : (
                   simulateData.map((item: any, index) => {
                     return (
-                      <Paper withBorder p={"lg"} key={index}>
-                        <Flex justify={"space-between"}>
-                          <Flex>
-                            <IconPoint
-                              size={"2rem"}
-                              fill={item.status ? "#17B26A" : "red"}
-                              color="white"
-                              className="mt-[-6px] ml-[-12px]"
-                            />
-                            <Text fw={600} size={"sm"}>
-                              {generateTextWithBadges(item.title)}
-                            </Text>
-                          </Flex>
-                          <Badge
-                            radius={"sm"}
-                            size="sm"
-                            color={
-                              item.type === "GENERAL"
-                                ? "orange"
-                                : item.type === "LINKEDIN"
-                                ? ""
-                                : "green"
-                            }
-                          >
-                            {item.type}
-                          </Badge>
-                        </Flex>
-                        <Text size={"sm"} fw={500}>
-                          {item.content}
-                        </Text>
-                        <Flex
-                          p={"sm"}
-                          className="bg-[#D444F1]/5"
-                          gap={4}
-                          align={"start"}
-                        >
-                          <Flex>
-                            <IconBulb size={"0.9rem"} color="#D444F1" />
-                          </Flex>
-                          <Text color="#D444F1" size={"xs"}>
-                            {item.ai_response}
-                          </Text>
-                        </Flex>
-                        <Popover
-                          arrowPosition="center"
-                          zIndex={40000000}
-                          width={300}
-                          position="bottom"
-                          withArrow
-                          shadow="md"
-                        >
-                          <Popover.Target>
-                            <Flex align="center" style={{ cursor: "pointer" }}>
-                              <IconEye
-                                size={"1rem"}
-                                style={{ marginRight: "4px" }}
-                              />
-                              <Text size={"xs"} fw={400}>
-                                See raw content
+                      <>
+                        <Paper withBorder p={"lg"} key={index}>
+                          <Flex justify={"space-between"}>
+                            <Flex>
+                              <IconPoint size={"2rem"} fill={item.status ? "#17B26A" : "red"} color="white" className="mt-[-6px] ml-[-12px]" />
+                              <Text fw={600} size={"sm"}>
+                                {generateTextWithBadges(item.title)}
                               </Text>
                             </Flex>
-                          </Popover.Target>
-                          <Popover.Dropdown>
-                            <Text size="xs">{item.raw_response}</Text>
-                          </Popover.Dropdown>
-                        </Popover>
-                      </Paper>
+                            <Badge radius={"sm"} size="sm" color={item.type === "GENERAL" ? "orange" : item.type === "LINKEDIN" ? "" : "green"}>
+                              {item.type}
+                            </Badge>
+                          </Flex>
+                          <Text size={"sm"} fw={500}>
+                            {item.content}
+                          </Text>
+                          <Flex p={"sm"} className="bg-[#D444F1]/5" gap={4} align={"start"}>
+                            <Flex>
+                              <IconBulb size={"0.9rem"} color="#D444F1" />
+                            </Flex>
+                            <Text color="#D444F1" size={"xs"}>
+                              {item.ai_response}
+                            </Text>
+                          </Flex>
+                          <Popover arrowPosition="center" zIndex={40000000} width={300} position="bottom" withArrow shadow="md">
+                            <Popover.Target>
+                              <Flex align="center" style={{ cursor: "pointer" }}>
+                                <IconEye size={"1rem"} style={{ marginRight: "4px" }} />
+                                <Text size={"xs"} fw={400}>
+                                  See raw content
+                                </Text>
+                              </Flex>
+                            </Popover.Target>
+                            <Popover.Dropdown>
+                              <Text size="xs">{item.raw_response}</Text>
+                            </Popover.Dropdown>
+                          </Popover>
+                        </Paper>
+                        <Flex align={"center"} gap={"md"} mt={"lg"}>
+                          <Button
+                            fullWidth
+                            disabled={!selectedProspect}
+                            color="grape"
+                            leftIcon={<IconSparkles size={"0.9rem"} />}
+                            onClick={() =>
+                              openContextModal({
+                                modal: "simulatepersonalizerModal",
+                                title: (
+                                  <Title order={3}>
+                                    <span className=" text-gray-500"></span> Personalizers
+                                  </Title>
+                                ),
+                                innerProps: {
+                                  prospectId: selectedProspect,
+                                  sequences: sequences,
+                                },
+                                centered: true,
+                                styles: {
+                                  content: {
+                                    minWidth: "700px",
+                                  },
+                                },
+                              })
+                            }
+                            style={{ margin: "0 8px 8px 8px" }} // Added margins to make the button smaller
+                          >
+                            Personalize
+                          </Button>
+                        </Flex>
+                      </>
                     );
                   })
                 )}
               </Flex>
             )}
           </ScrollArea>
-          <Flex align={"center"} gap={"md"} mt={"lg"}>
-            <Button
-              fullWidth
-              disabled={!selectedProspect}
-              color="grape"
-              leftIcon={<IconSparkles size={"0.9rem"} />}
-              onClick={() =>
-                openContextModal({
-                  modal: "simulatepersonalizerModal",
-                  title: (
-                    <Title order={3}>
-                      <span className=" text-gray-500"></span> Personalizers
-                    </Title>
-                  ),
-                  innerProps: {
-                    prospectId: selectedProspect,
-                    sequences: sequences,
-                  },
-                  centered: true,
-                  styles: {
-                    content: {
-                      minWidth: "700px",
-                    },
-                  },
-                })
-              }
-              style={{ margin: "0 8px 8px 8px" }} // Added margins to make the button smaller
-            >
-              Personalize
-            </Button>
-          </Flex>
         </Paper>
       </Flex>
       <Flex align={"center"} gap={"md"} mt={"lg"}>
-        <Button
-          variant="outline"
-          color="gray"
-          fullWidth
-          onClick={() => modals.closeAll()}
-        >
+        <Button variant="outline" color="gray" fullWidth onClick={() => modals.closeAll()}>
           Go Back
         </Button>
         <Button onClick={() => modals.closeAll()} fullWidth>

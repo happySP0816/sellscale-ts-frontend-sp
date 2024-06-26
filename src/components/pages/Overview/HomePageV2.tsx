@@ -5,6 +5,7 @@ import {
   Card,
   Flex,
   Grid,
+  Loader,
   Paper,
   Switch,
   Text,
@@ -50,7 +51,8 @@ export function LineChart() {
   const [currentMode, setCurrentMode] = useState("month");
   const [modes, setModes]: any = useState({});
   const [fetchedModes, setFetchedModes] = useState(false);
-  const [isCumulativeMode, setIsCumulativeMode] = useState(true);
+  const [isCumulativeMode, setIsCumulativeMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const userToken = useRecoilState(userTokenState);
 
@@ -63,12 +65,11 @@ export function LineChart() {
           Authorization: `Bearer ${userToken[0]}`,
         },
       })
-        .then((response) => {
-          const resp = response.json();
-          return resp;
-        })
+        .then((response) => response.json())
         .then((data) => {
+          console.log('data is', data)
           setModes(data.outreach_over_time || {});
+          setLoading(false);
         });
 
       setFetchedModes(true);
@@ -84,82 +85,103 @@ export function LineChart() {
     });
   };
 
-  const processData = (data: any) =>
-    isCumulativeMode ? getCumulativeData(data) : data;
+  const removeWeekendData = (data: any, labels: any) => {
+    const filteredData = [];
+    const filteredLabels = [];
+    for (let i = 0; i < labels.length; i++) {
+      const date = new Date(labels[i]);
+      const dayOfWeek = date.getDay();
+      const isSpecificWeekend = (date.getFullYear() === 2024 && date.getMonth() === 5 && (date.getDate() === 8 || date.getDate() === 9));
+      if (dayOfWeek !== 0 && dayOfWeek !== 6 && !isSpecificWeekend) { // 0 is Sunday, 6 is Saturday
+        filteredData.push(data[i]);
+        filteredLabels.push(labels[i]);
+      }
+    }
+    console.log('data is', filteredData, filteredLabels);
+    return { filteredData, filteredLabels };
+  };
 
-  const sumOutbounds = modes[currentMode]?.data.outbound.reduce(
-    (a: any, b: any) => a + b,
-    0
-  );
-  const sumAcceptances = modes[currentMode]?.data.acceptances.reduce(
-    (a: any, b: any) => a + b,
-    0
-  );
-  const sumReplies = modes[currentMode]?.data.replies.reduce(
-    (a: any, b: any) => a + b,
-    0
-  );
-  const sumPositiveReplies = modes[currentMode]?.data.positive_replies?.reduce(
-    (a: any, b: any) => a + b,
-    0
-  );
-  const sumDemos = modes[currentMode]?.data.demos?.reduce(
-    (a: any, b: any) => a + b,
-    0
-  );
+  const processData = (data: any, labels: any) => {
+    const { filteredData, filteredLabels } = removeWeekendData(data, labels);
+    if (!isCumulativeMode) {
+      return { data: filteredData, labels: filteredLabels };
+    }
+    return { data: getCumulativeData(filteredData), labels: filteredLabels };
+  };
 
   const theme = useMantineTheme();
 
-  const totalTouchpoints =
-    sumOutbounds + sumAcceptances + sumReplies + sumPositiveReplies + sumDemos;
+  let demosData = [];
+  let demosLabels = [];
+  let positiveRepliesData = [];
+  let positiveRepliesLabels = [];
+  let repliesData = [];
+  let repliesLabels = [];
+  let acceptancesData = [];
+  let acceptancesLabels = [];
+  let outboundData = [];
+  let outboundLabels = [];
+
+  if (!loading) {
+    ({ data: demosData, labels: demosLabels } = processData(modes[currentMode]?.data.demos, modes[currentMode]?.labels));
+    ({ data: positiveRepliesData, labels: positiveRepliesLabels } = processData(modes[currentMode]?.data.positive_replies, modes[currentMode]?.labels));
+    ({ data: repliesData, labels: repliesLabels } = processData(modes[currentMode]?.data.replies, modes[currentMode]?.labels));
+    ({ data: acceptancesData, labels: acceptancesLabels } = processData(modes[currentMode]?.data.acceptances, modes[currentMode]?.labels));
+    ({ data: outboundData, labels: outboundLabels } = processData(modes[currentMode]?.data.outbound, modes[currentMode]?.labels));
+  }
 
   const chartData = {
-    labels: modes[currentMode]?.labels,
+    labels: demosLabels, // Assuming all labels are the same after filtering weekends
     datasets: [
       {
-        label: "Total Outbound Volume",
-        data: processData(modes[currentMode]?.data.outbound),
-        backgroundColor: theme.colors.yellow[2],
-        borderColor: theme.colors.yellow[6],
-        borderWidth: 1,
-        stack: "Stack 0",
-      },
-      {
-        label: "Total Acceptances",
-        data: processData(modes[currentMode]?.data.acceptances),
-        backgroundColor: theme.colors.red[2],
-        borderColor: theme.colors.red[6],
-        borderWidth: 1,
-        stack: "Stack 0",
-      },
-      {
-        label: "Total Replies",
-        data: processData(modes[currentMode]?.data.replies),
-        backgroundColor: theme.colors.blue[2],
-        borderColor: theme.colors.blue[6],
-        borderWidth: 1,
-        stack: "Stack 0",
-      },
-      {
-        label: "Total Positive Replies",
-        data: processData(modes[currentMode]?.data.positive_replies),
-        backgroundColor: theme.colors.grape[2],
-        borderColor: theme.colors.grape[6],
-        borderWidth: 1,
-        stack: "Stack 0",
-      },
-      {
         label: "Total Demos",
-        data: processData(modes[currentMode]?.data.demos),
+        data: demosData,
         backgroundColor: theme.colors.green[2],
         borderColor: theme.colors.green[6],
         borderWidth: 1,
-        stack: "Stack 0",
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: theme.colors.green[6],
+      },
+      {
+        label: "Total Positive Replies",
+        data: positiveRepliesData,
+        backgroundColor: theme.colors.grape[2],
+        borderColor: theme.colors.grape[6],
+        borderWidth: 1,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: theme.colors.grape[6],
+      },
+      {
+        label: "Total Replies",
+        data: repliesData,
+        backgroundColor: theme.colors.blue[2],
+        borderColor: theme.colors.blue[6],
+        borderWidth: 1,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: theme.colors.blue[6],
+      },
+      {
+        label: "Total Acceptances",
+        data: acceptancesData,
+        backgroundColor: theme.colors.red[2],
+        borderColor: theme.colors.red[6],
+        borderWidth: 1,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: theme.colors.red[6],
+      },
+      {
+        label: "Total Outbound Volume",
+        data: outboundData,
+        backgroundColor: theme.colors.yellow[2],
+        borderColor: theme.colors.yellow[6],
+        borderWidth: 1,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: theme.colors.yellow[6],
       },
     ],
   };
 
-  const options: any = {
+  const options: any = { 
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -168,6 +190,13 @@ export function LineChart() {
         labels: {
           usePointStyle: true,
           padding: 20,
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context: any) {
+            return `${context.dataset.label}: ${context.raw}`;
+          },
         },
       },
     },
@@ -180,6 +209,7 @@ export function LineChart() {
       y: {
         grid: {
           borderDash: [5, 5],
+          display: true,
         },
       },
     },
@@ -238,7 +268,7 @@ export function LineChart() {
         </Flex>
       </Flex>
       <Box h={400} mt={"sm"}>
-        <Line data={chartData} options={options} />
+        {loading ? <Loader /> : <Line data={chartData} options={options} />}
       </Box>
     </Card>
   );

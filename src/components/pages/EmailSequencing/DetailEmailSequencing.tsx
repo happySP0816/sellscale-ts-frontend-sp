@@ -32,6 +32,7 @@ import {
   Stack,
   Group,
   Highlight,
+  TabsValue,
 } from "@mantine/core";
 import {
   useDebouncedState,
@@ -72,7 +73,7 @@ import {
 } from "@utils/requests/emailSequencing";
 import { patchEmailSubjectLineTemplate } from "@utils/requests/emailSubjectLines";
 import DOMPurify from "dompurify";
-import React, { FC, useEffect, useMemo, useState } from "react";
+import React, { FC, FormEventHandler, useEffect, useMemo, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   EmailSequenceStep,
@@ -93,6 +94,7 @@ import getResearchPointTypes from "@utils/requests/getResearchPointTypes";
 import { useQuery } from "@tanstack/react-query";
 import EmailSequenceStepAssets from "./EmailSequenceStepAssets";
 import SimulateMagicSubjectLineModal from "@modals/SimulateMagicSubjectLine";
+import Personalizers from "@pages/CampaignV2/Personalizers";
 
 const SpamScorePopover: FC<{
   subjectSpamScoreDetails?: SpamScoreResults | undefined | null;
@@ -255,7 +257,11 @@ function NewDetailEmailSequencing(props: {
   // Active Template States
   const [activeTemplate, setTemplate] = useState<EmailSequenceStep>();
   const [activeSubjectLine, setSubjectLine] = useState<SubjectLineTemplate>();
-
+  const [activeTab, setActiveTab] = useState<string>("body");
+  const handleTabChange = (value: TabsValue) => {
+    const newTab = value as string;
+    setActiveTab(newTab);
+  };
   // Modal States
   const [
     bodyLibraryOpened,
@@ -327,6 +333,15 @@ function NewDetailEmailSequencing(props: {
     return <></>;
   }
 
+  function getPersonalizersSection() {
+
+    const [personalizers, setPersonalizers] = useState<any>([]);
+
+    return (
+      <Personalizers data={currentProject} sequences={props.templates} setSequences={null} setPersonalizers={setPersonalizers} personalizers={personalizers} />
+    );
+  }
+
   function getEmailBodySection() {
     return (
       <Stack>
@@ -351,7 +366,7 @@ function NewDetailEmailSequencing(props: {
               radius={"sm"}
               onClick={openCreateEmailTemplate}
             >
-              Add Custom Template
+              Add Body Template
             </Button>
           </Flex>
           <EmailTemplateLibraryModal
@@ -585,7 +600,7 @@ function NewDetailEmailSequencing(props: {
               radius={"sm"}
               onClick={openCreateSubject}
             >
-              Add Custom Template
+              Add Subject Line Template
             </Button>
           </Flex>
           <CreateEmailSubjectLineModal
@@ -750,10 +765,13 @@ function NewDetailEmailSequencing(props: {
       />
 
       {props.currentTab === "PROSPECTED" ? (
-        <Tabs variant="outline" defaultValue="body">
+        <Tabs onTabChange={handleTabChange} variant="outline" defaultValue="body">
           <Tabs.List>
-            <Tabs.Tab value="subject_line">Subject Lines</Tabs.Tab>
-            <Tabs.Tab value="body">Body</Tabs.Tab>
+            <Tabs.Tab value="subject_line" style={{ fontWeight: activeTab === "subject_line" ? "bold" : "normal" }}>Subject Lines</Tabs.Tab>
+            <Tabs.Tab value="body" style={{ fontWeight: activeTab === "body" ? "bold" : "normal" }}>Body</Tabs.Tab>
+            <Tabs.Tab value="personalizers" style={{ fontWeight: activeTab === "personalizers" ? "bold" : "normal", display: "flex", alignItems: "center" }}>
+              Personalizers
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="subject_line">
@@ -762,6 +780,10 @@ function NewDetailEmailSequencing(props: {
 
           <Tabs.Panel value="body">
             <Box pt="xs">{getEmailBodySection()}</Box>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="personalizers">
+            <Box pt="xs">{getPersonalizersSection()}</Box>
           </Tabs.Panel>
         </Tabs>
       ) : (
@@ -782,7 +804,7 @@ function EmailPreviewHeader(props: {
   // Preview Email (Generation)
   const [prospectId, setProspectId] = useState<number>(0);
 
-  const { data, isFetching, refetch } = useQuery({
+  const { data, isFetching, refetch } = useQuery<any>({
     queryKey: [
       `query-generate-email`,
       {
@@ -803,6 +825,43 @@ function EmailPreviewHeader(props: {
       }
 
       if (currentTab === "PROSPECTED") {
+        //magic subject line generation will call the research endpoint.
+        if (subjectLine.is_magic_subject_line) {
+          if (prospectId === 0) {
+            return
+          }
+          const room_id = Array.from({ length: 16 }, () => Math.random().toString(36)[2]).join('');
+          const response = await fetch(API_URL + '/ml/simulate-magic-subject-line', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${userToken}`,
+            },
+            body: JSON.stringify({
+              sequence_id: props.template.step.id,
+              prospect_id: Number(prospectId),
+              archetype_id: currentProject?.id,
+              room_id,
+            }),
+          });
+          if (response.ok) {
+            const data = await response.json();
+
+            return {
+              subject_line: data.magic_subject_line,
+              body: data.personalized_email,
+              body_spam: {
+                read_minutes: 1,
+                read_minutes_score: 100,
+                spam_word_score: 100,
+                spam_words: [],
+                total_score: 100,
+              },
+            };
+          } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+        }
         return await generateInitialEmail(
           prospectId,
           currentTab,
@@ -1039,19 +1098,17 @@ function EmailPreviewHeader(props: {
           )}
           {props.currentTab === "PROSPECTED" && (
             <Flex mb={"md"}>
-              <Flex w={80} mr="xs">
-                <Text color="gray.6" fw={500} size="sm">
+              <Flex>
+                <Text color="gray.6" fw={500} size="sm" mr="xs">
                   Subject:
                 </Text>
-              </Flex>
-              <Flex>
                 {isFetching ? (
                   <Flex align="center">
                     <Loader mr="sm" size={20} color="purple" />
                     <Text color="purple">Generating...</Text>
                   </Flex>
                 ) : (
-                  <Text color="gray.8" fw={500} size="sm">
+                  <Text color="gray.8" fw={700} size="sm">
                     <div
                       dangerouslySetInnerHTML={{
                         __html: DOMPurify.sanitize(data?.subject_line ?? ""),
@@ -1244,6 +1301,7 @@ export const SubjectLineItem: React.FC<{
             >
               <ActionIcon
                 size="sm"
+                disabled={subjectLine.is_magic_subject_line || false}
                 onClick={(event) => {
                   if (subjectLine.times_used > 0) {
                     event.preventDefault();
@@ -1356,15 +1414,18 @@ export const SubjectLineItem: React.FC<{
                 >
                   Magic Subject Line
                 </span>
-                <Button
-                  size="xs"
-                  color='grape'
-                  onClick={() => {
-                    setMagicSubjectLineSimulatorOpened(true);
-                  }}
-                >
-                  Simulate
-                </Button>
+                {!window.location.href.includes('/setup/') && ( 
+                  // hide simulate button in setup. only show it in sequence buildah
+                  <Button
+                    size="xs"
+                    color='grape'
+                    onClick={() => {
+                      setMagicSubjectLineSimulatorOpened(true);
+                    }}
+                  >
+                    Simulate
+                  </Button>
+                )}
               </Flex>
             ) : (
               editedSubjectLine

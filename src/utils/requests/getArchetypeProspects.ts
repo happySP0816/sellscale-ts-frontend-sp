@@ -12,7 +12,7 @@ import { API_URL } from "@constants/data";
 export async function getArchetypeProspects(userToken: string, archetypeID: number, search: string = ""): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${API_URL}/client/archetype/${archetypeID}/prospects?search=${search}`,
+    `${API_URL}/client/archetype/${archetypeID}/prospects${search ? `?search=${search}` : ''}`,
     {
       method: "GET",
       headers: {

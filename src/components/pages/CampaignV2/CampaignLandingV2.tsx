@@ -549,7 +549,7 @@ export default function CampaignLandingV2() {
         <Flex justify="center" align="center" mt="md">
           <Select
             mr="sm"
-            data={sequences.map((sequence, index) => ({ value: index.toString(), label: sequence[0].title }))}
+            data={Array.isArray(sequences) ? sequences.map((sequence, index) => ({ value: index.toString(), label: sequence[0].title })) : []}
             placeholder="Select Sequence"
             style={{ marginLeft: "1rem" }}
             onChange={(value) => {

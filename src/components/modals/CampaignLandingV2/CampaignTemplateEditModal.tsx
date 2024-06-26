@@ -778,17 +778,25 @@ export default function CampaignTemplateEditModal({
                           <Button
                             disabled={addedTheMagic}
                             style={{
-                              background: "linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))",
+                              background: !currentProject?.ai_researcher_id || !currentProject.is_ai_research_personalization_enabled ? "grey" : "linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))",
                               color: "white",
                               boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                               backdropFilter: "blur(10px)",
                               padding: "10px 20px",
                               transition: "background 0.3s ease, box-shadow 0.3s ease",
-                              border: "1px solid cyan", // Added black border
+                              border: "1px solid grey",
                             }}
                             leftIcon={<IconSparkles size={"0.9rem"} />}
                             loading={loadingMagicSubjectLine}
                             onClick={async () => {
+                              if (!currentProject?.ai_researcher_id || !currentProject.is_ai_research_personalization_enabled) {
+                                showNotification({
+                                  title: 'Action Required',
+                                  message: 'Please enable AI Personalization and attach an AI Researcher with research questions.',
+                                  color: 'red',
+                                });
+                                return;
+                              }
                               setLoadingMagicSubjectLine(true);
                               try {
                                 await createEmailSubjectLineTemplate(userToken, currentProject?.id || -1, "", true);

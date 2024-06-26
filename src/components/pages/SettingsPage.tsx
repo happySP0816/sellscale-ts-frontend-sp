@@ -27,6 +27,7 @@ import {
   IconRefresh,
   IconSausage,
   IconWebhook,
+  IconWorld,
 } from "@tabler/icons";
 import PageTitle from "@nav/PageTitle";
 import { useQuery } from "@tanstack/react-query";
@@ -58,6 +59,9 @@ import ContactRecycling from "@common/settings/ContactRecycling";
 import WebhookConnectionPage from "./WebhookConnectionPage";
 import AccountSettings from "./AccountSettings";
 import Organization from "@common/settings/Organization";
+import { InboxesManagementPage } from "@common/settings/InboxesManagementPage";
+import WebTrafficRouting from "@common/settings/Traffic/WebTrafficRouting";
+import posthog from "posthog-js";
 
 export default function SettingsPage() {
   setPageTitle("Settings");
@@ -71,6 +75,15 @@ export default function SettingsPage() {
   const [searchParams] = useSearchParams();
   const defaultTab = tabId || "usage";
   const [currentTab, setCurrentTab] = useState(defaultTab);
+  const [showWebIntent, setShowWebIntent] = useState(false);
+
+  useEffect(() => {
+    posthog.onFeatureFlags(function () {
+      if (posthog.isFeatureEnabled("web-intent-feature")) {
+        setShowWebIntent(true);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const code = searchParams.get("code");
@@ -241,6 +254,11 @@ export default function SettingsPage() {
           <Tabs.Tab value="linkedin" icon={<IconBrandLinkedin size="0.8rem" />}>
             LinkedIn Connection
           </Tabs.Tab>
+          {showWebIntent && (
+            <Tabs.Tab value="traffic" icon={<IconWorld size="0.8rem" />}>
+              Web Traffic Routing
+            </Tabs.Tab>
+          )}
           <Tabs.Tab value="email" icon={<IconInbox size="0.8rem" />}>
             Email Connection
           </Tabs.Tab>
@@ -298,6 +316,10 @@ export default function SettingsPage() {
           />
         </Tabs.Panel>
 
+        <Tabs.Panel value="traffic" pl="xs" w="60%">
+          <WebTrafficRouting />
+        </Tabs.Panel>
+
         <Tabs.Panel value="email" pl="xs">
           <NylasConnectedCard
             connected={userData ? userData.nylas_connected : false}
@@ -320,6 +342,11 @@ export default function SettingsPage() {
         <Tabs.Panel value="contactRecycling" pl="xs">
           <Group noWrap>
             {currentTab === "contactRecycling" && <ContactRecycling />}
+          </Group>
+        </Tabs.Panel>
+        <Tabs.Panel value="inboxes" pl="xs">
+          <Group noWrap>
+            {currentTab === "inboxes" && <InboxesManagementPage />}
           </Group>
         </Tabs.Panel>
 

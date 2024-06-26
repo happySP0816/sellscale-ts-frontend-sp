@@ -86,6 +86,7 @@ import Costs from "@common/internal_tools/Costs";
 import DomainManagement from "@pages/DomainManagement";
 import HomePageV2 from "@pages/Overview/HomePageV2";
 import ProspectPuller from "@pages/ProspectPuller";
+import WebsitePage from "@pages/Website/WebsitePage";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -578,6 +579,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/prospect_puller",
         element: <ProspectPuller />,
+      },
+      {
+        path: "/website",
+        element: <WebsitePage />,
       },
     ],
   },

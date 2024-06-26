@@ -43,6 +43,19 @@ export default function Personalizers(props: any) {
     currentProject?.is_ai_research_personalization_enabled
   );
 
+  const getPersonalizers = async () => {
+    setLoadingPersonalizers(true);
+    const clientArchetypeId = Number(id);
+    const response = await fetchCampaignPersonalizers(
+      userToken,
+      clientArchetypeId
+    );
+    if (response) {
+      props.setPersonalizers(response.questions);
+    }
+    setLoadingPersonalizers(false);
+  };
+
   const updatePersonalizersEnabled = (enabled: boolean) => {
     fetch(`${API_URL}/client/archetype/${id}/update_personalizers_enabled`, {
       method: "PATCH",
@@ -68,18 +81,11 @@ export default function Personalizers(props: any) {
       });
   };
 
-  const getPersonalizers = async () => {
-    setLoadingPersonalizers(true);
-    const clientArchetypeId = Number(id);
-    const response = await fetchCampaignPersonalizers(
-      userToken,
-      clientArchetypeId
-    );
-    if (response) {
-      props.setPersonalizers(response.questions);
+  useEffect(() => {
+    if (id !== -1 && id !== null) {
+      getPersonalizers();
     }
-    setLoadingPersonalizers(false);
-  };
+  }, [id, currentProject]);
 
   const deletePersonalizer = (id: number) => {
     setLoadingPersonalizers(true);
@@ -380,6 +386,7 @@ export default function Personalizers(props: any) {
                 modal: "campaignPersonalizersModal",
                 title: <Title order={3}>Personalizers</Title>,
                 innerProps: {
+                  sequences: props.sequences,
                   ai_researcher_id: statsData?.ai_researcher_id,
                   id,
                   setPersonalizers: props.setPersonalizers,
@@ -389,6 +396,9 @@ export default function Personalizers(props: any) {
                   content: {
                     minWidth: "1040px",
                   },
+                },
+                onClose: () => {
+                  getPersonalizers();
                 },
               });
             }}

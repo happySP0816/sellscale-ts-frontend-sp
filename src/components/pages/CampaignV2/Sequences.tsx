@@ -396,7 +396,7 @@ export default function Sequences(props: any) {
                   </Collapse>
                 </Box>
               )}
-              {sequences.map((item: any, index: number) => {
+              {Array.isArray(sequences) && sequences.map((item: any, index: number) => {
                 return (
                   <VariantSelect
                     item={item}

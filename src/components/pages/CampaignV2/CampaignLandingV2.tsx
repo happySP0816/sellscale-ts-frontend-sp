@@ -161,6 +161,7 @@ export default function CampaignLandingV2() {
       email_open_tracking_enabled: false,
       email_link_tracking_enabled: false,
       is_ai_research_personalization_enabled: statsData.is_ai_research_personalization_enabled,
+      ai_researcher_id: statsData.ai_researcher_id,
     };
   };
   const userData = useRecoilValue(userDataState);
@@ -1178,7 +1179,7 @@ export default function CampaignLandingV2() {
             setLinkedinInitialMessages={setLinkedinInitialMessages}
             linkedinInitialMessages={linkedinInitialMessages}
           />
-          <Personalizers data={statsData} sequences={sequences} setPersonalizers={setPersonalizers} personalizers={personalizers} />
+          <Personalizers data={statsData} sequences={emailSequenceData} setPersonalizers={setPersonalizers} personalizers={personalizers} />
         </Flex>
       </Flex>
     </Paper>

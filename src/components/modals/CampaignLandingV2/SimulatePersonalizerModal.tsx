@@ -45,7 +45,7 @@ export default function SimulatepersonalizerModal({
     try {
       const prospectId = innerProps.prospectId; // Replace with actual prospectId
       const response = await researcher.getPersonalization(userToken, Number(prospectId), emailBody);
-      setOverrideEmailBody(response.personalized_email.replace(/\n/g, "<br/>"));
+      setOverrideEmailBody(response.personalized_email);
     } catch (error) {
       console.error("Error during personalization:", error);
     } finally {

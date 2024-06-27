@@ -16,7 +16,17 @@ import {
   Group,
   Title,
 } from "@mantine/core";
-import { Icon123, IconBrandLinkedin, IconChevronLeft, IconChevronRight, IconLetterT, IconLoader, IconMail, IconPlus, IconSearch } from "@tabler/icons";
+import {
+  Icon123,
+  IconBrandLinkedin,
+  IconChevronLeft,
+  IconChevronRight,
+  IconLetterT,
+  IconLoader,
+  IconMail,
+  IconPlus,
+  IconSearch,
+} from "@tabler/icons";
 import { nameToInitials, valueToColor } from "@utils/general";
 import { DataGrid } from "mantine-data-grid";
 import { useState } from "react";
@@ -144,12 +154,17 @@ export default function WebsiteOverview() {
     },
   ]);
 
-  const [filterData, setFilterData] = useState<DeanonymizationType[]>(deanonymData);
+  const [filterData, setFilterData] = useState<DeanonymizationType[]>(
+    deanonymData
+  );
 
   const handleFilter = (key: string) => {
     let newData = deanonymData;
     newData = deanonymData.filter(
-      (item) => item.company.toLowerCase().includes(key) || item.sdr_name.toLowerCase().includes(key) || item.job.toLowerCase().includes(key)
+      (item) =>
+        item.company.toLowerCase().includes(key) ||
+        item.sdr_name.toLowerCase().includes(key) ||
+        item.job.toLowerCase().includes(key)
     );
     setFilterData(newData);
   };
@@ -176,11 +191,22 @@ export default function WebsiteOverview() {
   };
 
   const data = {
-    labels: ["09 Jun", "10 Jun", "11 Jun", "12 Jun", "13 Jun", "14 Jun", "15 Jun", "16 Jun", "17 Jun", "18 Jun"],
+    labels: [
+      "09 Jun",
+      "10 Jun",
+      "11 Jun",
+      "12 Jun",
+      "13 Jun",
+      "14 Jun",
+      "15 Jun",
+      "16 Jun",
+      "17 Jun",
+      "18 Jun",
+    ],
     datasets: [
       {
-        label: "New Profile",
-        data: [65, 59, 80, 200, 20, 20, 49, 21, 52, 56, 72],
+        label: "Distinct Views",
+        data: [250, 40, 401, 180, 60, 96, 73, 93, 40, 103, 150],
         fill: false,
         borderColor: "#3B85EF",
         backgroundColor: "#3B85EF",
@@ -188,7 +214,7 @@ export default function WebsiteOverview() {
         borderDash: [5, 5],
       },
       {
-        label: "Repeat Profile",
+        label: "Deanonomized Contact",
         data: [130, 20, 201, 90, 30, 48, 39, 50, 10, 42, 59],
         fill: false,
         borderColor: "#D444F1",
@@ -283,7 +309,10 @@ export default function WebsiteOverview() {
                             alignItems: "center",
                           }}
                         >
-                          <IconUsersPlus color="#228be6" style={{ marginTop: "-5px" }} />
+                          <IconUsersPlus
+                            color="#228be6"
+                            style={{ marginTop: "-5px" }}
+                          />
                           Create Segment
                         </Title>
                       </div>
@@ -336,12 +365,23 @@ export default function WebsiteOverview() {
               ),
               maxSize: 210,
               cell: (cell) => {
-                const { sdr_name, avatar, job, linkedin, email } = cell.row.original;
+                const {
+                  sdr_name,
+                  avatar,
+                  job,
+                  linkedin,
+                  email,
+                } = cell.row.original;
 
                 return (
                   <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
                     <Flex align={"center"} gap={"sm"}>
-                      <Avatar src={avatar} size={"md"} radius={"xl"} color={valueToColor(theme, sdr_name)}>
+                      <Avatar
+                        src={avatar}
+                        size={"md"}
+                        radius={"xl"}
+                        color={valueToColor(theme, sdr_name)}
+                      >
                         {nameToInitials(sdr_name)}
                       </Avatar>
                       <Box>
@@ -349,8 +389,20 @@ export default function WebsiteOverview() {
                           <Text fw={600} size={"sm"}>
                             {sdr_name}
                           </Text>
-                          {linkedin && <IconBrandLinkedin size={"1.2rem"} fill="#228be6" color="white" />}
-                          {email && <IconMail size={"1.2rem"} fill="#228be6" color="white" />}
+                          {linkedin && (
+                            <IconBrandLinkedin
+                              size={"1.2rem"}
+                              fill="#228be6"
+                              color="white"
+                            />
+                          )}
+                          {email && (
+                            <IconMail
+                              size={"1.2rem"}
+                              fill="#228be6"
+                              color="white"
+                            />
+                          )}
                         </Flex>
                         <Text color="gray" size={"xs"} fw={600}>
                           {job}
@@ -395,7 +447,13 @@ export default function WebsiteOverview() {
                 const { visit_date } = cell.row.original;
 
                 return (
-                  <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                  <Flex
+                    align={"center"}
+                    gap={"xs"}
+                    py={"sm"}
+                    w={"100%"}
+                    h={"100%"}
+                  >
                     <Text fw={600}>{visit_date}</Text>
                   </Flex>
                 );
@@ -417,7 +475,13 @@ export default function WebsiteOverview() {
                 const { total_visit } = cell.row.original;
 
                 return (
-                  <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                  <Flex
+                    align={"center"}
+                    gap={"xs"}
+                    py={"sm"}
+                    w={"100%"}
+                    h={"100%"}
+                  >
                     <Text fw={600}>{total_visit}</Text>
                   </Flex>
                 );
@@ -437,7 +501,13 @@ export default function WebsiteOverview() {
                 const { icp_score } = cell.row.original;
 
                 return (
-                  <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                  <Flex
+                    align={"center"}
+                    gap={"xs"}
+                    py={"sm"}
+                    w={"100%"}
+                    h={"100%"}
+                  >
                     <Badge
                       color={
                         icp_score == 0
@@ -484,7 +554,13 @@ export default function WebsiteOverview() {
                 const { tag } = cell.row.original as any[""];
 
                 return (
-                  <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                  <Flex
+                    align={"center"}
+                    gap={"xs"}
+                    py={"sm"}
+                    w={"100%"}
+                    h={"100%"}
+                  >
                     <Flex gap={"sm"}>
                       {tag.length > 0 ? (
                         tag.map((item: any, index: number) => {
@@ -495,7 +571,12 @@ export default function WebsiteOverview() {
                           );
                         })
                       ) : (
-                        <Button size="xs" radius={"xl"} variant="outline" leftIcon={<IconPlus size={"0.9rem"} />}>
+                        <Button
+                          size="xs"
+                          radius={"xl"}
+                          variant="outline"
+                          leftIcon={<IconPlus size={"0.9rem"} />}
+                        >
                           Add
                         </Button>
                       )}
@@ -538,10 +619,12 @@ export default function WebsiteOverview() {
                     <Select
                       maw={100}
                       value={`${table.getState().pagination.pageIndex + 1}`}
-                      data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                        label: String(idx + 1),
-                        value: String(idx + 1),
-                      }))}
+                      data={new Array(table.getPageCount())
+                        .fill(0)
+                        .map((i, idx) => ({
+                          label: String(idx + 1),
+                          value: String(idx + 1),
+                        }))}
                       onChange={(v) => {
                         table.setPageIndex(Number(v) - 1);
                       }}
@@ -570,7 +653,9 @@ export default function WebsiteOverview() {
                       h={36}
                       disabled={table.getState().pagination.pageIndex === 0}
                       onClick={() => {
-                        table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                        table.setPageIndex(
+                          table.getState().pagination.pageIndex - 1
+                        );
                       }}
                     >
                       <IconChevronLeft stroke={theme.colors.gray[4]} />
@@ -579,9 +664,14 @@ export default function WebsiteOverview() {
                       variant="default"
                       color="gray.4"
                       h={36}
-                      disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                      disabled={
+                        table.getState().pagination.pageIndex ===
+                        table.getPageCount() - 1
+                      }
                       onClick={() => {
-                        table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                        table.setPageIndex(
+                          table.getState().pagination.pageIndex + 1
+                        );
                       }}
                     >
                       <IconChevronRight stroke={theme.colors.gray[4]} />

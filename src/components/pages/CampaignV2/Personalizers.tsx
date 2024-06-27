@@ -32,7 +32,7 @@ export default function Personalizers(props: any) {
   const { statsData } = props;
 
   const userToken = useRecoilValue(userTokenState);
-  const [currentProject] = useRecoilState(
+  const [currentProject, setCurrentProject] = useRecoilState(
     currentProjectState
   );
 
@@ -57,6 +57,13 @@ export default function Personalizers(props: any) {
   };
 
   const updatePersonalizersEnabled = (enabled: boolean) => {
+    setCurrentProject((prevProject) => {
+      if (!prevProject) return prevProject;
+      return {
+        ...prevProject,
+        is_ai_research_personalization_enabled: enabled,
+      };
+    });
     fetch(`${API_URL}/client/archetype/${id}/update_personalizers_enabled`, {
       method: "PATCH",
       headers: {

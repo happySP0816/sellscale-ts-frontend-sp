@@ -6,16 +6,7 @@ import RejectionAnalysis from "@common/persona/RejectionAnalysis";
 import ScrapingReport from "@common/persona/ScrapingReport";
 import TAMGraphV2 from "@common/persona/TAMGraphV2";
 import SettingUsage from "@common/settings/SettingUsage";
-import {
-  Alert,
-  Box,
-  Button,
-  Group,
-  Image,
-  Tabs,
-  Title,
-  rem,
-} from "@mantine/core";
+import { Alert, Box, Button, Group, Image, Tabs, Title, rem } from "@mantine/core";
 import MessagingAnalytics from "../AnalyticsPage/MessagingAnalytics";
 import AiActivityLogs from "../AnalyticsPage/AiActivityLogs";
 import { useRecoilValue } from "recoil";
@@ -29,6 +20,7 @@ import Sequence from "./Sequence/Sequence";
 import { IconBooks } from "@tabler/icons";
 import SequenceBuilderV3 from "@common/internal_tools/sequence_builder_v3/SequenceBuilderV3";
 import SequenceBuilderV3ClientFacing from "@common/internal_tools/sequence_builder_v3/SequenceBuilderV3ClientFacing";
+import AIBrainStrategy from "./AIBrainStrategy";
 
 const AnalyticsPageNew = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -43,9 +35,7 @@ const AnalyticsPageNew = () => {
           tab: {
             borderBottom: `2px solid transparent`,
             "&[data-active]": {
-              borderBottom: `2px solid ${
-                theme.colors.blue[theme.fn.primaryShade()]
-              }`,
+              borderBottom: `2px solid ${theme.colors.blue[theme.fn.primaryShade()]}`,
               color: theme.colors.blue[theme.fn.primaryShade()],
             },
             paddingTop: rem(16),
@@ -68,6 +58,7 @@ const AnalyticsPageNew = () => {
           <Tabs.Tab value="intakes">Intakes </Tabs.Tab>
           <Tabs.Tab value="assets">Assets </Tabs.Tab>
           <Tabs.Tab value="sequences">Sequences </Tabs.Tab>
+          <Tabs.Tab value="strategy">Strategies </Tabs.Tab>
           <Tabs.Tab value="tam" ml="auto">
             TAM
           </Tabs.Tab>
@@ -79,10 +70,7 @@ const AnalyticsPageNew = () => {
         </Tabs.List>
         <Tabs.Panel value="chatbot" pt="xs">
           <iframe
-            src={
-              "https://sellscale.retool.com/embedded/public/2fe5bcbd-17cd-4432-9a3e-6d8908703034#authToken=" +
-              userToken
-            }
+            src={"https://sellscale.retool.com/embedded/public/2fe5bcbd-17cd-4432-9a3e-6d8908703034#authToken=" + userToken}
             width={"100%"}
             height={window.innerHeight - 30}
             frameBorder={0}
@@ -116,6 +104,9 @@ const AnalyticsPageNew = () => {
         <Tabs.Panel value="sequences" pt="xs">
           <SequenceBuilderV3ClientFacing />
         </Tabs.Panel>
+        <Tabs.Panel value="strategy" pt="xs">
+          <AIBrainStrategy />
+        </Tabs.Panel>
         <Tabs.Panel value="assets" pt="xs">
           <Group position="right" pr={40}>
             <Button
@@ -134,10 +125,7 @@ const AnalyticsPageNew = () => {
             </Button>
           </Group>
           <iframe
-            src={
-              "https://sellscale.retool.com/embedded/public/035e7bc0-da4c-4913-a028-5c49e0d457fc#auth_token=" +
-              userToken
-            }
+            src={"https://sellscale.retool.com/embedded/public/035e7bc0-da4c-4913-a028-5c49e0d457fc#auth_token=" + userToken}
             width={"100%"}
             height={window.innerHeight - 30}
             frameBorder={0}

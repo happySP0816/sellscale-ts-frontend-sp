@@ -86,6 +86,9 @@ import CreateFundraiseSonarmodal from "@modals/Sonarmodal/CreateFundraiseSonarMo
 import AnalyticsModal from "@modals/AnalyticsModal";
 import CycleAnalyticsModal from "@modals/CycleAnalyticsModal";
 import AddSegmentModal from "@modals/website/AddSegmentModal";
+import StrategyCreateModal from "@modals/AIBrain/StrategyCreateModal";
+import StrategyEditModal from "@modals/AIBrain/StrategyEditModal";
+import StrategyPreviewModal from "@modals/AIBrain/StrategyPreviewModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -290,6 +293,9 @@ export default function App() {
               analyticModal: AnalyticsModal,
               cycleanalyticModal: CycleAnalyticsModal,
               createSegmentModal: AddSegmentModal,
+              createStrategy: StrategyCreateModal,
+              editStrategy: StrategyEditModal,
+              previewStrategy: StrategyPreviewModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

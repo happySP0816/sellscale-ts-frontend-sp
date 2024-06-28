@@ -193,13 +193,14 @@ export default function ProspectSelect(props: {
       } catch (e) {
         console.error(e);
       }
-      const resultProspects = result.data as ProspectShallow[];
-      resultProspects.sort((a, b) => {
+      let resultProspects = result.data as ProspectShallow[];
+      const sortedProspects = [...resultProspects].sort((a, b) => {
         if (a.icp_fit_score === b.icp_fit_score) {
           return a.full_name.localeCompare(b.full_name);
         }
         return b.icp_fit_score - a.icp_fit_score;
       });
+      resultProspects = sortedProspects;
 
       if (props.autoSelect && !selectedProspect) {
         const foundProspect = resultProspects.find(

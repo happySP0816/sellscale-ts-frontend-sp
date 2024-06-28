@@ -1,16 +1,19 @@
-import { currentProjectState, uploadDrawerOpenState } from '@atoms/personaAtoms';
-import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { getFreshCurrentProject } from '@auth/core';
-import ModalSelector from '@common/library/ModalSelector';
-import ProspectSelect from '@common/library/ProspectSelect';
-import VoiceSelect from '@common/library/VoiceSelect';
-import PersonaDetailsCTAs from '@common/persona/details/PersonaDetailsCTAs';
-import VoicesSection from '@common/voice_builder/VoicesSection';
-import { API_URL } from '@constants/data';
-import PersonaUploadDrawer from '@drawers/PersonaUploadDrawer';
-import { TypeAnimation } from 'react-type-animation';
+import {
+  currentProjectState,
+  uploadDrawerOpenState,
+} from "@atoms/personaAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { getFreshCurrentProject } from "@auth/core";
+import ModalSelector from "@common/library/ModalSelector";
+import ProspectSelect from "@common/library/ProspectSelect";
+import VoiceSelect from "@common/library/VoiceSelect";
+import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
+import VoicesSection from "@common/voice_builder/VoicesSection";
+import { API_URL } from "@constants/data";
+import PersonaUploadDrawer from "@drawers/PersonaUploadDrawer";
+import { TypeAnimation } from "react-type-animation";
 
-import { C, co, ct, ex } from '@fullcalendar/core/internal-common';
+import { C, co, ct, ex } from "@fullcalendar/core/internal-common";
 import {
   Group,
   Box,
@@ -53,17 +56,17 @@ import {
   List,
   Popover,
   CloseButton,
-} from '@mantine/core';
-import { useForm } from '@mantine/form';
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
 import {
   useDebouncedValue,
   useDidUpdate,
   useDisclosure,
   useHover,
   usePrevious,
-} from '@mantine/hooks';
-import sellScaleLogo from './assets/logo.jpg';
-import { modals, openConfirmModal, openContextModal } from '@mantine/modals';
+} from "@mantine/hooks";
+import sellScaleLogo from "./assets/logo.jpg";
+import { modals, openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconBrain,
   IconCheck,
@@ -82,29 +85,44 @@ import {
   IconUpload,
   IconUserSquare,
   IconX,
-} from '@tabler/icons-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { proxyURL, valueToColor, nameToInitials, testDelay } from '@utils/general';
-import { generateBumpLiMessage } from '@utils/requests/generateBumpLiMessage';
-import { getArchetypeConversion } from '@utils/requests/getArchetypeConversion';
-import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
-import getChannels from '@utils/requests/getChannels';
-import getLiProfile from '@utils/requests/getLiProfile';
+} from "@tabler/icons-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  proxyURL,
+  valueToColor,
+  nameToInitials,
+  testDelay,
+} from "@utils/general";
+import { generateBumpLiMessage } from "@utils/requests/generateBumpLiMessage";
+import { getArchetypeConversion } from "@utils/requests/getArchetypeConversion";
+import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
+import getChannels from "@utils/requests/getChannels";
+import getLiProfile from "@utils/requests/getLiProfile";
 import {
   createLiConvoSim,
   generateInitialMessageForLiConvoSim,
   getLiConvoSim,
-} from '@utils/requests/linkedinConvoSimulation';
-import { patchBumpFramework } from '@utils/requests/patchBumpFramework';
-import { updateBlocklist, updateInitialBlocklist } from '@utils/requests/updatePersonaBlocklist';
-import { useDebouncedCallback } from '@utils/useDebouncedCallback';
-import _, { set } from 'lodash';
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { BumpFramework, ResearchPointType } from 'src';
-import TextWithNewline from '@common/library/TextWithNewlines';
-import { getAcceptanceRates } from '@utils/requests/getAcceptanceRates';
-import { showNotification } from '@mantine/notifications';
+} from "@utils/requests/linkedinConvoSimulation";
+import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
+import {
+  updateBlocklist,
+  updateInitialBlocklist,
+} from "@utils/requests/updatePersonaBlocklist";
+import { useDebouncedCallback } from "@utils/useDebouncedCallback";
+import _, { set } from "lodash";
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { BumpFramework, ResearchPointType } from "src";
+import TextWithNewline from "@common/library/TextWithNewlines";
+import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
+import { showNotification } from "@mantine/notifications";
 import {
   IconArrowRight,
   IconArrowsExchange,
@@ -122,35 +140,43 @@ import {
   IconSwitch,
   IconTool,
   IconTrash,
-} from '@tabler/icons';
-import { useLocation, unstable_usePrompt, useNavigate, useBlocker } from 'react-router-dom';
-import { patchArchetypeDelayDays } from '@utils/requests/patchArchetypeDelayDays';
-import { patchArchetypeBumpAmount } from '@utils/requests/patchArchetypeBumpAmount';
-import { CtaSection } from './CtaSection';
-import CTAGenerator from './CTAGenerator';
-import { deterministicMantineColor } from '@utils/requests/utils';
-import moment from 'moment';
+} from "@tabler/icons";
+import {
+  useLocation,
+  unstable_usePrompt,
+  useNavigate,
+  useBlocker,
+} from "react-router-dom";
+import { patchArchetypeDelayDays } from "@utils/requests/patchArchetypeDelayDays";
+import { patchArchetypeBumpAmount } from "@utils/requests/patchArchetypeBumpAmount";
+import { CtaSection } from "./CtaSection";
+import CTAGenerator from "./CTAGenerator";
+import { deterministicMantineColor } from "@utils/requests/utils";
+import moment from "moment";
 import {
   createLiTemplate,
   getLiTemplates,
   updateLiTemplate,
-} from '@utils/requests/linkedinTemplates';
-import DOMPurify from 'isomorphic-dompurify';
-import InitialMessageTemplateSelector from './InitialMessageTemplateSelector';
-import LinkedinInitialMessageTemplate from './LinkedinInitialMessageTemplate';
-import { CTAGeneratorSuggestedModal } from '@modals/CTAGeneratorSuggestedModal';
-import { createBumpFramework } from '@utils/requests/createBumpFramework';
-import useRefresh from '@common/library/use-refresh';
-import AIBrainPill from '@common/persona/ICPFilter/AiBrainPill';
-import getResearchPointTypes from '@utils/requests/getResearchPointTypes';
-import BumpFrameworkAssets from '@modals/BumpFrameworkAssets';
-import LiInitialMessageAssets from '@modals/LiInitialMessageAssets';
+} from "@utils/requests/linkedinTemplates";
+import DOMPurify from "isomorphic-dompurify";
+import InitialMessageTemplateSelector from "./InitialMessageTemplateSelector";
+import LinkedinInitialMessageTemplate from "./LinkedinInitialMessageTemplate";
+import { CTAGeneratorSuggestedModal } from "@modals/CTAGeneratorSuggestedModal";
+import { createBumpFramework } from "@utils/requests/createBumpFramework";
+import useRefresh from "@common/library/use-refresh";
+import AIBrainPill from "@common/persona/ICPFilter/AiBrainPill";
+import getResearchPointTypes from "@utils/requests/getResearchPointTypes";
+import BumpFrameworkAssets from "@modals/BumpFrameworkAssets";
+import LiInitialMessageAssets from "@modals/LiInitialMessageAssets";
 
-export default function LinkedInSequenceSection(props: { backFunction?: () => void }) {
+export default function LinkedInSequenceSection(props: {
+  backFunction?: () => void;
+}) {
   const [activeCard, setActiveCard] = useState(0);
 
   const userToken = useRecoilValue(userTokenState);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
 
   const [loading, setLoading] = useState(false);
 
@@ -177,7 +203,7 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
       if (!currentProject) return [];
       const result = await getBumpFrameworks(
         userToken,
-        ['ACCEPTED', 'BUMPED'],
+        ["ACCEPTED", "BUMPED"],
         [],
         [currentProject?.id],
         undefined,
@@ -187,7 +213,7 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
         undefined,
         true
       );
-      if (result.status !== 'success') return [];
+      if (result.status !== "success") return [];
       return result.data.bump_frameworks as BumpFramework[];
     },
   });
@@ -200,15 +226,17 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
 
   let blocker = useBlocker(isDataChanged);
 
-  const bf0 = bumpFrameworks.find((bf) => bf.overall_status === 'ACCEPTED' && bf.active);
+  const bf0 = bumpFrameworks.find(
+    (bf) => bf.overall_status === "ACCEPTED" && bf.active
+  );
   const bf1 = bumpFrameworks.find(
-    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1 && bf.active
+    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 1 && bf.active
   );
   const bf2 = bumpFrameworks.find(
-    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2 && bf.active
+    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 2 && bf.active
   );
   const bf3 = bumpFrameworks.find(
-    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3 && bf.active
+    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 3 && bf.active
   );
   const bf0Delay = useRef(bf0?.bump_delay_days ?? 2);
   const bf1Delay = useRef(bf1?.bump_delay_days ?? 2);
@@ -243,9 +271,15 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
   const updateBumpAmount = async (bumpAmount: number) => {
     if (!currentProject) return;
     setLoading(true);
-    const response = await patchArchetypeBumpAmount(userToken, currentProject.id, bumpAmount);
-    if (response.status === 'success') {
-      setCurrentProject(await getFreshCurrentProject(userToken, currentProject.id));
+    const response = await patchArchetypeBumpAmount(
+      userToken,
+      currentProject.id,
+      bumpAmount
+    );
+    if (response.status === "success") {
+      setCurrentProject(
+        await getFreshCurrentProject(userToken, currentProject.id)
+      );
     }
     setLoading(false);
   };
@@ -259,22 +293,29 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
     }
   };
 
-  const bumpConversionColor = (bf: BumpFramework | undefined, conversion: number | undefined) => {
+  const bumpConversionColor = (
+    bf: BumpFramework | undefined,
+    conversion: number | undefined
+  ) => {
     return bf &&
       conversion &&
       bf?.etl_num_times_used &&
       conversion > 5 &&
       bf?.etl_num_times_used > 10
-      ? 'green'
-      : !bf?.etl_num_times_used || (bf?.etl_num_times_used && bf?.etl_num_times_used < 10)
-      ? 'gray'
-      : 'red';
+      ? "green"
+      : !bf?.etl_num_times_used ||
+        (bf?.etl_num_times_used && bf?.etl_num_times_used < 10)
+      ? "gray"
+      : "red";
   };
 
-  const getReplyPillText = (bf: BumpFramework | undefined, bfConversion: number | undefined) => {
+  const getReplyPillText = (
+    bf: BumpFramework | undefined,
+    bfConversion: number | undefined
+  ) => {
     return bf && bf.etl_num_times_used && bf.etl_num_times_used >= 10
-      ? (bfConversion ? bfConversion?.toFixed(0) : 0) + '%'
-      : 'TBD';
+      ? (bfConversion ? bfConversion?.toFixed(0) : 0) + "%"
+      : "TBD";
   };
 
   if (!currentProject) {
@@ -284,30 +325,31 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
   return (
     <>
       <Modal.Root
-        opened={isModalBlockerVisible || blocker.state === 'blocked'}
+        opened={isModalBlockerVisible || blocker.state === "blocked"}
         onClose={closeModal}
         centered
       >
         <Modal.Overlay />
         <Modal.Content>
           <Modal.Header>
-            <Flex w={'100%'} justify={'center'} align={'center'}>
+            <Flex w={"100%"} justify={"center"} align={"center"}>
               <Modal.Title>
-                <Text color='yellow' size={'1.25rem'} fw={500}>
+                <Text color="yellow" size={"1.25rem"} fw={500}>
                   Warning: Unsaved Change
                 </Text>
               </Modal.Title>
             </Flex>
           </Modal.Header>
           <Modal.Body>
-            <Text size={'1rem'} color='gray.8'>
-              Are you sure you want to dismiss these edits? Save before navigate away
+            <Text size={"1rem"} color="gray.8">
+              Are you sure you want to dismiss these edits? Save before navigate
+              away
             </Text>
 
-            <Flex justify={'space-between'} gap={'1rem'} mt={'1rem'}>
+            <Flex justify={"space-between"} gap={"1rem"} mt={"1rem"}>
               <Button
-                variant='filled'
-                color='yellow'
+                variant="filled"
+                color="yellow"
                 fullWidth
                 onClick={() => {
                   setIsDataChanged(false);
@@ -323,46 +365,59 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
               >
                 Dismiss
               </Button>
-              <Button variant='outline' color='blue' fullWidth onClick={closeModal}>
+              <Button
+                variant="outline"
+                color="blue"
+                fullWidth
+                onClick={closeModal}
+              >
                 Close
               </Button>
             </Flex>
           </Modal.Body>
         </Modal.Content>
       </Modal.Root>
-      <Card padding='lg' radius='md' withBorder>
-        <Group position='apart' p='xs' spacing={0} sx={{ alignItems: 'flex-start' }} noWrap>
-          <Box sx={{ flexBasis: '35%', position: 'relative' }}>
+      <Card padding="lg" radius="md" withBorder>
+        <Group
+          position="apart"
+          p="xs"
+          spacing={0}
+          sx={{ alignItems: "flex-start" }}
+          noWrap
+        >
+          <Box sx={{ flexBasis: "35%", position: "relative" }}>
             <LoadingOverlay visible={loading} />
             <Stack>
               <FrameworkCard
-                title='Connection Request'
-                bodyTitle='Invite Message'
+                title="Connection Request"
+                bodyTitle="Invite Message"
                 // bodyText="Say hello and introduce myself as a sales rep"
                 active={activeCard === 0}
                 conversion={conversionRate}
                 onClick={() => onSetActiveCard(0)}
                 footer={
-                  <Center sx={{ cursor: 'pointer' }}>
+                  <Center sx={{ cursor: "pointer" }}>
                     <Group spacing={2}>
                       <Text fz={14}>wait for</Text>
                       <NumberInput
-                        placeholder='# Days'
-                        variant='filled'
+                        placeholder="# Days"
+                        variant="filled"
                         hideControls
-                        sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                        sx={{ border: "solid 1px #777; border-radius: 4px;" }}
                         m={3}
                         min={0}
                         max={99}
                         w={bf0Delay.current > 9 ? 50 : 32}
-                        size='xs'
-                        defaultValue={currentProject?.first_message_delay_days ?? 0}
+                        size="xs"
+                        defaultValue={
+                          currentProject?.first_message_delay_days ?? 0
+                        }
                         onChange={async (value) => {
                           if (!currentProject) {
                             showNotification({
-                              title: 'Error',
-                              message: 'No campaign selected',
-                              color: 'red',
+                              title: "Error",
+                              message: "No campaign selected",
+                              color: "red",
                             });
                             return;
                           }
@@ -371,7 +426,7 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                             currentProject.id,
                             value || 0
                           );
-                          if (result.status === 'success') refetch();
+                          if (result.status === "success") refetch();
                         }}
                       />
                       <Text fz={14}>days, then:</Text>
@@ -392,32 +447,39 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                 mx={50}
               /> */}
               <Divider
-                variant='solid'
+                variant="solid"
                 label={
                   <Tooltip
                     label={
                       replyRate > 0.5
-                        ? 'Your reply rates are above industry standards (0.5%). Congrats!'
-                        : 'Your reply rates are below industry standards (0.5%). Consider changing your bumps'
+                        ? "Your reply rates are above industry standards (0.5%). Congrats!"
+                        : "Your reply rates are below industry standards (0.5%). Consider changing your bumps"
                     }
                     withinPortal
                     withArrow
                   >
                     <Badge
-                      ml='4px'
-                      variant='dot'
-                      color={isNaN(replyRate) ? 'grey' : replyRate > 0.5 ? 'green' : 'red'}
+                      ml="4px"
+                      variant="dot"
+                      color={
+                        isNaN(replyRate)
+                          ? "grey"
+                          : replyRate > 0.5
+                          ? "green"
+                          : "red"
+                      }
                     >
-                      Replied: {!isNaN(replyRate) ? replyRate.toFixed(1) + '%' : 'TBD'}
+                      Replied:{" "}
+                      {!isNaN(replyRate) ? replyRate.toFixed(1) + "%" : "TBD"}
                     </Badge>
                   </Tooltip>
                 }
-                labelPosition='center'
+                labelPosition="center"
                 mx={10}
               />
               {bump_amount >= 1 && (
                 <FrameworkCard
-                  title='Follow-Up 1'
+                  title="Follow-Up 1"
                   badgeText={`Reply ${getReplyPillText(bf0, bf0Conversion)}`}
                   badgeColor={bumpConversionColor(bf0, bf0Conversion)}
                   timesUsed={bf0?.etl_num_times_used ?? 0}
@@ -425,35 +487,40 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                   badgeHoverText={
                     bf0 && bf0Conversion
                       ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
-                      : (bf0 && bf0.etl_num_times_used && bf0.etl_num_times_used < 20
-                          ? 'Not enough data, '
-                          : '') +
+                      : (bf0 &&
+                        bf0.etl_num_times_used &&
+                        bf0.etl_num_times_used < 20
+                          ? "Not enough data, "
+                          : "") +
                         (bf0?.etl_num_times_converted || 0) +
-                        ' / ' +
+                        " / " +
                         (bf0?.etl_num_times_used || 0)
                   }
-                  bodyTitle={bf0?.title ?? ''}
+                  bodyTitle={bf0?.title ?? ""}
                   // bodyText={bf0?.description ?? ""}
                   footer={
                     <Center>
                       {!bf0?.id && (
-                        <Text color='gray' size='md' align='center'>
+                        <Text color="gray" size="md" align="center">
                           No framework selected
                         </Text>
                       )}
-                      <Group spacing={2} sx={{ visibility: bf0?.id ? 'visible' : 'hidden' }}>
+                      <Group
+                        spacing={2}
+                        sx={{ visibility: bf0?.id ? "visible" : "hidden" }}
+                      >
                         <Text fz={14}>wait for</Text>
                         <NumberInput
                           defaultValue={bf0Delay.current}
-                          placeholder='# Days'
-                          variant='filled'
+                          placeholder="# Days"
+                          variant="filled"
                           hideControls
-                          sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                          sx={{ border: "solid 1px #777; border-radius: 4px;" }}
                           m={3}
                           min={1}
                           max={99}
                           w={bf0Delay.current > 9 ? 50 : 30}
-                          size='xs'
+                          size="xs"
                           onChange={async (value) => {
                             if (!bf0) return;
                             bf0Delay.current = value || 2;
@@ -470,7 +537,7 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                               bf0.use_account_research,
                               bf0.transformer_blocklist
                             );
-                            if (result.status === 'success') refetch();
+                            if (result.status === "success") refetch();
                           }}
                         />
                         <Text fz={14}>days, then:</Text>
@@ -481,56 +548,61 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                   onClick={() => onSetActiveCard(1)}
                   canEdit
                   editProps={{
-                    title: 'Choose Bump Framework for Follow-Up 1',
+                    title: "Choose Bump Framework for Follow-Up 1",
                     bumpedCount: 0,
                     bumpedFrameworks: bumpFrameworks.filter(
-                      (bf) => bf.overall_status === 'ACCEPTED'
+                      (bf) => bf.overall_status === "ACCEPTED"
                     ),
                     activeBumpFrameworkId: bf0?.id ?? -1,
-                    overallStatus: 'ACCEPTED',
+                    overallStatus: "ACCEPTED",
                   }}
                 />
               )}
 
               {bump_amount >= 2 && (
                 <FrameworkCard
-                  title='Follow-Up 2'
+                  title="Follow-Up 2"
                   badgeText={`Reply ${getReplyPillText(bf1, bf1Conversion)}`}
                   timesUsed={bf1?.etl_num_times_used ?? 0}
                   timesConverted={bf1?.etl_num_times_converted ?? 0}
                   badgeHoverText={
                     bf1 && bf1Conversion
                       ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
-                      : (bf1 && bf1.etl_num_times_used && bf1.etl_num_times_used < 20
-                          ? 'Not enough data, '
-                          : '') +
+                      : (bf1 &&
+                        bf1.etl_num_times_used &&
+                        bf1.etl_num_times_used < 20
+                          ? "Not enough data, "
+                          : "") +
                         (bf1?.etl_num_times_converted || 0) +
-                        ' / ' +
+                        " / " +
                         (bf1?.etl_num_times_used || 0)
                   }
                   badgeColor={bumpConversionColor(bf1, bf1Conversion)}
-                  bodyTitle={bf1?.title ?? ''}
+                  bodyTitle={bf1?.title ?? ""}
                   // bodyText={bf1?.description ?? ""}
                   footer={
                     <Center>
                       {!bf1?.id && (
-                        <Text color='gray' size='md' align='center'>
+                        <Text color="gray" size="md" align="center">
                           No framework selected
                         </Text>
                       )}
-                      <Group spacing={2} sx={{ visibility: bf1?.id ? 'visible' : 'hidden' }}>
+                      <Group
+                        spacing={2}
+                        sx={{ visibility: bf1?.id ? "visible" : "hidden" }}
+                      >
                         <Text fz={14}>wait for</Text>
                         <NumberInput
                           defaultValue={bf1Delay.current}
-                          placeholder='# Days'
-                          variant='filled'
+                          placeholder="# Days"
+                          variant="filled"
                           hideControls
-                          sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                          sx={{ border: "solid 1px #777; border-radius: 4px;" }}
                           m={3}
                           min={1}
                           max={99}
                           w={bf1Delay.current > 9 ? 50 : 30}
-                          size='xs'
+                          size="xs"
                           onChange={async (value) => {
                             if (!bf1) return;
                             bf1Delay.current = value || 2;
@@ -547,7 +619,7 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                               bf1.use_account_research,
                               bf1.transformer_blocklist
                             );
-                            if (result.status === 'success') refetch();
+                            if (result.status === "success") refetch();
                           }}
                         />
                         <Text fz={14}>days, then:</Text>
@@ -558,13 +630,14 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                   onClick={() => onSetActiveCard(2)}
                   canEdit
                   editProps={{
-                    title: 'Choose Bump Framework for Follow-Up 2',
+                    title: "Choose Bump Framework for Follow-Up 2",
                     bumpedCount: 1,
                     bumpedFrameworks: bumpFrameworks.filter(
-                      (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1
+                      (bf) =>
+                        bf.overall_status === "BUMPED" && bf.bumped_count === 1
                     ),
                     activeBumpFrameworkId: bf1?.id ?? -1,
-                    overallStatus: 'BUMPED',
+                    overallStatus: "BUMPED",
                   }}
                   canRemove={bump_amount === 2}
                   onRemove={() => updateBumpAmount(1)}
@@ -573,7 +646,7 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
 
               {bump_amount >= 3 && (
                 <FrameworkCard
-                  title='Follow-Up 3'
+                  title="Follow-Up 3"
                   badgeText={`Reply ${getReplyPillText(bf2, bf2Conversion)}`}
                   timesUsed={bf2?.etl_num_times_used ?? 0}
                   timesConverted={bf2?.etl_num_times_converted ?? 0}
@@ -581,35 +654,40 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                   badgeHoverText={
                     bf2 && bf2Conversion
                       ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
-                      : (bf2 && bf2.etl_num_times_used && bf2.etl_num_times_used < 20
-                          ? 'Not enough data, '
-                          : '') +
+                      : (bf2 &&
+                        bf2.etl_num_times_used &&
+                        bf2.etl_num_times_used < 20
+                          ? "Not enough data, "
+                          : "") +
                         (bf2?.etl_num_times_converted || 0) +
-                        ' / ' +
+                        " / " +
                         (bf2?.etl_num_times_used || 0)
                   }
-                  bodyTitle={bf2?.title ?? ''}
+                  bodyTitle={bf2?.title ?? ""}
                   // bodyText={bf2?.description ?? ""}
                   footer={
                     <Center>
                       {!bf2?.id && (
-                        <Text color='gray' size='md' align='center'>
+                        <Text color="gray" size="md" align="center">
                           No framework selected
                         </Text>
                       )}
-                      <Group spacing={2} sx={{ visibility: bf2?.id ? 'visible' : 'hidden' }}>
+                      <Group
+                        spacing={2}
+                        sx={{ visibility: bf2?.id ? "visible" : "hidden" }}
+                      >
                         <Text fz={14}>wait for</Text>
                         <NumberInput
                           defaultValue={bf2Delay.current}
-                          placeholder='# Days'
-                          variant='filled'
+                          placeholder="# Days"
+                          variant="filled"
                           hideControls
-                          sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                          sx={{ border: "solid 1px #777; border-radius: 4px;" }}
                           m={3}
                           min={2}
                           max={99}
                           w={bf2Delay.current > 9 ? 50 : 30}
-                          size='xs'
+                          size="xs"
                           onChange={async (value) => {
                             if (!bf2) return;
                             bf2Delay.current = value || 2;
@@ -626,7 +704,7 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                               bf2.use_account_research,
                               bf2.transformer_blocklist
                             );
-                            if (result.status === 'success') refetch();
+                            if (result.status === "success") refetch();
                           }}
                         />
                         <Text fz={14}>days, then:</Text>
@@ -637,13 +715,14 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                   onClick={() => onSetActiveCard(3)}
                   canEdit
                   editProps={{
-                    title: 'Choose Bump Framework for Follow-Up 3',
+                    title: "Choose Bump Framework for Follow-Up 3",
                     bumpedCount: 2,
                     bumpedFrameworks: bumpFrameworks.filter(
-                      (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2
+                      (bf) =>
+                        bf.overall_status === "BUMPED" && bf.bumped_count === 2
                     ),
                     activeBumpFrameworkId: bf2?.id ?? -1,
-                    overallStatus: 'BUMPED',
+                    overallStatus: "BUMPED",
                   }}
                   canRemove={bump_amount === 3}
                   onRemove={() => updateBumpAmount(2)}
@@ -652,7 +731,7 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
 
               {bump_amount >= 4 && (
                 <FrameworkCard
-                  title='Follow-Up 4'
+                  title="Follow-Up 4"
                   badgeText={`Reply ${getReplyPillText(bf3, bf3Conversion)}`}
                   badgeColor={bumpConversionColor(bf3, bf3Conversion)}
                   timesUsed={bf3?.etl_num_times_used ?? 0}
@@ -660,26 +739,29 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                   badgeHoverText={
                     bf3 && bf3Conversion
                       ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
-                      : (bf3 && bf3.etl_num_times_used && bf3.etl_num_times_used < 20
-                          ? 'Not enough data, '
-                          : '') +
+                      : (bf3 &&
+                        bf3.etl_num_times_used &&
+                        bf3.etl_num_times_used < 20
+                          ? "Not enough data, "
+                          : "") +
                         (bf3?.etl_num_times_converted || 0) +
-                        ' / ' +
+                        " / " +
                         (bf3?.etl_num_times_used || 0)
                   }
-                  bodyTitle={bf3?.title ?? ''}
+                  bodyTitle={bf3?.title ?? ""}
                   // bodyText={bf3?.description ?? ""}
                   active={activeCard === 4}
                   onClick={() => onSetActiveCard(4)}
                   canEdit
                   editProps={{
-                    title: 'Choose Bump Framework for Follow-Up 4',
+                    title: "Choose Bump Framework for Follow-Up 4",
                     bumpedCount: 3,
                     bumpedFrameworks: bumpFrameworks.filter(
-                      (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3
+                      (bf) =>
+                        bf.overall_status === "BUMPED" && bf.bumped_count === 3
                     ),
                     activeBumpFrameworkId: bf3?.id ?? -1,
-                    overallStatus: 'BUMPED',
+                    overallStatus: "BUMPED",
                   }}
                   canRemove={bump_amount === 4}
                   onRemove={() => updateBumpAmount(3)}
@@ -689,12 +771,12 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
               {bump_amount < 4 && (
                 <Center>
                   <Stack spacing={5}>
-                    <Text ta='center' fw={200} c='dimmed' fz='xl'>
+                    <Text ta="center" fw={200} c="dimmed" fz="xl">
                       |
                     </Text>
                     <Button
-                      variant='subtle'
-                      radius='md'
+                      variant="subtle"
+                      radius="md"
                       compact
                       onClick={() => updateBumpAmount(bump_amount + 1)}
                     >
@@ -705,9 +787,12 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
               )}
             </Stack>
           </Box>
-          <Box sx={{ flexBasis: '65%' }}>
+          <Box sx={{ flexBasis: "65%" }}>
             {activeCard === 0 && (
-              <IntroMessageSection prospectId={prospectId} setProspectId={setProspectId} />
+              <IntroMessageSection
+                prospectId={prospectId}
+                setProspectId={setProspectId}
+              />
             )}
             {activeCard === 1 && (
               <FrameworkSectionShell
@@ -718,11 +803,13 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                 prospectId={prospectId}
                 setProspectId={setProspectId}
                 editProps={{
-                  title: 'Choose Bump Framework for Follow-Up 1',
+                  title: "Choose Bump Framework for Follow-Up 1",
                   bumpedCount: 0,
-                  bumpedFrameworks: bumpFrameworks.filter((bf) => bf.overall_status === 'ACCEPTED'),
+                  bumpedFrameworks: bumpFrameworks.filter(
+                    (bf) => bf.overall_status === "ACCEPTED"
+                  ),
                   activeBumpFrameworkId: bf0?.id ?? -1,
-                  overallStatus: 'ACCEPTED',
+                  overallStatus: "ACCEPTED",
                 }}
                 backFunction={props.backFunction}
               />
@@ -736,13 +823,14 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                 prospectId={prospectId}
                 setProspectId={setProspectId}
                 editProps={{
-                  title: 'Choose Bump Framework for Follow-Up 2',
+                  title: "Choose Bump Framework for Follow-Up 2",
                   bumpedCount: 1,
                   bumpedFrameworks: bumpFrameworks.filter(
-                    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1
+                    (bf) =>
+                      bf.overall_status === "BUMPED" && bf.bumped_count === 1
                   ),
                   activeBumpFrameworkId: bf1?.id ?? -1,
-                  overallStatus: 'BUMPED',
+                  overallStatus: "BUMPED",
                 }}
                 backFunction={props.backFunction}
               />
@@ -756,13 +844,14 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                 prospectId={prospectId}
                 setProspectId={setProspectId}
                 editProps={{
-                  title: 'Choose Bump Framework for Follow-Up 3',
+                  title: "Choose Bump Framework for Follow-Up 3",
                   bumpedCount: 2,
                   bumpedFrameworks: bumpFrameworks.filter(
-                    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2
+                    (bf) =>
+                      bf.overall_status === "BUMPED" && bf.bumped_count === 2
                   ),
                   activeBumpFrameworkId: bf2?.id ?? -1,
-                  overallStatus: 'BUMPED',
+                  overallStatus: "BUMPED",
                 }}
                 backFunction={props.backFunction}
               />
@@ -776,13 +865,14 @@ export default function LinkedInSequenceSection(props: { backFunction?: () => vo
                 prospectId={prospectId}
                 setProspectId={setProspectId}
                 editProps={{
-                  title: 'Choose Bump Framework for Follow-Up 4',
+                  title: "Choose Bump Framework for Follow-Up 4",
                   bumpedCount: 3,
                   bumpedFrameworks: bumpFrameworks.filter(
-                    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3
+                    (bf) =>
+                      bf.overall_status === "BUMPED" && bf.bumped_count === 3
                   ),
                   activeBumpFrameworkId: bf3?.id ?? -1,
-                  overallStatus: 'BUMPED',
+                  overallStatus: "BUMPED",
                 }}
                 backFunction={props.backFunction}
               />
@@ -826,7 +916,7 @@ function BumpFrameworkSelect(props: {
       const res = await fetch(
         `${API_URL}/bump_framework/bump_framework_templates?bumped_count=${props.bumpedCount}&overall_status=${props.overallStatus}`,
         {
-          method: 'GET',
+          method: "GET",
         }
       );
       const result = await res.json();
@@ -867,13 +957,13 @@ function BumpFrameworkSelect(props: {
       <ModalSelector
         selector={{
           override: (
-            <Button variant='outline' radius='md' compact color='blue' mr='xs'>
+            <Button variant="outline" radius="md" compact color="blue" mr="xs">
               ✨ Choose a Template
             </Button>
           ),
         }}
         title={{
-          name: 'Choose a Template',
+          name: "Choose a Template",
         }}
         showSearchbar
         size={600}
@@ -883,9 +973,10 @@ function BumpFrameworkSelect(props: {
           frameworkTemplates
             ?.filter((f) => {
               return (
-                (props.overallStatus === 'ACCEPTED' && f.overall_statuses?.includes('ACCEPTED')) ||
-                (props.overallStatus === 'BUMPED' &&
-                  f.overall_statuses?.includes('BUMPED') &&
+                (props.overallStatus === "ACCEPTED" &&
+                  f.overall_statuses?.includes("ACCEPTED")) ||
+                (props.overallStatus === "BUMPED" &&
+                  f.overall_statuses?.includes("BUMPED") &&
                   f.bumped_counts.includes(props.bumpedCount)) ||
                 !f.overall_statuses
               );
@@ -893,26 +984,32 @@ function BumpFrameworkSelect(props: {
             .map((template, index) => {
               return {
                 id: index,
-                name: template.name + template.tone + template.labels?.join(''),
+                name: template.name + template.tone + template.labels?.join(""),
                 content: (
                   <Flex>
-                    <Text ml='sm' size='sm' fw='500' mt='4px' mr='lg'>
+                    <Text ml="sm" size="sm" fw="500" mt="4px" mr="lg">
                       {template.name}
                     </Text>
                     {template.tone && (
                       <Badge
-                        size='xs'
-                        mt='7px'
-                        variant='filled'
-                        color={deterministicMantineColor(template.tone || '')}
+                        size="xs"
+                        mt="7px"
+                        variant="filled"
+                        color={deterministicMantineColor(template.tone || "")}
                       >
                         {template.tone}
                       </Badge>
                     )}
-                    <Box ml='md'>
+                    <Box ml="md">
                       {template.labels?.map((x) => {
                         return (
-                          <Badge size='xs' variant='outline' mr='4px' mt='4px' color='gray'>
+                          <Badge
+                            size="xs"
+                            variant="outline"
+                            mr="4px"
+                            mt="4px"
+                            color="gray"
+                          >
                             {x}
                           </Badge>
                         );
@@ -936,17 +1033,17 @@ function BumpFrameworkSelect(props: {
                     template.human_readable_prompt,
                     template.transformer_blocklist
                   );
-                  if (result.status === 'success') {
+                  if (result.status === "success") {
                     showNotification({
-                      title: 'Success',
-                      message: 'Bump Framework created successfully',
-                      color: 'green',
+                      title: "Success",
+                      message: "Bump Framework created successfully",
+                      color: "green",
                     });
                   } else {
                     showNotification({
-                      title: 'Error',
+                      title: "Error",
                       message: result.message,
-                      color: 'red',
+                      color: "red",
                     });
                   }
                   modals.closeAll();
@@ -961,15 +1058,15 @@ function BumpFrameworkSelect(props: {
       />
 
       <Button
-        variant='outline'
-        radius='md'
+        variant="outline"
+        radius="md"
         compact
-        color='orange'
-        mr='xs'
+        color="orange"
+        mr="xs"
         onClick={() => {
           openContextModal({
-            modal: 'createBumpFramework',
-            title: 'Make your own framework',
+            modal: "createBumpFramework",
+            title: "Make your own framework",
             innerProps: {
               modalOpened: true,
               openModal: () => {},
@@ -985,13 +1082,13 @@ function BumpFrameworkSelect(props: {
               archetypeID: currentProject?.id,
               bumpedCount: props.bumpedCount,
               initialValues: {
-                title: '',
-                description: '',
+                title: "",
+                description: "",
                 default: false,
                 bumpDelayDays: 2,
                 useAccountResearch: true,
-                bumpLength: '1 week',
-                human_readable_prompt: '',
+                bumpLength: "1 week",
+                human_readable_prompt: "",
               },
             },
           });
@@ -1009,36 +1106,41 @@ function IntroMessageSection(props: {
 }) {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const queryClient = useQueryClient();
 
   const prospectId = props.prospectId;
   const setProspectId = props.setProspectId;
 
   // const [prospectId, setProspectId] = useState<number>();
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [messageMetaData, setMessageMetaData] = useState<any>();
   const [loading, setLoading] = useState(false);
   const [prospectsLoading, setProspectsLoading] = useState(true);
 
   const [noProspectsFound, setNoProspectsFound] = useState(false);
-  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
+    uploadDrawerOpenState
+  );
 
   const [hoveredCTA, setHoveredCTA] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<string | null>('none');
+  const [activeTab, setActiveTab] = useState<string | null>("none");
   const { hovered: hoveredPersonSettingsBtn, ref: refPersonSettingsBtn } =
     useHover<HTMLButtonElement>();
-  const { hovered: hoveredYourCTAsBtn, ref: refYourCTAsBtn } = useHover<HTMLButtonElement>();
+  const { hovered: hoveredYourCTAsBtn, ref: refYourCTAsBtn } =
+    useHover<HTMLButtonElement>();
 
-  const [personalizationItemsCount, setPersonalizationItemsCount] = useState<number>();
+  const [personalizationItemsCount, setPersonalizationItemsCount] =
+    useState<number>();
   const [ctasItemsCount, setCtasItemsCount] = useState<number>();
 
   const openPersonalizationSettings = () => {
-    setActiveTab('personalization');
+    setActiveTab("personalization");
   };
   const openCTASettings = () => {
-    setActiveTab('ctas');
+    setActiveTab("ctas");
   };
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
@@ -1048,7 +1150,8 @@ function IntroMessageSection(props: {
 
   const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
     useState<boolean>(false);
-  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] = useState<string>();
+  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] =
+    useState<string>();
 
   const theme = useMantineTheme();
 
@@ -1063,7 +1166,9 @@ function IntroMessageSection(props: {
         setSelectedTemplateId(response.data[0].id);
         setHumanFeedbackForTemplate(response.data[0].additional_instructions);
       }
-      return response.status === 'success' ? (response.data as Record<string, any>[]) : [];
+      return response.status === "success"
+        ? (response.data as Record<string, any>[])
+        : [];
     },
     refetchOnWindowFocus: false,
     enabled: !!currentProject && !!currentProject.template_mode,
@@ -1077,13 +1182,17 @@ function IntroMessageSection(props: {
     if (!currentProject) return null;
     if (prospectId === -1) return null;
     setLoading(true);
-    setMessage('');
+    setMessage("");
 
     let convoResponse = await getLiConvoSim(userToken, undefined, prospectId);
-    if (convoResponse.status !== 'success' || forceRegenerate) {
+    if (convoResponse.status !== "success" || forceRegenerate) {
       // If convo doesn't exist, create it
-      const createResponse = await createLiConvoSim(userToken, currentProject.id, prospectId);
-      if (createResponse.status !== 'success') {
+      const createResponse = await createLiConvoSim(
+        userToken,
+        currentProject.id,
+        prospectId
+      );
+      if (createResponse.status !== "success") {
         setLoading(false);
         setTimeout(() => {
           setShowFeedback(true);
@@ -1095,7 +1204,7 @@ function IntroMessageSection(props: {
         createResponse.data,
         selectedTemplateId
       );
-      if (initMsgResponse.status !== 'success') {
+      if (initMsgResponse.status !== "success") {
         setLoading(false);
         setTimeout(() => {
           setShowFeedback(true);
@@ -1109,14 +1218,17 @@ function IntroMessageSection(props: {
         userToken,
         convoResponse.data.simulation.id
       );
-      if (initMsgResponse.status !== 'success') {
+      if (initMsgResponse.status !== "success") {
         setLoading(false);
         setTimeout(() => {
           setShowFeedback(true);
         }, 2000);
         return null;
       }
-      convoResponse = await getLiConvoSim(userToken, convoResponse.data.simulation.id);
+      convoResponse = await getLiConvoSim(
+        userToken,
+        convoResponse.data.simulation.id
+      );
     }
 
     setLoading(false);
@@ -1151,8 +1263,8 @@ function IntroMessageSection(props: {
 
   if (!currentProject) return <></>;
   return (
-    <Stack ml='xl' spacing={0}>
-      <Group position='apart'>
+    <Stack ml="xl" spacing={0}>
+      <Group position="apart">
         <Group>
           <Title order={3}>Invite Message</Title>
           {/* {ctasItemsCount !== undefined && (
@@ -1169,35 +1281,36 @@ function IntroMessageSection(props: {
         )}
       </Group>
       <Box my={5}>
-        <Text fz='xs' c='dimmed'>
-          Your initial outreach message on LinkedIn, this message has a 300 character limit.
+        <Text fz="xs" c="dimmed">
+          Your initial outreach message on LinkedIn, this message has a 300
+          character limit.
         </Text>
       </Box>
-      <Stack pt={20} spacing={5} sx={{ position: 'relative' }}>
+      <Stack pt={20} spacing={5} sx={{ position: "relative" }}>
         <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
         {noProspectsFound ? (
           <Box
             sx={{
-              border: '1px dashed #339af0',
-              borderRadius: '0.5rem',
+              border: "1px dashed #339af0",
+              borderRadius: "0.5rem",
             }}
-            p='sm'
+            p="sm"
             mih={100}
           >
             <Center h={100}>
               <Stack>
-                <Text ta='center' c='dimmed' fs='italic' fz='sm'>
+                <Text ta="center" c="dimmed" fs="italic" fz="sm">
                   No prospects found to show example message.
                 </Text>
                 <Center>
                   <Box>
                     <Button
-                      variant='filled'
-                      color='teal'
-                      radius='md'
-                      ml='auto'
-                      mr='0'
-                      size='xs'
+                      variant="filled"
+                      color="teal"
+                      radius="md"
+                      ml="auto"
+                      mr="0"
+                      size="xs"
                       rightIcon={<IconUpload size={14} />}
                       onClick={() => setUploadDrawerOpened(true)}
                     >
@@ -1210,16 +1323,16 @@ function IntroMessageSection(props: {
           </Box>
         ) : (
           <Box>
-            <Group position='apart' pb='0.3125rem'>
-              <Text fz='sm' fw={500} c='dimmed'>
+            <Group position="apart" pb="0.3125rem">
+              <Text fz="sm" fw={500} c="dimmed">
                 EXAMPLE INVITE MESSAGE:
               </Text>
               <Group>
                 <Button
-                  size='xs'
-                  variant='subtle'
+                  size="xs"
+                  variant="subtle"
                   compact
-                  leftIcon={<IconReload size='0.75rem' />}
+                  leftIcon={<IconReload size="0.75rem" />}
                   onClick={onRegenerate}
                 >
                   Regenerate
@@ -1243,19 +1356,25 @@ function IntroMessageSection(props: {
             </Group>
             <Box
               sx={{
-                border: '1px dashed #339af0',
-                borderRadius: '0.5rem',
+                border: "1px dashed #339af0",
+                borderRadius: "0.5rem",
               }}
-              p='sm'
+              p="sm"
               h={250}
             >
               {message && (
                 <LiExampleInvitation
                   message={message}
                   startHovered={
-                    activeTab === 'personalization' || hoveredPersonSettingsBtn ? true : undefined
+                    activeTab === "personalization" || hoveredPersonSettingsBtn
+                      ? true
+                      : undefined
                   }
-                  endHovered={activeTab === 'ctas' || hoveredYourCTAsBtn ? true : undefined}
+                  endHovered={
+                    activeTab === "ctas" || hoveredYourCTAsBtn
+                      ? true
+                      : undefined
+                  }
                   onClickStart={openPersonalizationSettings}
                   onClickEnd={openCTASettings}
                   onHoveredEnd={(hovered) => setHoveredCTA(hovered)}
@@ -1263,11 +1382,14 @@ function IntroMessageSection(props: {
               )}
             </Box>
             {messageMetaData && !currentProject.template_mode && (
-              <Group py='xs' noWrap>
-                <HoverCard width={280} shadow='md'>
+              <Group py="xs" noWrap>
+                <HoverCard width={280} shadow="md">
                   <HoverCard.Target>
-                    <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
-                      Personalizations:{' '}
+                    <Badge
+                      color="green"
+                      styles={{ root: { textTransform: "initial" } }}
+                    >
+                      Personalizations:{" "}
                       <Text fw={500} span>
                         {messageMetaData?.notes?.length}
                       </Text>
@@ -1275,25 +1397,30 @@ function IntroMessageSection(props: {
                   </HoverCard.Target>
                   <HoverCard.Dropdown>
                     <List>
-                      {messageMetaData?.notes?.map((note: any, index: number) => (
-                        <List.Item key={index}>
-                          <Text fz='sm'>{note}</Text>
-                        </List.Item>
-                      ))}
+                      {messageMetaData?.notes?.map(
+                        (note: any, index: number) => (
+                          <List.Item key={index}>
+                            <Text fz="sm">{note}</Text>
+                          </List.Item>
+                        )
+                      )}
                     </List>
                   </HoverCard.Dropdown>
                 </HoverCard>
-                <HoverCard width={280} shadow='md'>
+                <HoverCard width={280} shadow="md">
                   <HoverCard.Target>
-                    <Badge color='blue' styles={{ root: { textTransform: 'initial' } }}>
-                      CTA Used:{' '}
+                    <Badge
+                      color="blue"
+                      styles={{ root: { textTransform: "initial" } }}
+                    >
+                      CTA Used:{" "}
                       <Text fw={500} span>
                         {_.truncate(messageMetaData.cta, { length: 45 })}
                       </Text>
                     </Badge>
                   </HoverCard.Target>
                   <HoverCard.Dropdown>
-                    <Text size='sm'>{messageMetaData.cta}</Text>
+                    <Text size="sm">{messageMetaData.cta}</Text>
                   </HoverCard.Dropdown>
                 </HoverCard>
               </Group>
@@ -1311,11 +1438,13 @@ function IntroMessageSection(props: {
                 setCtaModalOpened(false);
               }}
               formValue={{
-                company: userData.client?.company || '',
-                persona: currentProject?.name || '',
-                proposition: currentProject?.cta_framework_action || '',
+                company: userData.client?.company || "",
+                persona: currentProject?.name || "",
+                proposition: currentProject?.cta_framework_action || "",
               }}
-              onTemplateSelected={(template: LinkedinInitialMessageTemplate) => {
+              onTemplateSelected={(
+                template: LinkedinInitialMessageTemplate
+              ) => {
                 createLiTemplate(
                   userToken,
                   currentProject.id,
@@ -1323,7 +1452,7 @@ function IntroMessageSection(props: {
                   template.raw_prompt,
                   false,
                   [],
-                  ''
+                  ""
                 ).then((res) => {
                   queryClient.refetchQueries({
                     queryKey: [`query-get-li-templates`],
@@ -1344,29 +1473,29 @@ function IntroMessageSection(props: {
           <Tabs
             value={activeTab}
             onTabChange={setActiveTab}
-            pt='sm'
-            variant='pills'
+            pt="sm"
+            variant="pills"
             keepMounted={true}
-            radius='md'
-            defaultValue='none'
+            radius="md"
+            defaultValue="none"
             allowTabDeactivation
           >
             <Tabs.List>
               <Tabs.Tab
                 ref={refPersonSettingsBtn}
-                value='personalization'
-                color='teal.5'
+                value="personalization"
+                color="teal.5"
                 rightSection={
                   <>
                     {personalizationItemsCount ? (
                       <Badge
                         w={16}
                         h={16}
-                        sx={{ pointerEvents: 'none' }}
-                        variant='filled'
-                        size='xs'
+                        sx={{ pointerEvents: "none" }}
+                        variant="filled"
+                        size="xs"
                         p={0}
-                        color='teal.6'
+                        color="teal.6"
                       >
                         {personalizationItemsCount}
                       </Badge>
@@ -1376,31 +1505,31 @@ function IntroMessageSection(props: {
                   </>
                 }
                 sx={(theme) => ({
-                  '&[data-active]': {
-                    backgroundColor: theme.colors.teal[0] + '!important',
-                    borderRadius: theme.radius.md + '!important',
-                    color: theme.colors.teal[8] + '!important',
+                  "&[data-active]": {
+                    backgroundColor: theme.colors.teal[0] + "!important",
+                    borderRadius: theme.radius.md + "!important",
+                    color: theme.colors.teal[8] + "!important",
                   },
-                  border: 'solid 1px ' + theme.colors.teal[5] + '!important',
+                  border: "solid 1px " + theme.colors.teal[5] + "!important",
                 })}
               >
                 Edit Personalization
               </Tabs.Tab>
               <Tabs.Tab
                 ref={refYourCTAsBtn}
-                value='ctas'
-                color='blue.4'
+                value="ctas"
+                color="blue.4"
                 rightSection={
                   <>
                     {ctasItemsCount ? (
                       <Badge
                         w={16}
                         h={16}
-                        sx={{ pointerEvents: 'none' }}
-                        variant='filled'
-                        size='xs'
+                        sx={{ pointerEvents: "none" }}
+                        variant="filled"
+                        size="xs"
                         p={0}
-                        color='blue.5'
+                        color="blue.5"
                       >
                         {ctasItemsCount}
                       </Badge>
@@ -1410,17 +1539,17 @@ function IntroMessageSection(props: {
                   </>
                 }
                 sx={(theme) => ({
-                  '&[data-active]': {
-                    backgroundColor: theme.colors.blue[0] + '!important',
-                    borderRadius: theme.radius.md + '!important',
-                    color: theme.colors.blue[8] + '!important',
+                  "&[data-active]": {
+                    backgroundColor: theme.colors.blue[0] + "!important",
+                    borderRadius: theme.radius.md + "!important",
+                    color: theme.colors.blue[8] + "!important",
                   },
-                  border: 'solid 1px ' + theme.colors.blue[4] + '!important',
+                  border: "solid 1px " + theme.colors.blue[4] + "!important",
                 })}
               >
                 Edit CTAs
               </Tabs.Tab>
-              <Tabs.Tab ml='auto' value='cta-analytics'>
+              <Tabs.Tab ml="auto" value="cta-analytics">
                 📊 CTA Analytics
               </Tabs.Tab>
               {/* <Tabs.Tab value="voice" ml="auto">
@@ -1428,11 +1557,13 @@ function IntroMessageSection(props: {
             </Tabs.Tab> */}
             </Tabs.List>
 
-            <Tabs.Panel value='personalization'>
+            <Tabs.Panel value="personalization">
               <PersonalizationSection
                 blocklist={currentProject.transformer_blocklist_initial ?? []}
                 onItemsChange={async (items) => {
-                  setPersonalizationItemsCount(items.filter((x: any) => x.checked).length);
+                  setPersonalizationItemsCount(
+                    items.filter((x: any) => x.checked).length
+                  );
 
                   // Update transformer blocklist
                   const result = await updateInitialBlocklist(
@@ -1441,11 +1572,13 @@ function IntroMessageSection(props: {
                     items.filter((x) => !x.checked).map((x) => x.id)
                   );
 
-                  setCurrentProject(await getFreshCurrentProject(userToken, currentProject.id));
+                  setCurrentProject(
+                    await getFreshCurrentProject(userToken, currentProject.id)
+                  );
                 }}
               />
             </Tabs.Panel>
-            <Tabs.Panel value='ctas'>
+            <Tabs.Panel value="ctas">
               <CtaSection
                 onCTAsLoaded={(data) => {
                   setCtasItemsCount(data.filter((x: any) => x.active).length);
@@ -1453,18 +1586,18 @@ function IntroMessageSection(props: {
                 outlineCTA={hoveredCTA ? messageMetaData.cta : undefined}
               />
             </Tabs.Panel>
-            <Tabs.Panel value='cta-analytics'>
+            <Tabs.Panel value="cta-analytics">
               <iframe
                 src={
-                  'https://sellscale.retool.com/embedded/public/7d0f9279-762b-46c5-ac75-cd90dd4bec05#auth_token=' +
+                  "https://sellscale.retool.com/embedded/public/7d0f9279-762b-46c5-ac75-cd90dd4bec05#auth_token=" +
                   userToken
                 }
                 style={{
-                  width: '100%',
-                  height: '500px',
-                  border: 'none',
-                  borderRadius: '8px',
-                  marginTop: '8px',
+                  width: "100%",
+                  height: "500px",
+                  border: "none",
+                  borderRadius: "8px",
+                  marginTop: "8px",
                 }}
               />
             </Tabs.Panel>
@@ -1506,18 +1639,18 @@ function LiExampleInvitation(props: {
   useEffect(() => {
     (async () => {
       const result = await getLiProfile(userToken);
-      if (result.status === 'success') {
+      if (result.status === "success") {
         setLiSDR(result.data);
       }
     })();
   }, []);
 
   // Animation for typing
-  const [curMessage, setCurMessage] = useState('');
+  const [curMessage, setCurMessage] = useState("");
   const animationPlaying = useRef(false);
   useEffect(() => {
     if (animationPlaying.current) return;
-    setCurMessage('');
+    setCurMessage("");
     (async () => {
       animationPlaying.current = true;
       const orginalMessage = props.message.trim();
@@ -1533,13 +1666,14 @@ function LiExampleInvitation(props: {
 
   // Get SDR data from LinkedIn
   const imgURL = liSDR
-    ? liSDR.miniProfile?.picture['com.linkedin.common.VectorImage'].rootUrl +
-      liSDR.miniProfile?.picture['com.linkedin.common.VectorImage'].artifacts[
-        liSDR.miniProfile?.picture['com.linkedin.common.VectorImage'].artifacts.length - 1
+    ? liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].rootUrl +
+      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
+        liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
+          .length - 1
       ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
-    ? liSDR.miniProfile?.firstName + ' ' + liSDR.miniProfile?.lastName
+    ? liSDR.miniProfile?.firstName + " " + liSDR.miniProfile?.lastName
     : userData.sdr_name;
   const title = liSDR ? liSDR.miniProfile?.occupation : userData.sdr_title;
 
@@ -1550,15 +1684,15 @@ function LiExampleInvitation(props: {
   // If the last sentence is too short, the CTA is probably the last two sentences
   let endMessage = sentences[sentences.length - 1];
   if (endMessage.length < MIN_CTA_ASSUMED_LENGTH) {
-    endMessage = sentences[sentences.length - 2] + ' ' + endMessage;
+    endMessage = sentences[sentences.length - 2] + " " + endMessage;
   }
 
-  let startMessage = message.replace(endMessage, '');
+  let startMessage = message.replace(endMessage, "");
 
   // Don't split for template mode
   if (currentProject?.template_mode) {
     startMessage = message;
-    endMessage = '';
+    endMessage = "";
   }
 
   let cutEndMessage = endMessage;
@@ -1571,7 +1705,7 @@ function LiExampleInvitation(props: {
     cutStartMessage = _.truncate(startMessage, {
       length: MAX_MESSAGE_SHOW_LENGTH,
     });
-    cutEndMessage = '';
+    cutEndMessage = "";
   }
 
   endMessage = endMessage.trim();
@@ -1584,57 +1718,59 @@ function LiExampleInvitation(props: {
     if (curMessage.length > startMessage.length) {
       endMessage = _.truncate(endMessage, {
         length: curMessage.length - startMessage.length,
-        omission: '█',
+        omission: "█",
       });
     } else {
       startMessage = _.truncate(startMessage, {
         length: curMessage.length,
-        omission: '█',
+        omission: "█",
       });
-      endMessage = '';
+      endMessage = "";
     }
   }
 
   return (
-    <Group spacing={10} sx={{ alignItems: 'flex-start' }} noWrap>
+    <Group spacing={10} sx={{ alignItems: "flex-start" }} noWrap>
       <Box w={55}>
         <Avatar
           src={proxyURL(imgURL)}
           alt={`${name}'s Profile Picture`}
           color={valueToColor(theme, name)}
-          radius='xl'
-          size='lg'
+          radius="xl"
+          size="lg"
         >
           {nameToInitials(name)}
         </Avatar>
       </Box>
-      <Stack w='100%'>
-        <Group position='apart' noWrap>
+      <Stack w="100%">
+        <Group position="apart" noWrap>
           <Box>
             <Text fw={550}>{name}</Text>
-            <Text fz='xs' c='dimmed' truncate>
+            <Text fz="xs" c="dimmed" truncate>
               {_.truncate(title, { length: 65 })}
             </Text>
           </Box>
           <Group spacing={0} noWrap>
             <Button
-              size='xs'
-              variant='subtle'
-              color='gray'
-              radius='xl'
+              size="xs"
+              variant="subtle"
+              color="gray"
+              radius="xl"
               sx={{
-                cursor: 'not-allowed',
+                cursor: "not-allowed",
               }}
+              disabled
             >
               Ignore
             </Button>
             <Button
-              size='xs'
-              variant='outline'
-              radius='xl'
+              size="xs"
+              variant="outline"
+              radius="xl"
               sx={{
-                cursor: 'not-allowed',
+                cursor: "not-allowed",
               }}
+              disabled
             >
               Accept
             </Button>
@@ -1642,17 +1778,17 @@ function LiExampleInvitation(props: {
         </Group>
         <Box
           sx={{
-            border: '2px solid #e2e2e2',
-            borderRadius: '0.5rem',
-            position: 'relative',
+            border: "2px solid #e2e2e2",
+            borderRadius: "0.5rem",
+            position: "relative",
           }}
-          px='sm'
-          pt='sm'
+          px="sm"
+          pt="sm"
           pb={5}
         >
           <Box>
             {showFullMessage || animationPlaying.current ? (
-              <Text fz='xs'>
+              <Text fz="xs">
                 {/* <Text
                   ref={startRef}
                   span
@@ -1682,7 +1818,7 @@ function LiExampleInvitation(props: {
                 >
                   {endMessage}
                 </Text> */}
-                <TextWithNewline style={{ fontSize: '12px' }}>
+                <TextWithNewline style={{ fontSize: "12px" }}>
                   {`${startMessage} ${endMessage}`}
                 </TextWithNewline>
                 <Text
@@ -1690,8 +1826,8 @@ function LiExampleInvitation(props: {
                   fw={600}
                   onClick={() => setShowFullMessage(false)}
                   sx={{
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
                   }}
                   span
                 >
@@ -1699,7 +1835,7 @@ function LiExampleInvitation(props: {
                 </Text>
               </Text>
             ) : (
-              <Text fz='xs'>
+              <Text fz="xs">
                 {/* <Text
                   ref={startRef}
                   span
@@ -1729,7 +1865,7 @@ function LiExampleInvitation(props: {
                 >
                   {cutEndMessage}
                 </Text> */}
-                <TextWithNewline style={{ fontSize: '12px' }}>
+                <TextWithNewline style={{ fontSize: "12px" }}>
                   {`${cutStartMessage} ${cutEndMessage}`}
                 </TextWithNewline>
                 <Text
@@ -1737,8 +1873,8 @@ function LiExampleInvitation(props: {
                   fw={600}
                   onClick={() => setShowFullMessage(true)}
                   sx={{
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
                   }}
                   span
                 >
@@ -1748,17 +1884,19 @@ function LiExampleInvitation(props: {
             )}
           </Box>
           <Button
-            size='xs'
-            variant='subtle'
-            color='gray'
-            radius='xl'
+            size="xs"
+            variant="subtle"
+            color="gray"
+            radius="xl"
             sx={{
-              cursor: 'not-allowed',
+              cursor: "not-allowed",
             }}
             ml={-8}
             compact
           >
-            Reply to {liSDR?.miniProfile?.firstName || userData.sdr_name.trim().split(' ')[0]}
+            Reply to{" "}
+            {liSDR?.miniProfile?.firstName ||
+              userData.sdr_name.trim().split(" ")[0]}
           </Button>
         </Box>
       </Stack>
@@ -1784,18 +1922,18 @@ function LiExampleMessage(props: {
   useEffect(() => {
     (async () => {
       const result = await getLiProfile(userToken);
-      if (result.status === 'success') {
+      if (result.status === "success") {
         setLiSDR(result.data);
       }
     })();
   }, []);
 
   // Animation for typing
-  const [curMessage, setCurMessage] = useState('');
+  const [curMessage, setCurMessage] = useState("");
   const animationPlaying = useRef(false);
   useEffect(() => {
     if (animationPlaying.current) return;
-    setCurMessage('');
+    setCurMessage("");
     (async () => {
       animationPlaying.current = true;
       const orginalMessage = props.message.trim();
@@ -1812,13 +1950,14 @@ function LiExampleMessage(props: {
 
   // Get SDR data from LinkedIn
   const imgURL = liSDR
-    ? liSDR.miniProfile?.picture['com.linkedin.common.VectorImage'].rootUrl +
-      liSDR.miniProfile?.picture['com.linkedin.common.VectorImage'].artifacts[
-        liSDR.miniProfile?.picture['com.linkedin.common.VectorImage'].artifacts.length - 1
+    ? liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].rootUrl +
+      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
+        liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
+          .length - 1
       ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
-    ? liSDR.miniProfile?.firstName + ' ' + liSDR.miniProfile?.lastName
+    ? liSDR.miniProfile?.firstName + " " + liSDR.miniProfile?.lastName
     : userData.sdr_name;
   const title = liSDR ? liSDR.miniProfile?.occupation : userData.sdr_title;
 
@@ -1829,34 +1968,34 @@ function LiExampleMessage(props: {
   if (animationPlaying.current) {
     message = _.truncate(message, {
       length: curMessage.length,
-      omission: '█',
+      omission: "█",
     });
   }
 
   console.log(message);
 
   return (
-    <Group spacing={10} sx={{ alignItems: 'flex-start' }} noWrap>
+    <Group spacing={10} sx={{ alignItems: "flex-start" }} noWrap>
       <Box w={55}>
         <Avatar
           src={proxyURL(imgURL)}
           alt={`${name}'s Profile Picture`}
           color={valueToColor(theme, name)}
-          radius='xl'
-          size='lg'
+          radius="xl"
+          size="lg"
         >
           {nameToInitials(name)}
         </Avatar>
       </Box>
-      <Stack w='100%' spacing={3}>
-        <Group position='apart' noWrap>
+      <Stack w="100%" spacing={3}>
+        <Group position="apart" noWrap>
           <Box>
             <Text fw={550}>{name}</Text>
           </Box>
         </Group>
         <Box>
           {animationPlaying.current ? (
-            <Text fz='xs'>
+            <Text fz="xs">
               {/* <Text
                 ref={ref}
                 span
@@ -1872,7 +2011,7 @@ function LiExampleMessage(props: {
               <TextWithNewline>{message}</TextWithNewline>
             </Text>
           ) : (
-            <Text fz='xs'>
+            <Text fz="xs">
               {/* <Text
                 ref={ref}
                 span
@@ -1927,7 +2066,7 @@ function FrameworkCard(props: {
     <Card
       ref={ref}
       p={0}
-      radius='md'
+      radius="md"
       withBorder
       onClick={() => {
         props.onClick();
@@ -1936,34 +2075,39 @@ function FrameworkCard(props: {
         }
       }}
       sx={(theme) => ({
-        cursor: 'pointer',
+        cursor: "pointer",
         backgroundColor: props.active
           ? theme.fn.lighten(
-              theme.fn.variant({ variant: 'filled', color: 'blue' }).background!,
+              theme.fn.variant({ variant: "filled", color: "blue" })
+                .background!,
               0.95
             )
           : hovered
           ? theme.fn.lighten(
-              theme.fn.variant({ variant: 'filled', color: 'blue' }).background!,
+              theme.fn.variant({ variant: "filled", color: "blue" })
+                .background!,
               0.99
             )
           : undefined,
-        borderColor: props.active || hovered ? theme.colors.blue[5] + '!important' : undefined,
+        borderColor:
+          props.active || hovered
+            ? theme.colors.blue[5] + "!important"
+            : undefined,
       })}
     >
       <Stack spacing={0}>
-        <Group position='apart' px={15} py={10} noWrap>
+        <Group position="apart" px={15} py={10} noWrap>
           <Group spacing={0} noWrap>
             <ActionIcon
-              variant='transparent'
-              color='blue'
+              variant="transparent"
+              color="blue"
               sx={{
-                cursor: 'default',
+                cursor: "default",
               }}
             >
-              <IconMessages size='1.1rem' />
+              <IconMessages size="1.1rem" />
             </ActionIcon>
-            <Text fw={500} sx={{ whiteSpace: 'nowrap' }}>
+            <Text fw={500} sx={{ whiteSpace: "nowrap" }}>
               {props.title}
             </Text>
           </Group>
@@ -1971,25 +2115,36 @@ function FrameworkCard(props: {
             <Tooltip
               label={
                 props.conversion > 9.0
-                  ? 'Your open rates are above industry standards (9%). Congrats!'
+                  ? "Your open rates are above industry standards (9%). Congrats!"
                   : props.conversion <= 9.0 && props.conversion > 0.0
-                  ? 'Your open rates are below industry standards (9%). Try changing your message to improve from your current ' +
+                  ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
                     Math.round(props.conversion * 10) / 10 +
-                    '%.'
-                  : (props.timesUsed && props.timesUsed < 20 ? 'Not enough data, ' : '') +
+                    "%."
+                  : (props.timesUsed && props.timesUsed < 20
+                      ? "Not enough data, "
+                      : "") +
                     props.timesConverted +
-                    ' / ' +
+                    " / " +
                     props.timesUsed +
-                    ' prospects have been bumped.'
+                    " prospects have been bumped."
               }
               withArrow
               withinPortal
             >
               <Badge
-                variant='dot'
-                color={isNaN(props.conversion) ? 'grey' : props.conversion > 9.0 ? 'green' : 'red'}
+                variant="dot"
+                color={
+                  isNaN(props.conversion)
+                    ? "grey"
+                    : props.conversion > 9.0
+                    ? "green"
+                    : "red"
+                }
               >
-                Opened: {!isNaN(props.conversion) ? Math.trunc(props.conversion) + '%' : 'TBD'}
+                Opened:{" "}
+                {!isNaN(props.conversion)
+                  ? Math.trunc(props.conversion) + "%"
+                  : "TBD"}
               </Badge>
             </Tooltip>
           )}
@@ -2002,11 +2157,11 @@ function FrameworkCard(props: {
               disabled={!props.badgeHoverText}
             >
               <Badge
-                ml='auto'
-                color={props.badgeColor || 'gray'}
-                size='sm'
+                ml="auto"
+                color={props.badgeColor || "gray"}
+                size="sm"
                 styles={{
-                  root: { textTransform: 'initial', fontWeight: 500 },
+                  root: { textTransform: "initial", fontWeight: 500 },
                 }}
               >
                 {props.badgeText}
@@ -2015,16 +2170,16 @@ function FrameworkCard(props: {
           )}
           <Group spacing={3}>
             {props.canRemove && props.onRemove && (
-              <Tooltip label='Remove' withinPortal>
+              <Tooltip label="Remove" withinPortal>
                 <ActionIcon
-                  radius='xl'
+                  radius="xl"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     props.onRemove!();
                   }}
                 >
-                  <IconCircleMinus size='1.2rem' />
+                  <IconCircleMinus size="1.2rem" />
                 </ActionIcon>
               </Tooltip>
             )}
@@ -2040,13 +2195,13 @@ function FrameworkCard(props: {
               label={props.bodyText}
               maw={500}
               openDelay={500}
-              position='bottom'
+              position="bottom"
               withArrow
               withinPortal
               multiline
               disabled={props.bodyText.length < 150}
             >
-              <Text fz={12} c='dimmed' truncate>
+              <Text fz={12} c="dimmed" truncate>
                 {_.truncate(props.bodyText, {
                   length: 50,
                 })}
@@ -2148,25 +2303,28 @@ function FrameworkSection(props: {
   const setProspectId = props.setProspectId;
 
   // const [prospectId, setProspectId] = useState<number>();
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [prospectsLoading, setProspectsLoading] = useState(true);
   const [changed, setChanged] = useState(false);
 
   const [noProspectsFound, setNoProspectsFound] = useState(false);
-  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
-  const [humanReadableContext, setHumanReadableContext] = useState<string | undefined>(
-    props.framework?.bump_framework_human_readable_prompt
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
+    uploadDrawerOpenState
   );
+  const [humanReadableContext, setHumanReadableContext] = useState<
+    string | undefined
+  >(props.framework?.bump_framework_human_readable_prompt);
   const [contextQuestion, setContextQuestion] = useState(
     props.framework?.bump_framework_human_readable_prompt
   );
 
   const [opened, { toggle }] = useDisclosure(false);
   const [openedCollapse, { toggle: toggleCollapse }] = useDisclosure(true);
-  const [activeTab, setActiveTab] = useState<string | null>('none');
+  const [activeTab, setActiveTab] = useState<string | null>("none");
   const [descriptionEditState, setDescriptionEditState] = useState(false);
-  const [personalizationItemsCount, setPersonalizationItemsCount] = useState<number>();
+  const [personalizationItemsCount, setPersonalizationItemsCount] =
+    useState<number>();
   const [personalizationItemIds, setPersonalizationItemIds] = useState(
     props.framework?.transformer_blocklist
   );
@@ -2175,7 +2333,9 @@ function FrameworkSection(props: {
   );
   const [feedbackChanged, setFeedbackChanged] = useState(false);
 
-  const [initialFrameworkId, setInitialFrameworkId] = useState<number>(props.framework?.id);
+  const [initialFrameworkId, setInitialFrameworkId] = useState<number>(
+    props.framework?.id
+  );
 
   let { hovered: hovered, ref: ref } = useHover();
 
@@ -2188,7 +2348,8 @@ function FrameworkSection(props: {
       useAccountResearch: props.framework?.use_account_research,
       additionalContext: props.framework?.additional_context,
       bumpFrameworkTemplateName: props.framework?.bump_framework_template_name,
-      bumpFrameworkHumanReadablePrompt: props.framework?.bump_framework_human_readable_prompt,
+      bumpFrameworkHumanReadablePrompt:
+        props.framework?.bump_framework_human_readable_prompt,
       humanFeedback: props.framework?.human_feedback,
     },
   });
@@ -2203,8 +2364,10 @@ function FrameworkSection(props: {
         promptInstructions: props.framework?.description,
         useAccountResearch: props.framework?.use_account_research,
         additionalContext: props.framework?.additional_context,
-        bumpFrameworkTemplateName: props.framework?.bump_framework_template_name,
-        bumpFrameworkHumanReadablePrompt: props.framework?.bump_framework_human_readable_prompt,
+        bumpFrameworkTemplateName:
+          props.framework?.bump_framework_template_name,
+        bumpFrameworkHumanReadablePrompt:
+          props.framework?.bump_framework_human_readable_prompt,
         humanFeedback: props.framework?.human_feedback,
       });
       setPersonalizationItemIds(props.framework?.transformer_blocklist);
@@ -2213,8 +2376,10 @@ function FrameworkSection(props: {
 
   const [debouncedForm] = useDebouncedValue(form.values, 200);
   const prevDebouncedForm = usePrevious(debouncedForm);
-  const [moreAdditionInformationOpened, { toggle: moreAdditionInformationToggle }] =
-    useDisclosure(false);
+  const [
+    moreAdditionInformationOpened,
+    { toggle: moreAdditionInformationToggle },
+  ] = useDisclosure(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [editing, setEditing] = useState(false);
 
@@ -2223,9 +2388,15 @@ function FrameworkSection(props: {
   const [savingSettings, setSavingSettings] = useState(false);
 
   const bfs = useMemo(() => {
-    return (templateShowAll ? props.frameworks : props.frameworks.filter((a) => a.active))
+    return (
+      templateShowAll
+        ? props.frameworks
+        : props.frameworks.filter((a) => a.active)
+    )
       .filter((v) => v && v.bumped_count == props.bumpCount)
-      .filter((v) => v.overall_status === 'ACCEPTED' || v.overall_status === 'BUMPED')
+      .filter(
+        (v) => v.overall_status === "ACCEPTED" || v.overall_status === "BUMPED"
+      )
       .sort((a, b) => {
         if (a.active) return -1;
         if (b.active) return 1;
@@ -2261,27 +2432,27 @@ function FrameworkSection(props: {
     });
 
     showNotification({
-      title: 'Settings Saved ✅',
-      message: 'Hit Regenerate to see your new message.',
-      color: 'green',
+      title: "Settings Saved ✅",
+      message: "Hit Regenerate to see your new message.",
+      color: "green",
     });
 
     setSavingSettings(false);
     setChanged(false);
 
-    return result.status === 'success';
+    return result.status === "success";
   };
 
   const openPersonalizationSettings = () => {
     if (form.values.useAccountResearch) {
-      setActiveTab('personalization');
+      setActiveTab("personalization");
     }
   };
 
   const getFollowUpMessage = async (prospectId: number, useCache: boolean) => {
     if (!currentProject) return null;
     setLoading(true);
-    setMessage('');
+    setMessage("");
 
     setShowUserFeedback(false);
 
@@ -2294,15 +2465,15 @@ function FrameworkSection(props: {
     );
 
     setLoading(false);
-    return result.status === 'success' ? result.data.message : null;
+    return result.status === "success" ? result.data.message : null;
   };
 
   const autoCompleteWithBrain = () => {
     setAiGenerating(true);
     fetch(`${API_URL}/ml/fill_prompt_from_brain`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
@@ -2312,7 +2483,7 @@ function FrameworkSection(props: {
     })
       .then((response) => response.json())
       .then((data) => {
-        form.setFieldValue('additionalContext', data.data);
+        form.setFieldValue("additionalContext", data.data);
         setChanged(true);
       })
       .finally(() => {
@@ -2349,23 +2520,23 @@ function FrameworkSection(props: {
 
   return (
     <>
-      <Stack ml='xl' spacing={0}>
+      <Stack ml="xl" spacing={0}>
         {!props.framework?.id && (
           <>
             <Card withBorder>
               <Card.Section
                 sx={{
-                  flexDirection: 'row',
-                  display: 'flex',
-                  gap: '1rem',
-                  textAlign: 'center',
-                  justifyContent: 'center',
+                  flexDirection: "row",
+                  display: "flex",
+                  gap: "1rem",
+                  textAlign: "center",
+                  justifyContent: "center",
                 }}
-                w='100%'
+                w="100%"
               >
-                <Box m='md' w='100%' sx={{}}>
-                  <IconCirclePlus size='1.5rem' color='gray' />
-                  <Text color='gray' mr='xs' fw='400' mb='xs'>
+                <Box m="md" w="100%" sx={{}}>
+                  <IconCirclePlus size="1.5rem" color="gray" />
+                  <Text color="gray" mr="xs" fw="400" mb="xs">
                     Create your first framework by clicking the buttons below.
                   </Text>
                 </Box>
@@ -2376,43 +2547,46 @@ function FrameworkSection(props: {
 
         {props.framework?.id && (
           <>
-            <Card padding='lg' radius='md'>
+            <Card padding="lg" radius="md">
               <Card.Section
                 sx={{
-                  flexDirection: 'row',
-                  display: 'flex',
-                  gap: '1rem',
+                  flexDirection: "row",
+                  display: "flex",
+                  gap: "1rem",
                 }}
-                w='100%'
+                w="100%"
               >
-                <Box mt='4px' w='100%' sx={{}}>
-                  <Title order={5} color='gray' mr='xs' fw='400'>
+                <Box mt="4px" w="100%" sx={{}}>
+                  <Title order={5} color="gray" mr="xs" fw="400">
                     Follow-Up {props.bumpCount + 1}:
                   </Title>
 
-                  <Flex direction='row'>
+                  <Flex direction="row">
                     {!titleInEditingMode ? (
-                      <Title order={3} onClick={() => setTitleInEditingMode((p) => !p)}>
-                        <span style={{ color: 'black', cursor: 'pointer' }}>
+                      <Title
+                        order={3}
+                        onClick={() => setTitleInEditingMode((p) => !p)}
+                      >
+                        <span style={{ color: "black", cursor: "pointer" }}>
                           {form.values.frameworkName}
                         </span>
                       </Title>
                     ) : (
                       <TextInput
-                        w='75%'
-                        placeholder='Name'
-                        variant='filled'
-                        {...form.getInputProps('frameworkName')}
+                        w="75%"
+                        placeholder="Name"
+                        variant="filled"
+                        {...form.getInputProps("frameworkName")}
                         onChange={(e) => {
-                          form.setFieldValue('frameworkName', e.target.value);
+                          form.setFieldValue("frameworkName", e.target.value);
                           setChanged(true);
                         }}
                       />
                     )}
                     <ActionIcon
-                      ml='8px'
-                      mt='8px'
-                      size='1rem'
+                      ml="8px"
+                      mt="8px"
+                      size="1rem"
                       sx={{ zIndex: 10, opacity: 0.7 }}
                       onClick={() => setTitleInEditingMode((p) => !p)}
                     >
@@ -2422,32 +2596,37 @@ function FrameworkSection(props: {
                 </Box>
               </Card.Section>
 
-              <Card.Section mt='xs' w='100%'>
-                <Flex direction='row'>
+              <Card.Section mt="xs" w="100%">
+                <Flex direction="row">
                   {descriptionEditState ? (
                     <Textarea
-                      w='100%'
-                      fz='xs'
-                      {...form.getInputProps('bumpFrameworkHumanReadablePrompt')}
+                      w="100%"
+                      fz="xs"
+                      {...form.getInputProps(
+                        "bumpFrameworkHumanReadablePrompt"
+                      )}
                       onChange={(e) => {
-                        form.setFieldValue('bumpFrameworkHumanReadablePrompt', e.target.value);
+                        form.setFieldValue(
+                          "bumpFrameworkHumanReadablePrompt",
+                          e.target.value
+                        );
                         setChanged(true);
                       }}
                     />
                   ) : (
                     <Text
-                      fz='xs'
-                      c='dimmed'
-                      sx={{ cursor: 'pointer' }}
+                      fz="xs"
+                      c="dimmed"
+                      sx={{ cursor: "pointer" }}
                       onClick={() => setDescriptionEditState((p) => !p)}
                     >
-                      <span style={{ fontWeight: 'bold' }}>Goal:</span>{' '}
+                      <span style={{ fontWeight: "bold" }}>Goal:</span>{" "}
                       {form.values.bumpFrameworkHumanReadablePrompt}
                     </Text>
                   )}
                   <ActionIcon
-                    size='1rem'
-                    ml='8px'
+                    size="1rem"
+                    ml="8px"
                     sx={{ zIndex: 10, opacity: 0.7 }}
                     onClick={() => setDescriptionEditState((p) => !p)}
                   >
@@ -2457,31 +2636,34 @@ function FrameworkSection(props: {
               </Card.Section>
             </Card>
             <Stack pt={20} spacing={15}>
-              <Box styles={{ position: 'relative' }}>
-                <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
+              <Box styles={{ position: "relative" }}>
+                <LoadingOverlay
+                  visible={loading || prospectsLoading}
+                  zIndex={10}
+                />
                 {noProspectsFound ? (
                   <Box
                     sx={{
-                      border: '1px dashed #339af0',
-                      borderRadius: '0.5rem',
+                      border: "1px dashed #339af0",
+                      borderRadius: "0.5rem",
                     }}
-                    p='sm'
+                    p="sm"
                     mih={100}
                   >
                     <Center h={100}>
                       <Stack>
-                        <Text ta='center' c='dimmed' fs='italic' fz='sm'>
+                        <Text ta="center" c="dimmed" fs="italic" fz="sm">
                           No prospects found to show example message.
                         </Text>
                         <Center>
                           <Box>
                             <Button
-                              variant='filled'
-                              color='teal'
-                              radius='md'
-                              ml='auto'
-                              mr='0'
-                              size='xs'
+                              variant="filled"
+                              color="teal"
+                              radius="md"
+                              ml="auto"
+                              mr="0"
+                              size="xs"
                               rightIcon={<IconUpload size={14} />}
                               onClick={() => setUploadDrawerOpened(true)}
                             >
@@ -2494,16 +2676,16 @@ function FrameworkSection(props: {
                   </Box>
                 ) : (
                   <Box>
-                    <Group position='apart' pb='0.3125rem'>
-                      <Text fz='xs' fw={500} c='dimmed' sx={{ opacity: 0.8 }}>
+                    <Group position="apart" pb="0.3125rem">
+                      <Text fz="xs" fw={500} c="dimmed" sx={{ opacity: 0.8 }}>
                         EXAMPLE GENERATION:
                       </Text>
                       <Group>
                         <Button
-                          size='xs'
-                          variant='subtle'
+                          size="xs"
+                          variant="subtle"
                           compact
-                          leftIcon={<IconReload size='0.75rem' />}
+                          leftIcon={<IconReload size="0.75rem" />}
                           onClick={onRegenerate}
                         >
                           Regenerate
@@ -2517,7 +2699,8 @@ function FrameworkSection(props: {
                           }}
                           onFinishLoading={(prospects) => {
                             setProspectsLoading(false);
-                            if (prospects.length === 0) setNoProspectsFound(true);
+                            if (prospects.length === 0)
+                              setNoProspectsFound(true);
                           }}
                           selectedProspect={prospectId}
                           autoSelect
@@ -2527,17 +2710,21 @@ function FrameworkSection(props: {
                     </Group>
                     <Box
                       sx={{
-                        border: '1px dashed #339af0',
-                        borderRadius: '0.5rem',
-                        maxWidth: '100%',
+                        border: "1px dashed #339af0",
+                        borderRadius: "0.5rem",
+                        maxWidth: "100%",
                       }}
-                      p='sm'
+                      p="sm"
                       mih={150}
                     >
                       {message && (
                         <LiExampleMessage
                           message={message}
-                          hovered={hovered || activeTab === 'personalization' ? true : undefined}
+                          hovered={
+                            hovered || activeTab === "personalization"
+                              ? true
+                              : undefined
+                          }
                           onClick={openPersonalizationSettings}
                           onAnimatonComplete={onAnimatonComplete}
                         />
@@ -2548,12 +2735,12 @@ function FrameworkSection(props: {
               </Box>
 
               {changed && (
-                <Group position='right'>
+                <Group position="right">
                   <Center>
                     <Button
-                      variant='default'
-                      w='200px'
-                      ml='auto'
+                      variant="default"
+                      w="200px"
+                      ml="auto"
                       loading={savingSettings}
                       disabled={!changed}
                       onClick={() => {
@@ -2566,16 +2753,16 @@ function FrameworkSection(props: {
                   </Center>
                   <Center>
                     <Button
-                      color='green'
-                      w='200px'
-                      ml='auto'
+                      color="green"
+                      w="200px"
+                      ml="auto"
                       loading={savingSettings}
                       disabled={!changed}
                       onClick={() => {
                         showNotification({
-                          title: 'Saving Settings...',
-                          message: 'This may take a few seconds.',
-                          color: 'blue',
+                          title: "Saving Settings...",
+                          message: "This may take a few seconds.",
+                          color: "blue",
                         });
                         saveSettings(debouncedForm);
                         props.setIsDataChanged(false);
@@ -2592,16 +2779,16 @@ function FrameworkSection(props: {
                 </Group>
               )}
 
-              {form.values.promptInstructions?.includes('Answer:') && (
+              {form.values.promptInstructions?.includes("Answer:") && (
                 <Alert
-                  icon={<IconBulb size='1rem' />}
-                  variant='outline'
+                  icon={<IconBulb size="1rem" />}
+                  variant="outline"
                   onClick={toggle}
-                  sx={{ cursor: 'pointer' }}
+                  sx={{ cursor: "pointer" }}
                 >
-                  <Text color='blue' fz='12px'>
-                    Note: This framework requires you fill out additional context in the prompt.
-                    Please press 'Advanced Settings'
+                  <Text color="blue" fz="12px">
+                    Note: This framework requires you fill out additional
+                    context in the prompt. Please press 'Advanced Settings'
                   </Text>
                 </Alert>
               )}
@@ -2613,67 +2800,78 @@ function FrameworkSection(props: {
               >
                 {showUserFeedback && (
                   <>
-                    <Card mb='16px'>
+                    <Card mb="16px">
                       <Card.Section
                         sx={{
                           backgroundColor: theme.colors.grape[6],
-                          flexDirection: 'row',
-                          display: 'flex',
-                          justifyContent: 'space-between',
+                          flexDirection: "row",
+                          display: "flex",
+                          justifyContent: "space-between",
                         }}
-                        p='xs'
+                        p="xs"
                         onClick={toggleCollapse}
                       >
                         <Text
-                          color='white'
-                          mt='4px'
-                          size='sm'
-                          sx={{ display: 'flex', alignItems: 'center' }}
+                          color="white"
+                          mt="4px"
+                          size="sm"
+                          sx={{ display: "flex", alignItems: "center" }}
                         >
-                          <IconSparkles size='1.2rem' color='white' strokeWidth={2} />
-                          <span style={{ marginLeft: '8px' }}>
-                            FINE TUNING: Feel free to give me feedback on improving the message!
+                          <IconSparkles
+                            size="1.2rem"
+                            color="white"
+                            strokeWidth={2}
+                          />
+                          <span style={{ marginLeft: "8px" }}>
+                            FINE TUNING: Feel free to give me feedback on
+                            improving the message!
                           </span>
                         </Text>
 
                         <IconChevronDown
-                          color='white'
+                          color="white"
                           strokeWidth={2}
-                          size={'1.2rem'}
+                          size={"1.2rem"}
                           style={{
-                            transitionDuration: '150ms',
-                            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-                            transform: opened ? `rotate(${opened ? 180 : 0}deg)` : 'none',
+                            transitionDuration: "150ms",
+                            transitionTimingFunction:
+                              "cubic-bezier(0.4, 0, 0.2, 1)",
+                            transform: opened
+                              ? `rotate(${opened ? 180 : 0}deg)`
+                              : "none",
                           }}
                         />
                       </Card.Section>
                       <Collapse in={openedCollapse}>
                         <Card.Section
                           sx={{
-                            border: 'solid 2px ' + theme.colors.gray[4] + ' !important',
+                            border:
+                              "solid 2px " +
+                              theme.colors.gray[4] +
+                              " !important",
                             borderTopWidth: 0,
                             borderRadius: 12,
                             borderTopLeftRadius: 0,
                             borderTopRightRadius: 0,
                           }}
-                          p='8px'
+                          p="8px"
                         >
-                          <Flex gap={'sm'}>
-                            <Box w={'100%'}>
+                          <Flex gap={"sm"}>
+                            <Box w={"100%"}>
                               <TextInput
-                                pl={'8px'}
-                                pr={'8px'}
-                                size='xs'
-                                placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
-                                {...form.getInputProps('humanFeedback')}
+                                pl={"8px"}
+                                pr={"8px"}
+                                size="xs"
+                                placeholder="- make it shorter&#10;-use this fact&#10;-mention the value prop"
+                                {...form.getInputProps("humanFeedback")}
                               />
                             </Box>
                             <Button
                               onClick={onRegenerate}
-                              variant='light'
-                              color='grape'
-                              size='xs'
-                              leftIcon={<IconReload size='0.75rem' />}
+                              variant="light"
+                              color="grape"
+                              size="xs"
+                              leftIcon={<IconReload size="0.75rem" />}
                             >
                               Regenerate
                             </Button>
@@ -2688,127 +2886,143 @@ function FrameworkSection(props: {
                   {bfs.map((bf, index) => (
                     <Paper
                       key={index}
-                      p='md'
+                      p="md"
                       mih={80}
                       sx={{
-                        position: 'relative',
-                        cursor: 'pointer',
+                        position: "relative",
+                        cursor: "pointer",
                         border:
-                          bf.id === props.framework.id ? 'solid 1px #339af0 !important' : undefined,
+                          bf.id === props.framework.id
+                            ? "solid 1px #339af0 !important"
+                            : undefined,
                         backgroundColor:
-                          bf.id === props.framework.id ? '#339af008 !important' : undefined,
-                        flexDirection: 'row',
-                        display: 'flex',
+                          bf.id === props.framework.id
+                            ? "#339af008 !important"
+                            : undefined,
+                        flexDirection: "row",
+                        display: "flex",
                       }}
                       withBorder
                     >
-                      <Flex mr='md' direction={'column'}>
+                      <Flex mr="md" direction={"column"}>
                         <Box
-                          miw='100px'
+                          miw="100px"
                           mah={80}
                           sx={{
-                            border: 'solid 1px #339af022',
-                            backgroundColor: '#339af022',
-                            padding: '8px',
-                            borderRadius: '4px',
-                            textAlign: 'center',
-                            cursor: 'pointer',
+                            border: "solid 1px #339af022",
+                            backgroundColor: "#339af022",
+                            padding: "8px",
+                            borderRadius: "4px",
+                            textAlign: "center",
+                            cursor: "pointer",
                           }}
-                          mt='xl'
+                          mt="xl"
                           onClick={() => {
                             openContextModal({
-                              modal: 'frameworkReplies',
-                              title: 'Past Example Replies',
+                              modal: "frameworkReplies",
+                              title: "Past Example Replies",
                               innerProps: {
                                 bumpId: bf.id,
                               },
                             });
                           }}
                         >
-                          <Text fw='bold' fz='md' color='blue' mt='xs'>
+                          <Text fw="bold" fz="md" color="blue" mt="xs">
                             {bf.etl_num_times_used != null &&
                               bf.etl_num_times_converted != null &&
                               Math.round(
-                                (bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) *
+                                (bf.etl_num_times_converted /
+                                  (bf.etl_num_times_used + 0.0001)) *
                                   100
                               )}
                             % reply
                           </Text>
-                          <Text size='8px' color='blue' fz={'xs'} fw='500'>
-                            ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
+                          <Text size="8px" color="blue" fz={"xs"} fw="500">
+                            ({bf.etl_num_times_converted}/
+                            {bf.etl_num_times_used} times)
                           </Text>
                         </Box>
                         <Button
                           onClick={() => {
                             openContextModal({
-                              modal: 'frameworkReplies',
-                              title: 'Past Example Usages',
+                              modal: "frameworkReplies",
+                              title: "Past Example Usages",
                               innerProps: {
                                 bumpId: bf.id,
                               },
                             });
                           }}
-                          size='xs'
+                          size="xs"
                           mt={3}
                         >
                           View Replies
                         </Button>
                       </Flex>
-                      <Box mr={40} w='100%'>
+                      <Box mr={40} w="100%">
                         <Flex>
                           <Text
-                            size='sm'
-                            fw='600'
-                            mb='xs'
-                            sx={{ textTransform: 'uppercase' }}
-                            color='gray'
-                            variant='outline'
+                            size="sm"
+                            fw="600"
+                            mb="xs"
+                            sx={{ textTransform: "uppercase" }}
+                            color="gray"
+                            variant="outline"
                           >
                             {bf.title}
                           </Text>
                           {/* Hovercard for transformers */}
 
-                          <HoverCard width={280} shadow='md'>
+                          <HoverCard width={280} shadow="md">
                             <HoverCard.Target>
                               <Badge
-                                leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
-                                color='lime'
-                                variant={
-                                  bf.active_transformers && bf.active_transformers.length > 0
-                                    ? 'filled'
-                                    : 'outline'
+                                leftSection={
+                                  <IconSearch
+                                    size="0.8rem"
+                                    style={{ marginTop: 4 }}
+                                  />
                                 }
-                                ml='xs'
-                                size='xs'
+                                color="lime"
+                                variant={
+                                  bf.active_transformers &&
+                                  bf.active_transformers.length > 0
+                                    ? "filled"
+                                    : "outline"
+                                }
+                                ml="xs"
+                                size="xs"
                                 onClick={() => {
                                   toggle();
                                 }}
                               >
-                                {bf.active_transformers && bf.active_transformers.length > 0
-                                  ? bf.active_transformers.length + ' Research Points'
-                                  : '0 Research Points'}
+                                {bf.active_transformers &&
+                                bf.active_transformers.length > 0
+                                  ? bf.active_transformers.length +
+                                    " Research Points"
+                                  : "0 Research Points"}
                               </Badge>
                             </HoverCard.Target>
                             <HoverCard.Dropdown
                               style={{
-                                backgroundColor: 'rgb(34, 37, 41)',
+                                backgroundColor: "rgb(34, 37, 41)",
                                 padding: 0,
                               }}
                             >
                               <Paper
                                 style={{
-                                  backgroundColor: 'rgb(34, 37, 41)',
-                                  color: 'white',
+                                  backgroundColor: "rgb(34, 37, 41)",
+                                  color: "white",
                                   padding: 10,
                                 }}
                               >
-                                <TextWithNewline style={{ fontSize: '12px' }}>
+                                <TextWithNewline style={{ fontSize: "12px" }}>
                                   {bf.active_transformers.length > 0
-                                    ? '<b>Active Research Points:</b>\n- ' +
+                                    ? "<b>Active Research Points:</b>\n- " +
                                       bf.active_transformers
-                                        .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                        .join('\n- ')
-                                    : 'Click to activate more research points'}
+                                        .map((rp: any) =>
+                                          rp.replaceAll("_", " ").toLowerCase()
+                                        )
+                                        .join("\n- ")
+                                    : "Click to activate more research points"}
                                 </TextWithNewline>
                               </Paper>
                             </HoverCard.Dropdown>
@@ -2819,40 +3033,41 @@ function FrameworkSection(props: {
                           <BumpFrameworkAssets bump_framework_id={bf.id} />
 
                           {bf.human_feedback && (
-                            <HoverCard width={280} shadow='md'>
+                            <HoverCard width={280} shadow="md">
                               <HoverCard.Target>
                                 <Badge
-                                  leftSection={<IconBulb size='0.8rem' />}
-                                  color='grape'
-                                  variant='filled'
-                                  ml='xs'
-                                  size='xs'
+                                  leftSection={<IconBulb size="0.8rem" />}
+                                  color="grape"
+                                  variant="filled"
+                                  ml="xs"
+                                  size="xs"
                                 >
                                   Fine Tuned
                                 </Badge>
                               </HoverCard.Target>
                               <HoverCard.Dropdown
                                 style={{
-                                  backgroundColor: 'rgb(34, 37, 41)',
+                                  backgroundColor: "rgb(34, 37, 41)",
                                   padding: 0,
                                 }}
                               >
                                 <Paper
                                   style={{
-                                    backgroundColor: 'rgb(34, 37, 41)',
-                                    color: 'white',
+                                    backgroundColor: "rgb(34, 37, 41)",
+                                    color: "white",
                                     padding: 10,
                                   }}
                                 >
-                                  <TextWithNewline style={{ fontSize: '12px' }}>
-                                    {'<b>Additional Instructions:</b>\n' + bf.human_feedback}
+                                  <TextWithNewline style={{ fontSize: "12px" }}>
+                                    {"<b>Additional Instructions:</b>\n" +
+                                      bf.human_feedback}
                                   </TextWithNewline>
                                 </Paper>
                               </HoverCard.Dropdown>
                             </HoverCard>
                           )}
                         </Flex>
-                        <Card withBorder w='100%' sx={{}}>
+                        <Card withBorder w="100%" sx={{}}>
                           {/* {editing ? (
                               <FocusTrap active={true}>
                                 <Textarea
@@ -2875,7 +3090,7 @@ function FrameworkSection(props: {
                                 />
                               </FocusTrap>
                             ) : ( */}
-                          <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                          <Text style={{ fontSize: "0.9rem", lineHeight: 2 }}>
                             <div
                               // onClick={() => {
                               //   setEditing(true);
@@ -2884,14 +3099,14 @@ function FrameworkSection(props: {
                                 __html: DOMPurify.sanitize(
                                   bf.description
                                     .replaceAll(
-                                      '[[',
+                                      "[[",
                                       "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                        theme.colors['blue'][5] +
+                                        theme.colors["blue"][5] +
                                         "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
                                     )
-                                    .replaceAll(']]', '</span>')
+                                    .replaceAll("]]", "</span>")
                                     .replaceAll(
-                                      '\n',
+                                      "\n",
                                       `<br style="display: block; content: ' '; margin: 10px 0 "/>`
                                     ) as string
                                 ),
@@ -2900,9 +3115,9 @@ function FrameworkSection(props: {
                           </Text>
                         </Card>
                       </Box>
-                      <Box sx={{ justifyContent: 'right' }} ml='auto'>
+                      <Box sx={{ justifyContent: "right" }} ml="auto">
                         <Switch
-                          sx={{ cursor: 'pointer' }}
+                          sx={{ cursor: "pointer" }}
                           checked={bf.active}
                           onChange={(checked) => {
                             setLoading(true);
@@ -2921,9 +3136,9 @@ function FrameworkSection(props: {
                             )
                               .then(() => {
                                 showNotification({
-                                  title: 'Success',
-                                  message: 'Bump Framework enabled',
-                                  color: 'green',
+                                  title: "Success",
+                                  message: "Bump Framework enabled",
+                                  color: "green",
                                 });
                               })
                               .finally(() => {
@@ -2938,20 +3153,20 @@ function FrameworkSection(props: {
                           }}
                         />
                         <Button
-                          mt='xs'
-                          variant='subtle'
-                          radius='xl'
-                          size='sm'
+                          mt="xs"
+                          variant="subtle"
+                          radius="xl"
+                          size="sm"
                           compact
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             // setEditing(true);
                             openContextModal({
-                              modal: 'liBfTemplate',
-                              title: 'Edit Template',
+                              modal: "liBfTemplate",
+                              title: "Edit Template",
                               innerProps: {
-                                mode: 'EDIT',
+                                mode: "EDIT",
                                 editProps: {
                                   bf: bf,
                                   templateId: bf.id,
@@ -2996,18 +3211,25 @@ function FrameworkSection(props: {
                 </Stack>
               </form>
 
-              <Modal opened={opened} onClose={toggle} size='lg'>
-                <Box w='100%' mb='md'>
-                  <Title order={4}>"{form.values?.frameworkName}" Research Points</Title>
-                  <Text color='gray'>
-                    {props.framework?.active_transformers.length} research points enabled.
+              <Modal opened={opened} onClose={toggle} size="lg">
+                <Box w="100%" mb="md">
+                  <Title order={4}>
+                    "{form.values?.frameworkName}" Research Points
+                  </Title>
+                  <Text color="gray">
+                    {props.framework?.active_transformers.length} research
+                    points enabled.
                   </Text>
                   <Divider />
                   <PersonalizationSection
                     blocklist={props.framework?.transformer_blocklist}
                     onItemsChange={async (items) => {
-                      setPersonalizationItemsCount(items.filter((x) => x.checked).length);
-                      setPersonalizationItemIds(items.filter((x) => !x.checked).map((x) => x.id));
+                      setPersonalizationItemsCount(
+                        items.filter((x) => x.checked).length
+                      );
+                      setPersonalizationItemIds(
+                        items.filter((x) => !x.checked).map((x) => x.id)
+                      );
                     }}
                     onChanged={() => {
                       setChanged(true);
@@ -3015,15 +3237,15 @@ function FrameworkSection(props: {
                   />
 
                   <Button
-                    w='100%'
-                    mt='md'
+                    w="100%"
+                    mt="md"
                     onClick={() => {
                       toggle();
                       setChanged(true);
                       saveSettings(debouncedForm);
                     }}
                     sx={{
-                      display: changed ? 'block' : 'none',
+                      display: changed ? "block" : "none",
                     }}
                   >
                     Save and Close
@@ -3037,24 +3259,25 @@ function FrameworkSection(props: {
                 onClick={() => {
                   setTemplateShowAll((p) => !p);
                 }}
-                color='gray'
-                variant='subtle'
+                color="gray"
+                variant="subtle"
                 leftIcon={
                   <IconChevronDown
-                    size='1rem'
+                    size="1rem"
                     style={{
-                      transform: templateShowAll ? 'rotate(180deg)' : '',
+                      transform: templateShowAll ? "rotate(180deg)" : "",
                     }}
                   />
                 }
               >
-                Show {templateShowAll ? 'Active Templates Only' : 'All Templates'}
+                Show{" "}
+                {templateShowAll ? "Active Templates Only" : "All Templates"}
               </Button>
             )}
           </>
         )}
 
-        <Flex pt={15} sx={{ justifyContent: 'right' }}>
+        <Flex pt={15} sx={{ justifyContent: "right" }}>
           {props.editProps && <BumpFrameworkSelect {...props.editProps} />}
         </Flex>
       </Stack>
@@ -3076,7 +3299,8 @@ function TemplateSection(props: {
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
   const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
     useState<boolean>(false);
-  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] = useState<string>();
+  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] =
+    useState<string>();
 
   const [templateActivesShow, setTemplateActivesShow] = useState([true]);
   useEffect(() => {
@@ -3093,7 +3317,9 @@ function TemplateSection(props: {
         setSelectedTemplateId(response.data[0].id);
         setHumanFeedbackForTemplate(response.data[0].additional_instructions);
       }
-      return response.status === 'success' ? (response.data as Record<string, any>[]) : [];
+      return response.status === "success"
+        ? (response.data as Record<string, any>[])
+        : [];
     },
     refetchOnWindowFocus: false,
     enabled: !!currentProject && !!currentProject.template_mode,
@@ -3103,58 +3329,59 @@ function TemplateSection(props: {
     <>
       {props.showFeedback && (
         <>
-          <Card mb='16px'>
+          <Card mb="16px">
             <Card.Section
               sx={{
                 backgroundColor: theme.colors.grape[6],
-                flexDirection: 'row',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                flexDirection: "row",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
               onClick={toggle}
-              p='xs'
+              p="xs"
             >
               <Text
-                color='white'
-                mt='4px'
-                size='sm'
-                sx={{ display: 'flex', alignItems: 'center' }}
+                color="white"
+                mt="4px"
+                size="sm"
+                sx={{ display: "flex", alignItems: "center" }}
                 fw={600}
               >
-                <IconSparkles size='1.2rem' color='white' strokeWidth={2} />
-                <span style={{ marginLeft: '8px' }}>
-                  FINE TUNING: Feel free to give me feedback on improving the message.
+                <IconSparkles size="1.2rem" color="white" strokeWidth={2} />
+                <span style={{ marginLeft: "8px" }}>
+                  FINE TUNING: Feel free to give me feedback on improving the
+                  message.
                 </span>
               </Text>
               <IconChevronDown
-                color='white'
+                color="white"
                 strokeWidth={2}
-                size={'1.2rem'}
+                size={"1.2rem"}
                 style={{
-                  transitionDuration: '150ms',
-                  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-                  transform: opened ? `rotate(${opened ? 180 : 0}deg)` : 'none',
+                  transitionDuration: "150ms",
+                  transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
+                  transform: opened ? `rotate(${opened ? 180 : 0}deg)` : "none",
                 }}
               />
             </Card.Section>
             <Collapse in={opened}>
               <Card.Section
-                p='8px'
+                p="8px"
                 sx={{
-                  border: 'solid 2px ' + theme.colors.gray[4] + ' !important',
+                  border: "solid 2px " + theme.colors.gray[4] + " !important",
                   borderTopWidth: 0,
                   borderRadius: 12,
                   borderTopLeftRadius: 0,
                   borderTopRightRadius: 0,
                 }}
               >
-                <Flex gap={'sm'}>
-                  <Box w={'100%'}>
+                <Flex gap={"sm"}>
+                  <Box w={"100%"}>
                     <TextInput
-                      w={'100%'}
-                      size='xs'
-                      placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
+                      w={"100%"}
+                      size="xs"
+                      placeholder="- make it shorter&#10;-use this fact&#10;-mention the value prop"
                       value={humanFeedbackForTemplate}
                       onChange={(e) => {
                         const value = e.target.value;
@@ -3166,10 +3393,10 @@ function TemplateSection(props: {
                   </Box>
                   <Button
                     onClick={props.onRegenerate}
-                    variant='light'
-                    color='grape'
-                    size='xs'
-                    leftIcon={<IconReload size='0.75rem' />}
+                    variant="light"
+                    color="grape"
+                    size="xs"
+                    leftIcon={<IconReload size="0.75rem" />}
                   >
                     Regenerate
                   </Button>
@@ -3179,7 +3406,7 @@ function TemplateSection(props: {
           </Card>
           {humanFeedbackForTemplateChanged && (
             <Box
-              sx={{ justifyContent: 'right', textAlign: 'right' }}
+              sx={{ justifyContent: "right", textAlign: "right" }}
               onClick={() => {
                 if (!currentProject) return;
                 updateLiTemplate(
@@ -3201,16 +3428,16 @@ function TemplateSection(props: {
                   })
                   .then((res) => {
                     setHumanFeedbackForTemplateChanged(false);
-                    setHumanFeedbackForTemplate('');
+                    setHumanFeedbackForTemplate("");
                     showNotification({
-                      title: 'Success',
-                      message: 'Feedback saved. Try regenerating.',
-                      color: 'green',
+                      title: "Success",
+                      message: "Feedback saved. Try regenerating.",
+                      color: "green",
                     });
                   });
               }}
             >
-              <Button color='green'>Save Feedback</Button>
+              <Button color="green">Save Feedback</Button>
             </Box>
           )}
         </>
@@ -3219,73 +3446,85 @@ function TemplateSection(props: {
         <Box>
           <Loader
             sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
             }}
           />
         </Box>
       ) : (
         <Stack>
-          <Stack mt='xs'>
+          <Stack mt="xs">
             {templates
               ?.filter((t: any) => templateActivesShow.includes(t.active))
               .sort((a: any, b: any) =>
-                a.active != b.active ? -(a.active - b.active) : a.title - b.title
+                a.active != b.active
+                  ? -(a.active - b.active)
+                  : a.title - b.title
               )
               .map((template, index) => (
                 <Paper
                   key={index}
-                  p='md'
+                  p="md"
                   mih={80}
                   sx={{
-                    position: 'relative',
-                    cursor: 'pointer',
+                    position: "relative",
+                    cursor: "pointer",
                     border:
-                      selectedTemplateId === template.id ? 'solid 1px #339af0 !important' : '',
+                      selectedTemplateId === template.id
+                        ? "solid 1px #339af0 !important"
+                        : "",
                     backgroundColor:
-                      selectedTemplateId === template.id ? '#339af008 !important' : '',
-                    flexDirection: 'row',
-                    display: 'flex',
+                      selectedTemplateId === template.id
+                        ? "#339af008 !important"
+                        : "",
+                    flexDirection: "row",
+                    display: "flex",
                   }}
                   withBorder
                   onClick={() => {
                     setSelectedTemplateId(template.id);
-                    setHumanFeedbackForTemplate(template.additional_instructions);
+                    setHumanFeedbackForTemplate(
+                      template.additional_instructions
+                    );
                   }}
                 >
                   <Box
-                    miw='100px'
+                    miw="100px"
                     mah={80}
                     sx={{
-                      border: 'solid 1px #339af022',
-                      backgroundColor: '#339af022',
-                      padding: '8px',
-                      borderRadius: '4px',
-                      textAlign: 'center',
+                      border: "solid 1px #339af022",
+                      backgroundColor: "#339af022",
+                      padding: "8px",
+                      borderRadius: "4px",
+                      textAlign: "center",
                     }}
-                    mt='xl'
-                    mr='md'
+                    mt="xl"
+                    mr="md"
                   >
-                    <Text fw='bold' fz='md' color='blue' mt='xs'>
-                      {Math.round((template.times_accepted / (template.times_used + 0.0001)) * 100)}
+                    <Text fw="bold" fz="md" color="blue" mt="xs">
+                      {Math.round(
+                        (template.times_accepted /
+                          (template.times_used + 0.0001)) *
+                          100
+                      )}
                       % reply
                     </Text>
-                    <Text color='blue' size='xs'>
+                    <Text color="blue" size="xs">
                       {template.times_accepted} / {template.times_used} times
                     </Text>
                   </Box>
 
-                  <Box mr={40} w='100%'>
+                  <Box mr={40} w="100%">
                     <Flex>
                       <Text
-                        size='sm'
-                        fw='600'
-                        mb='xs'
-                        sx={{ textTransform: 'uppercase' }}
-                        color='gray'
-                        variant='outline'
+                        size="sm"
+                        fw="600"
+                        mb="xs"
+                        sx={{ textTransform: "uppercase" }}
+                        color="gray"
+                        variant="outline"
                       >
                         {template.title}
                       </Text>
@@ -3313,72 +3552,83 @@ function TemplateSection(props: {
 
                       <AIBrainPill />
 
-                      <LiInitialMessageAssets linkedin_initial_message_id={template.id} />
+                      <LiInitialMessageAssets
+                        linkedin_initial_message_id={template.id}
+                      />
 
-                      {template.research_points && template.research_points.length > 0 && (
-                        <HoverCard width={280} shadow='md'>
-                          <HoverCard.Target>
-                            <Badge
-                              leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
-                              color='lime'
-                              variant='filled'
-                              ml='xs'
-                              size='xs'
-                            >
-                              {template.research_points.length} Research Points
-                            </Badge>
-                          </HoverCard.Target>
-                          <HoverCard.Dropdown
-                            style={{
-                              backgroundColor: 'rgb(34, 37, 41)',
-                              padding: 0,
-                            }}
-                          >
-                            <Paper
+                      {template.research_points &&
+                        template.research_points.length > 0 && (
+                          <HoverCard width={280} shadow="md">
+                            <HoverCard.Target>
+                              <Badge
+                                leftSection={
+                                  <IconSearch
+                                    size="0.8rem"
+                                    style={{ marginTop: 4 }}
+                                  />
+                                }
+                                color="lime"
+                                variant="filled"
+                                ml="xs"
+                                size="xs"
+                              >
+                                {template.research_points.length} Research
+                                Points
+                              </Badge>
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown
                               style={{
-                                backgroundColor: 'rgb(34, 37, 41)',
-                                color: 'white',
-                                padding: 10,
+                                backgroundColor: "rgb(34, 37, 41)",
+                                padding: 0,
                               }}
                             >
-                              <TextWithNewline style={{ fontSize: '12px' }}>
-                                {'<b>Active Research Points:</b>\n- ' +
-                                  template.research_points
-                                    .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                    .join('\n- ')}
-                              </TextWithNewline>
-                            </Paper>
-                          </HoverCard.Dropdown>
-                        </HoverCard>
-                      )}
+                              <Paper
+                                style={{
+                                  backgroundColor: "rgb(34, 37, 41)",
+                                  color: "white",
+                                  padding: 10,
+                                }}
+                              >
+                                <TextWithNewline style={{ fontSize: "12px" }}>
+                                  {"<b>Active Research Points:</b>\n- " +
+                                    template.research_points
+                                      .map((rp: any) =>
+                                        rp.replaceAll("_", " ").toLowerCase()
+                                      )
+                                      .join("\n- ")}
+                                </TextWithNewline>
+                              </Paper>
+                            </HoverCard.Dropdown>
+                          </HoverCard>
+                        )}
                       {template.additional_instructions && (
-                        <HoverCard width={280} shadow='md'>
+                        <HoverCard width={280} shadow="md">
                           <HoverCard.Target>
                             <Badge
-                              leftSection={<IconBulb size='0.8rem' />}
-                              color='grape'
-                              variant='filled'
-                              ml='xs'
-                              size='xs'
+                              leftSection={<IconBulb size="0.8rem" />}
+                              color="grape"
+                              variant="filled"
+                              ml="xs"
+                              size="xs"
                             >
                               Fine Tuned
                             </Badge>
                           </HoverCard.Target>
                           <HoverCard.Dropdown
                             style={{
-                              backgroundColor: 'rgb(34, 37, 41)',
+                              backgroundColor: "rgb(34, 37, 41)",
                               padding: 0,
                             }}
                           >
                             <Paper
                               style={{
-                                backgroundColor: 'rgb(34, 37, 41)',
-                                color: 'white',
+                                backgroundColor: "rgb(34, 37, 41)",
+                                color: "white",
                                 padding: 10,
                               }}
                             >
-                              <TextWithNewline style={{ fontSize: '12px' }}>
-                                {'<b>Additional Instructions:</b>\n' +
+                              <TextWithNewline style={{ fontSize: "12px" }}>
+                                {"<b>Additional Instructions:</b>\n" +
                                   template.additional_instructions}
                               </TextWithNewline>
                             </Paper>
@@ -3388,23 +3638,24 @@ function TemplateSection(props: {
                     </Flex>
                     <Card
                       withBorder
-                      w='100%'
+                      w="100%"
                       sx={{
-                        backgroundColor: selectedTemplateId == template.id ? '' : '#fbfbfb',
+                        backgroundColor:
+                          selectedTemplateId == template.id ? "" : "#fbfbfb",
                       }}
                     >
-                      <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                      <Text style={{ fontSize: "0.9rem", lineHeight: 2 }}>
                         <div
                           dangerouslySetInnerHTML={{
                             __html: DOMPurify.sanitize(
                               template.message
                                 .replaceAll(
-                                  '[[',
+                                  "[[",
                                   "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                    theme.colors['blue'][5] +
+                                    theme.colors["blue"][5] +
                                     "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
                                 )
-                                .replaceAll(']]', '</span>') as string
+                                .replaceAll("]]", "</span>") as string
                             ),
                           }}
                         />
@@ -3412,9 +3663,9 @@ function TemplateSection(props: {
                     </Card>
                   </Box>
 
-                  <Box sx={{ justifyContent: 'right' }} ml='auto'>
+                  <Box sx={{ justifyContent: "right" }} ml="auto">
                     <Switch
-                      sx={{ cursor: 'pointer' }}
+                      sx={{ cursor: "pointer" }}
                       checked={template.active}
                       onChange={(e) => {
                         if (!currentProject) return;
@@ -3433,17 +3684,17 @@ function TemplateSection(props: {
                       }}
                     />
                     <Button
-                      mt='xs'
-                      variant='subtle'
-                      radius='xl'
-                      size='sm'
+                      mt="xs"
+                      variant="subtle"
+                      radius="xl"
+                      size="sm"
                       compact
                       onClick={() => {
                         openContextModal({
-                          modal: 'liTemplate',
-                          title: 'Edit Template',
+                          modal: "liTemplate",
+                          title: "Edit Template",
                           innerProps: {
-                            mode: 'EDIT',
+                            mode: "EDIT",
                             editProps: {
                               templateId: template.id,
                               title: template.title,
@@ -3471,24 +3722,28 @@ function TemplateSection(props: {
                   setTemplateActivesShow([true]);
                 }
               }}
-              color='gray'
-              variant='subtle'
+              color="gray"
+              variant="subtle"
               leftIcon={
                 <IconChevronDown
-                  size='1rem'
+                  size="1rem"
                   style={{
-                    transform: templateActivesShow.length === 1 ? '' : 'rotate(180deg)',
+                    transform:
+                      templateActivesShow.length === 1 ? "" : "rotate(180deg)",
                   }}
                 />
               }
             >
-              Show {templateActivesShow.includes(true) ? 'All Templates' : 'Active Templates Only'}
+              Show{" "}
+              {templateActivesShow.includes(true)
+                ? "All Templates"
+                : "Active Templates Only"}
             </Button>
           )}
         </Stack>
       )}
 
-      <Flex pt={15} sx={{ justifyContent: 'right' }}>
+      <Flex pt={15} sx={{ justifyContent: "right" }}>
         {/* <Button
             onClick={() => setCtaModalOpened(true)}
             size='sm'
@@ -3502,15 +3757,15 @@ function TemplateSection(props: {
         <InitialMessageTemplateSelector
           onSelect={(template: LinkedinInitialMessageTemplate) => {
             showNotification({
-              title: '🤖 Generating...',
+              title: "🤖 Generating...",
               message: 'Generating custom "' + template.name + '" template...',
-              color: 'blue',
+              color: "blue",
             });
 
             fetch(`${API_URL}/linkedin_template/adjust_template_for_client`, {
-              method: 'POST',
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${userToken}`,
               },
               body: JSON.stringify({
@@ -3521,17 +3776,17 @@ function TemplateSection(props: {
                 return res.json();
               })
               .then((res) => {
-                const adjustedTemplate = res['adjusted_template'];
+                const adjustedTemplate = res["adjusted_template"];
                 openContextModal({
-                  modal: 'liTemplate',
-                  title: 'Create Template',
+                  modal: "liTemplate",
+                  title: "Create Template",
                   innerProps: {
-                    mode: 'CREATE',
+                    mode: "CREATE",
                     editProps: {
                       title: template.name,
                       message: adjustedTemplate,
                       active: true,
-                      humanFeedback: '',
+                      humanFeedback: "",
                       researchPoints: [],
                     },
                   },
@@ -3541,16 +3796,16 @@ function TemplateSection(props: {
         />
         <Stack spacing={5}>
           <Button
-            variant='outline'
-            radius='md'
+            variant="outline"
+            radius="md"
             compact
-            color='orange'
+            color="orange"
             onClick={() => {
               openContextModal({
-                modal: 'liTemplate',
-                title: 'Create Template',
+                modal: "liTemplate",
+                title: "Create Template",
                 innerProps: {
-                  mode: 'CREATE',
+                  mode: "CREATE",
                 },
               });
             }}
@@ -3573,20 +3828,13 @@ export const PersonalizationSection = (props: {
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
 
-  const [acceptanceRates, setAcceptanceRates] = useState<any>();
-
-  interface PectItem {
-    title: string;
-    id: string;
-    checked?: boolean;
-    disabled?: boolean;
-  }
-
   const { data: researchPointTypes } = useQuery({
     queryKey: [`query-get-research-point-types`],
     queryFn: async () => {
       const response = await getResearchPointTypes(userToken);
-      return response.status === 'success' ? (response.data as ResearchPointType[]) : [];
+      return response.status === "success"
+        ? (response.data as ResearchPointType[])
+        : [];
     },
     refetchOnWindowFocus: false,
   });
@@ -3595,130 +3843,30 @@ export const PersonalizationSection = (props: {
     if (!researchPointTypes) return;
     const convertedType = researchPointTypes.map((rp) => {
       return {
-        title: _.startCase(rp.name.toLowerCase().replaceAll('_', ' ')),
+        title: _.startCase(rp.name.toLowerCase().replaceAll("_", " ")),
         id: rp.name,
         checked: !props.blocklist.includes(rp.name),
         disabled: !!currentProject?.transformer_blocklist?.includes(rp.name),
       };
     });
 
-    setProspectItems(convertedType.filter((rp) => !rp.id.includes('JOB')));
-    setCompanyItems(convertedType.filter((rp) => rp.id.includes('JOB')));
+    setProspectItems(convertedType.filter((rp) => !rp.id.includes("JOB")));
+    setCompanyItems(convertedType.filter((rp) => rp.id.includes("JOB")));
   }, [researchPointTypes]);
 
   const [prospectItems, setProspectItems] = useState<
     { title: string; id: string; checked: boolean; disabled: boolean }[]
-  >([
-    // {
-    //   title: 'Personal Bio',
-    //   id: 'LINKEDIN_BIO_SUMMARY',
-    //   checked: !props.blocklist.includes('LINKEDIN_BIO_SUMMARY'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('LINKEDIN_BIO_SUMMARY'),
-    // },
-    // {
-    //   title: 'List Of Past Jobs',
-    //   id: 'LIST_OF_PAST_JOBS',
-    //   checked: !props.blocklist.includes('LIST_OF_PAST_JOBS'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('LIST_OF_PAST_JOBS'),
-    // },
-    // {
-    //   title: 'Years of Experience',
-    //   id: 'YEARS_OF_EXPERIENCE',
-    //   checked: !props.blocklist.includes('YEARS_OF_EXPERIENCE'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('YEARS_OF_EXPERIENCE'),
-    // },
-    // {
-    //   title: 'Current Experience',
-    //   id: 'CURRENT_EXPERIENCE_DESCRIPTION',
-    //   checked: !props.blocklist.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
-    // },
-    // {
-    //   title: 'Education History',
-    //   id: 'COMMON_EDUCATION',
-    //   checked: !props.blocklist.includes('COMMON_EDUCATION'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('COMMON_EDUCATION'),
-    // },
-    // {
-    //   title: 'Recommendations',
-    //   id: 'RECENT_RECOMMENDATIONS',
-    //   checked: !props.blocklist.includes('RECENT_RECOMMENDATIONS'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_RECOMMENDATIONS'),
-    // },
-    // {
-    //   title: 'Patents',
-    //   id: 'RECENT_PATENTS',
-    //   checked: !props.blocklist.includes('RECENT_PATENTS'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_PATENTS'),
-    // },
-    // {
-    //   title: 'Years at Current Job',
-    //   id: 'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB',
-    //   checked: !props.blocklist.includes('YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes(
-    //     'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'
-    //   ),
-    // },
-    // {
-    //   title: 'Location',
-    //   id: 'CURRENT_LOCATION',
-    //   checked: !props.blocklist.includes('CURRENT_LOCATION'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_LOCATION'),
-    // },
-    // {
-    //   title: 'Custom Data Points',
-    //   id: 'CUSTOM',
-    //   checked: !props.blocklist.includes('CUSTOM'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('CUSTOM'),
-    // },
-  ]);
+  >([]);
 
   const [companyItems, setCompanyItems] = useState<
     { title: string; id: string; checked: boolean; disabled: boolean }[]
-  >([
-    // {
-    //   title: 'Company Description',
-    //   id: 'CURRENT_JOB_DESCRIPTION',
-    //   checked: !props.blocklist.includes('CURRENT_JOB_DESCRIPTION'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_DESCRIPTION'),
-    // },
-    // {
-    //   title: 'Company Specialites',
-    //   id: 'CURRENT_JOB_SPECIALTIES',
-    //   checked: !props.blocklist.includes('CURRENT_JOB_SPECIALTIES'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_SPECIALTIES'),
-    // },
-    // {
-    //   title: 'Company Industry',
-    //   id: 'CURRENT_JOB_INDUSTRY',
-    //   checked: !props.blocklist.includes('CURRENT_JOB_INDUSTRY'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_INDUSTRY'),
-    // },
-    // {
-    //   title: 'General Company News',
-    //   id: 'SERP_NEWS_SUMMARY',
-    //   checked: !props.blocklist.includes('SERP_NEWS_SUMMARY'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY'),
-    // },
-    // {
-    //   title: 'Negative Company News',
-    //   id: 'SERP_NEWS_SUMMARY_NEGATIVE',
-    //   checked: !props.blocklist.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
-    // },
-    // {
-    //   title: 'Website Info',
-    //   id: 'GENERAL_WEBSITE_TRANSFORMER',
-    //   checked: !props.blocklist.includes('GENERAL_WEBSITE_TRANSFORMER'),
-    //   disabled: !!currentProject?.transformer_blocklist?.includes('GENERAL_WEBSITE_TRANSFORMER'),
-    // },
-  ]);
+  >([]);
 
   const { data, isFetching } = useQuery({
     queryKey: [`query-get-acceptance-rates`],
     queryFn: async () => {
       const result = await getAcceptanceRates(userToken);
-      return result.status === 'success' ? result.data : undefined;
+      return result.status === "success" ? result.data : undefined;
     },
   });
 
@@ -3738,7 +3886,7 @@ export const PersonalizationSection = (props: {
         .map((x) => {
           return {
             ...x,
-            type: 'PROSPECT',
+            type: "PROSPECT",
             accepted: getAcceptanceRate(x.id),
           };
         })
@@ -3746,7 +3894,7 @@ export const PersonalizationSection = (props: {
           companyItems.map((x) => {
             return {
               ...x,
-              type: 'COMPANY',
+              type: "COMPANY",
               accepted: getAcceptanceRate(x.id),
             };
           })
@@ -3764,53 +3912,11 @@ export const PersonalizationSection = (props: {
     if (props.hideAnalytics) return null;
     for (const d of data ?? []) {
       if (d.research_point_type === itemId) {
-        return Math.round(d['avg. acceptance %'] * 100) as number;
+        return Math.round(d["avg. acceptance %"] * 100) as number;
       }
     }
     return null;
   }
-
-  // useEffect(() => {
-  //   if (props.hideAnalytics) return;
-  //   const newPectList: PectItem[] = pectItemList.map((item) => ({
-  //     ...item,
-  //     checked: !props.blocklist.includes(item.id),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes(item.id),
-  //   }));
-
-  //   const newCompanyList: PectItem[] = companyItemList.map((item) => ({
-  //     ...item,
-  //     checked: !props.blocklist.includes(item.id),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes(item.id),
-  //   }));
-  //   // const newAllItems = newPectList
-  //   //   .map((x) => {
-  //   //     return {
-  //   //       ...x,
-  //   //       type: 'PROSPECT',
-  //   //       accepted: getAcceptanceRate(x.id),
-  //   //     };
-  //   //   })
-  //   //   .concat(
-  //   //     newCompanyList.map((x) => {
-  //   //       return {
-  //   //         ...x,
-  //   //         type: 'COMPANY',
-  //   //         accepted: getAcceptanceRate(x.id),
-  //   //       };
-  //   //     })
-  //   //   )
-  //   //   .sort((a, b) => {
-  //   //     if (a.accepted === null && b.accepted === null) return 0;
-  //   //     if (a.accepted === null) return 1;
-  //   //     if (b.accepted === null) return -1;
-  //   //     return b.accepted - a.accepted;
-  //   //   });
-
-  //   setProspectItems(newPectList);
-  //   setCompanyItems(newCompanyList);
-  //   props.onItemsChange(allItems);
-  // }, []);
 
   const markAll = (newLabel: boolean) => {
     setProspectItems((prev) => {
@@ -3868,39 +3974,51 @@ export const PersonalizationSection = (props: {
   }
 
   return (
-    <Flex direction='column'>
-      <Card radius={'md'} mb={'1rem'}>
-        <Flex direction={'column'}>
+    <Flex direction="column">
+      <Card radius={"md"} mb={"1rem"}>
+        <Flex direction={"column"}>
           <Box>
             <Title fw={300} order={4}>
-              {props.title ?? 'ACCEPTANCE RATE BY PERSONALIZATION:'}
+              {props.title ?? "ACCEPTANCE RATE BY PERSONALIZATION:"}
             </Title>
           </Box>
-          <Flex gap={'lg'} align={'center'} justify={'space-between'} my={'sm'}>
-            <Badge leftSection={<IconCircle size='0.7rem' />} color='green' size='lg' w={'100%'}>
+          <Flex gap={"lg"} align={"center"} justify={"space-between"} my={"sm"}>
+            <Badge
+              leftSection={<IconCircle size="0.7rem" />}
+              color="green"
+              size="lg"
+              w={"100%"}
+            >
               Profile Based Personalization:
             </Badge>
-            <Badge leftSection={<IconCircle size='0.7rem' />} color='grape' size='lg' w={'100%'}>
+            <Badge
+              leftSection={<IconCircle size="0.7rem" />}
+              color="grape"
+              size="lg"
+              w={"100%"}
+            >
               Account Based Personalization:
             </Badge>
           </Flex>
         </Flex>
         <Checkbox
-          variant='outline'
+          variant="outline"
           checked={allItems.every((x: any) => x.checked)}
-          label={'Select All Frameworks'}
-          mb='md'
+          label={"Select All Frameworks"}
+          mb="md"
           onChange={(event) => markAll(event.currentTarget.checked)}
         />
-        <Flex direction={'column'} gap={'0.5rem'}>
+        <Flex direction={"column"} gap={"0.5rem"}>
           {allItems.map((item) => (
             <ProcessBar
               id={item.id}
               title={item.title}
               percent={item.accepted ?? 0}
               checked={item.checked}
-              onPressItem={item.type === 'PROSPECT' ? setProfileChecked : setCompanyChecked}
-              color={item.type === 'PROSPECT' ? 'teal' : 'grape'}
+              onPressItem={
+                item.type === "PROSPECT" ? setProfileChecked : setCompanyChecked
+              }
+              color={item.type === "PROSPECT" ? "teal" : "grape"}
               hideAnalytics={props.hideAnalytics}
             />
           ))}
@@ -3923,46 +4041,46 @@ const ProcessBar: React.FC<{
   id,
   title,
   percent,
-  color = 'green',
+  color = "green",
   disabled,
   checked,
   onPressItem,
   hideAnalytics = false,
 }) => {
   return (
-    <Flex align={'center'} gap={'0.5rem'}>
-      <Flex sx={{ flex: 4 }} gap={'0.25rem'} align={'center'}>
+    <Flex align={"center"} gap={"0.5rem"}>
+      <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
         <Checkbox
-          size={'sm'}
+          size={"sm"}
           label={<Text fw={300}>{title}</Text>}
           checked={checked}
           disabled={disabled}
-          variant='outline'
+          variant="outline"
           onChange={(event) => onPressItem(id, event.currentTarget.checked)}
           color={color}
         />
         <Flex sx={{ flex: 1 }}>
-          <Divider w={'100%'} color={'#E9ECEF'} />
+          <Divider w={"100%"} color={"#E9ECEF"} />
         </Flex>
-        <Tooltip label='Historical Acceptance Rate' withArrow>
+        <Tooltip label="Historical Acceptance Rate" withArrow>
           <Button
-            variant={'light'}
+            variant={"light"}
             fw={700}
-            size='xs'
+            size="xs"
             color={color}
-            radius='xl'
-            h='auto'
-            fz={'0.625rem'}
-            py={'0.125rem'}
-            px={'0.25rem'}
+            radius="xl"
+            h="auto"
+            fz={"0.625rem"}
+            py={"0.125rem"}
+            px={"0.25rem"}
           >
-            {hideAnalytics ? 'Not Available' : percent + '%'}
+            {hideAnalytics ? "Not Available" : percent + "%"}
           </Button>
         </Tooltip>
       </Flex>
       {!hideAnalytics && (
-        <Flex direction={'column'} sx={{ flex: 6 }}>
-          <Progress value={percent} color={color} size={'lg'} radius='xl' />
+        <Flex direction={"column"} sx={{ flex: 6 }}>
+          <Progress value={percent} color={color} size={"lg"} radius="xl" />
         </Flex>
       )}
     </Flex>
@@ -3979,34 +4097,36 @@ export const PersonalizationCard: React.FC<{
   ) => void;
 }> = ({ title, isPurple, items, onPressItem }) => {
   return (
-    <Card shadow='xs' radius={'md'} mb={'1rem'}>
+    <Card shadow="xs" radius={"md"} mb={"1rem"}>
       <Card.Section>
         <Flex
-          align={'center'}
-          justify={'space-between'}
-          bg={`${isPurple ? 'grape' : 'teal'}.0`}
-          py={'0.5rem'}
-          px={'1rem'}
-          gap={'0.5rem'}
+          align={"center"}
+          justify={"space-between"}
+          bg={`${isPurple ? "grape" : "teal"}.0`}
+          py={"0.5rem"}
+          px={"1rem"}
+          gap={"0.5rem"}
         >
-          <Text fw={'400'} fz='xs' color={"${isPurple ? 'grape' : 'teal'}.8"}>
+          <Text fw={"400"} fz="xs" color={"${isPurple ? 'grape' : 'teal'}.8"}>
             {title}
           </Text>
         </Flex>
       </Card.Section>
-      <Grid gutter={'1.5rem'} py={'1rem'}>
+      <Grid gutter={"1.5rem"} py={"1rem"}>
         {items.map((item) => {
           return (
             <Grid.Col xs={12} md={6} xl={4} key={item.title}>
-              <Flex align={'center'} gap={'0.25rem'}>
+              <Flex align={"center"} gap={"0.25rem"}>
                 <Checkbox
-                  size={'xs'}
+                  size={"xs"}
                   label={item.title}
                   checked={item.checked}
                   disabled={item.disabled}
-                  onChange={(event) => onPressItem(item, event.currentTarget.checked)}
-                  color={`${isPurple ? 'grape' : 'teal'}`}
-                  variant='outline'
+                  onChange={(event) =>
+                    onPressItem(item, event.currentTarget.checked)
+                  }
+                  color={`${isPurple ? "grape" : "teal"}`}
+                  variant="outline"
                 />
               </Flex>
             </Grid.Col>

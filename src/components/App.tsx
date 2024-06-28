@@ -126,7 +126,7 @@ export default function App() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey && event.key === '\'') {
         const activeElement = document.activeElement as HTMLElement;
-        if (activeElement && (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'DIV' && activeElement.getAttribute('role') === 'textbox') || (activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'text'))) {
+        if (activeElement && (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'DIV' && activeElement.getAttribute('role') === 'textbox') || (activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'text') || (activeElement.classList.contains('mantine-Textarea-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('mantine-Input-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('tiptap') && activeElement.classList.contains('ProseMirror')))) {
           previousFocusedElementRef.current = activeElement;
 
           const contextInfo = getContextualInformation(activeElement);
@@ -151,19 +151,25 @@ export default function App() {
           title.style.marginBottom = '5px';
           popover.appendChild(title);
 
-          // const contextDiv = document.createElement('div');
-          // contextDiv.textContent = `Context: ${contextInfo}`;
-          // contextDiv.style.marginBottom = '5px';
-          // popover.appendChild(contextDiv);
-
           const textarea = document.createElement('textarea');
           textarea.style.width = '300px';
           textarea.style.height = 'auto';
           textarea.style.resize = 'none';
           textarea.style.overflow = 'hidden';
-          textarea.value = (activeElement as HTMLTextAreaElement).value;
+          textarea.value = ''; // Ensure the textarea is completely clear when opened
           textarea.addEventListener('input', handleInput);
           textarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              if (popoverRef.current) {
+                document.body.removeChild(popoverRef.current);
+                if (previousFocusedElementRef.current) {
+                  (previousFocusedElementRef.current as HTMLTextAreaElement).value = '';
+                  (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = 'black';
+                  (previousFocusedElementRef.current as HTMLTextAreaElement).focus();
+                }
+              }
+            }
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
               if (!textarea.dataset.enterPressed) {
@@ -245,11 +251,18 @@ export default function App() {
       console.log('Response JSON:', res);
       const interval = setInterval(() => {
         if (index < res.response.length) {
-          (element as HTMLTextAreaElement).value += res.response.charAt(index);
+          if (element.classList.contains('tiptap') && element.classList.contains('ProseMirror')) {
+            element.textContent += res.response.charAt(index);
+          } else {
+            (element as HTMLTextAreaElement).value += res.response.charAt(index);
+          }
           index += 1;
         } else {
           clearInterval(interval);
           removeLoadingGifAndAddButton(popover, element);
+          if (element.classList.contains('tiptap') && element.classList.contains('ProseMirror')) {
+            element.focus();
+          }
         }
       }, 10);
     })

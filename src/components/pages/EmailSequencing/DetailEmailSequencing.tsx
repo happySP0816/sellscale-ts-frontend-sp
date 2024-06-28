@@ -1310,7 +1310,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                         <div
                           contentEditable={currentProject?.is_ai_research_personalization_enabled && selectedVoice && selectedVoice !== 'null' ? true : undefined}
                           dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(data?.body?.replace(/(<br\s*\/?>\s*){2,}/g, '<br />').replace(/\n\s*\n/g, '\n') ?? ""),
+                            __html: DOMPurify.sanitize(data?.body?.replace(/(<br\s*\/?>\s*){2,}/g, '<br />')?.replace(/\n\s*\n/g, '\n') ?? ""),
                           }}
                           onInput={(e) => setChangedTemplate(e.currentTarget.innerHTML)}
                           style={{

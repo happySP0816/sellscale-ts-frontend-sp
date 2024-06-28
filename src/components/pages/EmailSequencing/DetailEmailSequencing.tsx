@@ -676,7 +676,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const userData = useRecoilValue(userDataState);
-  const [selectedVoice, setSelectedVoice] = useState<string>("");
+  const [selectedVoice, setSelectedVoice] = useState<string | null>("");
   const [aiVoices, setAiVoices] = useState<{ client_id: number; client_sdr_created_by: number; id: number; name: string }[]>([]);
   const [loadingVoices, setLoadingVoices] = useState<boolean>(false);
   const [loadingBankData, setLoadingBankData] = useState<boolean>(false);
@@ -1131,7 +1131,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                 </Flex>
               </div>
 
-              <div className={`${state && "absolute z-[9999] bg-[#f6f8fa] right-0 rounded-md"} flex flex-col`}>
+              {currentProject?.is_ai_research_personalization_enabled && <div className={`${state && "absolute z-[9999] bg-[#f6f8fa] right-0 rounded-md"} flex flex-col`}>
                 <Flex align="center" gap="sm">
                   <Select
                     label="Assign Voice"
@@ -1179,64 +1179,62 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                     searchable
                     creatable
                     getCreateLabel={(query) => `+ Create ${query}`}
-                    data={aiVoices.map(voice => ({ value: voice.id.toString(), label: voice.name }))}
+                    data={[{ value: 'null', label: 'No Voice' }, ...aiVoices.map(voice => ({ value: voice.id.toString(), label: voice.name }))]}
                     value={selectedVoice?.toString()}
                     onChange={async (value) => {
-                      if (value) {
-                        setSelectedVoice(value);
-                        try {
-                          setLoadingBankData(true);
-                          const [updateVoiceResponse, fewShotResponse] = await Promise.all([
-                            fetch(API_URL + `/ml/voices`, {
-                              method: 'PUT',
-                              headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: `Bearer ${userToken}`,
-                              },
-                              body: JSON.stringify({ voice_id: value, archetype_id: currentProject.id }),
-                            }),
-                            fetch(API_URL + `/ml/few-shot`, {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: `Bearer ${userToken}`,
-                              },
-                              body: JSON.stringify({ voice_id: value})
-                            })
-                          ]);
+                      setSelectedVoice(value);
+                      try {
+                        setLoadingBankData(true);
+                        const [updateVoiceResponse, fewShotResponse] = await Promise.all([
+                          fetch(API_URL + `/ml/voices`, {
+                            method: 'PUT',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              Authorization: `Bearer ${userToken}`,
+                            },
+                            body: JSON.stringify({ voice_id: value === 'null' ? null : value, archetype_id: currentProject.id }),
+                          }),
+                          fetch(API_URL + `/ml/few-shot`, {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              Authorization: `Bearer ${userToken}`,
+                            },
+                            body: JSON.stringify({ voice_id: value === 'null' ? null : value })
+                          })
+                        ]);
 
-                          setLoadingBankData(false);
+                        setLoadingBankData(false);
 
-                          if (!updateVoiceResponse.ok) {
-                            console.error('Failed to update voice');
-                          }
-
-                          if (fewShotResponse.ok) {
-                            const fewShotData = await fewShotResponse.json();
-                            const decomposedFewShotData = fewShotData.map((item: { nuance: string; }) => ({
-                              ...item,
-                              nuance: JSON.parse(item.nuance)
-                            }));
-                            console.log('data is', decomposedFewShotData)
-                            setFewShots(decomposedFewShotData);
-                          } else {
-                            console.error('Failed to fetch few-shot data');
-                          }
-                        } catch (error) {
-                          console.error('Error updating voice or fetching few-shot data:', error);
+                        if (!updateVoiceResponse.ok) {
+                          console.error('Failed to update voice');
                         }
+
+                        if (fewShotResponse.ok) {
+                          const fewShotData = await fewShotResponse.json();
+                          const decomposedFewShotData = fewShotData.map((item: { nuance: string; }) => ({
+                            ...item,
+                            nuance: JSON.parse(item.nuance)
+                          }));
+                          console.log('data is', decomposedFewShotData)
+                          setFewShots(decomposedFewShotData);
+                        } else {
+                          console.error('Failed to fetch few-shot data');
+                        }
+                      } catch (error) {
+                        console.error('Error updating voice or fetching few-shot data:', error);
                       }
                       refetch();
                     }}
                     miw={300}
-                    rightSection={!loadingBankData && fewShots && fewShots.length > 0 && <Button size="xs" onClick={() => setVoiceBankOpen(true)} color="blue" radius={"md"} style={{ transform: 'translateX(-50px)' }}>
+                    rightSection={!loadingBankData && fewShots && fewShots.length > 0 && selectedVoice !== 'null' && <Button size="xs" onClick={() => setVoiceBankOpen(true)} color="blue" radius={"md"} style={{ transform: 'translateX(-50px)' }}>
                       Open Voice Bank
                     </Button>}
                     dropdownComponent="div"
                     withinPortal
                   />
                 </Flex>
-              </div>
+              </div>}
             </Flex>
           </Flex>
         </Flex>
@@ -1310,9 +1308,9 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                     ) : (
                       <>
                         <div
-                          contentEditable
+                          contentEditable={currentProject?.is_ai_research_personalization_enabled && selectedVoice && selectedVoice !== 'null' ? true : undefined}
                           dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(data?.body ?? ""),
+                            __html: DOMPurify.sanitize(data?.body?.replace(/(<br\s*\/?>\s*){2,}/g, '<br />').replace(/\n\s*\n/g, '\n') ?? ""),
                           }}
                           onInput={(e) => setChangedTemplate(e.currentTarget.innerHTML)}
                           style={{
@@ -1323,7 +1321,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                             marginBottom: "16px",
                             whiteSpace: "pre-wrap",
                           }}
-                          onClick={() => handleGenerate()}
+                          onClick={() => {currentProject?.is_ai_research_personalization_enabled && selectedVoice && selectedVoice !== 'null' && handleGenerate()}}
                         />
                         {state && (
                           <>

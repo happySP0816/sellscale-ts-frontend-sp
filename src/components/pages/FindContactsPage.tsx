@@ -1,5 +1,4 @@
 import { userTokenState } from "@atoms/userAtoms";
-import YourNetworkSection from "@common/your_network/YourNetworkSection";
 import {
   Card,
   Flex,
@@ -7,161 +6,34 @@ import {
   Title,
   Text,
   TextInput,
-  Anchor,
-  NumberInput,
   Tooltip,
   Button,
   ActionIcon,
-  Badge,
-  useMantineTheme,
-  Loader,
-  Group,
-  Stack,
-  Box,
   Select,
-  Progress,
-  Divider,
-  Avatar,
   rem,
+  Modal,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import {
-  IconAffiliate,
   IconBrandLinkedin,
   IconDatabase,
-  IconDownload,
-  IconFile,
+  IconPlus,
   IconTable,
   IconUpload,
 } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
-import { valueToColor } from "@utils/general";
-import getSalesNavigatorLaunches, {
-  getSalesNavigatorLaunch,
-} from "@utils/requests/getSalesNavigatorLaunches";
-import postLaunchSalesNavigator from "@utils/requests/postLaunchSalesNavigator";
-import { useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { SalesNavigatorLaunch } from "src";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 import SalesNavigatorComponent from "./SalesNavigatorPage";
-import IndividualsDashboard from "@common/individuals/IndividualsDashboard";
-import { IconCsv, IconSparkles } from "@tabler/icons-react";
 import FileDropAndPreview from "@modals/upload-prospects/FileDropAndPreview";
 import LinkedInURLUpload from "@modals/upload-prospects/LinkedInURLUpload";
 import { currentProjectState } from "@atoms/personaAtoms";
 import ChatDashboard from "@common/individuals/ChatDashboard";
 import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
-import {
-  prospectUploadDrawerIdState,
-  prospectUploadDrawerOpenState,
-} from "@atoms/uploadAtoms";
-// import { getAllUploads } from "@utils/requests/getPersonas";
-import { useQuery } from "@tanstack/react-query";
-import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import _ from "lodash";
-import FileDropAndPreviewV2 from "@modals/upload-prospects/FileDropAndPreviewV2";
 import { API_URL } from "@constants/data";
 import SegmentV2 from "./SegmentV2/SegmentV2";
-
-type UploadDetailType = {
-  process: number;
-  success: number;
-  failed: number;
-  disqualified: number;
-  total: number;
-  percent: number;
-};
-
-type SDRType = {
-  avatar: string;
-  name: string;
-};
-
-type CSVType = {
-  fileName: string;
-  sdr: SDRType;
-  upload_details: UploadDetailType;
-};
-
-const test_data = [
-  {
-    fileName: "NewUploads1.csv",
-    sdr: {
-      avatar: "",
-      name: "Adam Meehan",
-    } as SDRType,
-    upload_details: {
-      process: 300,
-      success: 199,
-      failed: 50,
-      disqualified: 50,
-      total: 521,
-      percent: (300 / 500) * 100,
-    } as UploadDetailType,
-  },
-  {
-    fileName: "NewUploads2.csv",
-    sdr: {
-      avatar: "",
-      name: "Adam Meehan",
-    } as SDRType,
-    upload_details: {
-      process: 100,
-      success: 99,
-      failed: 0,
-      disqualified: 0,
-      total: 521,
-      percent: (100 / 521) * 100,
-    } as UploadDetailType,
-  },
-  {
-    fileName: "NewUploads3.csv",
-    sdr: {
-      avatar: "",
-      name: "Adam Meehan",
-    } as SDRType,
-    upload_details: {
-      process: 521,
-      success: 479,
-      failed: 20,
-      disqualified: 20,
-      total: 521,
-      percent: (521 / 521) * 100,
-    } as UploadDetailType,
-  },
-  {
-    fileName: "NewUploads4.csv",
-    sdr: {
-      avatar: "",
-      name: "Adam Meehan",
-    } as SDRType,
-    upload_details: {
-      process: 521,
-      success: 499,
-      failed: 20,
-      disqualified: 0,
-      total: 521,
-      percent: (521 / 521) * 100,
-    } as UploadDetailType,
-  },
-  {
-    fileName: "NewUploads5.csv",
-    sdr: {
-      avatar: "",
-      name: "Adam Meehan",
-    } as SDRType,
-    upload_details: {
-      process: 100,
-      success: 99,
-      failed: 0,
-      disqualified: 0,
-      total: 521,
-      percent: (100 / 521) * 100,
-    } as UploadDetailType,
-  },
-];
+import { useDisclosure } from "@mantine/hooks";
 
 type Segment = {
   id: number;
@@ -178,18 +50,6 @@ export default function FindContactsPage() {
   const activePersona = currentProject?.id;
   const activePersonaEmoji = currentProject?.emoji;
   const activePersonaName = currentProject?.name;
-
-  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
-    prospectUploadDrawerOpenState
-  );
-  const [uploadId, setUploadId] = useRecoilState(prospectUploadDrawerIdState);
-
-  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
-    columnAccessor: "fileName",
-    direction: "desc",
-  });
-
-  const [records, setRecords] = useState(test_data);
 
   const [segments, setSegments]: any = useState<Segment[]>([]);
   const urlParams = new URLSearchParams(window.location.search);
@@ -211,29 +71,48 @@ export default function FindContactsPage() {
     setSegments(segments);
   };
 
-  const handleSortStatusChange = (status: DataTableSortStatus) => {
-    // setPage(1)
-    console.log(status);
-    const data = _.sortBy(test_data, sortStatus.columnAccessor);
-    setRecords(sortStatus.direction === "desc" ? data.reverse() : data);
-    // const data = sortBy(companies, sortStatus.columnAccessor) as Company[]
-    // setRecords(sortStatus.direction === 'desc' ? data.reverse() : data)
-    setSortStatus(status);
-  };
-
-  // const { data: uploads } = useQuery({
-  //   queryKey: [`query-get-persona-uploads`],
-  //   queryFn: async () => {
-  //     const response = await getAllUploads(userToken, activePersona!);
-  //     return response.status === "success" ? response.data : [];
-  //   },
-  //   enabled: !!activePersona,
-  // });
   const [tab, setTab] = useState("");
-
   useEffect(() => {
     fetchSegments();
   }, []);
+
+  const [
+    createSegmentOpened,
+    { open: openCreateSegment, close: closeCreateSegment },
+  ] = useDisclosure(false);
+  const [createSegmentName, setCreateSegmentName] = useState("");
+  const [createSegmentLoading, setCreateSegmentLoading] = useState(false);
+  const createSegment = async () => {
+    setCreateSegmentLoading(true);
+
+    fetch(`${API_URL}/segment/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_title: createSegmentName,
+        filters: {},
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setSelectedSegmentId(data.id);
+      })
+      .finally(() => {
+        showNotification({
+          title: "Success",
+          message: "Segment created successfully",
+          color: "teal",
+        });
+        setCreateSegmentLoading(false);
+        setCreateSegmentName("");
+        closeCreateSegment();
+        fetchSegments();
+      });
+  };
 
   return (
     <Flex p="lg" direction="column" h="100%">
@@ -397,23 +276,66 @@ export default function FindContactsPage() {
             </Text>
 
             {/* Segment Selector */}
-            <Select
-              mb="md"
-              mt="md"
-              placeholder="Select Segment"
-              label="(optional) Select Segment"
-              description="Select a segment to add these prospects to"
-              value={selectedSegmentId}
-              onChange={(value: any) => {
-                setSelectedSegmentId(value);
-              }}
-              data={
-                segments?.map((segment: Segment) => ({
-                  value: segment.id,
-                  label: segment.segment_title,
-                })) ?? []
-              }
-            />
+            <Flex align="flex-end">
+              <Flex w="90%">
+                <Select
+                  mb="md"
+                  mt="md"
+                  w="100%"
+                  placeholder="Select Segment"
+                  label="(optional) Select Segment"
+                  description="Select a segment to add these prospects to"
+                  value={selectedSegmentId}
+                  onChange={(value: any) => {
+                    setSelectedSegmentId(value);
+                  }}
+                  data={
+                    segments?.map((segment: Segment) => ({
+                      value: segment.id,
+                      label: segment.segment_title,
+                    })) ?? []
+                  }
+                />
+              </Flex>
+              <Flex w="10%" align="center" justify={"center"}>
+                <Tooltip label="Create a new Segment" withArrow withinPortal>
+                  <ActionIcon
+                    onClick={() => {
+                      openCreateSegment();
+                    }}
+                    mb="lg"
+                    variant="filled"
+                  >
+                    <IconPlus size="1.5rem" />
+                  </ActionIcon>
+                </Tooltip>
+                <Modal
+                  opened={createSegmentOpened}
+                  onClose={closeCreateSegment}
+                  title="Create a New Segment"
+                >
+                  <TextInput
+                    label="Segment Title"
+                    value={createSegmentName}
+                    onChange={(e) =>
+                      setCreateSegmentName(e.currentTarget.value)
+                    }
+                  />
+                  <Text size="xs" mt="md">
+                    You can add filters from the Segments page
+                  </Text>
+                  <Flex mt="xl" justify="flex-end">
+                    <Button
+                      loading={createSegmentLoading}
+                      disabled={createSegmentName.length === 0}
+                      onClick={createSegment}
+                    >
+                      Create New Segment
+                    </Button>
+                  </Flex>
+                </Modal>
+              </Flex>
+            </Flex>
 
             <FileDropAndPreview
               segmentId={selectedSegmentId}

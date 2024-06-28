@@ -10,11 +10,13 @@ import UploadProspectsModal from "@modals/UploadProspectsModal";
 import SendLinkedInCredentialsModal from "@modals/SendLinkedInCredentialsModal";
 import InstructionsLinkedInCookieModal from "@modals/InstructionsLinkedInCookieModal";
 import CreateNewCTAModal from "@modals/CreateNewCTAModal";
+import logotrial from "../components/PersonaCampaigns/Logo-Trial-3.gif";
 import ViewEmailModal from "@modals/ViewEmailModal";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import SequenceWriterModal from "@modals/SequenceWriterModal";
 import CTAGeneratorModal from "@modals/CTAGeneratorModal";
+import { API_URL } from '@constants/data';
 import ManagePulsePrompt from "@modals/ManagePulsePromptModal";
 import ViewEmailThreadModal from "@modals/ViewEmailThreadModal";
 import ManageBumpFramework from "@modals/ManageBumpFrameworkModal";
@@ -117,6 +119,183 @@ export default function App() {
   const location = useLocation();
   const [socket, setSocket] = useRecoilState(socketState);
 
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+  const previousFocusedElementRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey && event.key === '\'') {
+        const activeElement = document.activeElement as HTMLElement;
+        if (activeElement && (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'DIV' && activeElement.getAttribute('role') === 'textbox') || (activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'text'))) {
+          previousFocusedElementRef.current = activeElement;
+
+          const contextInfo = getContextualInformation(activeElement);
+
+          const popover = document.createElement('div');
+          popover.style.position = 'fixed';
+          popover.style.top = '10px';
+          popover.style.left = '50%';
+          popover.style.transform = 'translateX(-50%)';
+          popover.style.zIndex = '10000';
+          popover.style.backgroundColor = 'white';
+          popover.style.border = '1px solid #ccc';
+          popover.style.padding = '10px';
+          popover.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+          document.body.appendChild(popover);
+          (popoverRef as React.MutableRefObject<HTMLDivElement | null>).current = popover;
+
+          const title = document.createElement('div');
+          title.textContent = 'Sellscale Super Prompt';
+          title.style.fontWeight = 'bold';
+          title.style.marginBottom = '5px';
+          popover.appendChild(title);
+
+          // const contextDiv = document.createElement('div');
+          // contextDiv.textContent = `Context: ${contextInfo}`;
+          // contextDiv.style.marginBottom = '5px';
+          // popover.appendChild(contextDiv);
+
+          const textarea = document.createElement('textarea');
+          textarea.style.width = '300px';
+          textarea.style.height = 'auto';
+          textarea.style.resize = 'none';
+          textarea.style.overflow = 'hidden';
+          textarea.value = (activeElement as HTMLTextAreaElement).value;
+          textarea.addEventListener('input', handleInput);
+          textarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (!textarea.dataset.enterPressed) {
+                textarea.dataset.enterPressed = 'true';
+                showLoadingGif(popover);
+                typeUserInput(previousFocusedElementRef.current, textarea.value, popover, contextInfo);
+              }
+            } else if (e.metaKey && e.key === 'Enter') {
+              e.preventDefault();
+              acceptGeneration(popover, textarea);
+            }
+          });
+          popover.appendChild(textarea);
+          textarea.focus();
+
+          const handleClickOutside = (event: MouseEvent) => {
+            if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+              document.body.removeChild(popoverRef.current);
+              document.removeEventListener('click', handleClickOutside);
+            }
+          };
+
+          document.addEventListener('click', handleClickOutside);
+        }
+      } else if (event.metaKey && event.key === 'Enter') {
+        const activeElement = document.activeElement as HTMLElement;
+        if (activeElement && activeElement.tagName === 'TEXTAREA') {
+          activeElement.blur();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  const handleInput = (event: Event) => {
+    const target = event.target as HTMLTextAreaElement;
+    target.style.height = 'auto';
+    target.style.height = `${target.scrollHeight}px`;
+  };
+
+  const showLoadingGif = (popover: HTMLDivElement) => {
+    const loadingGif = document.createElement('img');
+    loadingGif.src = logotrial;
+    loadingGif.style.display = 'block';
+    loadingGif.style.margin = '10px auto';
+    loadingGif.style.width = '50px';
+    popover.appendChild(loadingGif);
+  };
+
+  const typeUserInput = (element: HTMLElement | null, userInput: string, popover: HTMLDivElement, contextInfo: any) => {
+    if (!element) return;
+    let index = 0;
+
+    fetch(`${API_URL}/ml/quick`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({ userInput, contextInfo }),
+    })
+    .then(response => response.json())
+    .then(res => {
+      console.log('Response JSON:', res);
+      const interval = setInterval(() => {
+        if (index < res.response.length) {
+          (element as HTMLTextAreaElement).value += res.response.charAt(index);
+          index += 1;
+        } else {
+          clearInterval(interval);
+          removeLoadingGifAndAddButton(popover, element);
+        }
+      }, 10);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  };
+
+  const removeLoadingGifAndAddButton = (popover: HTMLDivElement, element: HTMLElement) => {
+    const loadingGif = popover.querySelector('img');
+    if (loadingGif) {
+      popover.removeChild(loadingGif);
+    }
+
+    const acceptButton = document.createElement('button');
+    acceptButton.textContent = 'Accept';
+    acceptButton.style.backgroundColor = '#87CEEB';
+    acceptButton.style.color = 'white';
+    acceptButton.style.border = 'none';
+    acceptButton.style.padding = '5px 10px';
+    acceptButton.style.cursor = 'pointer';
+    acceptButton.style.borderRadius = '4px';
+    acceptButton.addEventListener('click', () => {
+      acceptGeneration(popover, element);
+    });
+    popover.appendChild(acceptButton);
+
+    (element as HTMLTextAreaElement).style.color = 'green';
+  };
+
+  const acceptGeneration = (popover: HTMLDivElement, element: HTMLElement) => {
+    if (previousFocusedElementRef.current) {
+      const event = new Event('input', { bubbles: true });
+      (previousFocusedElementRef.current as HTMLTextAreaElement).value = (element as HTMLTextAreaElement).value;
+      previousFocusedElementRef.current.dispatchEvent(event);
+    }
+    (element as HTMLTextAreaElement).style.color = 'black';
+    document.body.removeChild(popover);
+  };
+
+  const getContextualInformation = (element: HTMLElement): string => {
+    const MAX_PARENT_COUNT = 6;
+    let context = '';
+    let currentElement: HTMLElement | null = element;
+    let parentCount = 0;
+
+    while (currentElement && parentCount < MAX_PARENT_COUNT) {
+      const textContent = currentElement.textContent?.trim();
+      if (textContent) {
+        context = `${textContent} ${context}`;
+      }
+      currentElement = currentElement.parentElement;
+      parentCount++;
+    }
+
+    return context.trim();
+  };
   // Socket.IO Connection
   // useEffect(() => {
   //   if (!socket) setSocket();

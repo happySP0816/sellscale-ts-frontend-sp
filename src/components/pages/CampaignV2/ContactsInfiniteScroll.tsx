@@ -247,7 +247,7 @@ export function ContactsInfiniteScroll({
       >
         <Flex direction="column" gap="sm">
           {campaignContacts &&
-            campaignContacts.length > 1 &&
+            campaignContacts.length >= 1 &&
             campaignContacts.map((contact, index) => (
               <Flex key={index} gap="sm">
                 <Box ml="md">

@@ -35,6 +35,7 @@ type PropsType = {
     contactObjective: string;
     contractSize: number;
     templateMode: boolean;
+    purpose: string;
   };
 };
 
@@ -81,6 +82,7 @@ export default function CreatePersona(props: PropsType) {
         linkedinChecked,
         emailChecked,
         connectionType,
+        purpose: props.createPersona.purpose,
       }
     );
     if (result.status === "error") {

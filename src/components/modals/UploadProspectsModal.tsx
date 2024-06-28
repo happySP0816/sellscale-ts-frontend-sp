@@ -12,6 +12,7 @@ import {
   Flex,
   Divider,
   Button,
+  Collapse,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import { useEffect, useRef, useState } from "react";
@@ -54,10 +55,14 @@ export default function UploadProspectsModal({
     "Set up a discovery call in order to identify a pain point"
   );
 
+  const [purpose, setPurpose] = useState("");
+
   const [personaContractSize, setPersonaContractSize] = useState(
     userData.client.contract_size
   );
   const [templateMode, setTemplateMode] = useState<string>("cta");
+
+  const [opened, setOpened] = useState(false);
 
   const [
     loadingPersonaBuyReasonGeneration,
@@ -191,6 +196,29 @@ export default function UploadProspectsModal({
                 onChange={(e) => setCreatedPersona(e.currentTarget.value)}
               />
 
+              <Collapse in={opened}>
+                <Textarea
+                  placeholder="eg. I want to offer them $150 Amazon gift card for a 30-minute call so I can ask them about their sales process"
+                  label="Purpose (optional)"
+                  description="Once filled, SellScale AI will automatically find 5 sample prospects and generate a draft campaign for you."
+                  value={purpose}
+                  // required
+                  onChange={(e) => setPurpose(e.currentTarget.value)}
+                />
+              </Collapse>
+
+              <Button
+                onClick={() => setOpened(!opened)}
+                compact
+                size="xs"
+                color="gray"
+                variant="subtle"
+                ml="auto"
+                mt="md"
+              >
+                {opened ? "Hide" : "Show"} Advanced Options
+              </Button>
+
               {/* <Textarea
                 label="Who do you want to target"
                 placeholder="Eg. I want to see product mangers in chicago who went to BYU and are currently in a hedge fund role at a large financial institution"
@@ -267,6 +295,7 @@ export default function UploadProspectsModal({
             contactObjective: contactObjective,
             contractSize: personaContractSize,
             templateMode: templateMode === "template",
+            purpose,
           }}
         />
       </Stack>

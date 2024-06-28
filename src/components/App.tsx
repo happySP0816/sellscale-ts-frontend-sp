@@ -163,7 +163,7 @@ export default function App() {
           textarea.value = (activeElement as HTMLTextAreaElement).value;
           textarea.addEventListener('input', handleInput);
           textarea.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
               if (!textarea.dataset.enterPressed) {
                 textarea.dataset.enterPressed = 'true';
@@ -173,6 +173,12 @@ export default function App() {
             } else if (e.metaKey && e.key === 'Enter') {
               e.preventDefault();
               acceptGeneration(popover, textarea);
+            } else if (e.key === 'Enter' && e.shiftKey) {
+              e.preventDefault();
+              const start = textarea.selectionStart;
+              const end = textarea.selectionEnd;
+              textarea.value = textarea.value.substring(0, start) + "\n" + textarea.value.substring(end);
+              textarea.selectionStart = textarea.selectionEnd = start + 1;
             }
           });
           popover.appendChild(textarea);
@@ -182,6 +188,10 @@ export default function App() {
             if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
               document.body.removeChild(popoverRef.current);
               document.removeEventListener('click', handleClickOutside);
+              if (previousFocusedElementRef.current) {
+                (previousFocusedElementRef.current as HTMLTextAreaElement).value = '';
+                (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = 'black';
+              }
             }
           };
 

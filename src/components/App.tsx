@@ -145,8 +145,9 @@ export default function App() {
           (popoverRef as React.MutableRefObject<HTMLDivElement | null>).current = popover;
 
           const title = document.createElement('div');
-          title.textContent = 'Sellscale Super Prompt';
-          title.style.fontWeight = 'bold';
+          title.textContent = 'Sellscale Quick Prompt';
+          title.style.fontStyle = 'italic';
+          title.style.fontFamily = 'Arial';
           title.style.marginBottom = '5px';
           popover.appendChild(title);
 

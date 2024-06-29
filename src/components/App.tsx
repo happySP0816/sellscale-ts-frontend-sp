@@ -177,9 +177,6 @@ export default function App() {
                 showLoadingGif(popover);
                 typeUserInput(previousFocusedElementRef.current, textarea.value, popover, contextInfo);
               }
-            } else if (e.metaKey && e.key === 'Enter') {
-              e.preventDefault();
-              acceptGeneration(popover, textarea);
             } else if (e.key === 'Enter' && e.shiftKey) {
               e.preventDefault();
               const start = textarea.selectionStart;
@@ -193,12 +190,13 @@ export default function App() {
 
           const handleClickOutside = (event: MouseEvent) => {
             if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+              (previousFocusedElementRef.current as HTMLTextAreaElement).value = '';
+              (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = 'black';
               document.body.removeChild(popoverRef.current);
               document.removeEventListener('click', handleClickOutside);
-              if (previousFocusedElementRef.current) {
-                (previousFocusedElementRef.current as HTMLTextAreaElement).value = '';
-                (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = 'black';
-              }
+              // if (previousFocusedElementRef.current) {
+                
+              // }
             }
           };
 
@@ -251,75 +249,124 @@ export default function App() {
       console.log('Response JSON:', res);
       const interval = setInterval(() => {
         if (index < res.response.length) {
-          if (element.classList.contains('tiptap') && element.classList.contains('ProseMirror')) {
-            element.textContent += res.response.charAt(index);
-          } else {
-            (element as HTMLTextAreaElement).value += res.response.charAt(index);
-          }
+          const char = res.response.charAt(index);
+            const textarea = element as HTMLTextAreaElement;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const value = textarea.value;
+            textarea.value = value.slice(0, start) + char + value.slice(end);
+            textarea.selectionStart = textarea.selectionEnd = start + 1;
+
+            // hack React16 内部定义了descriptor拦截value，此处重置状态
+            let tracker = (textarea as any)._valueTracker;
+            if (tracker) {
+              tracker.setValue(value);
+            }
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+          
           index += 1;
         } else {
           clearInterval(interval);
           removeLoadingGifAndAddButton(popover, element);
-          if (element.classList.contains('tiptap') && element.classList.contains('ProseMirror')) {
-            element.focus();
-          }
+          element.focus();
         }
-      }, 10);
+      }, 1);
     })
     .catch((error) => {
       console.error('Error:', error);
     });
   };
 
-  const removeLoadingGifAndAddButton = (popover: HTMLDivElement, element: HTMLElement) => {
-    const loadingGif = popover.querySelector('img');
-    if (loadingGif) {
-      popover.removeChild(loadingGif);
-    }
+const removeLoadingGifAndAddButton = (popover: HTMLDivElement, element: HTMLElement) => {
+  const loadingGif = popover.querySelector('img');
+  if (loadingGif) {
+    popover.removeChild(loadingGif);
+  }
 
-    const acceptButton = document.createElement('button');
-    acceptButton.textContent = 'Accept';
-    acceptButton.style.backgroundColor = '#87CEEB';
-    acceptButton.style.color = 'white';
-    acceptButton.style.border = 'none';
-    acceptButton.style.padding = '5px 10px';
-    acceptButton.style.cursor = 'pointer';
-    acceptButton.style.borderRadius = '4px';
-    acceptButton.addEventListener('click', () => {
-      acceptGeneration(popover, element);
-    });
-    popover.appendChild(acceptButton);
+  const acceptButton = document.createElement('button');
+  acceptButton.textContent = 'Accept';
+  acceptButton.style.backgroundColor = '#87CEEB';
+  acceptButton.style.color = 'white';
+  acceptButton.style.border = 'none';
+  acceptButton.style.padding = '5px 10px';
+  acceptButton.style.cursor = 'pointer';
+  acceptButton.style.borderRadius = '4px';
+  acceptButton.addEventListener('click', () => {
+    acceptGeneration(popover, element);
+  });
+  popover.appendChild(acceptButton);
 
-    (element as HTMLTextAreaElement).style.color = 'green';
-  };
+  // Add keydown event listener to the document to handle the Enter key
 
-  const acceptGeneration = (popover: HTMLDivElement, element: HTMLElement) => {
-    if (previousFocusedElementRef.current) {
-      const event = new Event('input', { bubbles: true });
-      (previousFocusedElementRef.current as HTMLTextAreaElement).value = (element as HTMLTextAreaElement).value;
-      previousFocusedElementRef.current.dispatchEvent(event);
-    }
-    (element as HTMLTextAreaElement).style.color = 'black';
-    document.body.removeChild(popover);
-  };
+  (element as HTMLTextAreaElement).style.color = 'green';
+};
 
-  const getContextualInformation = (element: HTMLElement): string => {
-    const MAX_PARENT_COUNT = 6;
-    let context = '';
-    let currentElement: HTMLElement | null = element;
-    let parentCount = 0;
 
-    while (currentElement && parentCount < MAX_PARENT_COUNT) {
-      const textContent = currentElement.textContent?.trim();
-      if (textContent) {
-        context = `${textContent} ${context}`;
+const acceptGeneration = (popover: HTMLDivElement, element: HTMLElement) => {
+  if (previousFocusedElementRef.current) {
+    const event = new Event('input', { bubbles: true });
+    (previousFocusedElementRef.current as HTMLTextAreaElement).value = (element as HTMLTextAreaElement).value;
+    previousFocusedElementRef.current.dispatchEvent(event);
+    previousFocusedElementRef.current.focus();
+    // Hack to trigger setState
+    setTimeout(() => {
+      (previousFocusedElementRef.current as HTMLTextAreaElement).value += ' ';
+      setTimeout(() => {
+        (previousFocusedElementRef.current as HTMLTextAreaElement).value = (previousFocusedElementRef.current as HTMLTextAreaElement).value.trim();
+      }, 20); // Adjust the delay as needed
+    }, 20); // Adjust the delay as needed
+  }
+  (element as HTMLTextAreaElement).style.color = 'black';
+  document.body.removeChild(popover);
+
+};
+
+const getContextualInformation = (element: HTMLElement): string => {
+  let context = '';
+  if (window.location.href.includes('/inbox')) {
+    context = 'Here is the conversation, I reached out first: \n';
+    const messageElements = document.querySelectorAll('div[style="font-size: 0.875rem;"], div.line-clamp-4');
+    let lineClampCount = 0;
+    let fontSizeCount = 0;
+
+    messageElements.forEach((messageElement) => {
+      if (messageElement.classList.contains('line-clamp-4')) {
+        lineClampCount++;
+      } else if (messageElement.getAttribute('style') === 'font-size: 0.875rem;') {
+        fontSizeCount++;
       }
-      currentElement = currentElement.parentElement;
-      parentCount++;
+    });
+
+    if (lineClampCount > fontSizeCount) {
+      context += 'These are emails, please try to follow my tone as close as possible, do not use markdown. use newlines for formatting. \n';
+    } else if (fontSizeCount > lineClampCount) {
+      context += 'These are LinkedIn messages, so please be more casual, or try to follow my tone as close as possible.: \n';
     }
 
-    return context.trim();
-  };
+    messageElements.forEach((messageElement) => {
+      const messageText = messageElement.innerHTML?.trim();
+      if (messageText) {
+        context += ` ${messageText} \n`;
+      }
+    });
+
+    return context;
+  }
+  const MAX_PARENT_COUNT = 6;
+  let currentElement: HTMLElement | null = element;
+  let parentCount = 0;
+
+  while (currentElement && parentCount < MAX_PARENT_COUNT) {
+    const textContent = currentElement.textContent?.trim();
+    if (textContent) {
+      context = `${textContent} ${context}`;
+    }
+    currentElement = currentElement.parentElement;
+    parentCount++;
+  }
+  let ret = context.trim();
+  return ret;
+};
   // Socket.IO Connection
   // useEffect(() => {
   //   if (!socket) setSocket();

@@ -233,7 +233,15 @@ export default function ProspectSelect(props: {
       <ModalSelector
         selector={{
           content: (
-            <Text>{selectedProspect?.full_name || "Select Prospect"}</Text>
+            <Text>
+              {loadingProspects ? (
+                <>
+                  <Loader size="xs" /> Loading prospects...
+                </>
+              ) : (
+                selectedProspect?.full_name || "Select Prospect"
+              )}
+            </Text>
           ),
           buttonProps: {
             variant: "outline",

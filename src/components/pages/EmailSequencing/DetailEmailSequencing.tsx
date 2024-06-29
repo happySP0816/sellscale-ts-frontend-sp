@@ -91,7 +91,7 @@ import EmailSequenceStepAssets from "./EmailSequenceStepAssets";
 import SimulateMagicSubjectLineModal from "@modals/SimulateMagicSubjectLine";
 import Personalizers from "@pages/CampaignV2/Personalizers";
 import { fetchCampaignStats } from "@utils/requests/campaignOverview";
-import {socket} from '../../App'
+import { socket } from '../../App'
 
 const SpamScorePopover: FC<{
   subjectSpamScoreDetails?: SpamScoreResults | undefined | null;
@@ -1259,7 +1259,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
         </Flex>
 
         <Box>
-          <Paper withBorder style={{ borderColor: "#228be6" }} radius={"sm"}>
+         {props.subjectLine && props.template &&  <Paper withBorder style={{ borderColor: "#228be6" }} radius={"sm"}>
             <Flex align={"center"} justify={"space-between"} px={"lg"} py={"sm"}>
               <Flex align={"center"} gap={4}>
                 <IconMail size={"0.9rem"} color="#228be6" />
@@ -1399,7 +1399,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                 </div>
               </Paper>
             </Collapse>
-          </Paper>
+          </Paper>}
         </Box>
       </Box>
     </Stack>

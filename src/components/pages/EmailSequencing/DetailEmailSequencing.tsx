@@ -91,7 +91,7 @@ import EmailSequenceStepAssets from "./EmailSequenceStepAssets";
 import SimulateMagicSubjectLineModal from "@modals/SimulateMagicSubjectLine";
 import Personalizers from "@pages/CampaignV2/Personalizers";
 import { fetchCampaignStats } from "@utils/requests/campaignOverview";
-import {socket} from '../../App'
+import { socket } from '../../App'
 
 const SpamScorePopover: FC<{
   subjectSpamScoreDetails?: SpamScoreResults | undefined | null;
@@ -1160,7 +1160,23 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                               },
                             ]);
                             setSelectedVoice(newVoice.id.toString());
-                            return newVoiceItem;
+
+                            // PUT the new voice ID to the campaign
+                            const updateCampaignResponse = await fetch(API_URL + `/campaigns/${currentProject.id}/voice`, {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${userToken}`,
+                              },
+                              body: JSON.stringify({ voice_id: newVoice.id }),
+                            });
+
+                            if (!updateCampaignResponse.ok) {
+                              console.error('Failed to update campaign with new voice');
+                            }
+
+                            refetch();
+                            return newVoiceItem; // Return the new voice item
                           } else {
                             console.error('Failed to create voice');
                             return null;
@@ -1170,9 +1186,9 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                           return null;
                         }
                       };
+
                       createVoice();
-                      refetch();
-                      return { value: query, label: query }; // Return a temporary item synchronously
+                      return { value: query, label: query }; // Return a placeholder value immediately
                     }}
                     ml="sm"
                     placeholder="Select voice"
@@ -1182,7 +1198,11 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                     data={[{ value: 'null', label: 'No Voice' }, ...aiVoices.map(voice => ({ value: voice.id.toString(), label: voice.name }))]}
                     value={selectedVoice?.toString()}
                     onChange={async (value) => {
-                      setSelectedVoice(value);
+                      if (value === 'null') {
+                        setSelectedVoice(null);
+                      } else {
+                        setSelectedVoice(value);
+                      }
                       try {
                         setLoadingBankData(true);
                         const [updateVoiceResponse, fewShotResponse] = await Promise.all([
@@ -1200,7 +1220,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                               'Content-Type': 'application/json',
                               Authorization: `Bearer ${userToken}`,
                             },
-                            body: JSON.stringify({ voice_id: value === 'null' ? null : value })
+                            body: JSON.stringify({ voice_id: value === 'null' ? null : value, client_archetype_id: currentProject.id })
                           })
                         ]);
 
@@ -1216,7 +1236,6 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                             ...item,
                             nuance: JSON.parse(item.nuance)
                           }));
-                          console.log('data is', decomposedFewShotData)
                           setFewShots(decomposedFewShotData);
                         } else {
                           console.error('Failed to fetch few-shot data');
@@ -1240,7 +1259,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
         </Flex>
 
         <Box>
-          <Paper withBorder style={{ borderColor: "#228be6" }} radius={"sm"}>
+         {props.subjectLine && props.template &&  <Paper withBorder style={{ borderColor: "#228be6" }} radius={"sm"}>
             <Flex align={"center"} justify={"space-between"} px={"lg"} py={"sm"}>
               <Flex align={"center"} gap={4}>
                 <IconMail size={"0.9rem"} color="#228be6" />
@@ -1380,7 +1399,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                 </div>
               </Paper>
             </Collapse>
-          </Paper>
+          </Paper>}
         </Box>
       </Box>
     </Stack>

@@ -579,7 +579,7 @@ const VariantSelect = (props: any) => {
             <span className="text-gray-400 mr-2">
               Variant {variant}/{item.length}:
             </span>
-            {variant ? item[variant - 1].title : 0}
+            {variant ? item[variant - 1]?.title : 0}
           </Text>
           <ActionIcon
             variant="filled"

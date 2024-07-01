@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Flex,
@@ -11,6 +11,7 @@ import {
   Button,
   Switch,
   useMantineTheme,
+  Textarea,
 } from "@mantine/core";
 import {
   IconMessages,
@@ -26,9 +27,12 @@ import { handleAssetCreation } from "@pages/Sequence/InlineTemplateAdder";
 import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
-import { postSequenceStepDeactivate } from "@utils/requests/emailSequencing";
+import { patchSequenceStep, postSequenceStepDeactivate } from "@utils/requests/emailSequencing";
 import { showNotification } from "@mantine/notifications";
 import { postBumpDeactivate } from "@utils/requests/postBumpDeactivate";
+import RichTextArea from "@common/library/RichTextArea";
+import { JSONContent } from "@tiptap/react";
+import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
 
 interface SequenceVariantProps {
   asset: any;
@@ -94,6 +98,33 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
   const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
   const currentProject = useRecoilValue(currentProjectState);
+
+  const [showEditor, setShowEditor] = useState(false);
+  const bodyRich = useRef<JSONContent | null>(null);
+  const bodyRef = useRef<string | null>(null);
+
+  const [textState, setTextState] = useState<string>(
+    assetType === "linkedin" && text.startsWith("<p>") && text.endsWith("</p>")
+      ? text.slice(3, -4)
+      : text
+  );
+
+  useEffect(() => {
+    if (typeof text === 'string') {
+      try {
+        bodyRich.current = JSON.parse(text);
+        bodyRef.current = text;
+      } catch (e) {
+        console.error('Failed to parse text as JSON', e);
+        bodyRich.current = null;
+        bodyRef.current = null;
+      }
+    } else {
+      bodyRich.current = text;
+      bodyRef.current = JSON.stringify(text);
+    }
+  }, [text]);
+
   return (
     <Box
       mb={"sm"}
@@ -120,8 +151,15 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
               Saved
             </Badge>
           )}
-          <Tooltip label="Editing coming soon" position="top">
-            <ActionIcon disabled mr="xs">
+          <Tooltip label="Edit template" position="top">
+            <ActionIcon disabled={isSaved === undefined} onClick={()=>{
+              if (opened){
+                setShowEditor(!showEditor);
+              } else {
+                handleToggle(index);
+                setShowEditor(true);
+              }
+            }} mr="xs">
               <IconEdit size={"0.9rem"} />
             </ActionIcon>
           </Tooltip>
@@ -234,11 +272,89 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
       >
         <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
           <Avatar src={userImgUrl} size={"md"} radius={"xl"} />
-          <Box>
-            <div style={{ fontSize: "11px" }}>
-              <BracketGradientWrapper>{text}</BracketGradientWrapper>
-            </div>
-          </Box>
+          {showEditor ? (
+            assetType === "email" ? (
+              <Flex direction="column" style={{ width: "100%" }}>
+                <RichTextArea
+                  onChange={(value, rawValue) => {
+                    bodyRich.current = rawValue;
+                    bodyRef.current = value;
+                  }}
+                  value={textState}
+                  height={250}
+                />
+                <Flex justify="flex-end" mt="xs">
+                  <Button
+                    size="xs"
+                    color="teal"
+                    onClick={() => {
+                      patchSequenceStep(
+                        userToken,
+                        assetId,
+                        "active",
+                        angle,
+                        bodyRef.current || '',
+                        null,
+                        false
+                      );
+                      setShowEditor(false);
+                      setTextState(bodyRef.current || '');
+                      console.log("Save button clicked");
+                    }}
+                  >
+                    Save
+                  </Button>
+                </Flex>
+              </Flex>
+            ) : assetType === "linkedin" ? (
+              <Flex direction="column" style={{ width: "100%" }}>
+                <Textarea
+                  onChange={(event) => {
+                    bodyRef.current = event.currentTarget.value;
+                    setTextState(event.currentTarget.value)
+                  }}
+                  value={textState}
+                  minRows={10}
+                />
+                <Flex justify="flex-end" mt="xs">
+                  <Button
+                    size="xs"
+                    color="teal"
+                    onClick={() => {
+                      {console.log('asset is', asset)}
+                      patchBumpFramework(
+                        userToken, // User token for authentication
+                        asset.bump_framework_id, // Bump framework ID
+                        asset.overall_status, // Overall status
+                        asset.title, // Title
+                        bodyRef.current || asset.description, // Description
+                        asset.length, // Length (positional argument)
+                        asset.bumped_count, // Bumped count (positional argument)
+                        2, // Bump delay days (positional argument)
+                        asset.active, // Set active
+                        true, // Set use account research
+                        undefined, // Blocklist (optional)
+                        null, // Additional context (optional)
+                        null, // Bump framework template name (optional)
+                        null // Bump framework human readable prompt (optional)
+                      );
+                      setShowEditor(false);
+                      setTextState(bodyRef.current || '');
+                      console.log("Save button clicked");
+                    }}
+                  >
+                    Save
+                  </Button>
+                </Flex>
+              </Flex>
+            ) : null
+          ) : (
+            <Box>
+              <div style={{ fontSize: "11px" }}>
+                <BracketGradientWrapper>{textState}</BracketGradientWrapper>
+              </div>
+            </Box>
+          )}
         </Flex>
       </Collapse>
     </Box>

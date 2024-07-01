@@ -1,6 +1,6 @@
 import { ActionIcon, Avatar, Box, Button, Collapse, Flex, Paper, ScrollArea, Switch, Tabs, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconBrandLinkedin, IconChevronDown, IconChevronUp, IconGlobe, IconWorld } from "@tabler/icons";
+import { IconArrowRight, IconBrandLinkedin, IconChevronDown, IconChevronUp, IconDeviceFloppy, IconFile, IconGlobe, IconWorld } from "@tabler/icons";
 import { useState } from "react";
 
 export default function ProspectPuller() {
@@ -86,6 +86,21 @@ export default function ProspectPuller() {
       company_global: "",
     },
   ]);
+
+  const [savedSearch, setSavedSearch] = useState([
+    {
+      label: "Saved Search",
+    },
+    {
+      label: "Tech Founder ICP",
+    },
+    {
+      label: "CTOs of Recently Funded XXX...",
+    },
+  ]);
+
+  const [tab, setTab] = useState("search");
+
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [opened, setOpened] = useState(false);
 
@@ -117,8 +132,12 @@ export default function ProspectPuller() {
             }}
           >
             <Tabs.List>
-              <Tabs.Tab value="search">Search</Tabs.Tab>
-              <Tabs.Tab value="save">Saved searches</Tabs.Tab>
+              <Tabs.Tab value="search" onClick={() => setTab("search")}>
+                Search
+              </Tabs.Tab>
+              <Tabs.Tab value="save" onClick={() => setTab("save")}>
+                Saved searches
+              </Tabs.Tab>
             </Tabs.List>
 
             <Tabs.Panel value="search">
@@ -145,7 +164,27 @@ export default function ProspectPuller() {
                 })}
               </Box>
             </Tabs.Panel>
-            <Tabs.Panel value="save">Saved searches</Tabs.Panel>
+            <Tabs.Panel value="save">
+              <Box p={"sm"}>
+                <Button fullWidth variant="outline" size="md" my={"sm"} leftIcon={<IconDeviceFloppy size={"1.4rem"} />}>
+                  Save This Search
+                </Button>
+                {savedSearch.map((item, index) => {
+                  return (
+                    <Paper withBorder radius={"sm"} px={"md"} py={"xs"} mb={"sm"}>
+                      <Flex align={"center"} justify={"space-between"}>
+                        <Text key={index} fw={700} lineClamp={1}>
+                          📌 {item.label}
+                        </Text>
+                        <ActionIcon>
+                          <IconArrowRight size={"1rem"} />
+                        </ActionIcon>
+                      </Flex>
+                    </Paper>
+                  );
+                })}
+              </Box>
+            </Tabs.Panel>
           </Tabs>
         </Paper>
         <Paper w={"80%"}>
@@ -159,7 +198,7 @@ export default function ProspectPuller() {
               </Text>
             </Box>
             <Flex align={"center"} gap={"sm"} pr={"sm"}>
-              <Button disabled>Create Segment</Button>
+              <Button disabled={tab === "save" ? false : true}>Create Segment</Button>
               <Switch
                 label="Advanced View"
                 labelPosition="left"

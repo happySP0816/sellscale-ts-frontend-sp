@@ -25,6 +25,8 @@ import {
   IconAnalyze,
   IconBrandLinkedin,
   IconMail,
+  IconCalendar,
+  IconSettings,
 } from "@tabler/icons";
 import { navigateToPage } from "@utils/documentChange";
 import { activateQueryPipeline } from "@utils/searchQueryPipeline";
@@ -106,32 +108,46 @@ export default function SpotlightWrapper({
 
   let mainActions: SpotlightAction[] = [
     {
-      title: "Home",
-      description: "Go to home",
+      title: "Pipeline",
+      description: "View your pipeline, daily activity, pending tasks and more",
       group: "Pages",
-      onTrigger: () => navigateToPage(navigate, `/home`),
-      icon: <IconHome size={18} />,
+      onTrigger: () => navigateToPage(navigate, `/overview`),
+      icon: <IconFilter size={18} />,
     },
     {
-      title: "LinkedIn",
-      description: "View your LinkedIn outbound",
+      title: "Inbox",
+      description: "View your inbox and send messages",
       group: "Pages",
-      onTrigger: () => navigateToPage(navigate, `/linkedin`),
-      icon: <IconBrandLinkedin size={18} />,
+      onTrigger: () => navigateToPage(navigate, `/inbox`),
+      icon: <IconSend size={18} />,
     },
     {
-      title: "Email",
-      description: "View your email outbound",
+      title: "Campaigns",
+      description: "View & create campaigns and analyze results",
       group: "Pages",
-      onTrigger: () => navigateToPage(navigate, `/email`),
-      icon: <IconMail size={18} />,
+      onTrigger: () => navigateToPage(navigate, `/campaigns`),
+      icon: <IconCalendar size={18} />,
     },
     {
-      title: "Personas",
-      description: "Create target ICPs and upload new prospect lists",
+      title: "Contacts",
+      description: "View and manage your contacts",
       group: "Pages",
-      onTrigger: () => navigateToPage(navigate, `/personas`),
+      onTrigger: () => navigateToPage(navigate, `/contacts/overview`),
       icon: <IconUsers size={18} />,
+    },
+    {
+      title: "AI Brain",
+      description: "View and manage your AI Brain strategies and analytics",
+      group: "Pages",
+      onTrigger: () => navigateToPage(navigate, `/analytics`),
+      icon: <IconAnalyze size={18} />,
+    },
+    {
+      title: "Settings",
+      description: "View and update your settings",
+      group: "Pages",
+      onTrigger: () => navigateToPage(navigate, `/settings`),
+      icon: <IconSettings size={18} />,
     },
   ];
   if (
@@ -152,12 +168,14 @@ export default function SpotlightWrapper({
   >(null);
 
   useEffect(() => {
-    if(query){
-      activateQueryPipeline(query, navigate, theme, userToken).then((result) => {
-        if(query === currentQuery.current){
-          setQueryResult(result);
+    if (query) {
+      activateQueryPipeline(query, navigate, theme, userToken).then(
+        (result) => {
+          if (query === currentQuery.current) {
+            setQueryResult(result);
+          }
         }
-      });
+      );
     }
   }, [query]);
 
@@ -176,10 +194,14 @@ export default function SpotlightWrapper({
           setQueryResult(null);
         }
       }}
-      actions={(queryResult === null) ? [] : (
-        (queryResult === false || query === '') ? mainActions : [...queryResult]
-      )}
-      actionComponent={                         CustomAction}
+      actions={
+        queryResult === null
+          ? mainActions
+          : queryResult === false || query === ""
+          ? mainActions
+          : [...queryResult]
+      }
+      actionComponent={CustomAction}
       searchIcon={<IconSearch size={18} />}
       searchPlaceholder={"Search everywhere..."}
       searchInputProps={{ autoComplete: "off" }}
@@ -188,16 +210,16 @@ export default function SpotlightWrapper({
       disabled={notLoggedIn}
       filter={(query: string, actions: SpotlightAction[]) => {
         actions.sort((a, b) => {
-          if(a.group === b.group){
+          if (a.group === b.group) {
             return a.title.localeCompare(b.title);
           } else {
-            return (b.group || '').localeCompare(a.group || '')
+            return (b.group || "").localeCompare(a.group || "");
           }
-        })
+        });
         return actions;
       }}
       nothingFoundMessage={
-        (query !== "" && queryResult !== null) ? (
+        query !== "" && queryResult !== null ? (
           <Text c="dimmed" fs="italic">
             Nothing found
           </Text>

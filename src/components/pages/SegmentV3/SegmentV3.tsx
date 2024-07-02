@@ -142,19 +142,7 @@ export default function SegmentV3(props: PropsType) {
     }
   };
   const getNestedRows = (rows: any) => {
-    const data = rows.flatMap((row: any) => {
-      const hasChildren = expandedRows.includes(row.id) && row.sub_segments && row.sub_segments.length > 0;
-      const nestedRows = hasChildren
-        ? row.sub_segments.map((subSegment: any, index: number, array: any[]) => ({
-            ...subSegment,
-            parentId: row.id,
-            isChild: true,
-            isLastChild: index === array.length - 1,
-          }))
-        : [];
-      return [{ ...row, isChild: false, hasChildren: hasChildren }, ...nestedRows];
-    });
-
+    const data = rows
     return data.filter((row: any) => {
       if (searchQuery && !JSON.stringify(row).toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
@@ -1062,7 +1050,7 @@ export default function SegmentV3(props: PropsType) {
             {/* <ActionIcon onClick={unusedToggle}>{openedUnUsed ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon> */}
           </Flex>
           <SimpleGrid cols={3} mt={"lg"}>
-            {data.map((item: {
+            {getNestedRows(data).map((item: {
               id: number,
               person_name: string,
               segment_title: string,

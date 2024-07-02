@@ -128,7 +128,6 @@ export default function App() {
         const activeElement = document.activeElement as HTMLElement;
         if (activeElement && (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'DIV' && activeElement.getAttribute('role') === 'textbox') || (activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'text') || (activeElement.classList.contains('mantine-Textarea-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('mantine-Input-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('tiptap') && activeElement.classList.contains('ProseMirror')))) {
           previousFocusedElementRef.current = activeElement;
-
           const contextInfo = getContextualInformation(activeElement);
 
           const popover = document.createElement('div');
@@ -164,9 +163,15 @@ export default function App() {
               if (popoverRef.current) {
                 document.body.removeChild(popoverRef.current);
                 if (previousFocusedElementRef.current) {
-                  (previousFocusedElementRef.current as HTMLTextAreaElement).value = '';
-                  (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = 'black';
-                  (previousFocusedElementRef.current as HTMLTextAreaElement).focus();
+                  if (previousFocusedElementRef.current.classList.contains('tiptap') && previousFocusedElementRef.current.classList.contains('ProseMirror')) {
+                    previousFocusedElementRef.current.innerHTML = '';
+                    previousFocusedElementRef.current.style.color = 'black';
+                    previousFocusedElementRef.current.focus();
+                  } else {
+                    (previousFocusedElementRef.current as HTMLTextAreaElement).value = '';
+                    (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = 'black';
+                    (previousFocusedElementRef.current as HTMLTextAreaElement).focus();
+                  }
                 }
               }
             }
@@ -188,19 +193,6 @@ export default function App() {
           popover.appendChild(textarea);
           textarea.focus();
 
-          const handleClickOutside = (event: MouseEvent) => {
-            if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-              (previousFocusedElementRef.current as HTMLTextAreaElement).value = '';
-              (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = 'black';
-              document.body.removeChild(popoverRef.current);
-              document.removeEventListener('click', handleClickOutside);
-              // if (previousFocusedElementRef.current) {
-                
-              // }
-            }
-          };
-
-          document.addEventListener('click', handleClickOutside);
         }
       } else if (event.metaKey && event.key === 'Enter') {
         const activeElement = document.activeElement as HTMLElement;
@@ -250,10 +242,13 @@ export default function App() {
       const interval = setInterval(() => {
         if (index < res.response.length) {
           const char = res.response.charAt(index);
+          if (element.classList.contains('tiptap') && element.classList.contains('ProseMirror')) {
+            element.innerText = element.innerText + (index === 0 && char === ' ' ? '' : char);
+          } else {
             const textarea = element as HTMLTextAreaElement;
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
-            const value = textarea.value;
+            const value = textarea.value || '';
             textarea.value = value.slice(0, start) + char + value.slice(end);
             textarea.selectionStart = textarea.selectionEnd = start + 1;
 
@@ -263,7 +258,7 @@ export default function App() {
               tracker.setValue(value);
             }
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
-          
+          }
           index += 1;
         } else {
           clearInterval(interval);
@@ -293,8 +288,30 @@ const removeLoadingGifAndAddButton = (popover: HTMLDivElement, element: HTMLElem
   acceptButton.style.borderRadius = '4px';
   acceptButton.addEventListener('click', () => {
     acceptGeneration(popover, element);
+    document.removeEventListener('click', handleClickOutside);
   });
   popover.appendChild(acceptButton);
+
+  const handleClickOutside = (event: MouseEvent) => {
+    console.log('popover is', popoverRef.current);
+    if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+      if (previousFocusedElementRef.current) {
+        if (previousFocusedElementRef.current.classList.contains('tiptap') && previousFocusedElementRef.current.classList.contains('ProseMirror')) {
+          previousFocusedElementRef.current.innerHTML = '';
+          previousFocusedElementRef.current.style.color = 'black';
+        } else {
+          (previousFocusedElementRef.current as HTMLTextAreaElement).value = '';
+          (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = 'black';
+        }
+      }
+      if (popoverRef.current.parentNode) {
+        popoverRef.current.parentNode.removeChild(popoverRef.current);
+      }
+      document.removeEventListener('click', handleClickOutside);
+    }
+  };
+
+  document.addEventListener('click', handleClickOutside);
 
   // Add keydown event listener to the document to handle the Enter key
 

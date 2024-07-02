@@ -1410,7 +1410,6 @@ export const SubjectLineItem: React.FC<{
   subjectLine: SubjectLineTemplate;
   refetch: () => Promise<void>;
 }> = ({ subjectLine, refetch }) => {
-  console.log("subject line", subjectLine);
   const [manageSubjectLineOpened, { open: openManageSubject, close: closeManageSubject }] = useDisclosure();
   const userToken = useRecoilValue(userTokenState);
 

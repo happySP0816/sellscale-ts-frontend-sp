@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Legend, DoughnutController, ArcElement, Chart } from "chart.js";
 import { useRecoilValue } from "recoil";
+import { API_URL } from "@constants/data";
+import { syncLocalStorage } from "@auth/core";
 
 Chart.register(ArcElement);
 
@@ -24,7 +26,44 @@ export default function SegmentV3Overview(props: any) {
   const [isSavingACV, setIsSavingACV] = useState(false); // State to manage loading state
   const userToken = useRecoilValue(userTokenState);
 
-  const totalSegments = data.length + data.map((x: any) => x.sub_segments.length).reduce((acc: number, item: any) => acc + item, 0);
+  const handleEditACVClick = () => {
+    setEditModeACV(true);
+  };
+
+  const handleSaveACVClick = () => {
+    const savedValue = editableACV === 0 ? 0 : Number(editableACV);
+    setIsSavingACV(true); // Start loading
+    fetch(`${API_URL}/client/`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        contract_size: savedValue,
+      }),
+    })
+      .then((response) => {
+        setIsSavingACV(false); // Stop loading
+        if (response.ok) {
+          syncLocalStorage(userToken, (userData) => {
+            userData.client.contract_size = savedValue;
+            setEditedACV(savedValue);
+            return userData;
+          });
+          setEditModeACV(false);
+          setEditableACV((num) => savedValue); // Update the display to show the saved value
+        } else {
+          console.error('Failed to update contract size');
+        }
+      })
+      .catch((error) => {
+        setIsSavingACV(false); // Stop loading on error
+        console.error('Error updating contract size:', error);
+      });
+  };
+
+  const totalSegments = data.length;
 
   const piechartOptions = {
     rotation: 270,
@@ -106,9 +145,32 @@ export default function SegmentV3Overview(props: any) {
           </Flex>
         </Flex>
         <Flex align={"center"} gap={"sm"}>
-          <Text size={30} fw={500}>
-            ${parseInt(`${editableACV}`).toLocaleString()}
-          </Text>
+          {!editModeACV ? (
+            <Text size={30} fw={500}>
+              ${isNaN(parseInt(`${editableACV}`)) ? '0' : parseInt(`${editableACV}`).toLocaleString()}
+            </Text>
+          ) : (
+            <TextInput
+              value={editableACV}
+              onChange={(event) => setEditableACV(Number(event.currentTarget.value))}
+              type='number'
+              style={{ width: '100%' }}
+            />
+          )}
+          <Tooltip
+            label={!editModeACV ? 'Edit ACV' : 'Save Changes'}
+            position={'bottom'}
+            openDelay={400}
+          >
+            <Button
+              size='xs'
+              compact
+              color={'gray'}
+              onClick={!editModeACV ? handleEditACVClick : handleSaveACVClick}
+            >
+              {!editModeACV ? <IconPencil size={'0.9rem'} /> : <IconCheck size={'0.9rem'} />}
+            </Button>
+          </Tooltip>
         </Flex>
       </Card>
 

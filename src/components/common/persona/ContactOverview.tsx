@@ -88,7 +88,7 @@ const ContactOverview = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="segments">
-          <SegmentV2
+          <SegmentV3
             onDownloadHistoryClick={() => {
               setTabValue("history");
             }}
@@ -98,7 +98,7 @@ const ContactOverview = () => {
         <Tabs.Panel value="sonar">
           <SellScaleSonar />
         </Tabs.Panel>
-
+        
         <Tabs.Panel value="segments_v3">
           <SegmentV3 />
         </Tabs.Panel>

@@ -1,6 +1,10 @@
-import { userDataState, adminDataState, userTokenState } from '@atoms/userAtoms';
-import { impersonateSDR } from '@auth/core';
-import { HEADER_HEIGHT } from '@constants/data';
+import {
+  userDataState,
+  adminDataState,
+  userTokenState,
+} from "@atoms/userAtoms";
+import { impersonateSDR } from "@auth/core";
+import { HEADER_HEIGHT } from "@constants/data";
 import {
   Avatar,
   Badge,
@@ -10,15 +14,15 @@ import {
   Select,
   SelectProps,
   Loader,
-} from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
-import { proxyURL, valueToColor, nameToInitials } from '@utils/general';
-import { getClientSDRs } from '@utils/requests/client';
-import { forwardRef } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { ClientSDR } from 'src';
+} from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
+import { proxyURL, valueToColor, nameToInitials } from "@utils/general";
+import { getClientSDRs } from "@utils/requests/client";
+import { forwardRef } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { ClientSDR } from "src";
 
-interface ItemProps extends React.ComponentPropsWithoutRef<'div'> {
+interface ItemProps extends React.ComponentPropsWithoutRef<"div"> {
   image: string;
   label: string;
 }
@@ -26,12 +30,17 @@ interface ItemProps extends React.ComponentPropsWithoutRef<'div'> {
 const SelectItem = forwardRef<HTMLDivElement, ItemProps>(
   ({ image, label, ...others }: ItemProps, ref) => (
     <div ref={ref} {...others}>
-      <Group spacing='sm' noWrap>
-        <Avatar src={proxyURL(image)} alt={`${label}'s Profile Picture`} radius='xl' size='xs'>
+      <Group spacing="sm" noWrap>
+        <Avatar
+          src={proxyURL(image)}
+          alt={`${label}'s Profile Picture`}
+          radius="xl"
+          size="xs"
+        >
           {nameToInitials(label)}
         </Avatar>
         <div>
-          <Text size='xs'>{label}</Text>
+          <Text size="xs">{label}</Text>
         </div>
       </Group>
     </div>
@@ -44,15 +53,11 @@ export default function AdminHeader(props: {}) {
   const [userData, setUserData] = useRecoilState(userDataState);
   const [adminData, setAdminData] = useRecoilState(adminDataState);
 
-  const {
-    data: rData,
-    refetch,
-    isLoading,
-  } = useQuery({
+  const { data: rData, refetch, isLoading } = useQuery({
     queryKey: [`query-get-org-sdrs`],
     queryFn: async () => {
       const result = await getClientSDRs(userToken);
-      const r = result.status === 'success' ? (result.data as ClientSDR[]) : [];
+      const r = result.status === "success" ? (result.data as ClientSDR[]) : [];
       saveToLocalStorage(r);
       return r;
     },
@@ -60,11 +65,11 @@ export default function AdminHeader(props: {}) {
 
   const saveToLocalStorage = (data: ClientSDR[] | undefined) => {
     if (!data) return;
-    localStorage.setItem('admin-sdrs-view', JSON.stringify(data));
+    localStorage.setItem("admin-sdrs-view", JSON.stringify(data));
   };
 
   const getFromLocalStorage = (): ClientSDR[] | undefined => {
-    const data = localStorage.getItem('admin-sdrs-view');
+    const data = localStorage.getItem("admin-sdrs-view");
     try {
       return data ? JSON.parse(data) : undefined;
     } catch (e) {
@@ -76,58 +81,68 @@ export default function AdminHeader(props: {}) {
 
   return (
     <Group
-      px='md'
-      position='apart'
-      align='center'
+      px="md"
+      position="apart"
+      align="center"
       sx={{
         zIndex: 5000,
       }}
       style={{
-        backgroundColor: theme.fn.variant({ variant: 'filled', color: 'dark' }).background,
+        backgroundColor: theme.fn.variant({ variant: "filled", color: "dark" })
+          .background,
       }}
       h={HEADER_HEIGHT}
     >
       <Group>
-        <Badge variant='outline' color='pink'>
+        <Badge variant="outline" color="pink">
           Admin View
         </Badge>
         <Avatar
           src={proxyURL(adminData?.img_url)}
           alt={`${adminData?.sdr_name}'s Profile Picture`}
           color={valueToColor(theme, adminData?.sdr_name)}
-          radius='xl'
-          size='sm'
+          radius="xl"
+          size="sm"
         >
           {nameToInitials(adminData?.sdr_name)}
         </Avatar>
-        <Text c='gray.3'>{adminData?.sdr_name}</Text>
+        <Text c="gray.3">{adminData?.sdr_name}</Text>
       </Group>
       <Group>
-        {isLoading && <Loader size='xs' color='gray' variant='dots' />}
+        {isLoading && <Loader size="xs" color="gray" variant="dots" />}
         {
           // sum of all unread messages
-          sdrs?.reduce((acc: any, sdr: any) => acc + (sdr.unread_inbox_messages || 0), 0) > 0 && (
-            <Badge variant='filled' color='red'>
-              {sdrs?.reduce((acc, sdr) => acc + (sdr.unread_inbox_messages || 0), 0)} unread
-              messages
-            </Badge>
-          )
+          Array.isArray(sdrs) &&
+            sdrs?.reduce(
+              (acc: any, sdr: any) => acc + (sdr.unread_inbox_messages || 0),
+              0
+            ) > 0 && (
+              <Badge variant="filled" color="red">
+                {sdrs?.reduce(
+                  (acc, sdr) => acc + (sdr.unread_inbox_messages || 0),
+                  0
+                )}{" "}
+                unread messages
+              </Badge>
+            )
         }
-        <Text c='gray.3'>👀 IMPERSONATING AS: </Text>
+        <Text c="gray.3">👀 IMPERSONATING AS: </Text>
         <Select
-          placeholder='Select SDR'
-          size='xs'
+          placeholder="Select SDR"
+          size="xs"
           onClick={(e) => {
             // fetch SDRs
             refetch();
           }}
           w={300}
-          data={(sdrs ?? [])
+          data={(Array.isArray(sdrs) ? sdrs : [])
             .sort((a, b) => a.sdr_name.localeCompare(b.sdr_name))
             .map((sdr) => {
               const num_unread = sdr.unread_inbox_messages;
               const num_unread_str =
-                num_unread && num_unread > 0 ? ` (🔴 ${num_unread} unread)` : '';
+                num_unread && num_unread > 0
+                  ? ` (🔴 ${num_unread} unread)`
+                  : "";
               return {
                 image: sdr.img_url,
                 label: sdr.sdr_name + num_unread_str,

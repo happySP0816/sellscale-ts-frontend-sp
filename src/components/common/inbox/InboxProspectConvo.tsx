@@ -1092,7 +1092,7 @@ export default function InboxProspectConvo(props: Props) {
             <LoadingOverlay
               zIndex={1}
               loader={loaderWithText('')}
-              visible={isFetching || isFetchingThreads || isFetchingMessages}
+              visible={false}
             />
             {openedOutboundChannel === 'EMAIL' && isConversationOpened && (
               <Group

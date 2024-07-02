@@ -669,6 +669,7 @@ export default function CampaignTemplateEditModal({
                               innerProps.campaignId
                             )
                           }
+                          sequenceType={sequenceType}
                           angle={template.message}
                           text={template.message}
                           assetId={template.id}
@@ -774,6 +775,7 @@ export default function CampaignTemplateEditModal({
                                     innerProps.campaignId
                                   )
                                 }
+                                sequenceType={sequenceType}
                                 angle={existingAsset.title}
                                 text={existingAsset.description}
                                 assetId={existingAsset.id}
@@ -829,6 +831,7 @@ export default function CampaignTemplateEditModal({
                                         innerProps.campaignId
                                       )
                                     }
+                                    sequenceType={sequenceType}
                                     angle={asset.angle}
                                     text={asset.text}
                                     assetId={asset.id}
@@ -1114,18 +1117,19 @@ export default function CampaignTemplateEditModal({
                     [],
                     //since we have initial messages, we need to increment step num by 1 here. todo: inline adding messages for initial messages.
                     sequenceType === "linkedin"
-                      ? stagingData[sequenceType].map((item: any) => ({
+                      ? stagingData[sequenceType]?.map((item: any) => ({
                           ...item,
                           step_num: item.step_num + 1,
                         }))
                       : stagingData[sequenceType]
-                  ).finally(() => {
+                  )
+                  
                     if (currentProject && currentProject.id !== null) {
                       innerProps.refetchSequenceData(Number(currentProject.id));
                     }
                     setLoading(false);
                     context.closeModal(id);
-                  });
+                  
                 }}
               >
                 Save to Sequence

@@ -33,6 +33,7 @@ import { postBumpDeactivate } from "@utils/requests/postBumpDeactivate";
 import RichTextArea from "@common/library/RichTextArea";
 import { JSONContent } from "@tiptap/react";
 import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
+import { API_URL } from "@constants/data";
 
 interface SequenceVariantProps {
   asset: any;
@@ -61,7 +62,7 @@ interface SequenceVariantProps {
     setStagingData: any
   ) => void;
   showAll?: boolean;
-  sequenceType?: string;
+  sequenceType: string;
   currentStepNum?: number;
   setSuggestionData?: (data: any) => void;
   setAddingLinkedinAsset?: (value: boolean) => void;
@@ -152,7 +153,7 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
             </Badge>
           )}
           <Tooltip label="Edit template" position="top">
-            <ActionIcon disabled={isSaved === undefined} onClick={()=>{
+            <ActionIcon disabled={isSaved === undefined && assetType !== 'staging'} onClick={()=>{
               if (opened){
                 setShowEditor(!showEditor);
               } else {
@@ -347,7 +348,76 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
                   </Button>
                 </Flex>
               </Flex>
-            ) : null
+            ) : assetType === 'staging' ? (
+              <Flex direction="column" style={{ width: "100%" }}>
+                <Textarea
+                  onChange={(event) => {
+                    bodyRef.current = event.currentTarget.value;
+                    setTextState(event.currentTarget.value)
+                  }}
+                  value={textState}
+                  minRows={10}
+                />
+                <Flex justify="flex-end" mt="xs">
+                  <Button
+                    size="xs"
+                    color="teal"
+                    onClick={async () => {
+                      console.log('asset is', asset);
+                      // console.log('item in staging data is: ', stagingData[assetType].find((item: any) => item.id === assetId));
+                      setShowEditor(false);
+                      setTextState(bodyRef.current || '');
+
+                      // Update the staging data with the new text
+                      console.log('staging data is', stagingData)
+                      const updatedStagingData = {
+                        ...stagingData,
+                        [sequenceType]: stagingData[sequenceType]?.map((item: any) =>
+                          item.id === assetId ? { ...item, text: textState || '', angle: asset.angle, assets: asset.assets, step_num: asset.step_num } : item
+                        ) || [],
+                      };
+                      setStagingData(updatedStagingData);
+
+                      // Call the fetch to update the asset on the server
+                      if (sequenceType === 'linkedin'){
+                        try {
+                          const response = await fetch(`${API_URL}/client/update_asset`, {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              Authorization: `Bearer ${userToken}`,
+                            },
+                            body: JSON.stringify({
+                              asset_id: asset.assets[0],
+                              asset_key: asset.angle,
+                              asset_value:  bodyRef.current || '',
+                              asset_raw_value: bodyRef.current || '',
+                              asset_type: 'TEXT',
+                              asset_tags: asset.asset_tags,
+                            }),
+                          });
+
+                          if (!response.ok) {
+                            throw new Error('Failed to update asset');
+                          }
+
+                          console.log('Asset updated successfully');
+                        } catch (error) {
+                          console.error('Error updating asset:', error);
+                        }
+                      }
+                      console.log("Save button clicked");
+                    }}
+                  >
+                    Save
+                  </Button>
+                </Flex>
+              </Flex>
+
+            ) : (
+              null
+            ) 
+
           ) : (
             <Box>
               <div style={{ fontSize: "11px" }}>

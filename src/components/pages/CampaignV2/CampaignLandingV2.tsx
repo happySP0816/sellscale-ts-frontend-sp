@@ -18,6 +18,7 @@ import {
   Tooltip,
   Grid,
   Textarea,
+  ActionIcon,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -25,7 +26,18 @@ import posthog from "posthog-js";
 import Hook from "@pages/channels/components/Hook";
 import Tour from "reactour";
 import { API_URL } from "@constants/data";
-import { IconBrandLinkedin, IconCalendar, IconChecks, IconEdit, IconMailOpened, IconSend, IconSettings, IconTrash } from "@tabler/icons";
+import {
+  IconArrowLeftRight,
+  IconArrowsLeftRight,
+  IconBrandLinkedin,
+  IconCalendar,
+  IconChecks,
+  IconEdit,
+  IconMailOpened,
+  IconSend,
+  IconSettings,
+  IconTrash,
+} from "@tabler/icons";
 import { IconMessageCheck, IconSparkles } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { fetchCampaignStats, fetchTotalContacts, fetchCampaignAnalytics } from "@utils/requests/campaignOverview";
@@ -870,6 +882,23 @@ export default function CampaignLandingV2() {
                           },
                         }}
                       />
+                      <Tooltip label="Swap Linkedin & Email">
+                        <ActionIcon
+                          variant="outline"
+                          color="gray"
+                          onClick={() =>
+                            showNotification({
+                              title: "",
+                              message: "Coming soon!",
+                              color: "blue",
+                              autoClose: 5000,
+                            })
+                          }
+                          className=" min-w-[37px] min-h-[37px] border-[#D9DEE5]"
+                        >
+                          <IconArrowsLeftRight color="#228be6" size={"1rem"} />
+                        </ActionIcon>
+                      </Tooltip>
                     </Group>
                   </Paper>
                 </Flex>

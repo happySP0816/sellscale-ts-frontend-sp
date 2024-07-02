@@ -1,4 +1,18 @@
-import { Box, Flex, Text, Badge, Button, Select, ActionIcon, useMantineTheme, SimpleGrid, Paper, Title } from "@mantine/core";
+import {
+  Box,
+  Flex,
+  Text,
+  Badge,
+  Button,
+  Select,
+  ActionIcon,
+  useMantineTheme,
+  SimpleGrid,
+  Paper,
+  Title,
+  Loader,
+  HoverCard,
+} from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import {
   IconBulb,
@@ -15,51 +29,48 @@ import {
 } from "@tabler/icons";
 import { IconLighter } from "@tabler/icons-react";
 import { DataGrid } from "mantine-data-grid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useStrategiesApi } from "./StrategyApi";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import { closeAllModals, closeContextModal } from "@mantine/modals/lib/events";
 
 export default function AIBrainStrategy() {
   const theme = useMantineTheme();
   const [udPageSize, setUdPageSize] = useState("25");
+  const userToken = useRecoilValue(userTokenState);
+  const [fetchingStrategies, setFetchingStrategies] = useState(false);
 
-  const [strategies, setStrategies] = useState([
-    {
-      title: "Bay Area Campaign",
-      goal: "Test out if Bay Area is working betterl select different...",
-      tagged_campaigns: ["🥞 PTAL Campaign 1", "⛰ PTAL Campaign 2", "🏓 PTAL Campaign 3"],
-      response: 5,
-      demo: 2,
-      status: "Failed",
-    },
-    {
-      title: "Bay Area Campaign",
-      goal: "Test out if Bay Area is working betterl select different...",
-      tagged_campaigns: ["🥞 PTAL Campaign 1", "⛰ PTAL Campaign 2", "🏓 PTAL Campaign 3", "🐢 PTAL Campaign 4"],
-      response: 5,
-      demo: 2,
-      status: "Failed",
-    },
-    {
-      title: "Bay Area Campaign",
-      goal: "Test out if Bay Area is working betterl select different...",
-      tagged_campaigns: ["🥞 PTAL Campaign 1", "⛰ PTAL Campaign 2", "🏓 PTAL Campaign 3"],
-      response: 5,
-      demo: 2,
-      status: "Failed",
-    },
-    {
-      title: "Bay Area Campaign",
-      goal: "Test out if Bay Area is working betterl select different...",
-      tagged_campaigns: ["🥞 PTAL Campaign 1", "⛰ PTAL Campaign 2", "🏓 PTAL Campaign 3", "🐢 PTAL Campaign 4"],
-      response: 5,
-      demo: 2,
-      status: "Success",
-    },
-  ]);
+  const {
+    isLoading,
+    getAllSubscriptions,
+    postCreateStrategy,
+    getStrategy,
+    patchUpdateStrategy,
+    postAddArchetypeMapping,
+    deleteRemoveArchetypeMapping,
+    getAllStrategies,
+  } = useStrategiesApi(userToken);
+
+  const [strategies, setStrategies] = useState([]);
+
+  const handleGetAllStrategies = async () => {
+    setFetchingStrategies(true);
+    const response = await getAllStrategies();
+    console.log(response);
+    setStrategies(response);
+    setFetchingStrategies(false);
+  };
+
+  useEffect(() => {
+    handleGetAllStrategies();
+  }, [userToken]);
 
   return (
     <Box>
       <Flex align={"center"} justify={"space-between"}>
-        <Title order={3}>SellScale Initiated Campaigns (New Strategies)</Title>
+        <Title order={3}>Strategy Log</Title>
+        {fetchingStrategies && <Loader />}
         <Button
           leftIcon={<IconPlus size={"0.9rem"} />}
           onClick={() => {
@@ -71,7 +82,20 @@ export default function AIBrainStrategy() {
                   <Title order={2}>Create Strategy</Title>
                 </Flex>
               ),
-              innerProps: {},
+              innerProps: {
+                onSubmit: async (
+                  title: string,
+                  description: string,
+                  archetypes: number[]
+                ) => {
+                  const response = await postCreateStrategy(
+                    title,
+                    description,
+                    archetypes
+                  );
+                  handleGetAllStrategies();
+                },
+              },
             });
           }}
         >
@@ -102,10 +126,10 @@ export default function AIBrainStrategy() {
                   <Text color="gray">Strategy Title</Text>
                 </Flex>
               ),
-              minSize: 300,
-              maxSize: 400,
-              cell: (cell) => {
-                const { title, goal } = cell.row.original;
+              minSize: 200,
+              maxSize: 300,
+              cell: (cell: any) => {
+                const { title, description } = cell.row.original;
 
                 return (
                   <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
@@ -114,8 +138,9 @@ export default function AIBrainStrategy() {
                         <Text size={"sm"} fw={700}>
                           {title}
                         </Text>
-                        <Text size={"sm"} fw={500} mt={6}>
-                          <span className=" font-semibold">Goal:</span> {goal}
+                        <Text size={"sm"} fw={500} mt={6} color="gray">
+                          <span className=" font-semibold">Goal:</span>{" "}
+                          {description?.replace(/<[^>]*>/g, " ")}
                         </Text>
                       </Box>
                     </Flex>
@@ -131,20 +156,51 @@ export default function AIBrainStrategy() {
                   <Text color="gray">Tagged Campaigns</Text>
                 </Flex>
               ),
-              cell: (cell) => {
-                const { tagged_campaigns } = cell.row.original;
+              cell: (cell: any) => {
+                const { archetypes } = cell.row.original;
 
                 return (
                   <Flex w={"100%"} h={"100%"} align={"center"}>
-                    <SimpleGrid cols={2} verticalSpacing={"xs"}>
-                      {tagged_campaigns.map((item, index) => {
-                        return (
-                          <Text lineClamp={1} fw={600} key={index} className="">
-                            {item}
-                          </Text>
-                        );
-                      })}
-                    </SimpleGrid>
+                    <Box>
+                      {archetypes
+                        ?.slice(0, 4)
+                        .map((item: any, index: number) => {
+                          return (
+                            <Text
+                              lineClamp={1}
+                              fw={600}
+                              key={index}
+                              className=""
+                            >
+                              {item.emoji} {item.archetype}
+                            </Text>
+                          );
+                        })}
+                      {archetypes?.length > 4 && (
+                        <HoverCard shadow="md" withinPortal>
+                          <HoverCard.Target>
+                            <Text
+                              size={"sm"}
+                              fw={500}
+                              color="gray"
+                              mt={6}
+                              className=" font-semibold"
+                            >
+                              +{archetypes?.length - 4} more
+                            </Text>
+                          </HoverCard.Target>
+                          <HoverCard.Dropdown>
+                            {archetypes
+                              .slice(4)
+                              .map((item: any, index: number) => (
+                                <Text key={index} size={"sm"} fw={600}>
+                                  {item.emoji} {item.archetype}
+                                </Text>
+                              ))}
+                          </HoverCard.Dropdown>
+                        </HoverCard>
+                      )}
+                    </Box>
                   </Flex>
                 );
               },
@@ -159,17 +215,24 @@ export default function AIBrainStrategy() {
               ),
               maxSize: 210,
               enableResizing: true,
-              cell: (cell) => {
-                const { response, demo } = cell.row.original;
+              cell: (cell: any) => {
+                const { num_pos_response, num_demo } = cell.row.original;
 
                 return (
-                  <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                  <Flex
+                    align={"center"}
+                    gap={"xs"}
+                    py={"sm"}
+                    w={"100%"}
+                    h={"100%"}
+                  >
                     <Text color="green" size={"xs"} fw={500}>
-                      <span className=" font-bold">{response}</span> (+) Responses
+                      <span className=" font-bold">{num_pos_response}</span> (+)
+                      Responses
                     </Text>
                     <IconPoint size={"1.2rem"} fill="gray" color="white" />
                     <Text color="grape" size={"xs"} fw={500}>
-                      <span className=" font-bold">{demo}</span> Demos
+                      <span className=" font-bold">{num_demo}</span> Demos
                     </Text>
                   </Flex>
                 );
@@ -187,12 +250,29 @@ export default function AIBrainStrategy() {
               ),
               maxSize: 120,
               enableResizing: true,
-              cell: (cell) => {
+              cell: (cell: any) => {
                 const { status } = cell.row.original;
 
                 return (
-                  <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
-                    <Badge color={status === "Failed" ? "red" : status === "Success" ? "green" : "orange"}>{status}</Badge>
+                  <Flex
+                    align={"center"}
+                    justify={"center"}
+                    gap={"xs"}
+                    py={"sm"}
+                    w={"100%"}
+                    h={"100%"}
+                  >
+                    <Badge
+                      color={
+                        status === "FAILED"
+                          ? "red"
+                          : status === "SUCCESS"
+                          ? "green"
+                          : "orange"
+                      }
+                    >
+                      {status?.toLowerCase().replaceAll("_", " ")}
+                    </Badge>
                   </Flex>
                 );
               },
@@ -207,9 +287,17 @@ export default function AIBrainStrategy() {
               ),
               maxSize: 100,
               enableResizing: true,
-              cell: (cell) => {
+              cell: (cell: any) => {
+                const { description } = cell.row.original;
                 return (
-                  <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                  <Flex
+                    align={"center"}
+                    justify={"center"}
+                    gap={"xs"}
+                    py={"sm"}
+                    w={"100%"}
+                    h={"100%"}
+                  >
                     <ActionIcon
                       size={"sm"}
                       radius={"xl"}
@@ -225,7 +313,7 @@ export default function AIBrainStrategy() {
                             </Flex>
                           ),
                           innerProps: {
-                            strategies: cell.row.original,
+                            description: description,
                           },
                         });
                       }}
@@ -247,7 +335,27 @@ export default function AIBrainStrategy() {
                             </Flex>
                           ),
                           innerProps: {
-                            strategies: cell.row.original,
+                            title: cell.row.original.title,
+                            description: cell.row.original.description,
+                            archetypes: cell.row.original.archetypes?.map(
+                              (x: any) => x.id
+                            ),
+                            status: cell.row.original.status,
+                            onSubmit: async (
+                              title: string,
+                              description: string,
+                              archetypes: number[],
+                              status: string
+                            ) => {
+                              const response = await patchUpdateStrategy(
+                                cell.row.original.id,
+                                title,
+                                description,
+                                archetypes,
+                                status
+                              );
+                              handleGetAllStrategies();
+                            },
                           },
                         });
                       }}
@@ -292,10 +400,12 @@ export default function AIBrainStrategy() {
                     <Select
                       maw={100}
                       value={`${table.getState().pagination.pageIndex + 1}`}
-                      data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                        label: String(idx + 1),
-                        value: String(idx + 1),
-                      }))}
+                      data={new Array(table.getPageCount())
+                        .fill(0)
+                        .map((i, idx) => ({
+                          label: String(idx + 1),
+                          value: String(idx + 1),
+                        }))}
                       onChange={(v) => {
                         table.setPageIndex(Number(v) - 1);
                       }}
@@ -324,7 +434,9 @@ export default function AIBrainStrategy() {
                       h={36}
                       disabled={table.getState().pagination.pageIndex === 0}
                       onClick={() => {
-                        table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                        table.setPageIndex(
+                          table.getState().pagination.pageIndex - 1
+                        );
                       }}
                     >
                       <IconChevronLeft stroke={theme.colors.gray[4]} />
@@ -333,9 +445,14 @@ export default function AIBrainStrategy() {
                       variant="default"
                       color="gray.4"
                       h={36}
-                      disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                      disabled={
+                        table.getState().pagination.pageIndex ===
+                        table.getPageCount() - 1
+                      }
                       onClick={() => {
-                        table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                        table.setPageIndex(
+                          table.getState().pagination.pageIndex + 1
+                        );
                       }}
                     >
                       <IconChevronRight stroke={theme.colors.gray[4]} />

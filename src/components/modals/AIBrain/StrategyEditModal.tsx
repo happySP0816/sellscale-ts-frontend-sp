@@ -1,50 +1,94 @@
+import { userTokenState } from "@atoms/userAtoms";
 import RichTextArea from "@common/library/RichTextArea";
-import { Badge, Box, Button, Flex, Group, Radio, Text, TextInput } from "@mantine/core";
+import { API_URL } from "@constants/data";
+import {
+  Badge,
+  Box,
+  Button,
+  Flex,
+  Group,
+  MultiSelect,
+  Radio,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import { IconX } from "@tabler/icons";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 
 export default function StrategyEditModal({
   innerProps,
   context,
   id,
 }: ContextModalProps<{
-  strategies: any;
+  title: string;
+  description: string;
+  status: string;
+  archetypes: number[];
+  onSubmit: (
+    title: string,
+    description: string,
+    archetypes: number[],
+    status: string
+  ) => void;
 }>) {
-  console.log("======", innerProps.strategies);
-  const strategies = innerProps.strategies;
+  const userToken = useRecoilValue(userTokenState);
+  const [status, setStatus] = useState(innerProps.status);
+  const [title, setTitle]: any = useState(innerProps.title);
+  const [description, setDescription] = useState(innerProps.description);
+  const [archetypes, setArchetypes]: any = useState(innerProps.archetypes); // Typo: setArchetype
+  const [allArchetypes, setAllArchetypes] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/client/all_archetypes`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setAllArchetypes(
+          data.data.map((x: any) => {
+            return {
+              value: x.id,
+              label: x.emoji + " " + x.archetype,
+            };
+          })
+        );
+      });
+  }, [userToken]);
+
   return (
     <Box>
-      <TextInput label="Strategy Name" defaultValue={strategies.title} />
-      <TextInput label="Attach Campaigns" placeholder="Search campaigns" mt={20} />
-      <Flex gap={"sm"} mt={"sm"} wrap={"wrap"}>
-        {strategies.tagged_campaigns?.map((item: any, index: number) => {
-          return (
-            <Box>
-              <Badge
-                size="md"
-                key={index}
-                color="gray"
-                rightSection={
-                  <IconX
-                    size={"0.8rem"}
-                    className="mt-[6px] hover:cursor-pointer"
-                    onClick={() => {
-                      console.log("-");
-                    }}
-                  />
-                }
-                sx={{ textTransform: "initial" }}
-              >
-                {item}
-              </Badge>
-            </Box>
-          );
-        })}
-      </Flex>
-      <Radio.Group label="Status" mt={"md"} value={strategies.status}>
+      <TextInput
+        label="Strategy Name"
+        defaultValue={innerProps.title}
+        onChange={setTitle}
+      />
+      <MultiSelect
+        withinPortal
+        label="Attach Campaigns"
+        placeholder="Search campaigns"
+        data={allArchetypes}
+        onChange={(value: any) => {
+          setArchetypes(value);
+        }}
+        value={archetypes}
+        mt={20}
+      />
+      <Radio.Group
+        label="Status"
+        mt={"md"}
+        value={status}
+        onChange={(value) => setStatus(value)}
+        defaultValue={innerProps.status}
+      >
         <Flex mt="8" gap={70}>
           <Radio
-            value="Progress"
+            value="IN_PROGRESS"
             label="In Progress"
             styles={{
               label: {
@@ -55,7 +99,7 @@ export default function StrategyEditModal({
             }}
           />
           <Radio
-            value="Failed"
+            value="FAILED"
             label="Failed"
             styles={{
               label: {
@@ -66,7 +110,7 @@ export default function StrategyEditModal({
             }}
           />
           <Radio
-            value="Success"
+            value="SUCCESS"
             label="Success"
             styles={{
               label: {
@@ -82,13 +126,25 @@ export default function StrategyEditModal({
         <Text fw={500} size={"sm"} mb={"8"}>
           Description
         </Text>
-        <RichTextArea height={200} />
+        <RichTextArea
+          height={200}
+          onChange={setDescription}
+          value={innerProps.description}
+        />
       </Box>
       <Flex gap={"xl"} mt={40}>
         <Button variant="outline" color="gray" fullWidth>
           Cancel
         </Button>
-        <Button fullWidth>Save Strategy</Button>
+        <Button
+          fullWidth
+          onClick={() => {
+            innerProps.onSubmit(title, description, archetypes, status);
+            context.closeAll();
+          }}
+        >
+          Save Strategy
+        </Button>
       </Flex>
     </Box>
   );

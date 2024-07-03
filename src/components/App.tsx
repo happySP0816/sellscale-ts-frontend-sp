@@ -132,6 +132,9 @@ export default function App() {
 
   const handleInputWithSuggestion = (event: Event) => {
 
+    if (userData?.client_name !== 'SellScale' && userData?.client_name !== 'DailyDropout.fyi'){
+      return;
+    }
     //do not run the autocomplete if we're on the login page:
     if (window.location.pathname === '/login') {
       return;

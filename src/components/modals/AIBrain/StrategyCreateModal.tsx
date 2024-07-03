@@ -69,6 +69,7 @@ export default function StrategyCreateModal({
         withinPortal
         label="Attach Campaigns"
         placeholder="Search campaigns"
+        searchable
         data={allArchetypes}
         onChange={(value) => {
           setArchetypes(value);

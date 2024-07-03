@@ -216,25 +216,47 @@ export default function AIBrainStrategy() {
               maxSize: 210,
               enableResizing: true,
               cell: (cell: any) => {
-                const { num_pos_response, num_demo } = cell.row.original;
+                const {
+                  num_pos_response,
+                  num_demo,
+                  num_sent,
+                } = cell.row.original;
 
                 return (
-                  <Flex
-                    align={"center"}
-                    gap={"xs"}
-                    py={"sm"}
-                    w={"100%"}
-                    h={"100%"}
-                  >
-                    <Text color="green" size={"xs"} fw={500}>
-                      <span className=" font-bold">{num_pos_response}</span> (+)
-                      Responses
-                    </Text>
-                    <IconPoint size={"1.2rem"} fill="gray" color="white" />
-                    <Text color="grape" size={"xs"} fw={500}>
-                      <span className=" font-bold">{num_demo}</span> Demos
-                    </Text>
-                  </Flex>
+                  <Box py={"sm"} w={"100%"} h={"100%"}>
+                    <Flex>
+                      <Text color="blue" size={"sm"} fw={500}>
+                        <span className=" font-bold">{num_sent} </span>
+                        Sent
+                      </Text>
+                      <Text color="gray" size={"xs"} fw={500} ml="xs">
+                        (100%)
+                      </Text>
+                    </Flex>
+                    <Flex>
+                      <Text color="green" size={"sm"} fw={500}>
+                        <span className=" font-bold">{num_pos_response}</span>{" "}
+                        (+) Responses
+                      </Text>
+                      <Text color="gray" size={"xs"} fw={500} ml="xs">
+                        (
+                        {(
+                          (num_pos_response / (num_sent + 0.0001)) *
+                          100
+                        ).toFixed(1)}
+                        %)
+                      </Text>
+                    </Flex>
+                    <Flex>
+                      <Text color="grape" size={"sm"} fw={500}>
+                        <span className=" font-bold">{num_demo}</span> Demos
+                      </Text>
+                      <Text color="gray" size={"xs"} fw={500} ml="xs">
+                        ({((num_demo / (num_sent + 0.0001)) * 100).toFixed(1)}
+                        %)
+                      </Text>
+                    </Flex>
+                  </Box>
                 );
               },
             },

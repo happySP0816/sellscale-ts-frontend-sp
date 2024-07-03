@@ -122,11 +122,261 @@ export default function App() {
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const previousFocusedElementRef = useRef<HTMLElement | null>(null);
 
+  const [suggestion, setSuggestion] = useState<string>('');
+  const [showSuggestion, setShowSuggestion] = useState<boolean>(false);
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const suggestionInputRef = useRef<string>('');
+  const previousValueRef = useRef<string>('');
+
+  /*Autocomplete */
+
+  const handleInputWithSuggestion = (event: Event) => {
+
+    if (userData?.client_name !== 'SellScale' && userData?.client_name !== 'DailyDropout.fyi'){
+      return;
+    }
+    //do not run the autocomplete if we're on the login page:
+    if (window.location.pathname === '/login') {
+      return;
+    }
+
+    const target = event.target as HTMLTextAreaElement | HTMLElement;
+    if (target instanceof HTMLTextAreaElement) {
+      target.style.height = 'auto';
+      target.style.height = `${target.scrollHeight}px`;
+    }
+
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    let currentValue: string;
+    let previousValue: string;
+
+    //tiptap prose mirror (rich text editor) needs to be handled differently
+    if (target.classList.contains('tiptap') && target.classList.contains('ProseMirror')) {
+      currentValue = target.innerText;
+      previousValue = previousValueRef.current;
+      previousValueRef.current = currentValue;
+    } else if (target instanceof HTMLTextAreaElement) {
+      currentValue = target.value;
+      previousValue = previousValueRef.current;
+      previousValueRef.current = currentValue;
+    } else {
+      return;
+    }
+
+    if (currentValue?.length < previousValue?.length) {
+      // User deleted some data, do not trigger autocomplete
+      setSuggestion('');
+      setShowSuggestion(false);
+      return;
+    }
+
+    const cursorAtEnd = target instanceof HTMLTextAreaElement ? target.selectionStart === currentValue.length : true;
+    const endsWithNewline = currentValue.endsWith('\n');
+    const cursorBeforeNewline = target instanceof HTMLTextAreaElement ? currentValue[target.selectionStart] === '\n' : false;
+
+    if (!cursorAtEnd && !endsWithNewline && !cursorBeforeNewline) {
+      // Do not trigger autocomplete if not at the end, doesn't end with a newline, or not before a newline
+      setSuggestion('');
+      setShowSuggestion(false);
+      return;
+    }
+
+    debounceTimeout.current = setTimeout(async () => {
+      const userInput = 'please give a completion for the following text, only the completion, do not premise it with anything and certainly do not write what I already wrote. Here is the text you will need to complete: ' + currentValue;
+      if (userInput.trim() === '') {
+        setSuggestion('');
+        setShowSuggestion(false);
+        return;
+      }
+
+      try {
+        // Create and show the loading GIF
+        const loadingGif = document.createElement('img');
+        loadingGif.src = logotrial;
+        loadingGif.style.position = 'fixed';
+        loadingGif.style.top = '10px';
+        loadingGif.style.right = '10px';
+        loadingGif.style.width = '50px';
+        loadingGif.style.zIndex = '10000';
+        document.body.appendChild(loadingGif);
+
+        const response = await fetch(`${API_URL}/ml/quick`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({ userInput, contextInfo: 'N/A' }),
+        });
+
+        // Remove the loading GIF after fetching
+        if (loadingGif.parentNode) {
+          loadingGif.parentNode.removeChild(loadingGif);
+        }
+
+        const data = await response.json();
+        suggestionInputRef.current = data.response;
+        setSuggestion(data.response);
+        setShowSuggestion(true);
+
+        // Show suggestion immediately
+        if (target instanceof HTMLTextAreaElement) {
+          const start = target.selectionStart;
+          const end = target.selectionEnd;
+          target.value = target.value.substring(0, start) + data.response + target.value.substring(end);
+          target.selectionStart = start;
+          target.selectionEnd = start + data.response.length;
+        } else if (target.classList.contains('tiptap') && target.classList.contains('ProseMirror')) {
+          const range = document.createRange();
+          const selection = window.getSelection();
+          range.selectNodeContents(target);
+          range.collapse(false);
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+          if (!popoverRef.current) {
+            target.textContent += data.response;
+          } else {
+            const range = document.createRange();
+            const selection = window.getSelection();
+            range.selectNodeContents(target);
+            range.collapse(false);
+            selection?.removeAllRanges();
+            selection?.addRange(range);
+            selection?.getRangeAt(0).insertNode(document.createTextNode(data.response));
+            selection?.collapseToEnd();
+          }
+
+          // Highlight the inserted text
+          const getTextNodesUnder = (node: Node) => {
+            const textNodes = [];
+            const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+            let n;
+            while ((n = walker.nextNode())) {
+              textNodes.push(n);
+            }
+            return textNodes;
+          };
+
+          const textNodes = getTextNodesUnder(target);
+          const textContent = textNodes.map(node => node.textContent).join('');
+          const textLength = textContent.length;
+
+          if (textLength === 0) {
+            console.log('ProseMirror instance is empty.');
+            return;
+          }
+
+          const startOffset = textLength - data.response.length;
+          const endOffset = textLength;
+
+          let currentOffset = 0;
+          let startNode, endNode, startNodeOffset, endNodeOffset;
+
+          for (const node of textNodes) {
+            const nodeLength = node.textContent?.length ?? 0;
+            if (currentOffset + nodeLength >= startOffset && !startNode) {
+              startNode = node;
+              startNodeOffset = startOffset - currentOffset;
+            }
+            if (currentOffset + nodeLength >= endOffset) {
+              endNode = node;
+              endNodeOffset = endOffset - currentOffset;
+              break;
+            }
+            currentOffset += nodeLength;
+          }
+
+          const endRange = document.createRange();
+          if (startNode && endNode && startNodeOffset && endNodeOffset) {
+            endRange.setStart(startNode, startNodeOffset);
+            endRange.setEnd(endNode, endNodeOffset);
+          } else {
+            console.error('Error: startNode or endNode is undefined.');
+          }
+
+          selection?.removeAllRanges();
+          selection?.addRange(endRange);
+        }
+
+        // Reset suggestion for the next request
+        setSuggestion('');
+        setShowSuggestion(false);
+
+      } catch (error) {
+        console.error('Error fetching autocomplete suggestion:', error);
+        setSuggestion('');
+        setShowSuggestion(false);
+      }
+    }, 1500);
+  };
+
+  const handleKeyDownWithSuggestion = (event: KeyboardEvent) => {
+    const target = event.target as HTMLTextAreaElement | HTMLElement;
+
+    if (event.key === 'Tab' && suggestionInputRef.current) {
+      event.preventDefault();
+      if (target instanceof HTMLTextAreaElement) {
+        const start = target.selectionStart;
+        const end = target.selectionEnd;
+        target.value = target.value.substring(0, start) + suggestionInputRef.current + target.value.substring(end);
+        target.selectionStart = target.selectionEnd = start + suggestionInputRef.current.length;
+      } else if (target.classList.contains('tiptap') && target.classList.contains('ProseMirror')) {
+        const selection = window.getSelection();
+        if (selection?.rangeCount) {
+          const range = selection.getRangeAt(0);
+          range.deleteContents();
+          range.insertNode(document.createTextNode(suggestionInputRef.current));
+          selection.collapseToEnd();
+        }
+      }
+      suggestionInputRef.current = '';
+      setSuggestion('');
+      setShowSuggestion(false);
+    } else if (event.key !== 'Tab') {
+      setShowSuggestion(false);
+    }
+  };
+
+  useEffect(() => {
+    let lastKeyPressed: string | null = null;
+
+    const handleInput = (event: Event) => {
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement && (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'DIV' && (activeElement.getAttribute('role') === 'textbox' || activeElement.getAttribute('contenteditable') === 'true')) || (activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'text') || (activeElement.classList.contains('mantine-Textarea-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('mantine-Input-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('tiptap') && activeElement.classList.contains('ProseMirror')))) {
+        // Ensure the suggestion component does not run within the quick prompt
+        if (!popoverRef.current) {
+          activeElement.addEventListener('input', (e) => {
+            if (lastKeyPressed !== 'Backspace' && lastKeyPressed !== 'Delete') {
+              handleInputWithSuggestion(e);
+            }
+          });
+          activeElement.addEventListener('keydown', handleKeyDownWithSuggestion);
+          activeElement.addEventListener('keydown', (e) => {
+            lastKeyPressed = e.key;
+            if (e.key === 'Tab') {
+              e.preventDefault();
+              handleKeyDownWithSuggestion(e as unknown as KeyboardEvent);
+            }
+          });
+        }
+      }
+    };
+
+    document.addEventListener('focusin', handleInput);
+
+    return () => {
+      document.removeEventListener('focusin', handleInput);
+    };
+  }, [showSuggestion, suggestion]);
+  /* Quick Prompt */
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey && event.key === '\'') {
         const activeElement = document.activeElement as HTMLElement;
-        if (activeElement && (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'DIV' && activeElement.getAttribute('role') === 'textbox') || (activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'text') || (activeElement.classList.contains('mantine-Textarea-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('mantine-Input-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('tiptap') && activeElement.classList.contains('ProseMirror')))) {
+        if (activeElement && (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'DIV' && (activeElement.getAttribute('role') === 'textbox' || activeElement.getAttribute('contenteditable') === 'true')) || (activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'text') || (activeElement.classList.contains('mantine-Textarea-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('mantine-Input-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('tiptap') && activeElement.classList.contains('ProseMirror')))) {
           previousFocusedElementRef.current = activeElement;
           const contextInfo = getContextualInformation(activeElement);
 
@@ -309,6 +559,7 @@ const removeLoadingGifAndAddButton = (popover: HTMLDivElement, element: HTMLElem
       }
       document.removeEventListener('click', handleClickOutside);
     }
+    popoverRef.current = null; 
   };
 
   document.addEventListener('click', handleClickOutside);
@@ -335,6 +586,7 @@ const acceptGeneration = (popover: HTMLDivElement, element: HTMLElement) => {
   }
   (element as HTMLTextAreaElement).style.color = 'black';
   document.body.removeChild(popover);
+  popoverRef.current = null; 
 
 };
 

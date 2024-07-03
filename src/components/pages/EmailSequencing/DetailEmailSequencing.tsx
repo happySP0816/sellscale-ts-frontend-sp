@@ -1145,7 +1145,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                               'Content-Type': 'application/json',
                               Authorization: `Bearer ${userToken}`,
                             },
-                            body: JSON.stringify({ name: query, archetype_id: currentProject.id }),
+                            body: JSON.stringify({ name: query, client_archetype_id: currentProject.id }),
                           });
                           if (response.ok) {
                             const newVoice = await response.json();
@@ -1198,6 +1198,10 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                     data={[{ value: 'null', label: 'No Voice' }, ...aiVoices.map(voice => ({ value: voice.id.toString(), label: voice.name }))]}
                     value={selectedVoice?.toString()}
                     onChange={async (value) => {
+                      const numericValue = Number(value);
+                      if (isNaN(numericValue)) {
+                        return;
+                      }
                       if (value === 'null') {
                         setSelectedVoice(null);
                       } else {
@@ -1329,7 +1333,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                         <div
                           contentEditable={currentProject?.is_ai_research_personalization_enabled && selectedVoice && selectedVoice !== 'null' ? true : undefined}
                           dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(data?.body?.replace(/(<br\s*\/?>\s*){2,}/g, '<br />')?.replace(/\n\s*\n/g, '\n') ?? ""),
+                            __html: DOMPurify.sanitize(typeof data?.body === 'string' ? data.body.replace(/(<br\s*\/?>\s*){2,}/g, '<br />').replace(/\n\s*\n/g, '\n') : ""),
                           }}
                           onInput={(e) => setChangedTemplate(e.currentTarget.innerHTML)}
                           style={{

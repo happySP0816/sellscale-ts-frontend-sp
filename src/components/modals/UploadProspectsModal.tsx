@@ -43,11 +43,19 @@ import { API_URL } from "@constants/data";
 import CreatePersona from "@common/persona/CreatePersona";
 import Hook from "@pages/channels/components/Hook";
 
-export default function UploadProspectsModal({ context, id, innerProps }: ContextModalProps<{ mode: "ADD-ONLY" | "ADD-CREATE" | "CREATE-ONLY" }>) {
+export default function UploadProspectsModal({
+  context,
+  id,
+  innerProps,
+}: ContextModalProps<{ mode: "ADD-ONLY" | "ADD-CREATE" | "CREATE-ONLY" }>) {
   const theme = useMantineTheme();
   const userData = useRecoilValue(userDataState);
-  const [personas, setPersonas] = useState<{ value: string; label: string; group: string | undefined }[]>([]);
-  const defaultPersonas = useRef<{ value: string; label: string; group: string | undefined }[]>([]);
+  const [personas, setPersonas] = useState<
+    { value: string; label: string; group: string | undefined }[]
+  >([]);
+  const defaultPersonas = useRef<
+    { value: string; label: string; group: string | undefined }[]
+  >([]);
   const [createdPersona, setCreatedPersona] = useState("");
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
 
@@ -56,32 +64,44 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
   const [ctas, setCTAs] = useState<{ id: number; cta: string }[]>([]);
 
   const [fitReason, setFitReason] = useState("");
-  const [icpMatchingPrompt, setICPMatchingPrompt] = useState("Describe your persona here ...");
+  const [icpMatchingPrompt, setICPMatchingPrompt] = useState(
+    "Describe your persona here ..."
+  );
 
-  const [contactObjective, setContactObjective] = useState("Set up a discovery call in order to identify a pain point");
+  const [contactObjective, setContactObjective] = useState(
+    "Set up a discovery call in order to identify a pain point"
+  );
 
   const [purpose, setPurpose] = useState("");
 
-  const [personaContractSize, setPersonaContractSize] = useState(userData.client.contract_size);
+  const [personaContractSize, setPersonaContractSize] = useState(
+    userData.client.contract_size
+  );
   const [templateMode, setTemplateMode] = useState<string>("cta");
 
   const [opened, setOpened] = useState(false);
 
   const [tab, setTab] = useState("scratch");
 
-  const [loadingPersonaBuyReasonGeneration, setLoadingPersonaBuyReasonGeneration] = useState(false);
+  const [
+    loadingPersonaBuyReasonGeneration,
+    setLoadingPersonaBuyReasonGeneration,
+  ] = useState(false);
   const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
     setLoadingPersonaBuyReasonGeneration(true);
-    const res = await fetch(`${API_URL}/client/archetype/generate_persona_buy_reason`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        persona_name: createdPersona,
-      }),
-    })
+    const res = await fetch(
+      `${API_URL}/client/archetype/generate_persona_buy_reason`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          persona_name: createdPersona,
+        }),
+      }
+    )
       .then(async (r) => {
         if (r.status === 200) {
           return {
@@ -112,20 +132,26 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
     return res as MsgResponse;
   };
 
-  const [loadingICPMatchingPromptGeneration, setLoadingICPMatchingPromptGeneration] = useState(false);
+  const [
+    loadingICPMatchingPromptGeneration,
+    setLoadingICPMatchingPromptGeneration,
+  ] = useState(false);
   const generateICPMatchingPrompt = async (): Promise<MsgResponse> => {
     setLoadingICPMatchingPromptGeneration(true);
-    const res = await fetch(`${API_URL}/client/archetype/generate_persona_icp_matching_prompt`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        persona_name: selectedPersona,
-        persona_buy_reason: fitReason,
-      }),
-    })
+    const res = await fetch(
+      `${API_URL}/client/archetype/generate_persona_icp_matching_prompt`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          persona_name: selectedPersona,
+          persona_buy_reason: fitReason,
+        }),
+      }
+    )
       .then(async (r) => {
         if (r.status === 200) {
           return {
@@ -161,35 +187,43 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
   const [strategies, setStrategies] = useState([
     {
       title: "Account Targeting",
-      goal: "Test out if Bay Area is working better; select different meetings.",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
     },
     {
       title: "Similar Accounts",
-      goal: "Test out if Bay Area is working better; select different meetings.",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
     },
     {
       title: "Location Targeting",
-      goal: "Test out if Bay Area is working better; select different meetings.",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
     },
     {
       title: "Giftcard Campaign",
-      goal: "Test out if Bay Area is working better; select different meetings.",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
     },
     {
       title: "Location Targeting",
-      goal: "Test out if Bay Area is working better; select different meetings.",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
     },
     {
       title: "Giftcard Campaign",
-      goal: "Test out if Bay Area is working better; select different meetings.",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
     },
     {
       title: "Account Targeting",
-      goal: "Test out if Bay Area is working better; select different meetings.",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
     },
     {
       title: "Similar Accounts",
-      goal: "Test out if Bay Area is working better; select different meetings.",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
     },
   ]);
   const [pages, setPages] = useState(0);
@@ -206,7 +240,8 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
       p={0}
       style={{
         position: "relative",
-        backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
+        backgroundColor:
+          theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
       }}
     >
       <SegmentedControl
@@ -225,7 +260,8 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
             ),
           },
           {
-            value: "EMAIL",
+            value: "strategy",
+            disabled: true,
             label: (
               <Center>
                 <IconBulb size="1rem" />
@@ -262,7 +298,15 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                   />
                 </Collapse>
 
-                <Button onClick={() => setOpened(!opened)} compact size="xs" color="gray" variant="subtle" ml="auto" mt="md">
+                <Button
+                  onClick={() => setOpened(!opened)}
+                  compact
+                  size="xs"
+                  color="gray"
+                  variant="subtle"
+                  ml="auto"
+                  mt="md"
+                >
                   {opened ? "Hide" : "Show"} Advanced Options
                 </Button>
 
@@ -287,12 +331,18 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                 label={"Set Persona"}
                 defaultValue={
                   defaultPersonas.current.length === 1 ||
-                  (defaultPersonas.current.length > 1 && defaultPersonas.current[0].group === "Active" && defaultPersonas.current[1].group === "Inactive")
+                  (defaultPersonas.current.length > 1 &&
+                    defaultPersonas.current[0].group === "Active" &&
+                    defaultPersonas.current[1].group === "Inactive")
                     ? defaultPersonas.current[0].value
                     : undefined
                 }
                 data={personas}
-                placeholder={innerProps.mode === "ADD-ONLY" ? "Select a persona for the prospects" : "Select or create a persona for the prospects"}
+                placeholder={
+                  innerProps.mode === "ADD-ONLY"
+                    ? "Select a persona for the prospects"
+                    : "Select or create a persona for the prospects"
+                }
                 nothingFound={"Nothing found"}
                 icon={<IconUsers size={14} />}
                 searchable
@@ -313,7 +363,11 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                 }}
                 onChange={(value) => {
                   // If created persona exists and is one of the existing personas, clear it
-                  if (createdPersona.length > 0 && personas.filter((personas) => personas.value === value).length > 0) {
+                  if (
+                    createdPersona.length > 0 &&
+                    personas.filter((personas) => personas.value === value)
+                      .length > 0
+                  ) {
                     setPersonas(defaultPersonas.current);
                     setCreatedPersona("");
                   }
@@ -338,7 +392,10 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
         </Stack>
       ) : (
         <Stack spacing="xs" mt={"md"}>
-          <TextInput placeholder="Search strategies" rightSection={<IconSearch size={"1rem"} color="gray" />} />
+          <TextInput
+            placeholder="Search strategies"
+            rightSection={<IconSearch size={"1rem"} color="gray" />}
+          />
           <SimpleGrid cols={2}>
             {strategies.slice(pages * 4, pages * 4 + 4).map((item, index) => {
               return (
@@ -347,7 +404,12 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                     <Text fw={600} size={"md"}>
                       {item.title}
                     </Text>
-                    <ActionIcon variant="light" color="blue" radius={"xl"} size={"sm"}>
+                    <ActionIcon
+                      variant="light"
+                      color="blue"
+                      radius={"xl"}
+                      size={"sm"}
+                    >
                       <IconEye size={"0.9rem"} />
                     </ActionIcon>
                   </Flex>
@@ -361,11 +423,23 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                       openContextModal({
                         modal: "strategySelectModal",
                         title: (
-                          <Title order={3} sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                            <ActionIcon variant="light" color="blue" radius={"xl"}>
+                          <Title
+                            order={3}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "5px",
+                            }}
+                          >
+                            <ActionIcon
+                              variant="light"
+                              color="blue"
+                              radius={"xl"}
+                            >
                               <IconArrowLeft size={"1rem"} />
                             </ActionIcon>
-                            <span className="text-gray-600">Go back to</span> Create Campaign
+                            <span className="text-gray-600">Go back to</span>{" "}
+                            Create Campaign
                           </Title>
                         ),
                         innerProps: { title: item.title },
@@ -387,10 +461,13 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
             <Flex align={"center"}>
               <Select
                 w={100}
-                data={Array.from({ length: Math.ceil(strategies.length / 4) }, (_, i) => ({
-                  label: `${i + 1}`,
-                  value: i.toString(),
-                }))}
+                data={Array.from(
+                  { length: Math.ceil(strategies.length / 4) },
+                  (_, i) => ({
+                    label: `${i + 1}`,
+                    value: i.toString(),
+                  })
+                )}
                 variant="unstyled"
                 onChange={(e) => setPages(Number(e))}
                 styles={{

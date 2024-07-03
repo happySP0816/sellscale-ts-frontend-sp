@@ -122,11 +122,120 @@ export default function App() {
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const previousFocusedElementRef = useRef<HTMLElement | null>(null);
 
+  const [suggestion, setSuggestion] = useState<string>('');
+  const [showSuggestion, setShowSuggestion] = useState<boolean>(false);
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const suggestionInputRef = useRef<string>('');
+  const previousValueRef = useRef<string>('');
+
+  const handleInputWithSuggestion = (event: Event) => {
+    const target = event.target as HTMLTextAreaElement;
+    target.style.height = 'auto';
+    target.style.height = `${target.scrollHeight}px`;
+
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    const currentValue = target.value;
+    const previousValue = previousValueRef.current;
+    previousValueRef.current = currentValue;
+
+    if (currentValue.length < previousValue.length) {
+      // User deleted some data, do not trigger autocomplete
+      setSuggestion('');
+      setShowSuggestion(false);
+      return;
+    }
+
+    debounceTimeout.current = setTimeout(async () => {
+      const userInput = 'please give a completion for the following text, only the completion, do not premise it with anything and certainly do not write what I already wrote. Here is the text you will need to complete: ' + target.value;
+      if (userInput.trim() === '') {
+        setSuggestion('');
+        setShowSuggestion(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/ml/quick`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({ userInput, contextInfo: 'N/A' }),
+        });
+
+        const data = await response.json();
+        suggestionInputRef.current = data.response;
+        setSuggestion(data.response);
+        setShowSuggestion(true);
+
+        // Show suggestion immediately
+        const start = target.selectionStart;
+        const end = target.selectionEnd;
+        target.value = target.value.substring(0, start) + data.response + target.value.substring(end);
+        target.selectionStart = start;
+        target.selectionEnd = start + data.response.length;
+
+        // Reset suggestion for the next request
+        setSuggestion('');
+        setShowSuggestion(false);
+
+      } catch (error) {
+        console.error('Error fetching autocomplete suggestion:', error);
+        setSuggestion('');
+        setShowSuggestion(false);
+      }
+    }, 1000);
+  };
+
+  const handleKeyDownWithSuggestion = (event: KeyboardEvent) => {
+    const target = event.target as HTMLTextAreaElement;
+
+    if (event.key === 'Tab' && suggestionInputRef.current) {
+      event.preventDefault();
+      const start = target.selectionStart;
+      const end = target.selectionEnd;
+      target.value = target.value.substring(0, start) + suggestionInputRef.current + target.value.substring(end);
+      target.selectionStart = target.selectionEnd = start + suggestionInputRef.current.length;
+      suggestionInputRef.current = '';
+      setSuggestion('');
+      setShowSuggestion(false);
+    } else if (event.key !== 'Tab') {
+      setShowSuggestion(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleInput = (event: Event) => {
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement && (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'DIV' && (activeElement.getAttribute('role') === 'textbox' || activeElement.getAttribute('contenteditable') === 'true')) || (activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'text') || (activeElement.classList.contains('mantine-Textarea-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('mantine-Input-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('tiptap') && activeElement.classList.contains('ProseMirror')))) {
+        // Ensure the suggestion component does not run within the quick prompt
+        if (!popoverRef.current) {
+          activeElement.addEventListener('input', handleInputWithSuggestion);
+          activeElement.addEventListener('keydown', handleKeyDownWithSuggestion);
+          activeElement.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+              e.preventDefault();
+              handleKeyDownWithSuggestion(e as unknown as KeyboardEvent);
+            }
+          });
+        }
+      }
+    };
+
+    document.addEventListener('focusin', handleInput);
+
+    return () => {
+      document.removeEventListener('focusin', handleInput);
+    };
+  }, [showSuggestion, suggestion]);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey && event.key === '\'') {
         const activeElement = document.activeElement as HTMLElement;
-        if (activeElement && (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'DIV' && activeElement.getAttribute('role') === 'textbox') || (activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'text') || (activeElement.classList.contains('mantine-Textarea-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('mantine-Input-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('tiptap') && activeElement.classList.contains('ProseMirror')))) {
+        if (activeElement && (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'DIV' && (activeElement.getAttribute('role') === 'textbox' || activeElement.getAttribute('contenteditable') === 'true')) || (activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'text') || (activeElement.classList.contains('mantine-Textarea-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('mantine-Input-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('tiptap') && activeElement.classList.contains('ProseMirror')))) {
           previousFocusedElementRef.current = activeElement;
           const contextInfo = getContextualInformation(activeElement);
 
@@ -309,6 +418,7 @@ const removeLoadingGifAndAddButton = (popover: HTMLDivElement, element: HTMLElem
       }
       document.removeEventListener('click', handleClickOutside);
     }
+    popoverRef.current = null; 
   };
 
   document.addEventListener('click', handleClickOutside);
@@ -335,6 +445,7 @@ const acceptGeneration = (popover: HTMLDivElement, element: HTMLElement) => {
   }
   (element as HTMLTextAreaElement).style.color = 'black';
   document.body.removeChild(popover);
+  popoverRef.current = null; 
 
 };
 

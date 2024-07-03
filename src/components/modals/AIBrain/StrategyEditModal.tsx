@@ -72,6 +72,7 @@ export default function StrategyEditModal({
         withinPortal
         label="Attach Campaigns"
         placeholder="Search campaigns"
+        searchable
         data={allArchetypes}
         onChange={(value: any) => {
           setArchetypes(value);

@@ -132,19 +132,42 @@ export default function AIBrainStrategy() {
                 const { title, description } = cell.row.original;
 
                 return (
-                  <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                    <Flex align={"center"} gap={"sm"}>
-                      <Box>
-                        <Text size={"sm"} fw={700}>
-                          {title}
-                        </Text>
-                        <Text size={"sm"} fw={500} mt={6} color="gray">
-                          <span className=" font-semibold">Goal:</span>{" "}
-                          {description?.replace(/<[^>]*>/g, " ")}
-                        </Text>
-                      </Box>
-                    </Flex>
-                  </Flex>
+                  <Box h={"100%"} ml={0} pl={0} w={200}>
+                    <Text size={"sm"} fw={700}>
+                      {title}
+                    </Text>
+                    <Text mt={0} color="gray" size={"10px"}>
+                      {description?.replace(/<[^>]*>/g, " ")?.slice(0, 60)}
+                    </Text>
+                    <Text mt={0} color="gray" size={"10px"}>
+                      {description?.replace(/<[^>]*>/g, " ")?.slice(60, 120)}
+                    </Text>
+                    <Text mt={0} color="gray" size={"10px"}>
+                      {description?.replace(/<[^>]*>/g, " ")?.slice(120, 160)}
+                    </Text>
+                    {
+                      <HoverCard shadow="md" withinPortal position="right">
+                        <HoverCard.Target>
+                          <Text
+                            size={"xs"}
+                            fw={500}
+                            color="gray"
+                            mt={6}
+                            className=" font-semibold"
+                          >
+                            Read More
+                          </Text>
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown>
+                          <Text size={"sm"} maw={200}>
+                            <div
+                              dangerouslySetInnerHTML={{ __html: description }}
+                            />
+                          </Text>
+                        </HoverCard.Dropdown>
+                      </HoverCard>
+                    }
+                  </Box>
                 );
               },
             },

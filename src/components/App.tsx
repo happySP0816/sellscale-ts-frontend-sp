@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import SequenceWriterModal from "@modals/SequenceWriterModal";
 import CTAGeneratorModal from "@modals/CTAGeneratorModal";
-import { API_URL } from '@constants/data';
+import { API_URL } from "@constants/data";
 import ManagePulsePrompt from "@modals/ManagePulsePromptModal";
 import ViewEmailThreadModal from "@modals/ViewEmailThreadModal";
 import ManageBumpFramework from "@modals/ManageBumpFrameworkModal";
@@ -91,6 +91,7 @@ import AddSegmentModal from "@modals/website/AddSegmentModal";
 import StrategyCreateModal from "@modals/AIBrain/StrategyCreateModal";
 import StrategyEditModal from "@modals/AIBrain/StrategyEditModal";
 import StrategyPreviewModal from "@modals/AIBrain/StrategyPreviewModal";
+import SelectStrategyModal from "@modals/SelectStrategyModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -124,65 +125,73 @@ export default function App() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey && event.key === '\'') {
+      if (event.metaKey && event.key === "'") {
         const activeElement = document.activeElement as HTMLElement;
-        if (activeElement && (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'DIV' && activeElement.getAttribute('role') === 'textbox') || (activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'text') || (activeElement.classList.contains('mantine-Textarea-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('mantine-Input-input') && activeElement.tagName === 'TEXTAREA') || (activeElement.classList.contains('tiptap') && activeElement.classList.contains('ProseMirror')))) {
+        if (
+          activeElement &&
+          (activeElement.tagName === "TEXTAREA" ||
+            (activeElement.tagName === "DIV" && activeElement.getAttribute("role") === "textbox") ||
+            (activeElement.tagName === "INPUT" && (activeElement as HTMLInputElement).type === "text") ||
+            (activeElement.classList.contains("mantine-Textarea-input") && activeElement.tagName === "TEXTAREA") ||
+            (activeElement.classList.contains("mantine-Input-input") && activeElement.tagName === "TEXTAREA") ||
+            (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
+        ) {
           previousFocusedElementRef.current = activeElement;
           const contextInfo = getContextualInformation(activeElement);
 
-          const popover = document.createElement('div');
-          popover.style.position = 'fixed';
-          popover.style.top = '10px';
-          popover.style.left = '50%';
-          popover.style.transform = 'translateX(-50%)';
-          popover.style.zIndex = '10000';
-          popover.style.backgroundColor = 'white';
-          popover.style.border = '1px solid #ccc';
-          popover.style.padding = '10px';
-          popover.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+          const popover = document.createElement("div");
+          popover.style.position = "fixed";
+          popover.style.top = "10px";
+          popover.style.left = "50%";
+          popover.style.transform = "translateX(-50%)";
+          popover.style.zIndex = "10000";
+          popover.style.backgroundColor = "white";
+          popover.style.border = "1px solid #ccc";
+          popover.style.padding = "10px";
+          popover.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.1)";
           document.body.appendChild(popover);
           (popoverRef as React.MutableRefObject<HTMLDivElement | null>).current = popover;
 
-          const title = document.createElement('div');
-          title.textContent = 'Sellscale Quick Prompt';
-          title.style.fontStyle = 'italic';
-          title.style.fontFamily = 'Arial';
-          title.style.marginBottom = '5px';
+          const title = document.createElement("div");
+          title.textContent = "Sellscale Quick Prompt";
+          title.style.fontStyle = "italic";
+          title.style.fontFamily = "Arial";
+          title.style.marginBottom = "5px";
           popover.appendChild(title);
 
-          const textarea = document.createElement('textarea');
-          textarea.style.width = '300px';
-          textarea.style.height = 'auto';
-          textarea.style.resize = 'none';
-          textarea.style.overflow = 'hidden';
-          textarea.value = ''; // Ensure the textarea is completely clear when opened
-          textarea.addEventListener('input', handleInput);
-          textarea.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
+          const textarea = document.createElement("textarea");
+          textarea.style.width = "300px";
+          textarea.style.height = "auto";
+          textarea.style.resize = "none";
+          textarea.style.overflow = "hidden";
+          textarea.value = ""; // Ensure the textarea is completely clear when opened
+          textarea.addEventListener("input", handleInput);
+          textarea.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
               e.preventDefault();
               if (popoverRef.current) {
                 document.body.removeChild(popoverRef.current);
                 if (previousFocusedElementRef.current) {
-                  if (previousFocusedElementRef.current.classList.contains('tiptap') && previousFocusedElementRef.current.classList.contains('ProseMirror')) {
-                    previousFocusedElementRef.current.innerHTML = '';
-                    previousFocusedElementRef.current.style.color = 'black';
+                  if (previousFocusedElementRef.current.classList.contains("tiptap") && previousFocusedElementRef.current.classList.contains("ProseMirror")) {
+                    previousFocusedElementRef.current.innerHTML = "";
+                    previousFocusedElementRef.current.style.color = "black";
                     previousFocusedElementRef.current.focus();
                   } else {
-                    (previousFocusedElementRef.current as HTMLTextAreaElement).value = '';
-                    (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = 'black';
+                    (previousFocusedElementRef.current as HTMLTextAreaElement).value = "";
+                    (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = "black";
                     (previousFocusedElementRef.current as HTMLTextAreaElement).focus();
                   }
                 }
               }
             }
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               if (!textarea.dataset.enterPressed) {
-                textarea.dataset.enterPressed = 'true';
+                textarea.dataset.enterPressed = "true";
                 showLoadingGif(popover);
                 typeUserInput(previousFocusedElementRef.current, textarea.value, popover, contextInfo);
               }
-            } else if (e.key === 'Enter' && e.shiftKey) {
+            } else if (e.key === "Enter" && e.shiftKey) {
               e.preventDefault();
               const start = textarea.selectionStart;
               const end = textarea.selectionEnd;
@@ -192,35 +201,34 @@ export default function App() {
           });
           popover.appendChild(textarea);
           textarea.focus();
-
         }
-      } else if (event.metaKey && event.key === 'Enter') {
+      } else if (event.metaKey && event.key === "Enter") {
         const activeElement = document.activeElement as HTMLElement;
-        if (activeElement && activeElement.tagName === 'TEXTAREA') {
+        if (activeElement && activeElement.tagName === "TEXTAREA") {
           activeElement.blur();
         }
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
   const handleInput = (event: Event) => {
     const target = event.target as HTMLTextAreaElement;
-    target.style.height = 'auto';
+    target.style.height = "auto";
     target.style.height = `${target.scrollHeight}px`;
   };
 
   const showLoadingGif = (popover: HTMLDivElement) => {
-    const loadingGif = document.createElement('img');
+    const loadingGif = document.createElement("img");
     loadingGif.src = logotrial;
-    loadingGif.style.display = 'block';
-    loadingGif.style.margin = '10px auto';
-    loadingGif.style.width = '50px';
+    loadingGif.style.display = "block";
+    loadingGif.style.margin = "10px auto";
+    loadingGif.style.width = "50px";
     popover.appendChild(loadingGif);
   };
 
@@ -229,161 +237,159 @@ export default function App() {
     let index = 0;
 
     fetch(`${API_URL}/ml/quick`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({ userInput, contextInfo }),
     })
-    .then(response => response.json())
-    .then(res => {
-      console.log('Response JSON:', res);
-      const interval = setInterval(() => {
-        if (index < res.response.length) {
-          const char = res.response.charAt(index);
-          if (element.classList.contains('tiptap') && element.classList.contains('ProseMirror')) {
-            element.innerText = element.innerText + (index === 0 && char === ' ' ? '' : char);
-          } else {
-            const textarea = element as HTMLTextAreaElement;
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const value = textarea.value || '';
-            textarea.value = value.slice(0, start) + char + value.slice(end);
-            textarea.selectionStart = textarea.selectionEnd = start + 1;
+      .then((response) => response.json())
+      .then((res) => {
+        console.log("Response JSON:", res);
+        const interval = setInterval(() => {
+          if (index < res.response.length) {
+            const char = res.response.charAt(index);
+            if (element.classList.contains("tiptap") && element.classList.contains("ProseMirror")) {
+              element.innerText = element.innerText + (index === 0 && char === " " ? "" : char);
+            } else {
+              const textarea = element as HTMLTextAreaElement;
+              const start = textarea.selectionStart;
+              const end = textarea.selectionEnd;
+              const value = textarea.value || "";
+              textarea.value = value.slice(0, start) + char + value.slice(end);
+              textarea.selectionStart = textarea.selectionEnd = start + 1;
 
-            // hack React16 内部定义了descriptor拦截value，此处重置状态
-            let tracker = (textarea as any)._valueTracker;
-            if (tracker) {
-              tracker.setValue(value);
+              // hack React16 内部定义了descriptor拦截value，此处重置状态
+              let tracker = (textarea as any)._valueTracker;
+              if (tracker) {
+                tracker.setValue(value);
+              }
+              textarea.dispatchEvent(new Event("input", { bubbles: true }));
             }
-            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            index += 1;
+          } else {
+            clearInterval(interval);
+            removeLoadingGifAndAddButton(popover, element);
+            element.focus();
           }
-          index += 1;
-        } else {
-          clearInterval(interval);
-          removeLoadingGifAndAddButton(popover, element);
-          element.focus();
-        }
-      }, 1);
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
+        }, 1);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 
-const removeLoadingGifAndAddButton = (popover: HTMLDivElement, element: HTMLElement) => {
-  const loadingGif = popover.querySelector('img');
-  if (loadingGif) {
-    popover.removeChild(loadingGif);
-  }
-
-  const acceptButton = document.createElement('button');
-  acceptButton.textContent = 'Accept';
-  acceptButton.style.backgroundColor = '#87CEEB';
-  acceptButton.style.color = 'white';
-  acceptButton.style.border = 'none';
-  acceptButton.style.padding = '5px 10px';
-  acceptButton.style.cursor = 'pointer';
-  acceptButton.style.borderRadius = '4px';
-  acceptButton.addEventListener('click', () => {
-    acceptGeneration(popover, element);
-    document.removeEventListener('click', handleClickOutside);
-  });
-  popover.appendChild(acceptButton);
-
-  const handleClickOutside = (event: MouseEvent) => {
-    console.log('popover is', popoverRef.current);
-    if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-      if (previousFocusedElementRef.current) {
-        if (previousFocusedElementRef.current.classList.contains('tiptap') && previousFocusedElementRef.current.classList.contains('ProseMirror')) {
-          previousFocusedElementRef.current.innerHTML = '';
-          previousFocusedElementRef.current.style.color = 'black';
-        } else {
-          (previousFocusedElementRef.current as HTMLTextAreaElement).value = '';
-          (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = 'black';
-        }
-      }
-      if (popoverRef.current.parentNode) {
-        popoverRef.current.parentNode.removeChild(popoverRef.current);
-      }
-      document.removeEventListener('click', handleClickOutside);
+  const removeLoadingGifAndAddButton = (popover: HTMLDivElement, element: HTMLElement) => {
+    const loadingGif = popover.querySelector("img");
+    if (loadingGif) {
+      popover.removeChild(loadingGif);
     }
+
+    const acceptButton = document.createElement("button");
+    acceptButton.textContent = "Accept";
+    acceptButton.style.backgroundColor = "#87CEEB";
+    acceptButton.style.color = "white";
+    acceptButton.style.border = "none";
+    acceptButton.style.padding = "5px 10px";
+    acceptButton.style.cursor = "pointer";
+    acceptButton.style.borderRadius = "4px";
+    acceptButton.addEventListener("click", () => {
+      acceptGeneration(popover, element);
+      document.removeEventListener("click", handleClickOutside);
+    });
+    popover.appendChild(acceptButton);
+
+    const handleClickOutside = (event: MouseEvent) => {
+      console.log("popover is", popoverRef.current);
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+        if (previousFocusedElementRef.current) {
+          if (previousFocusedElementRef.current.classList.contains("tiptap") && previousFocusedElementRef.current.classList.contains("ProseMirror")) {
+            previousFocusedElementRef.current.innerHTML = "";
+            previousFocusedElementRef.current.style.color = "black";
+          } else {
+            (previousFocusedElementRef.current as HTMLTextAreaElement).value = "";
+            (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = "black";
+          }
+        }
+        if (popoverRef.current.parentNode) {
+          popoverRef.current.parentNode.removeChild(popoverRef.current);
+        }
+        document.removeEventListener("click", handleClickOutside);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+
+    // Add keydown event listener to the document to handle the Enter key
+
+    (element as HTMLTextAreaElement).style.color = "green";
   };
 
-  document.addEventListener('click', handleClickOutside);
-
-  // Add keydown event listener to the document to handle the Enter key
-
-  (element as HTMLTextAreaElement).style.color = 'green';
-};
-
-
-const acceptGeneration = (popover: HTMLDivElement, element: HTMLElement) => {
-  if (previousFocusedElementRef.current) {
-    const event = new Event('input', { bubbles: true });
-    (previousFocusedElementRef.current as HTMLTextAreaElement).value = (element as HTMLTextAreaElement).value;
-    previousFocusedElementRef.current.dispatchEvent(event);
-    previousFocusedElementRef.current.focus();
-    // Hack to trigger setState
-    setTimeout(() => {
-      (previousFocusedElementRef.current as HTMLTextAreaElement).value += ' ';
+  const acceptGeneration = (popover: HTMLDivElement, element: HTMLElement) => {
+    if (previousFocusedElementRef.current) {
+      const event = new Event("input", { bubbles: true });
+      (previousFocusedElementRef.current as HTMLTextAreaElement).value = (element as HTMLTextAreaElement).value;
+      previousFocusedElementRef.current.dispatchEvent(event);
+      previousFocusedElementRef.current.focus();
+      // Hack to trigger setState
       setTimeout(() => {
-        (previousFocusedElementRef.current as HTMLTextAreaElement).value = (previousFocusedElementRef.current as HTMLTextAreaElement).value.trim();
+        (previousFocusedElementRef.current as HTMLTextAreaElement).value += " ";
+        setTimeout(() => {
+          (previousFocusedElementRef.current as HTMLTextAreaElement).value = (previousFocusedElementRef.current as HTMLTextAreaElement).value.trim();
+        }, 20); // Adjust the delay as needed
       }, 20); // Adjust the delay as needed
-    }, 20); // Adjust the delay as needed
-  }
-  (element as HTMLTextAreaElement).style.color = 'black';
-  document.body.removeChild(popover);
-
-};
-
-const getContextualInformation = (element: HTMLElement): string => {
-  let context = '';
-  if (window.location.href.includes('/inbox')) {
-    context = 'Here is the conversation, I reached out first: \n';
-    const messageElements = document.querySelectorAll('div[style="font-size: 0.875rem;"], div.line-clamp-4');
-    let lineClampCount = 0;
-    let fontSizeCount = 0;
-
-    messageElements.forEach((messageElement) => {
-      if (messageElement.classList.contains('line-clamp-4')) {
-        lineClampCount++;
-      } else if (messageElement.getAttribute('style') === 'font-size: 0.875rem;') {
-        fontSizeCount++;
-      }
-    });
-
-    if (lineClampCount > fontSizeCount) {
-      context += 'These are emails, please try to follow my tone as close as possible, do not use markdown. use newlines for formatting. \n';
-    } else if (fontSizeCount > lineClampCount) {
-      context += 'These are LinkedIn messages, so please be more casual, or try to follow my tone as close as possible.: \n';
     }
+    (element as HTMLTextAreaElement).style.color = "black";
+    document.body.removeChild(popover);
+  };
 
-    messageElements.forEach((messageElement) => {
-      const messageText = messageElement.innerHTML?.trim();
-      if (messageText) {
-        context += ` ${messageText} \n`;
+  const getContextualInformation = (element: HTMLElement): string => {
+    let context = "";
+    if (window.location.href.includes("/inbox")) {
+      context = "Here is the conversation, I reached out first: \n";
+      const messageElements = document.querySelectorAll('div[style="font-size: 0.875rem;"], div.line-clamp-4');
+      let lineClampCount = 0;
+      let fontSizeCount = 0;
+
+      messageElements.forEach((messageElement) => {
+        if (messageElement.classList.contains("line-clamp-4")) {
+          lineClampCount++;
+        } else if (messageElement.getAttribute("style") === "font-size: 0.875rem;") {
+          fontSizeCount++;
+        }
+      });
+
+      if (lineClampCount > fontSizeCount) {
+        context += "These are emails, please try to follow my tone as close as possible, do not use markdown. use newlines for formatting. \n";
+      } else if (fontSizeCount > lineClampCount) {
+        context += "These are LinkedIn messages, so please be more casual, or try to follow my tone as close as possible.: \n";
       }
-    });
 
-    return context;
-  }
-  const MAX_PARENT_COUNT = 6;
-  let currentElement: HTMLElement | null = element;
-  let parentCount = 0;
+      messageElements.forEach((messageElement) => {
+        const messageText = messageElement.innerHTML?.trim();
+        if (messageText) {
+          context += ` ${messageText} \n`;
+        }
+      });
 
-  while (currentElement && parentCount < MAX_PARENT_COUNT) {
-    const textContent = currentElement.textContent?.trim();
-    if (textContent) {
-      context = `${textContent} ${context}`;
+      return context;
     }
-    currentElement = currentElement.parentElement;
-    parentCount++;
-  }
-  let ret = context.trim();
-  return ret;
-};
+    const MAX_PARENT_COUNT = 6;
+    let currentElement: HTMLElement | null = element;
+    let parentCount = 0;
+
+    while (currentElement && parentCount < MAX_PARENT_COUNT) {
+      const textContent = currentElement.textContent?.trim();
+      if (textContent) {
+        context = `${textContent} ${context}`;
+      }
+      currentElement = currentElement.parentElement;
+      parentCount++;
+    }
+    let ret = context.trim();
+    return ret;
+  };
   // Socket.IO Connection
   // useEffect(() => {
   //   if (!socket) setSocket();
@@ -563,6 +569,7 @@ const getContextualInformation = (element: HTMLElement): string => {
               createStrategy: StrategyCreateModal,
               editStrategy: StrategyEditModal,
               previewStrategy: StrategyPreviewModal,
+              strategySelectModal: SelectStrategyModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

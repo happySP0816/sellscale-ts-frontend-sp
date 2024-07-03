@@ -207,9 +207,20 @@ export default function CampaignTemplateEditModal({
     (subjectLine: SubjectLineTemplate) =>
       subjectLine.is_magic_subject_line === true
   );
-  const [stagingData, setStagingData] = useState(
-    innerProps.stagingData || { email: [] }
-  );
+  const [stagingData, setStagingData] = useState(() => {
+    const savedStagingData = sessionStorage.getItem('stagingData');
+    const parsedStagingData = savedStagingData ? JSON.parse(savedStagingData) : (innerProps.stagingData || { email: [], projectId: currentProject?.id });
+    
+    // Check if the current project ID is different from the saved one
+    if (currentProject && parsedStagingData.projectId !== currentProject.id) {
+      return { email: [], projectId: currentProject.id };
+    }
+    return parsedStagingData;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('stagingData', JSON.stringify(stagingData));
+  }, [stagingData]);
   const [suggestionData, setSuggestionData] = useState<any>([]);
 
   const handleToggle = (key: number) => {

@@ -4,6 +4,7 @@ import DynamicRichTextArea from "@common/library/DynamicRichTextArea";
 import ProspectSelect from "@common/library/ProspectSelect";
 import { PersonalizationSection } from "@common/sequence/LinkedInSequenceSection";
 import { API_URL, SCREEN_SIZES } from "@constants/data";
+import { diffWords } from 'diff';
 import {
   Badge,
   Box,
@@ -676,10 +677,13 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const userData = useRecoilValue(userDataState);
-  const [selectedVoice, setSelectedVoice] = useState<string | null>("");
+  const [selectedVoice, setSelectedVoice] = useState<string | null>('');
+  const [selectedVoiceId, setSelectedVoiceId] = useState<number | null>(null);
   const [aiVoices, setAiVoices] = useState<{ client_id: number; client_sdr_created_by: number; id: number; name: string }[]>([]);
   const [loadingVoices, setLoadingVoices] = useState<boolean>(false);
   const [loadingBankData, setLoadingBankData] = useState<boolean>(false);
+  const [newFewShot, setNewFewShot] = useState<string>('');
+  const [savingFewShot, setSavingFewShot] = useState<boolean>(false);
   const [voiceBankOpen, setVoiceBankOpen] = useState<boolean>(false);
   const [progressStep, setProgressStep] = useState<Number>(0);
   const roomIDref = useRef<string>('');
@@ -688,6 +692,8 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
     {
       id: number;
       nuance: string[];
+      edited_string: string;
+      original_string: string;
     }[]
   >([]);
 
@@ -733,6 +739,11 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
         });
         if (response.ok) {
           const data = await response.json();
+          const selectedVoiceData = data.find((voice: any) => voice.id === selectedVoiceId);
+          if (selectedVoiceData) {
+            setSelectedVoice(selectedVoiceData.name);
+          }
+
           setAiVoices(data);
         } else {
           console.error('Failed to fetch voices');
@@ -753,7 +764,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
     try {
       setLoadingBankData(true);
       const data = await fetchCampaignStats(userToken, currentProject?.id || -1);
-      setSelectedVoice(data.ai_voice_id);
+      setSelectedVoiceId(data.ai_voice_id);
       if (data.ai_voice_id) {
         const response = await fetch(API_URL + '/ml/few-shot', {
           method: 'POST',
@@ -765,11 +776,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
         });
         if (response.ok) {
           const fewShotData = await response.json();
-          const decomposedFewShotData = fewShotData.map((item: { nuance: string; }) => ({
-            ...item,
-            nuance: JSON.parse(item.nuance),
-          }));
-          setFewShots(decomposedFewShotData);
+          setFewShots(fewShotData);
         } else {
           console.error('Failed to fetch few-shot data');
         }
@@ -780,25 +787,42 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
     setLoadingBankData(false);
   }
 
-  const modifyFewShot = (index: number, nuanceIndex: number) => async () => {
-    setFewShots((prevFewShots) => {
-      const updatedFewShots = prevFewShots.map((fewShot, i) => {
-        if (i === index) {
-          const updatedNuance = fewShot.nuance.filter((_, nIndex) => nIndex !== nuanceIndex);
-          const updatedFewShot = {
-            ...fewShot,
-            nuance: updatedNuance,
-          };
-          return updatedFewShot;
-        }
-        return fewShot;
-      });
-      return updatedFewShots;
+  const stripMarkdown = (text: string) => {
+    return text.replace(/(\*\*|__)(.*?)\1/g, '$2') // bold
+               .replace(/(\*|_)(.*?)\1/g, '$2')   // italic
+               .replace(/(~~)(.*?)\1/g, '$2')     // strikethrough
+               .replace(/`([^`]+)`/g, '$1')       // inline code
+               .replace(/!\[.*?\]\(.*?\)/g, '')   // images
+               .replace(/\[.*?\]\(.*?\)/g, '')    // links
+               .replace(/^\s*#\s+/gm, '')         // headers
+               .replace(/^\s*>\s+/gm, '')         // blockquotes
+               .replace(/^\s*[-*+]\s+/gm, '')     // unordered lists
+               .replace(/^\s*\d+\.\s+/gm, '')     // ordered lists
+               .replace(/^\s*---+\s*$/gm, '')     // horizontal rules
+               .replace(/^\s*```\s*[^`]*\s*```/gm, '') // code blocks
+               .replace(/<\/?[^>]+(>|$)/g, '');   // HTML tags
+  };
+
+  const getHighlightedDiff = (original: string, edited: string) => {
+    const strippedOriginal = stripMarkdown(original);
+    const strippedEdited = stripMarkdown(edited);
+    const diff = diffWords(strippedOriginal, strippedEdited);
+    return diff.map((part: any, index: any) => {
+      const color = part.added ? 'green' : part.removed ? 'red' : 'black';
+      const backgroundColor = part.added ? '#e6ffe6' : part.removed ? '#ffe6e6' : 'transparent';
+      return (
+        <span key={index} style={{ color, backgroundColor }}>
+          {part.value}
+        </span>
+      );
     });
+  };
+  const modifyFewShot = (index: number, nuanceIndex: number) => async () => {
+    setFewShots((prevFewShots) => prevFewShots.filter((_, i) => i !== index));
 
     try {
+      // delete it!
       const fewShot = fewShots[index];
-      const updatedNuance = fewShot.nuance.filter((_, nIndex) => nIndex !== nuanceIndex);
       const response = await fetch(API_URL + '/ml/few-shot', {
         method: 'PUT',
         headers: {
@@ -807,7 +831,6 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
         },
         body: JSON.stringify({
           id: fewShot.id,
-          nuance: JSON.stringify(updatedNuance),
         }),
       });
       if (!response.ok) {
@@ -872,6 +895,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
             return {
               subject_line: data.magic_subject_line,
               body: data.personalized_email,
+              ai_research: data.ai_research,
               body_spam: {
                 read_minutes: 1,
                 read_minutes_score: 100,
@@ -1070,29 +1094,76 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
           <Paper radius="md" style={{ zIndex: 9999, padding: '20px' }}>
             <Flex justify="center" mb="md">
               <Text size="lg" weight={700}>
-                Bank for <i>{aiVoices[Number(selectedVoice) - 1]?.name || 'Select Voice'}</i>
+                Bank for <i>{aiVoices.find(voice => voice.id === selectedVoiceId)?.name || 'Unknown Voice'}</i>
               </Text>
             </Flex>
             <ScrollArea style={{ height: 450, overflow: 'hidden', scrollbarWidth: 'none' }} className="hide-scrollbar" scrollHideDelay={0}>
               <Flex direction="column">
                 {fewShots.map((shot, index) => (
-                  <React.Fragment key={index}>
-                    {shot.nuance.map((nuance, nuanceIndex) => (
-                      <Flex key={nuanceIndex} direction="column" style={{ padding: '10px', borderRadius: '8px', backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff' }}>
-                        <Flex direction="row" justify="space-between" align="center">
-                          <Text ml="sm" style={{ fontWeight: 700, color: '#000', fontSize: '1rem' }}>{nuance}</Text>
-                          <ActionIcon color="red" onClick={modifyFewShot(index,nuanceIndex)} variant="light">
-                            <IconTrash size={16} />
-                          </ActionIcon>
-                        </Flex>
-                        <Divider />
-                      </Flex>
-                    ))}
-                  </React.Fragment>
+                  <Flex key={index} direction="column" style={{ padding: '10px', borderRadius: '8px', backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff' }}>
+                    <Flex direction="row" justify="space-between" align="center">
+                      <Text ml="sm" style={{ fontWeight: 700, color: '#000', fontSize: '1rem' }}>
+                        <div>{getHighlightedDiff(shot.original_string, shot.edited_string)}</div>
+                      </Text>
+                      <ActionIcon color="red" onClick={modifyFewShot(index, 0)} variant="light">
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Flex>
+                    <Divider />
+                  </Flex>
                 ))}
               </Flex>
             </ScrollArea>
           </Paper>
+        <Divider mt="md" />
+        <Box mt="md" p="md" style={{ backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+          <Text size="md" weight={700} mb="sm">
+            Add New Few-Shot Example
+          </Text>
+          <Textarea
+            placeholder="Type your instructions here..."
+            autosize
+            minRows={3}
+            onChange={(event) => setNewFewShot(event.currentTarget.value)}
+            value={newFewShot}
+          />
+          {newFewShot && (
+            <Button
+              mt="md"
+              onClick={async () => {
+                try {
+                  setSavingFewShot(true);
+                  const response = await fetch(API_URL + '/ml/add-few-shot', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${userToken}`,
+                    },
+                    body: JSON.stringify({
+                      client_archetype_id: currentProject.id,
+                      original_string: newFewShot,
+                      edited_string: newFewShot, // Assuming the edited string is the same as the original for now
+                    }),
+                  });
+                  if (response.ok) {
+                    const data = await response.json();
+                    setFewShots((prevFewShots) => [...prevFewShots, data]);
+                    setNewFewShot('');
+                  } else {
+                    console.error('Failed to save few-shot example');
+                  }
+                } catch (error) {
+                  console.error('Error saving few-shot example:', error);
+                } finally {
+                  setSavingFewShot(false);
+                }
+              }}
+              loading={savingFewShot}
+            >
+              Save
+            </Button>
+          )}
+        </Box>
         </Modal>
       )}
 
@@ -1159,7 +1230,6 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                                 name: newVoice.name,
                               },
                             ]);
-                            setSelectedVoice(newVoice.id.toString());
 
                             // PUT the new voice ID to the campaign
                             const updateCampaignResponse = await fetch(API_URL + `/campaigns/${currentProject.id}/voice`, {
@@ -1196,17 +1266,8 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                     creatable
                     getCreateLabel={(query) => `+ Create ${query}`}
                     data={[{ value: 'null', label: 'No Voice' }, ...aiVoices.map(voice => ({ value: voice.id.toString(), label: voice.name }))]}
-                    value={selectedVoice?.toString()}
+                    value={selectedVoiceId ? selectedVoiceId.toString() : 'null'}
                     onChange={async (value) => {
-                      const numericValue = Number(value);
-                      if (isNaN(numericValue)) {
-                        return;
-                      }
-                      if (value === 'null') {
-                        setSelectedVoice(null);
-                      } else {
-                        setSelectedVoice(value);
-                      }
                       try {
                         setLoadingBankData(true);
                         const [updateVoiceResponse, fewShotResponse] = await Promise.all([
@@ -1236,9 +1297,9 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
 
                         if (fewShotResponse.ok) {
                           const fewShotData = await fewShotResponse.json();
-                          const decomposedFewShotData = fewShotData.map((item: { nuance: string; }) => ({
+                          const decomposedFewShotData = fewShotData.map((item: { edited_string: string; }) => ({
                             ...item,
-                            nuance: JSON.parse(item.nuance)
+                            edited_string: item.edited_string
                           }));
                           setFewShots(decomposedFewShotData);
                         } else {
@@ -1247,10 +1308,16 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                       } catch (error) {
                         console.error('Error updating voice or fetching few-shot data:', error);
                       }
+                      if (value === 'null') {
+                        setSelectedVoiceId(null);
+                        setFewShots([]);
+                      } else {
+                        setSelectedVoiceId(Number(value));
+                      }
                       refetch();
                     }}
                     miw={300}
-                    rightSection={!loadingBankData && fewShots && fewShots.length > 0 && selectedVoice !== 'null' && <Button size="xs" onClick={() => setVoiceBankOpen(true)} color="blue" radius={"md"} style={{ transform: 'translateX(-50px)' }}>
+                    rightSection={!loadingBankData && fewShots && fewShots.length > 0 && selectedVoiceId !== null && <Button size="xs" onClick={() => setVoiceBankOpen(true)} color="blue" radius={"md"} style={{ transform: 'translateX(-50px)' }}>
                       Open Voice Bank
                     </Button>}
                     dropdownComponent="div"
@@ -1331,7 +1398,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                     ) : (
                       <>
                         <div
-                          contentEditable={currentProject?.is_ai_research_personalization_enabled && selectedVoice && selectedVoice !== 'null' ? true : undefined}
+                          contentEditable={currentProject?.is_ai_research_personalization_enabled && selectedVoice !== 'null' ? true : undefined}
                           dangerouslySetInnerHTML={{
                             __html: DOMPurify.sanitize(typeof data?.body === 'string' ? data.body.replace(/(<br\s*\/?>\s*){2,}/g, '<br />').replace(/\n\s*\n/g, '\n') : ""),
                           }}
@@ -1344,7 +1411,12 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                             marginBottom: "16px",
                             whiteSpace: "pre-wrap",
                           }}
-                          onClick={() => {currentProject?.is_ai_research_personalization_enabled && selectedVoice && selectedVoice !== 'null' && handleGenerate()}}
+                          onClick={() => {
+                            if (currentProject?.is_ai_research_personalization_enabled && selectedVoice !== 'null') {
+                              handleGenerate();
+                            }
+                          }
+                          }
                         />
                         {state && (
                           <>
@@ -1393,8 +1465,9 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                         </Text>
                         <Box>
                           <List withPadding size={"sm"}>
-                            <List.Item>8+ years of experience in industry</List.Item>
-                            <List.Item>Been at Blackstone Valley Community Care for over half a decade.</List.Item>
+                            {data?.ai_research?.map((research: { short_summary: string }, index: number) => (
+                              <List.Item key={index}>{research.short_summary}</List.Item>
+                            ))}
                           </List>
                         </Box>
                       </Flex>

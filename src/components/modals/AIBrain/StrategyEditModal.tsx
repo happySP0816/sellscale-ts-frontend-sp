@@ -66,7 +66,7 @@ export default function StrategyEditModal({
       <TextInput
         label="Strategy Name"
         defaultValue={innerProps.title}
-        onChange={setTitle}
+        onChange={(event) => setTitle(event.currentTarget.value)}
       />
       <MultiSelect
         withinPortal

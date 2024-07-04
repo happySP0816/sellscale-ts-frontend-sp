@@ -739,8 +739,6 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
         });
         if (response.ok) {
           const data = await response.json();
-          console.log('voices are', data);
-          console.log('selected voices is', selectedVoiceId);
           const selectedVoiceData = data.find((voice: any) => voice.id === selectedVoiceId);
           if (selectedVoiceData) {
             setSelectedVoice(selectedVoiceData.name);
@@ -1414,9 +1412,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                             whiteSpace: "pre-wrap",
                           }}
                           onClick={() => {
-                            console.log('params are', currentProject?.is_ai_research_personalization_enabled, selectedVoice !== 'null')
                             if (currentProject?.is_ai_research_personalization_enabled && selectedVoice !== 'null') {
-                              console.log('data is', data);
                               handleGenerate();
                             }
                           }

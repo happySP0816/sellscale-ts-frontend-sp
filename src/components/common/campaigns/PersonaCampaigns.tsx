@@ -1616,7 +1616,7 @@ export function PersonCampaignCard(props: {
                       </ActionIcon>
                     )}
                     {props.persona.sdr_id == userData?.id && (
-                      <Popover width={200} position="right" offset={12}>
+                      <Popover withArrow width={200} position="right" offset={{ mainAxis: 7, crossAxis: 16 }}>
                         <Popover.Target>
                           <Badge
                             variant="filled"

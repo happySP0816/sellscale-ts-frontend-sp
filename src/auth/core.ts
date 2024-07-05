@@ -130,7 +130,8 @@ export async function impersonateSDR(
   sdr: ClientSDR,
   impersonate: ClientSDR,
   setUserToken: SetterOrUpdater<string>,
-  setUserData: SetterOrUpdater<any>
+  setUserData: SetterOrUpdater<any>,
+  reload: boolean = true
 ) {
   if (sdr.role !== 'ADMIN') {
     return;
@@ -140,5 +141,7 @@ export async function impersonateSDR(
 
   await authorize(impersonate.auth_token, setUserToken, setUserData);
 
-  window.location.reload();
+  if (reload) {
+    window.location.reload();
+  }
 }

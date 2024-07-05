@@ -31,7 +31,7 @@ import {
 } from '@tabler/icons-react';
 import _ from 'lodash';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { userTokenState } from '@atoms/userAtoms';
+import { adminDataState, userTokenState } from '@atoms/userAtoms';
 import {
   fetchingProspectIdState,
   mainTabState,
@@ -95,6 +95,8 @@ const StatusSelectItem = forwardRef<HTMLDivElement, StatusSelectItemProps>(
 export function ProspectConvoCard(props: {
   id: number;
   name: string;
+  client_sdr_name: string;
+  client_sdr_img_url: string;
   title: string;
   img_url: string;
   latest_msg: string;
@@ -109,6 +111,7 @@ export function ProspectConvoCard(props: {
   const fetchingProspectId = useRecoilValue(fetchingProspectIdState);
   const theme = useMantineTheme();
   const navigate = useNavigate();
+  const adminData = useRecoilValue(adminDataState);
   return (
     <>
       <Flex
@@ -172,6 +175,19 @@ export function ProspectConvoCard(props: {
             <Text size={10} c='dimmed' fs='italic' fw={!props.opened ? 700 : 300}>
               {props.title}
             </Text>
+            {adminData?.role === 'ADMIN' && <Flex align="center" gap="xs">
+              <Avatar
+                size='sm'
+                radius='xl'
+                src={proxyURL(props.client_sdr_img_url)}
+                color={valueToColor(theme, props.client_sdr_name)}
+              >
+                {nameToInitials(props.client_sdr_name)}
+              </Avatar>
+              <Text size={10} c='dimmed' fs='italic' fw={!props.opened ? 700 : 300}>
+                {props.client_sdr_name}
+              </Text>
+            </Flex>}
           </Stack>
           {props.default_channel && (
             <Box sx={{ position: 'absolute', top: 15, right: 0 }}>
@@ -330,6 +346,8 @@ export default function ProspectList(props: {
           email_status: p.email_status,
           in_purgatory: is_purgatory,
           purgatory_until: p.hidden_until,
+          client_sdr_name: p.client_sdr_name, 
+          client_sdr_img_url: p.client_sdr_img_url
         };
       })
       .sort(
@@ -653,6 +671,8 @@ export default function ProspectList(props: {
                               new_msg_count={prospect.new_msg_count || 0}
                               latest_msg_from_sdr={prospect.latest_msg_from_sdr}
                               opened={prospect.id === openedProspectId}
+                              client_sdr_name={prospect.client_sdr_name || ''}
+                              client_sdr_img_url={prospect.client_sdr_img_url || ''}
                             />
                           </Container>
                           {prospect.in_purgatory && (

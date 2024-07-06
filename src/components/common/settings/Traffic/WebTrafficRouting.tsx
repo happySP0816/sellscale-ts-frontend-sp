@@ -42,6 +42,7 @@ export default function WebTrafficRouting() {
     getMostRecentTrackEvent,
     getTrackSourceMetadata,
     isLoading,
+    getTrackEventHistory,
   } = useTrackApi(userToken);
 
   const [script, setScript] = useState("");

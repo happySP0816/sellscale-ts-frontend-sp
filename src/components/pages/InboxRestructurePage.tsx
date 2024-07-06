@@ -7,7 +7,7 @@ import {
 } from '@atoms/inboxAtoms';
 import { currentInboxCountState, currentProjectState } from '@atoms/personaAtoms';
 import { prospectShowPurgatoryState } from '@atoms/prospectAtoms';
-import { userTokenState, userDataState } from '@atoms/userAtoms';
+import { userTokenState, userDataState, adminDataState } from '@atoms/userAtoms';
 import { logout } from '@auth/core';
 import InboxProspectConvo from '@common/inbox/InboxProspectConvo';
 import InboxProspectDetails from '@common/inbox/InboxProspectDetails';
@@ -96,6 +96,7 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
   setPageTitle('Inbox');
 
   const userToken = useRecoilValue(userTokenState);
+  const adminData = useRecoilValue(adminDataState);
 
   const [openedList, setOpenedList] = useRecoilState(openedProspectListState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
@@ -119,7 +120,7 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
       // const prospects =
       //   response.status === 'success' ? (response.data as ProspectRestructured[]) : [];
 
-      const response = await getProspectBucketsForInbox(userToken);
+      const response = await getProspectBucketsForInbox(userToken, adminData?.role === 'ADMIN');
       const buckets = response.status === 'success' ? (response.data as ProspectBuckets) : null;
 
       // @ts-ignore

@@ -27,7 +27,7 @@ import {
 import { useRecoilState, useRecoilValue } from "recoil";
 import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
 import ProfileIcon from "@nav/ProfileIcon";
-import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { adminDataState, userDataState, userTokenState } from "@atoms/userAtoms";
 import { isLoggedIn } from "@auth/core";
 import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
@@ -143,6 +143,7 @@ const useStyles = createStyles((theme) => ({
 export default function SideNavbar(props: {}) {
   const { classes, cx } = useStyles();
   const userToken = useRecoilValue(userTokenState);
+  const adminData = useRecoilValue(adminDataState);
   const navigate = useNavigate();
   const [fetchedPreOnboardingData, setFetchedPreOnboardingData] = useState(
     false
@@ -169,7 +170,7 @@ export default function SideNavbar(props: {}) {
       // const response = await getInboxCounts(userToken);
       // const data = response.status === 'success' ? response.data : null;
 
-      const response = await getProspectBucketsForInbox(userToken);
+      const response = await getProspectBucketsForInbox(userToken, adminData?.role === 'ADMIN');
       const buckets =
         response.status === "success"
           ? (response.data as ProspectBuckets)

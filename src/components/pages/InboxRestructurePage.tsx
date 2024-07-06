@@ -67,6 +67,7 @@ export type ProspectRestructured = {
 
 export type ProspectBucketRecord = {
   client_sdr_name: string;
+  client_sdr_img_url?: string;
   company: string;
   deactivate_ai_engagement: boolean;
   email_last_message_from_prospect?: string;

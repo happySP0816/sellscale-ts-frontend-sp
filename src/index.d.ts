@@ -241,6 +241,8 @@ export interface ProspectShallow {
   last_name: string;
   company: string;
   title: string;
+  client_sdr_name?: string;
+  client_sdr_img_url?: string;
   email: string;
   icp_fit_score: number;
   icp_fit_reason: string;

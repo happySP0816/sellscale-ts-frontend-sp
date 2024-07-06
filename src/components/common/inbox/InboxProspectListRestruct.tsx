@@ -15,6 +15,7 @@ import {
   LoadingOverlay,
   Menu,
   ScrollArea,
+  Select,
   Stack,
   Tabs,
   Text,
@@ -40,14 +41,22 @@ import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
 import { ProspectConvoCard } from "./InboxProspectList";
 import { currentInboxCountState } from "@atoms/personaAtoms";
 import { openContextModal } from "@mantine/modals";
+import { adminDataState, userDataState, userTokenState } from "@atoms/userAtoms";
+import { impersonateSDR } from "@auth/core";
+import { ClientSDR } from "src";
 
 export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const theme = useMantineTheme();
   const [openedList, setOpenedList] = useRecoilState(openedProspectListState);
+  const adminData = useRecoilValue(adminDataState);
+  const [userToken, setUserToken] = useRecoilState(userTokenState);
+  const [userData, setUserData] = useRecoilState(userDataState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
 
   const [searchFilter, setSearchFilter] = useState("");
   const [mainTab, setMainTab] = useRecoilState(mainTabState);
+  const [selectedUser, setSelectedUser] = useState("all");
+
   const inboxTab = (() => {
     if (mainTab === "manual_bucket") return "manual";
     if (mainTab === "ai_bucket") return "ai";
@@ -69,7 +78,36 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
         p.title?.toLowerCase().includes(searchFilter.toLowerCase()) ||
         p.company?.toLowerCase().includes(searchFilter.toLowerCase()) ||
         p.full_name?.toLowerCase().includes(searchFilter.toLowerCase())
+    )
+    .filter((p) => selectedUser === "all" || p.client_sdr_name === selectedUser);
+
+  const unfilteredProspects = bucket
+    .filter((p) => !["REMOVED", "NULL"].includes((p.overall_status ?? "NULL").toUpperCase()))
+    .filter(
+      (p) =>
+        p.title?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        p.company?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        p.full_name?.toLowerCase().includes(searchFilter.toLowerCase())
     );
+  const unfilteredProspectsGrouped = Object.entries(
+    _.groupBy(
+      unfilteredProspects.map((p) => ({
+        ...p,
+        status: p.status_email ?? p.status_linkedin,
+      })),
+      (p) => p.status
+    )
+  )
+    .sort((a, b) => {
+      if (a[0].toLowerCase().includes("scheduling")) return -1;
+      if (b[0].toLowerCase().includes("scheduling")) return 1;
+      return b[0].localeCompare(a[0]);
+    })
+    .filter((group) => {
+      // if (group[0].toLowerCase().includes('sent_outreach')) return false;
+      // if (group[0].toLowerCase().includes('email_opened')) return false;
+      return true;
+    });
 
   const prospectGroups = Object.entries(
     _.groupBy(
@@ -96,7 +134,59 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
       <Drawer
         opened={openedList}
         onClose={() => setOpenedList(false)}
-        title={<Title order={4}>Your Conversations</Title>}
+        title={
+          <Flex direction="row" align="center" gap="md">
+            <Title order={4}>Conversations</Title>
+            {adminData?.role === "ADMIN" && (
+              <Select
+                placeholder="Select Name"
+                data={[
+                  { value: "all", label: "All", image: null },
+                  ...Array.from(
+                    new Map(
+                      unfilteredProspectsGrouped
+                        .flatMap((group) => group[1])
+                        .map((prospect) => [
+                          prospect.client_sdr_name,
+                          {
+                            value: prospect.client_sdr_name,
+                            label: prospect.client_sdr_name,
+                            image: prospect.client_sdr_img_url,
+                          },
+                        ])
+                    ).values()
+                  ),
+                ]}
+                itemComponent={({ value, label, image, ...others }) => (
+                  <div {...others} style={{ display: "flex", alignItems: "center" }}>
+                    {image && <Avatar src={image} size="sm" mr="sm" />}
+                    {label}
+                  </div>
+                )}
+                value={selectedUser}
+                onChange={(value) => {
+                  if (value !== null) {
+                    if (value !== "all") {
+                      const getFromLocalStorage = (): ClientSDR[] => {
+                        const data = localStorage.getItem("admin-sdrs-view");
+                        return data ? JSON.parse(data) : [];
+                      };
+                      const sdrs: ClientSDR[] = getFromLocalStorage();
+                      const sdr = sdrs?.find((sdr) => sdr?.sdr_name === value);
+                      if (sdr) {
+                        impersonateSDR(adminData, sdr, setUserToken, setUserData, false);
+                      } else {
+                        console.error("SDR not found");
+                      }
+                    }
+                    // console.log('selected user is', value);
+                    setSelectedUser(value);
+                  }
+                }}
+              />
+            )}
+          </Flex>
+        }
         style={{
           marginLeft: NAV_BAR_SIDE_WIDTH,
         }}
@@ -342,6 +432,8 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                               }}
                             >
                               <ProspectConvoCard
+                                client_sdr_name={prospect.client_sdr_name}
+                                client_sdr_img_url={prospect.client_sdr_img_url || ""}
                                 id={prospect.prospect_id}
                                 name={prospect.full_name}
                                 title={prospect.title}

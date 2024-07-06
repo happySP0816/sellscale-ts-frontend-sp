@@ -1,34 +1,16 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Card,
-  Flex,
-  Grid,
-  Loader,
-  Paper,
-  Switch,
-  Text,
-  rem,
-  useMantineTheme,
-} from "@mantine/core";
+import { Badge, Box, Button, Card, Flex, Grid, Loader, Paper, Switch, Text, rem, useMantineTheme } from "@mantine/core";
 
 import WhiteLogo from "../../../../public/favicon.svg";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { DatePickerInput } from "@mantine/dates";
-import {
-  IconCalendar,
-  IconCircle,
-  IconInfoCircle,
-  IconPoint,
-} from "@tabler/icons";
+import { IconCalendar, IconCircle, IconInfoCircle, IconPoint } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import TodayActivityV2 from "./TodayActivityV2";
 import { CampaignAnalyticsData } from "@common/campaigns/CampaignAnalytics";
 import { isLoggedIn } from "@auth/core";
 import { getPersonasActivity } from "@utils/requests/getPersonas";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { Line } from "react-chartjs-2";
 import { API_URL } from "@constants/data";
 import OperatorDashboard, { Task } from "./OperatorDash/OperatorDash";
@@ -67,7 +49,7 @@ export function LineChart() {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log('data is', data)
+          console.log("data is", data);
           setModes(data.outreach_over_time || {});
           setLoading(false);
         });
@@ -91,13 +73,14 @@ export function LineChart() {
     for (let i = 0; i < labels.length; i++) {
       const date = new Date(labels[i]);
       const dayOfWeek = date.getDay();
-      const isSpecificWeekend = (date.getFullYear() === 2024 && date.getMonth() === 5 && (date.getDate() === 8 || date.getDate() === 9));
-      if (dayOfWeek !== 0 && dayOfWeek !== 6 && !isSpecificWeekend) { // 0 is Sunday, 6 is Saturday
+      const isSpecificWeekend = date.getFullYear() === 2024 && date.getMonth() === 5 && (date.getDate() === 8 || date.getDate() === 9);
+      if (dayOfWeek !== 0 && dayOfWeek !== 6 && !isSpecificWeekend) {
+        // 0 is Sunday, 6 is Saturday
         filteredData.push(data[i]);
         filteredLabels.push(labels[i]);
       }
     }
-    console.log('data is', filteredData, filteredLabels);
+    console.log("data is", filteredData, filteredLabels);
     return { filteredData, filteredLabels };
   };
 
@@ -181,7 +164,7 @@ export function LineChart() {
     ],
   };
 
-  const options: any = { 
+  const options: any = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -215,29 +198,22 @@ export function LineChart() {
     },
   };
 
+  const matches = useMediaQuery("(max-width: 400px)");
+
   return (
-    <Card
-      shadow="md"
-      withBorder
-      py={15}
-      px={20}
-      style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
-      w={"100%"}
-    >
-      <Flex align={"center"} gap={"sm"} justify={"space-between"}>
+    <Card shadow="md" withBorder py={15} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }} w={"100%"}>
+      <Flex align={{ base: "start", md: "center" }} gap={"sm"} justify={"space-between"} direction={{ base: "column", sm: "row" }}>
         <Text fw={700} size={"lg"}>
           Total Outbound
         </Text>
-        <Flex align={"center"} gap={"sm"}>
+        <Flex gap={"sm"} align={{ base: "start", md: "center" }} direction={{ base: "column", sm: "row" }}>
           <Switch
             size="xs"
             color="blue"
             labelPosition="left"
             label="Show Cumulative:"
             checked={isCumulativeMode}
-            onChange={(event) =>
-              setIsCumulativeMode(event.currentTarget.checked)
-            }
+            onChange={(event) => setIsCumulativeMode(event.currentTarget.checked)}
             styles={{
               root: {
                 border: "1px solid #e9ecef",
@@ -255,7 +231,7 @@ export function LineChart() {
               {["week", "month", "year"].map((mode) => (
                 <Button
                   onClick={() => setCurrentMode(mode)}
-                  size="sm"
+                  size={matches ? "xs" : "sm"}
                   color={currentMode === mode ? "green" : "gray"}
                   variant={currentMode === mode ? "outline" : "subtle"}
                   key={mode}
@@ -283,10 +259,7 @@ export default function HomePageV2() {
   const [numOperatorDashItems, setNumOperatorDashItems] = useState(0);
   const [request, setRequest] = useState("");
 
-  const [
-    campaignAnalyticData,
-    setCampaignAnalyticData,
-  ] = useState<CampaignAnalyticsData>({
+  const [campaignAnalyticData, setCampaignAnalyticData] = useState<CampaignAnalyticsData>({
     sentOutreach: 0,
     accepted: 0,
     activeConvos: 0,
@@ -341,42 +314,30 @@ export default function HomePageV2() {
   }, []);
 
   return (
-    <Flex
-      p={"lg"}
-      maw={"1250px"}
-      gap={"md"}
-      direction={"column"}
-      ml="auto"
-      mr="auto"
-    >
-      <Flex align={"center"} justify={"space-between"}>
-        <Flex gap={"sm"} align={"center"}>
-          <img src={WhiteLogo} className="w-[20px] h-[20px]" />
+    <Flex p={{ base: "xs", md: "lg" }} maw={"1250px"} gap={"md"} direction={"column"} ml="auto" mr="auto">
+      <Flex align={{ base: "start", md: "center" }} gap={{ base: "sm" }} justify={"space-between"} direction={{ base: "column", sm: "row" }}>
+        <Flex gap={"sm"} align={{ base: "start", md: "center" }} w={{ base: "100%", lg: "fit-content" }}>
+          <img src={WhiteLogo} className="w-[20px] h-[20px] md:mt-0 mt-1" />
           <Text fw={600} size={"xl"}>
             Hey {userData.sdr_name}, here's your overview
           </Text>
         </Flex>
         <DatePickerInput
-          icon={
-            <IconCalendar
-              style={{ width: rem(18), height: rem(18) }}
-              stroke={1.5}
-            />
-          }
-          w={200}
+          icon={<IconCalendar style={{ width: rem(18), height: rem(18) }} stroke={1.5} />}
+          w={{ base: "100%", md: 200 }}
           value={value.toDate()}
           onChange={(value) => setValue(moment(value))}
           disabled
         />
       </Flex>
       <TodayActivityV2 aiActivityData={aiActivityData} />
-      <Flex gap={"lg"}>
+      <Flex gap={"lg"} direction={{ base: "column", lg: "row" }}>
         <LineChart />
-          <OperatorDashboardV2
-            onOperatorDashboardEntriesChange={(task: Task[]) => {
-              setNumOperatorDashItems(task.length);
-            }}
-          />
+        <OperatorDashboardV2
+          onOperatorDashboardEntriesChange={(task: Task[]) => {
+            setNumOperatorDashItems(task.length);
+          }}
+        />
       </Flex>
       <PipelineOverviewV2 />
       <CampaignUtilization />

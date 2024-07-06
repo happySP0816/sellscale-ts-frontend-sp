@@ -35,7 +35,7 @@ const TodayActivityV2: FC<{ aiActivityData: TodayActivityData }> = ({ aiActivity
   );
 
   return (
-    <Paper className="flex justify-between" p={"md"} radius={"sm"} bg="#F6E9F9" style={{ border: "1px solid #F0C0F6" }}>
+    <Paper className="flex md:flex-row flex-col justify-between" p={"md"} radius={"sm"} bg="#F6E9F9" style={{ border: "1px solid #F0C0F6" }}>
       <Flex align={"center"} gap={6}>
         <IconSparkles color="#ECA3F3" />
         <Text size={"sm"} fw={700}>
@@ -45,7 +45,7 @@ const TodayActivityV2: FC<{ aiActivityData: TodayActivityData }> = ({ aiActivity
           {aiActivityData.totalActivity.toLocaleString()} touches
         </Text>
       </Flex>
-      <Flex gap={"sm"} align={"center"}>
+      <Flex gap={{ base: "xs", md: "sm" }} align={"center"} wrap={"wrap"}>
         {values.map((item: any, index: number) => {
           return (
             <Flex key={index} gap={"xs"} align={"center"}>

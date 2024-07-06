@@ -130,9 +130,7 @@ export default function CampaignUtilization() {
   const [seatData, setSeatData] = useState<seatDataType[]>([]);
   const [outboundData, setOutboundData] = useState<outboundType>();
 
-  const [activeCampaign, setActiveCampaign] = useState<activeCampaignType[]>(
-    []
-  );
+  const [activeCampaign, setActiveCampaign] = useState<activeCampaignType[]>([]);
 
   const [loading, setLoading] = useState(false);
 
@@ -143,23 +141,8 @@ export default function CampaignUtilization() {
     datasets: [
       {
         data: [
-          Math.min(
-            100,
-            Math.floor(
-              ((outboundData?.seat_active || 0) /
-                (outboundData?.seat_total || 1)) *
-                100
-            )
-          ),
-          100 -
-            Math.min(
-              100,
-              Math.floor(
-                ((outboundData?.seat_active || 0) /
-                  (outboundData?.seat_total || 1)) *
-                  100
-              )
-            ),
+          Math.min(100, Math.floor(((outboundData?.seat_active || 0) / (outboundData?.seat_total || 1)) * 100)),
+          100 - Math.min(100, Math.floor(((outboundData?.seat_active || 0) / (outboundData?.seat_total || 1)) * 100)),
         ],
         backgroundColor: ["#3b84ef", "#eaecf0"],
         borderWidth: 0,
@@ -172,23 +155,8 @@ export default function CampaignUtilization() {
     datasets: [
       {
         data: [
-          Math.min(
-            100,
-            Math.floor(
-              ((outboundData?.message_active || 0) /
-                (outboundData?.message_total || 1)) *
-                100
-            )
-          ),
-          100 -
-            Math.min(
-              100,
-              Math.floor(
-                ((outboundData?.message_active || 0) /
-                  (outboundData?.message_total || 1)) *
-                  100
-              )
-            ),
+          Math.min(100, Math.floor(((outboundData?.message_active || 0) / (outboundData?.message_total || 1)) * 100)),
+          100 - Math.min(100, Math.floor(((outboundData?.message_active || 0) / (outboundData?.message_total || 1)) * 100)),
         ],
         backgroundColor: ["#d444f1", "#eaecf0"],
         borderWidth: 0,
@@ -273,8 +241,8 @@ export default function CampaignUtilization() {
 
   return (
     <div>
-      <Flex py={"lg"} gap={"lg"}>
-        <Flex direction={"column"} gap={"sm"} w={"70%"}>
+      <Flex py={"lg"} gap={"lg"} direction={{ base: "column", md: "row" }}>
+        <Flex direction={"column"} gap={"sm"} w={{ base: "100%", md: "70%" }}>
           <Flex align={"center"} gap={"5px"}>
             <Text
               style={{
@@ -287,9 +255,7 @@ export default function CampaignUtilization() {
               size={"lg"}
             >
               <span>Campaigns</span>
-              <Badge sx={{ background: "#228be6", color: "white" }}>
-                {activeCampaign?.length}
-              </Badge>
+              <Badge sx={{ background: "#228be6", color: "white" }}>{activeCampaign?.length}</Badge>
             </Text>
             <Divider w={"100%"} />
             <Flex>
@@ -302,8 +268,7 @@ export default function CampaignUtilization() {
               </ActionIcon>
               <ActionIcon
                 onClick={() => {
-                  if (page < Math.ceil(activeCampaign.length / 5) - 1)
-                    setPage((page) => (page = page + 1));
+                  if (page < Math.ceil(activeCampaign.length / 5) - 1) setPage((page) => (page = page + 1));
                 }}
               >
                 <IconChevronRight />
@@ -341,13 +306,7 @@ export default function CampaignUtilization() {
                     const { status } = cell.row.original;
 
                     return (
-                      <Flex
-                        w={"100%"}
-                        h={"100%"}
-                        px={"sm"}
-                        align={"center"}
-                        justify={"center"}
-                      >
+                      <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"center"}>
                         <Badge>{status}</Badge>
                       </Flex>
                     );
@@ -365,39 +324,17 @@ export default function CampaignUtilization() {
                   ),
 
                   cell: (cell) => {
-                    const {
-                      campaign,
-                      num_total_linkedin,
-                      num_total_email,
-                    } = cell.row.original;
+                    const { campaign, num_total_linkedin, num_total_email } = cell.row.original;
 
                     return (
-                      <Flex
-                        w={"100%"}
-                        px={"sm"}
-                        h={"100%"}
-                        align={"center"}
-                        gap={"md"}
-                      >
+                      <Flex w={"100%"} px={"sm"} h={"100%"} align={"center"} gap={"md"}>
                         <Flex>
                           <Text lineClamp={1}>{campaign}</Text>
                         </Flex>
 
                         <Flex w={"100%"} align={"center"} gap={3}>
-                          {num_total_email > 0 && (
-                            <IconMail
-                              size={"1.3rem"}
-                              fill="#228be6"
-                              color="white"
-                            />
-                          )}
-                          {num_total_linkedin > 0 && (
-                            <IconBrandLinkedin
-                              size={"1.3rem"}
-                              fill="#228be6"
-                              color="white"
-                            />
-                          )}
+                          {num_total_email > 0 && <IconMail size={"1.3rem"} fill="#228be6" color="white" />}
+                          {num_total_linkedin > 0 && <IconBrandLinkedin size={"1.3rem"} fill="#228be6" color="white" />}
                         </Flex>
                       </Flex>
                     );
@@ -417,26 +354,11 @@ export default function CampaignUtilization() {
                     const { rep, rep_profile_picture } = cell.row.original;
 
                     return (
-                      <Flex
-                        gap={"sm"}
-                        w={"100%"}
-                        px={"sm"}
-                        h={"100%"}
-                        align={"center"}
-                      >
-                        <Avatar
-                          src={rep_profile_picture}
-                          color={valueToColor(theme, rep)}
-                          radius={"xl"}
-                        >
+                      <Flex gap={"sm"} w={"100%"} px={"sm"} h={"100%"} align={"center"}>
+                        <Avatar src={rep_profile_picture} color={valueToColor(theme, rep)} radius={"xl"}>
                           {nameToInitials(rep)}
                         </Avatar>
-                        <Text fw={500}>
-                          {rep.split(" ")[0] +
-                            " " +
-                            rep.split(" ")[1].slice(0, 1) +
-                            "."}
-                        </Text>
+                        <Text fw={500}>{rep.split(" ")[0] + " " + rep.split(" ")[1].slice(0, 1) + "."}</Text>
                       </Flex>
                     );
                   },
@@ -456,48 +378,26 @@ export default function CampaignUtilization() {
                     const { num_used_total, num_total } = cell.row.original;
 
                     return (
-                      <Flex
-                        direction={"column"}
-                        align={"center"}
-                        justify={"center"}
-                        w={"100%"}
-                        h={"100%"}
-                        py={"sm"}
-                      >
+                      <Flex direction={"column"} align={"center"} justify={"center"} w={"100%"} h={"100%"} py={"sm"}>
                         <Flex w={"100%"} align={"center"} gap={"8px"} px={"xs"}>
-                          <Progress
-                            value={(num_used_total / num_total) * 100}
-                            w={"100%"}
-                          />
+                          <Progress value={(num_used_total / num_total) * 100} w={"100%"} />
                           <Text color="#228be6" fw={500}>
                             {Math.round((num_used_total / num_total) * 100)}%
                           </Text>
                         </Flex>
                         <Flex align={"center"}>
                           <Text fw={500}>
-                            {num_used_total} / {num_total}{" "}
-                            <span style={{ color: "gray !important" }}>
-                              Sent
-                            </span>
+                            {num_used_total} / {num_total} <span style={{ color: "gray !important" }}>Sent</span>
                           </Text>
-                          {Math.round((num_total - num_used_total) / 20) < 3 ? (
-                            <IconPoint fill="gray" color="white" />
-                          ) : null}
+                          {Math.round((num_total - num_used_total) / 20) < 3 ? <IconPoint fill="gray" color="white" /> : null}
                           <Text
                             color={"red"}
                             sx={{
-                              display:
-                                Math.round((num_total - num_used_total) / 20) <
-                                3
-                                  ? "block"
-                                  : "none",
+                              display: Math.round((num_total - num_used_total) / 20) < 3 ? "block" : "none",
                             }}
                           >
                             {Math.round((num_total - num_used_total) / 20)} day
-                            {Math.round((num_total - num_used_total) / 20) < 3
-                              ? "s"
-                              : ""}{" "}
-                            left
+                            {Math.round((num_total - num_used_total) / 20) < 3 ? "s" : ""} left
                           </Text>
                         </Flex>
                       </Flex>
@@ -519,20 +419,8 @@ export default function CampaignUtilization() {
                     const { persona_id, rep_id } = cell.row.original;
 
                     return (
-                      <Flex
-                        direction={"column"}
-                        align={"center"}
-                        justify={"center"}
-                        gap={"xs"}
-                        py={"lg"}
-                        w={"100%"}
-                        h={"100%"}
-                      >
-                        <Switch
-                          checked
-                          disabled={rep_id == userId ? false : true}
-                          onClick={() => handleDeactive(persona_id)}
-                        />
+                      <Flex direction={"column"} align={"center"} justify={"center"} gap={"xs"} py={"lg"} w={"100%"} h={"100%"}>
+                        <Switch checked disabled={rep_id == userId ? false : true} onClick={() => handleDeactive(persona_id)} />
                       </Flex>
                     );
                   },
@@ -567,7 +455,7 @@ export default function CampaignUtilization() {
             />
           </Paper>
         </Flex>
-        <Flex gap={"md"} direction={"column"} w={"30%"}>
+        <Flex gap={"md"} direction={"column"} w={{ base: "100%", md: "30%" }}>
           <Flex align={"center"} gap={"5px"}>
             <Text
               style={{
@@ -586,12 +474,7 @@ export default function CampaignUtilization() {
           </Flex>
           <Card px={"md"} radius={"md"} w={"100%"} withBorder>
             <Flex align={"center"} justify={"space-between"} w={"100%"}>
-              <Text
-                size={"sm"}
-                fw={500}
-                color="gray"
-                sx={{ display: "flex", gap: "6px", alignItems: "center" }}
-              >
+              <Text size={"sm"} fw={500} color="gray" sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
                 <div className=" rounded-full bg-[#3b84ef] w-[8px] h-[8px]"></div>
                 Seat Utilization
               </Text>
@@ -691,15 +574,7 @@ export default function CampaignUtilization() {
                   direction={"column"}
                 >
                   <Text fw={600} size={"xl"}>
-                    {Math.min(
-                      100,
-                      Math.floor(
-                        ((outboundData?.seat_active || 0) /
-                          (outboundData?.seat_total || 1)) *
-                          100
-                      )
-                    )}
-                    %
+                    {Math.min(100, Math.floor(((outboundData?.seat_active || 0) / (outboundData?.seat_total || 1)) * 100))}%
                   </Text>{" "}
                 </Flex>
               </div>
@@ -711,12 +586,7 @@ export default function CampaignUtilization() {
 
           <Card px={"md"} radius={"md"} w={"100%"} withBorder>
             <Flex align={"center"} justify={"space-between"} w={"100%"}>
-              <Text
-                size={"sm"}
-                fw={500}
-                color="gray"
-                sx={{ display: "flex", gap: "6px", alignItems: "center" }}
-              >
+              <Text size={"sm"} fw={500} color="gray" sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
                 <div className=" rounded-full bg-[#d444f1] w-[8px] h-[8px]"></div>
                 Message Utilization
               </Text>
@@ -755,15 +625,7 @@ export default function CampaignUtilization() {
                   direction={"column"}
                 >
                   <Text fw={600} size={"xl"}>
-                    {Math.min(
-                      100,
-                      Math.floor(
-                        ((outboundData?.message_active || 0) /
-                          (outboundData?.message_total || 1)) *
-                          100
-                      )
-                    )}
-                    %
+                    {Math.min(100, Math.floor(((outboundData?.message_active || 0) / (outboundData?.message_total || 1)) * 100))}%
                   </Text>{" "}
                 </Flex>
               </div>

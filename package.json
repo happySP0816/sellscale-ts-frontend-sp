@@ -72,6 +72,7 @@
     "chartjs-plugin-annotation": "^3.0.1",
     "cors": "^2.8.5",
     "dayjs": "^1.11.11",
+    "diff": "^5.2.0",
     "emoji-picker-react": "^4.4.12",
     "env-cmd": "^10.1.0",
     "fuzzball": "^2.1.2",
@@ -118,6 +119,7 @@
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
     "@types/babel__generator": "^7.6.4",
+    "@types/diff": "^5.2.1",
     "@types/jest": "^29.4.1",
     "@types/lodash": "^4.14.191",
     "@types/react": "^18.0.28",

@@ -584,6 +584,8 @@ export default function InboxSmartleadPage(props: {
                         new_msg_count={0}
                         latest_msg_from_sdr={false}
                         opened={prospect.prospect_id === openedProspectId}
+                        client_sdr_name={prospect.client_sdr_name || ''}
+                        client_sdr_img_url={prospect.client_sdr_img_url || ''}
                       />
                       {prospect.hidden_until && (
                         <Tooltip

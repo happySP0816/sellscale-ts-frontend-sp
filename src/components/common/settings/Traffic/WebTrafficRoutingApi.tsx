@@ -64,11 +64,47 @@ export const useTrackApi = (userToken: string) => {
     return data;
   };
 
+  const getTrackEventHistory = async (dateRange: number) => {
+    setIsLoading(true);
+    const url = new URL(
+      `${API_URL}/track/get_track_event_history?days=${dateRange}`
+    );
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    const data = await response.json();
+    setIsLoading(false);
+    return data;
+  };
+
+  const getDeanonomizedContacts = async (days: number = 14) => {
+    setIsLoading(true);
+    const url = new URL(
+      `${API_URL}/track/get_deanonomized_contacts?days=${days}`
+    );
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    const data = await response.json();
+    setIsLoading(false);
+    return data.contacts;
+  };
+
   return {
     isLoading,
     getTrackSourceMetadata,
     getScript,
     verifySource,
     getMostRecentTrackEvent,
+    getTrackEventHistory,
+    getDeanonomizedContacts,
   };
 };

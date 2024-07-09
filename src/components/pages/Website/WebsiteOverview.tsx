@@ -15,6 +15,7 @@ import {
   Card,
   Group,
   Title,
+  Loader,
 } from "@mantine/core";
 import {
   Icon123,
@@ -29,10 +30,14 @@ import {
 } from "@tabler/icons";
 import { nameToInitials, valueToColor } from "@utils/general";
 import { DataGrid } from "mantine-data-grid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { openContextModal } from "@mantine/modals";
 import { IconUsersPlus } from "@tabler/icons-react";
+import { useTrackApi } from "@common/settings/Traffic/WebTrafficRoutingApi";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import moment from "moment";
 
 type DeanonymizationType = {
   avatar: string;
@@ -43,130 +48,106 @@ type DeanonymizationType = {
   company: string;
   visit_date: string;
   total_visit: number;
-  icp_score: number;
+  intent_score: string;
   tag: string[];
 };
 
 export default function WebsiteOverview() {
   const theme = useMantineTheme();
+  const userToken = useRecoilValue(userTokenState);
+
+  const [dateRange, setDateRange] = useState("14");
+  const [loading, setLoading] = useState(false);
+  const [trackHistory, setTrackHistory] = useState<any[]>([]);
+  const [locations, setLocations] = useState<any[]>([]);
+
+  const {
+    getScript,
+    verifySource,
+    getMostRecentTrackEvent,
+    getTrackSourceMetadata,
+    isLoading,
+    getTrackEventHistory,
+    getDeanonomizedContacts,
+  } = useTrackApi(userToken);
 
   const [udPageSize, setUdPageSize] = useState("25");
-  const [countryData, setCountryData] = useState([
-    {
-      country: "USA",
-      label: "United States",
-      value: 24586,
-    },
-    {
-      country: "ERP",
-      label: "Europe",
-      value: 18421,
-    },
-    {
-      country: "asia",
-      label: "Asia",
-      value: 16220,
-    },
-    {
-      country: "brazil",
-      label: "Brazil",
-      value: 9842,
-    },
-    {
-      country: "other",
-      label: "Others >",
-      value: 2144,
-    },
-  ]);
+  // const [countryData, setCountryData] = useState([
+  //   {
+  //     country: "USA",
+  //     label: "United States",
+  //     value: 24586,
+  //   },
+  // ]);
 
   const [deanonymData, setDeanonymData] = useState<DeanonymizationType[]>([
-    {
-      avatar: "",
-      sdr_name: "Benn TK",
-      linkedin: true,
-      email: true,
-      job: "VP of Engineering",
-      company: "XYZ Technologies",
-      visit_date: "June 15, 2024",
-      total_visit: 12,
-      icp_score: 1,
-      tag: ["Potential Client"],
-    },
-    {
-      avatar: "",
-      sdr_name: "Benjamin K.",
-      linkedin: true,
-      email: false,
-      job: "Product Manager",
-      company: "ABC Communication",
-      visit_date: "June 15, 2024",
-      total_visit: 9,
-      icp_score: 2,
-      tag: ["Potential Invistor"],
-    },
-    {
-      avatar: "",
-      sdr_name: "Bryan Hank",
-      linkedin: false,
-      email: true,
-      job: "CTO",
-      company: "XYZ Pvt. Ltd.",
-      visit_date: "June 15, 2024",
-      total_visit: 4,
-      icp_score: 3,
-      tag: [],
-    },
-    {
-      avatar: "",
-      sdr_name: "Clark Mann",
-      linkedin: true,
-      email: true,
-      job: "CTO",
-      company: "ABC Infotech",
-      visit_date: "June 15, 2024",
-      total_visit: 9,
-      icp_score: 5,
-      tag: ["Potential Competitor"],
-    },
-    {
-      avatar: "",
-      sdr_name: "Anton Paul",
-      linkedin: true,
-      email: false,
-      job: "CTO",
-      company: "XYZ",
-      visit_date: "June 15, 2024",
-      total_visit: 12,
-      icp_score: 4,
-      tag: [],
-    },
-    {
-      avatar: "",
-      sdr_name: "Benjamin K.",
-      linkedin: true,
-      email: false,
-      job: "Product Manager",
-      company: "ABC Communication",
-      visit_date: "June 15, 2024",
-      total_visit: 9,
-      icp_score: 5,
-      tag: ["Potential Invistor"],
-    },
+    // {
+    //   avatar: "",
+    //   sdr_name: "Benn TK",
+    //   linkedin: true,
+    //   email: true,
+    //   job: "VP of Engineering",
+    //   company: "XYZ Technologies",
+    //   visit_date: "June 15, 2024",
+    //   total_visit: 12,
+    //   icp_score: 1,
+    //   tag: ["Potential Client"],
+    // },
   ]);
 
-  const [filterData, setFilterData] = useState<DeanonymizationType[]>(
-    deanonymData
-  );
+  const handleGetTrackHistory = async () => {
+    setLoading(true);
+    const data = await getTrackEventHistory(parseInt(dateRange));
+    setTrackHistory(data.traffic);
+    setLocations(data.locations);
 
-  const handleFilter = (key: string) => {
-    let newData = deanonymData;
-    newData = deanonymData.filter(
-      (item) =>
-        item.company.toLowerCase().includes(key) ||
-        item.sdr_name.toLowerCase().includes(key) ||
-        item.job.toLowerCase().includes(key)
-    );
-    setFilterData(newData);
+    setLoading(false);
+  };
+
+  const handleGetDeanonymizedContacts = async () => {
+    const data = await getDeanonomizedContacts(parseInt(dateRange));
+    console.log("SWAG");
+    console.log(data);
+    setDeanonymData(data ? data : []);
+  };
+
+  useEffect(() => {
+    handleGetTrackHistory();
+    handleGetDeanonymizedContacts();
+  }, [userToken, dateRange]);
+
+  const maxDeanonymizedVisits =
+    Math.max(...trackHistory?.map((x) => x.distinct_deanonymized_visits), 0) +
+    5;
+
+  const data = {
+    labels: trackHistory
+      ?.map((x) => moment(x.label).format("MMM D YYYY"))
+      .reverse(),
+    datasets: [
+      {
+        label: "Distinct Views",
+        data: trackHistory?.map((x) => x.distinct_visits).reverse(),
+        fill: false,
+        borderColor: "#3B85EF",
+        backgroundColor: "#3B85EF",
+        width: 4,
+        borderDash: [5, 5],
+        yAxisID: "y",
+      },
+      {
+        label: "Deanonomized Contact",
+        data: trackHistory
+          ?.map((x) => x.distinct_deanonymized_visits)
+          .reverse(),
+        fill: false,
+        borderColor: "#D444F1",
+        backgroundColor: "#D444F1",
+        width: 4,
+        borderDash: [5, 5],
+        yAxisID: "y1",
+      },
+    ],
   };
 
   const options: any = {
@@ -187,42 +168,19 @@ export default function WebsiteOverview() {
           borderDash: [5, 5],
         },
       },
+      y: {
+        type: "linear",
+        position: "left",
+      },
+      y1: {
+        type: "linear",
+        position: "right",
+        max: maxDeanonymizedVisits,
+        grid: {
+          drawOnChartArea: false,
+        },
+      },
     },
-  };
-
-  const data = {
-    labels: [
-      "09 Jun",
-      "10 Jun",
-      "11 Jun",
-      "12 Jun",
-      "13 Jun",
-      "14 Jun",
-      "15 Jun",
-      "16 Jun",
-      "17 Jun",
-      "18 Jun",
-    ],
-    datasets: [
-      {
-        label: "Distinct Views",
-        data: [250, 40, 401, 180, 60, 96, 73, 93, 40, 103, 150],
-        fill: false,
-        borderColor: "#3B85EF",
-        backgroundColor: "#3B85EF",
-        width: 4,
-        borderDash: [5, 5],
-      },
-      {
-        label: "Deanonomized Contact",
-        data: [130, 20, 201, 90, 30, 48, 39, 50, 10, 42, 59],
-        fill: false,
-        borderColor: "#D444F1",
-        backgroundColor: "#D444F1",
-        width: 4,
-        borderDash: [5, 5],
-      },
-    ],
   };
 
   const [selected, setSelected] = useState<any>({});
@@ -232,9 +190,12 @@ export default function WebsiteOverview() {
       <Paper withBorder radius={"sm"} p={"md"}>
         <Flex justify={"space-between"}>
           <Box w={"70%"}>
-            <Text size={"xl"} fw={700}>
-              Traffic Analysis
-            </Text>
+            <Flex>
+              <Text size={"xl"} fw={700}>
+                Traffic Analysis
+              </Text>
+              {loading && <Loader size="sm" ml="md" variant="dots" />}
+            </Flex>
             <Text size={"sm"} color="gray" fw={400}>
               Track visitor numbers to better understand audience engagement.
             </Text>
@@ -246,33 +207,66 @@ export default function WebsiteOverview() {
             <Flex align={"start"} justify={"space-between"}>
               <Box>
                 <Text size={"xl"} fw={700}>
-                  {71213}
+                  {data.datasets[0].data.reduce((acc, value) => acc + value, 0)}
                 </Text>
                 <Text color="gray" size={"xs"}>
                   Global view count
                 </Text>
               </Box>
-              <Select w={140} data={["This month", "This year", "This day"]} />
+              <Select
+                w={140}
+                defaultValue={dateRange}
+                onChange={(v: any) => setDateRange(v)}
+                data={[
+                  { label: "7 days", value: "7" },
+                  { label: "14 days", value: "14" },
+                  { label: "30 days", value: "30" },
+                  { label: "60 days", value: "60" },
+                  { label: "90 days", value: "90" },
+                  { label: "All Time", value: "10000" },
+                ]}
+              />
             </Flex>
             <Divider my={"md"} />
             <Flex direction={"column"} gap={"sm"}>
-              {countryData
-                .sort((a, b) => (a.value > b.value ? -1 : 1))
-                .map((item, index) => {
-                  return (
-                    <Box>
-                      <Flex align={"center"} justify={"space-between"}>
+              {locations.map((item, index) => {
+                return (
+                  <Box>
+                    <Flex align={"center"} justify={"space-between"}>
+                      <Flex>
                         <Text size={"sm"} fw={500}>
-                          {item.label}
+                          {item.location.split(",")[0]},{" "}
+                          {item.location.split(",")[1]}
                         </Text>
-                        <Text size={"sm"} fw={500}>
-                          {item.value}
+                        <Text
+                          size={"xs"}
+                          fw={500}
+                          color="gray"
+                          ml="4px"
+                          mt="2px"
+                        >
+                          {item.location.split(",")[2]}
                         </Text>
                       </Flex>
-                      <Progress value={(item.value / 30000) * 100} mt={2} />
-                    </Box>
-                  );
-                })}
+                      <Text size={"sm"} fw={500}>
+                        {item.distinct_deanonymized_visits}
+                      </Text>
+                    </Flex>
+                    <Progress
+                      value={
+                        (item.distinct_deanonymized_visits /
+                          locations.reduce(
+                            (acc, item) =>
+                              acc + item.distinct_deanonymized_visits,
+                            1
+                          )) *
+                        100
+                      }
+                      mt={2}
+                    />
+                  </Box>
+                );
+              })}
             </Flex>
           </Paper>
         </Flex>
@@ -288,12 +282,12 @@ export default function WebsiteOverview() {
             </Text>
           </Box>
           <Flex align={"center"} gap={"sm"}>
-            {Object.keys(selected).length !== 0 && (
+            {Object.keys(selected)?.length !== 0 && (
               <Button variant="outline" onClick={() => alert("Show Modal")}>
                 Add Tag
               </Button>
             )}
-            <Button
+            {/* <Button
               leftIcon={<IconPlus size={"0.9rem"} />}
               onClick={() =>
                 openContextModal({
@@ -329,17 +323,17 @@ export default function WebsiteOverview() {
               }
             >
               Add 5 visitors to Segment
-            </Button>
+            </Button> */}
             <TextInput
               placeholder="Search contacts"
               w={240}
               rightSection={<IconSearch size={"0.9rem"} color="gray" />}
-              onChange={(e) => handleFilter(e.target.value)}
+              onChange={(e) => {}}
             />
           </Flex>
         </Flex>
         <DataGrid
-          data={filterData}
+          data={deanonymData}
           highlightOnHover
           mt={"sm"}
           withPagination
@@ -386,7 +380,7 @@ export default function WebsiteOverview() {
                       </Avatar>
                       <Box>
                         <Flex gap={5} align={"center"}>
-                          <Text fw={600} size={"sm"}>
+                          <Text fw={500} size={"sm"}>
                             {sdr_name}
                           </Text>
                           {linkedin && (
@@ -404,7 +398,7 @@ export default function WebsiteOverview() {
                             />
                           )}
                         </Flex>
-                        <Text color="gray" size={"xs"} fw={600}>
+                        <Text color="gray" size={"xs"} fw={500}>
                           {job}
                         </Text>
                       </Box>
@@ -421,12 +415,13 @@ export default function WebsiteOverview() {
                   <Text color="gray">Company</Text>
                 </Flex>
               ),
+              maxSize: 300,
               cell: (cell) => {
                 const { company } = cell.row.original;
 
                 return (
                   <Flex w={"100%"} h={"100%"} align={"center"}>
-                    <Text lineClamp={1} fw={600}>
+                    <Text lineClamp={1} fw={500}>
                       {company}
                     </Text>
                   </Flex>
@@ -438,7 +433,7 @@ export default function WebsiteOverview() {
               header: () => (
                 <Flex align={"center"} gap={"3px"}>
                   <IconLetterT color="gray" size={"0.9rem"} />
-                  <Text color="gray">Date Visited</Text>
+                  <Text color="gray">Last Visit</Text>
                 </Flex>
               ),
               maxSize: 160,
@@ -454,7 +449,9 @@ export default function WebsiteOverview() {
                     w={"100%"}
                     h={"100%"}
                   >
-                    <Text fw={600}>{visit_date}</Text>
+                    <Text fw={500}>
+                      {moment(visit_date).format("MMMM Do YYYY")}
+                    </Text>
                   </Flex>
                 );
               },
@@ -482,23 +479,23 @@ export default function WebsiteOverview() {
                     w={"100%"}
                     h={"100%"}
                   >
-                    <Text fw={600}>{total_visit}</Text>
+                    <Text fw={500}>{total_visit} visits</Text>
                   </Flex>
                 );
               },
             },
             {
-              accessorKey: "icp_score",
+              accessorKey: "intent_score",
               header: () => (
                 <Flex align={"center"} gap={"3px"}>
                   <IconLoader color="gray" size={"0.9rem"} />
-                  <Text color="gray">ICP Score</Text>
+                  <Text color="gray">Intent Score</Text>
                 </Flex>
               ),
               maxSize: 160,
               enableResizing: true,
               cell: (cell) => {
-                const { icp_score } = cell.row.original;
+                const { intent_score } = cell.row.original;
 
                 return (
                   <Flex
@@ -510,31 +507,14 @@ export default function WebsiteOverview() {
                   >
                     <Badge
                       color={
-                        icp_score == 0
-                          ? "red"
-                          : icp_score == 1
-                          ? "orange"
-                          : icp_score == 2
+                        intent_score == "MEDIUM"
                           ? "yellow"
-                          : icp_score == 3
-                          ? "green"
-                          : icp_score == 4
+                          : intent_score == "HIGH"
                           ? "blue"
-                          : "gray"
+                          : "green"
                       }
-                      variant="light"
                     >
-                      {icp_score == 0
-                        ? "Very Low"
-                        : icp_score == 1
-                        ? "Low"
-                        : icp_score == 2
-                        ? "Medium"
-                        : icp_score == 3
-                        ? "High"
-                        : icp_score == 4
-                        ? "Very High"
-                        : "Not Scored"}
+                      {intent_score}
                     </Badge>
                   </Flex>
                 );
@@ -562,7 +542,7 @@ export default function WebsiteOverview() {
                     h={"100%"}
                   >
                     <Flex gap={"sm"}>
-                      {tag.length > 0 ? (
+                      {tag?.length > 0 ? (
                         tag.map((item: any, index: number) => {
                           return (
                             <Badge key={index} tt={"initial"}>

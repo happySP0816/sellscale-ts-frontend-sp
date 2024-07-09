@@ -13,10 +13,27 @@ import {
   Divider,
   Button,
   Collapse,
+  SegmentedControl,
+  Center,
+  Box,
+  SimpleGrid,
+  ActionIcon,
+  Title,
 } from "@mantine/core";
-import { ContextModalProps } from "@mantine/modals";
+import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useEffect, useRef, useState } from "react";
-import { IconBrandLinkedin, IconMailOpened, IconUsers } from "@tabler/icons";
+import {
+  IconArrowLeft,
+  IconBrandLinkedin,
+  IconBulb,
+  IconChevronLeft,
+  IconChevronRight,
+  IconEye,
+  IconMailOpened,
+  IconPlus,
+  IconSearch,
+  IconUsers,
+} from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
@@ -63,6 +80,8 @@ export default function UploadProspectsModal({
   const [templateMode, setTemplateMode] = useState<string>("cta");
 
   const [opened, setOpened] = useState(false);
+
+  const [tab, setTab] = useState("scratch");
 
   const [
     loadingPersonaBuyReasonGeneration,
@@ -165,6 +184,50 @@ export default function UploadProspectsModal({
 
   const userToken = useRecoilValue(userTokenState);
 
+  const [strategies, setStrategies] = useState([
+    {
+      title: "Account Targeting",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
+    },
+    {
+      title: "Similar Accounts",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
+    },
+    {
+      title: "Location Targeting",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
+    },
+    {
+      title: "Giftcard Campaign",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
+    },
+    {
+      title: "Location Targeting",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
+    },
+    {
+      title: "Giftcard Campaign",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
+    },
+    {
+      title: "Account Targeting",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
+    },
+    {
+      title: "Similar Accounts",
+      goal:
+        "Test out if Bay Area is working better; select different meetings.",
+    },
+  ]);
+  const [pages, setPages] = useState(0);
+
   useEffect(() => {
     if (personas.length === 0 && defaultPersonas.current.length > 0) {
       setPersonas(defaultPersonas.current);
@@ -181,45 +244,73 @@ export default function UploadProspectsModal({
           theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
       }}
     >
-      <Stack spacing="xs">
-        <Text color="gray" size={"sm"}>
-          Enter the information below to describe and fine-tune your campaign
-        </Text>
-        <>
-          {innerProps.mode === "CREATE-ONLY" ? (
-            <>
-              <TextInput
-                placeholder="eg. C-Suite Sales Leaders in tech companies"
-                label="Campaign Name"
-                value={createdPersona}
-                // required
-                onChange={(e) => setCreatedPersona(e.currentTarget.value)}
-              />
-
-              <Collapse in={opened}>
-                <Textarea
-                  placeholder="eg. I want to offer them $150 Amazon gift card for a 30-minute call so I can ask them about their sales process"
-                  label="Purpose (optional)"
-                  description="Once filled, SellScale AI will automatically find 5 sample prospects and generate a draft campaign for you."
-                  value={purpose}
+      <SegmentedControl
+        size="sm"
+        w={"100%"}
+        value={tab}
+        onChange={(value) => setTab(value)}
+        data={[
+          {
+            value: "scratch",
+            label: (
+              <Center>
+                <IconPlus size="1rem" />
+                <Box ml={10}>Create from Scratch</Box>
+              </Center>
+            ),
+          },
+          {
+            value: "strategy",
+            disabled: true,
+            label: (
+              <Center>
+                <IconBulb size="1rem" />
+                <Box ml={10}>Create from Strategy</Box>
+              </Center>
+            ),
+          },
+        ]}
+      />
+      {tab === "scratch" ? (
+        <Stack spacing="xs" mt={"md"}>
+          <Text color="gray" size={"sm"}>
+            Enter the information below to describe and fine-tune your campaign
+          </Text>
+          <>
+            {innerProps.mode === "CREATE-ONLY" ? (
+              <>
+                <TextInput
+                  placeholder="eg. C-Suite Sales Leaders in tech companies"
+                  label="Campaign Name"
+                  value={createdPersona}
                   // required
-                  onChange={(e) => setPurpose(e.currentTarget.value)}
+                  onChange={(e) => setCreatedPersona(e.currentTarget.value)}
                 />
-              </Collapse>
 
-              <Button
-                onClick={() => setOpened(!opened)}
-                compact
-                size="xs"
-                color="gray"
-                variant="subtle"
-                ml="auto"
-                mt="md"
-              >
-                {opened ? "Hide" : "Show"} Advanced Options
-              </Button>
+                <Collapse in={opened}>
+                  <Textarea
+                    placeholder="eg. I want to offer them $150 Amazon gift card for a 30-minute call so I can ask them about their sales process"
+                    label="Purpose (optional)"
+                    description="Once filled, SellScale AI will automatically find 5 sample prospects and generate a draft campaign for you."
+                    value={purpose}
+                    // required
+                    onChange={(e) => setPurpose(e.currentTarget.value)}
+                  />
+                </Collapse>
 
-              {/* <Textarea
+                <Button
+                  onClick={() => setOpened(!opened)}
+                  compact
+                  size="xs"
+                  color="gray"
+                  variant="subtle"
+                  ml="auto"
+                  mt="md"
+                >
+                  {opened ? "Hide" : "Show"} Advanced Options
+                </Button>
+
+                {/* <Textarea
                 label="Who do you want to target"
                 placeholder="Eg. I want to see product mangers in chicago who went to BYU and are currently in a hedge fund role at a large financial institution"
                 minRows={3}
@@ -234,71 +325,187 @@ export default function UploadProspectsModal({
                 label="What do you want to say"
                 onChange={(e) => setContactObjective(e.target.value)}
               /> */}
-            </>
-          ) : (
-            <Select
-              label={"Set Persona"}
-              defaultValue={
-                defaultPersonas.current.length === 1 ||
-                (defaultPersonas.current.length > 1 &&
-                  defaultPersonas.current[0].group === "Active" &&
-                  defaultPersonas.current[1].group === "Inactive")
-                  ? defaultPersonas.current[0].value
-                  : undefined
-              }
-              data={personas}
-              placeholder={
-                innerProps.mode === "ADD-ONLY"
-                  ? "Select a persona for the prospects"
-                  : "Select or create a persona for the prospects"
-              }
-              nothingFound={"Nothing found"}
-              icon={<IconUsers size={14} />}
-              searchable
-              creatable={innerProps.mode === "ADD-CREATE"}
-              clearable
-              getCreateLabel={(query) => (
-                <>
-                  <span style={{ fontWeight: 700 }}>New Persona: </span>
-                  {query}
-                </>
-              )}
-              onCreate={(query) => {
-                // value = ID if selected, name if created
-                const item = { value: query, label: query, group: undefined }; // group: "Active"
-                setPersonas((current) => [...current, item]);
-                setCreatedPersona(query);
-                return item;
-              }}
-              onChange={(value) => {
-                // If created persona exists and is one of the existing personas, clear it
-                if (
-                  createdPersona.length > 0 &&
-                  personas.filter((personas) => personas.value === value)
-                    .length > 0
-                ) {
-                  setPersonas(defaultPersonas.current);
-                  setCreatedPersona("");
+              </>
+            ) : (
+              <Select
+                label={"Set Persona"}
+                defaultValue={
+                  defaultPersonas.current.length === 1 ||
+                  (defaultPersonas.current.length > 1 &&
+                    defaultPersonas.current[0].group === "Active" &&
+                    defaultPersonas.current[1].group === "Inactive")
+                    ? defaultPersonas.current[0].value
+                    : undefined
                 }
-                setSelectedPersona(value);
-              }}
-            />
-          )}
-        </>
+                data={personas}
+                placeholder={
+                  innerProps.mode === "ADD-ONLY"
+                    ? "Select a persona for the prospects"
+                    : "Select or create a persona for the prospects"
+                }
+                nothingFound={"Nothing found"}
+                icon={<IconUsers size={14} />}
+                searchable
+                creatable={innerProps.mode === "ADD-CREATE"}
+                clearable
+                getCreateLabel={(query) => (
+                  <>
+                    <span style={{ fontWeight: 700 }}>New Persona: </span>
+                    {query}
+                  </>
+                )}
+                onCreate={(query) => {
+                  // value = ID if selected, name if created
+                  const item = { value: query, label: query, group: undefined }; // group: "Active"
+                  setPersonas((current) => [...current, item]);
+                  setCreatedPersona(query);
+                  return item;
+                }}
+                onChange={(value) => {
+                  // If created persona exists and is one of the existing personas, clear it
+                  if (
+                    createdPersona.length > 0 &&
+                    personas.filter((personas) => personas.value === value)
+                      .length > 0
+                  ) {
+                    setPersonas(defaultPersonas.current);
+                    setCreatedPersona("");
+                  }
+                  setSelectedPersona(value);
+                }}
+              />
+            )}
+          </>
 
-        <CreatePersona
-          createPersona={{
-            name: createdPersona,
-            ctas: ctas.map((cta) => cta.cta),
-            fitReason: fitReason,
-            icpMatchingPrompt: icpMatchingPrompt,
-            contactObjective: contactObjective,
-            contractSize: personaContractSize,
-            templateMode: templateMode === "template",
-            purpose,
-          }}
-        />
-      </Stack>
+          <CreatePersona
+            createPersona={{
+              name: createdPersona,
+              ctas: ctas.map((cta) => cta.cta),
+              fitReason: fitReason,
+              icpMatchingPrompt: icpMatchingPrompt,
+              contactObjective: contactObjective,
+              contractSize: personaContractSize,
+              templateMode: templateMode === "template",
+              purpose,
+            }}
+          />
+        </Stack>
+      ) : (
+        <Stack spacing="xs" mt={"md"}>
+          <TextInput
+            placeholder="Search strategies"
+            rightSection={<IconSearch size={"1rem"} color="gray" />}
+          />
+          <SimpleGrid cols={2}>
+            {strategies.slice(pages * 4, pages * 4 + 4).map((item, index) => {
+              return (
+                <Paper withBorder radius={"sm"} p={"sm"} key={index}>
+                  <Flex align={"center"} justify={"space-between"}>
+                    <Text fw={600} size={"md"}>
+                      {item.title}
+                    </Text>
+                    <ActionIcon
+                      variant="light"
+                      color="blue"
+                      radius={"xl"}
+                      size={"sm"}
+                    >
+                      <IconEye size={"0.9rem"} />
+                    </ActionIcon>
+                  </Flex>
+                  <Text fw={600} size={"xs"} mt={"sm"}>
+                    Goal: <span className="text-gray-400">{item.goal}</span>
+                  </Text>
+                  <Button
+                    fullWidth
+                    mt={"sm"}
+                    onClick={() => {
+                      openContextModal({
+                        modal: "strategySelectModal",
+                        title: (
+                          <Title
+                            order={3}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "5px",
+                            }}
+                          >
+                            <ActionIcon
+                              variant="light"
+                              color="blue"
+                              radius={"xl"}
+                            >
+                              <IconArrowLeft size={"1rem"} />
+                            </ActionIcon>
+                            <span className="text-gray-600">Go back to</span>{" "}
+                            Create Campaign
+                          </Title>
+                        ),
+                        innerProps: { title: item.title },
+                        styles: {
+                          content: {
+                            minWidth: "800px",
+                          },
+                        },
+                      });
+                    }}
+                  >
+                    Select
+                  </Button>
+                </Paper>
+              );
+            })}
+          </SimpleGrid>
+          <Paper withBorder>
+            <Flex align={"center"}>
+              <Select
+                w={100}
+                data={Array.from(
+                  { length: Math.ceil(strategies.length / 4) },
+                  (_, i) => ({
+                    label: `${i + 1}`,
+                    value: i.toString(),
+                  })
+                )}
+                variant="unstyled"
+                onChange={(e) => setPages(Number(e))}
+                styles={{
+                  input: {
+                    paddingLeft: "14px",
+                  },
+                }}
+              />
+              <Divider orientation="vertical" />
+              <Text w={"100%"} size={"sm"} color="gray" align="center">
+                of {Math.ceil(strategies.length / 4)} pages
+              </Text>
+              <Divider orientation="vertical" />
+              <ActionIcon
+                variant="transparent"
+                onClick={() => {
+                  if (pages > 0) {
+                    setPages((pages) => (pages = pages - 1));
+                  }
+                }}
+              >
+                <IconChevronLeft size={"0.9rem"} />
+              </ActionIcon>
+              <Divider orientation="vertical" />
+              <ActionIcon
+                variant="transparent"
+                onClick={() => {
+                  if (pages < Math.ceil(strategies.length / 4) - 1) {
+                    setPages((pages) => (pages = pages + 1));
+                  }
+                }}
+              >
+                <IconChevronRight size={"0.9rem"} />
+              </ActionIcon>
+            </Flex>
+          </Paper>
+        </Stack>
+      )}
     </Paper>
   );
 }

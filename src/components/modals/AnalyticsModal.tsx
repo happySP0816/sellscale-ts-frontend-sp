@@ -1,6 +1,8 @@
+import { currentProjectState } from "@atoms/personaAtoms";
+import { userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
 import {
   ActionIcon,
-  Avatar,
   Box,
   Button,
   Collapse,
@@ -10,15 +12,14 @@ import {
   Paper,
   SimpleGrid,
   Text,
-  useMantineTheme,
   Switch,
   ScrollArea,
   Title,
+  Center,
+  Loader,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import {
-  IconArrowRight,
   IconBallpen,
   IconCalendar,
   IconChecks,
@@ -27,404 +28,23 @@ import {
   IconChevronRight,
   IconChevronUp,
   IconExternalLink,
-  IconInfoCircle,
   IconLetterT,
   IconMessages,
   IconSend,
   IconToggleRight,
+  IconUser,
 } from "@tabler/icons";
 import { IconMessageCheck, IconSparkles } from "@tabler/icons-react";
-import { nameToInitials, valueToColor } from "@utils/general";
 import { DataGrid } from "mantine-data-grid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
+import { useRecoilValue } from "recoil";
 
-type SentimentData = {
-  reply: string;
-  intent: string;
-};
-
-type ActionsData = {
-  template: string;
-  open_rate: number;
-  reply_rate: number;
-  action: boolean;
-};
-
-type IcpData = {
-  avatar: string;
-  name: string;
-  job: string;
-  icp: string;
-  clicks: number;
-};
-
-type CycleData = {
-  period: string;
-  volume: number;
-  total: number;
-  opened: number;
-  replied: number;
-  sentimentData: SentimentData[];
-  actionsData: ActionsData[];
-  subjectData: any[];
-  personalizerData: any[];
-  icpData: IcpData[];
-  recommendData: any[];
-};
 
 export default function AnalyticsModal() {
-  const theme = useMantineTheme();
 
   const [sentimentPage, setSentimentPage] = useState(0);
-  const [icpPage, setIcpPage] = useState(0);
 
-  const [actionsPage, setActionsPage] = useState(0);
-
-  const [cycleData, setCycleData] = useState<CycleData[]>([
-    {
-      period: "5/16 - Present",
-      volume: 156,
-      total: 200,
-      opened: 12,
-      replied: 12,
-      sentimentData: [
-        {
-          reply: `"Let's do it"`,
-          intent: "Positive",
-        },
-        {
-          reply: `"No thanks"`,
-          intent: "Negative",
-        },
-        {
-          reply: `"Let's do it"`,
-          intent: "Positive",
-        },
-      ],
-      actionsData: [
-        {
-          template: "Would you like a 20$ gift card?",
-          open_rate: 33,
-          reply_rate: 33,
-          action: true,
-        },
-        {
-          template: "$50 for a chat about devops",
-          open_rate: 33,
-          reply_rate: 33,
-          action: false,
-        },
-      ],
-      icpData: [
-        {
-          avatar: "",
-          name: "Adam B. Markk",
-          job: "CTO, IBM Tech",
-          icp: "10",
-          clicks: 5,
-        },
-        {
-          avatar: "",
-          job: "RockStar CEO, BlueSwitch",
-          name: "Richard Chalme",
-          icp: "10",
-          clicks: 5,
-        },
-        {
-          avatar: "",
-          name: "Erik Cooper",
-          job: "CEO, Captical Group Holdings",
-          icp: "10",
-          clicks: 5,
-        },
-        {
-          avatar: "",
-          job: "Chief Financial Officer, XTIVIA",
-          name: "Neil Friedman",
-          icp: "10",
-          clicks: 5,
-        },
-      ],
-      recommendData: [
-        {
-          content: "$50 for a chat about devops?",
-        },
-        {
-          content: "$50 for a chat about devops?",
-        },
-        {
-          content: "$50 for a chat about devops?",
-        },
-      ],
-      subjectData: [
-        {
-          subject_lines: "[[creative phrase about securing secrets]] with Doppler",
-          open_rate: 33,
-          reply_rate: 33,
-          action: true,
-        },
-        {
-          subject_lines: "$50 for a chat about devops?",
-          open_rate: 33,
-          reply_rate: 33,
-          action: false,
-        },
-      ],
-      personalizerData: [
-        {
-          personalizers: "Pull some recent news on [[company]] from the last 3 months",
-          open_rate: 33,
-          reply_rate: 33,
-          action: false,
-        },
-      ],
-    },
-    {
-      period: "5/13 - 5/16",
-      volume: 156,
-      total: 200,
-      opened: 12,
-      replied: 12,
-      sentimentData: [
-        {
-          reply: `"Let's do it"`,
-          intent: "Positive",
-        },
-        {
-          reply: `"No thanks"`,
-          intent: "Negative",
-        },
-        {
-          reply: `"Let's do it"`,
-          intent: "Positive",
-        },
-      ],
-      actionsData: [
-        {
-          template: "Would you like a 20$ gift card?",
-          open_rate: 33,
-          reply_rate: 33,
-          action: true,
-        },
-        {
-          template: "$50 for a chat about devops",
-          open_rate: 33,
-          reply_rate: 33,
-          action: false,
-        },
-      ],
-      icpData: [
-        {
-          avatar: "",
-          name: "Adam B. Markk",
-          job: "CTO, IBM Tech",
-          icp: "10",
-          clicks: 5,
-        },
-        {
-          avatar: "",
-          job: "RockStar CEO, BlueSwitch",
-          name: "Richard Chalme",
-          icp: "10",
-          clicks: 5,
-        },
-        {
-          avatar: "",
-          name: "Erik Cooper",
-          job: "CEO, Captical Group Holdings",
-          icp: "10",
-          clicks: 5,
-        },
-        {
-          avatar: "",
-          job: "Chief Financial Officer, XTIVIA",
-          name: "Neil Friedman",
-          icp: "10",
-          clicks: 5,
-        },
-      ],
-      recommendData: [
-        {
-          content: "$50 for a chat about devops?",
-        },
-        {
-          content: "$50 for a chat about devops?",
-        },
-        {
-          content: "$50 for a chat about devops?",
-        },
-      ],
-      subjectData: [
-        {
-          subject_lines: "[[creative phrase about securing secrets]] with Doppler",
-          open_rate: 33,
-          reply_rate: 33,
-          action: true,
-        },
-        {
-          subject_lines: "$50 for a chat about devops?",
-          open_rate: 33,
-          reply_rate: 33,
-          action: false,
-        },
-      ],
-      personalizerData: [
-        {
-          personalizers: "Pull some recent news on [[company]] from the last 3 months",
-          open_rate: 33,
-          reply_rate: 33,
-          action: false,
-        },
-      ],
-    },
-    {
-      period: "5/5 - 5/13",
-      volume: 156,
-      total: 200,
-      opened: 12,
-      replied: 12,
-      sentimentData: [
-        {
-          reply: `"Let's do it"`,
-          intent: "Positive",
-        },
-        {
-          reply: `"No thanks"`,
-          intent: "Negative",
-        },
-        {
-          reply: `"Let's do it"`,
-          intent: "Positive",
-        },
-      ],
-      actionsData: [
-        {
-          template: "Would you like a 20$ gift card?",
-          open_rate: 33,
-          reply_rate: 33,
-          action: true,
-        },
-        {
-          template: "$50 for a chat about devops",
-          open_rate: 33,
-          reply_rate: 33,
-          action: false,
-        },
-      ],
-      icpData: [
-        {
-          avatar: "",
-          name: "Adam B. Markk",
-          job: "CTO, IBM Tech",
-          icp: "10",
-          clicks: 5,
-        },
-        {
-          avatar: "",
-          job: "RockStar CEO, BlueSwitch",
-          name: "Richard Chalme",
-          icp: "10",
-          clicks: 5,
-        },
-        {
-          avatar: "",
-          name: "Erik Cooper",
-          job: "CEO, Captical Group Holdings",
-          icp: "10",
-          clicks: 5,
-        },
-        {
-          avatar: "",
-          job: "Chief Financial Officer, XTIVIA",
-          name: "Neil Friedman",
-          icp: "10",
-          clicks: 5,
-        },
-      ],
-      recommendData: [
-        {
-          content: "$50 for a chat about devops?",
-        },
-        {
-          content: "$50 for a chat about devops?",
-        },
-        {
-          content: "$50 for a chat about devops?",
-        },
-      ],
-      subjectData: [
-        {
-          subject_lines: "[[creative phrase about securing secrets]] with Doppler",
-          open_rate: 33,
-          reply_rate: 33,
-          action: true,
-        },
-        {
-          subject_lines: "$50 for a chat about devops?",
-          open_rate: 33,
-          reply_rate: 33,
-          action: false,
-        },
-      ],
-      personalizerData: [
-        {
-          personalizers: "Pull some recent news on [[company]] from the last 3 months",
-          open_rate: 33,
-          reply_rate: 33,
-          action: false,
-        },
-      ],
-    },
-  ]);
-
-  const spendingData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    datasets: [
-      {
-        label: "Send",
-        data: [65, 59, 80, 81, 56, 55, 40, 20, 230, 402, 201, 115, 20],
-        fill: false,
-        borderColor: "#55c2c1",
-        backgroundColor: "#55c2c1",
-      },
-      {
-        label: "Open",
-        data: [230, 402, 201, 45, 39, 60, 71, 46, 35, 50, 55, 40, 20],
-        fill: false,
-        borderColor: "#e9be4d",
-        backgroundColor: "#e9be4d",
-      },
-      {
-        label: "Click",
-        data: [65, 59, 80, 81, 56, 55, 40, 20, 230, 402, 201, 115, 20],
-        fill: false,
-        borderColor: "#d444f1",
-        backgroundColor: "#d444f1",
-      },
-      {
-        label: "Reply",
-        data: [332, 121, 446, 11, 25, 60, 71, 224, 52, 66, 342, 221, 12],
-        fill: false,
-        borderColor: "#228be6",
-        backgroundColor: "#228be6",
-      },
-      {
-        label: "Demo",
-        data: [24, 257, 311, 563, 424, 22, 14, 6, 241, 112, 55, 40, 20],
-        fill: false,
-        borderColor: "#ec8a0a",
-        backgroundColor: "#ec8a0a",
-      },
-      {
-        label: "Goal",
-        data: new Array(12).fill(520), // Assuming 75 is your goal value
-        borderColor: "rgba(255, 99, 132, 1)",
-        borderWidth: 1,
-        borderDash: [10, 5],
-      },
-    ],
-  };
   const Spendingoptions: any = {
     responsive: true,
     maintainAspectRatio: false,
@@ -443,34 +63,171 @@ export default function AnalyticsModal() {
           borderDash: [5, 5],
         },
       },
-      y: {
-        grid: {
-          borderDash: [5, 5],
+      yAxes: [{
+        scaleLabel: {
+            display: true,
+            labelString: 'LABEL',
         },
-      },
+        type: 'logarithmic',
+        position: 'left',
+        ticks: {
+             min: 0.1, //minimum tick
+             max: 1000, //maximum tick
+             callback: function (value: { toString: () => any; }, index: any, values: any) {
+                 return Number(value.toString());//pass tick values as a string into Number function
+             }
+        },
+        afterBuildTicks: function (chartObj: { ticks: number[]; }) { //Build ticks labelling as per your need
+            chartObj.ticks = [];
+            chartObj.ticks.push(0.1);
+            chartObj.ticks.push(1);
+            chartObj.ticks.push(10);
+            chartObj.ticks.push(100);
+            chartObj.ticks.push(1000);
+        }
+      }],
     },
     elements: {
       point: {
         radius: 1,
       },
+      line: {
+        tension: 0.4, // Smooth the lines for better visualization
+      },
     },
   };
+
+
+  const currentProject = useRecoilValue(currentProjectState);
+  const userToken = useRecoilValue(userTokenState);
+  const [cycleDates, setCycleDates] = useState<{ start: string, end: string }[]>([]);
+  const [cycleDataCache, setCycleDataCache] = useState<{ [key: number]: any }>({});
+
+  const getCumulativeData = (data: any) => {
+    if (!data) return [];
+    let cumulative = 0;
+    return data.map((value: any) => {
+      cumulative += value;
+      return cumulative;
+    });
+  };
+
+  useEffect(() => {
+    const fetchCycleDates = async () => {
+      if (currentProject?.id) {
+        try {
+          const response = await fetch(`${API_URL}/analytics/get_cycle_dates?campaignID=${currentProject.id}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${userToken}`,
+            },
+          });
+          const data = await response.json();
+          // Assuming data is an array of objects with start and end properties
+          setCycleDates(data);
+          console.log('dates are', data);
+          console.log(data);
+
+          // Initialize cycleDataCache with the length of cycle dates
+          const initialCache = data.reduce((acc: { [key: number]: any }, _: any, index: number) => {
+            acc[index] = null;
+            return acc;
+          }, {});
+          setCycleDataCache(initialCache);
+        } catch (error) {
+          console.error('Error fetching cycle dates:', error);
+        }
+      }
+    };
+
+    fetchCycleDates();
+  }, [currentProject?.id, userToken]);
 
   const [selectStep, setSelectStep] = useState<number | null>(null);
   const [opened, setOpened] = useState(false);
 
-  const handleToggle = (index: number) => {
+  // Function to fetch data for a specific cycle
+  const fetchCycleData = async (index: number) => {
+    const cycle = cycleDates[index];
+    
+    // Initiate fetch requests for three different endpoints
+    const analyticsData = fetch(`http://localhost:8000/client/campaign_analytics?client_archetype_id=${currentProject?.id}&start_date=${cycle.start}&end_date=${cycle.end}&verbose=true`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userToken}`,
+      },
+    }).catch(error => {
+      console.error('Error fetching analytics data:', error);
+      return null;
+    });
+    const template_analytics_data = fetch(`${API_URL}/analytics/template_analytics?archetype_id=${currentProject?.id}&start_date=${cycle.start}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userToken}`,
+      },
+    }).catch(error => {
+      console.error('Error fetching template analytics data:', error);
+      return null;
+    });
+
+    // Wait for all fetch requests to complete
+    const [
+      template_analytics_data_response,
+      analyticsDataResponse,
+    ] = await Promise.all([
+      template_analytics_data,
+      analyticsData,
+    ]);
+
+    // Parse the JSON responses
+    const parseJsonResponse = async (response: Response | null) => {
+      if (!response) return null;
+      try {
+        return await response.json();
+      } catch (error) {
+        console.error('Error parsing JSON:', error);
+        return null;
+      }
+    };
+
+    const templateAnalyticsDataJson = await parseJsonResponse(template_analytics_data_response);
+    const analyticsDataJson = await parseJsonResponse(analyticsDataResponse);
+    console.log('analyticsDataJson', analyticsDataJson)
+
+    // Return the results as an object
+    return {
+      templateAnalytics: templateAnalyticsDataJson,
+      analyticsData: analyticsDataJson,
+    };
+  };
+
+  // Function to handle the toggle action for cycle data
+  const handleToggle = async (index: number) => {
+    // If the selected step is already open, toggle its state
     if (selectStep === index) {
       setOpened(!opened);
     } else {
+      // Otherwise, open the selected step and set it as the current step
       setOpened(true);
       setSelectStep(index);
+
+      // If the data for the selected cycle is not cached, fetch and cache it
+      // if (!cycleDataCache[index]) {
+        const data = await fetchCycleData(index);
+        console.log('data is', data);
+        setCycleDataCache((prevCache) => ({
+          ...prevCache,
+          [index]: data,
+        }));
+      // }
     }
-    setSelectStep(index);
   };
   return (
     <Paper>
-      {cycleData.map((item, index) => {
+      {cycleDates.map((item, index) => {
         return (
           <Box
             mb={"sm"}
@@ -485,9 +242,8 @@ export default function AnalyticsModal() {
                   Cycle {index + 1}:
                 </Text>
                 <Text fw={600} size={"sm"}>
-                  {item.period}
-                </Text>
-              </Flex>
+                  {new Date(cycleDates[index]?.start ?? '').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })} - {new Date(cycleDates[index]?.end ?? '').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}
+                  </Text></Flex>
               <Flex gap={1} align={"center"}>
                 <Text></Text>
                 <ActionIcon
@@ -500,7 +256,7 @@ export default function AnalyticsModal() {
               </Flex>
             </Flex>
             <Collapse in={selectStep === index && opened}>
-              <ScrollArea h={500}>
+              {cycleDataCache?.[index]?.analyticsData?.daily ? <ScrollArea h={500}>
                 <Flex
                   gap={"sm"}
                   p={"sm"}
@@ -521,7 +277,7 @@ export default function AnalyticsModal() {
                       onClick={() =>
                         openContextModal({
                           modal: "cycleanalyticModal",
-                          title: <Title order={3}>Cycle Analytics (Coming Soon ⚠️)</Title>,
+                          title: <Title order={3}>Cycle Analytics</Title>,
                           innerProps: {},
                           styles: {
                             content: {
@@ -535,16 +291,68 @@ export default function AnalyticsModal() {
                     </Button>
                   </Flex>
                   <Flex gap={"sm"}>
-                    <Paper w={"40%"} h={300} withBorder radius={"md"}>
-                      <Line typeof="linear" data={spendingData} options={Spendingoptions} />
+                    <Paper w={"35%"} h={300} withBorder radius={"md"}>
+                      {cycleDataCache?.[index]?.analyticsData?.daily ? (
+                        <Line 
+                          typeof="linear" 
+                          data={{
+                            labels: cycleDataCache[index].analyticsData.daily
+                              .sort((a: { date: string | number | Date; }, b: { date: string | number | Date; }) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                              .map((day: { date: string | number | Date; }) => new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                            datasets: [
+                              {
+                                label: "Send",
+                                data: getCumulativeData(cycleDataCache[index].analyticsData.daily
+                                  .sort((a: { date: string | number | Date; }, b: { date: string | number | Date; }) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                                  .map((day: { num_sent: any; }) => day.num_sent)),
+                                fill: false,
+                                borderColor: "#55c2c1",
+                                backgroundColor: "#55c2c1",
+                              },
+                              {
+                                label: "Open",
+                                data: getCumulativeData(cycleDataCache[index].analyticsData.daily
+                                  .sort((a: { date: string | number | Date; }, b: { date: string | number | Date; }) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                                  .map((day: { num_opens: any; }) => day.num_opens)),
+                                fill: false,
+                                borderColor: "#e9be4d",
+                                backgroundColor: "#e9be4d",
+                              },
+                              {
+                                label: "Reply",
+                                data: getCumulativeData(cycleDataCache[index].analyticsData.daily
+                                  .sort((a: { date: string | number | Date; }, b: { date: string | number | Date; }) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                                  .map((day: { num_replies: any; }) => day.num_replies)),
+                                fill: false,
+                                borderColor: "#228be6",
+                                backgroundColor: "#228be6",
+                              },
+                              {
+                                label: "Demo",
+                                data: getCumulativeData(cycleDataCache[index].analyticsData.daily
+                                  .sort((a: { date: string | number | Date; }, b: { date: string | number | Date; }) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                                  .map((day: { num_demos: any; }) => day.num_demos)),
+                                fill: false,
+                                borderColor: "#ec8a0a",
+                                backgroundColor: "#ec8a0a",
+                              },
+                            ],
+                          }} 
+                          options={Spendingoptions} 
+                        />
+                      ) : (
+                        <Center>
+                          <Loader />
+                        </Center>
+                      )}
                     </Paper>
-                    <Box w={"60%"}>
+                    <Box w={"55%"}>
                       <Paper w={"100%"} withBorder>
                         <Flex align={"center"} justify={"space-between"} h={"100%"} w="100%">
                           <Box
                             py={"sm"}
                             px={"xs"}
-                            w={"100%"}
+                            w={"80%"}
                             h={"100%"}
                             sx={{
                               backgroundColor: "",
@@ -561,15 +369,16 @@ export default function AnalyticsModal() {
                               </Text>
                             </Flex>
                             <Flex align={"center"} gap={"sm"}>
-                              <Text fz={24}>{30}</Text>
-                              {/* <Text fz={24}>{analyticsData.num_sent}</Text> */}
+                              <Text fz={24}>
+                                {cycleDataCache[index]?.analyticsData?.daily.reduce((total: any, day: { num_sent: any; }) => total + day.num_sent, 0)}
+                              </Text>
                             </Flex>
                           </Box>
                           <Divider orientation="vertical" />
                           <Box
                             py={"sm"}
                             px={"xs"}
-                            w={"100%"}
+                            w={"80%"}
                             h={"100%"}
                             sx={{
                               backgroundColor: "",
@@ -586,14 +395,14 @@ export default function AnalyticsModal() {
                               </Text>
                             </Flex>
                             <Flex align={"center"} gap={"sm"}>
-                              <Text fz={24}>{403}</Text>
+                              <Text fz={24}>{cycleDataCache[index]?.analyticsData?.daily.reduce((total: any, day: { num_opens: any; }) => total + day.num_opens, 0)}</Text>
                             </Flex>
                           </Box>
                           <Divider orientation="vertical" />
                           <Box
                             py={"sm"}
                             px={"xs"}
-                            w={"100%"}
+                            w={"80%"}
                             h={"100%"}
                             sx={{
                               backgroundColor: "",
@@ -610,7 +419,7 @@ export default function AnalyticsModal() {
                               </Text>
                             </Flex>
                             <Flex align={"center"} gap={"sm"}>
-                              <Text fz={24}>{23}</Text>
+                              <Text fz={24}>{cycleDataCache[index]?.analyticsData?.daily.reduce((total: any, day: { num_replies: any; }) => total + day.num_replies, 0)}</Text>
                             </Flex>
                           </Box>
                           <Divider orientation="vertical" />
@@ -634,14 +443,14 @@ export default function AnalyticsModal() {
                               </Text>
                             </Flex>
                             <Flex align={"center"} gap={"sm"}>
-                              <Text fz={24}>{42}</Text>
+                              <Text fz={24}>{cycleDataCache[index]?.analyticsData?.daily.reduce((total: any, day: { num_pos_replies: any; }) => total + day.num_pos_replies, 0)}</Text>
                             </Flex>
                           </Box>
                           <Divider orientation="vertical" />
                           <Box
                             py={"sm"}
                             px={"xs"}
-                            w={"100%"}
+                            w={"80%"}
                             h={"100%"}
                             sx={{
                               backgroundColor: "",
@@ -656,12 +465,18 @@ export default function AnalyticsModal() {
                               <Text fw={400}>Demo</Text>
                             </Flex>
                             <Flex align={"center"} gap={"sm"}>
-                              <Text fz={24}>{0}</Text>
+                              <Text fz={24}>{cycleDataCache[index]?.analyticsData?.daily.reduce((total: any, day: { num_demos: any; }) => total + day.num_demos, 0)}</Text>
                             </Flex>
                           </Box>
                         </Flex>
                       </Paper>
-                      <Box mt={"sm"}>
+                     { cycleDataCache?.[index]?.analyticsData?.daily
+                            .filter((day: { positive_reply_details: any; }) => day.positive_reply_details)
+                            .map((day: { positive_reply_details: { split: (arg0: string) => [any, any, any, any]; }[]; }) => {
+                              const [id, name, intent, reply] = day.positive_reply_details[0].split("###");
+                              return { id, name, intent, reply };
+                            })
+                            .slice(sentimentPage * 2, sentimentPage * 2 + 2).length !== 0 && <Box mt={"sm"}>
                         <Flex align={"center"} gap={"5px"}>
                           <Text
                             style={{
@@ -673,7 +488,7 @@ export default function AnalyticsModal() {
                             fw={700}
                             size={"lg"}
                           >
-                            <span>Sentiment Analysis</span>
+                            <span>Positive Replies</span>
                           </Text>
                           <Divider w={"100%"} />
                           <Flex>
@@ -685,17 +500,23 @@ export default function AnalyticsModal() {
                               <IconChevronLeft />
                             </ActionIcon>
                             <ActionIcon
-                              onClick={() => {
-                                if (item && item.sentimentData && sentimentPage < Math.ceil(item?.sentimentData?.length / 2) - 1)
-                                  setSentimentPage((page) => (page = page + 1));
-                              }}
+                              // onClick={() => {
+                              //   if (item && item.sentimentData && sentimentPage < Math.ceil(item?.sentimentData?.length / 2) - 1)
+                              //     setSentimentPage((page) => (page = page + 1));
+                              // }}
                             >
                               <IconChevronRight />
                             </ActionIcon>
                           </Flex>
                         </Flex>
-                        <DataGrid
-                          data={item?.sentimentData?.slice(sentimentPage * 2, sentimentPage * 2 + 2)}
+                        {cycleDataCache?.[index]?.analyticsData?.daily && <DataGrid
+                          data={cycleDataCache?.[index]?.analyticsData?.daily
+                            .filter((day: { positive_reply_details: any; }) => day.positive_reply_details)
+                            .map((day: { positive_reply_details: { split: (arg0: string) => [any, any, any, any]; }[]; }) => {
+                              const [id, name, intent, reply] = day.positive_reply_details[0].split("###");
+                              return { id, name, intent, reply };
+                            })
+                            .slice(sentimentPage * 2, sentimentPage * 2 + 2)}
                           highlightOnHover
                           withSorting
                           withColumnBorders
@@ -713,7 +534,28 @@ export default function AnalyticsModal() {
                           }}
                           columns={[
                             {
-                              accessorKey: "replies",
+                              accessorKey: "name",
+                              header: () => (
+                                <Flex align={"center"} gap={"3px"}>
+                                  <IconUser color="gray" size={"0.9rem"} />
+                                  <Text color="gray">Name</Text>
+                                </Flex>
+                              ),
+                              minSize: 200,
+                              cell: (cell) => {
+                                let { name } = cell.row.original;
+
+                                return (
+                                  <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
+                                    <Text color="gray" size={"sm"}>
+                                      {name}
+                                    </Text>
+                                  </Flex>
+                                );
+                              },
+                            },
+                            {
+                              accessorKey: "reply",
                               header: () => (
                                 <Flex align={"center"} gap={"3px"}>
                                   <IconMessages color="gray" size={"0.9rem"} />
@@ -748,8 +590,8 @@ export default function AnalyticsModal() {
 
                                 return (
                                   <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
-                                    <Badge color={intent === "Positive" ? "green" : "red"} tt={"initial"}>
-                                      {intent}
+                                    <Badge color={'green'} tt={"initial"}>
+                                     {intent}
                                     </Badge>
                                   </Flex>
                                 );
@@ -767,6 +609,7 @@ export default function AnalyticsModal() {
                               maxSize: 200,
                               enableResizing: true,
                               cell: (cell) => {
+                                let { id } = cell.row.original as any;
                                 return (
                                   <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
                                     <Badge
@@ -778,6 +621,9 @@ export default function AnalyticsModal() {
                                           fontWeight: 400,
                                         },
                                       }}
+                                      component="a"
+                                      href={`/prospects/${id}`}
+                                      target="_blank"
                                     >
                                       View Conversation
                                     </Badge>
@@ -786,8 +632,8 @@ export default function AnalyticsModal() {
                               },
                             },
                           ]}
-                        />
-                      </Box>
+                        />}
+                      </Box>}
                     </Box>
                   </Flex>
                   <Paper>
@@ -806,47 +652,44 @@ export default function AnalyticsModal() {
                       </Text>
                       <Divider w={"100%"} />
                       <Flex>
-                        <ActionIcon
-                          onClick={() => {
-                            if (icpPage > 0) setIcpPage((page) => (page = page - 1));
-                          }}
-                        >
-                          <IconChevronLeft />
-                        </ActionIcon>
-                        <ActionIcon
-                          onClick={() => {
-                            if (icpPage < Math.ceil(item?.icpData?.length / 5) - 1) setIcpPage((page) => (page = page + 1));
-                          }}
-                        >
-                          <IconChevronRight />
-                        </ActionIcon>
                       </Flex>
                     </Flex>
                     <SimpleGrid cols={5} mt={"sm"}>
-                      {item?.icpData.slice(icpPage * 5, icpPage * 5 + 5).map((icpItem: any, icpIndex: number) => {
+                      {Array.from(new Set(cycleDataCache?.[index]?.analyticsData?.top_icp_people?.map((icpItem: any) => icpItem.full_name)))
+                        .map((uniqueName) => {
+                          if (typeof uniqueName === 'string') {
+                            return cycleDataCache?.[index]?.analyticsData?.top_icp_people?.find((icpItem: any) => icpItem.full_name === uniqueName);
+                          }
+                          return undefined;
+                        })
+                        .filter((icpItem: any) => icpItem !== undefined) // Ensure no undefined values
+                      .map((icpItem: any, icpIndex: number) => {
                         return (
                           <Paper withBorder radius={"md"} key={icpIndex}>
-                            <div className={`${icpIndex % 2 === 0 ? "bg-[#98a3b4]" : "bg-[#eceef1]"} h-8 flex justify-center rounded-t-lg`}>
-                              <Avatar src={icpItem.avatar} size={"sm"} radius={"xl"} mt={18} color={valueToColor(theme, icpItem?.name)}>
-                                {nameToInitials(icpItem?.name)}
-                              </Avatar>
-                            </div>
                             <Flex direction={"column"} mt={4} align={"center"} p={"sm"} justify={"space-between"} gap={4}>
                               <Text size={"sm"} align="center" fw={600}>
-                                {icpItem.name}
+                                {icpItem.full_name}
                               </Text>
                               <Text color="gray" size={"xs"} align="center" fw={600}>
                                 {icpItem.job}
                               </Text>
                               <Flex align={"center"} gap={"xs"}>
                                 <Text size={"sm"} color="gray">
-                                  ICP:
+                                  ICP Fit Score:
                                 </Text>
-                                <Badge>{"High"}</Badge>
-                                <Text size={"sm"} color="gray">
-                                  Clicks:
-                                </Text>
-                                <Badge color="grape">{icpItem.clicks}</Badge>
+                                <Badge size="xs" color={
+                                  icpItem.icp_fit_score == 0 ? "red" :
+                                    icpItem.icp_fit_score == 1 ? "orange" :
+                                      icpItem.icp_fit_score == 2 ? "yellow" :
+                                        icpItem.icp_fit_score == 3 ? "green" :
+                                          icpItem.icp_fit_score == 4 ? "blue" : "gray"
+                                }>{
+                                  icpItem.icp_fit_score == 0 ? "Very Low" :
+                                    icpItem.icp_fit_score == 1 ? "Low" :
+                                      icpItem.icp_fit_score == 2 ? "Medium" :
+                                        icpItem.icp_fit_score == 3 ? "High" :
+                                          icpItem.icp_fit_score == 4 ? "Very High" : "Not Scored"
+                                }</Badge>
                               </Flex>
                             </Flex>
                           </Paper>
@@ -855,7 +698,7 @@ export default function AnalyticsModal() {
                     </SimpleGrid>
                   </Paper>
                   <Box mt={"sm"}>
-                    <Flex align={"center"} gap={"5px"}>
+                    {/* <Flex align={"center"} gap={"5px"}>
                       <Text
                         style={{
                           display: "flex",
@@ -869,8 +712,8 @@ export default function AnalyticsModal() {
                         <span>Recommended Actions</span>
                       </Text>
                       <Divider w={"100%"} />
-                    </Flex>
-                    <SimpleGrid cols={3} mt={"sm"}>
+                    </Flex> */}
+                    {/* <SimpleGrid cols={3} mt={"sm"}>
                       {item?.recommendData.slice(0, 3).map((recommendItem: any, recommendIndex: number) => {
                         return (
                           <Paper withBorder radius={"md"} key={recommendIndex} p={"sm"}>
@@ -889,9 +732,9 @@ export default function AnalyticsModal() {
                           </Paper>
                         );
                       })}
-                    </SimpleGrid>
-                    <DataGrid
-                      data={item?.actionsData}
+                    </SimpleGrid> */}
+                    {cycleDataCache[index]?.templateAnalytics?.data?.cta_analytics !== 0 && <DataGrid
+                      data={cycleDataCache[index]?.templateAnalytics?.data?.cta_analytics || []}
                       highlightOnHover
                       withSorting
                       withColumnBorders
@@ -909,47 +752,40 @@ export default function AnalyticsModal() {
                       }}
                       columns={[
                         {
-                          accessorKey: "template",
+                          accessorKey: "text_value",
                           header: () => (
                             <Flex align={"center"} gap={"3px"}>
                               <IconBallpen color="gray" size={"0.9rem"} />
-                              <Text color="gray">Templates</Text>
+                              <Text color="gray">CTAs</Text>
                             </Flex>
                           ),
                           cell: (cell) => {
-                            let { template } = cell.row.original;
+                            let { text_value } = cell.row.original;
 
                             return (
                               <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
                                 <Flex>
                                   <Text color="gray" size={"sm"} w={"100%"}>
-                                    {template}
+                                    {text_value}
                                   </Text>
-                                </Flex>
-                                <Flex gap={"sm"}>
-                                  <Button variant="light" size="xs">
-                                    Intro
-                                  </Button>
-                                  <Button variant="light" color="grape" size="xs">
-                                    Gift
-                                  </Button>
                                 </Flex>
                               </Flex>
                             );
                           },
                         },
                         {
-                          accessorKey: "open_rate",
+                          accessorKey: "num_open",
                           minSize: 40,
                           maxSize: 140,
                           header: () => (
                             <Flex align={"center"} gap={"3px"}>
                               <IconLetterT color="gray" size={"0.9rem"} />
-                              <Text color="gray">Open RAte</Text>
+                              <Text color="gray">Open Rate</Text>
                             </Flex>
                           ),
                           cell: (cell) => {
-                            let { open_rate }: any = cell.row.original;
+                            let { num_open, num_sent }: any = cell.row.original;
+                            let open_rate = num_sent ? ((num_open / num_sent) * 100).toFixed(2) : 0;
 
                             return (
                               <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
@@ -959,7 +795,7 @@ export default function AnalyticsModal() {
                           },
                         },
                         {
-                          accessorKey: "reply_rate",
+                          accessorKey: "num_reply",
                           minSize: 40,
                           maxSize: 140,
                           header: () => (
@@ -969,7 +805,8 @@ export default function AnalyticsModal() {
                             </Flex>
                           ),
                           cell: (cell) => {
-                            let { reply_rate }: any = cell.row.original;
+                            let { num_reply, num_sent }: any = cell.row.original;
+                            let reply_rate = num_sent ? ((num_reply / num_sent) * 100).toFixed(2) : 0;
 
                             return (
                               <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
@@ -1005,9 +842,9 @@ export default function AnalyticsModal() {
                           width: "100%",
                         },
                       }}
-                    />
-                    <DataGrid
-                      data={item?.subjectData}
+                    />}
+                    {cycleDataCache[index]?.templateAnalytics?.data?.linkedin_template_analytics && <DataGrid
+                      data={cycleDataCache[index]?.templateAnalytics?.data?.linkedin_template_analytics || []}
                       highlightOnHover
                       withSorting
                       withColumnBorders
@@ -1025,21 +862,21 @@ export default function AnalyticsModal() {
                       }}
                       columns={[
                         {
-                          accessorKey: "subject_lines",
+                          accessorKey: "message",
                           header: () => (
                             <Flex align={"center"} gap={"3px"}>
                               <IconBallpen color="gray" size={"0.9rem"} />
-                              <Text color="gray">Subject Lines</Text>
+                              <Text color="gray">Linkedin Templates</Text>
                             </Flex>
                           ),
                           cell: (cell) => {
-                            let { subject_lines } = cell.row.original;
+                            let { message } = cell.row.original;
 
                             return (
                               <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
                                 <Flex>
                                   <Text color="gray" size={"sm"} w={"100%"}>
-                                    {subject_lines}
+                                    {message}
                                   </Text>
                                 </Flex>
                               </Flex>
@@ -1047,17 +884,18 @@ export default function AnalyticsModal() {
                           },
                         },
                         {
-                          accessorKey: "open_rate",
+                          accessorKey: "num_open",
                           minSize: 40,
                           maxSize: 140,
                           header: () => (
                             <Flex align={"center"} gap={"3px"}>
                               <IconLetterT color="gray" size={"0.9rem"} />
-                              <Text color="gray">Open RAte</Text>
+                              <Text color="gray">Open Rate</Text>
                             </Flex>
                           ),
                           cell: (cell) => {
-                            let { open_rate }: any = cell.row.original;
+                            let { num_open, num_sent }: any = cell.row.original;
+                            let open_rate = num_sent ? ((num_open / num_sent) * 100).toFixed(2) : 0;
 
                             return (
                               <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
@@ -1067,7 +905,7 @@ export default function AnalyticsModal() {
                           },
                         },
                         {
-                          accessorKey: "reply_rate",
+                          accessorKey: "num_reply",
                           minSize: 40,
                           maxSize: 140,
                           header: () => (
@@ -1077,7 +915,8 @@ export default function AnalyticsModal() {
                             </Flex>
                           ),
                           cell: (cell) => {
-                            let { reply_rate }: any = cell.row.original;
+                            let { num_reply, num_sent }: any = cell.row.original;
+                            let reply_rate = num_sent ? ((num_reply / num_sent) * 100).toFixed(2) : 0;
 
                             return (
                               <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
@@ -1113,8 +952,9 @@ export default function AnalyticsModal() {
                           width: "100%",
                         },
                       }}
-                    />
-                    <DataGrid
+                    />}
+                    
+                    {/* <DataGrid
                       data={item?.personalizerData}
                       highlightOnHover
                       withSorting
@@ -1226,10 +1066,10 @@ export default function AnalyticsModal() {
                           width: "100%",
                         },
                       }}
-                    />
+                    /> */}
                   </Box>
                 </Flex>
-              </ScrollArea>
+              </ScrollArea> : (<Center mt="xl" mb="xl"><Loader /></Center>)}
             </Collapse>
           </Box>
         );

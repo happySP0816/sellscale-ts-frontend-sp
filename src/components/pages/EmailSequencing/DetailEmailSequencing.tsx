@@ -217,7 +217,6 @@ function NewDetailEmailSequencing(props: {
   refetch: () => Promise<void>;
   scrollToTop: () => void;
 }) {
-  console.log('current tab is', props.currentTab)
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);

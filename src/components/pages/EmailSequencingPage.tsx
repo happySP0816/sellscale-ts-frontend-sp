@@ -438,7 +438,7 @@ function EmailSequenceStepView(props: {
             <>
               {props.sequenceBucket?.templates?.map((template, index) => {
                 // Show only the first Sequence Step of not showing all
-                if (index > 0 && !showAll) {
+                if (index > 0 && !showAll && !template) {
                   return <></>;
                 }
 

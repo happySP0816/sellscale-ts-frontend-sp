@@ -1,20 +1,7 @@
-import {
-  Box,
-  Flex,
-  Text,
-  Badge,
-  Button,
-  Select,
-  ActionIcon,
-  useMantineTheme,
-  SimpleGrid,
-  Paper,
-  Title,
-  Loader,
-  HoverCard,
-} from "@mantine/core";
+import { Box, Flex, Text, Badge, Button, Select, ActionIcon, useMantineTheme, SimpleGrid, Paper, Title, Loader, HoverCard } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import {
+  Icon123,
   IconBulb,
   IconChevronLeft,
   IconChevronRight,
@@ -83,16 +70,8 @@ export default function AIBrainStrategy() {
                 </Flex>
               ),
               innerProps: {
-                onSubmit: async (
-                  title: string,
-                  description: string,
-                  archetypes: number[]
-                ) => {
-                  const response = await postCreateStrategy(
-                    title,
-                    description,
-                    archetypes
-                  );
+                onSubmit: async (title: string, description: string, archetypes: number[]) => {
+                  const response = await postCreateStrategy(title, description, archetypes);
                   handleGetAllStrategies();
                 },
               },
@@ -119,15 +98,37 @@ export default function AIBrainStrategy() {
           }}
           columns={[
             {
+              accessorKey: "strategy",
+              header: () => (
+                <Flex align={"center"} gap={"3px"}>
+                  <Icon123 color="gray" size={"0.9rem"} />
+                  <Text color="gray">Strategy</Text>
+                </Flex>
+              ),
+              minSize: 50,
+              maxSize: 140,
+              cell: (cell: any) => {
+                const { title, description } = cell.row.original;
+
+                return (
+                  <Box h={"100%"} ml={0} pl={0}>
+                    <Text size={"sm"} fw={700} align="center">
+                      {1}
+                    </Text>
+                  </Box>
+                );
+              },
+            },
+            {
               accessorKey: "strategy_title",
               header: () => (
                 <Flex align={"center"} gap={"3px"}>
-                  <IconLamp color="gray" size={"0.9rem"} />
+                  <IconBulb color="gray" size={"0.9rem"} />
                   <Text color="gray">Strategy Title</Text>
                 </Flex>
               ),
-              minSize: 200,
-              maxSize: 300,
+              minSize: 220,
+              maxSize: 340,
               cell: (cell: any) => {
                 const { title, description } = cell.row.original;
 
@@ -145,24 +146,24 @@ export default function AIBrainStrategy() {
                     <Text mt={0} color="gray" size={"10px"}>
                       {description?.replace(/<[^>]*>/g, " ")?.slice(120, 160)}
                     </Text>
+                    <Flex gap={"xs"} mt={"sm"}>
+                      <Text size={"10px"} fw={500} color="gray">
+                        First Sent Date: <span className="text-black">{"06/06/2024"}</span>
+                      </Text>
+                      <Text size={"10px"} fw={500} color="gray">
+                        Last Sent Date: <span className="text-black">{"06/06/2024"}</span>
+                      </Text>
+                    </Flex>
                     {
                       <HoverCard shadow="md" withinPortal position="right">
                         <HoverCard.Target>
-                          <Text
-                            size={"xs"}
-                            fw={500}
-                            color="gray"
-                            mt={6}
-                            className=" font-semibold"
-                          >
+                          <Text size={"xs"} fw={500} color="gray" mt={6} className=" font-semibold">
                             Read More
                           </Text>
                         </HoverCard.Target>
                         <HoverCard.Dropdown>
                           <Text size={"sm"} maw={200}>
-                            <div
-                              dangerouslySetInnerHTML={{ __html: description }}
-                            />
+                            <div dangerouslySetInnerHTML={{ __html: description }} />
                           </Text>
                         </HoverCard.Dropdown>
                       </HoverCard>
@@ -185,41 +186,26 @@ export default function AIBrainStrategy() {
                 return (
                   <Flex w={"100%"} h={"100%"} align={"center"}>
                     <Box>
-                      {archetypes
-                        ?.slice(0, 4)
-                        .map((item: any, index: number) => {
-                          return (
-                            <Text
-                              lineClamp={1}
-                              fw={600}
-                              key={index}
-                              className=""
-                            >
-                              {item.emoji} {item.archetype}
-                            </Text>
-                          );
-                        })}
+                      {archetypes?.slice(0, 4).map((item: any, index: number) => {
+                        return (
+                          <Text lineClamp={1} fw={600} key={index} className="">
+                            {item.emoji} {item.archetype}
+                          </Text>
+                        );
+                      })}
                       {archetypes?.length > 4 && (
                         <HoverCard shadow="md" withinPortal>
                           <HoverCard.Target>
-                            <Text
-                              size={"sm"}
-                              fw={500}
-                              color="gray"
-                              mt={6}
-                              className=" font-semibold"
-                            >
+                            <Text size={"sm"} fw={500} color="gray" mt={6} className=" font-semibold">
                               +{archetypes?.length - 4} more
                             </Text>
                           </HoverCard.Target>
                           <HoverCard.Dropdown>
-                            {archetypes
-                              .slice(4)
-                              .map((item: any, index: number) => (
-                                <Text key={index} size={"sm"} fw={600}>
-                                  {item.emoji} {item.archetype}
-                                </Text>
-                              ))}
+                            {archetypes.slice(4).map((item: any, index: number) => (
+                              <Text key={index} size={"sm"} fw={600}>
+                                {item.emoji} {item.archetype}
+                              </Text>
+                            ))}
                           </HoverCard.Dropdown>
                         </HoverCard>
                       )}
@@ -236,14 +222,10 @@ export default function AIBrainStrategy() {
                   <Text color="gray">Cumulative Analysis</Text>
                 </Flex>
               ),
-              maxSize: 210,
+              maxSize: 200,
               enableResizing: true,
               cell: (cell: any) => {
-                const {
-                  num_pos_response,
-                  num_demo,
-                  num_sent,
-                } = cell.row.original;
+                const { num_pos_response, num_demo, num_sent } = cell.row.original;
 
                 return (
                   <Box py={"sm"} w={"100%"} h={"100%"}>
@@ -258,15 +240,10 @@ export default function AIBrainStrategy() {
                     </Flex>
                     <Flex>
                       <Text color="green" size={"sm"} fw={500}>
-                        <span className=" font-bold">{num_pos_response}</span>{" "}
-                        (+) Responses
+                        <span className=" font-bold">{num_pos_response}</span> (+) Responses
                       </Text>
                       <Text color="gray" size={"xs"} fw={500} ml="xs">
-                        (
-                        {(
-                          (num_pos_response / (num_sent + 0.0001)) *
-                          100
-                        ).toFixed(1)}
+                        ({((num_pos_response / (num_sent + 0.0001)) * 100).toFixed(1)}
                         %)
                       </Text>
                     </Flex>
@@ -293,31 +270,14 @@ export default function AIBrainStrategy() {
                   <Text color="gray">Status</Text>
                 </Flex>
               ),
-              maxSize: 120,
+              maxSize: 110,
               enableResizing: true,
               cell: (cell: any) => {
                 const { status } = cell.row.original;
 
                 return (
-                  <Flex
-                    align={"center"}
-                    justify={"center"}
-                    gap={"xs"}
-                    py={"sm"}
-                    w={"100%"}
-                    h={"100%"}
-                  >
-                    <Badge
-                      color={
-                        status === "FAILED"
-                          ? "red"
-                          : status === "SUCCESS"
-                          ? "green"
-                          : "orange"
-                      }
-                    >
-                      {status?.toLowerCase().replaceAll("_", " ")}
-                    </Badge>
+                  <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                    <Badge color={status === "FAILED" ? "red" : status === "SUCCESS" ? "green" : "orange"}>{status?.toLowerCase().replaceAll("_", " ")}</Badge>
                   </Flex>
                 );
               },
@@ -335,14 +295,7 @@ export default function AIBrainStrategy() {
               cell: (cell: any) => {
                 const { description } = cell.row.original;
                 return (
-                  <Flex
-                    align={"center"}
-                    justify={"center"}
-                    gap={"xs"}
-                    py={"sm"}
-                    w={"100%"}
-                    h={"100%"}
-                  >
+                  <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
                     <ActionIcon
                       size={"sm"}
                       radius={"xl"}
@@ -382,23 +335,10 @@ export default function AIBrainStrategy() {
                           innerProps: {
                             title: cell.row.original.title,
                             description: cell.row.original.description,
-                            archetypes: cell.row.original.archetypes?.map(
-                              (x: any) => x.id
-                            ),
+                            archetypes: cell.row.original.archetypes?.map((x: any) => x.id),
                             status: cell.row.original.status,
-                            onSubmit: async (
-                              title: string,
-                              description: string,
-                              archetypes: number[],
-                              status: string
-                            ) => {
-                              const response = await patchUpdateStrategy(
-                                cell.row.original.id,
-                                title,
-                                description,
-                                archetypes,
-                                status
-                              );
+                            onSubmit: async (title: string, description: string, archetypes: number[], status: string) => {
+                              const response = await patchUpdateStrategy(cell.row.original.id, title, description, archetypes, status);
                               handleGetAllStrategies();
                             },
                           },
@@ -445,12 +385,10 @@ export default function AIBrainStrategy() {
                     <Select
                       maw={100}
                       value={`${table.getState().pagination.pageIndex + 1}`}
-                      data={new Array(table.getPageCount())
-                        .fill(0)
-                        .map((i, idx) => ({
-                          label: String(idx + 1),
-                          value: String(idx + 1),
-                        }))}
+                      data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
+                        label: String(idx + 1),
+                        value: String(idx + 1),
+                      }))}
                       onChange={(v) => {
                         table.setPageIndex(Number(v) - 1);
                       }}
@@ -479,9 +417,7 @@ export default function AIBrainStrategy() {
                       h={36}
                       disabled={table.getState().pagination.pageIndex === 0}
                       onClick={() => {
-                        table.setPageIndex(
-                          table.getState().pagination.pageIndex - 1
-                        );
+                        table.setPageIndex(table.getState().pagination.pageIndex - 1);
                       }}
                     >
                       <IconChevronLeft stroke={theme.colors.gray[4]} />
@@ -490,14 +426,9 @@ export default function AIBrainStrategy() {
                       variant="default"
                       color="gray.4"
                       h={36}
-                      disabled={
-                        table.getState().pagination.pageIndex ===
-                        table.getPageCount() - 1
-                      }
+                      disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
                       onClick={() => {
-                        table.setPageIndex(
-                          table.getState().pagination.pageIndex + 1
-                        );
+                        table.setPageIndex(table.getState().pagination.pageIndex + 1);
                       }}
                     >
                       <IconChevronRight stroke={theme.colors.gray[4]} />

@@ -242,7 +242,7 @@ const Sidebar: React.FC<{
               if (!futureSequenceBucket?.templates) {
                 continue;
               }
-              for (const template of futureSequenceBucket.templates) {
+              for (const template of futureSequenceBucket?.templates) {
                 if (template.step.active) {
                   hasDefaultInFuture = true;
                   break;

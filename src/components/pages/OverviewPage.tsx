@@ -59,12 +59,7 @@ import {
   IconWoman,
   IconWorld,
 } from "@tabler/icons";
-import {
-  IconGrid3x3,
-  IconMessageCheck,
-  IconSparkles,
-  IconSunElectricity,
-} from "@tabler/icons-react";
+import { IconGrid3x3, IconMessageCheck, IconSparkles, IconSunElectricity } from "@tabler/icons-react";
 import { API_URL } from "@constants/data";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
@@ -74,7 +69,7 @@ import { getPersonasActivity } from "@utils/requests/getPersonas";
 import { CampaignAnalyticsData } from "@common/campaigns/CampaignAnalytics";
 import { isLoggedIn } from "@auth/core";
 import { TodayActivityData } from "@common/campaigns/OverallPipeline/TodayActivity";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { DataTable } from "mantine-datatable";
 import OperatorOverview from "./Overview/OperatorOverview";
 import getDomainDetails from "@utils/requests/getDomainDetails";
@@ -132,35 +127,18 @@ export function BarChart() {
     });
   };
 
-  const processData = (data: any) =>
-    isCumulativeMode ? getCumulativeData(data) : data;
+  const processData = (data: any) => (isCumulativeMode ? getCumulativeData(data) : data);
 
-  const sumOutbounds = modes[currentMode]?.data.outbound.reduce(
-    (a: any, b: any) => a + b,
-    0
-  );
-  const sumAcceptances = modes[currentMode]?.data.acceptances.reduce(
-    (a: any, b: any) => a + b,
-    0
-  );
-  const sumReplies = modes[currentMode]?.data.replies.reduce(
-    (a: any, b: any) => a + b,
-    0
-  );
-  const sumPositiveReplies = modes[currentMode]?.data.positive_replies?.reduce(
-    (a: any, b: any) => a + b,
-    0
-  );
-  const sumDemos = modes[currentMode]?.data.demos?.reduce(
-    (a: any, b: any) => a + b,
-    0
-  );
+  const sumOutbounds = modes[currentMode]?.data.outbound.reduce((a: any, b: any) => a + b, 0);
+  const sumAcceptances = modes[currentMode]?.data.acceptances.reduce((a: any, b: any) => a + b, 0);
+  const sumReplies = modes[currentMode]?.data.replies.reduce((a: any, b: any) => a + b, 0);
+  const sumPositiveReplies = modes[currentMode]?.data.positive_replies?.reduce((a: any, b: any) => a + b, 0);
+  const sumDemos = modes[currentMode]?.data.demos?.reduce((a: any, b: any) => a + b, 0);
 
   const theme = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(true);
 
-  const totalTouchpoints =
-    sumOutbounds + sumAcceptances + sumReplies + sumPositiveReplies + sumDemos;
+  const totalTouchpoints = sumOutbounds + sumAcceptances + sumReplies + sumPositiveReplies + sumDemos;
 
   const chartData = {
     labels: modes[currentMode]?.labels,
@@ -222,43 +200,21 @@ export function BarChart() {
 
   return (
     <Card withBorder mt="md" p="0">
-      <Flex
-        mb="md"
-        pl="md"
-        pr="md"
-        p="xs"
-        sx={{ backgroundColor: theme.colors.blue[6] }}
-      >
-        <Title
-          order={3}
-          mt="0"
-          sx={{ flexDirection: "row", display: "flex", color: "white" }}
-        >
+      <Flex mb="md" pl="md" pr="md" p="xs" sx={{ backgroundColor: theme.colors.blue[6] }}>
+        <Title order={3} mt="0" sx={{ flexDirection: "row", display: "flex", color: "white" }}>
           Volume
         </Title>
         {opened ? (
-          <IconChevronDown
-            color="white"
-            size="2rem"
-            style={{ marginLeft: "auto", cursor: "pointer" }}
-            onClick={() => toggle()}
-          />
+          <IconChevronDown color="white" size="2rem" style={{ marginLeft: "auto", cursor: "pointer" }} onClick={() => toggle()} />
         ) : (
-          <IconChevronUp
-            color="white"
-            size="2rem"
-            style={{ marginLeft: "auto", cursor: "pointer" }}
-            onClick={() => toggle()}
-          />
+          <IconChevronUp color="white" size="2rem" style={{ marginLeft: "auto", cursor: "pointer" }} onClick={() => toggle()} />
         )}
       </Flex>
       <Collapse in={opened}>
         <Card pt="0">
           <Flex direction="row" mb="xs">
             <Box>
-              <Text color="gray">
-                {isCumulativeMode ? "CUMULATIVE" : "DAILY"} OUTBOUND TOUCHPOINTS
-              </Text>
+              <Text color="gray">{isCumulativeMode ? "CUMULATIVE" : "DAILY"} OUTBOUND TOUCHPOINTS</Text>
               <Title>{totalTouchpoints.toLocaleString()}</Title>
             </Box>
             <Flex ml="auto">
@@ -296,9 +252,7 @@ export function BarChart() {
             labelPosition="right"
             label="View cumulative activity"
             checked={isCumulativeMode}
-            onChange={(event) =>
-              setIsCumulativeMode(event.currentTarget.checked)
-            }
+            onChange={(event) => setIsCumulativeMode(event.currentTarget.checked)}
           />
         </Card>
       </Collapse>
@@ -402,16 +356,14 @@ export function ActiveChannels() {
     if (result.status == "success") {
       showNotification({
         title: "Success",
-        message:
-          "Email statistics are being refreshed. Please allow 5-10 minutes for this to complete.",
+        message: "Email statistics are being refreshed. Please allow 5-10 minutes for this to complete.",
         color: "green",
       });
       fetchEmailDetails();
     } else {
       showNotification({
         title: "Error",
-        message:
-          "There was an error refreshing email statistics. Please try again.",
+        message: "There was an error refreshing email statistics. Please try again.",
         color: "red",
       });
     }
@@ -430,9 +382,7 @@ export function ActiveChannels() {
     for (const domain of data.domain_details || []) {
       let sorted_inboxes = domain.inboxes || [];
       // Sort in alphabetical order of the email address
-      sorted_inboxes = sorted_inboxes.sort((a: any, b: any) =>
-        a.email_address.localeCompare(b.email_address)
-      );
+      sorted_inboxes = sorted_inboxes.sort((a: any, b: any) => a.email_address.localeCompare(b.email_address));
 
       formatted_domains.push({
         domain: domain.domain,
@@ -443,9 +393,7 @@ export function ActiveChannels() {
         inboxes: sorted_inboxes,
       });
     }
-    formatted_domains = formatted_domains.sort((a: any, b: any) =>
-      a.domain.localeCompare(b.domain)
-    );
+    formatted_domains = formatted_domains.sort((a: any, b: any) => a.domain.localeCompare(b.domain));
     setDomains(formatted_domains);
 
     setFetchedChannels(true);
@@ -459,9 +407,7 @@ export function ActiveChannels() {
     const data = result.data;
     let linkedin_snapshots: any[] = [];
     for (const sdr of data) {
-      linkedin_snapshots = linkedin_snapshots.concat(
-        sdr.snapshots.filter((x: any) => x.channel_type == "LINKEDIN")
-      );
+      linkedin_snapshots = linkedin_snapshots.concat(sdr.snapshots.filter((x: any) => x.channel_type == "LINKEDIN"));
     }
     setLinkedinSeats(linkedin_snapshots || []);
 
@@ -495,29 +441,11 @@ export function ActiveChannels() {
   return (
     <>
       <Card withBorder mt="xs" p={0} pt={0}>
-        <Flex
-          mb="md"
-          pl="md"
-          pr="md"
-          p="xs"
-          sx={{ backgroundColor: theme.colors.blue[6] }}
-          align="center"
-        >
-          <Title
-            order={3}
-            mt="0"
-            sx={{ flexDirection: "row", display: "flex", color: "white" }}
-          >
+        <Flex mb="md" pl="md" pr="md" p="xs" sx={{ backgroundColor: theme.colors.blue[6] }} align="center">
+          <Title order={3} mt="0" sx={{ flexDirection: "row", display: "flex", color: "white" }}>
             Infrastructure
           </Title>
-          <Badge
-            color="red"
-            variant="outline"
-            size="lg"
-            sx={{ backgroundColor: "white" }}
-            ml="md"
-            mt="2px"
-          >
+          <Badge color="red" variant="outline" size="lg" sx={{ backgroundColor: "white" }} ml="md" mt="2px">
             🔥 Warmup ENABLED
           </Badge>
 
@@ -533,19 +461,9 @@ export function ActiveChannels() {
           </ActionIcon>
 
           {opened ? (
-            <IconChevronDown
-              color="white"
-              size="2rem"
-              style={{ marginLeft: "8px", cursor: "pointer" }}
-              onClick={() => toggle()}
-            />
+            <IconChevronDown color="white" size="2rem" style={{ marginLeft: "8px", cursor: "pointer" }} onClick={() => toggle()} />
           ) : (
-            <IconChevronUp
-              color="white"
-              size="2rem"
-              style={{ marginLeft: "auto", cursor: "pointer" }}
-              onClick={() => toggle()}
-            />
+            <IconChevronUp color="white" size="2rem" style={{ marginLeft: "auto", cursor: "pointer" }} onClick={() => toggle()} />
           )}
         </Flex>
         <Collapse in={opened}>
@@ -560,19 +478,8 @@ export function ActiveChannels() {
                     <Text ml="4px" fz="14px" color="gray" fw="500" mt="2px">
                       Company Send Limit:
                     </Text>
-                    <Flex
-                      color="gray"
-                      pt="4px"
-                      pl="16px"
-                      pr="16px"
-                      ml="xs"
-                      sx={{ border: "solid 1px #ddd; border-radius: 20px;" }}
-                      mah={30}
-                    >
-                      <IconBrandLinkedin
-                        size="1rem"
-                        color={theme.colors.blue[6]}
-                      />
+                    <Flex color="gray" pt="4px" pl="16px" pr="16px" ml="xs" sx={{ border: "solid 1px #ddd; border-radius: 20px;" }} mah={30}>
+                      <IconBrandLinkedin size="1rem" color={theme.colors.blue[6]} />
                       <Text ml="4px" fz="12px" color="gray" fw="bold">
                         <span
                           style={{
@@ -585,15 +492,7 @@ export function ActiveChannels() {
                         {totalLinkedInWarmup * 5} / week
                       </Text>
                     </Flex>
-                    <Flex
-                      color="gray"
-                      pt="4px"
-                      pl="16px"
-                      pr="16px"
-                      ml="xs"
-                      sx={{ border: "solid 1px #ddd; border-radius: 20px;" }}
-                      mah={26}
-                    >
+                    <Flex color="gray" pt="4px" pl="16px" pr="16px" ml="xs" sx={{ border: "solid 1px #ddd; border-radius: 20px;" }} mah={26}>
                       <IconMail size="1rem" color={theme.colors.orange[6]} />
                       <Text ml="4px" fz="12px" color="gray" fw="bold">
                         <span
@@ -609,16 +508,12 @@ export function ActiveChannels() {
                     </Flex>
                   </Flex>
                   <Text ml="auto" align="right" h={39}>
-                    <IconUser size="1rem" color={theme.colors.blue[6]} />{" "}
-                    <b>{sdrs.filter((x: any) => x.active).length}</b> Active
-                    Seats
+                    <IconUser size="1rem" color={theme.colors.blue[6]} /> <b>{sdrs.filter((x: any) => x.active).length}</b> Active Seats
                   </Text>
                 </Flex>
                 <Grid>
                   {sdrs
-                    .sort(
-                      (sdr_a: any, sdr_b: any) => -(sdr_a.active - sdr_b.active)
-                    )
+                    .sort((sdr_a: any, sdr_b: any) => -(sdr_a.active - sdr_b.active))
                     .filter((sdr: any) => sdr.active)
                     .map((sdr: any) => {
                       let totalSendVolume = 0;
@@ -631,13 +526,8 @@ export function ActiveChannels() {
                       }
 
                       let inboxes = sdr.emails
-                        ?.filter(
-                          (inbox: any) => inbox.smartlead_account_id != null
-                        )
-                        .sort(
-                          (a: any, b: any) =>
-                            b.total_sent_count - a.total_sent_count
-                        );
+                        ?.filter((inbox: any) => inbox.smartlead_account_id != null)
+                        .sort((a: any, b: any) => b.total_sent_count - a.total_sent_count);
 
                       return (
                         <Grid.Col span={4} mb="xs">
@@ -656,10 +546,7 @@ export function ActiveChannels() {
                                 />
                               </Box>
                               <Box ml="xs" mt="0">
-                                <Badge
-                                  size="xs"
-                                  color={sdr.active ? "green" : "gray"}
-                                >
+                                <Badge size="xs" color={sdr.active ? "green" : "gray"}>
                                   {sdr.active ? "Active" : "Inactive"}
                                 </Badge>
                                 <Text fw={500} fz={16}>
@@ -675,36 +562,17 @@ export function ActiveChannels() {
                                   label = "Email";
                                 }
 
-                                let icon = (
-                                  <IconBrandLinkedin
-                                    size="1.4rem"
-                                    color={theme.colors.blue[6]}
-                                  />
-                                );
+                                let icon = <IconBrandLinkedin size="1.4rem" color={theme.colors.blue[6]} />;
                                 if (channel == "EMAIL") {
-                                  icon = (
-                                    <IconMail
-                                      size="1.4rem"
-                                      color={theme.colors.blue[6]}
-                                    />
-                                  );
+                                  icon = <IconMail size="1.4rem" color={theme.colors.blue[6]} />;
                                 }
 
                                 if (channel == "LINKEDIN") {
-                                  inboxes = linkedinSeats.filter(
-                                    (inbox: any) =>
-                                      inbox.client_sdr_id == sdr.id
-                                  );
+                                  inboxes = linkedinSeats.filter((inbox: any) => inbox.client_sdr_id == sdr.id);
                                 } else {
                                   inboxes = sdr.emails
-                                    ?.filter(
-                                      (inbox: any) =>
-                                        inbox.smartlead_account_id != null
-                                    )
-                                    .sort(
-                                      (a: any, b: any) =>
-                                        b.total_sent_count - a.total_sent_count
-                                    );
+                                    ?.filter((inbox: any) => inbox.smartlead_account_id != null)
+                                    .sort((a: any, b: any) => b.total_sent_count - a.total_sent_count);
                                 }
 
                                 let unit = "seat";
@@ -723,31 +591,13 @@ export function ActiveChannels() {
                                       <HoverCard shadow="md" withinPortal>
                                         <HoverCard.Target>
                                           <Box w="100%">
-                                            <Box
-                                              w="100%"
-                                              sx={{ cursor: "pointer" }}
-                                              mt="xs"
-                                            >
+                                            <Box w="100%" sx={{ cursor: "pointer" }} mt="xs">
                                               <Flex w="100%">
                                                 {icon}
-                                                <Text
-                                                  color="blue"
-                                                  fw="bold"
-                                                  w="40%"
-                                                  ml="xs"
-                                                >
+                                                <Text color="blue" fw="bold" w="40%" ml="xs">
                                                   {label}
                                                 </Text>
-                                                <Badge
-                                                  color="gray"
-                                                  w="60%"
-                                                  ml="xs"
-                                                  fw="700"
-                                                  size="sm"
-                                                  variant="outline"
-                                                  mr="md"
-                                                  mt="4px"
-                                                >
+                                                <Badge color="gray" w="60%" ml="xs" fw="700" size="sm" variant="outline" mr="md" mt="4px">
                                                   {numUnits || 1} {unit}
                                                 </Badge>
                                               </Flex>
@@ -758,11 +608,7 @@ export function ActiveChannels() {
                                           <Table>
                                             <thead>
                                               <tr>
-                                                <th>
-                                                  {channel == "EMAIL"
-                                                    ? "Inbox"
-                                                    : "Account"}
-                                                </th>
+                                                <th>{channel == "EMAIL" ? "Inbox" : "Account"}</th>
                                                 <th>Daily Limit</th>
                                                 <th>Warmup</th>
                                                 <th>Reputation</th>
@@ -770,70 +616,32 @@ export function ActiveChannels() {
                                             </thead>
                                             <tbody>
                                               {inboxes?.map((inbox: any) => {
-                                                let warmed =
-                                                  inbox.total_sent_count > 100;
-                                                let days_left =
-                                                  (100 -
-                                                    inbox.total_sent_count) /
-                                                  inbox.daily_limit;
-                                                let reputable =
-                                                  inbox.smartlead_reputation ==
-                                                  100;
-                                                let reputation =
-                                                  inbox.smartlead_reputation;
+                                                let warmed = inbox.total_sent_count > 100;
+                                                let days_left = (100 - inbox.total_sent_count) / inbox.daily_limit;
+                                                let reputable = inbox.smartlead_reputation == 100;
+                                                let reputation = inbox.smartlead_reputation;
 
                                                 if (channel == "LINKEDIN") {
-                                                  warmed =
-                                                    inbox.daily_limit > 15;
-                                                  days_left =
-                                                    (15 - inbox.daily_limit) /
-                                                    inbox.daily_limit;
-                                                  reputable =
-                                                    inbox.reputation == 100;
+                                                  warmed = inbox.daily_limit > 15;
+                                                  days_left = (15 - inbox.daily_limit) / inbox.daily_limit;
+                                                  reputable = inbox.reputation == 100;
                                                   reputation = inbox.reputation;
                                                 }
 
                                                 return (
                                                   <tr>
                                                     <td>
-                                                      {inbox.channel_type ==
-                                                      "LINKEDIN" ? (
-                                                        <IconBrandLinkedin size="0.9rem" />
-                                                      ) : (
-                                                        <IconMail size="0.9rem" />
-                                                      )}{" "}
-                                                      {inbox.email_address ||
-                                                        inbox.account_name}
+                                                      {inbox.channel_type == "LINKEDIN" ? <IconBrandLinkedin size="0.9rem" /> : <IconMail size="0.9rem" />}{" "}
+                                                      {inbox.email_address || inbox.account_name}
                                                     </td>
+                                                    <td>{inbox.daily_limit} per day</td>
                                                     <td>
-                                                      {inbox.daily_limit} per
-                                                      day
-                                                    </td>
-                                                    <td>
-                                                      <Badge
-                                                        size="xs"
-                                                        color={
-                                                          warmed
-                                                            ? "green"
-                                                            : "orange"
-                                                        }
-                                                      >
-                                                        {warmed
-                                                          ? "Warm"
-                                                          : `${Math.ceil(
-                                                              days_left
-                                                            )} Days left`}
+                                                      <Badge size="xs" color={warmed ? "green" : "orange"}>
+                                                        {warmed ? "Warm" : `${Math.ceil(days_left)} Days left`}
                                                       </Badge>
                                                     </td>
                                                     <td>
-                                                      <Badge
-                                                        size="xs"
-                                                        color={
-                                                          reputable
-                                                            ? "green"
-                                                            : "yellow"
-                                                        }
-                                                      >
+                                                      <Badge size="xs" color={reputable ? "green" : "yellow"}>
                                                         {reputation || "N/A"}%
                                                       </Badge>
                                                     </td>
@@ -854,34 +662,14 @@ export function ActiveChannels() {
 
                             {inboxes?.map((inbox: any) => {
                               const warmed = inbox.total_sent_count > 100;
-                              const days_left =
-                                (180 - inbox.total_sent_count) /
-                                inbox.daily_limit;
+                              const days_left = (180 - inbox.total_sent_count) / inbox.daily_limit;
 
                               return (
-                                <HoverCard
-                                  withinPortal
-                                  withArrow
-                                  position="right-end"
-                                >
+                                <HoverCard withinPortal withArrow position="right-end">
                                   <HoverCard.Target>
-                                    <Badge
-                                      size="xs"
-                                      color={
-                                        inbox.total_sent_count > 100
-                                          ? "green"
-                                          : "yellow"
-                                      }
-                                      variant="dot"
-                                    >
-                                      {inbox.total_sent_count > 100
-                                        ? "WARMED -"
-                                        : "WARMING -"}
-                                      <span
-                                        style={{ textTransform: "lowercase" }}
-                                      >
-                                        {inbox.email_address}
-                                      </span>
+                                    <Badge size="xs" color={inbox.total_sent_count > 100 ? "green" : "yellow"} variant="dot">
+                                      {inbox.total_sent_count > 100 ? "WARMED -" : "WARMING -"}
+                                      <span style={{ textTransform: "lowercase" }}>{inbox.email_address}</span>
                                     </Badge>
                                   </HoverCard.Target>
                                   <HoverCard.Dropdown w={400}>
@@ -897,36 +685,17 @@ export function ActiveChannels() {
                                       <tbody>
                                         <tr>
                                           <td>
-                                            <IconMail size="0.9rem" />{" "}
-                                            {inbox.email_address}
+                                            <IconMail size="0.9rem" /> {inbox.email_address}
                                           </td>
                                           <td>{inbox.daily_limit} per day</td>
                                           <td>
-                                            <Badge
-                                              size="xs"
-                                              color={
-                                                warmed ? "green" : "orange"
-                                              }
-                                            >
-                                              {warmed
-                                                ? "Warm"
-                                                : `${Math.ceil(
-                                                    days_left
-                                                  )} Days left`}
+                                            <Badge size="xs" color={warmed ? "green" : "orange"}>
+                                              {warmed ? "Warm" : `${Math.ceil(days_left)} Days left`}
                                             </Badge>
                                           </td>
                                           <td>
-                                            <Badge
-                                              size="xs"
-                                              color={
-                                                inbox.smartlead_reputation > 80
-                                                  ? "green"
-                                                  : "yellow"
-                                              }
-                                            >
-                                              {inbox.smartlead_reputation ||
-                                                "N/A"}
-                                              %
+                                            <Badge size="xs" color={inbox.smartlead_reputation > 80 ? "green" : "yellow"}>
+                                              {inbox.smartlead_reputation || "N/A"}%
                                             </Badge>
                                           </td>
                                         </tr>
@@ -956,12 +725,7 @@ export function ActiveChannels() {
                       render: ({ inboxes }) => {
                         // Calculate average reputation
                         inboxes = inboxes || [];
-                        const avg =
-                          inboxes?.reduce(
-                            (sum, inbox) =>
-                              sum + (inbox?.smartlead_reputation || 0),
-                            0
-                          ) / inboxes?.length;
+                        const avg = inboxes?.reduce((sum, inbox) => sum + (inbox?.smartlead_reputation || 0), 0) / inboxes?.length;
                         return (
                           <Text>
                             {avg.toFixed(0)}% {avg === 100 ? "🟩" : "🟥"}
@@ -1007,11 +771,7 @@ export function ActiveChannels() {
                               <Box key={index}>
                                 <HoverCard shadow="md" withinPortal>
                                   <HoverCard.Target>
-                                    <Text style={{ cursor: "pointer" }}>
-                                      {inbox.smartlead_reputation >= 100
-                                        ? "✅"
-                                        : "🟥"}
-                                    </Text>
+                                    <Text style={{ cursor: "pointer" }}>{inbox.smartlead_reputation >= 100 ? "✅" : "🟥"}</Text>
                                   </HoverCard.Target>
                                   <HoverCard.Dropdown>
                                     <DataTable
@@ -1027,49 +787,23 @@ export function ActiveChannels() {
                                           accessor: "daily_limit",
                                           title: "Daily Limit",
                                           render: ({ daily_limit }) => {
-                                            return (
-                                              <Text>{daily_limit} per day</Text>
-                                            );
+                                            return <Text>{daily_limit} per day</Text>;
                                           },
                                         },
                                         {
                                           accessor: "smartlead_warmup_enabled",
                                           title: "Warmup",
-                                          render: ({
-                                            smartlead_warmup_enabled,
-                                          }) => {
+                                          render: ({ smartlead_warmup_enabled }) => {
                                             return (
-                                              <Badge
-                                                color={
-                                                  smartlead_warmup_enabled
-                                                    ? "green"
-                                                    : "red"
-                                                }
-                                              >
-                                                {smartlead_warmup_enabled
-                                                  ? "TRUE"
-                                                  : "FALSE"}
-                                              </Badge>
+                                              <Badge color={smartlead_warmup_enabled ? "green" : "red"}>{smartlead_warmup_enabled ? "TRUE" : "FALSE"}</Badge>
                                             );
                                           },
                                         },
                                         {
                                           accessor: "is_smtp_success",
                                           title: "Reputation",
-                                          render: ({
-                                            smartlead_reputation,
-                                          }) => {
-                                            return (
-                                              <Badge
-                                                color={
-                                                  smartlead_reputation == 100
-                                                    ? "green"
-                                                    : "red"
-                                                }
-                                              >
-                                                {smartlead_reputation || "N/A"}
-                                              </Badge>
-                                            );
+                                          render: ({ smartlead_reputation }) => {
+                                            return <Badge color={smartlead_reputation == 100 ? "green" : "red"}>{smartlead_reputation || "N/A"}</Badge>;
                                           },
                                         },
                                       ]}
@@ -1211,9 +945,7 @@ export function ActiveChannels() {
 
 export function ActiveCampaigns() {
   const [activeCampaigns, setActiveCampaigns] = React.useState([]);
-  const [fetchedActiveCampaigns, setFetchActiveCampaigns] = React.useState(
-    false
-  );
+  const [fetchedActiveCampaigns, setFetchActiveCampaigns] = React.useState(false);
   const userData = useRecoilValue(userDataState);
   const [mode, setMode] = useState("list");
   const [campaignsShown, setCampaignsShown] = useState([true]);
@@ -1259,32 +991,14 @@ export function ActiveCampaigns() {
 
   return (
     <Card withBorder mt="md" p="0">
-      <Flex
-        mb="md"
-        pl="md"
-        pr="md"
-        p="xs"
-        color="white"
-        sx={{ backgroundColor: theme.colors.blue[6] }}
-      >
+      <Flex mb="md" pl="md" pr="md" p="xs" color="white" sx={{ backgroundColor: theme.colors.blue[6] }}>
         <Title order={3} color="white">
-          {campaignsShown.length == 1 ? "Active" : "All"} Campaigns{" "}
-          {query.length > 0 ? `with "${query}"` : ""}
+          {campaignsShown.length == 1 ? "Active" : "All"} Campaigns {query.length > 0 ? `with "${query}"` : ""}
         </Title>
         {opened ? (
-          <IconChevronDown
-            color="white"
-            size="2rem"
-            style={{ marginLeft: "auto", cursor: "pointer" }}
-            onClick={() => toggle()}
-          />
+          <IconChevronDown color="white" size="2rem" style={{ marginLeft: "auto", cursor: "pointer" }} onClick={() => toggle()} />
         ) : (
-          <IconChevronUp
-            color="white"
-            size="2rem"
-            style={{ marginLeft: "auto", cursor: "pointer" }}
-            onClick={() => toggle()}
-          />
+          <IconChevronUp color="white" size="2rem" style={{ marginLeft: "auto", cursor: "pointer" }} onClick={() => toggle()} />
         )}
       </Flex>
       <Collapse in={opened}>
@@ -1292,8 +1006,7 @@ export function ActiveCampaigns() {
           <Flex>
             <Box>
               <Text color="gray">
-                These are the active campaigns running from across all of{" "}
-                {userData.client?.company}
+                These are the active campaigns running from across all of {userData.client?.company}
                 's users
               </Text>
               <Text color="gray">
@@ -1301,8 +1014,7 @@ export function ActiveCampaigns() {
                 <Badge size="sm" color="green">
                   Active
                 </Badge>{" "}
-                campaigns and{" "}
-                {activeCampaigns.filter((x: any) => !x.active).length}{" "}
+                campaigns and {activeCampaigns.filter((x: any) => !x.active).length}{" "}
                 <Badge size="sm" color="gray">
                   Inactive
                 </Badge>{" "}
@@ -1330,9 +1042,7 @@ export function ActiveCampaigns() {
                     value: "grid",
                     label: (
                       <Center>
-                        <IconGrid3x3
-                          style={{ width: rem(16), height: rem(16) }}
-                        />
+                        <IconGrid3x3 style={{ width: rem(16), height: rem(16) }} />
                         <Box ml={10}>Grid</Box>
                       </Center>
                     ),
@@ -1360,11 +1070,7 @@ export function ActiveCampaigns() {
               .sort((a: any, b: any) => b.open_percent - a.open_percent)
               .sort((a: any, b: any) => -(a.active - b.active))
               .filter((x: any) => campaignsShown.includes(x.active))
-              .filter(
-                (x: any) =>
-                  x.name.toLowerCase().includes(query.toLowerCase()) ||
-                  x.archetype.toLowerCase().includes(query.toLowerCase())
-              )
+              .filter((x: any) => x.name.toLowerCase().includes(query.toLowerCase()) || x.archetype.toLowerCase().includes(query.toLowerCase()))
               .map((x: any) => {
                 return (
                   <Grid.Col span={mode === "grid" ? 6 : 12}>
@@ -1382,38 +1088,18 @@ export function ActiveCampaigns() {
                             }
                       }
                     >
-                      <Group
-                        mb={mode === "grid" ? "xs" : "0px"}
-                        sx={{ cursor: "pointer" }}
-                        w="100%"
-                      >
+                      <Group mb={mode === "grid" ? "xs" : "0px"} sx={{ cursor: "pointer" }} w="100%">
                         <Tooltip label={x.name} withinPortal>
-                          <Image
-                            src={x.img_url}
-                            width={40}
-                            height={40}
-                            radius="sm"
-                          />
+                          <Image src={x.img_url} width={40} height={40} radius="sm" />
                         </Tooltip>
                         <Box>
-                          <Badge
-                            color={x.active ? "green" : "gray"}
-                            variant="light"
-                            size="sm"
-                            mb="xs"
-                          >
+                          <Badge color={x.active ? "green" : "gray"} variant="light" size="sm" mb="xs">
                             {x.active ? "Active" : "Inactive"}
                           </Badge>
                           <Tooltip label={x.archetype} withinPortal>
                             <Text fw={500}>
-                              {x.emoji}{" "}
-                              {x.archetype.substring(
-                                0,
-                                mode === "grid" ? 34 : 44
-                              )}
-                              {x.archetype.length > (mode === "grid" ? 34 : 44)
-                                ? "..."
-                                : ""}
+                              {x.emoji} {x.archetype.substring(0, mode === "grid" ? 34 : 44)}
+                              {x.archetype.length > (mode === "grid" ? 34 : 44) ? "..." : ""}
                             </Text>
                           </Tooltip>
                         </Box>
@@ -1421,218 +1107,92 @@ export function ActiveCampaigns() {
 
                       {mode === "grid" && (
                         <>
-                          <Text
-                            c="dimmed"
-                            size="xs"
-                            mah="110px"
-                            mb="xs"
-                            sx={{ overflowY: "scroll" }}
-                          >
-                            {x.included_individual_title_keywords?.length >
-                              0 && (
-                              <Tooltip
-                                label="Prioritized Job Titles"
-                                withinPortal
-                              >
+                          <Text c="dimmed" size="xs" mah="110px" mb="xs" sx={{ overflowY: "scroll" }}>
+                            {x.included_individual_title_keywords?.length > 0 && (
+                              <Tooltip label="Prioritized Job Titles" withinPortal>
                                 <p style={{ margin: 0, marginBottom: 4 }}>
-                                  <IconBriefcase
-                                    size="0.75rem"
-                                    color="#868E96"
-                                  />{" "}
-                                  {x.included_individual_title_keywords
-                                    .join(", ")
-                                    .substring(0, 60)}
-                                  {x.included_individual_title_keywords.join(
-                                    ", "
-                                  ).length > 60
-                                    ? "..."
-                                    : ""}
+                                  <IconBriefcase size="0.75rem" color="#868E96" /> {x.included_individual_title_keywords.join(", ").substring(0, 60)}
+                                  {x.included_individual_title_keywords.join(", ").length > 60 ? "..." : ""}
                                 </p>
                               </Tooltip>
                             )}
 
-                            {x.included_individual_locations_keywords?.length >
-                              0 && (
-                              <Tooltip
-                                label="Prioritized Prospect Locations"
-                                withinPortal
-                              >
+                            {x.included_individual_locations_keywords?.length > 0 && (
+                              <Tooltip label="Prioritized Prospect Locations" withinPortal>
                                 <p style={{ margin: 0, marginBottom: 4 }}>
-                                  <IconWorld size="0.75rem" color="#868E96" />{" "}
-                                  {x.included_individual_locations_keywords
-                                    .join(", ")
-                                    .substring(0, 60)}
-                                  {x.included_individual_locations_keywords.join(
-                                    ", "
-                                  ).length > 60
-                                    ? "..."
-                                    : ""}
+                                  <IconWorld size="0.75rem" color="#868E96" /> {x.included_individual_locations_keywords.join(", ").substring(0, 60)}
+                                  {x.included_individual_locations_keywords.join(", ").length > 60 ? "..." : ""}
                                 </p>
                               </Tooltip>
                             )}
 
-                            {x.included_individual_industry_keywords?.length >
-                              0 && (
-                              <Tooltip
-                                label="Prioritized Prospect Industries"
-                                withinPortal
-                              >
+                            {x.included_individual_industry_keywords?.length > 0 && (
+                              <Tooltip label="Prioritized Prospect Industries" withinPortal>
                                 <p style={{ margin: 0, marginBottom: 4 }}>
-                                  <IconBuildingFactory
-                                    size="0.75rem"
-                                    color="#868E96"
-                                  />{" "}
-                                  {x.included_individual_industry_keywords
-                                    .join(", ")
-                                    .substring(0, 60)}
-                                  {x.included_individual_industry_keywords.join(
-                                    ", "
-                                  ).length > 60
-                                    ? "..."
-                                    : ""}
+                                  <IconBuildingFactory size="0.75rem" color="#868E96" /> {x.included_individual_industry_keywords.join(", ").substring(0, 60)}
+                                  {x.included_individual_industry_keywords.join(", ").length > 60 ? "..." : ""}
                                 </p>
                               </Tooltip>
                             )}
 
-                            {x.included_individual_generalized_keywords
-                              ?.length > 0 && (
-                              <Tooltip
-                                label="Prioritized Prospect Keywords"
-                                withinPortal
-                              >
+                            {x.included_individual_generalized_keywords?.length > 0 && (
+                              <Tooltip label="Prioritized Prospect Keywords" withinPortal>
                                 <p style={{ margin: 0, marginBottom: 4 }}>
-                                  <IconBook size="0.75rem" color="#868E96" />{" "}
-                                  {x.included_individual_generalized_keywords
-                                    .join(", ")
-                                    .substring(0, 60)}
-                                  {x.included_individual_generalized_keywords.join(
-                                    ", "
-                                  ).length > 60
-                                    ? "..."
-                                    : ""}
+                                  <IconBook size="0.75rem" color="#868E96" /> {x.included_individual_generalized_keywords.join(", ").substring(0, 60)}
+                                  {x.included_individual_generalized_keywords.join(", ").length > 60 ? "..." : ""}
                                 </p>
                               </Tooltip>
                             )}
 
-                            {x.included_individual_skills_keywords?.length >
-                              0 && (
-                              <Tooltip
-                                label="Prioritized Prospect Skills"
-                                withinPortal
-                              >
+                            {x.included_individual_skills_keywords?.length > 0 && (
+                              <Tooltip label="Prioritized Prospect Skills" withinPortal>
                                 <p style={{ margin: 0, marginBottom: 4 }}>
-                                  <IconSunElectricity
-                                    size="0.75rem"
-                                    color="#868E96"
-                                  />{" "}
-                                  {x.included_individual_skills_keywords
-                                    .join(", ")
-                                    .substring(0, 60)}
-                                  {x.included_individual_skills_keywords.join(
-                                    ", "
-                                  ).length > 60
-                                    ? "..."
-                                    : ""}
+                                  <IconSunElectricity size="0.75rem" color="#868E96" /> {x.included_individual_skills_keywords.join(", ").substring(0, 60)}
+                                  {x.included_individual_skills_keywords.join(", ").length > 60 ? "..." : ""}
                                 </p>
                               </Tooltip>
                             )}
 
                             {x.included_company_name_keywords?.length > 0 && (
-                              <Tooltip
-                                label="Prioritized Prospect Companies"
-                                withinPortal
-                              >
+                              <Tooltip label="Prioritized Prospect Companies" withinPortal>
                                 <p style={{ margin: 0, marginBottom: 4 }}>
-                                  <IconBuilding
-                                    size="0.75rem"
-                                    color="#868E96"
-                                  />{" "}
-                                  {x.included_company_name_keywords
-                                    .join(", ")
-                                    .substring(0, 60)}
-                                  {x.included_company_name_keywords.join(", ")
-                                    .length > 60
-                                    ? "..."
-                                    : ""}
+                                  <IconBuilding size="0.75rem" color="#868E96" /> {x.included_company_name_keywords.join(", ").substring(0, 60)}
+                                  {x.included_company_name_keywords.join(", ").length > 60 ? "..." : ""}
                                 </p>
                               </Tooltip>
                             )}
 
-                            {x.included_company_locations_keywords?.length >
-                              0 && (
-                              <Tooltip
-                                label="Prioritized Prospect Company Locations"
-                                withinPortal
-                              >
+                            {x.included_company_locations_keywords?.length > 0 && (
+                              <Tooltip label="Prioritized Prospect Company Locations" withinPortal>
                                 <p style={{ margin: 0, marginBottom: 4 }}>
-                                  <IconGlobe size="0.75rem" color="#868E96" />{" "}
-                                  {x.included_company_locations_keywords
-                                    .join(", ")
-                                    .substring(0, 60)}
-                                  {x.included_company_locations_keywords.join(
-                                    ", "
-                                  ).length > 60
-                                    ? "..."
-                                    : ""}
+                                  <IconGlobe size="0.75rem" color="#868E96" /> {x.included_company_locations_keywords.join(", ").substring(0, 60)}
+                                  {x.included_company_locations_keywords.join(", ").length > 60 ? "..." : ""}
                                 </p>
                               </Tooltip>
                             )}
 
-                            {x.included_company_generalized_keywords?.length >
-                              0 && (
-                              <Tooltip
-                                label="Prioritized Prospect Company Keywords"
-                                withinPortal
-                              >
+                            {x.included_company_generalized_keywords?.length > 0 && (
+                              <Tooltip label="Prioritized Prospect Company Keywords" withinPortal>
                                 <p style={{ margin: 0, marginBottom: 4 }}>
-                                  <IconInfoCircle
-                                    size="0.75rem"
-                                    color="#868E96"
-                                  />{" "}
-                                  {x.included_company_generalized_keywords
-                                    .join(", ")
-                                    .substring(0, 60)}
-                                  {x.included_company_generalized_keywords.join(
-                                    ", "
-                                  ).length > 60
-                                    ? "..."
-                                    : ""}
+                                  <IconInfoCircle size="0.75rem" color="#868E96" /> {x.included_company_generalized_keywords.join(", ").substring(0, 60)}
+                                  {x.included_company_generalized_keywords.join(", ").length > 60 ? "..." : ""}
                                 </p>
                               </Tooltip>
                             )}
 
-                            {x.included_company_industries_keywords?.length >
-                              0 && (
-                              <Tooltip
-                                label="Prioritized Prospect Company Industries"
-                                withinPortal
-                              >
+                            {x.included_company_industries_keywords?.length > 0 && (
+                              <Tooltip label="Prioritized Prospect Company Industries" withinPortal>
                                 <p style={{ margin: 0, marginBottom: 4 }}>
-                                  <IconBuildingFactory
-                                    size="0.75rem"
-                                    color="#868E96"
-                                  />{" "}
-                                  {x.included_company_industries_keywords
-                                    .join(", ")
-                                    .substring(0, 60)}
-                                  {x.included_company_industries_keywords.join(
-                                    ", "
-                                  ).length > 60
-                                    ? "..."
-                                    : ""}
+                                  <IconBuildingFactory size="0.75rem" color="#868E96" /> {x.included_company_industries_keywords.join(", ").substring(0, 60)}
+                                  {x.included_company_industries_keywords.join(", ").length > 60 ? "..." : ""}
                                 </p>
                               </Tooltip>
                             )}
 
                             {x.company_size_start && x.company_size_end ? (
-                              <Tooltip
-                                label="Prioritized Prospect Company Size"
-                                withinPortal
-                              >
+                              <Tooltip label="Prioritized Prospect Company Size" withinPortal>
                                 <p style={{ margin: 0, marginBottom: 4 }}>
-                                  <IconMan size="0.75rem" color="#868E96" />{" "}
-                                  {x.company_size_start.toLocaleString()} -{" "}
-                                  {x.company_size_end.toLocaleString()}{" "}
+                                  <IconMan size="0.75rem" color="#868E96" /> {x.company_size_start.toLocaleString()} - {x.company_size_end.toLocaleString()}{" "}
                                   Employees
                                 </p>
                               </Tooltip>
@@ -1645,29 +1205,9 @@ export function ActiveCampaigns() {
 
                       <Divider mt="md" />
 
-                      <Flex
-                        align={"center"}
-                        justify={"space-between"}
-                        gap={"0.1rem"}
-                        mt="md"
-                        mb="md"
-                        ml="md"
-                        mr="md"
-                      >
-                        <Tooltip
-                          label={
-                            x.num_sent.toLocaleString() +
-                            " Sent / " +
-                            x.num_sent.toLocaleString() +
-                            " Sent"
-                          }
-                          withinPortal
-                        >
-                          <Flex
-                            gap={"0.25rem"}
-                            align={"center"}
-                            sx={{ cursor: "pointer" }}
-                          >
+                      <Flex align={"center"} justify={"space-between"} gap={"0.1rem"} mt="md" mb="md" ml="md" mr="md">
+                        <Tooltip label={x.num_sent.toLocaleString() + " Sent / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
+                          <Flex gap={"0.25rem"} align={"center"} sx={{ cursor: "pointer" }}>
                             <IconSend size="0.75rem" color="#868E96" />
                             <Text fw={"600"} fz={"0.7rem"} color="gray.6">
                               Send:
@@ -1680,87 +1220,42 @@ export function ActiveCampaigns() {
 
                         <Divider orientation="vertical" size="xs" m="4px" />
 
-                        <Tooltip
-                          label={
-                            x.num_opens.toLocaleString() +
-                            " Opens / " +
-                            x.num_sent.toLocaleString() +
-                            " Sent"
-                          }
-                          withinPortal
-                        >
-                          <Flex
-                            gap={"0.25rem"}
-                            align={"center"}
-                            sx={{ cursor: "pointer" }}
-                          >
+                        <Tooltip label={x.num_opens.toLocaleString() + " Opens / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
+                          <Flex gap={"0.25rem"} align={"center"} sx={{ cursor: "pointer" }}>
                             <IconChecks size="0.75rem" color="#868E96" />
                             <Text fw={"600"} fz={"0.7rem"} color="gray.6">
                               Opens:
                             </Text>
                             <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                              {Math.round(
-                                (x.num_opens / (x.num_sent + 0.0001)) * 100
-                              )}
-                              %
+                              {Math.round((x.num_opens / (x.num_sent + 0.0001)) * 100)}%
                             </Text>
                           </Flex>
                         </Tooltip>
 
                         <Divider orientation="vertical" size="xs" m="4px" />
 
-                        <Tooltip
-                          label={
-                            x.num_replies.toLocaleString() +
-                            " Replies / " +
-                            x.num_opens.toLocaleString() +
-                            " Opens"
-                          }
-                          withinPortal
-                        >
-                          <Flex
-                            gap={"0.25rem"}
-                            align={"center"}
-                            sx={{ cursor: "pointer" }}
-                          >
+                        <Tooltip label={x.num_replies.toLocaleString() + " Replies / " + x.num_opens.toLocaleString() + " Opens"} withinPortal>
+                          <Flex gap={"0.25rem"} align={"center"} sx={{ cursor: "pointer" }}>
                             <IconMessageCheck size="0.75rem" color="#868E96" />
                             <Text fw={"600"} fz={"0.7rem"} color="gray.6">
                               Replies:
                             </Text>
                             <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                              {Math.round(
-                                (x.num_replies / (x.num_opens + 0.0001)) * 100
-                              )}
-                              %
+                              {Math.round((x.num_replies / (x.num_opens + 0.0001)) * 100)}%
                             </Text>
                           </Flex>
                         </Tooltip>
 
                         <Divider orientation="vertical" size="xs" m="4px" />
 
-                        <Tooltip
-                          label={
-                            x.num_demos.toLocaleString() +
-                            " Demos / " +
-                            x.num_replies.toLocaleString() +
-                            " Replies"
-                          }
-                          withinPortal
-                        >
-                          <Flex
-                            gap={"0.25rem"}
-                            align={"center"}
-                            sx={{ cursor: "pointer" }}
-                          >
+                        <Tooltip label={x.num_demos.toLocaleString() + " Demos / " + x.num_replies.toLocaleString() + " Replies"} withinPortal>
+                          <Flex gap={"0.25rem"} align={"center"} sx={{ cursor: "pointer" }}>
                             <IconMessageCheck size="0.75rem" color="#868E96" />
                             <Text fw={"600"} fz={"0.7rem"} color="gray.6">
                               Demos:
                             </Text>
                             <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                              {Math.round(
-                                (x.num_demos / (x.num_replies + 0.0001)) * 100
-                              )}
-                              %
+                              {Math.round((x.num_demos / (x.num_replies + 0.0001)) * 100)}%
                             </Text>
                           </Flex>
                         </Tooltip>
@@ -1771,13 +1266,7 @@ export function ActiveCampaigns() {
               })}
             <Button
               variant="subtle"
-              leftIcon={
-                campaignsShown.length === 1 ? (
-                  <IconArrowDown size="0.8rem" />
-                ) : (
-                  <IconArrowUp size="0.8rem" />
-                )
-              }
+              leftIcon={campaignsShown.length === 1 ? <IconArrowDown size="0.8rem" /> : <IconArrowUp size="0.8rem" />}
               onClick={() => {
                 if (campaignsShown.length === 1) {
                   setCampaignsShown([true, false]);
@@ -1803,10 +1292,7 @@ export default function OverviewPage() {
   const [numOperatorDashItems, setNumOperatorDashItems] = useState(0);
   const [request, setRequest] = useState("");
 
-  const [
-    campaignAnalyticData,
-    setCampaignAnalyticData,
-  ] = useState<CampaignAnalyticsData>({
+  const [campaignAnalyticData, setCampaignAnalyticData] = useState<CampaignAnalyticsData>({
     sentOutreach: 0,
     accepted: 0,
     activeConvos: 0,
@@ -1856,60 +1342,46 @@ export default function OverviewPage() {
     }
   };
 
+  const matches = useMediaQuery("(max-width: 400px)");
+
   useEffect(() => {
     fetchCampaignPersonas();
   }, []);
   const [activeTab, setActiveTab] = useState<string | null>("operation_overview");
   return (
     <Box p="xl" maw="1300px" ml="auto" mr="auto">
-      <Tabs
-        defaultValue="operator_dash"
-        value={activeTab}
-        onTabChange={setActiveTab}
-      >
-        <Flex mb="xs">
+      <Tabs defaultValue="operator_dash" value={activeTab} onTabChange={setActiveTab}>
+        <Flex mb="xs" direction={{ base: "column", md: "row" }} gap={"md"}>
           <Button
             variant={activeTab === "operation_overview" ? "filled" : "outline"}
             color={activeTab === "operation_overview" ? "" : "gray"}
             sx={{
-              backgroundColor:
-                activeTab === "operation_overview" ? "rgb(72 72 72)" : "white",
+              backgroundColor: activeTab === "operation_overview" ? "rgb(72 72 72)" : "white",
               color: activeTab === "operation_overview" ? "white" : "",
               "&:hover": {
-                backgroundColor:
-                  activeTab === "operation_overview" ? "rgb(72 72 72)" : "none",
+                backgroundColor: activeTab === "operation_overview" ? "rgb(72 72 72)" : "none",
               },
             }}
             onClick={() => setActiveTab("operation_overview")}
-            leftIcon={
-              <IconCone
-                fill={activeTab === "operation_overview" ? "" : "rgb(72 72 72)"}
-                size={"1rem"}
-              />
-            }
+            leftIcon={<IconCone fill={activeTab === "operation_overview" ? "" : "rgb(72 72 72)"} size={"1rem"} />}
           >
             Pipeline
           </Button>
-          <Button.Group ml="auto">
+          <Button.Group ml="auto" w={{ base: "100%", sm: "fit-content" }}>
             <Button
               ml="auto"
+              size={matches ? "xs" : "md"}
+              w={matches ? "100%" : "inherit"}
               variant={activeTab === "operator_dash" ? "filled" : "outline"}
               color={activeTab === "operator_dash" ? "" : "gray"}
               sx={{
-                backgroundColor:
-                  activeTab === "operator_dash" ? "rgb(72 72 72)" : "white",
+                backgroundColor: activeTab === "operator_dash" ? "rgb(72 72 72)" : "white",
                 color: activeTab === "operator_dash" ? "white" : "",
                 "&:hover": {
-                  backgroundColor:
-                    activeTab === "operator_dash" ? "rgb(72 72 72)" : "none",
+                  backgroundColor: activeTab === "operator_dash" ? "rgb(72 72 72)" : "none",
                 },
               }}
-              leftIcon={
-                <IconSparkles
-                  size={"1rem"}
-                  fill={activeTab === "operator_dash" ? "" : "rgb(72 72 72)"}
-                />
-              }
+              leftIcon={<IconSparkles size={"1rem"} fill={activeTab === "operator_dash" ? "" : "rgb(72 72 72)"} />}
               onClick={() => setActiveTab("operator_dash")}
               radius={"md"}
             >
@@ -1918,21 +1390,16 @@ export default function OverviewPage() {
             <Button
               variant={activeTab === "utilization" ? "filled" : "outline"}
               color={activeTab === "utilization" ? "" : "gray"}
+              w={matches ? "100%" : "inherit"}
+              size={matches ? "xs" : "md"}
               sx={{
-                backgroundColor:
-                  activeTab === "utilization" ? "rgb(72 72 72)" : "white",
+                backgroundColor: activeTab === "utilization" ? "rgb(72 72 72)" : "white",
                 color: activeTab === "utilization" ? "white" : "",
                 "&:hover": {
-                  backgroundColor:
-                    activeTab === "utilization" ? "rgb(72 72 72)" : "none",
+                  backgroundColor: activeTab === "utilization" ? "rgb(72 72 72)" : "none",
                 },
               }}
-              leftIcon={
-                <IconSparkles
-                  size={"1rem"}
-                  fill={activeTab === "utilization" ? "" : "rgb(72 72 72)"}
-                />
-              }
+              leftIcon={<IconSparkles size={"1rem"} fill={activeTab === "utilization" ? "" : "rgb(72 72 72)"} />}
               onClick={() => setActiveTab("utilization")}
               radius={"md"}
             >
@@ -1941,22 +1408,17 @@ export default function OverviewPage() {
             <Button
               variant={activeTab === "overview" ? "filled" : "outline"}
               color={activeTab === "overview" ? "" : "gray"}
+              size={matches ? "xs" : "md"}
+              w={matches ? "100%" : "inherit"}
               sx={{
-                backgroundColor:
-                  activeTab === "overview" ? "rgb(72 72 72)" : "white",
+                backgroundColor: activeTab === "overview" ? "rgb(72 72 72)" : "white",
                 color: activeTab === "overview" ? "white" : "",
                 "&:hover": {
-                  backgroundColor:
-                    activeTab === "overview" ? "rgb(72 72 72)" : "none",
+                  backgroundColor: activeTab === "overview" ? "rgb(72 72 72)" : "none",
                 },
               }}
               onClick={() => setActiveTab("overview")}
-              leftIcon={
-                <IconChartBar
-                  fill={activeTab === "overview" ? "" : "rgb(72 72 72)"}
-                  size={"1rem"}
-                />
-              }
+              leftIcon={<IconChartBar fill={activeTab === "overview" ? "" : "rgb(72 72 72)"} size={"1rem"} />}
               radius={"md"}
             >
               Stats
@@ -1966,9 +1428,7 @@ export default function OverviewPage() {
 
         <Tabs.Panel value="operation_overview">
           <PipelineOverview
-            onContactsClicked={() =>
-              (window.location.href = "/contacts/overview")
-            }
+            onContactsClicked={() => (window.location.href = "/contacts/overview")}
             onUtilizationClicked={() => setActiveTab("utilization")}
             onOpportunitiesClicked={() => (window.location.href = "/campaigns")}
             onPipelineClicked={() => setActiveTab("overview")}
@@ -1977,10 +1437,7 @@ export default function OverviewPage() {
 
         <Tabs.Panel value="overview">
           <Box mb="xs" mt={"md"}>
-            <OverallPipeline
-              campaignData={campaignAnalyticData}
-              aiActivityData={aiActivityData}
-            />
+            <OverallPipeline campaignData={campaignAnalyticData} aiActivityData={aiActivityData} />
           </Box>
           <BarChart />
           <ActiveChannels />

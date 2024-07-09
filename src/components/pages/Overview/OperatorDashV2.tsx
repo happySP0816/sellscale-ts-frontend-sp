@@ -122,109 +122,111 @@ const OperatorDashboardV2 = (props: PropsType) => {
 
     return (
       <>
-      {!noItems && <Box>
-        <Flex align={"center"} gap={"sm"} justify={"space-between"}>
-          <Flex align={"center"} gap={6}>
-            <Title order={4} sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              {title}
-            </Title>
-            <Badge variant="filled">{tasks.length}</Badge>
-          </Flex>
+        {!noItems && (
+          <Box>
+            <Flex align={"center"} gap={"sm"} justify={"space-between"}>
+              <Flex align={"center"} gap={6}>
+                <Title order={4} sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                  {title}
+                </Title>
+                <Badge variant="filled">{tasks.length}</Badge>
+              </Flex>
 
-          <Flex>
-            <ActionIcon
-              onClick={() => {
-                if (page > 0) setPage((page) => (page = page - 1));
-              }}
-            >
-              <IconChevronLeft />
-            </ActionIcon>
-            <ActionIcon
-              onClick={() => {
-                if (page < Math.ceil(tasks.length / 2) - 1) setPage((page) => (page = page + 1));
-              }}
-            >
-              <IconChevronRight />
-            </ActionIcon>
-          </Flex>
-        </Flex>
+              <Flex>
+                <ActionIcon
+                  onClick={() => {
+                    if (page > 0) setPage((page) => (page = page - 1));
+                  }}
+                >
+                  <IconChevronLeft />
+                </ActionIcon>
+                <ActionIcon
+                  onClick={() => {
+                    if (page < Math.ceil(tasks.length / 2) - 1) setPage((page) => (page = page + 1));
+                  }}
+                >
+                  <IconChevronRight />
+                </ActionIcon>
+              </Flex>
+            </Flex>
 
-        <SimpleGrid cols={1} mt={"sm"}>
-          {tasks.slice(page * 2, page * 2 + 2).map((item, index: number) => {
-            return (
-              <Card withBorder mb="xs" p="md" key={index} h={"100%"}>
-                <Flex direction={"column"} gap={"sm"} justify={"space-between"} h={"100%"}>
-                  <Flex align={"center"} justify={"space-between"}>
-                    <Flex
-                      sx={{
-                        borderRadius: "100px",
-                        textAlign: "center",
-                        width: 36,
-                        height: 36,
-                        flexShrink: 0,
-                      }}
-                      justify={"center"}
-                      align={"center"}
-                      bg={
-                        item.status === "COMPLETED"
-                          ? theme.colors.green[2]
-                          : item.status === "PENDING" && item.urgency === "HIGH"
-                          ? theme.colors.red[2]
-                          : item.status === "PENDING" && item.urgency === "MEDIUM"
-                          ? theme.colors.orange[2]
-                          : item.status === "PENDING" && item.urgency === "LOW"
-                          ? theme.colors.gray[2]
-                          : theme.colors.green[2]
-                      }
-                    >
-                      {item.emoji}
+            <SimpleGrid cols={1} mt={"sm"}>
+              {tasks.slice(page * 2, page * 2 + 2).map((item, index: number) => {
+                return (
+                  <Card withBorder mb="xs" p="md" key={index} h={"100%"}>
+                    <Flex direction={"column"} gap={"sm"} justify={"space-between"} h={"100%"}>
+                      <Flex align={"center"} justify={"space-between"}>
+                        <Flex
+                          sx={{
+                            borderRadius: "100px",
+                            textAlign: "center",
+                            width: 36,
+                            height: 36,
+                            flexShrink: 0,
+                          }}
+                          justify={"center"}
+                          align={"center"}
+                          bg={
+                            item.status === "COMPLETED"
+                              ? theme.colors.green[2]
+                              : item.status === "PENDING" && item.urgency === "HIGH"
+                              ? theme.colors.red[2]
+                              : item.status === "PENDING" && item.urgency === "MEDIUM"
+                              ? theme.colors.orange[2]
+                              : item.status === "PENDING" && item.urgency === "LOW"
+                              ? theme.colors.gray[2]
+                              : theme.colors.green[2]
+                          }
+                        >
+                          {item.emoji}
+                        </Flex>
+                        {item.status === "PENDING" && item.urgency === "HIGH" && (
+                          <Badge size="lg" color={"red"}>
+                            High Priority
+                          </Badge>
+                        )}
+                      </Flex>
+                      <Box>
+                        <Title order={5} lineClamp={1}>
+                          {item.title}
+                        </Title>
+                        <Text color="#666" size="sm" lineClamp={2}>
+                          {item.subtitle}
+                        </Text>
+                      </Box>
+                      {item.status !== "PENDING" ? (
+                        <Button
+                          component="a"
+                          w={"fit-content"}
+                          variant="outline"
+                          color={"green"}
+                          // onClick={() => redirectToTask(task.id)}
+                          disabled={true}
+                          loading={fetchingComplete && currentTaskId === item.id}
+                        >
+                          {"  "} <IconCircleCheck size={16} color={theme.colors.gray[5]} />
+                          Reviewed
+                        </Button>
+                      ) : (
+                        <Button
+                          component="a"
+                          w={"fit-content"}
+                          variant="outline"
+                          color={"red"}
+                          onClick={() => redirectToTask(item.id)}
+                          loading={fetchingComplete && currentTaskId === item.id}
+                        >
+                          Review
+                          {"  "} <IconArrowRight size={16} color="red" />
+                        </Button>
+                      )}
                     </Flex>
-                    {item.status === "PENDING" && item.urgency === "HIGH" && (
-                      <Badge size="lg" color={"red"}>
-                        High Priority
-                      </Badge>
-                    )}
-                  </Flex>
-                  <Box>
-                    <Title order={5} lineClamp={1}>
-                      {item.title}
-                    </Title>
-                    <Text color="#666" size="sm" lineClamp={2}>
-                      {item.subtitle}
-                    </Text>
-                  </Box>
-                  {item.status !== "PENDING" ? (
-                    <Button
-                      component="a"
-                      w={"fit-content"}
-                      variant="outline"
-                      color={"green"}
-                      // onClick={() => redirectToTask(task.id)}
-                      disabled={true}
-                      loading={fetchingComplete && currentTaskId === item.id}
-                    >
-                      {"  "} <IconCircleCheck size={16} color={theme.colors.gray[5]} />
-                      Reviewed
-                    </Button>
-                  ) : (
-                    <Button
-                      component="a"
-                      w={"fit-content"}
-                      variant="outline"
-                      color={"red"}
-                      onClick={() => redirectToTask(item.id)}
-                      loading={fetchingComplete && currentTaskId === item.id}
-                    >
-                      Review
-                      {"  "} <IconArrowRight size={16} color="red" />
-                    </Button>
-                  )}
-                </Flex>
-              </Card>
-            );
-          })}
-        </SimpleGrid>
-      </Box>}
+                  </Card>
+                );
+              })}
+            </SimpleGrid>
+          </Box>
+        )}
       </>
     );
   };

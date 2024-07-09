@@ -103,6 +103,7 @@ import AddSegmentModal from "@modals/website/AddSegmentModal";
 import StrategyCreateModal from "@modals/AIBrain/StrategyCreateModal";
 import StrategyEditModal from "@modals/AIBrain/StrategyEditModal";
 import StrategyPreviewModal from "@modals/AIBrain/StrategyPreviewModal";
+import SelectStrategyModal from "@modals/SelectStrategyModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -955,6 +956,7 @@ export default function App() {
               createStrategy: StrategyCreateModal,
               editStrategy: StrategyEditModal,
               previewStrategy: StrategyPreviewModal,
+              strategySelectModal: SelectStrategyModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

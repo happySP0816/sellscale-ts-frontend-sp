@@ -694,6 +694,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
   const [voiceBankOpen, setVoiceBankOpen] = useState<boolean>(false);
   const [progressStep, setProgressStep] = useState<Number>(0);
   const roomIDref = useRef<string>('');
+  const [canSave, setCanSave] = useState<boolean>(false);
   const [sections, setSections] = useState<{ value: number; color: string; label: string; }[]>([]);
   const [fewShots, setFewShots] = useState<
     {
@@ -872,7 +873,9 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
 
       if (currentTab === "PROSPECTED") {
         //magic subject line generation will call the research endpoint.
-        if ((subjectLine.is_magic_subject_line || currentProject?.is_ai_research_personalization_enabled)) {
+        if (subjectLine.is_magic_subject_line || currentProject?.is_ai_research_personalization_enabled) {
+
+          setCanSave(false);
           if (prospectId === 0) {
             return
           }
@@ -1064,6 +1067,8 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
       body: JSON.stringify({
         client_archetype_id: currentProject.id,
         original_string: oldVersion,
+        prospect_id: prospectId,
+        template_id: props.template?.step.id,
         edited_string: newVesion,
       }),
     })
@@ -1110,7 +1115,8 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                   <Flex key={index} direction="column" style={{ padding: '10px', borderRadius: '8px', backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff' }}>
                     <Flex direction="row" justify="space-between" align="center">
                       <Text ml="sm" style={{ fontWeight: 700, color: '#000', fontSize: '1rem' }}>
-                        <div>{getHighlightedDiff(shot.original_string, shot.edited_string)}</div>
+                        {/* If the edited string contains '##########', split it and use the second half. Otherwise, use the entire edited string. */}
+                        <div>{getHighlightedDiff(shot.original_string, shot.edited_string.includes('##########') ? shot.edited_string.split('##########')[1] : shot.edited_string)}</div>
                       </Text>
                       <ActionIcon color="red" onClick={modifyFewShot(index, 0)} variant="light">
                         <IconTrash size={16} />
@@ -1409,7 +1415,10 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                           dangerouslySetInnerHTML={{
                             __html: DOMPurify.sanitize(typeof data?.body === 'string' ? data.body.replace(/(<br\s*\/?>\s*){2,}/g, '<br />').replace(/\n\s*\n/g, '\n') : ""),
                           }}
-                          onInput={(e) => setChangedTemplate(e.currentTarget.innerHTML)}
+                          onInput={(e) => {
+                            setChangedTemplate(e.currentTarget.innerHTML);
+                            setCanSave(true);
+                          }}
                           style={{
                             border: "1px solid #ced4da",
                             borderRadius: "4px",
@@ -1431,7 +1440,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                               <Button variant="outline" color="gray" onClick={() => setState(false)}>
                                 Cancel
                               </Button>
-                              <Button onClick={() => handleSave(data.body, changedTemplate)}>Save to voice memory</Button>
+                              <Button disabled={!canSave} onClick={() => handleSave(data.body, changedTemplate)}>Save to voice memory</Button>
                             </Flex>
                             <Divider my={"lg"} />
                           </>

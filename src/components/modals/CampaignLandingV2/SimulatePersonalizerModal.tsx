@@ -5,7 +5,7 @@ import * as researcher from "@utils/requests/researchers";
 import { IconSparkles } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
-import { emailSequenceState, userTokenState } from "@atoms/userAtoms";
+import { userTokenState } from "@atoms/userAtoms";
 import { ContextModalProps } from "@mantine/modals";
 import { JSONContent } from "@tiptap/react";
 

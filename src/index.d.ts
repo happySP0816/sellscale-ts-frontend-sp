@@ -473,6 +473,7 @@ export interface LinkedInMessage {
   initial_message_research_points: string[];
   initial_message_stack_ranked_config_id: number;
   initial_message_stack_ranked_config_name: string;
+  is_sending?: boolean;
 }
 
 export interface EmailThread {

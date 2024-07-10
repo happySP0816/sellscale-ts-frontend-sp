@@ -93,6 +93,7 @@ import StrategyEditModal from "@modals/AIBrain/StrategyEditModal";
 import StrategyPreviewModal from "@modals/AIBrain/StrategyPreviewModal";
 import SelectStrategyModal from "@modals/SelectStrategyModal";
 import PreFiltersV2EditModal from "@modals/PrefiltersV2/PrefilterV2EditModal";
+import ResetSegmentModal from "@modals/SegmentV2/ResetSegmentModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -810,6 +811,7 @@ export default function App() {
               segmentprefilter: SegmentEditPrefilterModal,
               clearsegment: ClearSegmentModal,
               deletesegment: DeleteSegmentModal,
+              resetsegment: ResetSegmentModal,
               duplicateCampaign: DuplicateCampaignModal,
               websiteintentsplit: WebsiteIntentSplitModal,
               championChange: ChampionChangeModal,

@@ -134,7 +134,7 @@ const OutreachSlider: React.FC<OutreachSliderProps> = ({
               openContextModal({
                 modal: "analyticModal",
                 title: (
-                  <Title order={3}>Campaign Analytics (Coming soon ⚠️)</Title>
+                  <Title order={3}>Campaign Analytics</Title>
                 ),
                 innerProps: {},
                 styles: {

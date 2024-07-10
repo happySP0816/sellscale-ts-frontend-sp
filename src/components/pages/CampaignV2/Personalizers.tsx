@@ -202,6 +202,7 @@ export default function Personalizers(props: any) {
             }}
           />
           <Button
+            disabled={!Array.isArray(props.sequences)}
             leftIcon={<IconPlus size={"0.9rem"} />}
             onClick={() =>
               openContextModal({

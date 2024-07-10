@@ -62,6 +62,7 @@ import Organization from "@common/settings/Organization";
 import { InboxesManagementPage } from "@common/settings/InboxesManagementPage";
 import WebTrafficRouting from "@common/settings/Traffic/WebTrafficRouting";
 import posthog from "posthog-js";
+import PreFilterV2 from "@common/settings/PreFiltersV2/PrefiltersV2";
 
 export default function SettingsPage() {
   setPageTitle("Settings");
@@ -195,6 +196,10 @@ export default function SettingsPage() {
 
           <Tabs.Tab value="pre-filters" icon={<IconFilter size="0.8rem" />}>
             Pre-Filters
+          </Tabs.Tab>
+
+          <Tabs.Tab value="pre-filters-v2" icon={<IconFilter size="0.8rem" />}>
+            Pre-Filters (Beta)
           </Tabs.Tab>
 
           <Tabs.Tab value="filters" icon={<IconTrashFilled size="0.8rem" />}>
@@ -363,6 +368,10 @@ export default function SettingsPage() {
               allowFullScreen
             />
           </Group>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="pre-filters-v2" pl="xs">
+          <PreFilterV2 />
         </Tabs.Panel>
 
         <Tabs.Panel value="webhooks" pl="xs">

@@ -1,16 +1,10 @@
 import { userTokenState } from "@atoms/userAtoms";
 import RichTextArea from "@common/library/RichTextArea";
 import { API_URL } from "@constants/data";
-import {
-  Button,
-  Flex,
-  MultiSelect,
-  Paper,
-  Select,
-  Text,
-  TextInput,
-} from "@mantine/core";
+import { Box, Button, Flex, MultiSelect, Paper, Select, Text, TextInput } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
 import { ContextModalProps } from "@mantine/modals";
+import { IconCalendar } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 
@@ -52,12 +46,7 @@ export default function StrategyCreateModal({
 
   return (
     <Paper>
-      <TextInput
-        label="Strategy Name"
-        placeholder="Eg. Product managers in chicago"
-        value={title}
-        onChange={(event) => setTitle(event.currentTarget.value)}
-      />
+      <TextInput label="Strategy Name" placeholder="Eg. Product managers in chicago" value={title} onChange={(event) => setTitle(event.currentTarget.value)} />
       <Text mt="xs">Description</Text>
       <RichTextArea
         onChange={(value) => {
@@ -76,6 +65,15 @@ export default function StrategyCreateModal({
         }}
         mt={20}
       />
+      <Box>
+        <Text size={"sm"} fw={500} mt={"sm"}>
+          Time Frame
+        </Text>
+        <Flex gap={"md"}>
+          <DateInput valueFormat="DD/MM/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} />
+          <DateInput valueFormat="DD/MM/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} />
+        </Flex>
+      </Box>
       <Flex gap={"xl"} mt={40}>
         <Button variant="outline" color="gray" fullWidth>
           Cancel

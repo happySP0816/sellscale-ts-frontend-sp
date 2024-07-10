@@ -1,19 +1,10 @@
 import { userTokenState } from "@atoms/userAtoms";
 import RichTextArea from "@common/library/RichTextArea";
 import { API_URL } from "@constants/data";
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  Group,
-  MultiSelect,
-  Radio,
-  Text,
-  TextInput,
-} from "@mantine/core";
+import { Badge, Box, Button, Flex, Group, MultiSelect, Radio, Text, TextInput } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
 import { ContextModalProps } from "@mantine/modals";
-import { IconX } from "@tabler/icons";
+import { IconCalendar, IconX } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 
@@ -26,12 +17,7 @@ export default function StrategyEditModal({
   description: string;
   status: string;
   archetypes: number[];
-  onSubmit: (
-    title: string,
-    description: string,
-    archetypes: number[],
-    status: string
-  ) => void;
+  onSubmit: (title: string, description: string, archetypes: number[], status: string) => void;
 }>) {
   const userToken = useRecoilValue(userTokenState);
   const [status, setStatus] = useState(innerProps.status);
@@ -63,11 +49,7 @@ export default function StrategyEditModal({
 
   return (
     <Box>
-      <TextInput
-        label="Strategy Name"
-        defaultValue={innerProps.title}
-        onChange={(event) => setTitle(event.currentTarget.value)}
-      />
+      <TextInput label="Strategy Name" defaultValue={innerProps.title} onChange={(event) => setTitle(event.currentTarget.value)} />
       <MultiSelect
         withinPortal
         label="Attach Campaigns"
@@ -80,13 +62,16 @@ export default function StrategyEditModal({
         value={archetypes}
         mt={20}
       />
-      <Radio.Group
-        label="Status"
-        mt={"md"}
-        value={status}
-        onChange={(value) => setStatus(value)}
-        defaultValue={innerProps.status}
-      >
+      <Box>
+        <Text size={"sm"} fw={500} mt={"sm"}>
+          Time Frame
+        </Text>
+        <Flex gap={"md"}>
+          <DateInput valueFormat="DD/MM/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} />
+          <DateInput valueFormat="DD/MM/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} />
+        </Flex>
+      </Box>
+      <Radio.Group label="Status" mt={"md"} value={status} onChange={(value) => setStatus(value)} defaultValue={innerProps.status}>
         <Flex mt="8" gap={70}>
           <Radio
             value="IN_PROGRESS"
@@ -127,11 +112,7 @@ export default function StrategyEditModal({
         <Text fw={500} size={"sm"} mb={"8"}>
           Description
         </Text>
-        <RichTextArea
-          height={200}
-          onChange={setDescription}
-          value={innerProps.description}
-        />
+        <RichTextArea height={200} onChange={setDescription} value={innerProps.description} />
       </Box>
       <Flex gap={"xl"} mt={40}>
         <Button variant="outline" color="gray" fullWidth>

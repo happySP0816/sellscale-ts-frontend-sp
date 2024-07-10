@@ -247,36 +247,44 @@ function NewDetailEmailSequencing(props: {
   }, [props]);
 
   const triggerPatchEmailBodyTemplateTitle = async (template: EmailSequenceStep, title: string) => {
-    setLoading(true);
-    const result = await patchSequenceStep(
-      userToken,
-      template.step.id,
-      template.step.overall_status,
-      title,
-      template.step.template,
-      template.step.bumped_count,
-      template.step.default
-    );
-    if (result.status != "success") {
-      showNotification({
-        title: "Error",
-        message: result.message,
-        color: "red",
-      });
-      setLoading(false);
-      return;
-    } else {
+    try {
+      setLoading(true);
+      const result = await patchSequenceStep(
+        userToken,
+        template.step.id,
+        template.step.overall_status,
+        title,
+        template.step.template,
+        template.step.bumped_count,
+        template.step.default
+      );
+      if (result.status !== "success") {
+        throw new Error(result.message);
+      }
       showNotification({
         title: "Success",
         message: "Successfully updated email title",
         color: "green",
       });
-
-      props.refetch();
+      await props.refetch();
+    } catch (error) {
+      if (error instanceof Error) {
+        showNotification({
+          title: "Error",
+          message: error.message,
+          color: "red",
+        });
+      } else {
+        showNotification({
+          title: "Error",
+          message: "An unknown error occurred",
+          color: "red",
+        });
+      }
+    } finally {
+      setLoading(false);
+      refreshTitle();
     }
-
-    setLoading(false);
-    refreshTitle();
   };
   const debouncedTriggerPatchEmailBodyTemplateTitle = _.debounce(triggerPatchEmailBodyTemplateTitle, 200);
 
@@ -284,10 +292,9 @@ function NewDetailEmailSequencing(props: {
     return <></>;
   }
 
+  const [personalizers, setPersonalizers] = useState<any>([]);
+
   function getPersonalizersSection() {
-
-    const [personalizers, setPersonalizers] = useState<any>([]);
-
     return (
       <Personalizers data={currentProject} sequences={props.templates} setSequences={null} setPersonalizers={setPersonalizers} personalizers={personalizers} />
     );
@@ -1441,7 +1448,7 @@ function EmailPreviewHeader(props: { currentTab: string; template?: EmailSequenc
                       </>
                     )}
                   </div>
-                  {isFetching && currentProject.is_ai_research_personalization_enabled && (
+                  {isFetching && currentProject.is_ai_research_personalization_enabled &&  props.currentTab === 'PROSPECTED' && (
                     <Progress
                       mt="md"
                       size="xl"

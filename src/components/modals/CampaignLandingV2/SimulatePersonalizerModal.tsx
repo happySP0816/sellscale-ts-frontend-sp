@@ -5,7 +5,7 @@ import * as researcher from "@utils/requests/researchers";
 import { IconSparkles } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
+import { emailSequenceState, userTokenState } from "@atoms/userAtoms";
 import { ContextModalProps } from "@mantine/modals";
 import { JSONContent } from "@tiptap/react";
 
@@ -20,6 +20,7 @@ export default function SimulatepersonalizerModal({
   const [emailBody, setEmailBody] = useState("");
   const [overrideEmailBody, setOverrideEmailBody] = useState<string | undefined>(undefined); 
   const [rawEmailBody, setRawEmailBody] = useState<JSONContent | undefined>(undefined);
+  const [sequenceId, setSequenceId] = useState<number | undefined>(undefined);
   const sequences = innerProps?.sequences?.flatMap((sequenceGroup: any[]) => {
     const descriptions = new Set();
     return sequenceGroup.filter((sequence: any) => {
@@ -35,7 +36,6 @@ export default function SimulatepersonalizerModal({
   const sequenceTitles = innerProps?.sequences?.flatMap((sequenceGroup: any[]) => {
     return sequenceGroup.map((sequence: any) => sequence.title);
   });
-  console.log('sequence titles are', sequenceTitles)
   const [originalEmailBody, setOriginalEmailBody] = useState<string | undefined>(undefined);
 
   const handleSimulate = async () => {
@@ -44,7 +44,7 @@ export default function SimulatepersonalizerModal({
     setSimulate(true);
     try {
       const prospectId = innerProps.prospectId; // Replace with actual prospectId
-      const response = await researcher.getPersonalization(userToken, Number(prospectId), emailBody);
+      const response = await researcher.getPersonalization(userToken, Number(prospectId), sequenceId || 0);
       setOverrideEmailBody(response.personalized_email);
     } catch (error) {
       console.error("Error during personalization:", error);
@@ -95,6 +95,7 @@ export default function SimulatepersonalizerModal({
                 onChange={(value: any) => {
                   setOverrideEmailBody(sequences[value]);
                   setEmailBody(sequences[value]);
+                  setSequenceId(innerProps.sequences[value][0]?.id); // Set the sequenceId here
                 }}
                 ></Select>
             )}

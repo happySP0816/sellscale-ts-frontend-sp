@@ -154,7 +154,7 @@ export async function createResearcherAnswer(
 export async function getPersonalization(
   userToken: string,
   prospectId: number,
-  emailBody: string
+  templateId: number
 ): Promise<any> {
   const response = await fetch(`${API_URL}/ml/researcher/email-personalize`, {
     method: "POST",
@@ -162,7 +162,7 @@ export async function getPersonalization(
       Authorization: `Bearer ${userToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ prospect_id: prospectId, email_body: emailBody }),
+    body: JSON.stringify({ prospect_id: prospectId, template_id: templateId }),
   });
 
   return response.json();

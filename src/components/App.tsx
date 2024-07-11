@@ -1,8 +1,8 @@
-import { MantineProvider, ColorSchemeProvider, LoadingOverlay, ColorScheme } from "@mantine/core";
+import { MantineProvider, ColorSchemeProvider, LoadingOverlay, ColorScheme, Title, Flex } from "@mantine/core";
 
 import Layout from "./nav/Layout";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
-import { ModalsProvider } from "@mantine/modals";
+import { ModalsProvider, openContextModal } from "@mantine/modals";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { navConfettiState, navLoadingState } from "@atoms/navAtoms";
 import SpotlightWrapper from "@nav/SpotlightWrapper";
@@ -94,6 +94,8 @@ import StrategyPreviewModal from "@modals/AIBrain/StrategyPreviewModal";
 import SelectStrategyModal from "@modals/SelectStrategyModal";
 import PreFiltersV2EditModal from "@modals/PrefiltersV2/PrefilterV2EditModal";
 import ResetSegmentModal from "@modals/SegmentV2/ResetSegmentModal";
+import SellScaleAssistModal from "@modals/SellScaleAssistModal";
+import { IconWand } from "@tabler/icons";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -386,83 +388,93 @@ export default function App() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey && event.key === "'") {
-        const activeElement = document.activeElement as HTMLElement;
-        if (
-          activeElement &&
-          (activeElement.tagName === "TEXTAREA" ||
-            (activeElement.tagName === "DIV" &&
-              (activeElement.getAttribute("role") === "textbox" || activeElement.getAttribute("contenteditable") === "true")) ||
-            (activeElement.tagName === "INPUT" && (activeElement as HTMLInputElement).type === "text") ||
-            (activeElement.classList.contains("mantine-Textarea-input") && activeElement.tagName === "TEXTAREA") ||
-            (activeElement.classList.contains("mantine-Input-input") && activeElement.tagName === "TEXTAREA") ||
-            (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
-        ) {
-          previousFocusedElementRef.current = activeElement;
-          const contextInfo = getContextualInformation(activeElement);
+        // const activeElement = document.activeElement as HTMLElement;
+        // if (
+        //   activeElement &&
+        //   (activeElement.tagName === "TEXTAREA" ||
+        //     (activeElement.tagName === "DIV" &&
+        //       (activeElement.getAttribute("role") === "textbox" || activeElement.getAttribute("contenteditable") === "true")) ||
+        //     (activeElement.tagName === "INPUT" && (activeElement as HTMLInputElement).type === "text") ||
+        //     (activeElement.classList.contains("mantine-Textarea-input") && activeElement.tagName === "TEXTAREA") ||
+        //     (activeElement.classList.contains("mantine-Input-input") && activeElement.tagName === "TEXTAREA") ||
+        //     (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
+        // ) {
+        //   previousFocusedElementRef.current = activeElement;
+        //   const contextInfo = getContextualInformation(activeElement);
 
-          const popover = document.createElement("div");
-          popover.style.position = "fixed";
-          popover.style.top = "10px";
-          popover.style.left = "50%";
-          popover.style.transform = "translateX(-50%)";
-          popover.style.zIndex = "10000";
-          popover.style.backgroundColor = "white";
-          popover.style.border = "1px solid #ccc";
-          popover.style.padding = "10px";
-          popover.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.1)";
-          document.body.appendChild(popover);
-          (popoverRef as React.MutableRefObject<HTMLDivElement | null>).current = popover;
+        //   const popover = document.createElement("div");
+        //   popover.style.position = "fixed";
+        //   popover.style.top = "10px";
+        //   popover.style.left = "50%";
+        //   popover.style.transform = "translateX(-50%)";
+        //   popover.style.zIndex = "10000";
+        //   popover.style.backgroundColor = "white";
+        //   popover.style.border = "1px solid #ccc";
+        //   popover.style.padding = "10px";
+        //   popover.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.1)";
+        //   document.body.appendChild(popover);
+        //   (popoverRef as React.MutableRefObject<HTMLDivElement | null>).current = popover;
 
-          const title = document.createElement("div");
-          title.textContent = "Sellscale Quick Prompt";
-          title.style.fontStyle = "italic";
-          title.style.fontFamily = "Arial";
-          title.style.marginBottom = "5px";
-          popover.appendChild(title);
+        //   const title = document.createElement("div");
+        //   title.textContent = "Sellscale Quick Prompt";
+        //   title.style.fontStyle = "italic";
+        //   title.style.fontFamily = "Arial";
+        //   title.style.marginBottom = "5px";
+        //   popover.appendChild(title);
 
-          const textarea = document.createElement("textarea");
-          textarea.style.width = "300px";
-          textarea.style.height = "auto";
-          textarea.style.resize = "none";
-          textarea.style.overflow = "hidden";
-          textarea.value = ""; // Ensure the textarea is completely clear when opened
-          textarea.addEventListener("input", handleInput);
-          textarea.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") {
-              e.preventDefault();
-              if (popoverRef.current) {
-                document.body.removeChild(popoverRef.current);
-                if (previousFocusedElementRef.current) {
-                  if (previousFocusedElementRef.current.classList.contains("tiptap") && previousFocusedElementRef.current.classList.contains("ProseMirror")) {
-                    previousFocusedElementRef.current.innerHTML = "";
-                    previousFocusedElementRef.current.style.color = "black";
-                    previousFocusedElementRef.current.focus();
-                  } else {
-                    (previousFocusedElementRef.current as HTMLTextAreaElement).value = "";
-                    (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = "black";
-                    (previousFocusedElementRef.current as HTMLTextAreaElement).focus();
-                  }
-                }
-              }
-            }
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              if (!textarea.dataset.enterPressed) {
-                textarea.dataset.enterPressed = "true";
-                showLoadingGif(popover);
-                typeUserInput(previousFocusedElementRef.current, textarea.value, popover, contextInfo);
-              }
-            } else if (e.key === "Enter" && e.shiftKey) {
-              e.preventDefault();
-              const start = textarea.selectionStart;
-              const end = textarea.selectionEnd;
-              textarea.value = textarea.value.substring(0, start) + "\n" + textarea.value.substring(end);
-              textarea.selectionStart = textarea.selectionEnd = start + 1;
-            }
-          });
-          popover.appendChild(textarea);
-          textarea.focus();
-        }
+        //   const textarea = document.createElement("textarea");
+        //   textarea.style.width = "300px";
+        //   textarea.style.height = "auto";
+        //   textarea.style.resize = "none";
+        //   textarea.style.overflow = "hidden";
+        //   textarea.value = ""; // Ensure the textarea is completely clear when opened
+        //   textarea.addEventListener("input", handleInput);
+        //   textarea.addEventListener("keydown", (e) => {
+        //     if (e.key === "Escape") {
+        //       e.preventDefault();
+        //       if (popoverRef.current) {
+        //         document.body.removeChild(popoverRef.current);
+        //         if (previousFocusedElementRef.current) {
+        //           if (previousFocusedElementRef.current.classList.contains("tiptap") && previousFocusedElementRef.current.classList.contains("ProseMirror")) {
+        //             previousFocusedElementRef.current.innerHTML = "";
+        //             previousFocusedElementRef.current.style.color = "black";
+        //             previousFocusedElementRef.current.focus();
+        //           } else {
+        //             (previousFocusedElementRef.current as HTMLTextAreaElement).value = "";
+        //             (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = "black";
+        //             (previousFocusedElementRef.current as HTMLTextAreaElement).focus();
+        //           }
+        //         }
+        //       }
+        //     }
+        //     if (e.key === "Enter" && !e.shiftKey) {
+        //       e.preventDefault();
+        //       if (!textarea.dataset.enterPressed) {
+        //         textarea.dataset.enterPressed = "true";
+        //         showLoadingGif(popover);
+        //         typeUserInput(previousFocusedElementRef.current, textarea.value, popover, contextInfo);
+        //       }
+        //     } else if (e.key === "Enter" && e.shiftKey) {
+        //       e.preventDefault();
+        //       const start = textarea.selectionStart;
+        //       const end = textarea.selectionEnd;
+        //       textarea.value = textarea.value.substring(0, start) + "\n" + textarea.value.substring(end);
+        //       textarea.selectionStart = textarea.selectionEnd = start + 1;
+        //     }
+        //   });
+        //   popover.appendChild(textarea);
+        //   textarea.focus();
+        // }
+        openContextModal({
+          modal: "assistmodal",
+          title: (
+            <Flex align={"center"} gap={"xs"}>
+              <IconWand size={"1.4rem"} color="#d33ff1" />
+              <Title order={3}>SellScale Writing Assist</Title>
+            </Flex>
+          ),
+          innerProps: {},
+        });
       } else if (event.metaKey && event.key === "Enter") {
         const activeElement = document.activeElement as HTMLElement;
         if (activeElement && activeElement.tagName === "TEXTAREA") {
@@ -835,6 +847,7 @@ export default function App() {
               previewStrategy: StrategyPreviewModal,
               strategySelectModal: SelectStrategyModal,
               prefilterEditModal: PreFiltersV2EditModal,
+              assistmodal: SellScaleAssistModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

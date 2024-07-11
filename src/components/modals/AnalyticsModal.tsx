@@ -65,25 +65,25 @@ export default function AnalyticsModal() {
       },
       yAxes: [{
         scaleLabel: {
-            display: true,
-            labelString: 'LABEL',
+          display: true,
+          labelString: 'LABEL',
         },
         type: 'logarithmic',
         position: 'left',
         ticks: {
-             min: 0.1, //minimum tick
-             max: 1000, //maximum tick
-             callback: function (value: { toString: () => any; }, index: any, values: any) {
-                 return Number(value.toString());//pass tick values as a string into Number function
-             }
+          min: 0.1, //minimum tick
+          max: 1000, //maximum tick
+          callback: function (value: { toString: () => any; }, index: any, values: any) {
+            return Number(value.toString());//pass tick values as a string into Number function
+          }
         },
         afterBuildTicks: function (chartObj: { ticks: number[]; }) { //Build ticks labelling as per your need
-            chartObj.ticks = [];
-            chartObj.ticks.push(0.1);
-            chartObj.ticks.push(1);
-            chartObj.ticks.push(10);
-            chartObj.ticks.push(100);
-            chartObj.ticks.push(1000);
+          chartObj.ticks = [];
+          chartObj.ticks.push(0.1);
+          chartObj.ticks.push(1);
+          chartObj.ticks.push(10);
+          chartObj.ticks.push(100);
+          chartObj.ticks.push(1000);
         }
       }],
     },
@@ -150,7 +150,7 @@ export default function AnalyticsModal() {
   // Function to fetch data for a specific cycle
   const fetchCycleData = async (index: number) => {
     const cycle = cycleDates[index];
-    
+
     // Initiate fetch requests for three different endpoints
     const analyticsData = fetch(`http://localhost:8000/client/campaign_analytics?client_archetype_id=${currentProject?.id}&start_date=${cycle.start}&end_date=${cycle.end}&verbose=true`, {
       method: 'GET',
@@ -216,12 +216,12 @@ export default function AnalyticsModal() {
 
       // If the data for the selected cycle is not cached, fetch and cache it
       // if (!cycleDataCache[index]) {
-        const data = await fetchCycleData(index);
-        console.log('data is', data);
-        setCycleDataCache((prevCache) => ({
-          ...prevCache,
-          [index]: data,
-        }));
+      const data = await fetchCycleData(index);
+      console.log('data is', data);
+      setCycleDataCache((prevCache) => ({
+        ...prevCache,
+        [index]: data,
+      }));
       // }
     }
   };
@@ -243,7 +243,7 @@ export default function AnalyticsModal() {
                 </Text>
                 <Text fw={600} size={"sm"}>
                   {new Date(cycleDates[index]?.start ?? '').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })} - {new Date(cycleDates[index]?.end ?? '').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}
-                  </Text></Flex>
+                </Text></Flex>
               <Flex gap={1} align={"center"}>
                 <Text></Text>
                 <ActionIcon
@@ -293,8 +293,8 @@ export default function AnalyticsModal() {
                   <Flex gap={"sm"}>
                     <Paper w={"35%"} h={300} withBorder radius={"md"}>
                       {cycleDataCache?.[index]?.analyticsData?.daily ? (
-                        <Line 
-                          typeof="linear" 
+                        <Line
+                          typeof="linear"
                           data={{
                             labels: cycleDataCache[index].analyticsData.daily
                               .sort((a: { date: string | number | Date; }, b: { date: string | number | Date; }) => new Date(a.date).getTime() - new Date(b.date).getTime())
@@ -337,8 +337,8 @@ export default function AnalyticsModal() {
                                 backgroundColor: "#ec8a0a",
                               },
                             ],
-                          }} 
-                          options={Spendingoptions} 
+                          }}
+                          options={Spendingoptions}
                         />
                       ) : (
                         <Center>
@@ -470,170 +470,170 @@ export default function AnalyticsModal() {
                           </Box>
                         </Flex>
                       </Paper>
-                     { cycleDataCache?.[index]?.analyticsData?.daily
-                            .filter((day: { positive_reply_details: any; }) => day.positive_reply_details)
-                            .map((day: { positive_reply_details: { split: (arg0: string) => [any, any, any, any]; }[]; }) => {
-                              const [id, name, intent, reply] = day.positive_reply_details[0].split("###");
-                              return { id, name, intent, reply };
-                            })
-                            .slice(sentimentPage * 2, sentimentPage * 2 + 2).length !== 0 && <Box mt={"sm"}>
-                        <Flex align={"center"} gap={"5px"}>
-                          <Text
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "5px",
-                              whiteSpace: "nowrap",
-                            }}
-                            fw={700}
-                            size={"lg"}
-                          >
-                            <span>Positive Replies</span>
-                          </Text>
-                          <Divider w={"100%"} />
-                          <Flex>
-                            <ActionIcon
-                              onClick={() => {
-                                if (sentimentPage > 0 || selectStep === index) setSentimentPage((page) => (page = page - 1));
+                      {cycleDataCache?.[index]?.analyticsData?.daily
+                        .filter((day: { positive_reply_details: any; }) => day.positive_reply_details)
+                        .map((day: { positive_reply_details: { split: (arg0: string) => [any, any, any, any]; }[]; }) => {
+                          const [id, name, intent, reply] = day.positive_reply_details[0].split("###");
+                          return { id, name, intent, reply };
+                        })
+                        .slice(sentimentPage * 2, sentimentPage * 2 + 2).length !== 0 && <Box mt={"sm"}>
+                          <Flex align={"center"} gap={"5px"}>
+                            <Text
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "5px",
+                                whiteSpace: "nowrap",
                               }}
+                              fw={700}
+                              size={"lg"}
                             >
-                              <IconChevronLeft />
-                            </ActionIcon>
-                            <ActionIcon
+                              <span>Positive Replies</span>
+                            </Text>
+                            <Divider w={"100%"} />
+                            <Flex>
+                              <ActionIcon
+                                onClick={() => {
+                                  if (sentimentPage > 0 || selectStep === index) setSentimentPage((page) => (page = page - 1));
+                                }}
+                              >
+                                <IconChevronLeft />
+                              </ActionIcon>
+                              <ActionIcon
                               // onClick={() => {
                               //   if (item && item.sentimentData && sentimentPage < Math.ceil(item?.sentimentData?.length / 2) - 1)
                               //     setSentimentPage((page) => (page = page + 1));
                               // }}
-                            >
-                              <IconChevronRight />
-                            </ActionIcon>
+                              >
+                                <IconChevronRight />
+                              </ActionIcon>
+                            </Flex>
                           </Flex>
-                        </Flex>
-                        {cycleDataCache?.[index]?.analyticsData?.daily && <DataGrid
-                          data={cycleDataCache?.[index]?.analyticsData?.daily
-                            .filter((day: { positive_reply_details: any; }) => day.positive_reply_details)
-                            .map((day: { positive_reply_details: { split: (arg0: string) => [any, any, any, any]; }[]; }) => {
-                              const [id, name, intent, reply] = day.positive_reply_details[0].split("###");
-                              return { id, name, intent, reply };
-                            })
-                            .slice(sentimentPage * 2, sentimentPage * 2 + 2)}
-                          highlightOnHover
-                          withSorting
-                          withColumnBorders
-                          withBorder
-                          // loading={loading}
-                          mt={"md"}
-                          sx={{
-                            cursor: "pointer",
-                            "& .mantine-10xyzsm>tbody>tr>td": {
-                              padding: "0px",
-                            },
-                            "& tr": {
-                              background: "white",
-                            },
-                          }}
-                          columns={[
-                            {
-                              accessorKey: "name",
-                              header: () => (
-                                <Flex align={"center"} gap={"3px"}>
-                                  <IconUser color="gray" size={"0.9rem"} />
-                                  <Text color="gray">Name</Text>
-                                </Flex>
-                              ),
-                              minSize: 200,
-                              cell: (cell) => {
-                                let { name } = cell.row.original;
+                          {cycleDataCache?.[index]?.analyticsData?.daily && <DataGrid
+                            data={cycleDataCache?.[index]?.analyticsData?.daily
+                              .filter((day: { positive_reply_details: any; }) => day.positive_reply_details)
+                              .map((day: { positive_reply_details: { split: (arg0: string) => [any, any, any, any]; }[]; }) => {
+                                const [id, name, intent, reply] = day.positive_reply_details[0].split("###");
+                                return { id, name, intent, reply };
+                              })
+                              .slice(sentimentPage * 2, sentimentPage * 2 + 2)}
+                            highlightOnHover
+                            withSorting
+                            withColumnBorders
+                            withBorder
+                            // loading={loading}
+                            mt={"md"}
+                            sx={{
+                              cursor: "pointer",
+                              "& .mantine-10xyzsm>tbody>tr>td": {
+                                padding: "0px",
+                              },
+                              "& tr": {
+                                background: "white",
+                              },
+                            }}
+                            columns={[
+                              {
+                                accessorKey: "name",
+                                header: () => (
+                                  <Flex align={"center"} gap={"3px"}>
+                                    <IconUser color="gray" size={"0.9rem"} />
+                                    <Text color="gray">Name</Text>
+                                  </Flex>
+                                ),
+                                minSize: 200,
+                                cell: (cell) => {
+                                  let { name } = cell.row.original;
 
-                                return (
-                                  <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
-                                    <Text color="gray" size={"sm"}>
-                                      {name}
-                                    </Text>
-                                  </Flex>
-                                );
+                                  return (
+                                    <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
+                                      <Text color="gray" size={"sm"}>
+                                        {name}
+                                      </Text>
+                                    </Flex>
+                                  );
+                                },
                               },
-                            },
-                            {
-                              accessorKey: "reply",
-                              header: () => (
-                                <Flex align={"center"} gap={"3px"}>
-                                  <IconMessages color="gray" size={"0.9rem"} />
-                                  <Text color="gray">Replies</Text>
-                                </Flex>
-                              ),
-                              minSize: 200,
-                              cell: (cell) => {
-                                let { reply } = cell.row.original;
+                              {
+                                accessorKey: "reply",
+                                header: () => (
+                                  <Flex align={"center"} gap={"3px"}>
+                                    <IconMessages color="gray" size={"0.9rem"} />
+                                    <Text color="gray">Replies</Text>
+                                  </Flex>
+                                ),
+                                minSize: 200,
+                                cell: (cell) => {
+                                  let { reply } = cell.row.original;
 
-                                return (
-                                  <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
-                                    <Text color="gray" size={"sm"}>
-                                      {reply}
-                                    </Text>
-                                  </Flex>
-                                );
+                                  return (
+                                    <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
+                                      <Text color="gray" size={"sm"}>
+                                        {reply}
+                                      </Text>
+                                    </Flex>
+                                  );
+                                },
                               },
-                            },
-                            {
-                              accessorKey: "intent",
-                              minSize: 40,
-                              maxSize: 120,
-                              header: () => (
-                                <Flex align={"center"} gap={"3px"}>
-                                  <IconLetterT color="gray" size={"0.9rem"} />
-                                  <Text color="gray">Intent</Text>
-                                </Flex>
-                              ),
-                              cell: (cell) => {
-                                let { intent }: any = cell.row.original;
+                              {
+                                accessorKey: "intent",
+                                minSize: 40,
+                                maxSize: 120,
+                                header: () => (
+                                  <Flex align={"center"} gap={"3px"}>
+                                    <IconLetterT color="gray" size={"0.9rem"} />
+                                    <Text color="gray">Intent</Text>
+                                  </Flex>
+                                ),
+                                cell: (cell) => {
+                                  let { intent }: any = cell.row.original;
 
-                                return (
-                                  <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
-                                    <Badge color={'green'} tt={"initial"}>
-                                     {intent}
-                                    </Badge>
-                                  </Flex>
-                                );
+                                  return (
+                                    <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                                      <Badge color={'green'} tt={"initial"}>
+                                        {intent}
+                                      </Badge>
+                                    </Flex>
+                                  );
+                                },
                               },
-                            },
-                            {
-                              accessorKey: "action",
-                              header: () => (
-                                <Flex align={"center"} gap={"3px"}>
-                                  <IconToggleRight color="gray" size={"0.9rem"} />
-                                  <Text color="gray">Action</Text>
-                                </Flex>
-                              ),
-                              minSize: 180,
-                              maxSize: 200,
-                              enableResizing: true,
-                              cell: (cell) => {
-                                let { id } = cell.row.original as any;
-                                return (
-                                  <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
-                                    <Badge
-                                      tt={"initial"}
-                                      variant="filled"
-                                      rightSection={<IconExternalLink size={"0.9rem"} style={{ marginTop: "5px" }} />}
-                                      styles={{
-                                        root: {
-                                          fontWeight: 400,
-                                        },
-                                      }}
-                                      component="a"
-                                      href={`/prospects/${id}`}
-                                      target="_blank"
-                                    >
-                                      View Conversation
-                                    </Badge>
+                              {
+                                accessorKey: "action",
+                                header: () => (
+                                  <Flex align={"center"} gap={"3px"}>
+                                    <IconToggleRight color="gray" size={"0.9rem"} />
+                                    <Text color="gray">Action</Text>
                                   </Flex>
-                                );
+                                ),
+                                minSize: 180,
+                                maxSize: 200,
+                                enableResizing: true,
+                                cell: (cell) => {
+                                  let { id } = cell.row.original as any;
+                                  return (
+                                    <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
+                                      <Badge
+                                        tt={"initial"}
+                                        variant="filled"
+                                        rightSection={<IconExternalLink size={"0.9rem"} style={{ marginTop: "5px" }} />}
+                                        styles={{
+                                          root: {
+                                            fontWeight: 400,
+                                          },
+                                        }}
+                                        component="a"
+                                        href={`/prospects/${id}`}
+                                        target="_blank"
+                                      >
+                                        View Conversation
+                                      </Badge>
+                                    </Flex>
+                                  );
+                                },
                               },
-                            },
-                          ]}
-                        />}
-                      </Box>}
+                            ]}
+                          />}
+                        </Box>}
                     </Box>
                   </Flex>
                   <Paper>
@@ -663,38 +663,38 @@ export default function AnalyticsModal() {
                           return undefined;
                         })
                         .filter((icpItem: any) => icpItem !== undefined) // Ensure no undefined values
-                      .map((icpItem: any, icpIndex: number) => {
-                        return (
-                          <Paper withBorder radius={"md"} key={icpIndex}>
-                            <Flex direction={"column"} mt={4} align={"center"} p={"sm"} justify={"space-between"} gap={4}>
-                              <Text size={"sm"} align="center" fw={600}>
-                                {icpItem.full_name}
-                              </Text>
-                              <Text color="gray" size={"xs"} align="center" fw={600}>
-                                {icpItem.job}
-                              </Text>
-                              <Flex align={"center"} gap={"xs"}>
-                                <Text size={"sm"} color="gray">
-                                  ICP Fit Score:
+                        .map((icpItem: any, icpIndex: number) => {
+                          return (
+                            <Paper withBorder radius={"md"} key={icpIndex}>
+                              <Flex direction={"column"} mt={4} align={"center"} p={"sm"} justify={"space-between"} gap={4}>
+                                <Text size={"sm"} align="center" fw={600}>
+                                  {icpItem.full_name}
                                 </Text>
-                                <Badge size="xs" color={
-                                  icpItem.icp_fit_score == 0 ? "red" :
-                                    icpItem.icp_fit_score == 1 ? "orange" :
-                                      icpItem.icp_fit_score == 2 ? "yellow" :
-                                        icpItem.icp_fit_score == 3 ? "green" :
-                                          icpItem.icp_fit_score == 4 ? "blue" : "gray"
-                                }>{
-                                  icpItem.icp_fit_score == 0 ? "Very Low" :
-                                    icpItem.icp_fit_score == 1 ? "Low" :
-                                      icpItem.icp_fit_score == 2 ? "Medium" :
-                                        icpItem.icp_fit_score == 3 ? "High" :
-                                          icpItem.icp_fit_score == 4 ? "Very High" : "Not Scored"
-                                }</Badge>
+                                <Text color="gray" size={"xs"} align="center" fw={600}>
+                                  {icpItem.job}
+                                </Text>
+                                <Flex align={"center"} gap={"xs"}>
+                                  <Text size={"sm"} color="gray">
+                                    ICP Fit Score:
+                                  </Text>
+                                  <Badge size="xs" color={
+                                    icpItem.icp_fit_score == 0 ? "red" :
+                                      icpItem.icp_fit_score == 1 ? "orange" :
+                                        icpItem.icp_fit_score == 2 ? "yellow" :
+                                          icpItem.icp_fit_score == 3 ? "green" :
+                                            icpItem.icp_fit_score == 4 ? "blue" : "gray"
+                                  }>{
+                                      icpItem.icp_fit_score == 0 ? "Very Low" :
+                                        icpItem.icp_fit_score == 1 ? "Low" :
+                                          icpItem.icp_fit_score == 2 ? "Medium" :
+                                            icpItem.icp_fit_score == 3 ? "High" :
+                                              icpItem.icp_fit_score == 4 ? "Very High" : "Not Scored"
+                                    }</Badge>
+                                </Flex>
                               </Flex>
-                            </Flex>
-                          </Paper>
-                        );
-                      })}
+                            </Paper>
+                          );
+                        })}
                     </SimpleGrid>
                   </Paper>
                   <Box mt={"sm"}>
@@ -733,227 +733,462 @@ export default function AnalyticsModal() {
                         );
                       })}
                     </SimpleGrid> */}
-                    {cycleDataCache[index]?.templateAnalytics?.data?.cta_analytics !== 0 && <DataGrid
-                      data={cycleDataCache[index]?.templateAnalytics?.data?.cta_analytics || []}
-                      highlightOnHover
-                      withSorting
-                      withColumnBorders
-                      withBorder
-                      // loading={loading}
-                      mt={"md"}
-                      sx={{
-                        cursor: "pointer",
-                        "& .mantine-10xyzsm>tbody>tr>td": {
-                          padding: "0px",
-                        },
-                        "& tr": {
-                          background: "white",
-                        },
-                      }}
-                      columns={[
-                        {
-                          accessorKey: "text_value",
-                          header: () => (
-                            <Flex align={"center"} gap={"3px"}>
-                              <IconBallpen color="gray" size={"0.9rem"} />
-                              <Text color="gray">CTAs</Text>
-                            </Flex>
-                          ),
-                          cell: (cell) => {
-                            let { text_value } = cell.row.original;
+                    {cycleDataCache[index]?.templateAnalytics?.data?.cta_analytics && cycleDataCache[index].templateAnalytics.data.cta_analytics.length > 0 && (
+                      <DataGrid
+                        data={cycleDataCache[index]?.templateAnalytics?.data?.cta_analytics || []}
+                        highlightOnHover
+                        withSorting
+                        withColumnBorders
+                        withBorder
+                        // loading={loading}
+                        mt={"md"}
+                        sx={{
+                          cursor: "pointer",
+                          "& .mantine-10xyzsm>tbody>tr>td": {
+                            padding: "0px",
+                          },
+                          "& tr": {
+                            background: "white",
+                          },
+                        }}
+                        columns={[
+                          {
+                            accessorKey: "text_value",
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconBallpen color="gray" size={"0.9rem"} />
+                                <Text color="gray">CTAs</Text>
+                              </Flex>
+                            ),
+                            cell: (cell) => {
+                              let { text_value } = cell.row.original;
 
-                            return (
-                              <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
-                                <Flex>
-                                  <Text color="gray" size={"sm"} w={"100%"}>
-                                    {text_value}
-                                  </Text>
+                              return (
+                                <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
+                                  <Flex>
+                                    <Text color="gray" size={"sm"} w={"100%"}>
+                                      {text_value}
+                                    </Text>
+                                  </Flex>
                                 </Flex>
-                              </Flex>
-                            );
+                              );
+                            },
                           },
-                        },
-                        {
-                          accessorKey: "num_open",
-                          minSize: 40,
-                          maxSize: 140,
-                          header: () => (
-                            <Flex align={"center"} gap={"3px"}>
-                              <IconLetterT color="gray" size={"0.9rem"} />
-                              <Text color="gray">Open Rate</Text>
-                            </Flex>
-                          ),
-                          cell: (cell) => {
-                            let { num_open, num_sent }: any = cell.row.original;
-                            let open_rate = num_sent ? ((num_open / num_sent) * 100).toFixed(2) : 0;
-
-                            return (
-                              <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
-                                <Badge color="green">{open_rate}%</Badge>
+                          {
+                            accessorKey: "num_open",
+                            minSize: 40,
+                            maxSize: 140,
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconLetterT color="gray" size={"0.9rem"} />
+                                <Text color="gray">Open Rate</Text>
                               </Flex>
-                            );
-                          },
-                        },
-                        {
-                          accessorKey: "num_reply",
-                          minSize: 40,
-                          maxSize: 140,
-                          header: () => (
-                            <Flex align={"center"} gap={"3px"}>
-                              <IconLetterT color="gray" size={"0.9rem"} />
-                              <Text color="gray">Reply Rate</Text>
-                            </Flex>
-                          ),
-                          cell: (cell) => {
-                            let { num_reply, num_sent }: any = cell.row.original;
-                            let reply_rate = num_sent ? ((num_reply / num_sent) * 100).toFixed(2) : 0;
+                            ),
+                            cell: (cell) => {
+                              let { num_open, num_sent }: any = cell.row.original;
+                              let open_rate = num_sent ? ((num_open / num_sent) * 100).toFixed(2) : 0;
 
-                            return (
-                              <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
-                                <Badge color="green">{reply_rate}%</Badge>
-                              </Flex>
-                            );
-                          },
-                        },
-                        {
-                          accessorKey: "action",
-                          header: () => (
-                            <Flex align={"center"} gap={"3px"}>
-                              <IconToggleRight color="gray" size={"0.9rem"} />
-                              <Text color="gray">Action</Text>
-                            </Flex>
-                          ),
-                          minSize: 100,
-                          maxSize: 100,
-                          enableResizing: true,
-                          cell: (cell) => {
-                            let { action }: any = cell.row.original;
-
-                            return (
-                              <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
-                                <Switch defaultChecked={action} />
-                              </Flex>
-                            );
-                          },
-                        },
-                      ]}
-                      styles={{
-                        dataCellContent: {
-                          width: "100%",
-                        },
-                      }}
-                    />}
-                    {cycleDataCache[index]?.templateAnalytics?.data?.linkedin_template_analytics && <DataGrid
-                      data={cycleDataCache[index]?.templateAnalytics?.data?.linkedin_template_analytics || []}
-                      highlightOnHover
-                      withSorting
-                      withColumnBorders
-                      withBorder
-                      // loading={loading}
-                      mt={"md"}
-                      sx={{
-                        cursor: "pointer",
-                        "& .mantine-10xyzsm>tbody>tr>td": {
-                          padding: "0px",
-                        },
-                        "& tr": {
-                          background: "white",
-                        },
-                      }}
-                      columns={[
-                        {
-                          accessorKey: "message",
-                          header: () => (
-                            <Flex align={"center"} gap={"3px"}>
-                              <IconBallpen color="gray" size={"0.9rem"} />
-                              <Text color="gray">Linkedin Templates</Text>
-                            </Flex>
-                          ),
-                          cell: (cell) => {
-                            let { message } = cell.row.original;
-
-                            return (
-                              <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
-                                <Flex>
-                                  <Text color="gray" size={"sm"} w={"100%"}>
-                                    {message}
-                                  </Text>
+                              return (
+                                <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                                  <Badge color="green">{open_rate}%</Badge>
                                 </Flex>
-                              </Flex>
-                            );
+                              );
+                            },
                           },
-                        },
-                        {
-                          accessorKey: "num_open",
-                          minSize: 40,
-                          maxSize: 140,
-                          header: () => (
-                            <Flex align={"center"} gap={"3px"}>
-                              <IconLetterT color="gray" size={"0.9rem"} />
-                              <Text color="gray">Open Rate</Text>
-                            </Flex>
-                          ),
-                          cell: (cell) => {
-                            let { num_open, num_sent }: any = cell.row.original;
-                            let open_rate = num_sent ? ((num_open / num_sent) * 100).toFixed(2) : 0;
+                          {
+                            accessorKey: "num_reply",
+                            minSize: 40,
+                            maxSize: 140,
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconLetterT color="gray" size={"0.9rem"} />
+                                <Text color="gray">Reply Rate</Text>
+                              </Flex>
+                            ),
+                            cell: (cell) => {
+                              let { num_reply, num_sent }: any = cell.row.original;
+                              let reply_rate = num_sent ? ((num_reply / num_sent) * 100).toFixed(2) : 0;
 
-                            return (
-                              <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
-                                <Badge color="green">{open_rate}%</Badge>
-                              </Flex>
-                            );
+                              return (
+                                <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                                  <Badge color="green">{reply_rate}%</Badge>
+                                </Flex>
+                              );
+                            },
                           },
-                        },
-                        {
-                          accessorKey: "num_reply",
-                          minSize: 40,
-                          maxSize: 140,
-                          header: () => (
-                            <Flex align={"center"} gap={"3px"}>
-                              <IconLetterT color="gray" size={"0.9rem"} />
-                              <Text color="gray">Reply Rate</Text>
-                            </Flex>
-                          ),
-                          cell: (cell) => {
-                            let { num_reply, num_sent }: any = cell.row.original;
-                            let reply_rate = num_sent ? ((num_reply / num_sent) * 100).toFixed(2) : 0;
+                          {
+                            accessorKey: "action",
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconToggleRight color="gray" size={"0.9rem"} />
+                                <Text color="gray">Action</Text>
+                              </Flex>
+                            ),
+                            minSize: 100,
+                            maxSize: 100,
+                            enableResizing: true,
+                            cell: (cell) => {
+                              let { action }: any = cell.row.original;
 
-                            return (
-                              <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
-                                <Badge color="green">{reply_rate}%</Badge>
-                              </Flex>
-                            );
+                              return (
+                                <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
+                                  <Switch defaultChecked={!action} />
+                                </Flex>
+                              );
+                            },
                           },
-                        },
-                        {
-                          accessorKey: "action",
-                          header: () => (
-                            <Flex align={"center"} gap={"3px"}>
-                              <IconToggleRight color="gray" size={"0.9rem"} />
-                              <Text color="gray">Action</Text>
-                            </Flex>
-                          ),
-                          minSize: 100,
-                          maxSize: 100,
-                          enableResizing: true,
-                          cell: (cell) => {
-                            let { action }: any = cell.row.original;
+                        ]}
+                        styles={{
+                          dataCellContent: {
+                            width: "100%",
+                          },
+                        }}
+                      />
+                    )}
+                    {cycleDataCache[index]?.templateAnalytics?.data?.linkedin_template_analytics && cycleDataCache[index].templateAnalytics.data.linkedin_template_analytics.length > 0 ? (
+                      <DataGrid
+                        data={cycleDataCache[index]?.templateAnalytics?.data?.linkedin_template_analytics}
+                        highlightOnHover
+                        withSorting
+                        withColumnBorders
+                        withBorder
+                        // loading={loading}
+                        mt={"md"}
+                        sx={{
+                          cursor: "pointer",
+                          "& .mantine-10xyzsm>tbody>tr>td": {
+                            padding: "0px",
+                          },
+                          "& tr": {
+                            background: "white",
+                          },
+                        }}
+                        columns={[
+                          {
+                            accessorKey: "message",
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconBallpen color="gray" size={"0.9rem"} />
+                                <Text color="gray">Email Templates</Text>
+                              </Flex>
+                            ),
+                            cell: (cell) => {
+                              let { message } = cell.row.original;
 
-                            return (
-                              <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
-                                <Switch defaultChecked={action} />
-                              </Flex>
-                            );
+                              return (
+                                <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
+                                  <Flex>
+                                    <Text color="gray" size={"sm"} w={"100%"}>
+                                      {message}
+                                    </Text>
+                                  </Flex>
+                                </Flex>
+                              );
+                            },
                           },
-                        },
-                      ]}
-                      styles={{
-                        dataCellContent: {
-                          width: "100%",
-                        },
-                      }}
-                    />}
-                    
+                          {
+                            accessorKey: "num_open",
+                            minSize: 40,
+                            maxSize: 140,
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconLetterT color="gray" size={"0.9rem"} />
+                                <Text color="gray">Open Rate</Text>
+                              </Flex>
+                            ),
+                            cell: (cell) => {
+                              let { num_open, num_sent }: any = cell.row.original;
+                              let open_rate = num_sent ? ((num_open / num_sent) * 100).toFixed(2) : 0;
+
+                              return (
+                                <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                                  <Badge color="green">{open_rate}%</Badge>
+                                </Flex>
+                              );
+                            },
+                          },
+                          {
+                            accessorKey: "num_reply",
+                            minSize: 40,
+                            maxSize: 140,
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconLetterT color="gray" size={"0.9rem"} />
+                                <Text color="gray">Reply Rate</Text>
+                              </Flex>
+                            ),
+                            cell: (cell) => {
+                              let { num_reply, num_sent }: any = cell.row.original;
+                              let reply_rate = num_sent ? ((num_reply / num_sent) * 100).toFixed(2) : 0;
+
+                              return (
+                                <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                                  <Badge color="green">{reply_rate}%</Badge>
+                                </Flex>
+                              );
+                            },
+                          },
+                          {
+                            accessorKey: "action",
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconToggleRight color="gray" size={"0.9rem"} />
+                                <Text color="gray">Action</Text>
+                              </Flex>
+                            ),
+                            minSize: 100,
+                            maxSize: 100,
+                            enableResizing: true,
+                            cell: (cell) => {
+                              let { action }: any = cell.row.original;
+
+                              return (
+                                <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
+                                  <Switch defaultChecked={!action} />
+                                </Flex>
+                              );
+                            },
+                          },
+                        ]}
+                        styles={{
+                          dataCellContent: {
+                            width: "100%",
+                          },
+                        }}
+                      />
+                    ) : null}
+
+
+
+                    {cycleDataCache[index]?.templateAnalytics?.data?.email_templates_analytics && cycleDataCache[index].templateAnalytics.data.email_templates_analytics.length > 0 ? (
+                      <DataGrid
+                        data={cycleDataCache[index]?.templateAnalytics?.data?.email_templates_analytics}
+                        highlightOnHover
+                        withSorting
+                        withColumnBorders
+                        withBorder
+                        // loading={loading}
+                        mt={"md"}
+                        sx={{
+                          cursor: "pointer",
+                          "& .mantine-10xyzsm>tbody>tr>td": {
+                            padding: "0px",
+                          },
+                          "& tr": {
+                            background: "white",
+                          },
+                        }}
+                        columns={[
+                          {
+                            accessorKey: "message",
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconBallpen color="gray" size={"0.9rem"} />
+                                <Text color="gray">Email Templates</Text>
+                              </Flex>
+                            ),
+                            cell: (cell) => {
+                              let { title } = cell.row.original as any;
+
+                              return (
+                                <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
+                                  <Flex>
+                                    <Text color="gray" size={"sm"} w={"100%"}>
+                                      {title}
+                                    </Text>
+                                  </Flex>
+                                </Flex>
+                              );
+                            },
+                          },
+                          {
+                            accessorKey: "num_open",
+                            minSize: 40,
+                            maxSize: 140,
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconLetterT color="gray" size={"0.9rem"} />
+                                <Text color="gray">Open Rate</Text>
+                              </Flex>
+                            ),
+                            cell: (cell) => {
+                              let { num_open, num_sent }: any = cell.row.original;
+                              let open_rate = num_sent ? ((num_open / num_sent) * 100).toFixed(2) : 0;
+
+                              return (
+                                <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                                  <Badge color="green">{open_rate}%</Badge>
+                                </Flex>
+                              );
+                            },
+                          },
+                          {
+                            accessorKey: "num_reply",
+                            minSize: 40,
+                            maxSize: 140,
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconLetterT color="gray" size={"0.9rem"} />
+                                <Text color="gray">Reply Rate</Text>
+                              </Flex>
+                            ),
+                            cell: (cell) => {
+                              let { num_reply, num_sent }: any = cell.row.original;
+                              let reply_rate = num_sent ? ((num_reply / num_sent) * 100).toFixed(2) : 0;
+
+                              return (
+                                <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                                  <Badge color="green">{reply_rate}%</Badge>
+                                </Flex>
+                              );
+                            },
+                          },
+                          {
+                            accessorKey: "action",
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconToggleRight color="gray" size={"0.9rem"} />
+                                <Text color="gray">Action</Text>
+                              </Flex>
+                            ),
+                            minSize: 100,
+                            maxSize: 100,
+                            enableResizing: true,
+                            cell: (cell) => {
+                              let { action }: any = cell.row.original;
+
+                              return (
+                                <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
+                                  <Switch defaultChecked={!action} />
+                                </Flex>
+                              );
+                            },
+                          },
+                        ]}
+                        styles={{
+                          dataCellContent: {
+                            width: "100%",
+                          },
+                        }}
+                      />
+                    ) : null}
+
+
+                    {cycleDataCache[index]?.templateAnalytics?.data?.subject_lines_analytics && cycleDataCache[index].templateAnalytics.data.subject_lines_analytics.length > 0 ? (
+                      <DataGrid
+                        data={cycleDataCache[index]?.templateAnalytics?.data?.subject_lines_analytics}
+                        highlightOnHover
+                        withSorting
+                        withColumnBorders
+                        withBorder
+                        // loading={loading}
+                        mt={"md"}
+                        sx={{
+                          cursor: "pointer",
+                          "& .mantine-10xyzsm>tbody>tr>td": {
+                            padding: "0px",
+                          },
+                          "& tr": {
+                            background: "white",
+                          },
+                        }}
+                        columns={[
+                          {
+                            accessorKey: "message",
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconBallpen color="gray" size={"0.9rem"} />
+                                <Text color="gray">Subject Lines</Text>
+                              </Flex>
+                            ),
+                            cell: (cell) => {
+                              let { subject_line } = cell.row.original as any;
+
+                              return (
+                                <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
+                                  <Flex>
+                                    <Text color="gray" size={"sm"} w={"100%"}>
+                                      {subject_line}
+                                    </Text>
+                                  </Flex>
+                                </Flex>
+                              );
+                            },
+                          },
+                          {
+                            accessorKey: "num_open",
+                            minSize: 40,
+                            maxSize: 140,
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconLetterT color="gray" size={"0.9rem"} />
+                                <Text color="gray">Open Rate</Text>
+                              </Flex>
+                            ),
+                            cell: (cell) => {
+                              let { num_open, num_sent }: any = cell.row.original;
+                              let open_rate = num_sent ? ((num_open / num_sent) * 100).toFixed(2) : 0;
+
+                              return (
+                                <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                                  <Badge color="green">{open_rate}%</Badge>
+                                </Flex>
+                              );
+                            },
+                          },
+                          {
+                            accessorKey: "num_reply",
+                            minSize: 40,
+                            maxSize: 140,
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconLetterT color="gray" size={"0.9rem"} />
+                                <Text color="gray">Reply Rate</Text>
+                              </Flex>
+                            ),
+                            cell: (cell) => {
+                              let { num_reply, num_sent }: any = cell.row.original;
+                              let reply_rate = num_sent ? ((num_reply / num_sent) * 100).toFixed(2) : 0;
+
+                              return (
+                                <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                                  <Badge color="green">{reply_rate}%</Badge>
+                                </Flex>
+                              );
+                            },
+                          },
+                          {
+                            accessorKey: "action",
+                            header: () => (
+                              <Flex align={"center"} gap={"3px"}>
+                                <IconToggleRight color="gray" size={"0.9rem"} />
+                                <Text color="gray">Action</Text>
+                              </Flex>
+                            ),
+                            minSize: 100,
+                            maxSize: 100,
+                            enableResizing: true,
+                            cell: (cell) => {
+                              let { action }: any = cell.row.original;
+
+                              return (
+                                <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
+                                  <Switch defaultChecked={!action} />
+                                </Flex>
+                              );
+                            },
+                          },
+                        ]}
+                        styles={{
+                          dataCellContent: {
+                            width: "100%",
+                          },
+                        }}
+                      />
+                    ) : null}
+
+
+
                     {/* <DataGrid
                       data={item?.personalizerData}
                       highlightOnHover

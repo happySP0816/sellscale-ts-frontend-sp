@@ -202,13 +202,12 @@ export default function CRMContactFilter() {
               </Flex>
             ),
             cell: (cell) => {
-              const { active } = cell.row.original;
+              const { do_not_contact } = cell.row.original;
 
               return (
                 <Flex align={"center"} justify={"center"} w={"100%"} h={"100%"}>
                   <Switch 
-                    defaultChecked={true} 
-                    checked={active}
+                    checked={do_not_contact}
                     onChange={async (event) => {
                       const isChecked = event.currentTarget.checked;
                       try {

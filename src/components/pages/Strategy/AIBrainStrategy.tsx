@@ -16,11 +16,35 @@ import {
 } from "@tabler/icons";
 import { IconLighter } from "@tabler/icons-react";
 import { DataGrid } from "mantine-data-grid";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStrategiesApi } from "./StrategyApi";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { closeAllModals, closeContextModal } from "@mantine/modals/lib/events";
+
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  // Title,
+  Tooltip,
+  Legend,
+  Filler, // 1. Import Filler plugin
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  // Title,
+  Tooltip,
+  Legend,
+  Filler // 1. Register Filler plugin
+);
 
 export default function AIBrainStrategy() {
   const theme = useMantineTheme();
@@ -53,6 +77,56 @@ export default function AIBrainStrategy() {
     handleGetAllStrategies();
   }, [userToken]);
 
+  const options: any = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top",
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context: any) {
+            return `${context.dataset.label}: ${context.raw}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          borderDash: [5, 5],
+        },
+      },
+      y: {
+        grid: {
+          borderDash: [5, 5],
+          display: true,
+        },
+      },
+    },
+  };
+
+  const data = {
+    labels: ["January", "February", "March", "April", "May", "June", "July"],
+    datasets: [
+      {
+        label: "Dataset 1",
+        data: [120, 150, 200, 40, 79, 20, 100],
+        borderColor: "rgb(255, 99, 132)",
+        backgroundColor: "rgba(255, 0, 0)",
+        fill: {
+          target: "origin",
+          above: "rgba(255, 0, 0, 0.3)",
+        },
+      },
+    ],
+  };
+
   return (
     <Box>
       <Flex align={"center"} justify={"space-between"}>
@@ -81,6 +155,9 @@ export default function AIBrainStrategy() {
           New Strategy
         </Button>
       </Flex>
+      <Paper h={350} w={"100%"} p={"lg"} mt={"md"}>
+        <AreaChart />
+      </Paper>
       <Paper>
         <DataGrid
           data={strategies}
@@ -471,3 +548,66 @@ export default function AIBrainStrategy() {
     </Box>
   );
 }
+
+const AreaChart: React.FC = () => {
+  const chartRef = useRef<any>(null);
+
+  const additionalData = [
+    { demo: 500, strategy: "Email Test Campaign" },
+    { demo: 450, strategy: "Social Media Blitz" },
+  ];
+
+  const data: any = {
+    labels: ["January", "February", "March", "April", "May", "June", "July"],
+    datasets: [
+      {
+        label: "Positive responsives",
+        data: [65, 59, 80, 81, 56, 55, 40],
+        fill: true,
+        borderColor: "rgba(75,192,192,1)",
+        backgroundColor: "rgba(75,192,192,0.2)",
+        pointRadius: 8,
+        pointBackgroundColor: "rgba(75,192,192,1)",
+      },
+    ],
+  };
+
+  const options: any = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top",
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+        },
+      },
+      tooltip: {
+        enabled: true,
+        callbacks: {
+          label: function (context: any) {
+            const index = context.dataIndex;
+            const info = additionalData[index];
+            return [`Demo: ${info.demo}`, `Strategy${index}: ${info.strategy}`];
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          borderDash: [5, 5],
+        },
+      },
+      y: {
+        grid: {
+          borderDash: [5, 5],
+          display: true,
+        },
+      },
+    },
+  };
+
+  return <Line ref={chartRef} data={data} options={options} />;
+};

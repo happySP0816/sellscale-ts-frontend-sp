@@ -94,6 +94,7 @@ import StrategyPreviewModal from "@modals/AIBrain/StrategyPreviewModal";
 import SelectStrategyModal from "@modals/SelectStrategyModal";
 import PreFiltersV2EditModal from "@modals/PrefiltersV2/PrefilterV2EditModal";
 import ResetSegmentModal from "@modals/SegmentV2/ResetSegmentModal";
+import ICPRoutingCreateModal from "@modals/website/ICPRoutingCreateModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -835,6 +836,7 @@ export default function App() {
               previewStrategy: StrategyPreviewModal,
               strategySelectModal: SelectStrategyModal,
               prefilterEditModal: PreFiltersV2EditModal,
+              createICProutingModal: ICPRoutingCreateModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

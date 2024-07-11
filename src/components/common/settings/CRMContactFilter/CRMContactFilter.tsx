@@ -198,7 +198,7 @@ export default function CRMContactFilter() {
             maxSize: 140,
             header: () => (
               <Flex align={"center"} gap={"3px"}>
-                <Text color="gray">Yes Contact</Text>
+                <Text color="gray">Don't Contact</Text>
               </Flex>
             ),
             cell: (cell) => {
@@ -209,6 +209,13 @@ export default function CRMContactFilter() {
                   <Switch 
                     checked={do_not_contact}
                     onChange={async (event) => {
+                      setFilteredData((prevData: any) => 
+                        prevData.map((item: any) => 
+                          (item as any).id === (cell.row.original as any).id 
+                            ? { ...item, do_not_contact: isChecked } 
+                            : item
+                        )
+                      )
                       const isChecked = event.currentTarget.checked;
                       try {
                         const response = await fetch(`${API_URL}/merge_crm/dnc`, {
@@ -223,7 +230,8 @@ export default function CRMContactFilter() {
                           throw new Error('Network response was not ok');
                         }
                         const result = await response.json();
-                        console.log('Switch update result:', result);
+                        console.log('Switch update result:', result);  
+                        ;
                       } catch (error) {
                         console.error('Error updating switch state:', error);
                       }

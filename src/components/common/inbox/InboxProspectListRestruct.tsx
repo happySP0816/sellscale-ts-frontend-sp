@@ -18,6 +18,7 @@ import {
   ScrollArea,
   Select,
   Stack,
+  Switch,
   Tabs,
   Text,
   ThemeIcon,
@@ -26,23 +27,63 @@ import {
   rem,
   useMantineTheme,
 } from "@mantine/core";
-import { IconSearch, IconAdjustmentsFilled, IconInfoCircle, IconClock, IconStar, IconBellOff, IconSparkles, IconRobotFace } from "@tabler/icons-react";
+import {
+  IconSearch,
+  IconAdjustmentsFilled,
+  IconInfoCircle,
+  IconClock,
+  IconStar,
+  IconBellOff,
+  IconSparkles,
+  IconRobotFace,
+} from "@tabler/icons-react";
 import _ from "lodash";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { forwardRef, useEffect, useState } from "react";
 import { HEADER_HEIGHT } from "./InboxProspectConvo";
-import { labelizeConvoSubstatus, prospectStatuses, nurturingProspectStatuses, getStatusDetails, labelizeStatus } from "./utils";
-import InboxProspectListFilter, { InboxProspectListFilterState, defaultInboxProspectListFilterState } from "./InboxProspectListFilter";
-import { IconAlarm, IconAlertCircle, IconBolt, IconChevronUp, IconEdit, IconGridDots, IconMoodSmile, IconUser } from "@tabler/icons";
+import {
+  labelizeConvoSubstatus,
+  prospectStatuses,
+  nurturingProspectStatuses,
+  getStatusDetails,
+  labelizeStatus,
+} from "./utils";
+import InboxProspectListFilter, {
+  InboxProspectListFilterState,
+  defaultInboxProspectListFilterState,
+} from "./InboxProspectListFilter";
+import {
+  IconAdjustmentsHorizontal,
+  IconBolt,
+  IconUser,
+  IconAlarm,
+  IconAlertCircle,
+  IconChevronUp,
+  IconEdit,
+  IconGridDots,
+  IconMoodSmile,
+} from "@tabler/icons";
 import { useNavigate } from "react-router-dom";
-import { INBOX_PAGE_HEIGHT, ProspectBucketRecord, ProspectBuckets } from "../../pages/InboxRestructurePage";
-import { mainTabState, openedProspectIdState, openedProspectListState } from "@atoms/inboxAtoms";
+import {
+  INBOX_PAGE_HEIGHT,
+  ProspectBucketRecord,
+  ProspectBuckets,
+} from "../../pages/InboxRestructurePage";
+import {
+  mainTabState,
+  openedProspectIdState,
+  openedProspectListState,
+} from "@atoms/inboxAtoms";
 import { useDisclosure } from "@mantine/hooks";
 import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
 import { ProspectConvoCard } from "./InboxProspectList";
 import { currentInboxCountState } from "@atoms/personaAtoms";
 import { openContextModal } from "@mantine/modals";
-import { adminDataState, userDataState, userTokenState } from "@atoms/userAtoms";
+import {
+  adminDataState,
+  userDataState,
+  userTokenState,
+} from "@atoms/userAtoms";
 import { impersonateSDR } from "@auth/core";
 import { ClientSDR } from "src";
 
@@ -52,7 +93,9 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const adminData = useRecoilValue(adminDataState);
   const [userToken, setUserToken] = useRecoilState(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
-  const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
+  const [openedProspectId, setOpenedProspectId] = useRecoilState(
+    openedProspectIdState
+  );
 
   const [searchFilter, setSearchFilter] = useState("");
   const [mainTab, setMainTab] = useRecoilState(mainTabState);
@@ -73,17 +116,29 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const bucket = props.buckets[mainTab] as ProspectBucketRecord[];
 
   const prospects = bucket
-    .filter((p) => !["REMOVED", "NULL"].includes((p.overall_status ?? "NULL").toUpperCase()))
+    .filter(
+      (p) =>
+        !["REMOVED", "NULL"].includes(
+          (p.overall_status ?? "NULL").toUpperCase()
+        )
+    )
     .filter(
       (p) =>
         p.title?.toLowerCase().includes(searchFilter.toLowerCase()) ||
         p.company?.toLowerCase().includes(searchFilter.toLowerCase()) ||
         p.full_name?.toLowerCase().includes(searchFilter.toLowerCase())
     )
-    .filter((p) => selectedUser === "all" || p.client_sdr_name === selectedUser);
+    .filter(
+      (p) => selectedUser === "all" || p.client_sdr_name === selectedUser
+    );
 
   const unfilteredProspects = bucket
-    .filter((p) => !["REMOVED", "NULL"].includes((p.overall_status ?? "NULL").toUpperCase()))
+    .filter(
+      (p) =>
+        !["REMOVED", "NULL"].includes(
+          (p.overall_status ?? "NULL").toUpperCase()
+        )
+    )
     .filter(
       (p) =>
         p.title?.toLowerCase().includes(searchFilter.toLowerCase()) ||
@@ -159,7 +214,10 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                   ),
                 ]}
                 itemComponent={({ value, label, image, ...others }) => (
-                  <div {...others} style={{ display: "flex", alignItems: "center" }}>
+                  <div
+                    {...others}
+                    style={{ display: "flex", alignItems: "center" }}
+                  >
                     {image && <Avatar src={image} size="sm" mr="sm" />}
                     {label}
                   </div>
@@ -175,7 +233,13 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                       const sdrs: ClientSDR[] = getFromLocalStorage();
                       const sdr = sdrs?.find((sdr) => sdr?.sdr_name === value);
                       if (sdr) {
-                        impersonateSDR(adminData, sdr, setUserToken, setUserData, false);
+                        impersonateSDR(
+                          adminData,
+                          sdr,
+                          setUserToken,
+                          setUserData,
+                          false
+                        );
                       } else {
                         console.error("SDR not found");
                       }
@@ -231,17 +295,29 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
             >
               <Tabs.List grow>
                 <Tabs.Tab value="manual">
-                  <Indicator size={6} disabled={props.buckets.manual_bucket.length === 0}>
-                    <Tooltip label="Messages you're responsible for." withinPortal position="right">
+                  <Indicator
+                    size={6}
+                    disabled={props.buckets.manual_bucket.length === 0}
+                  >
+                    <Tooltip
+                      label="Messages you're responsible for."
+                      withinPortal
+                      position="right"
+                    >
                       <Group spacing={5} noWrap>
                         <IconMoodSmile size="1rem" />
-                        {mainTab === "manual_bucket" && <Text>Human Inbox</Text>}
+                        {mainTab === "manual_bucket" && (
+                          <Text>Human Inbox</Text>
+                        )}
                       </Group>
                     </Tooltip>
                   </Indicator>
                 </Tabs.Tab>
                 <Tabs.Tab value="ai">
-                  <Indicator size={6} disabled={props.buckets.ai_bucket.length === 0}>
+                  <Indicator
+                    size={6}
+                    disabled={props.buckets.ai_bucket.length === 0}
+                  >
                     <Group spacing={5} noWrap>
                       <IconRobotFace size="1rem" />
                       {mainTab === "ai_bucket" && <Text>AI Inbox</Text>}
@@ -253,7 +329,11 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                     <Tabs.Tab value="other">
                       <Group spacing={5} noWrap>
                         <IconGridDots size="1rem" />
-                        {inboxTab === "other" && <Text>{_.startCase(mainTab.split("_bucket")[0])}</Text>}
+                        {inboxTab === "other" && (
+                          <Text>
+                            {_.startCase(mainTab.split("_bucket")[0])}
+                          </Text>
+                        )}
                       </Group>
                     </Tabs.Tab>
                   </Menu.Target>
@@ -317,7 +397,8 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                 {inboxTab === "manual" ? (
                   <Box bg={"#E4E5E6"} p={"md"}>
                     <Text size={"sm"} color="gray">
-                      Off load some of the messages you have to respond to by assigning them to your AI!
+                      Off load some of the messages you have to respond to by
+                      assigning them to your AI!
                     </Text>
                     <Flex
                       align={"center"}
@@ -364,14 +445,22 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                       <Text size={"sm"} color="gray">
                         AI index performance revival rate
                       </Text>
-                      <Flex align={"center"} gap={3} className="hover:cursor-pointer">
+                      <Flex
+                        align={"center"}
+                        gap={3}
+                        className="hover:cursor-pointer"
+                      >
                         {/* <IconEdit size={"0.9rem"} color="#888" />
                         <Tooltip label="Coming soon.">
                           <Text fw={500} underline size={"sm"} color="#888">
                             Edit reply frameworks
                           </Text>
                         </Tooltip> */}
-                        <Flex align={"center"} w={"100%"} justify={"space-between"}>
+                        <Flex
+                          align={"center"}
+                          w={"100%"}
+                          justify={"space-between"}
+                        >
                           <Text fw={600} size={"sm"}>
                             Revival Rate: {25}%
                           </Text>
@@ -382,7 +471,15 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                             label={
                               <Box>
                                 <Flex align={"center"} gap={4} py={6}>
-                                  <Badge variant="light" leftSection={<IconUser size={"0.9rem"} className="mt-1" />}>
+                                  <Badge
+                                    variant="light"
+                                    leftSection={
+                                      <IconUser
+                                        size={"0.9rem"}
+                                        className="mt-1"
+                                      />
+                                    }
+                                  >
                                     {5}
                                   </Badge>
                                   <Text color="gray" size={"sm"} fw={500}>
@@ -391,7 +488,15 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                                 </Flex>
                                 <Divider my={6} />
                                 <Flex align={"center"} gap={4} py={6}>
-                                  <Badge variant="light" leftSection={<IconBolt size={"0.9rem"} className="mt-1" />}>
+                                  <Badge
+                                    variant="light"
+                                    leftSection={
+                                      <IconBolt
+                                        size={"0.9rem"}
+                                        className="mt-1"
+                                      />
+                                    }
+                                  >
                                     {25}
                                   </Badge>
                                   <Text color="gray" size={"sm"} fw={500}>
@@ -408,10 +513,17 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                         </Flex>
                       </Flex>
                     </Box>
-                    <Flex bg={"#FFFAEA"} align={"center"} gap={"xs"} px={"md"} py={"sm"}>
+                    <Flex
+                      bg={"#FFFAEA"}
+                      align={"center"}
+                      gap={"xs"}
+                      px={"md"}
+                      py={"sm"}
+                    >
                       <IconAlarm size={"0.9rem"} color="orange" />
                       <Text color="orange">
-                        AI set to clear inbox in <Badge color="orange">{"03"}</Badge>days
+                        AI set to clear inbox in{" "}
+                        <Badge color="orange">{"03"}</Badge>days
                       </Text>
                     </Flex>
                   </>
@@ -419,31 +531,77 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                   <></>
                 )}
                 {/* Search bar */}
-                <Input
-                  p={5}
-                  sx={{ flex: 1 }}
-                  styles={{
-                    input: {
-                      backgroundColor: theme.white,
-                      border: `1px solid ${theme.colors.gray[2]}`,
-                      "&:focus-within": {
-                        borderColor: theme.colors.gray[4],
+                <Flex align={"center"}>
+                  <Input
+                    p={5}
+                    sx={{ flex: 1 }}
+                    styles={{
+                      input: {
+                        backgroundColor: theme.white,
+                        border: `1px solid ${theme.colors.gray[2]}`,
+                        "&:focus-within": {
+                          borderColor: theme.colors.gray[4],
+                        },
+                        "&::placeholder": {
+                          color: theme.colors.gray[6],
+                          fontWeight: 500,
+                        },
                       },
-                      "&::placeholder": {
-                        color: theme.colors.gray[6],
-                        fontWeight: 500,
-                      },
-                    },
-                  }}
-                  icon={<IconSearch size="1.0rem" />}
-                  value={searchFilter}
-                  onChange={(event) => setSearchFilter(event.currentTarget.value)}
-                  onKeyDown={(event) => {
-                    if (event.metaKey && event.key === "'") event.preventDefault();
-                  }}
-                  radius={theme.radius.md}
-                  placeholder="Search..."
-                />
+                    }}
+                    icon={<IconSearch size="1.0rem" />}
+                    value={searchFilter}
+                    onChange={(event) =>
+                      setSearchFilter(event.currentTarget.value)
+                    }
+                    radius={theme.radius.md}
+                    placeholder="Search..."
+                  />
+                  <Popover width={280} position="bottom" withArrow shadow="md">
+                    <Popover.Target>
+                      <ActionIcon variant="transparent">
+                        <IconAdjustmentsHorizontal
+                          size={"1.4rem"}
+                          color="gray"
+                        />
+                      </ActionIcon>
+                    </Popover.Target>
+                    <Popover.Dropdown>
+                      <Stack spacing={"xs"}>
+                        <Select
+                          data={[
+                            { label: "Star vs No-star", value: "star" },
+                            { label: "Category", value: "category" },
+                          ]}
+                          label="Group By:"
+                          placeholder="Select"
+                        />
+                        <Select
+                          data={[
+                            { label: "Last Response", value: "last_response" },
+                            { label: "Stars", value: "stars" },
+                            { label: "Alphabetical", value: "alpha" },
+                          ]}
+                          placeholder="Select"
+                          label="Sort by:"
+                        />
+                        <Select
+                          data={[{ label: "Search by name", value: "name" }]}
+                          label="Filter By:"
+                          placeholder="Select"
+                        />
+                        <Switch
+                          labelPosition="left"
+                          label="Show starred chats on top"
+                          defaultChecked
+                        />
+                        <Divider />
+                        <Text underline color="gray" size={"sm"} align="center">
+                          Reset to default
+                        </Text>
+                      </Stack>
+                    </Popover.Dropdown>
+                  </Popover>
+                </Flex>
 
                 <ScrollArea h={"calc(92vh - 90px)"}>
                   <Stack spacing={0}>
@@ -472,18 +630,29 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                             >
                               <ProspectConvoCard
                                 client_sdr_name={prospect.client_sdr_name}
-                                client_sdr_img_url={prospect.client_sdr_img_url || ""}
+                                client_sdr_img_url={
+                                  prospect.client_sdr_img_url || ""
+                                }
                                 id={prospect.prospect_id}
                                 name={prospect.full_name}
                                 title={prospect.title}
                                 img_url={""}
-                                latest_msg={prospect.email_last_message_from_prospect ?? ""}
-                                latest_msg_time={prospect.li_last_message_timestamp ?? ""}
+                                latest_msg={
+                                  prospect.email_last_message_from_prospect ??
+                                  ""
+                                }
+                                latest_msg_time={
+                                  prospect.li_last_message_timestamp ?? ""
+                                }
                                 icp_fit={-1}
                                 new_msg_count={0}
                                 latest_msg_from_sdr={false}
-                                default_channel={mainTab !== "snoozed" ? "LINKEDIN" : undefined}
-                                opened={prospect.prospect_id === openedProspectId}
+                                default_channel={
+                                  mainTab !== "snoozed" ? "LINKEDIN" : undefined
+                                }
+                                opened={
+                                  prospect.prospect_id === openedProspectId
+                                }
                                 snoozed_until={prospect.hidden_until}
                               />
                             </Box>

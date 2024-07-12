@@ -111,6 +111,7 @@ import ResetSegmentModal from "@modals/SegmentV2/ResetSegmentModal";
 import SellScaleAssistModal from "@modals/SellScaleAssistModal";
 import { IconWand } from "@tabler/icons";
 import ICPRoutingCreateModal from "@modals/website/ICPRoutingCreateModal";
+import { a } from "@react-spring/web";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -145,7 +146,7 @@ export default function App() {
   const [suggestion, setSuggestion] = useState<string>("");
   const [showSuggestion, setShowSuggestion] = useState<boolean>(false);
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [isAccpet, setAccept] = useState<boolean>(false);
+  const acceptRef = useRef<boolean>(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const suggestionInputRef = useRef<string>("");
   const previousValueRef = useRef<string>("");
@@ -406,13 +407,8 @@ export default function App() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const modalElement = document.querySelector('.mantine-Paper-root.mantine-Modal-content');
-      if (modalElement && event.metaKey && event.key >= '0' && event.key <= '9') {
-        const keyIndex = parseInt(event.key, 10);
-        const keyItem = keyData.find(item => item.keyboard === keyIndex);
-        if (keyItem) {
-          setLoading(true);
-          typeUserInput(previousFocusedElementRef.current, keyItem.prompt, getContextualInformation());
-        }
+      if (acceptRef.current === true && modalElement && event.key === "Enter" && !event.shiftKey) {
+        handleAccept();
       }
       if (event.metaKey && event.key === "'") {
         const activeElement = document.activeElement as HTMLElement;
@@ -451,6 +447,16 @@ export default function App() {
 
   ////
   const onKeyDown = (e: any) => {
+
+    if (e.target.value.length === 0 && e.key >= '0' && e.key <= '9') {
+      const keyIndex = parseInt(e.key, 10);
+      const keyItem = keyData.find(item => item.keyboard === keyIndex);
+      if (keyItem) {
+        setLoading(true);
+        typeUserInput(previousFocusedElementRef.current, keyItem.prompt, getContextualInformation());
+      }
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       setLoading(true);
       e.preventDefault();
@@ -475,7 +481,7 @@ export default function App() {
     }
     const element: HTMLElement | null = previousFocusedElementRef.current;
     if (element) element.style.color = "black";
-    setAccept(false);
+    acceptRef.current = false;
     close();
   };
   ////
@@ -521,7 +527,7 @@ export default function App() {
           } else {
             clearInterval(interval);
             setLoading(false);
-            setAccept(true);
+            acceptRef.current = true;
             // removeLoadingGifAndAddButton(popover, element);
             // element.focus();
           }
@@ -622,9 +628,6 @@ export default function App() {
   const [confetti, setConfetti] = useRecoilState(navConfettiState);
 
   const { height, width } = useViewportSize();
-
-  const [drawerProspectId, setDrawerProspectId] = useRecoilState(prospectDrawerIdState);
-  const [drawerOpened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
 
   // Select the last used project
   const userToken = useRecoilValue(userTokenState);
@@ -845,7 +848,7 @@ export default function App() {
           <Modal
             opened={opened}
             size={600}
-            onClose={close}
+            onClose={handleAccept}
             title={
               <Flex align={"center"} gap={"xs"}>
                 <IconWand size={"1.4rem"} color="#d33ff1" />
@@ -861,7 +864,7 @@ export default function App() {
               },
             }}
           >
-            <SellScaleAssistModal isLoading={isLoading} handleKeyDown={onKeyDown} isAccpet={isAccpet} handleAccept={handleAccept} />
+            <SellScaleAssistModal isLoading={isLoading} handleKeyDown={onKeyDown} isAccpet={acceptRef.current} handleAccept={handleAccept} />
           </Modal>
         </SpotlightWrapper>
       </MantineProvider>

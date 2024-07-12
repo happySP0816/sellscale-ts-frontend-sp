@@ -7,6 +7,8 @@ import { userTokenState } from "@atoms/userAtoms";
 
 export default function SellScaleAssistModal(props: any) {
   const { isLoading, handleKeyDown, handleAccept, isAccpet } = props;
+
+  const [suggestion, setSuggestion] = useState("");
   const [keyData, setKeyData] = useState([
     {
       title: "Linkedin CTA",
@@ -78,7 +80,15 @@ export default function SellScaleAssistModal(props: any) {
           <img src={logotrial} style={{ width: 80, height: 80 }} />
         </div>
       )}
-      {(!isLoading && !isAccpet) && <Textarea ref={textareaRef} minRows={3} placeholder="Enter your prompt and press Enter to generate, or use one of the hotkeys" onKeyDown={handleKeyDown} />}
+      {(!isLoading && !isAccpet) && (
+        <Textarea
+          ref={textareaRef}
+          minRows={3}
+          placeholder="Enter your prompt and press Enter to generate, or use one of the hotkeys"
+          onKeyDown={handleKeyDown}
+          onChange={(e) => setSuggestion(e.target.value)}
+        />
+      )}
       {isAccpet && (
         <div className="w-full justify-center flex">
           <Button onClick={handleAccept} color="green" mr={0} mt={"md"} style={{ backgroundColor: "#28a745", color: "#fff", fontWeight: "bold", fontSize: "1.1rem" }}>
@@ -87,7 +97,7 @@ export default function SellScaleAssistModal(props: any) {
         </div>
       )}
 
-      {!isLoading && !isAccpet && <Paper radius={"sm"} bg={"#fbfcfe"} p={"sm"} mt={"sm"}>
+      {!isLoading && !isAccpet && suggestion === '' &&  <Paper radius={"sm"} bg={"#fbfcfe"} p={"sm"} mt={"sm"}>
         {/* <Text size={"sm"} color="gray">
           Auto activate one of the hotkeys by pressing 0-9
         </Text> */}
@@ -100,7 +110,7 @@ export default function SellScaleAssistModal(props: any) {
                     {item.title}
                   </Text>
                   <Text color="gray" size={"sm"} fw={500} className="flex items-center gap-1" style={{ whiteSpace: 'nowrap' }}>
-                    Press <Kbd>{navigator.platform.includes('Win') ? 'Windows' : '⌘'} + {item.keyboard}</Kbd>
+                    Press <Kbd>{item.keyboard}</Kbd>
                   </Text>
                 </Flex>
               </Paper>

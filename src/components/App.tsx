@@ -111,7 +111,6 @@ import ResetSegmentModal from "@modals/SegmentV2/ResetSegmentModal";
 import SellScaleAssistModal from "@modals/SellScaleAssistModal";
 import { IconWand } from "@tabler/icons";
 import ICPRoutingCreateModal from "@modals/website/ICPRoutingCreateModal";
-import { a } from "@react-spring/web";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 

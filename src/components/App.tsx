@@ -402,94 +402,19 @@ export default function App() {
   //   };
   // }, [showSuggestion, suggestion]);
 
-  const [textarea, setTextArea] = useState();
   /* Quick Prompt */
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      const modalElement = document.querySelector('.mantine-Paper-root.mantine-Modal-content');
+      if (modalElement && event.metaKey && event.key >= '0' && event.key <= '9') {
+        const keyIndex = parseInt(event.key, 10);
+        const keyItem = keyData.find(item => item.keyboard === keyIndex);
+        if (keyItem) {
+          setLoading(true);
+          typeUserInput(previousFocusedElementRef.current, keyItem.prompt, getContextualInformation());
+        }
+      }
       if (event.metaKey && event.key === "'") {
-        // const activeElement = document.activeElement as HTMLElement;
-        // if (
-        //   activeElement &&
-        //   (activeElement.tagName === "TEXTAREA" ||
-        //     (activeElement.tagName === "DIV" &&
-        //       (activeElement.getAttribute("role") === "textbox" || activeElement.getAttribute("contenteditable") === "true")) ||
-        //     (activeElement.tagName === "INPUT" && (activeElement as HTMLInputElement).type === "text") ||
-        //     (activeElement.classList.contains("mantine-Textarea-input") && activeElement.tagName === "TEXTAREA") ||
-        //     (activeElement.classList.contains("mantine-Input-input") && activeElement.tagName === "TEXTAREA") ||
-        //     (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
-        // ) {
-        //   previousFocusedElementRef.current = activeElement;
-        //   const contextInfo = getContextualInformation(activeElement);
-
-        //   const popover = document.createElement("div");
-        //   popover.style.position = "fixed";
-        //   popover.style.top = "10px";
-        //   popover.style.left = "50%";
-        //   popover.style.transform = "translateX(-50%)";
-        //   popover.style.zIndex = "10000";
-        //   popover.style.backgroundColor = "white";
-        //   popover.style.border = "1px solid #ccc";
-        //   popover.style.padding = "10px";
-        //   popover.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.1)";
-        //   // const stringElement = `
-        //   //   <section class="mantine-Paper-root mantine-Modal-content mantine-Modal-content mantine-15is8t6" role="dialog" tabindex="-1" aria-modal="true" style="transition-property: transform, opacity; transition-duration: 200ms; transition-timing-function: ease; transform-origin: center center; opacity: 1; transform: scale(1);" aria-describedby="mantine-obqnv1gq4-body" aria-labelledby="mantine-obqnv1gq4-title"><div class="mantine-Modal-header mantine-19pz3dh"><h2 class="mantine-Modal-title mantine-1k9itrp" id="mantine-obqnv1gq4-title"><div class="mantine-1iy1luo"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-wand" width="1.4rem" height="1.4rem" viewBox="0 0 24 24" stroke-width="2" stroke="#d33ff1" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><polyline points="6 21 21 6 18 3 3 18 6 21"></polyline><line x1="15" y1="6" x2="18" y2="9"></line><path d="M9 3a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path><path d="M19 13a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path></svg><h3 class="mantine-Text-root mantine-Title-root mantine-o7l2et">SellScale Writing Assist</h3></div></h2><button class="mantine-UnstyledButton-root mantine-ActionIcon-root mantine-CloseButton-root mantine-Modal-close mantine-11u9qu1" type="button"><svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 1rem; height: 1rem;"><path d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg></button></div><div class="mantine-Modal-body mantine-1q36a81" id="mantine-obqnv1gq4-body"><div class="mantine-1avyp1d"><div class="mantine-InputWrapper-root mantine-Textarea-root mantine-1fywkoc"><div class="mantine-Input-wrapper mantine-Textarea-wrapper mantine-1v7s5f8"><textarea class="mantine-Input-input mantine-Textarea-input mantine-10ym0i4" id="mantine-bu01vrbdm" placeholder="Write prompt and press Enter to generate" rows="3" aria-invalid="false"></textarea></div></div><div class="mantine-Paper-root mantine-haj7q3"><div class="mantine-Text-root mantine-ojyuqj">Auto activate one of the hotkeys by pressing 0-9</div><div class="mantine-SimpleGrid-root mantine-b43d9x"><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Linkedin CTA</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">1</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Linkedin Initial Message</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">2</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Linkedin Follow Up</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">3</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Linkedin Break Up</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">4</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Linkedin Subject</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">5</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Email Initial Message</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">6</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Email Follow Up</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">7</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Email Break Up</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">8</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Email Linkedin</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">9</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Email Email</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">0</kbd></div></div></div></div></div></div></div></section>
-        //   // `;
-        //   // popover.innerHTML = stringElement;
-        //   document.body.appendChild(popover);
-
-        //   (popoverRef as React.MutableRefObject<HTMLDivElement | null>).current = popover;
-
-        //   const title = document.createElement("div");
-        //   title.textContent = "Sellscale Quick Prompt";
-        //   title.style.fontStyle = "italic";
-        //   title.style.fontFamily = "Arial";
-        //   title.style.marginBottom = "5px";
-        //   // popover.appendChild(title);
-
-        //   const textarea = document.createElement("textarea");
-        //   textarea.style.width = "300px";
-        //   textarea.style.height = "auto";
-        //   textarea.style.resize = "none";
-        //   textarea.style.overflow = "hidden";
-        //   textarea.value = ""; // Ensure the textarea is completely clear when opened
-        //   textarea.addEventListener("input", handleInput);
-        //   textarea.addEventListener("keydown", (e) => {
-        //     if (e.key === "Escape") {
-        //       e.preventDefault();
-        //       if (popoverRef.current) {
-        //         document.body.removeChild(popoverRef.current);
-        //         if (previousFocusedElementRef.current) {
-        //           if (previousFocusedElementRef.current.classList.contains("tiptap") && previousFocusedElementRef.current.classList.contains("ProseMirror")) {
-        //             previousFocusedElementRef.current.innerHTML = "";
-        //             previousFocusedElementRef.current.style.color = "black";
-        //             previousFocusedElementRef.current.focus();
-        //           } else {
-        //             (previousFocusedElementRef.current as HTMLTextAreaElement).value = "";
-        //             (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = "black";
-        //             (previousFocusedElementRef.current as HTMLTextAreaElement).focus();
-        //           }
-        //         }
-        //       }
-        //     }
-        //     if (e.key === "Enter" && !e.shiftKey) {
-        //       e.preventDefault();
-        //       if (!textarea.dataset.enterPressed) {
-        //         textarea.dataset.enterPressed = "true";
-        //         showLoadingGif(popover);
-        //         typeUserInput(previousFocusedElementRef.current, textarea.value, popover, contextInfo);
-        //       }
-        //     } else if (e.key === "Enter" && e.shiftKey) {
-        //       e.preventDefault();
-        //       const start = textarea.selectionStart;
-        //       const end = textarea.selectionEnd;
-        //       textarea.value = textarea.value.substring(0, start) + "\n" + textarea.value.substring(end);
-        //       textarea.selectionStart = textarea.selectionEnd = start + 1;
-        //     }
-        //   });
-        //   // popover.appendChild(textarea);
-        //   textarea.focus();
-        // }
-
         const activeElement = document.activeElement as HTMLElement;
         if (
           activeElement &&
@@ -503,7 +428,9 @@ export default function App() {
         ) {
           previousFocusedElementRef.current = activeElement;
         }
-        open();
+        if (previousFocusedElementRef.current && document.contains(previousFocusedElementRef.current)) {
+          open();
+        }
       } else if (event.metaKey && event.key === "Enter") {
         const activeElement = document.activeElement as HTMLElement;
         if (activeElement && activeElement.tagName === "TEXTAREA") {
@@ -521,21 +448,6 @@ export default function App() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
-
-  const handleInput = (event: Event) => {
-    const target = event.target as HTMLTextAreaElement;
-    target.style.height = "auto";
-    target.style.height = `${target.scrollHeight}px`;
-  };
-
-  const showLoadingGif = (popover: HTMLDivElement) => {
-    const loadingGif = document.createElement("img");
-    loadingGif.src = logotrial;
-    loadingGif.style.display = "block";
-    loadingGif.style.margin = "10px auto";
-    loadingGif.style.width = "50px";
-    popover.appendChild(loadingGif);
-  };
 
   ////
   const onKeyDown = (e: any) => {
@@ -621,71 +533,6 @@ export default function App() {
       });
   };
 
-  const removeLoadingGifAndAddButton = (popover: HTMLDivElement, element: HTMLElement) => {
-    const loadingGif = popover.querySelector("img");
-    if (loadingGif) {
-      popover.removeChild(loadingGif);
-    }
-
-    const acceptButton = document.createElement("button");
-    acceptButton.textContent = "Accept";
-    acceptButton.style.backgroundColor = "#87CEEB";
-    acceptButton.style.color = "white";
-    acceptButton.style.border = "none";
-    acceptButton.style.padding = "5px 10px";
-    acceptButton.style.cursor = "pointer";
-    acceptButton.style.borderRadius = "4px";
-    acceptButton.addEventListener("click", () => {
-      acceptGeneration(popover, element);
-      document.removeEventListener("click", handleClickOutside);
-    });
-    popover.appendChild(acceptButton);
-
-    const handleClickOutside = (event: MouseEvent) => {
-      console.log("popover is", popoverRef.current);
-      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-        if (previousFocusedElementRef.current) {
-          if (previousFocusedElementRef.current.classList.contains("tiptap") && previousFocusedElementRef.current.classList.contains("ProseMirror")) {
-            previousFocusedElementRef.current.innerHTML = "";
-            previousFocusedElementRef.current.style.color = "black";
-          } else {
-            (previousFocusedElementRef.current as HTMLTextAreaElement).value = "";
-            (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = "black";
-          }
-        }
-        if (popoverRef.current.parentNode) {
-          popoverRef.current.parentNode.removeChild(popoverRef.current);
-        }
-        document.removeEventListener("click", handleClickOutside);
-      }
-      popoverRef.current = null;
-    };
-
-    document.addEventListener("click", handleClickOutside);
-
-    // Add keydown event listener to the document to handle the Enter key
-
-    (element as HTMLTextAreaElement).style.color = "green";
-  };
-
-  const acceptGeneration = (popover: HTMLDivElement, element: HTMLElement) => {
-    if (previousFocusedElementRef.current) {
-      const event = new Event("input", { bubbles: true });
-      (previousFocusedElementRef.current as HTMLTextAreaElement).value = (element as HTMLTextAreaElement).value;
-      previousFocusedElementRef.current.dispatchEvent(event);
-      previousFocusedElementRef.current.focus();
-      // Hack to trigger setState
-      setTimeout(() => {
-        (previousFocusedElementRef.current as HTMLTextAreaElement).value += " ";
-        setTimeout(() => {
-          (previousFocusedElementRef.current as HTMLTextAreaElement).value = (previousFocusedElementRef.current as HTMLTextAreaElement).value.trim();
-        }, 20); // Adjust the delay as needed
-      }, 20); // Adjust the delay as needed
-    }
-    (element as HTMLTextAreaElement).style.color = "black";
-    document.body.removeChild(popover);
-    popoverRef.current = null;
-  };
 
   // const getContextualInformation = (element: HTMLElement): string => {
   const getContextualInformation = (): string => {
@@ -835,42 +682,52 @@ export default function App() {
     {
       title: "Linkedin CTA",
       keyboard: 1,
+      prompt: "Please write a compelling call-to-action for LinkedIn. Do not use any placeholders."
     },
     {
       title: "Linkedin Initial Message",
       keyboard: 2,
+      prompt: "Please draft an engaging initial message for LinkedIn. Do not use any placeholders."
     },
     {
       title: "Linkedin Follow Up",
       keyboard: 3,
+      prompt: "Please create a follow-up message for LinkedIn. Do not use any placeholders."
     },
     {
       title: "Linkedin Break Up",
       keyboard: 4,
+      prompt: "Please write a break-up message for LinkedIn. Do not use any placeholders."
     },
     {
       title: "Linkedin Subject",
       keyboard: 5,
+      prompt: "Please provide a subject line for a LinkedIn message.  Do not use any placeholders."
     },
     {
       title: "Email Initial Message",
       keyboard: 6,
+      prompt: "Please draft an initial email message. Do not use any placeholders."
     },
     {
       title: "Email Follow Up",
       keyboard: 7,
+      prompt: "Please create a follow-up email message. Do not use any placeholders."
     },
     {
       title: "Email Break Up",
       keyboard: 8,
+      prompt: "Please write a break-up email message. Do not use any placeholders."
     },
     {
       title: "Email Linkedin",
       keyboard: 9,
+      prompt: "Please draft an email response that references LinkedIn. Do not use any placeholders."
     },
     {
       title: "Email Email",
       keyboard: 0,
+      prompt: "Please draft an email message response given the context. Do not use any placeholders."
     },
   ]);
 
@@ -999,6 +856,9 @@ export default function App() {
             styles={{
               inner: {
                 zIndex: 1000,
+              },
+              overlay: {
+                backgroundColor: 'transparent',
               },
             }}
           >

@@ -11,14 +11,21 @@ import OngoingScrapes from "./OngoingScrapes";
 import ProspectUploadHistory from "@common/settings/History/ProspectUploadHistory";
 import Personas from "./Personas";
 import SegmentV2 from "@pages/SegmentV2/SegmentV2";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SellScaleSonar from "@common/settings/Sonar/SellscaleSonar";
 import SegmentV3 from "@pages/SegmentV3/SegmentV3";
 import GlobalContactsPage from "@common/settings/GlobalContacts/GlobalContactsPage";
+import ContactsGlobe from "@common/settings/GlobalContacts/ContactsGlobe";
 
 const ContactOverview = () => {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
+
+  const [showGlobeTab, setShowGlobeTab] = useState(false);
+
+  useEffect(() => {
+    if (userData?.client.id === 1) {setShowGlobeTab(true);}
+  }, []);
 
   const [tabValue, setTabValue] = useState("segments");
 
@@ -41,6 +48,10 @@ const ContactOverview = () => {
             <IconChartArcs size="0.8rem" style={{ marginRight: "8px", marginTop: "4px" }} />
             Global Contacts
           </Tabs.Tab>
+          {showGlobeTab && <Tabs.Tab value="globe_view">
+            <IconMap size="0.8rem" style={{ marginRight: "8px", marginTop: "4px" }} />
+            Contacts Geo-view
+          </Tabs.Tab>}
           <Tabs.Tab value="sonar" mt={6} ml="auto">
             <IconRadar size="0.8rem" style={{ marginRight: "8px", marginTop: "4px" }} />
             Sonar
@@ -77,6 +88,10 @@ const ContactOverview = () => {
         )}
         <Tabs.Panel value="global_contacts">
           <GlobalContactsPage />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="globe_view">
+          <ContactsGlobe />
         </Tabs.Panel>
 
         <Tabs.Panel value="upload_overview">

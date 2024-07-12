@@ -1,8 +1,22 @@
-import { MantineProvider, ColorSchemeProvider, LoadingOverlay, ColorScheme } from "@mantine/core";
+import {
+  MantineProvider,
+  ColorSchemeProvider,
+  LoadingOverlay,
+  ColorScheme,
+  Title,
+  Flex,
+  Modal,
+  Textarea,
+  Paper,
+  Text,
+  SimpleGrid,
+  Kbd,
+  Button,
+} from "@mantine/core";
 
 import Layout from "./nav/Layout";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
-import { ModalsProvider } from "@mantine/modals";
+import { ModalsProvider, openContextModal } from "@mantine/modals";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { navConfettiState, navLoadingState } from "@atoms/navAtoms";
 import SpotlightWrapper from "@nav/SpotlightWrapper";
@@ -12,7 +26,7 @@ import InstructionsLinkedInCookieModal from "@modals/InstructionsLinkedInCookieM
 import CreateNewCTAModal from "@modals/CreateNewCTAModal";
 import logotrial from "../components/PersonaCampaigns/Logo-Trial-3.gif";
 import ViewEmailModal from "@modals/ViewEmailModal";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import SequenceWriterModal from "@modals/SequenceWriterModal";
 import CTAGeneratorModal from "@modals/CTAGeneratorModal";
@@ -47,7 +61,7 @@ import { getPersonasOverview } from "@utils/requests/getPersonas";
 import { PersonaOverview } from "src";
 import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
 import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
-import { useViewportSize } from "@mantine/hooks";
+import { useDisclosure, useViewportSize } from "@mantine/hooks";
 import Confetti from "react-confetti";
 import LiTemplateModal from "@modals/LiTemplateModal";
 import { SOCKET_SERVICE_URL } from "@constants/data";
@@ -94,6 +108,8 @@ import StrategyPreviewModal from "@modals/AIBrain/StrategyPreviewModal";
 import SelectStrategyModal from "@modals/SelectStrategyModal";
 import PreFiltersV2EditModal from "@modals/PrefiltersV2/PrefilterV2EditModal";
 import ResetSegmentModal from "@modals/SegmentV2/ResetSegmentModal";
+import SellScaleAssistModal from "@modals/SellScaleAssistModal";
+import { IconWand } from "@tabler/icons";
 import ICPRoutingCreateModal from "@modals/website/ICPRoutingCreateModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
@@ -128,6 +144,8 @@ export default function App() {
 
   const [suggestion, setSuggestion] = useState<string>("");
   const [showSuggestion, setShowSuggestion] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [isAccpet, setAccept] = useState<boolean>(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const suggestionInputRef = useRef<string>("");
   const previousValueRef = useRef<string>("");
@@ -344,48 +362,58 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    let lastKeyPressed: string | null = null;
+  // useEffect(() => {
+  //   let lastKeyPressed: string | null = null;
 
-    const handleInput = (event: Event) => {
-      const activeElement = document.activeElement as HTMLElement;
-      if (
-        activeElement &&
-        (activeElement.tagName === "TEXTAREA" ||
-          (activeElement.tagName === "DIV" && (activeElement.getAttribute("role") === "textbox" || activeElement.getAttribute("contenteditable") === "true")) ||
-          (activeElement.tagName === "INPUT" && (activeElement as HTMLInputElement).type === "text") ||
-          (activeElement.classList.contains("mantine-Textarea-input") && activeElement.tagName === "TEXTAREA") ||
-          (activeElement.classList.contains("mantine-Input-input") && activeElement.tagName === "TEXTAREA") ||
-          (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
-      ) {
-        // Ensure the suggestion component does not run within the quick prompt
-        if (!popoverRef.current) {
-          activeElement.addEventListener("input", (e) => {
-            if (lastKeyPressed !== "Backspace" && lastKeyPressed !== "Delete") {
-              handleInputWithSuggestion(e);
-            }
-          });
-          activeElement.addEventListener("keydown", handleKeyDownWithSuggestion);
-          activeElement.addEventListener("keydown", (e) => {
-            lastKeyPressed = e.key;
-            if (e.key === "Tab") {
-              e.preventDefault();
-              handleKeyDownWithSuggestion(e as unknown as KeyboardEvent);
-            }
-          });
-        }
-      }
-    };
+  //   const handleInput = (event: Event) => {
+  //     const activeElement = document.activeElement as HTMLElement;
+  //     if (
+  //       activeElement &&
+  //       (activeElement.tagName === "TEXTAREA" ||
+  //         (activeElement.tagName === "DIV" && (activeElement.getAttribute("role") === "textbox" || activeElement.getAttribute("contenteditable") === "true")) ||
+  //         (activeElement.tagName === "INPUT" && (activeElement as HTMLInputElement).type === "text") ||
+  //         (activeElement.classList.contains("mantine-Textarea-input") && activeElement.tagName === "TEXTAREA") ||
+  //         (activeElement.classList.contains("mantine-Input-input") && activeElement.tagName === "TEXTAREA") ||
+  //         (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
+  //     ) {
+  //       // Ensure the suggestion component does not run within the quick prompt
+  //       if (!popoverRef.current) {
+  //         activeElement.addEventListener("input", (e) => {
+  //           if (lastKeyPressed !== "Backspace" && lastKeyPressed !== "Delete") {
+  //             handleInputWithSuggestion(e);
+  //           }
+  //         });
+  //         activeElement.addEventListener("keydown", handleKeyDownWithSuggestion);
+  //         activeElement.addEventListener("keydown", (e) => {
+  //           lastKeyPressed = e.key;
+  //           if (e.key === "Tab") {
+  //             e.preventDefault();
+  //             handleKeyDownWithSuggestion(e as unknown as KeyboardEvent);
+  //           }
+  //         });
+  //       }
+  //     }
+  //   };
 
-    document.addEventListener("focusin", handleInput);
+  //   document.addEventListener("focusin", handleInput);
 
-    return () => {
-      document.removeEventListener("focusin", handleInput);
-    };
-  }, [showSuggestion, suggestion]);
+  //   return () => {
+  //     document.removeEventListener("focusin", handleInput);
+  //   };
+  // }, [showSuggestion, suggestion]);
+
   /* Quick Prompt */
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      const modalElement = document.querySelector('.mantine-Paper-root.mantine-Modal-content');
+      if (modalElement && event.metaKey && event.key >= '0' && event.key <= '9') {
+        const keyIndex = parseInt(event.key, 10);
+        const keyItem = keyData.find(item => item.keyboard === keyIndex);
+        if (keyItem) {
+          setLoading(true);
+          typeUserInput(previousFocusedElementRef.current, keyItem.prompt, getContextualInformation());
+        }
+      }
       if (event.metaKey && event.key === "'") {
         const activeElement = document.activeElement as HTMLElement;
         if (
@@ -399,70 +427,9 @@ export default function App() {
             (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
         ) {
           previousFocusedElementRef.current = activeElement;
-          const contextInfo = getContextualInformation(activeElement);
-
-          const popover = document.createElement("div");
-          popover.style.position = "fixed";
-          popover.style.top = "10px";
-          popover.style.left = "50%";
-          popover.style.transform = "translateX(-50%)";
-          popover.style.zIndex = "10000";
-          popover.style.backgroundColor = "white";
-          popover.style.border = "1px solid #ccc";
-          popover.style.padding = "10px";
-          popover.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.1)";
-          document.body.appendChild(popover);
-          (popoverRef as React.MutableRefObject<HTMLDivElement | null>).current = popover;
-
-          const title = document.createElement("div");
-          title.textContent = "Sellscale Quick Prompt";
-          title.style.fontStyle = "italic";
-          title.style.fontFamily = "Arial";
-          title.style.marginBottom = "5px";
-          popover.appendChild(title);
-
-          const textarea = document.createElement("textarea");
-          textarea.style.width = "300px";
-          textarea.style.height = "auto";
-          textarea.style.resize = "none";
-          textarea.style.overflow = "hidden";
-          textarea.value = ""; // Ensure the textarea is completely clear when opened
-          textarea.addEventListener("input", handleInput);
-          textarea.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") {
-              e.preventDefault();
-              if (popoverRef.current) {
-                document.body.removeChild(popoverRef.current);
-                if (previousFocusedElementRef.current) {
-                  if (previousFocusedElementRef.current.classList.contains("tiptap") && previousFocusedElementRef.current.classList.contains("ProseMirror")) {
-                    previousFocusedElementRef.current.innerHTML = "";
-                    previousFocusedElementRef.current.style.color = "black";
-                    previousFocusedElementRef.current.focus();
-                  } else {
-                    (previousFocusedElementRef.current as HTMLTextAreaElement).value = "";
-                    (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = "black";
-                    (previousFocusedElementRef.current as HTMLTextAreaElement).focus();
-                  }
-                }
-              }
-            }
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              if (!textarea.dataset.enterPressed) {
-                textarea.dataset.enterPressed = "true";
-                showLoadingGif(popover);
-                typeUserInput(previousFocusedElementRef.current, textarea.value, popover, contextInfo);
-              }
-            } else if (e.key === "Enter" && e.shiftKey) {
-              e.preventDefault();
-              const start = textarea.selectionStart;
-              const end = textarea.selectionEnd;
-              textarea.value = textarea.value.substring(0, start) + "\n" + textarea.value.substring(end);
-              textarea.selectionStart = textarea.selectionEnd = start + 1;
-            }
-          });
-          popover.appendChild(textarea);
-          textarea.focus();
+        }
+        if (previousFocusedElementRef.current && document.contains(previousFocusedElementRef.current)) {
+          open();
         }
       } else if (event.metaKey && event.key === "Enter") {
         const activeElement = document.activeElement as HTMLElement;
@@ -470,6 +437,9 @@ export default function App() {
           activeElement.blur();
         }
       }
+      // if (event.key.length === 1 && !isNaN(Number(event.key))) {
+      //   alert(`You are pressed ${event.key}`);
+      // }
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -479,22 +449,39 @@ export default function App() {
     };
   }, []);
 
-  const handleInput = (event: Event) => {
-    const target = event.target as HTMLTextAreaElement;
-    target.style.height = "auto";
-    target.style.height = `${target.scrollHeight}px`;
+  ////
+  const onKeyDown = (e: any) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      setLoading(true);
+      e.preventDefault();
+      const contextInfo = getContextualInformation();
+      console.log(previousFocusedElementRef.current);
+      typeUserInput(previousFocusedElementRef.current, e.target.value, contextInfo);
+    }
   };
 
-  const showLoadingGif = (popover: HTMLDivElement) => {
-    const loadingGif = document.createElement("img");
-    loadingGif.src = logotrial;
-    loadingGif.style.display = "block";
-    loadingGif.style.margin = "10px auto";
-    loadingGif.style.width = "50px";
-    popover.appendChild(loadingGif);
-  };
+  const handleAccept = () => {
+    if (previousFocusedElementRef.current) {
+      const event = new Event("input", { bubbles: true });
 
-  const typeUserInput = (element: HTMLElement | null, userInput: string, popover: HTMLDivElement, contextInfo: any) => {
+      previousFocusedElementRef.current.dispatchEvent(event);
+      previousFocusedElementRef.current.focus();
+      setTimeout(() => {
+        (previousFocusedElementRef.current as HTMLTextAreaElement).value += " ";
+        setTimeout(() => {
+          (previousFocusedElementRef.current as HTMLTextAreaElement).value = (previousFocusedElementRef.current as HTMLTextAreaElement).value.trim();
+        }, 20);
+      }, 20);
+    }
+    const element: HTMLElement | null = previousFocusedElementRef.current;
+    if (element) element.style.color = "black";
+    setAccept(false);
+    close();
+  };
+  ////
+
+  // const typeUserInput = (element: HTMLElement | null, userInput: string, popover: HTMLDivElement, contextInfo: any) => {
+  const typeUserInput = (element: HTMLElement | null, userInput: string, contextInfo: any) => {
     if (!element) return;
     let index = 0;
 
@@ -513,6 +500,7 @@ export default function App() {
           if (index < res.response.length) {
             const char = res.response.charAt(index);
             if (element.classList.contains("tiptap") && element.classList.contains("ProseMirror")) {
+              element.style.color = "green";
               element.innerText = element.innerText + (index === 0 && char === " " ? "" : char);
             } else {
               const textarea = element as HTMLTextAreaElement;
@@ -527,13 +515,16 @@ export default function App() {
               if (tracker) {
                 tracker.setValue(value);
               }
+              element.style.color = "green";
               textarea.dispatchEvent(new Event("input", { bubbles: true }));
             }
             index += 1;
           } else {
             clearInterval(interval);
-            removeLoadingGifAndAddButton(popover, element);
-            element.focus();
+            setLoading(false);
+            setAccept(true);
+            // removeLoadingGifAndAddButton(popover, element);
+            // element.focus();
           }
         }, 1);
       })
@@ -542,117 +533,53 @@ export default function App() {
       });
   };
 
-  const removeLoadingGifAndAddButton = (popover: HTMLDivElement, element: HTMLElement) => {
-    const loadingGif = popover.querySelector("img");
-    if (loadingGif) {
-      popover.removeChild(loadingGif);
-    }
 
-    const acceptButton = document.createElement("button");
-    acceptButton.textContent = "Accept";
-    acceptButton.style.backgroundColor = "#87CEEB";
-    acceptButton.style.color = "white";
-    acceptButton.style.border = "none";
-    acceptButton.style.padding = "5px 10px";
-    acceptButton.style.cursor = "pointer";
-    acceptButton.style.borderRadius = "4px";
-    acceptButton.addEventListener("click", () => {
-      acceptGeneration(popover, element);
-      document.removeEventListener("click", handleClickOutside);
-    });
-    popover.appendChild(acceptButton);
-
-    const handleClickOutside = (event: MouseEvent) => {
-      console.log("popover is", popoverRef.current);
-      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-        if (previousFocusedElementRef.current) {
-          if (previousFocusedElementRef.current.classList.contains("tiptap") && previousFocusedElementRef.current.classList.contains("ProseMirror")) {
-            previousFocusedElementRef.current.innerHTML = "";
-            previousFocusedElementRef.current.style.color = "black";
-          } else {
-            (previousFocusedElementRef.current as HTMLTextAreaElement).value = "";
-            (previousFocusedElementRef.current as HTMLTextAreaElement).style.color = "black";
-          }
-        }
-        if (popoverRef.current.parentNode) {
-          popoverRef.current.parentNode.removeChild(popoverRef.current);
-        }
-        document.removeEventListener("click", handleClickOutside);
-      }
-      popoverRef.current = null;
-    };
-
-    document.addEventListener("click", handleClickOutside);
-
-    // Add keydown event listener to the document to handle the Enter key
-
-    (element as HTMLTextAreaElement).style.color = "green";
-  };
-
-  const acceptGeneration = (popover: HTMLDivElement, element: HTMLElement) => {
-    if (previousFocusedElementRef.current) {
-      const event = new Event("input", { bubbles: true });
-      (previousFocusedElementRef.current as HTMLTextAreaElement).value = (element as HTMLTextAreaElement).value;
-      previousFocusedElementRef.current.dispatchEvent(event);
-      previousFocusedElementRef.current.focus();
-      // Hack to trigger setState
-      setTimeout(() => {
-        (previousFocusedElementRef.current as HTMLTextAreaElement).value += " ";
-        setTimeout(() => {
-          (previousFocusedElementRef.current as HTMLTextAreaElement).value = (previousFocusedElementRef.current as HTMLTextAreaElement).value.trim();
-        }, 20); // Adjust the delay as needed
-      }, 20); // Adjust the delay as needed
-    }
-    (element as HTMLTextAreaElement).style.color = "black";
-    document.body.removeChild(popover);
-    popoverRef.current = null;
-  };
-
-  const getContextualInformation = (element: HTMLElement): string => {
+  // const getContextualInformation = (element: HTMLElement): string => {
+  const getContextualInformation = (): string => {
     let context = "";
-    if (window.location.href.includes("/inbox")) {
-      context = "Here is the conversation, I reached out first: \n";
-      const messageElements = document.querySelectorAll('div[style="font-size: 0.875rem;"], div.line-clamp-4');
-      let lineClampCount = 0;
-      let fontSizeCount = 0;
+    // if (window.location.href.includes("/inbox")) {
+    context = "Here is the conversation, I reached out first: \n";
+    const messageElements = document.querySelectorAll('div[style="font-size: 0.875rem;"], div.line-clamp-4');
+    let lineClampCount = 0;
+    let fontSizeCount = 0;
 
-      messageElements.forEach((messageElement) => {
-        if (messageElement.classList.contains("line-clamp-4")) {
-          lineClampCount++;
-        } else if (messageElement.getAttribute("style") === "font-size: 0.875rem;") {
-          fontSizeCount++;
-        }
-      });
-
-      if (lineClampCount > fontSizeCount) {
-        context += "These are emails, please try to follow my tone as close as possible, do not use markdown. use newlines for formatting. \n";
-      } else if (fontSizeCount > lineClampCount) {
-        context += "These are LinkedIn messages, so please be more casual, or try to follow my tone as close as possible.: \n";
+    messageElements.forEach((messageElement) => {
+      if (messageElement.classList.contains("line-clamp-4")) {
+        lineClampCount++;
+      } else if (messageElement.getAttribute("style") === "font-size: 0.875rem;") {
+        fontSizeCount++;
       }
+    });
 
-      messageElements.forEach((messageElement) => {
-        const messageText = messageElement.innerHTML?.trim();
-        if (messageText) {
-          context += ` ${messageText} \n`;
-        }
-      });
-
-      return context;
+    if (lineClampCount > fontSizeCount) {
+      context += "These are emails, please try to follow my tone as close as possible, do not use markdown. use newlines for formatting. \n";
+    } else if (fontSizeCount > lineClampCount) {
+      context += "These are LinkedIn messages, so please be more casual, or try to follow my tone as close as possible.: \n";
     }
-    const MAX_PARENT_COUNT = 6;
-    let currentElement: HTMLElement | null = element;
-    let parentCount = 0;
 
-    while (currentElement && parentCount < MAX_PARENT_COUNT) {
-      const textContent = currentElement.textContent?.trim();
-      if (textContent) {
-        context = `${textContent} ${context}`;
+    messageElements.forEach((messageElement) => {
+      const messageText = messageElement.innerHTML?.trim();
+      if (messageText) {
+        context += ` ${messageText} \n`;
       }
-      currentElement = currentElement.parentElement;
-      parentCount++;
-    }
-    let ret = context.trim();
-    return ret;
+    });
+
+    return context;
+    // }
+    // const MAX_PARENT_COUNT = 6;
+    // let currentElement: HTMLElement | null = element;
+    // let parentCount = 0;
+
+    // while (currentElement && parentCount < MAX_PARENT_COUNT) {
+    //   const textContent = currentElement.textContent?.trim();
+    //   if (textContent) {
+    //     context = `${textContent} ${context}`;
+    //   }
+    //   currentElement = currentElement.parentElement;
+    //   parentCount++;
+    // }
+    // let ret = context.trim();
+    // return ret;
   };
   // Socket.IO Connection
   // useEffect(() => {
@@ -749,6 +676,61 @@ export default function App() {
     })();
   }, [location]);
 
+  const [opened, { open, close }] = useDisclosure(false);
+
+  const [keyData, setKeyData] = useState([
+    {
+      title: "Linkedin CTA",
+      keyboard: 1,
+      prompt: "Please write a compelling call-to-action for LinkedIn. Do not use any placeholders."
+    },
+    {
+      title: "Linkedin Initial Message",
+      keyboard: 2,
+      prompt: "Please draft an engaging initial message for LinkedIn. Do not use any placeholders."
+    },
+    {
+      title: "Linkedin Follow Up",
+      keyboard: 3,
+      prompt: "Please create a follow-up message for LinkedIn. Do not use any placeholders."
+    },
+    {
+      title: "Linkedin Break Up",
+      keyboard: 4,
+      prompt: "Please write a break-up message for LinkedIn. Do not use any placeholders."
+    },
+    {
+      title: "Linkedin Subject",
+      keyboard: 5,
+      prompt: "Please provide a subject line for a LinkedIn message.  Do not use any placeholders."
+    },
+    {
+      title: "Email Initial Message",
+      keyboard: 6,
+      prompt: "Please draft an initial email message. Do not use any placeholders."
+    },
+    {
+      title: "Email Follow Up",
+      keyboard: 7,
+      prompt: "Please create a follow-up email message. Do not use any placeholders."
+    },
+    {
+      title: "Email Break Up",
+      keyboard: 8,
+      prompt: "Please write a break-up email message. Do not use any placeholders."
+    },
+    {
+      title: "Email Linkedin",
+      keyboard: 9,
+      prompt: "Please draft an email response that references LinkedIn. Do not use any placeholders."
+    },
+    {
+      title: "Email Email",
+      keyboard: 0,
+      prompt: "Please draft an email message response given the context. Do not use any placeholders."
+    },
+  ]);
+
   return (
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider
@@ -836,6 +818,7 @@ export default function App() {
               previewStrategy: StrategyPreviewModal,
               strategySelectModal: SelectStrategyModal,
               prefilterEditModal: PreFiltersV2EditModal,
+              assistmodal: SellScaleAssistModal,
               createICProutingModal: ICPRoutingCreateModal,
             }}
             modalProps={{
@@ -860,6 +843,27 @@ export default function App() {
             />
             {isLoggedIn() && <ProspectDetailsDrawer />}
           </ModalsProvider>
+          <Modal
+            opened={opened}
+            size={600}
+            onClose={close}
+            title={
+              <Flex align={"center"} gap={"xs"}>
+                <IconWand size={"1.4rem"} color="#d33ff1" />
+                <Title order={3}>SellScale Writing Assist</Title>
+              </Flex>
+            }
+            styles={{
+              inner: {
+                zIndex: 1000,
+              },
+              overlay: {
+                backgroundColor: 'transparent',
+              },
+            }}
+          >
+            <SellScaleAssistModal isLoading={isLoading} handleKeyDown={onKeyDown} isAccpet={isAccpet} handleAccept={handleAccept} />
+          </Modal>
         </SpotlightWrapper>
       </MantineProvider>
     </ColorSchemeProvider>

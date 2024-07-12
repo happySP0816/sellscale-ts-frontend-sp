@@ -67,7 +67,7 @@ export default function CustomAccordionV1(props: any) {
           )}
           <MultiSelect
             withinPortal
-            variant={selectedData.length ? "unstyled" : "default"}
+            variant="default"
             data={
               data !== null
                 ? data

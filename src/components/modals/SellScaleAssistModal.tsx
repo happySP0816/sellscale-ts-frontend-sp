@@ -50,42 +50,7 @@ export default function SellScaleAssistModal(props: any) {
     },
   ]);
 
-  const previousFocusedElementRef = useRef<HTMLElement | null>(null);
-  const popoverRef = useRef<HTMLDivElement | null>(null);
-  const userToken = useRecoilValue(userTokenState);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey && event.key === "'") {
-        const activeElement = document.activeElement as HTMLElement;
-        if (
-          activeElement &&
-          (activeElement.tagName === "TEXTAREA" ||
-            (activeElement.tagName === "DIV" &&
-              (activeElement.getAttribute("role") === "textbox" || activeElement.getAttribute("contenteditable") === "true")) ||
-            (activeElement.tagName === "INPUT" && (activeElement as HTMLInputElement).type === "text") ||
-            (activeElement.classList.contains("mantine-Textarea-input") && activeElement.tagName === "TEXTAREA") ||
-            (activeElement.classList.contains("mantine-Input-input") && activeElement.tagName === "TEXTAREA") ||
-            (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
-        ) {
-          previousFocusedElementRef.current = activeElement;
-        }
-        open();
-      } else if (event.metaKey && event.key === "Enter") {
-        const activeElement = document.activeElement as HTMLElement;
-        if (activeElement && activeElement.tagName === "TEXTAREA") {
-          activeElement.blur();
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
 
   useEffect(() => {
     setTimeout(() => {
@@ -95,41 +60,11 @@ export default function SellScaleAssistModal(props: any) {
     }, 50);
   }, [open]);
 
-  const getContextualInformation = (): string => {
-    let context = "Here is the conversation, I reached out first: \n";
-    const messageElements = document.querySelectorAll('div[style="font-size: 0.875rem;"], div.line-clamp-4');
-    let lineClampCount = 0;
-    let fontSizeCount = 0;
-
-    messageElements.forEach((messageElement) => {
-      if (messageElement.classList.contains("line-clamp-4")) {
-        lineClampCount++;
-      } else if (messageElement.getAttribute("style") === "font-size: 0.875rem;") {
-        fontSizeCount++;
-      }
-    });
-
-    if (lineClampCount > fontSizeCount) {
-      context += "These are emails, please try to follow my tone as close as possible, do not use markdown. use newlines for formatting. \n";
-    } else if (fontSizeCount > lineClampCount) {
-      context += "These are LinkedIn messages, so please be more casual, or try to follow my tone as close as possible.: \n";
-    }
-
-    messageElements.forEach((messageElement) => {
-      const messageText = messageElement.innerHTML?.trim();
-      if (messageText) {
-        context += ` ${messageText} \n`;
-      }
-    });
-
-    return context;
-  };
-
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", minHeight: "80px" }}>
       {isLoading && (
-        <div
-          style={{
+      <div
+        style={{
             width: "100%",
             height: "100%",
             position: "absolute",
@@ -143,11 +78,11 @@ export default function SellScaleAssistModal(props: any) {
           <img src={logotrial} style={{ width: 80, height: 80 }} />
         </div>
       )}
-      <Textarea ref={textareaRef} minRows={3} placeholder="Enter your prompt and press Enter to generate, or use one of the hotkeys" onKeyDown={handleKeyDown} />
+      {(!isLoading && !isAccpet) && <Textarea ref={textareaRef} minRows={3} placeholder="Enter your prompt and press Enter to generate, or use one of the hotkeys" onKeyDown={handleKeyDown} />}
       {isAccpet && (
-        <div className="w-full justify-end flex">
-          <Button onClick={handleAccept} color="green" mr={0} mt={"md"}>
-            Accept
+        <div className="w-full justify-center flex">
+          <Button onClick={handleAccept} color="green" mr={0} mt={"md"} style={{ backgroundColor: "#28a745", color: "#fff", fontWeight: "bold", fontSize: "1.1rem" }}>
+             Accept {"\u23CE"}
           </Button>
         </div>
       )}

@@ -504,14 +504,13 @@ export default function App() {
               element.innerText = element.innerText + (index === 0 && char === " " ? "" : char);
             } else {
               const textarea = element as HTMLTextAreaElement;
-              const start = textarea.selectionStart;
-              const end = textarea.selectionEnd;
               const value = textarea.value || "";
-              textarea.value = value.slice(0, start) + char + value.slice(end);
+              const start = textarea.selectionStart;
+              textarea.value = value.slice(0, start) + char + value.slice(start);
               textarea.selectionStart = textarea.selectionEnd = start + 1;
 
-              // hack React16 内部定义了descriptor拦截value，此处重置状态
-              let tracker = (textarea as any)._valueTracker;
+              // Reset React16 internal value tracker
+              const tracker = (textarea as any)._valueTracker;
               if (tracker) {
                 tracker.setValue(value);
               }

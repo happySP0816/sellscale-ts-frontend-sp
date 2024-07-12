@@ -629,6 +629,9 @@ export default function App() {
 
   const { height, width } = useViewportSize();
 
+  const [drawerProspectId, setDrawerProspectId] = useRecoilState(prospectDrawerIdState);
+  const [drawerOpened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
+
   // Select the last used project
   const userToken = useRecoilValue(userTokenState);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);

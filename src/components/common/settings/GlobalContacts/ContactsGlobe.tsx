@@ -7,11 +7,13 @@ import {
   Card,
   useMantineTheme,
 } from "@mantine/core";
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import { Map, Marker, ZoomControl } from "pigeon-maps";
+import { osm } from "pigeon-maps/providers";
+import { useState } from "react";
 
 export default function ContactsGlobe() {
   const theme = useMantineTheme();
+  const [hoveredPin, setHoveredPin] = useState<number | null>(null);
 
   const samplePins = [
     { position: [40.7128, -74.0060], city: "New York, NY", name: "John Doe" },
@@ -42,16 +44,20 @@ export default function ContactsGlobe() {
           position: "relative",
         }}
       >
-        <MapContainer 
-          bounds={[[24.396308, -125.0], [49.384358, -66.93457]]} // Setting bounds to cover the U.S.
-          style={{ height: "100%", width: "100%", borderRadius: theme.radius.md }}
+        <Map
+          provider={osm}
+          defaultCenter={[37.7749, -122.4194]}
+          defaultZoom={4}
         >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
           {samplePins.map((pin, index) => (
-            <Marker key={index} position={pin.position}>
-              <Popup>
+            <Marker
+              key={index}
+              width={50}
+              anchor={pin.position as [number, number]}
+              onMouseOver={() => setHoveredPin(index)}
+              onMouseOut={() => setHoveredPin(null)}
+            >
+              {hoveredPin === index ? (
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Avatar radius="xl" mr="sm" />
                   <Box>
@@ -59,10 +65,11 @@ export default function ContactsGlobe() {
                     <Text size="xs" color="dimmed">{pin.city}</Text>
                   </Box>
                 </Box>
-              </Popup>
+              ) : undefined}
             </Marker>
           ))}
-        </MapContainer>
+          <ZoomControl />
+        </Map>
       </Card>
     </Flex>
   );

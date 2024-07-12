@@ -24,7 +24,7 @@ const ContactOverview = () => {
   const [showGlobeTab, setShowGlobeTab] = useState(false);
 
   useEffect(() => {
-    if (userData?.id === 1) {setShowGlobeTab(true);}
+    if (userData?.client.id === 1) {setShowGlobeTab(true);}
   }, []);
 
   const [tabValue, setTabValue] = useState("segments");

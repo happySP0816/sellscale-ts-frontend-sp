@@ -98,7 +98,6 @@
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.6",
     "react-icons": "^4.7.1",
-    "react-leaflet": "^4.2.1",
     "react-markdown": "^8.0.5",
     "react-router-dom": "^6.19.0",
     "react-scripts": "5.0.1",

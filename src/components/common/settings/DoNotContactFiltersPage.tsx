@@ -3,6 +3,7 @@ import { IconAlertCircle, IconBuilding } from "@tabler/icons";
 import { IconLifebuoy } from "@tabler/icons-react";
 import React from "react";
 import DoNotContactListV2 from "./DoNotContactListV2";
+import CRMContactFilter from "./CRMContactFilter/CRMContactFilter";
 
 export default function DoNotContactFiltersPage() {
   const [selectedTab, setSelectedTab] = React.useState("company-dnc");
@@ -44,6 +45,9 @@ export default function DoNotContactFiltersPage() {
           <Tabs.Tab value="sdr-dnc" icon={<IconLifebuoy size="0.8rem" />}>
             SDR Filter
           </Tabs.Tab>
+          <Tabs.Tab value="crm-contact-filter" icon={<IconLifebuoy size="0.8rem" />}>
+            CRM Contact Filter
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="sdr-dnc" pt="xs">
@@ -52,6 +56,10 @@ export default function DoNotContactFiltersPage() {
 
         <Tabs.Panel value="company-dnc" pt="xs">
           {selectedTab === "company-dnc" && <DoNotContactListV2 />}
+        </Tabs.Panel>
+
+        <Tabs.Panel value="crm-contact-filter" pt="xs">
+          {selectedTab === "crm-contact-filter" && <CRMContactFilter />}
         </Tabs.Panel>
       </Tabs>
     </Paper>

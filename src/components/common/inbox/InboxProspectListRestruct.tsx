@@ -402,6 +402,9 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                   icon={<IconSearch size="1.0rem" />}
                   value={searchFilter}
                   onChange={(event) => setSearchFilter(event.currentTarget.value)}
+                  onKeyDown={(event) => {
+                    if (event.metaKey && event.key === "'") event.preventDefault();
+                  }}
                   radius={theme.radius.md}
                   placeholder="Search..."
                 />

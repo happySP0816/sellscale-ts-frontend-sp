@@ -1,7 +1,9 @@
-import { Box, Flex, Kbd, Paper, SimpleGrid, Text, Textarea } from "@mantine/core";
+import { Button, Flex, Kbd, Paper, SimpleGrid, Text, Textarea } from "@mantine/core";
+import logotrial from "../../components/PersonaCampaigns/Logo-Trial-3.gif";
 import { useState } from "react";
 
-export default function SellScaleAssistModal() {
+export default function SellScaleAssistModal(props: any) {
+  const { isLoading, handleKeyDown, handleAccept, isAccpet } = props;
   const [keyData, setKeyData] = useState([
     {
       title: "Linkedin CTA",
@@ -44,9 +46,35 @@ export default function SellScaleAssistModal() {
       keyboard: 0,
     },
   ]);
+
   return (
-    <Box>
-      <Textarea minRows={3} placeholder="Write prompt and press Enter to generate" />
+    <div style={{ position: "relative" }}>
+      {isLoading && (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
+            zIndex: 1000,
+            backdropFilter: "blur(5px)",
+          }}
+        >
+          <img src={logotrial} style={{ width: 80, height: 80 }} />
+        </div>
+      )}
+      <Textarea minRows={3} placeholder="Write prompt and press Enter to generate" onKeyDown={handleKeyDown} />
+      {isAccpet && (
+        <div className="w-full justify-end flex">
+          <Button onClick={handleAccept} color="green" mr={0} mt={"md"}>
+            Accept
+          </Button>
+        </div>
+      )}
+
       <Paper radius={"sm"} bg={"#fbfcfe"} p={"sm"} mt={"sm"}>
         <Text size={"sm"} color="gray">
           Auto activate one of the hotkeys by pressing 0-9
@@ -68,6 +96,6 @@ export default function SellScaleAssistModal() {
           })}
         </SimpleGrid>
       </Paper>
-    </Box>
+    </div>
   );
 }

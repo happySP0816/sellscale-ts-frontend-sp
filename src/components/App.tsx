@@ -1,4 +1,18 @@
-import { MantineProvider, ColorSchemeProvider, LoadingOverlay, ColorScheme, Title, Flex } from "@mantine/core";
+import {
+  MantineProvider,
+  ColorSchemeProvider,
+  LoadingOverlay,
+  ColorScheme,
+  Title,
+  Flex,
+  Modal,
+  Textarea,
+  Paper,
+  Text,
+  SimpleGrid,
+  Kbd,
+  Button,
+} from "@mantine/core";
 
 import Layout from "./nav/Layout";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
@@ -12,7 +26,7 @@ import InstructionsLinkedInCookieModal from "@modals/InstructionsLinkedInCookieM
 import CreateNewCTAModal from "@modals/CreateNewCTAModal";
 import logotrial from "../components/PersonaCampaigns/Logo-Trial-3.gif";
 import ViewEmailModal from "@modals/ViewEmailModal";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import SequenceWriterModal from "@modals/SequenceWriterModal";
 import CTAGeneratorModal from "@modals/CTAGeneratorModal";
@@ -47,7 +61,7 @@ import { getPersonasOverview } from "@utils/requests/getPersonas";
 import { PersonaOverview } from "src";
 import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
 import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
-import { useViewportSize } from "@mantine/hooks";
+import { useDisclosure, useViewportSize } from "@mantine/hooks";
 import Confetti from "react-confetti";
 import LiTemplateModal from "@modals/LiTemplateModal";
 import { SOCKET_SERVICE_URL } from "@constants/data";
@@ -96,6 +110,7 @@ import PreFiltersV2EditModal from "@modals/PrefiltersV2/PrefilterV2EditModal";
 import ResetSegmentModal from "@modals/SegmentV2/ResetSegmentModal";
 import SellScaleAssistModal from "@modals/SellScaleAssistModal";
 import { IconWand } from "@tabler/icons";
+import ICPRoutingCreateModal from "@modals/website/ICPRoutingCreateModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -129,6 +144,8 @@ export default function App() {
 
   const [suggestion, setSuggestion] = useState<string>("");
   const [showSuggestion, setShowSuggestion] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [isAccpet, setAccept] = useState<boolean>(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const suggestionInputRef = useRef<string>("");
   const previousValueRef = useRef<string>("");
@@ -345,45 +362,47 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    let lastKeyPressed: string | null = null;
+  // useEffect(() => {
+  //   let lastKeyPressed: string | null = null;
 
-    const handleInput = (event: Event) => {
-      const activeElement = document.activeElement as HTMLElement;
-      if (
-        activeElement &&
-        (activeElement.tagName === "TEXTAREA" ||
-          (activeElement.tagName === "DIV" && (activeElement.getAttribute("role") === "textbox" || activeElement.getAttribute("contenteditable") === "true")) ||
-          (activeElement.tagName === "INPUT" && (activeElement as HTMLInputElement).type === "text") ||
-          (activeElement.classList.contains("mantine-Textarea-input") && activeElement.tagName === "TEXTAREA") ||
-          (activeElement.classList.contains("mantine-Input-input") && activeElement.tagName === "TEXTAREA") ||
-          (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
-      ) {
-        // Ensure the suggestion component does not run within the quick prompt
-        if (!popoverRef.current) {
-          activeElement.addEventListener("input", (e) => {
-            if (lastKeyPressed !== "Backspace" && lastKeyPressed !== "Delete") {
-              handleInputWithSuggestion(e);
-            }
-          });
-          activeElement.addEventListener("keydown", handleKeyDownWithSuggestion);
-          activeElement.addEventListener("keydown", (e) => {
-            lastKeyPressed = e.key;
-            if (e.key === "Tab") {
-              e.preventDefault();
-              handleKeyDownWithSuggestion(e as unknown as KeyboardEvent);
-            }
-          });
-        }
-      }
-    };
+  //   const handleInput = (event: Event) => {
+  //     const activeElement = document.activeElement as HTMLElement;
+  //     if (
+  //       activeElement &&
+  //       (activeElement.tagName === "TEXTAREA" ||
+  //         (activeElement.tagName === "DIV" && (activeElement.getAttribute("role") === "textbox" || activeElement.getAttribute("contenteditable") === "true")) ||
+  //         (activeElement.tagName === "INPUT" && (activeElement as HTMLInputElement).type === "text") ||
+  //         (activeElement.classList.contains("mantine-Textarea-input") && activeElement.tagName === "TEXTAREA") ||
+  //         (activeElement.classList.contains("mantine-Input-input") && activeElement.tagName === "TEXTAREA") ||
+  //         (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
+  //     ) {
+  //       // Ensure the suggestion component does not run within the quick prompt
+  //       if (!popoverRef.current) {
+  //         activeElement.addEventListener("input", (e) => {
+  //           if (lastKeyPressed !== "Backspace" && lastKeyPressed !== "Delete") {
+  //             handleInputWithSuggestion(e);
+  //           }
+  //         });
+  //         activeElement.addEventListener("keydown", handleKeyDownWithSuggestion);
+  //         activeElement.addEventListener("keydown", (e) => {
+  //           lastKeyPressed = e.key;
+  //           if (e.key === "Tab") {
+  //             e.preventDefault();
+  //             handleKeyDownWithSuggestion(e as unknown as KeyboardEvent);
+  //           }
+  //         });
+  //       }
+  //     }
+  //   };
 
-    document.addEventListener("focusin", handleInput);
+  //   document.addEventListener("focusin", handleInput);
 
-    return () => {
-      document.removeEventListener("focusin", handleInput);
-    };
-  }, [showSuggestion, suggestion]);
+  //   return () => {
+  //     document.removeEventListener("focusin", handleInput);
+  //   };
+  // }, [showSuggestion, suggestion]);
+
+  const [textarea, setTextArea] = useState();
   /* Quick Prompt */
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -412,7 +431,12 @@ export default function App() {
         //   popover.style.border = "1px solid #ccc";
         //   popover.style.padding = "10px";
         //   popover.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.1)";
+        //   // const stringElement = `
+        //   //   <section class="mantine-Paper-root mantine-Modal-content mantine-Modal-content mantine-15is8t6" role="dialog" tabindex="-1" aria-modal="true" style="transition-property: transform, opacity; transition-duration: 200ms; transition-timing-function: ease; transform-origin: center center; opacity: 1; transform: scale(1);" aria-describedby="mantine-obqnv1gq4-body" aria-labelledby="mantine-obqnv1gq4-title"><div class="mantine-Modal-header mantine-19pz3dh"><h2 class="mantine-Modal-title mantine-1k9itrp" id="mantine-obqnv1gq4-title"><div class="mantine-1iy1luo"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-wand" width="1.4rem" height="1.4rem" viewBox="0 0 24 24" stroke-width="2" stroke="#d33ff1" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><polyline points="6 21 21 6 18 3 3 18 6 21"></polyline><line x1="15" y1="6" x2="18" y2="9"></line><path d="M9 3a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path><path d="M19 13a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path></svg><h3 class="mantine-Text-root mantine-Title-root mantine-o7l2et">SellScale Writing Assist</h3></div></h2><button class="mantine-UnstyledButton-root mantine-ActionIcon-root mantine-CloseButton-root mantine-Modal-close mantine-11u9qu1" type="button"><svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 1rem; height: 1rem;"><path d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg></button></div><div class="mantine-Modal-body mantine-1q36a81" id="mantine-obqnv1gq4-body"><div class="mantine-1avyp1d"><div class="mantine-InputWrapper-root mantine-Textarea-root mantine-1fywkoc"><div class="mantine-Input-wrapper mantine-Textarea-wrapper mantine-1v7s5f8"><textarea class="mantine-Input-input mantine-Textarea-input mantine-10ym0i4" id="mantine-bu01vrbdm" placeholder="Write prompt and press Enter to generate" rows="3" aria-invalid="false"></textarea></div></div><div class="mantine-Paper-root mantine-haj7q3"><div class="mantine-Text-root mantine-ojyuqj">Auto activate one of the hotkeys by pressing 0-9</div><div class="mantine-SimpleGrid-root mantine-b43d9x"><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Linkedin CTA</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">1</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Linkedin Initial Message</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">2</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Linkedin Follow Up</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">3</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Linkedin Break Up</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">4</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Linkedin Subject</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">5</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Email Initial Message</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">6</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Email Follow Up</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">7</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Email Break Up</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">8</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Email Linkedin</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">9</kbd></div></div></div><div class="mantine-Paper-root mantine-66p1ex" data-with-border="true"><div class="mantine-hpmcve"><div class="mantine-Text-root mantine-1889v51">Email Email</div><div class="mantine-Text-root flex items-center gap-1 mantine-mqzhg6">Press <kbd class="mantine-Kbd-root mantine-hfgeur">0</kbd></div></div></div></div></div></div></div></section>
+        //   // `;
+        //   // popover.innerHTML = stringElement;
         //   document.body.appendChild(popover);
+
         //   (popoverRef as React.MutableRefObject<HTMLDivElement | null>).current = popover;
 
         //   const title = document.createElement("div");
@@ -420,7 +444,7 @@ export default function App() {
         //   title.style.fontStyle = "italic";
         //   title.style.fontFamily = "Arial";
         //   title.style.marginBottom = "5px";
-        //   popover.appendChild(title);
+        //   // popover.appendChild(title);
 
         //   const textarea = document.createElement("textarea");
         //   textarea.style.width = "300px";
@@ -462,25 +486,33 @@ export default function App() {
         //       textarea.selectionStart = textarea.selectionEnd = start + 1;
         //     }
         //   });
-        //   popover.appendChild(textarea);
+        //   // popover.appendChild(textarea);
         //   textarea.focus();
         // }
-        openContextModal({
-          modal: "assistmodal",
-          title: (
-            <Flex align={"center"} gap={"xs"}>
-              <IconWand size={"1.4rem"} color="#d33ff1" />
-              <Title order={3}>SellScale Writing Assist</Title>
-            </Flex>
-          ),
-          innerProps: {},
-        });
+
+        const activeElement = document.activeElement as HTMLElement;
+        if (
+          activeElement &&
+          (activeElement.tagName === "TEXTAREA" ||
+            (activeElement.tagName === "DIV" &&
+              (activeElement.getAttribute("role") === "textbox" || activeElement.getAttribute("contenteditable") === "true")) ||
+            (activeElement.tagName === "INPUT" && (activeElement as HTMLInputElement).type === "text") ||
+            (activeElement.classList.contains("mantine-Textarea-input") && activeElement.tagName === "TEXTAREA") ||
+            (activeElement.classList.contains("mantine-Input-input") && activeElement.tagName === "TEXTAREA") ||
+            (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
+        ) {
+          previousFocusedElementRef.current = activeElement;
+        }
+        open();
       } else if (event.metaKey && event.key === "Enter") {
         const activeElement = document.activeElement as HTMLElement;
         if (activeElement && activeElement.tagName === "TEXTAREA") {
           activeElement.blur();
         }
       }
+      // if (event.key.length === 1 && !isNaN(Number(event.key))) {
+      //   alert(`You are pressed ${event.key}`);
+      // }
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -505,7 +537,39 @@ export default function App() {
     popover.appendChild(loadingGif);
   };
 
-  const typeUserInput = (element: HTMLElement | null, userInput: string, popover: HTMLDivElement, contextInfo: any) => {
+  ////
+  const onKeyDown = (e: any) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      setLoading(true);
+      e.preventDefault();
+      const contextInfo = getContextualInformation();
+      console.log(previousFocusedElementRef.current);
+      typeUserInput(previousFocusedElementRef.current, e.target.value, contextInfo);
+    }
+  };
+
+  const handleAccept = () => {
+    if (previousFocusedElementRef.current) {
+      const event = new Event("input", { bubbles: true });
+
+      previousFocusedElementRef.current.dispatchEvent(event);
+      previousFocusedElementRef.current.focus();
+      setTimeout(() => {
+        (previousFocusedElementRef.current as HTMLTextAreaElement).value += " ";
+        setTimeout(() => {
+          (previousFocusedElementRef.current as HTMLTextAreaElement).value = (previousFocusedElementRef.current as HTMLTextAreaElement).value.trim();
+        }, 20);
+      }, 20);
+    }
+    const element: HTMLElement | null = previousFocusedElementRef.current;
+    if (element) element.style.color = "black";
+    setAccept(false);
+    close();
+  };
+  ////
+
+  // const typeUserInput = (element: HTMLElement | null, userInput: string, popover: HTMLDivElement, contextInfo: any) => {
+  const typeUserInput = (element: HTMLElement | null, userInput: string, contextInfo: any) => {
     if (!element) return;
     let index = 0;
 
@@ -524,6 +588,7 @@ export default function App() {
           if (index < res.response.length) {
             const char = res.response.charAt(index);
             if (element.classList.contains("tiptap") && element.classList.contains("ProseMirror")) {
+              element.style.color = "green";
               element.innerText = element.innerText + (index === 0 && char === " " ? "" : char);
             } else {
               const textarea = element as HTMLTextAreaElement;
@@ -538,13 +603,16 @@ export default function App() {
               if (tracker) {
                 tracker.setValue(value);
               }
+              element.style.color = "green";
               textarea.dispatchEvent(new Event("input", { bubbles: true }));
             }
             index += 1;
           } else {
             clearInterval(interval);
-            removeLoadingGifAndAddButton(popover, element);
-            element.focus();
+            setLoading(false);
+            setAccept(true);
+            // removeLoadingGifAndAddButton(popover, element);
+            // element.focus();
           }
         }, 1);
       })
@@ -619,51 +687,52 @@ export default function App() {
     popoverRef.current = null;
   };
 
-  const getContextualInformation = (element: HTMLElement): string => {
+  // const getContextualInformation = (element: HTMLElement): string => {
+  const getContextualInformation = (): string => {
     let context = "";
-    if (window.location.href.includes("/inbox")) {
-      context = "Here is the conversation, I reached out first: \n";
-      const messageElements = document.querySelectorAll('div[style="font-size: 0.875rem;"], div.line-clamp-4');
-      let lineClampCount = 0;
-      let fontSizeCount = 0;
+    // if (window.location.href.includes("/inbox")) {
+    context = "Here is the conversation, I reached out first: \n";
+    const messageElements = document.querySelectorAll('div[style="font-size: 0.875rem;"], div.line-clamp-4');
+    let lineClampCount = 0;
+    let fontSizeCount = 0;
 
-      messageElements.forEach((messageElement) => {
-        if (messageElement.classList.contains("line-clamp-4")) {
-          lineClampCount++;
-        } else if (messageElement.getAttribute("style") === "font-size: 0.875rem;") {
-          fontSizeCount++;
-        }
-      });
-
-      if (lineClampCount > fontSizeCount) {
-        context += "These are emails, please try to follow my tone as close as possible, do not use markdown. use newlines for formatting. \n";
-      } else if (fontSizeCount > lineClampCount) {
-        context += "These are LinkedIn messages, so please be more casual, or try to follow my tone as close as possible.: \n";
+    messageElements.forEach((messageElement) => {
+      if (messageElement.classList.contains("line-clamp-4")) {
+        lineClampCount++;
+      } else if (messageElement.getAttribute("style") === "font-size: 0.875rem;") {
+        fontSizeCount++;
       }
+    });
 
-      messageElements.forEach((messageElement) => {
-        const messageText = messageElement.innerHTML?.trim();
-        if (messageText) {
-          context += ` ${messageText} \n`;
-        }
-      });
-
-      return context;
+    if (lineClampCount > fontSizeCount) {
+      context += "These are emails, please try to follow my tone as close as possible, do not use markdown. use newlines for formatting. \n";
+    } else if (fontSizeCount > lineClampCount) {
+      context += "These are LinkedIn messages, so please be more casual, or try to follow my tone as close as possible.: \n";
     }
-    const MAX_PARENT_COUNT = 6;
-    let currentElement: HTMLElement | null = element;
-    let parentCount = 0;
 
-    while (currentElement && parentCount < MAX_PARENT_COUNT) {
-      const textContent = currentElement.textContent?.trim();
-      if (textContent) {
-        context = `${textContent} ${context}`;
+    messageElements.forEach((messageElement) => {
+      const messageText = messageElement.innerHTML?.trim();
+      if (messageText) {
+        context += ` ${messageText} \n`;
       }
-      currentElement = currentElement.parentElement;
-      parentCount++;
-    }
-    let ret = context.trim();
-    return ret;
+    });
+
+    return context;
+    // }
+    // const MAX_PARENT_COUNT = 6;
+    // let currentElement: HTMLElement | null = element;
+    // let parentCount = 0;
+
+    // while (currentElement && parentCount < MAX_PARENT_COUNT) {
+    //   const textContent = currentElement.textContent?.trim();
+    //   if (textContent) {
+    //     context = `${textContent} ${context}`;
+    //   }
+    //   currentElement = currentElement.parentElement;
+    //   parentCount++;
+    // }
+    // let ret = context.trim();
+    // return ret;
   };
   // Socket.IO Connection
   // useEffect(() => {
@@ -760,6 +829,51 @@ export default function App() {
     })();
   }, [location]);
 
+  const [opened, { open, close }] = useDisclosure(false);
+
+  const [keyData, setKeyData] = useState([
+    {
+      title: "Linkedin CTA",
+      keyboard: 1,
+    },
+    {
+      title: "Linkedin Initial Message",
+      keyboard: 2,
+    },
+    {
+      title: "Linkedin Follow Up",
+      keyboard: 3,
+    },
+    {
+      title: "Linkedin Break Up",
+      keyboard: 4,
+    },
+    {
+      title: "Linkedin Subject",
+      keyboard: 5,
+    },
+    {
+      title: "Email Initial Message",
+      keyboard: 6,
+    },
+    {
+      title: "Email Follow Up",
+      keyboard: 7,
+    },
+    {
+      title: "Email Break Up",
+      keyboard: 8,
+    },
+    {
+      title: "Email Linkedin",
+      keyboard: 9,
+    },
+    {
+      title: "Email Email",
+      keyboard: 0,
+    },
+  ]);
+
   return (
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider
@@ -848,6 +962,7 @@ export default function App() {
               strategySelectModal: SelectStrategyModal,
               prefilterEditModal: PreFiltersV2EditModal,
               assistmodal: SellScaleAssistModal,
+              createICProutingModal: ICPRoutingCreateModal,
             }}
             modalProps={{
               closeOnClickOutside: false,
@@ -871,6 +986,24 @@ export default function App() {
             />
             {isLoggedIn() && <ProspectDetailsDrawer />}
           </ModalsProvider>
+          <Modal
+            opened={opened}
+            size={600}
+            onClose={close}
+            title={
+              <Flex align={"center"} gap={"xs"}>
+                <IconWand size={"1.4rem"} color="#d33ff1" />
+                <Title order={3}>SellScale Writing Assist</Title>
+              </Flex>
+            }
+            styles={{
+              inner: {
+                zIndex: 1000,
+              },
+            }}
+          >
+            <SellScaleAssistModal isLoading={isLoading} handleKeyDown={onKeyDown} isAccpet={isAccpet} handleAccept={handleAccept} />
+          </Modal>
         </SpotlightWrapper>
       </MantineProvider>
     </ColorSchemeProvider>

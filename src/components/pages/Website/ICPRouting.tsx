@@ -1,51 +1,81 @@
-import { ActionIcon, Badge, Box, Button, Title, Flex, Paper, Select, Switch, Text, useMantineTheme } from "@mantine/core";
+import { userTokenState } from "@atoms/userAtoms";
+import {
+  IcpRouteData,
+  UpdateIcpRouteData,
+  useTrackApi,
+} from "@common/settings/Traffic/WebTrafficRoutingApi";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Title,
+  Flex,
+  Paper,
+  Select,
+  Switch,
+  Text,
+  useMantineTheme,
+} from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
-import { IconChevronLeft, IconChevronRight, IconCircleCheck, IconCircleX, IconLetterT, IconPencil, IconPlus, IconToggleRight } from "@tabler/icons";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconCircleCheck,
+  IconCircleX,
+  IconLetterT,
+  IconPencil,
+  IconPlus,
+  IconToggleRight,
+} from "@tabler/icons";
+import { on } from "events";
 import { DataGrid } from "mantine-data-grid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 
 export default function ICPRouting() {
+  const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
   const [loading, setLoading] = useState(false);
   const [acPageSize, setAcPageSize] = useState("25");
 
-  const [data, setData] = useState([
-    {
-      companyName: "Compeitition1",
-      description: "This is a company that is 'competitive' with SellScale and is building AI products in the sales space.",
-      routeTo: "competition segment",
-      send_slack: true,
-      status: true,
-    },
-    {
-      companyName: "Compeitition1",
-      description: "This is a company that is 'competitive' with SellScale and is building AI products in the sales space.",
-      routeTo: "competition segment",
-      send_slack: true,
-      status: true,
-    },
-    {
-      companyName: "Compeitition1",
-      description: "This is a company that is 'competitive' with SellScale and is building AI products in the sales space.",
-      routeTo: "competition segment",
-      send_slack: true,
-      status: true,
-    },
-    {
-      companyName: "Compeitition1",
-      description: "This is a company that is 'competitive' with SellScale and is building AI products in the sales space.",
-      routeTo: "competition segment",
-      send_slack: false,
-      status: false,
-    },
-    {
-      companyName: "Compeitition1",
-      description: "This is a company that is 'competitive' with SellScale and is building AI products in the sales space.",
-      routeTo: "competition segment",
-      send_slack: true,
-      status: false,
-    },
-  ]);
+  const {
+    isLoading,
+    getTrackSourceMetadata,
+    getScript,
+    verifySource,
+    getMostRecentTrackEvent,
+    getTrackEventHistory,
+    getDeanonomizedContacts,
+    createIcpRoute,
+    updateIcpRoute,
+    getAllIcpRoutes,
+  } = useTrackApi(userToken);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const icpRoutes = await getAllIcpRoutes();
+      const formattedData = icpRoutes.map((route: UpdateIcpRouteData) => ({
+        icpRouteTitle: route.title,
+        description: route.description,
+        routeTo: route.segment_id ? `Connected to segment ✅` : "no segment",
+        send_slack: route.send_slack,
+        status: route.active,
+        icpRouteId: route.id,
+      }));
+      setData(formattedData);
+    } catch (error) {
+      console.error("Error fetching ICP routes:", error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [userToken]);
+
+  const [data, setData]: [IcpRouteData[], any] = useState([]);
 
   return (
     <Paper withBorder radius={"sm"} p={"md"} mt={"md"}>
@@ -55,7 +85,8 @@ export default function ICPRouting() {
             ICP Routing
           </Text>
           <Text size={"xs"} color="gray" fw={400}>
-            Automatically categorize website visitors and score them. Based on scoring, send them to specific segments and trigger automations.
+            Automatically categorize website visitors and score them. Based on
+            scoring, send them to specific segments and trigger automations.
           </Text>
         </Box>
         <Button
@@ -68,7 +99,11 @@ export default function ICPRouting() {
                   <Title order={3}>Create ICP Routing</Title>
                 </Flex>
               ),
-              innerProps: {},
+              innerProps: {
+                onClose: () => {
+                  fetchData();
+                },
+              },
               styles: {
                 content: {
                   minWidth: "600px",
@@ -109,13 +144,19 @@ export default function ICPRouting() {
               </Flex>
             ),
             cell: (cell) => {
-              const { companyName, description } = cell.row.original;
+              const { icpRouteTitle, description } = cell.row.original;
 
               return (
-                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                <Flex
+                  w={"100%"}
+                  h={"100%"}
+                  px={"sm"}
+                  align={"center"}
+                  justify={"start"}
+                >
                   <Box>
                     <Text size={"sm"} fw={500}>
-                      {companyName}
+                      {icpRouteTitle}
                     </Text>
                     <Text size={"xs"} color="gray">
                       {description}
@@ -140,9 +181,26 @@ export default function ICPRouting() {
               const { routeTo } = cell.row.original;
 
               return (
-                <Flex align={"center"} justify={"center"} gap={"xs"} py={"lg"} w={"100%"} h={"100%"}>
-                  <Flex justify={"center"} w={"100%"} align={"center"} gap={"md"}>
-                    <Badge>{routeTo}</Badge>
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  gap={"xs"}
+                  py={"lg"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  <Flex
+                    justify={"center"}
+                    w={"100%"}
+                    align={"center"}
+                    gap={"md"}
+                  >
+                    <Badge
+                      color={routeTo?.includes("✅") ? "green" : "gray"}
+                      variant={routeTo?.includes("✅") ? "filled" : "light"}
+                    >
+                      {routeTo || "No Route"}
+                    </Badge>
                   </Flex>
                 </Flex>
               );
@@ -163,9 +221,29 @@ export default function ICPRouting() {
               const { send_slack } = cell.row.original;
 
               return (
-                <Flex align={"center"} justify={"center"} gap={"xs"} py={"lg"} w={"100%"} h={"100%"}>
-                  <Flex justify={"center"} w={"100%"} align={"center"} gap={"md"}>
-                    {send_slack ? <IconCircleCheck size={"1.8rem"} fill="green" color="white" /> : <IconCircleX size={"1.8rem"} fill="red" color="white" />}
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  gap={"xs"}
+                  py={"lg"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  <Flex
+                    justify={"center"}
+                    w={"100%"}
+                    align={"center"}
+                    gap={"md"}
+                  >
+                    {send_slack ? (
+                      <IconCircleCheck
+                        size={"1.8rem"}
+                        fill="green"
+                        color="white"
+                      />
+                    ) : (
+                      <IconCircleX size={"1.8rem"} fill="red" color="white" />
+                    )}
                   </Flex>
                 </Flex>
               );
@@ -183,12 +261,33 @@ export default function ICPRouting() {
             minSize: 120,
             enableResizing: true,
             cell: (cell) => {
-              const { status } = cell.row.original;
+              const { status, id } = cell.row.original;
 
               return (
-                <Flex align={"center"} justify={"center"} gap={"xs"} py={"lg"} w={"100%"} h={"100%"}>
-                  <Flex justify={"center"} w={"100%"} align={"center"} gap={"md"}>
-                    <Switch defaultChecked={status} />
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  gap={"xs"}
+                  py={"lg"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  <Flex
+                    justify={"center"}
+                    w={"100%"}
+                    align={"center"}
+                    gap={"md"}
+                  >
+                    <Switch
+                      defaultChecked={status || false}
+                      onClick={() => {
+                        updateIcpRoute(cell.row.original.icpRouteId || -1, {
+                          active: !status,
+                        }).finally(() => {
+                          fetchData();
+                        });
+                      }}
+                    ></Switch>
                   </Flex>
                 </Flex>
               );
@@ -206,9 +305,48 @@ export default function ICPRouting() {
             minSize: 100,
             cell: (cell) => {
               return (
-                <Flex align={"center"} justify={"center"} gap={"xs"} py={"lg"} w={"100%"} h={"100%"}>
-                  <Flex justify={"center"} w={"100%"} align={"center"} gap={"md"}>
-                    <Button size="xs" radius={"xl"} color="yellow" variant="light" leftIcon={<IconPencil color="orange" size={"1rem"} />}>
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  gap={"xs"}
+                  py={"lg"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  <Flex
+                    justify={"center"}
+                    w={"100%"}
+                    align={"center"}
+                    gap={"md"}
+                  >
+                    <Button
+                      size="xs"
+                      radius={"xl"}
+                      color="yellow"
+                      variant="light"
+                      leftIcon={<IconPencil color="orange" size={"1rem"} />}
+                      onClick={() => {
+                        openContextModal({
+                          modal: "createICProutingModal",
+                          title: (
+                            <Flex>
+                              <Title order={3}>Edit ICP Routing</Title>
+                            </Flex>
+                          ),
+                          innerProps: {
+                            onClose: () => {
+                              fetchData();
+                            },
+                            icpRouteId: cell.row.original.icpRouteId,
+                          },
+                          styles: {
+                            content: {
+                              minWidth: "600px",
+                            },
+                          },
+                        });
+                      }}
+                    >
                       Edit
                     </Button>
                   </Flex>
@@ -250,10 +388,12 @@ export default function ICPRouting() {
                   <Select
                     maw={100}
                     value={`${table.getState().pagination.pageIndex + 1}`}
-                    data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                      label: String(idx + 1),
-                      value: String(idx + 1),
-                    }))}
+                    data={new Array(table.getPageCount())
+                      .fill(0)
+                      .map((i, idx) => ({
+                        label: String(idx + 1),
+                        value: String(idx + 1),
+                      }))}
                     onChange={(v) => {
                       table.setPageIndex(Number(v) - 1);
                     }}
@@ -282,7 +422,9 @@ export default function ICPRouting() {
                     h={36}
                     disabled={table.getState().pagination.pageIndex === 0}
                     onClick={() => {
-                      table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                      table.setPageIndex(
+                        table.getState().pagination.pageIndex - 1
+                      );
                     }}
                   >
                     <IconChevronLeft stroke={theme.colors.gray[4]} />
@@ -291,9 +433,14 @@ export default function ICPRouting() {
                     variant="default"
                     color="gray.4"
                     h={36}
-                    disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                    disabled={
+                      table.getState().pagination.pageIndex ===
+                      table.getPageCount() - 1
+                    }
                     onClick={() => {
-                      table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                      table.setPageIndex(
+                        table.getState().pagination.pageIndex + 1
+                      );
                     }}
                   >
                     <IconChevronRight stroke={theme.colors.gray[4]} />

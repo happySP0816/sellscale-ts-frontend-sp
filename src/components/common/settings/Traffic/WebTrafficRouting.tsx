@@ -37,12 +37,16 @@ export default function WebTrafficRouting() {
   const userToken = useRecoilValue(userTokenState);
 
   const {
+    isLoading,
+    getTrackSourceMetadata,
     getScript,
     verifySource,
     getMostRecentTrackEvent,
-    getTrackSourceMetadata,
-    isLoading,
     getTrackEventHistory,
+    getDeanonomizedContacts,
+    createIcpRoute,
+    updateIcpRoute,
+    getAllIcpRoutes,
   } = useTrackApi(userToken);
 
   const [script, setScript] = useState("");

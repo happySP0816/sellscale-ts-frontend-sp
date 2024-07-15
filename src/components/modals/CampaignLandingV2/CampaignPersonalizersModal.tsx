@@ -44,7 +44,7 @@ import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
 import { modals } from "@mantine/modals";
 import * as researchers from "@utils/requests/researchers";
-import { useState, useEffect, useRef, Key } from "react";
+import { useState, useEffect, useRef, Key, JSXElementConstructor, ReactElement, ReactNode } from "react";
 import { deterministicMantineColor } from "@utils/requests/utils";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { getFreshCurrentProject } from "@auth/core";
@@ -266,6 +266,8 @@ export default function CampaignPersonalizersModal({
     );
     const newSimulateData = data.answers
       .map((item: any) => ({
+        citations: item.citations,
+        // images: item.images,
         title: item.question.key,
         type: item.question.type,
         content: item.short_summary,
@@ -651,32 +653,80 @@ export default function CampaignPersonalizersModal({
                               {item.ai_response}
                             </Text>
                           </Flex>
-                          <Popover
-                            arrowPosition="center"
-                            zIndex={40000000}
-                            width={300}
-                            position="bottom"
-                            withArrow
-                            shadow="md"
-                          >
-                            <Popover.Target>
-                              <Flex
-                                align="center"
-                                style={{ cursor: "pointer" }}
-                              >
-                                <IconEye
-                                  size={"1rem"}
-                                  style={{ marginRight: "4px" }}
-                                />
-                                <Text size={"xs"} fw={400}>
-                                  See raw content
+                          <Flex justify="space-between" align="center">
+                            <Popover
+                              arrowPosition="center"
+                              zIndex={40000000}
+                              width={300}
+                              position="bottom"
+                              withArrow
+                              shadow="md"
+                            >
+                              <Popover.Target>
+                                <Flex
+                                  align="center"
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  <IconEye
+                                    size={"1rem"}
+                                    style={{ marginRight: "4px" }}
+                                  />
+                                  <Text size={"xs"} fw={400}>
+                                    See raw content
+                                  </Text>
+                                </Flex>
+                              </Popover.Target>
+                              <Popover.Dropdown>
+                                <Text size="xs">{item.raw_response}</Text>
+                              </Popover.Dropdown>
+                            </Popover>
+                            <Popover
+                              arrowPosition="center"
+                              zIndex={40000000}
+                              width={300}
+                              position="bottom"
+                              withArrow
+                              shadow="md"
+                            >
+                              <Popover.Target>
+                                <Flex
+                                  align="center"
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  <Text size={"xs"} fw={400}>
+                                    View Citations
+                                  </Text>
+                                </Flex>
+                              </Popover.Target>
+                              <Popover.Dropdown>
+                                <Text size="xs">
+                                  <strong>Citations:</strong>
+                                  <ul>
+                                    {item?.citations?.map((citation: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined, idx: Key | null | undefined) => (
+                                      <li key={idx}>
+                                        <a href={typeof citation === 'string' ? citation : undefined} target="_blank" rel="noopener noreferrer">
+                                          {citation}
+                                        </a>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                  {/* {item?.images?.length > 0 && (
+                                    <>
+                                      <strong>Images:</strong>
+                                      <ul>
+                                        {item.images.map((image, idx) => (
+                                          console.log('image is', image),
+                                          <li key={idx}>
+                                            <img src={image} alt={`Image ${idx}`} style={{ maxWidth: "100%" }} />
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </>
+                                  )} */}
                                 </Text>
-                              </Flex>
-                            </Popover.Target>
-                            <Popover.Dropdown>
-                              <Text size="xs">{item.raw_response}</Text>
-                            </Popover.Dropdown>
-                          </Popover>
+                              </Popover.Dropdown>
+                            </Popover>
+                          </Flex>
                         </Paper>
                         <Flex align={"center"} gap={"md"} mt={"lg"}>
                           <Button

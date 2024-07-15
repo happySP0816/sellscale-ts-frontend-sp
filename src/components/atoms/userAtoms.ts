@@ -1,6 +1,6 @@
 import { emailSequencesDataType, linkedinSequencesDataType } from "@pages/CampaignV2/Sequences";
 import { atom } from "recoil";
-import { ClientSDR } from "src";
+import { ClientSDR, SubjectLineTemplate } from "src";
 import { Contact } from "src/components/pages/CampaignV2/ContactsInfiniteScroll";
 
 const userTokenState = atom({
@@ -18,6 +18,11 @@ const campaignContactsState = atom({
   default: (JSON.parse(localStorage.getItem("userContacts") ?? "{}") || {}) as Contact[],
 });
 
+const emailSubjectLinesState = atom<SubjectLineTemplate[]>({
+  key: "email-subject-lines",
+  default: (JSON.parse(localStorage.getItem("email-subject-lines") ?? "[]") || []) as SubjectLineTemplate[],
+});
+
 const linkedinSequenceState = atom({
   key: "linkedin-sequence",
   default: (JSON.parse(localStorage.getItem("linkedin-sequence") ?? "{}") || {}) as linkedinSequencesDataType,
@@ -33,4 +38,4 @@ const adminDataState = atom({
   default: (JSON.parse(localStorage.getItem("admin-data") ?? "{}") || {}) as ClientSDR | null,
 });
 
-export { userTokenState, userDataState, adminDataState, campaignContactsState, linkedinSequenceState, emailSequenceState };
+export { userTokenState, userDataState, adminDataState, campaignContactsState, linkedinSequenceState, emailSequenceState, emailSubjectLinesState };

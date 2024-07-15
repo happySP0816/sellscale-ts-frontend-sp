@@ -1,13 +1,9 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { emailSubjectLinesState, userTokenState } from "@atoms/userAtoms";
 import { LoadingOverlay, TextInput, Card, Flex, Button, Box, Overlay, CloseButton } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { createEmailSubjectLineTemplate } from "@utils/requests/emailSubjectLines";
 import { useState } from "react";
 import { useRecoilState } from "recoil";
-import { MsgResponse } from "src";
-import {
-  closeAllModals,
-} from "@mantine/modals";
 
 
 interface CreateEmailSubjectLine extends Record<string, unknown> {
@@ -19,7 +15,10 @@ interface CreateEmailSubjectLine extends Record<string, unknown> {
 }
 
 export default function CreateEmailSubjectLineModal(props: CreateEmailSubjectLine) {
+
+
   const [userToken] = useRecoilState(userTokenState);
+  const [emailSubjectLines, setEmailSubjectLines] = useRecoilState(emailSubjectLinesState);
 
   const [loading, setLoading] = useState(false);
   const [subjectLine, setSubjectLine] = useState<string>("");
@@ -43,13 +42,14 @@ export default function CreateEmailSubjectLineModal(props: CreateEmailSubjectLin
         color: 'green',
       })
       setLoading(false);
+      if (setEmailSubjectLines) {
+        setEmailSubjectLines((prev: any) => [...prev, result.data]);
+      }
       props.backFunction();
       props.closeModal();
-      closeAllModals();
       setSubjectLine("");
     }
 
-    
     return;
   }
 

@@ -1,5 +1,6 @@
 import {
   emailSequenceState,
+  emailSubjectLinesState,
   linkedinSequenceState,
   userDataState,
   userTokenState,
@@ -103,7 +104,6 @@ export default function CampaignTemplateEditModal({
   refetchSequenceData: (clientArchetypeId: number) => void;
   // emailSequenceData: any;
   // linkedinSequenceData: any;
-  emailSubjectLines: any;
   addedTemplate: any;
   currentStepNum: any;
   createTemplateBuilder: boolean;
@@ -114,7 +114,7 @@ export default function CampaignTemplateEditModal({
 }>) {
   const linkedinSequenceData = useRecoilValue(linkedinSequenceState);
   const emailSequenceData = useRecoilValue(emailSequenceState);
-
+  const [emailSubjectLines, setEmailSubjectLines] = useRecoilState(emailSubjectLinesState);
   const [templateType, setTemplateType] = useState("template" || "generate");
   const [sequenceType, setSequenceType]: any = useState<string>(
     innerProps.sequenceType || "email"
@@ -124,6 +124,7 @@ export default function CampaignTemplateEditModal({
       ? emailSequenceData.length || 3
       : linkedinSequenceData.length || 3
   );
+  const [generatingSubjectLines, setGeneratingSubjectLines] = useState(false);
   const [currentStepNum, setCurrentStepNum] = useState(
     innerProps.currentStepNum || 1 || null
   );
@@ -203,7 +204,7 @@ export default function CampaignTemplateEditModal({
   const userData = useRecoilValue(userDataState);
   const currentProject = useRecoilValue(currentProjectState);
   const campaignId = innerProps.campaignId;
-  const addedTheMagic = innerProps.emailSubjectLines.some(
+  const addedTheMagic = emailSubjectLines.some(
     (subjectLine: SubjectLineTemplate) =>
       subjectLine.is_magic_subject_line === true
   );
@@ -243,6 +244,28 @@ export default function CampaignTemplateEditModal({
     }
     setSelectStep2(key);
   };
+
+  const generateEmailSubjectLines = async () => {
+    setGeneratingSubjectLines(true);
+    const response = await fetch(
+      `${API_URL}/email_sequence/subject_line/generate`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          archetype_id: currentProject?.id,
+        })
+      }
+    );
+    const result = await response.json();
+    if (result.status === "success") {
+      setEmailSubjectLines(prev => [...prev, ...result.data]);
+    }
+    setGeneratingSubjectLines(false);
+  }
 
   const getAllAssets = async () => {
     fetch(`${API_URL}/client/get_assets`, {
@@ -493,7 +516,7 @@ export default function CampaignTemplateEditModal({
                       innerProps: {
                         sequenceType,
                         stagingData,
-                        emailSubjectLines: innerProps.emailSubjectLines,
+                        emailSubjectLines: emailSubjectLines,
                         linkedinTemplates: linkedinSequenceData,
                         emailSequenceData: emailSequenceData,
                         refetchSequenceData: innerProps.refetchSequenceData,
@@ -523,7 +546,7 @@ export default function CampaignTemplateEditModal({
                           innerProps: {
                             sequenceType,
                             stagingData,
-                            emailSubjectLines: innerProps.emailSubjectLines,
+                            emailSubjectLines: emailSubjectLines,
                             linkedinSequenceData: linkedinSequenceData,
                             emailSequenceData: emailSequenceData,
                             refetchSequenceData: innerProps.refetchSequenceData,
@@ -626,7 +649,11 @@ export default function CampaignTemplateEditModal({
             )}
             <Tabs
               defaultValue={currentStepNum.toString() || 1}
-              onTabChange={(value) => setCurrentStepNum(Number(value))}
+              onTabChange={(value) => {
+                const stepNum = Number(value);
+                console.log(stepNum);
+                setCurrentStepNum(stepNum);
+              }}
               styles={{
                 tabsList: {
                   background: "#ECEEF1",
@@ -702,7 +729,7 @@ export default function CampaignTemplateEditModal({
               {currentStepNum === steps + 1 && sequenceType === "email" && (
                 <ScrollArea viewportRef={viewport} h={350}>
                   <Flex p={"lg"} h={"100%"} direction={"column"}>
-                    {innerProps.emailSubjectLines.map(
+                    {emailSubjectLines.map(
                       (subjectLine: any, index: number) => {
                         return (
                           <Box
@@ -954,7 +981,7 @@ export default function CampaignTemplateEditModal({
                     px="sm"
                     style={{ position: "relative" }}
                   >
-                    {innerProps.emailSubjectLines.map(
+                    {emailSubjectLines.map(
                       (subjectLine: SubjectLineTemplate) => {
                         return (
                           <SubjectLineItem
@@ -1001,6 +1028,16 @@ export default function CampaignTemplateEditModal({
                       >
                         Add Subject line
                       </Button>
+                      {emailSequenceData.length > 0 && <Button
+                        loading={generatingSubjectLines}
+                        mt="sm"
+                        color="grape"
+                        leftIcon={<IconPlus size={"0.9rem"} />}
+                        onClick={generateEmailSubjectLines}
+                        fullWidth
+                      >
+                        Generate Subject Lines
+                      </Button>}
                       <Flex align="center" mt="xl">
                         {!addedTheMagic && (
                           <Button
@@ -1047,7 +1084,7 @@ export default function CampaignTemplateEditModal({
                                 );
                               } finally {
                                 setLoadingMagicSubjectLine(false);
-                                closeAllModals();
+                                // closeAllModals();
                               }
                             }}
                             fullWidth
@@ -1097,7 +1134,9 @@ export default function CampaignTemplateEditModal({
               )}
             </Tabs>
 
-            <Flex
+
+            {/* isNaN corresponds to subject lines */}
+            {!isNaN(currentStepNum) && <Flex
               gap={"md"}
               p={"lg"}
               style={{ borderTop: "1px solid #dee2e6" }}
@@ -1145,7 +1184,7 @@ export default function CampaignTemplateEditModal({
               >
                 Save to Sequence
               </Button>
-            </Flex>
+            </Flex>}
           </Paper>
         </Flex>
       )}

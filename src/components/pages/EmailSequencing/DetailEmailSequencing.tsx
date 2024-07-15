@@ -1,5 +1,5 @@
 import { currentProjectState } from "@atoms/personaAtoms";
-import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { emailSubjectLinesState, userDataState, userTokenState } from "@atoms/userAtoms";
 import DynamicRichTextArea from "@common/library/DynamicRichTextArea";
 import ProspectSelect from "@common/library/ProspectSelect";
 import { PersonalizationSection } from "@common/sequence/LinkedInSequenceSection";
@@ -1508,6 +1508,7 @@ export const SubjectLineItem: React.FC<{
 
   const [loading, setLoading] = React.useState(false);
   const [editing, setEditing] = React.useState(false);
+  const [emailSubjectLines, setEmailSubjectLines] = useRecoilState(emailSubjectLinesState);
   const [magicSubjectLineSimulatorOpened, setMagicSubjectLineSimulatorOpened] = useState(false);
   const [editedSubjectLine, setEditedSubjectLine] = React.useState(
     subjectLine.subject_line
@@ -1516,6 +1517,44 @@ export const SubjectLineItem: React.FC<{
   useEffect(() => {
     setEditedSubjectLine(subjectLine.subject_line);
   }, [subjectLine]);
+
+  const deleteSubjectLineTemplate = async (subjectLineId: number) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/email_sequence/subject_line/delete`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email_subject_line_template_id: subjectLineId,
+          }),
+        }
+      );
+      const result = await response.json();
+      if (result.status !== "success") {
+        showNotification({
+          title: "Error",
+          message: result.message,
+          color: "red",
+        });
+        return;
+      }
+      showNotification({
+        title: "Success",
+        message: "Successfully deleted email subject line",
+        color: "green",
+      });
+    } catch (error) {
+      showNotification({
+        title: "Error",
+        message: "An error occurred while deleting the email subject line",
+        color: "red",
+      });
+    }
+  };
 
   // Edit Subject Line
   const triggerPatchEmailSubjectLineTemplate = async () => {
@@ -1617,8 +1656,21 @@ export const SubjectLineItem: React.FC<{
                 <IconPencil size="1.0rem" />
               </ActionIcon>
             </Tooltip>
-            <Tooltip label="Coming Soon" withinPortal withArrow>
-              <ActionIcon size="sm" disabled={editing}>
+            <Tooltip label="Delete subject line" withinPortal withArrow>
+              <ActionIcon
+                size="sm"
+                disabled={editing}
+                onClick={async () => {
+                  try {
+                    console.log('subject line is', subjectLine);
+                    setEmailSubjectLines(emailSubjectLines.filter((item) => item.id !== subjectLine.id));
+                    deleteSubjectLineTemplate(subjectLine.id);
+                    // Optionally, you can add a callback or state update here to reflect the deletion in the UI
+                  } catch (error) {
+                    console.error("Failed to delete subject line:", error);
+                  }
+                }}
+              >
                 <IconTrash size="1.0rem" />
               </ActionIcon>
             </Tooltip>

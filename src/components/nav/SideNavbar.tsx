@@ -332,11 +332,11 @@ export default function SideNavbar(props: {}) {
             label="Settings"
             tabKey="settings"
           />
-          <SideNavbarItem
-            icon={<IconPencil />}
-            label="Adjust AI"
-            tabKey="ai-request"
-          />
+          {/*<SideNavbarItem*/}
+          {/*  icon={<IconPencil />}*/}
+          {/*  label="Adjust AI"*/}
+          {/*  tabKey="ai-request"*/}
+          {/*/>*/}
         </Box>
         <Box>
           <Divider color="dark.4" />

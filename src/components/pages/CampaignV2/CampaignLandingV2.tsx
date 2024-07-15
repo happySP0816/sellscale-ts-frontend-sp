@@ -43,7 +43,7 @@ import { useState, useEffect } from "react";
 import { fetchCampaignStats, fetchTotalContacts, fetchCampaignAnalytics } from "@utils/requests/campaignOverview";
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { useParams } from "react-router-dom";
-import { emailSequenceState, linkedinSequenceState, userDataState, userTokenState } from "@atoms/userAtoms";
+import { emailSequenceState, emailSubjectLinesState, linkedinSequenceState, userDataState, userTokenState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { ContactsInfiniteScroll } from "./ContactsInfiniteScroll";
@@ -205,7 +205,9 @@ export default function CampaignLandingV2() {
   // const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [analyticsData, setAnalyticsData] = useState<any>([]);
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>([]);
-  const [emailSubjectLines, setEmailSubjectLines] = useState<SubjectLineTemplate[]>([]);
+  
+  const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<SubjectLineTemplate[]>(emailSubjectLinesState);
+
   const [statsData, setStatsData] = useState<StatsData | null>(null);
   const [showActivateWarningModal, setShowActivateWarningModal] = useState(false);
   const [showToneArea, setShowToneArea] = useState(false);

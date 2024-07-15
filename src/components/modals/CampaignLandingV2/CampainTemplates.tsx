@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { emailSubjectLinesState, userTokenState } from "@atoms/userAtoms";
 import { userDataState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
 import RichTextArea from "@common/library/RichTextArea";
@@ -11,7 +11,7 @@ import { ContextModalProps, closeAllModals, openContextModal } from "@mantine/mo
 import { showNotification } from "@mantine/notifications";
 import { IconBrandLinkedin, IconMailOpened } from "@tabler/icons";
 import { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 export default function CampaignTemplatesModal({
   innerProps,
@@ -31,12 +31,12 @@ export default function CampaignTemplatesModal({
   setStagingData: Function;
   addToStagingData?: any;
   emailSequenceData: any;
-  emailSubjectLines: any;
   linkedinSequenceData: any;
 }>) {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const userData = useRecoilValue(userDataState);
+  const [emailSubjectLines, setEmailSubjectLines] = useRecoilState(emailSubjectLinesState);
 
   const [type, setType]: any = useState(innerProps.sequenceType || "email");
   const [tags, setTags]: any = useState([]);
@@ -78,9 +78,10 @@ export default function CampaignTemplatesModal({
         title: <Title order={3}>Sequence Builder</Title>,
         innerProps: {
           sequenceType: innerProps.sequenceType,
-          emailSubjectLines: innerProps.emailSubjectLines,
+          emailSubjectLines: emailSubjectLines,
           // emailSequenceData: innerProps.emailSequenceData,
           // linkedinSequenceData: innerProps.linkedinSequenceData,
+          setEmailSubjectLines: setEmailSubjectLines,
           addedTemplate: asset,
           stagingData: innerProps.stagingData,
           refetchSequenceData: innerProps.refetchSequenceData,

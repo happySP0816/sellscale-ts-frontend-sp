@@ -667,7 +667,7 @@ const AreaChart: React.FC<{dataAndLabels: {labels: string[], maxRateData: number
             }
             const index = context.dataIndex;
             const info = areaChartProps.dataAndLabels.rateByStrategyData[index];
-            return [`Rate: ${info.rate.toFixed(2)}%`, `Strategy ${index}: ${info.name}`];
+            return [`Rate: ${info.rate.toFixed(2)}%`, `Strategy ${index + 1}: ${info.name}`];
           },
         },
       },

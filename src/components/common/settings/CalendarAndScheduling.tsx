@@ -18,43 +18,44 @@ import {
   Overlay,
   AspectRatio,
   Box,
-} from '@mantine/core';
-import { IconCheck, IconCircleCheck, IconCopy, IconEdit, IconInfoCircle, IconLink, IconPencil, IconX } from '@tabler/icons';
-import { useEffect, useState } from 'react';
+  Stack,
+} from "@mantine/core";
+import { IconCheck, IconCircleCheck, IconCopy, IconEdit, IconInfoCircle, IconLink, IconPencil, IconPlus, IconX } from "@tabler/icons";
+import { useEffect, useState } from "react";
 
-import { patchSchedulingLink } from '@utils/requests/patchSchedulingLink';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { showNotification } from '@mantine/notifications';
-import { API_URL } from '@constants/data';
-import { IconCalendarShare, IconCircleCheckFilled, IconInfoHexagon, IconInfoTriangle, IconPointFilled } from '@tabler/icons-react';
+import { patchSchedulingLink } from "@utils/requests/patchSchedulingLink";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { showNotification } from "@mantine/notifications";
+import { API_URL } from "@constants/data";
+import { IconCalendarShare, IconCircleCheckFilled, IconInfoHexagon, IconInfoTriangle, IconPointFilled } from "@tabler/icons-react";
 
 const urlRegex: RegExp = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[a-z0-9\-]+(?:\.[a-z]{2,})+(?:\/[\w\-\.\?\=\&]*)*$/i;
 
 const REDIRECT_URI = `https://app.sellscale.com/authcalendly`;
-const CALENDLY_CLIENT_ID = 'SfpOyr5Hq4QrjnZwoKtM0n_vOW_hZ6ppGpxHgmnW70U';
+const CALENDLY_CLIENT_ID = "SfpOyr5Hq4QrjnZwoKtM0n_vOW_hZ6ppGpxHgmnW70U";
 
 export default function CalendarAndScheduling() {
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
   const [updated, setUpdated] = useState<boolean>(false);
 
   const [timeZone, setTimeZone] = useState<string>(userData.timezone);
 
-  const [schedulingLink, setSchedulingLink] = useState<string>(userData.scheduling_link || '');
+  const [schedulingLink, setSchedulingLink] = useState<string>(userData.scheduling_link || "");
 
   useEffect(() => {
     if (timeZone && timeZone !== userData.timezone) {
       (async () => {
         const response = await fetch(`${API_URL}/client/sdr/timezone`, {
-          method: 'POST',
+          method: "POST",
           headers: {
             Authorization: `Bearer ${userToken}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             timezone: timeZone,
@@ -62,10 +63,10 @@ export default function CalendarAndScheduling() {
         });
         setUserData({ ...userData, timezone: timeZone });
         showNotification({
-          id: 'change-sdr-timezone',
-          title: 'Time Zone Updated',
+          id: "change-sdr-timezone",
+          title: "Time Zone Updated",
           message: `Your time zone has been updated.`,
-          color: 'green',
+          color: "green",
           autoClose: 2000,
         });
       })();
@@ -77,9 +78,9 @@ export default function CalendarAndScheduling() {
     setSchedulingLink(value);
 
     if (value && !urlRegex.test(value)) {
-      setError('Please enter a valid URL');
+      setError("Please enter a valid URL");
     } else {
-      setError('');
+      setError("");
     }
   }
 
@@ -88,27 +89,27 @@ export default function CalendarAndScheduling() {
 
     if (error) {
       showNotification({
-        title: 'Error',
-        message: 'Please enter a valid URL',
-        color: 'red',
+        title: "Error",
+        message: "Please enter a valid URL",
+        color: "red",
         autoClose: 3000,
       });
       setIsLoading(false);
       return;
     } else if (!schedulingLink) {
       showNotification({
-        title: 'Error',
-        message: 'Please enter a URL',
-        color: 'red',
+        title: "Error",
+        message: "Please enter a URL",
+        color: "red",
         autoClose: 3000,
       });
       setIsLoading(false);
       return;
     } else if (schedulingLink === userData.scheduling_link) {
       showNotification({
-        title: 'Error',
-        message: 'Please enter a different URL',
-        color: 'red',
+        title: "Error",
+        message: "Please enter a different URL",
+        color: "red",
         autoClose: 3000,
       });
       setIsLoading(false);
@@ -118,11 +119,11 @@ export default function CalendarAndScheduling() {
     const response = await patchSchedulingLink(userToken, schedulingLink);
     setIsLoading(false);
 
-    if (response.status === 'success') {
+    if (response.status === "success") {
       showNotification({
-        title: 'Success',
-        message: 'Scheduling link updated successfully',
-        color: 'teal',
+        title: "Success",
+        message: "Scheduling link updated successfully",
+        color: "teal",
         autoClose: 3000,
       });
       setUserData({ ...userData, scheduling_link: schedulingLink });
@@ -130,51 +131,100 @@ export default function CalendarAndScheduling() {
       setIsEditing(false);
     } else {
       showNotification({
-        title: 'Error',
-        message: 'Could not update scheduling link, please try again or contact support',
-        color: 'red',
+        title: "Error",
+        message: "Could not update scheduling link, please try again or contact support",
+        color: "red",
         autoClose: 3000,
       });
     }
   };
 
+  const [team, setTeam] = useState([
+    {
+      avatar: "",
+      fullname: "Patiwat Mishkis",
+      job: "Marketing Manager",
+      calendar_link: "calendly.com/patiwat-mishkis",
+    },
+    {
+      avatar: "",
+      fullname: "Leon Mishkis",
+      job: "Marketing Manager",
+      calendar_link: "calendly.com/leon-mishkis",
+    },
+  ]);
+
   return (
-    <Paper withBorder m='xs' p='md' radius='md'>
-      <Title order={3}>Calendar Integration</Title>
-      <Card mt='md' padding='lg' radius='md' withBorder>
+    <Paper withBorder m="xs" p="md" radius="md">
+      <Card mt="md" padding="lg" radius="md" withBorder bg={"#fcfcfd"}>
+        <Flex align={"center"} justify={"space-between"}>
+          <Box>
+            <Title order={3}>Teamwide Calendar Integration</Title>
+            <Text mt="sm" fz="sm">
+              Add your team's calendars to refernece when scheduling, or have the AI pull a certain rep's time
+            </Text>
+          </Box>
+          <Button leftIcon={<IconPlus size={"0.9rem"} />}>Add New</Button>
+        </Flex>
+        <Stack spacing={"sm"} mt={"sm"}>
+          {team.map((item, index) => {
+            return (
+              <Box key={index}>
+                <Flex align={"center"} gap={"sm"}>
+                  <Avatar radius={"xl"} size={50} />
+                  <Box>
+                    <Text size={"lg"} fw={600}>
+                      {item.fullname}
+                    </Text>
+                    <Text size={"sm"} fw={500} color="gray">
+                      {item.job}
+                    </Text>
+                  </Box>
+                </Flex>
+                <Flex gap={"sm"} my={"xs"} align={"end"}>
+                  <TextInput label="CALENDAR_LINK:" placeholder={item.calendar_link} w={"100%"} />
+                  <Button leftIcon={<IconEdit size={"0.9rem"} />}>Edit</Button>
+                </Flex>
+                {index < team.length - 1 && <Divider mt={"md"} />}
+              </Box>
+            );
+          })}
+        </Stack>
+      </Card>
+      <Card mt="md" padding="lg" radius="md" withBorder>
         <LoadingOverlay visible={isLoading} />
-        <Flex gap={4} align={'center'}>
-          <Text fz='lg' fw='bold'>
+        <Flex gap={4} align={"center"}>
+          <Text fz="lg" fw="bold">
             Scheduling Link
           </Text>
-          {updated && <IconCircleCheck color='green' size={'1.2rem'} />}
+          {updated && <IconCircleCheck color="green" size={"1.2rem"} />}
         </Flex>
-        <Text mt='sm' fz='sm'>
+        <Text mt="sm" fz="sm">
           Whenever SellScale AI detects a high propensity prospect who is interested in scheduling a time with you, the AI will use this link to book on your
           calendar. Needs to be a valid URL (Calendly, Chron, Hubspot, etc).
         </Text>
-        <Divider mt={'sm'} />
-        <Flex align={'end'} gap={'sm'} justify={'space-between'} w={'100%'}>
+        <Divider mt={"sm"} />
+        <Flex align={"end"} gap={"sm"} justify={"space-between"} w={"100%"}>
           <Input.Wrapper
             label={
-              <Text color='gray' tt={'uppercase'}>
+              <Text color="gray" tt={"uppercase"}>
                 calendar link
               </Text>
             }
             error={error}
-            mt='sm'
-            w={'100%'}
+            mt="sm"
+            w={"100%"}
           >
             <Input
-              placeholder='https://calendly.com/yourname'
+              placeholder="https://calendly.com/yourname"
               value={schedulingLink}
               disabled={!isEditing}
               onChange={handleUrlChange}
-              rightSection={<IconCopy size={'1rem'} />}
+              rightSection={<IconCopy size={"1rem"} />}
               // withAsterisk
             />
           </Input.Wrapper>
-          <Button leftIcon={<IconPencil size={'0.9rem'} />} onClick={() => setIsEditing(true)}>
+          <Button leftIcon={<IconPencil size={"0.9rem"} />} onClick={() => setIsEditing(true)}>
             Edit
           </Button>
         </Flex>
@@ -187,29 +237,29 @@ export default function CalendarAndScheduling() {
           )} */}
 
         {isEditing && (
-          <Flex justify='space-between' mt='sm'>
+          <Flex justify="space-between" mt="sm">
             <Button
-              variant='light'
-              color='red'
+              variant="light"
+              color="red"
               onClick={() => {
                 setIsEditing(false);
-                setError('');
-                setSchedulingLink(userData.scheduling_link || '');
+                setError("");
+                setSchedulingLink(userData.scheduling_link || "");
               }}
             >
               Cancel
             </Button>
-            <Button variant='light' color='green' onClick={triggerPatchSchedulingLink}>
+            <Button variant="light" color="green" onClick={triggerPatchSchedulingLink}>
               Save
             </Button>
           </Flex>
         )}
-        <Flex direction={'column'} gap={2} mt={'sm'}>
-          <Text color='gray' tt={'uppercase'}>
+        <Flex direction={"column"} gap={2} mt={"sm"}>
+          <Text color="gray" tt={"uppercase"}>
             example message
           </Text>
-          <Flex style={{ border: '1px solid #dee2e6', borderRadius: '8px' }} align={'center'} justify={'center'}>
-            <Box pos='relative'>
+          <Flex style={{ border: "1px solid #dee2e6", borderRadius: "8px" }} align={"center"} justify={"center"}>
+            <Box pos="relative">
               <LoadingOverlay
                 visible={!userData.scheduling_link}
                 zIndex={1000}
@@ -217,44 +267,44 @@ export default function CalendarAndScheduling() {
                 loader={
                   <Notification
                     withCloseButton={false}
-                    icon={<IconInfoTriangle size='0.8rem' />}
-                    title='Scheduling link is not set'
-                    color='red'
+                    icon={<IconInfoTriangle size="0.8rem" />}
+                    title="Scheduling link is not set"
+                    color="red"
                     withBorder
-                    bg={'#fff6f5'}
-                    style={{ border: '1px solid #f9c5c4' }}
-                    w={'fit-content'}
+                    bg={"#fff6f5"}
+                    style={{ border: "1px solid #f9c5c4" }}
+                    w={"fit-content"}
                     fw={500}
                   >
-                    <Text size={'xs'}>Integrate Calendar to schedule meetings using SellScale AI.</Text>
+                    <Text size={"xs"}>Integrate Calendar to schedule meetings using SellScale AI.</Text>
                   </Notification>
                 }
               />
-              <Flex p={'sm'} gap={'sm'}>
-                <Avatar src={userData.img_url} radius={'xl'} size={'lg'} />
-                <Flex direction={'column'} gap={'sm'}>
-                  <Text fw={'700'} size={'sm'} style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+              <Flex p={"sm"} gap={"sm"}>
+                <Avatar src={userData.img_url} radius={"xl"} size={"lg"} />
+                <Flex direction={"column"} gap={"sm"}>
+                  <Text fw={"700"} size={"sm"} style={{ display: "flex", gap: 5, alignItems: "center" }}>
                     {userData.sdr_name}
-                    <Text color='gray' fw={500}>
-                      <IconPointFilled size={'0.5rem'} style={{ marginRight: '5' }} />
-                      {'5:04 PM'}
+                    <Text color="gray" fw={500}>
+                      <IconPointFilled size={"0.5rem"} style={{ marginRight: "5" }} />
+                      {"5:04 PM"}
                     </Text>
                   </Text>
-                  <Text size={'sm'} color='gray' fw={500}>
-                    {'Hi Brandon'}
+                  <Text size={"sm"} color="gray" fw={500}>
+                    {"Hi Brandon"}
                   </Text>
-                  <Text size={'sm'} color='gray' fw={500}>
+                  <Text size={"sm"} color="gray" fw={500}>
                     {
                       "Hope you're doing great! Just wanted to quickly check in and see if you might have a few minutes to chat about some cool stuff we're working on."
                     }
                   </Text>
-                  <Text size={'sm'} style={{ display: 'flex', gap: 5 }} color='gray' fw={500}>
-                    You can pick a time that works for your here:{' '}
-                    <Anchor href={userData.scheduling_link} target='_blank' fw={500}>
+                  <Text size={"sm"} style={{ display: "flex", gap: 5 }} color="gray" fw={500}>
+                    You can pick a time that works for your here:{" "}
+                    <Anchor href={userData.scheduling_link} target="_blank" fw={500}>
                       {userData.scheduling_link}
                     </Anchor>
                   </Text>
-                  <Text size={'sm'} color='gray' fw={500}>
+                  <Text size={"sm"} color="gray" fw={500}>
                     Looking forward to it!
                   </Text>
                 </Flex>
@@ -294,21 +344,21 @@ export default function CalendarAndScheduling() {
       </Card> */}
 
       <Card>
-        <Text fz='lg' fw='bold'>
+        <Text fz="lg" fw="bold">
           Time Zone
         </Text>
-        <Text mt='sm' fz='sm'>
+        <Text mt="sm" fz="sm">
           This time zone should be set to the time zone for the majority of your prospects.
         </Text>
         <Select
-          mt='md'
+          mt="md"
           withinPortal
           /* @ts-ignore */
-          data={Intl.supportedValuesOf('timeZone')}
+          data={Intl.supportedValuesOf("timeZone")}
           placeholder={Intl.DateTimeFormat().resolvedOptions().timeZone}
           searchable
           clearable
-          nothingFound='Time zone not found'
+          nothingFound="Time zone not found"
           value={timeZone}
           onChange={(value) => setTimeZone(value as string)}
         />

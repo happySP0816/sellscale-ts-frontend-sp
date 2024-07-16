@@ -1,4 +1,4 @@
-import { Button, Flex, Select, Text, TextInput } from "@mantine/core";
+import {Button, Flex, NumberInput, Select, Text, TextInput} from "@mantine/core";
 import { ContextModalProps, closeAllModals } from "@mantine/modals";
 import { useEffect, useState } from "react";
 
@@ -7,11 +7,10 @@ export default function SplitSegmentModal({
   id,
   innerProps,
 }: ContextModalProps<{
-  parentSegments: Array<{ segment_id: number; segment_title: string }>;
+  currentSegment: { id: number; segment_title: string };
   onSplit: (segment_id: any, segment_title: any) => void;
 }>) {
-  const [parentSegmentId, setParentSegmentId] = useState(null);
-  const [childSegmentName, setChildSegmentName] = useState(null);
+  const [numberOfBatches, setNumberOfBatches] = useState(1);
 
   return (
     <>
@@ -21,29 +20,28 @@ export default function SplitSegmentModal({
           creating this sub segment, you will be navigated to filter prospects &
           add into this segment.
         </Text>
-        <Select
-          withinPortal
+        <TextInput
           label={
             <Text color="gray" fw={500}>
               SPLIT FROM SEGMENT:
             </Text>
           }
+          disabled
           placeholder="Select Segment"
-          data={innerProps.parentSegments.map((segment: any) => ({
-            value: segment.segment_id,
-            label: segment.segment_title,
-          }))}
-          onChange={(value: any) => setParentSegmentId(value)}
+          value={innerProps.currentSegment.segment_title}
         />
-        <TextInput
+        <NumberInput
           label={
             <Text color="gray" fw={500}>
-              CHILD SEGMENT NAME:
+              Number Of New Batches:
             </Text>
           }
-          placeholder="Enter child segment name"
+          placeholder="Enter Number Of Batches"
+          value={numberOfBatches}
           onChange={(event: any) =>
-            setChildSegmentName(event.currentTarget.value)
+            {
+              setNumberOfBatches(+event)
+            }
           }
         />
       </Flex>
@@ -62,7 +60,7 @@ export default function SplitSegmentModal({
           radius="md"
           onClick={() => {
             innerProps.onSplit &&
-              innerProps.onSplit(parentSegmentId, childSegmentName);
+              innerProps.onSplit(innerProps.currentSegment.id, numberOfBatches);
             closeAllModals();
           }}
         >

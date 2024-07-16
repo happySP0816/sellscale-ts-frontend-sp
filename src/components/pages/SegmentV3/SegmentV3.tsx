@@ -100,6 +100,7 @@ export default function SegmentV3(props: PropsType) {
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
 
+
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
   const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(false);
   const [sdrs, setAllSDRs] = useState([] as any[]);
@@ -111,7 +112,6 @@ export default function SegmentV3(props: PropsType) {
   const [editSegmentName, setEditSegmentName] = useState("");
   const [showCreateSegmentModal, setShowCreateSegmentModal] = useState(false);
   const [showBatchModal, setShowBatchModal] = useState(false);
-  const [createBatchNumber, setCreateBatchNumber] = useState(2);
   const [showUnassignedSegments, setShowUnassignedSegments] = useState(false);
   const [showAutoDownloadModal, setOpenAutoDownloadModal] = useState(false);
   const [showAutoDownloadFeature, setShowAutoDownloadFeature] = useState(false);
@@ -205,7 +205,7 @@ export default function SegmentV3(props: PropsType) {
       });
   };
 
-  const createNSubsegments = async (showLoader: boolean) => {
+  const createNSubsegments = async (segmentId: number, numberOfBatches: number, showLoader: boolean) => {
     if (showLoader) {
       setLoading(true);
     }
@@ -216,8 +216,8 @@ export default function SegmentV3(props: PropsType) {
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
-        segment_id: selectedSegmentId,
-        num_batches: createBatchNumber,
+        segment_id: segmentId,
+        num_batches: numberOfBatches,
       }),
     })
       .then((response) => response.json())
@@ -1043,8 +1043,13 @@ export default function SegmentV3(props: PropsType) {
             <Text sx={{ whiteSpace: "nowrap" }} fw={600}>
               Existing Segments
             </Text>
-            <Flex>
-              <Badge variant="filled">{data.length}</Badge>
+            <Flex align={"center"}>
+              {
+                loading ? <Loader /> :
+                <Badge variant="filled">
+                {data.length}
+                </Badge>
+              }
             </Flex>
             <Divider w={"100%"} />
             {/* <ActionIcon onClick={unusedToggle}>{openedUnUsed ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon> */}
@@ -1203,6 +1208,41 @@ export default function SegmentV3(props: PropsType) {
                             >
                               <IconCopy size={"0.9rem"} />
                               Duplicate Segment
+                            </Menu.Item>
+                            <Menu.Item
+                              onClick={() => {
+                                setSelectedSegmentId(item.id);
+                                openContextModal({
+                                  modal: 'splitSegment',
+                                  title: (
+                                    <Group position='apart'>
+                                      <div>
+                                        <Title
+                                          order={3}
+                                          sx={{
+                                            display: 'flex',
+                                            gap: '8px',
+                                            alignItems: 'center',
+                                          }}
+                                        >
+                                          <IconButterfly color='#228be6' style={{ marginTop: '-5px' }} />
+                                          Split Segment
+                                        </Title>
+                                      </div>
+                                    </Group>
+                                  ),
+                                  innerProps: {
+                                    currentSegment: data.filter((segment: any) => {
+                                      return segment.id === item.id;
+                                    })[0],
+                                    onSplit: (segmentId: any, numberOfBatches: any) => {
+                                      createNSubsegments(segmentId, numberOfBatches, true);
+                                    },
+                                  }
+                                })
+                              }}
+                            >
+                              Split Segment
                             </Menu.Item>
 
                             <Menu.Divider />

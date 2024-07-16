@@ -19,6 +19,7 @@ import {
   Grid,
   Textarea,
   ActionIcon,
+  TextInput,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -209,6 +210,8 @@ export default function CampaignLandingV2() {
   const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<SubjectLineTemplate[]>(emailSubjectLinesState);
 
   const [statsData, setStatsData] = useState<StatsData | null>(null);
+  const [isEditingCampaignName, setIsEditingCampaignName] = useState(false);
+  const [editableText, setEditableText] = useState("");
   const [showActivateWarningModal, setShowActivateWarningModal] = useState(false);
   const [showToneArea, setShowToneArea] = useState(false);
   const [selectedVoiceSequence, setSelectedVoiceSequence] = useState<any>(null);
@@ -343,6 +346,22 @@ export default function CampaignLandingV2() {
     }
     setLoadingTotalContacts(false);
   };
+
+  const updateCampaignName = (newName: string, campaignId: number) => {
+    fetch(
+      `${API_URL}/client/archetype/${campaignId}/update_description_and_fit`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          updated_persona_name: newName,
+        }),
+      }
+    )
+  }
 
   const updateConnectionType = (newConnectionType: string, campaignId: number) => {
     setLoadingStats(true);
@@ -733,10 +752,45 @@ export default function CampaignLandingV2() {
                       </Flex>
                     }
                   >
-                    <Text fw={600} size={20}>
-                      {statsData?.emoji} {statsData?.archetype_name?.substring(0, 70)}
-                      {statsData?.archetype_name?.length > 70 && "..."}
-                    </Text>
+                    {isEditingCampaignName ? (
+                      <TextInput
+                        value={editableText}
+                        onChange={(e) => setEditableText(e.currentTarget.value)}
+                        onBlur={() => {
+                          setIsEditingCampaignName(false);
+                          setStatsData((prevData: any) => ({
+                            ...prevData,
+                            archetype_name: editableText,
+                          }));
+                          updateCampaignName(editableText, currentProject?.id || -1);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setIsEditingCampaignName(false);
+                            setStatsData((prevData: any) => ({
+                              ...prevData,
+                              archetype_name: editableText,
+                            }));
+                            updateCampaignName(editableText, currentProject?.id || -1);
+                          }
+                        }}
+                        autoFocus
+                        style={{ width: `${editableText.length + 2}ch` }}
+                      />
+                    ) : (
+                      <Text
+                        fw={600}
+                        size={20}
+                        onClick={() => {
+                          setEditableText(`${statsData?.emoji} ${statsData?.archetype_name}`);
+                          setIsEditingCampaignName(true);
+                        }}
+                        style={{ cursor: "text" }}
+                      >
+                        {statsData?.emoji} {statsData?.archetype_name?.substring(0, 70)}
+                        {statsData?.archetype_name?.length > 70 && "..."}
+                      </Text>
+                    )}
                   </Tooltip>
                   <Badge
                     data-tour="campaign-status"

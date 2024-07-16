@@ -21,7 +21,9 @@ export const useStrategiesApi = (userToken: string) => {
   const postCreateStrategy = async (
     name: string,
     description: string,
-    clientArchetypeIds: number[]
+    clientArchetypeIds: number[],
+    startDate: Date,
+    endDate: Date,
   ) => {
     setIsLoading(true);
     const response = await fetch(`${API_URL}/strategies/create`, {
@@ -34,6 +36,8 @@ export const useStrategiesApi = (userToken: string) => {
         name,
         description,
         client_archetype_ids: clientArchetypeIds,
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString(),
       }),
     });
     const data = await response.json();
@@ -60,7 +64,9 @@ export const useStrategiesApi = (userToken: string) => {
     newTitle: string,
     newDescription: string,
     newArchetypes: number[],
-    newStatus: string
+    newStatus: string,
+    startDate: Date,
+    endDate: Date,
   ) => {
     setIsLoading(true);
     const response = await fetch(`${API_URL}/strategies/${strategyId}/update`, {
@@ -74,6 +80,8 @@ export const useStrategiesApi = (userToken: string) => {
         new_description: newDescription,
         new_status: newStatus,
         new_archetypes: newArchetypes,
+        start_date: startDate,
+        end_date: endDate,
       }),
     });
     const data = await response.json();

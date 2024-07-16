@@ -13,10 +13,12 @@ export default function StrategyCreateModal({
   context,
   id,
 }: ContextModalProps<{
-  onSubmit: (title: string, description: string, archetypes: number[]) => void;
+  onSubmit: (title: string, description: string, archetypes: number[], startDate: Date | null, endDate: Date | null) => void;
 }>) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   const [archetypes, setArchetypes]: any = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -70,8 +72,8 @@ export default function StrategyCreateModal({
           Time Frame
         </Text>
         <Flex gap={"md"}>
-          <DateInput valueFormat="DD/MM/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} />
-          <DateInput valueFormat="DD/MM/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} />
+          <DateInput valueFormat="DD/MM/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} onChange={setStartDate}/>
+          <DateInput valueFormat="DD/MM/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} onChange={setEndDate}/>
         </Flex>
       </Box>
       <Flex gap={"xl"} mt={40}>
@@ -84,7 +86,7 @@ export default function StrategyCreateModal({
           disabled={loading || !title || !description}
           onClick={() => {
             setLoading(true);
-            innerProps.onSubmit(title, description, archetypes);
+            innerProps.onSubmit(title, description, archetypes, startDate, endDate);
             context.closeAll();
             setLoading(false);
           }}

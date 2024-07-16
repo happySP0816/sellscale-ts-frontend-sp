@@ -17,7 +17,9 @@ export default function StrategyEditModal({
   description: string;
   status: string;
   archetypes: number[];
-  onSubmit: (title: string, description: string, archetypes: number[], status: string) => void;
+  startDate: Date | null;
+  endDate: Date | null;
+  onSubmit: (title: string, description: string, archetypes: number[], status: string, startDate: Date | null, endDate: Date | null) => void;
 }>) {
   const userToken = useRecoilValue(userTokenState);
   const [status, setStatus] = useState(innerProps.status);
@@ -25,6 +27,9 @@ export default function StrategyEditModal({
   const [description, setDescription] = useState(innerProps.description);
   const [archetypes, setArchetypes]: any = useState(innerProps.archetypes); // Typo: setArchetype
   const [allArchetypes, setAllArchetypes] = useState([]);
+
+  const [startDate, setStartDate] = useState<Date | null>(innerProps.startDate);
+  const [endDate, setEndDate] = useState<Date | null>(innerProps.endDate);
 
   useEffect(() => {
     fetch(`${API_URL}/client/all_archetypes`, {
@@ -67,8 +72,8 @@ export default function StrategyEditModal({
           Time Frame
         </Text>
         <Flex gap={"md"}>
-          <DateInput valueFormat="DD/MM/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} />
-          <DateInput valueFormat="DD/MM/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} />
+          <DateInput valueFormat="MM/DD/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} value={startDate} onChange={setStartDate}/>
+          <DateInput valueFormat="MM/DD/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} value={endDate} onChange={setEndDate}/>
         </Flex>
       </Box>
       <Radio.Group label="Status" mt={"md"} value={status} onChange={(value) => setStatus(value)} defaultValue={innerProps.status}>
@@ -121,7 +126,7 @@ export default function StrategyEditModal({
         <Button
           fullWidth
           onClick={() => {
-            innerProps.onSubmit(title, description, archetypes, status);
+            innerProps.onSubmit(title, description, archetypes, status, startDate, endDate);
             context.closeAll();
           }}
         >

@@ -65,72 +65,79 @@ export default function StrategyEditModal({
           setArchetypes(value);
         }}
         value={archetypes}
-        mt={20}
+        mt={10}
       />
+        <Flex gap={"md"} align="center" justify="center">
+          <Box>
+            <Text size={"sm"} fw={500}>
+              Time Frame
+            </Text>
+            <Flex gap={"sm"}>
+              <DateInput valueFormat="MM/DD/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} value={startDate} onChange={setStartDate}/>
+              <DateInput valueFormat="MM/DD/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} value={endDate} onChange={setEndDate}/>
+            </Flex>
+          </Box>
+          <Box>
+            <Text mb="xs" size={"sm"} fw={500} mt={"sm"}>
+              Status
+            </Text>
+            <Radio.Group mb="md" value={status} onChange={(value) => setStatus(value)} defaultValue={innerProps.status}>
+            <Flex gap={20}>
+              <Radio
+                value="NOT_STARTED"
+                label="Not Started"
+                styles={{
+                  label: {
+                    color: "grey",
+                    fontSize: "16px",
+                    fontWeight: 500,
+                    whiteSpace: "nowrap",
+                  },
+                }}
+              />
+              <Radio
+                value="IN_PROGRESS"
+                label="In Progress"
+                styles={{
+                  label: {
+                    color: "orange",
+                    fontSize: "16px",
+                    fontWeight: 500,
+                    whiteSpace: "nowrap",
+                  },
+                }}
+              />
+              <Radio
+                value="FAILED"
+                label="Failed"
+                styles={{
+                  label: {
+                    color: "red",
+                    fontSize: "16px",
+                    fontWeight: 500,
+                  },
+                }}
+              />
+              <Radio
+                value="SUCCESS"
+                label="Success"
+                styles={{
+                  label: {
+                    color: "green",
+                    fontSize: "16px",
+                    fontWeight: 500,
+                  },
+                }}
+              />
+            </Flex>
+          </Radio.Group>
+          </Box>
+        </Flex>
       <Box>
-        <Text size={"sm"} fw={500} mt={"sm"}>
-          Time Frame
-        </Text>
-        <Flex gap={"md"}>
-          <DateInput valueFormat="MM/DD/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} value={startDate} onChange={setStartDate}/>
-          <DateInput valueFormat="MM/DD/YYYY" rightSection={<IconCalendar size={"0.9rem"} color="gray" />} w={"100%"} value={endDate} onChange={setEndDate}/>
-        </Flex>
-      </Box>
-      <Radio.Group label="Status" mt={"md"} value={status} onChange={(value) => setStatus(value)} defaultValue={innerProps.status}>
-        <Flex mt="8" gap={40}>
-          <Radio
-            value="NOT_STARTED"
-            label="Not Started"
-            styles={{
-              label: {
-                color: "grey",
-                fontSize: "16px",
-                fontWeight: 500,
-                whiteSpace: "nowrap",
-              },
-            }}
-          />
-          <Radio
-            value="IN_PROGRESS"
-            label="In Progress"
-            styles={{
-              label: {
-                color: "orange",
-                fontSize: "16px",
-                fontWeight: 500,
-                whiteSpace: "nowrap",
-              },
-            }}
-          />
-          <Radio
-            value="FAILED"
-            label="Failed"
-            styles={{
-              label: {
-                color: "red",
-                fontSize: "16px",
-                fontWeight: 500,
-              },
-            }}
-          />
-          <Radio
-            value="SUCCESS"
-            label="Success"
-            styles={{
-              label: {
-                color: "green",
-                fontSize: "16px",
-                fontWeight: 500,
-              },
-            }}
-          />
-        </Flex>
-      </Radio.Group>
-      <Box mt={20}>
         <Text fw={500} size={"sm"} mb={"8"}>
           Description
         </Text>
-        <RichTextArea height={200} onChange={setDescription} value={innerProps.description} />
+        <RichTextArea height={300} onChange={setDescription} value={innerProps.description} />
       </Box>
       <Flex gap={"xl"} mt={40}>
         <Button variant="outline" color="gray" fullWidth>

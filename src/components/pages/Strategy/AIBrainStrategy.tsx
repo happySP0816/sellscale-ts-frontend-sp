@@ -421,7 +421,7 @@ export default function AIBrainStrategy() {
 
                 return (
                   <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
-                    <Badge color={status === "FAILED" ? "red" : status === "SUCCESS" ? "green" : "orange"}>{status?.toLowerCase().replaceAll("_", " ")}</Badge>
+                    <Badge color={status === "FAILED" ? "red" : status === "SUCCESS" ? "green" : status === "NOT_STARTED" ? "gray" : "orange"}>{status?.toLowerCase().replaceAll("_", " ")}</Badge>
                   </Flex>
                 );
               },

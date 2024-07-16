@@ -476,6 +476,11 @@ export default function AIBrainStrategy() {
                               <Title order={2}>Edit Strategy</Title>
                             </Flex>
                           ),
+                          styles: {
+                            content: {
+                              minWidth: "70%",
+                            },
+                          },
                           innerProps: {
                             title: cell.row.original.title,
                             description: cell.row.original.description,

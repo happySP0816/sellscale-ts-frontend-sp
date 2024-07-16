@@ -58,18 +58,19 @@ export default function ResetSegmentModal({
         {resetTitle}
       </Text>
       <Flex mt={"xl"} gap={"xl"}>
-        <Button fullWidth variant="outline" color="gray">
+        <Button fullWidth variant="outline" color="gray" disabled={loading}>
           Cancel
         </Button>
         <Button color="red" fullWidth
                 onClick={() => {
                   innerProps.onClick(innerProps.currentSegment.segment_id, resetTitle)
                   setLoading(true);
+                  }
                 }
-        }
+                loading={loading}
                 disabled={loading}
         >
-          {loading ? <IconLoader /> : "Confirm Reset"}
+          Confirm Reset
         </Button>
       </Flex>
     </Box>

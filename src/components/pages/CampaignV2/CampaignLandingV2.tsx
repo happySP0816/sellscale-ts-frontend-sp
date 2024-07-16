@@ -28,6 +28,7 @@ import Hook from "@pages/channels/components/Hook";
 import Tour from "reactour";
 import { API_URL } from "@constants/data";
 import {
+  IconArrowLeft,
   IconArrowLeftRight,
   IconArrowsLeftRight,
   IconBrandLinkedin,
@@ -43,7 +44,7 @@ import { IconMessageCheck, IconSparkles } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { fetchCampaignStats, fetchTotalContacts, fetchCampaignAnalytics } from "@utils/requests/campaignOverview";
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { emailSequenceState, emailSubjectLinesState, linkedinSequenceState, userDataState, userTokenState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -182,6 +183,7 @@ export default function CampaignLandingV2() {
 
   const id = Number(useParams().id);
   const [personalizers, setPersonalizers] = useState([]);
+  const navigate = useNavigate();
   const [personalizersEnabled, setPersonalizersEnabled] = useState(currentProject?.is_ai_research_personalization_enabled);
   const [status, setStatus] = useState("SETUP");
   const [isTourOpen, setIsTourOpen] = useState(false);
@@ -546,6 +548,14 @@ export default function CampaignLandingV2() {
 
   return (
     <Paper p={"lg"} maw={1150} h="100%" ml="auto" mr="auto" style={{ backgroundColor: "transparent" }}>
+      <Flex align="center" mb="md" onClick={() => navigate('/campaigns')} style={{ cursor: "pointer" }}>
+        <ActionIcon size="lg" variant="transparent">
+          <IconArrowLeft size={24} />
+        </ActionIcon>
+        <Text size="md" fw={700} ml="xs">
+          All Campaigns
+        </Text>
+      </Flex>
       <Modal
         size={900}
         opened={voiceBuilderOpened}

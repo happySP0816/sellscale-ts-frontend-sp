@@ -78,7 +78,7 @@ import { CreateEmailReplyFrameworkContextModal } from "@modals/CreateEmailReplyF
 import MakeReminderCardModal from "@modals/MakeReminderCardModal";
 import SellscaleChat from "./chat/sellscaleChat";
 import AutoSpitModal from "@modals/SegmentV2/AutoSpitModal";
-import SplitSegmentModal from "@modals/SegmentV2/SplitSegmentModal";
+import SplitSegmentModal from "@modals/SegmentV3/SplitSegmentModal";
 import SegmentEditPrefilterModal from "@modals/SegmentV2/SegmentEditPrefilterModal";
 import ClearSegmentModal from "@modals/SegmentV2/ClearSegmentModal";
 import DeleteSegmentModal from "@modals/SegmentV2/DeleteSegmentModal";
@@ -107,7 +107,7 @@ import StrategyEditModal from "@modals/AIBrain/StrategyEditModal";
 import StrategyPreviewModal from "@modals/AIBrain/StrategyPreviewModal";
 import SelectStrategyModal from "@modals/SelectStrategyModal";
 import PreFiltersV2EditModal from "@modals/PrefiltersV2/PrefilterV2EditModal";
-import ResetSegmentModal from "@modals/SegmentV2/ResetSegmentModal";
+import ResetSegmentModal from "@modals/SegmentV3/ResetSegmentModal";
 import SellScaleAssistModal from "@modals/SellScaleAssistModal";
 import { IconWand } from "@tabler/icons";
 import ICPRoutingCreateModal from "@modals/website/ICPRoutingCreateModal";

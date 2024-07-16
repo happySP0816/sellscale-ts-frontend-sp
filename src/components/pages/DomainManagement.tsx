@@ -49,15 +49,17 @@ import { API_URL } from "@constants/data";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 
-const MAX_INBOXES = 10;
-const MAX_DOMAINS = 5;
+const MAX_INBOXES = 60;
+const MAX_DOMAINS = 30;
 
 export default function DomainManagement() {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
 
-  const [addMoreOpened, { open: openAddMore, close: closeAddMore }] =
-    useDisclosure(false);
+  const [
+    addMoreOpened,
+    { open: openAddMore, close: closeAddMore },
+  ] = useDisclosure(false);
   const [
     requestMoreOpened,
     { open: openRequestMore, close: closeRequestMore },

@@ -14,6 +14,7 @@ import {
   Loader,
   LoadingOverlay,
   Menu,
+  Popover,
   ScrollArea,
   Select,
   Stack,
@@ -32,7 +33,7 @@ import { forwardRef, useEffect, useState } from "react";
 import { HEADER_HEIGHT } from "./InboxProspectConvo";
 import { labelizeConvoSubstatus, prospectStatuses, nurturingProspectStatuses, getStatusDetails, labelizeStatus } from "./utils";
 import InboxProspectListFilter, { InboxProspectListFilterState, defaultInboxProspectListFilterState } from "./InboxProspectListFilter";
-import { IconAlarm, IconAlertCircle, IconChevronUp, IconEdit, IconGridDots, IconMoodSmile } from "@tabler/icons";
+import { IconAlarm, IconAlertCircle, IconBolt, IconChevronUp, IconEdit, IconGridDots, IconMoodSmile, IconUser } from "@tabler/icons";
 import { useNavigate } from "react-router-dom";
 import { INBOX_PAGE_HEIGHT, ProspectBucketRecord, ProspectBuckets } from "../../pages/InboxRestructurePage";
 import { mainTabState, openedProspectIdState, openedProspectListState } from "@atoms/inboxAtoms";
@@ -243,7 +244,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                   <Indicator size={6} disabled={props.buckets.ai_bucket.length === 0}>
                     <Group spacing={5} noWrap>
                       <IconRobotFace size="1rem" />
-                      {mainTab === "ai_bucket" && <Text>Queued for AI</Text>}
+                      {mainTab === "ai_bucket" && <Text>AI Inbox</Text>}
                     </Group>
                   </Indicator>
                 </Tabs.Tab>
@@ -361,15 +362,50 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                   <>
                     <Box bg={"#E4E5E6"} p={"md"}>
                       <Text size={"sm"} color="gray">
-                        Teach your AI to automate replies
+                        AI index performance revival rate
                       </Text>
                       <Flex align={"center"} gap={3} className="hover:cursor-pointer">
-                        <IconEdit size={"0.9rem"} color="#888" />
+                        {/* <IconEdit size={"0.9rem"} color="#888" />
                         <Tooltip label="Coming soon.">
                           <Text fw={500} underline size={"sm"} color="#888">
                             Edit reply frameworks
                           </Text>
-                        </Tooltip>
+                        </Tooltip> */}
+                        <Flex align={"center"} w={"100%"} justify={"space-between"}>
+                          <Text fw={600} size={"sm"}>
+                            Revival Rate: {25}%
+                          </Text>
+                          <Tooltip
+                            arrowOffset={10}
+                            arrowSize={4}
+                            bg={"white"}
+                            label={
+                              <Box>
+                                <Flex align={"center"} gap={4} py={6}>
+                                  <Badge variant="light" leftSection={<IconUser size={"0.9rem"} className="mt-1" />}>
+                                    {5}
+                                  </Badge>
+                                  <Text color="gray" size={"sm"} fw={500}>
+                                    Prospects Responded
+                                  </Text>
+                                </Flex>
+                                <Divider my={6} />
+                                <Flex align={"center"} gap={4} py={6}>
+                                  <Badge variant="light" leftSection={<IconBolt size={"0.9rem"} className="mt-1" />}>
+                                    {25}
+                                  </Badge>
+                                  <Text color="gray" size={"sm"} fw={500}>
+                                    AI Revival Attempted
+                                  </Text>
+                                </Flex>
+                              </Box>
+                            }
+                            withArrow
+                            position="right"
+                          >
+                            <IconInfoCircle size={"1rem"} color="#228be6" />
+                          </Tooltip>
+                        </Flex>
                       </Flex>
                     </Box>
                     <Flex bg={"#FFFAEA"} align={"center"} gap={"xs"} px={"md"} py={"sm"}>

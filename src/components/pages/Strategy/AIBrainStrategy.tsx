@@ -1,39 +1,50 @@
-import { Box, Flex, Text, Badge, Button, Select, ActionIcon, useMantineTheme, SimpleGrid, Paper, Title, Loader, HoverCard } from "@mantine/core";
-import { openContextModal } from "@mantine/modals";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Flex,
+  HoverCard,
+  Loader,
+  Paper,
+  Select,
+  Text,
+  Title,
+  useMantineTheme
+} from "@mantine/core";
+import {openContextModal} from "@mantine/modals";
 import {
   Icon123,
   IconBulb,
   IconChevronLeft,
   IconChevronRight,
   IconEye,
-  IconLamp,
   IconLoader,
   IconPencil,
   IconPlus,
-  IconPoint,
   IconTargetArrow,
   IconToggleLeft,
 } from "@tabler/icons";
-import { IconLighter } from "@tabler/icons-react";
-import { DataGrid } from "mantine-data-grid";
-import { useEffect, useRef, useState } from "react";
-import { useStrategiesApi } from "./StrategyApi";
-import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
-import { closeAllModals, closeContextModal } from "@mantine/modals/lib/events";
+import {IconLighter} from "@tabler/icons-react";
+import {DataGrid} from "mantine-data-grid";
+import {useEffect, useMemo, useRef, useState} from "react";
+import {useStrategiesApi} from "./StrategyApi";
+import {useRecoilValue} from "recoil";
+import {userTokenState} from "@atoms/userAtoms";
 
-import { Line } from "react-chartjs-2";
+import {Line} from "react-chartjs-2";
 import {
-  Chart as ChartJS,
   CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  // Title,
-  Tooltip,
+  Chart as ChartJS,
+  Filler,
   Legend,
-  Filler, // 1. Import Filler plugin
+  LinearScale,
+  LineElement,
+  PointElement,
+  Tooltip,
 } from "chart.js";
+import {ShapeUtils} from "three";
+import area = ShapeUtils.area;
 
 ChartJS.register(
   CategoryScale,
@@ -68,10 +79,49 @@ export default function AIBrainStrategy() {
   const handleGetAllStrategies = async () => {
     setFetchingStrategies(true);
     const response = await getAllStrategies();
-    console.log(response);
     setStrategies(response);
     setFetchingStrategies(false);
   };
+
+  const generateLabelsAndData = useMemo(() => {
+    if (strategies.length === 0) {
+      return { labels: [], maxRateData: [], rateByStrategyData: [] };
+    }
+    const maxRateByMonth = new Map<number, number>();
+    const rateByStrategyData: {name: string, rate: number, month: number}[] = [];
+
+    strategies.map((strategy: any) => {
+      const posResponse = strategy.num_pos_response;
+      const numSent = strategy.num_sent;
+      const monthNumber = new Date(strategy.start_date).getMonth();
+
+      const strategyRate =  numSent ? (posResponse / numSent) * 100 : 0;
+      rateByStrategyData.push({name: "" + strategy.title, rate: strategyRate, month: monthNumber});
+
+      if (maxRateByMonth.has(monthNumber)) {
+        if (strategyRate > maxRateByMonth.get(monthNumber)!) {
+          maxRateByMonth.set(monthNumber, strategyRate);
+        }
+      } else {
+        maxRateByMonth.set(monthNumber, strategyRate);
+      }
+    });
+
+    if (maxRateByMonth.size === 0) {
+      return { labels: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], maxRateData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], rateByStrategyData: [] }
+    }
+
+    const maxMonth = Math.max(...Array.from(maxRateByMonth.keys()));
+
+    const labels = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].slice(0, maxMonth + 1);
+    const maxRateData: number[] = [];
+
+    for (let i = 0; i <= maxMonth; i++) {
+      maxRateData.push(maxRateByMonth.get(i) ?? 0);
+    }
+
+    return { labels, maxRateData, rateByStrategyData };
+  }, [strategies]);
 
   useEffect(() => {
     handleGetAllStrategies();
@@ -144,8 +194,8 @@ export default function AIBrainStrategy() {
                 </Flex>
               ),
               innerProps: {
-                onSubmit: async (title: string, description: string, archetypes: number[]) => {
-                  const response = await postCreateStrategy(title, description, archetypes);
+                onSubmit: async (title: string, description: string, archetypes: number[], startDate: Date, endDate: Date) => {
+                  const response = await postCreateStrategy(title, description, archetypes, startDate, endDate);
                   handleGetAllStrategies();
                 },
               },
@@ -156,7 +206,7 @@ export default function AIBrainStrategy() {
         </Button>
       </Flex>
       <Paper h={350} w={"100%"} p={"lg"} mt={"md"}>
-        <AreaChart />
+        <AreaChart dataAndLabels={generateLabelsAndData} />
       </Paper>
       <Paper>
         <DataGrid
@@ -186,11 +236,10 @@ export default function AIBrainStrategy() {
               maxSize: 140,
               cell: (cell: any) => {
                 const { title, description } = cell.row.original;
-
                 return (
                   <Box h={"100%"} ml={0} pl={0}>
                     <Text size={"sm"} fw={700} align="center">
-                      {1}
+                      {cell.row.index + 1}
                     </Text>
                   </Box>
                 );
@@ -207,7 +256,25 @@ export default function AIBrainStrategy() {
               minSize: 220,
               maxSize: 340,
               cell: (cell: any) => {
-                const { title, description } = cell.row.original;
+                const { title, description, start_date: startDate, end_date: endDate } = cell.row.original;
+
+                const startDateConverted = new Date(startDate);
+
+                const formattedStartDate = startDateConverted.toLocaleDateString('en-US', {
+                  timeZone: 'UTC',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit'
+                });
+
+                const endDateConverted = new Date(endDate);
+
+                const formattedEndDate = endDateConverted.toLocaleDateString('en-US', {
+                  timeZone: 'UTC',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit'
+                });
 
                 return (
                   <Box h={"100%"} ml={0} pl={0} w={200}>
@@ -225,10 +292,10 @@ export default function AIBrainStrategy() {
                     </Text>
                     <Flex gap={"xs"} mt={"sm"}>
                       <Text size={"10px"} fw={500} color="gray">
-                        First Sent Date: <span className="text-black">{"06/06/2024"}</span>
+                        First Sent Date: <span className="text-black">{formattedStartDate}</span>
                       </Text>
                       <Text size={"10px"} fw={500} color="gray">
-                        Last Sent Date: <span className="text-black">{"06/06/2024"}</span>
+                        Last Sent Date: <span className="text-black">{formattedEndDate}</span>
                       </Text>
                     </Flex>
                     {
@@ -414,8 +481,10 @@ export default function AIBrainStrategy() {
                             description: cell.row.original.description,
                             archetypes: cell.row.original.archetypes?.map((x: any) => x.id),
                             status: cell.row.original.status,
-                            onSubmit: async (title: string, description: string, archetypes: number[], status: string) => {
-                              const response = await patchUpdateStrategy(cell.row.original.id, title, description, archetypes, status);
+                            startDate: new Date(cell.row.original.start_date),
+                            endDate: new Date(cell.row.original.end_date),
+                            onSubmit: async (title: string, description: string, archetypes: number[], status: string, startDate: Date, endDate: Date) => {
+                              const response = await patchUpdateStrategy(cell.row.original.id, title, description, archetypes, status, startDate, endDate);
                               handleGetAllStrategies();
                             },
                           },
@@ -549,24 +618,30 @@ export default function AIBrainStrategy() {
   );
 }
 
-const AreaChart: React.FC = () => {
+const AreaChart: React.FC<{dataAndLabels: {labels: string[], maxRateData: number[], rateByStrategyData: {name: string, rate: number, month: number}[] }}> = (areaChartProps) => {
   const chartRef = useRef<any>(null);
 
-  const additionalData = [
-    { demo: 500, strategy: "Email Test Campaign" },
-    { demo: 450, strategy: "Social Media Blitz" },
-  ];
-
   const data: any = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
+    labels: areaChartProps.dataAndLabels.labels,
     datasets: [
       {
-        label: "Positive responsives",
-        data: [65, 59, 80, 81, 56, 55, 40],
+        label: "Positive Response rate By Strategy",
+        data: areaChartProps.dataAndLabels.rateByStrategyData.map((strategyRate) => {
+          return {x: areaChartProps.dataAndLabels.labels[strategyRate.month], y: strategyRate.rate};
+        }),
+        borderColor: "rgba(255, 99, 132, 1)",
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        pointRadius: 4,
+        pointBackgroundColor: "rgba(255, 99, 132, 1)",
+        showLine: false,
+      },
+      {
+        label: "Max Positive Response rate",
+        data: areaChartProps.dataAndLabels.maxRateData,
         fill: true,
         borderColor: "rgba(75,192,192,1)",
         backgroundColor: "rgba(75,192,192,0.2)",
-        pointRadius: 8,
+        pointRadius: 4,
         pointBackgroundColor: "rgba(75,192,192,1)",
       },
     ],
@@ -587,9 +662,12 @@ const AreaChart: React.FC = () => {
         enabled: true,
         callbacks: {
           label: function (context: any) {
+            if (context.dataset.label === "Max Positive Response rate") {
+              return '';
+            }
             const index = context.dataIndex;
-            const info = additionalData[index];
-            return [`Demo: ${info.demo}`, `Strategy${index}: ${info.strategy}`];
+            const info = areaChartProps.dataAndLabels.rateByStrategyData[index];
+            return [`Rate: ${info.rate.toFixed(2)}%`, `Strategy ${index}: ${info.name}`];
           },
         },
       },
@@ -604,6 +682,12 @@ const AreaChart: React.FC = () => {
         grid: {
           borderDash: [5, 5],
           display: true,
+        },
+        beginAtZero: true,
+        ticks: {
+          callback: function(value: string) {
+            return value + '%';
+          },
         },
       },
     },

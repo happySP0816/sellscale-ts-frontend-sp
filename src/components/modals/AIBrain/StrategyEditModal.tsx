@@ -77,7 +77,19 @@ export default function StrategyEditModal({
         </Flex>
       </Box>
       <Radio.Group label="Status" mt={"md"} value={status} onChange={(value) => setStatus(value)} defaultValue={innerProps.status}>
-        <Flex mt="8" gap={70}>
+        <Flex mt="8" gap={40}>
+          <Radio
+            value="NOT_STARTED"
+            label="Not Started"
+            styles={{
+              label: {
+                color: "grey",
+                fontSize: "16px",
+                fontWeight: 500,
+                whiteSpace: "nowrap",
+              },
+            }}
+          />
           <Radio
             value="IN_PROGRESS"
             label="In Progress"
@@ -86,6 +98,7 @@ export default function StrategyEditModal({
                 color: "orange",
                 fontSize: "16px",
                 fontWeight: 500,
+                whiteSpace: "nowrap",
               },
             }}
           />

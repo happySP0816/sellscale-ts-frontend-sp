@@ -39,6 +39,7 @@ import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import moment from "moment";
 import { deterministicMantineColor } from "@utils/requests/utils";
+import { showNotification } from "@mantine/notifications";
 
 type DeanonymizationType = {
   avatar: string;
@@ -346,8 +347,13 @@ export default function WebsiteOverview() {
                   const selectedContacts = Object.keys(selected).map(
                     (index: any) => deanonymData[index].id
                   );
-                  // alert(`Selected Contacts: ${selectedContacts.join(", ")}`);
                   autoClassifyDeanonymizedContacts(selectedContacts);
+                  showNotification({
+                    title: "Classifying...",
+                    message:
+                      "Contacts are being classified. Please refresh to see the changes.",
+                    color: "teal",
+                  });
                 }}
               >
                 Classify {Object.keys(selected).length} Visitors

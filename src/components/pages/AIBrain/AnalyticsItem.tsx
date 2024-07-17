@@ -456,7 +456,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
               )}
             </Box>
           </Flex>
-          {thereExistsICPData && <Paper>
+          {/* thereExistsICPData && <Paper>
             <Flex align={"center"} gap={"5px"}>
               <Text
                 style={{
@@ -474,7 +474,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
               <Flex>
               </Flex>
             </Flex>
-            {/* <SimpleGrid cols={5} mt={"sm"}>
+            <SimpleGrid cols={5} mt={"sm"}>
               {Array.from(new Set(topIcpPeople?.map((icpItem: { full_name: any; }) => icpItem.full_name)))
                 .map((uniqueName) => {
                   if (typeof uniqueName === 'string') {
@@ -515,8 +515,8 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
                     </Paper>
                   );
                 })}
-            </SimpleGrid> */}
-          </Paper>}
+            </SimpleGrid>
+          </Paper> */}
         </Flex>
       ) : (
        <></>

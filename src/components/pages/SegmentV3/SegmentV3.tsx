@@ -70,7 +70,7 @@ import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import { IconArrowsSplit2, IconUsersMinus, IconUsersPlus } from "@tabler/icons-react";
-import { openConfirmModal, openContextModal } from "@mantine/modals";
+import {closeAllModals, openConfirmModal, openContextModal} from "@mantine/modals";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
 import { showNotification } from "@mantine/notifications";
 import { RequestCampaignModal } from "@modals/SegmentV2/RequestCampaignModal";
@@ -250,6 +250,30 @@ export default function SegmentV3(props: PropsType) {
         setLoading(false);
         getAllSegments(true);
         setShowTransferSegmentModal(false);
+      });
+  };
+
+  const resetSegment = async (segmentId: number, newSegmentTitle: string, showLoader: boolean) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(`${API_URL}/segment/reset_segment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_id: segmentId,
+        new_segment_title: newSegmentTitle,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {})
+      .finally(() => {
+        setLoading(false);
+        closeAllModals();
+        getAllSegments(true);
       });
   };
 
@@ -1288,7 +1312,15 @@ export default function SegmentV3(props: PropsType) {
                                       maxWidth: "500px !important",
                                     },
                                   }),
-                                  innerProps: {},
+                                  innerProps: {
+                                    currentSegment: {
+                                      segment_title: item.segment_title,
+                                      segment_id: item.id,
+                                    },
+                                    onClick: (segment_id: number, segment_title: string) => {
+                                      resetSegment(segment_id, segment_title, true);
+                                    }
+                                  },
                                 })
                               }
                             >

@@ -1,5 +1,15 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { ActionIcon, Badge, Box, Button, Flex, HoverCard, Text, TextInput, Title } from "@mantine/core";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Flex,
+  HoverCard,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import EmailQueuedMessageItem from "./EmailQueuedMessageItem";
@@ -14,90 +24,88 @@ import { DateTimePicker } from "@mantine/dates";
 import { patchScheduledEmails } from "@utils/requests/patchScheduledEmail";
 import { showNotification } from "@mantine/notifications";
 import { useForceUpdate } from "@mantine/hooks";
-import { UpcomingGenerationsView } from '@common/messages/LinkedinQueuedMessages';
+import { UpcomingGenerationsView } from "@common/messages/LinkedinQueuedMessages";
 
 export default function EmailQueuedMessages(props: { all?: boolean }) {
   const userToken = useRecoilValue(userTokenState);
-  const userData = useRecoilValue(userDataState)
+  const userData = useRecoilValue(userDataState);
   const currentProject = useRecoilValue(currentProjectState);
   const [messages, setMessages] = useState<any[]>([]);
-  const [search, setSearch] = useState<string>('');
+  const [search, setSearch] = useState<string>("");
 
   const forceUpdate = useForceUpdate();
 
   useEffect(() => {
-    if (search === '') {
+    if (search === "") {
       setMessages(data || []);
       return;
     }
     const filtered = messages.filter((message: any) => {
       const p = message.prospect as Prospect;
       return p.full_name.toLowerCase().includes(search.toLowerCase());
-    })
+    });
 
     setMessages(filtered);
-  }, [search])
+  }, [search]);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-scheduled-emails`],
     queryFn: async () => {
+      const response = await getScheduledEmails(userToken, null, true);
 
-      const response = await getScheduledEmails(
-        userToken,
-        null,
-        true
-      );
-
-      let messages = response.status === 'success' ? response.data.schedule : [];
+      let messages =
+        response.status === "success" ? response.data.schedule : [];
 
       // Sort the messages on date scheduled
       messages = messages.sort((a: any, b: any) => {
-        return new Date(a.date_scheduled).getTime() - new Date(b.date_scheduled).getTime();
-      })
+        return (
+          new Date(a.date_scheduled).getTime() -
+          new Date(b.date_scheduled).getTime()
+        );
+      });
       setMessages(messages);
 
-      console.log(messages)
+      console.log(messages);
 
-      return messages as any[]
+      return messages as any[];
     },
     refetchOnWindowFocus: false,
   });
 
-  const triggerModifyScheduledDate = async (scheduleID: number, newTime: Date | string) => {
-
-    const result = await patchScheduledEmails(
-      userToken,
-      scheduleID,
-      newTime
-    )
-    if (result.status === 'success') {
+  const triggerModifyScheduledDate = async (
+    scheduleID: number,
+    newTime: Date | string
+  ) => {
+    const result = await patchScheduledEmails(userToken, scheduleID, newTime);
+    if (result.status === "success") {
       showNotification({
-        title: 'Updated',
-        message: 'Successfully updated the scheduled date and future dates',
-        color: 'green',
+        title: "Updated",
+        message: "Successfully updated the scheduled date and future dates",
+        color: "green",
         autoClose: 5000,
       });
-      refetch()
+      refetch();
       forceUpdate();
     } else {
       showNotification({
-        title: 'Error',
+        title: "Error",
         message: result.message,
-        color: 'red',
+        color: "red",
         autoClose: 5000,
       });
     }
-
-  }
+  };
 
   return (
-    <Flex w='100%' align='left' justify={'center'} direction='column'>
+    <Flex w="100%" align="left" justify={"center"} direction="column">
       <UpcomingGenerationsView showEmailActive />
-      <Title order={4} mt='lg' mb='xs'>{userData.sdr_name}'s Queued Emails</Title>
+      <Title order={4} mt="lg" mb="xs">
+        {userData.sdr_name}'s Queued Emails
+      </Title>
       <TextInput
         rightSection={<IconSearch size={14} />}
         placeholder="Search by prospect name"
-        mb='xs'
+        mb="xs"
         value={search}
         onChange={(e) => setSearch(e.currentTarget.value)}
       />
@@ -116,12 +124,8 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
             title: "Prospect",
             render: ({ prospect }) => {
               const p = prospect as Prospect;
-              return (
-                <Text>
-                  {p.full_name}
-                </Text>
-              )
-            }
+              return <Text>{p.full_name}</Text>;
+            },
           },
           {
             accessor: "date_scheduled",
@@ -129,7 +133,7 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
             render: ({ date_scheduled, id }) => {
               // Convert the time string to SDRs timezone
               const date = new Date(date_scheduled);
-              const month = date.toLocaleString('default', { month: 'long' });
+              const month = date.toLocaleString("default", { month: "long" });
               const day = date.getDate();
               const hours = date.getHours();
               const minutes = date.getMinutes();
@@ -140,10 +144,14 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
               const [value, setValue] = useState<Date>(date);
 
               useEffect(() => {
-                setValue(date)
-              }, [date_scheduled])
+                setValue(date);
+              }, [date_scheduled]);
 
-              const formattedTime = `${hours % 12 || 12}:${minutes.toString().padStart(2, '0')}${hours >= 12 ? 'PM' : 'AM'}`;
+              const formattedTime = `${
+                hours % 12 || 12
+              }:${minutes.toString().padStart(2, "0")}${
+                hours >= 12 ? "PM" : "AM"
+              }`;
               const formattedDate = `${month} ${day} - ${formattedTime}`;
 
               return (
@@ -154,25 +162,27 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
                       value={value}
                       onChange={(value) => {
                         if (!value) {
-                          setValue(date)
+                          setValue(date);
                         }
-                        setValue(value as Date)
+                        setValue(value as Date);
                       }}
                       submitButtonProps={{
                         onClick: () => {
-                          triggerModifyScheduledDate(id, value)
-                        }
+                          triggerModifyScheduledDate(id, value);
+                        },
                       }}
                       popoverProps={{
                         withArrow: true,
-                        arrowPosition: 'center',
-                        withinPortal: true
+                        arrowPosition: "center",
+                        withinPortal: true,
                       }}
                       defaultValue={date}
                       hideOutsideDates
                       valueFormat={"MMMM D, YYYY - h:mm A"}
                       maw={300}
                       minDate={today}
+                      onPointerEnterCapture={(e: any) => {}}
+                      onPointerLeaveCapture={(e: any) => {}}
                     />
                   </>
                   {/* <Flex align='center'>
@@ -184,8 +194,8 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
                     </ActionIcon>
                   </Flex> */}
                 </>
-              )
-            }
+              );
+            },
           },
           {
             accessor: "",
@@ -193,14 +203,14 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
             render: (data) => {
               // Determine the type
               let type = data.email_type;
-              if (type === 'INITIAL_EMAIL') {
-                type = 'Initial Email';
+              if (type === "INITIAL_EMAIL") {
+                type = "Initial Email";
               } else {
                 // Get the status of the template
-                const body_template = data.body_template
+                const body_template = data.body_template;
                 const overall_status = body_template.overall_status;
-                if (overall_status === 'ACCEPTED') {
-                  type = 'Follow Up #1'
+                if (overall_status === "ACCEPTED") {
+                  type = "Follow Up #1";
                 } else {
                   // Get bump count
                   const bumped_count = body_template.bumped_count;
@@ -209,16 +219,14 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
               }
 
               return (
-                <Badge
-                  color={type === 'Initial Email' ? 'teal' : 'grape'}
-                >
+                <Badge color={type === "Initial Email" ? "teal" : "grape"}>
                   {type}
                 </Badge>
                 // <Text>
                 //   {subject_line_template.subject_line}
                 // </Text>
-              )
-            }
+              );
+            },
           },
           {
             accessor: "",
@@ -236,70 +244,59 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
                   withArrow
                 >
                   <HoverCard.Target>
-                    {
-                      disabled ? (
-                        <Text>
-                          Generating soon...
-                        </Text>
-                      ) : (
-                        <Button
-                          variant='outline'
-                          size='xs'
-                          disabled={disabled}
-                        >
-                          See Preview
-                        </Button>
-                      )
-                    }
+                    {disabled ? (
+                      <Text>Generating soon...</Text>
+                    ) : (
+                      <Button variant="outline" size="xs" disabled={disabled}>
+                        See Preview
+                      </Button>
+                    )}
                   </HoverCard.Target>
                   <HoverCard.Dropdown>
-                    {
-                      disabled ? (
-                        <Text size="sm">
-                          Preview not available yet! Messages generate 24 hours before sending.
-                        </Text>
-                      ) : (
-                        <>
-                          <Text size="sm">
-                            Subject Line:
+                    {disabled ? (
+                      <Text size="sm">
+                        Preview not available yet! Messages generate 24 hours
+                        before sending.
+                      </Text>
+                    ) : (
+                      <>
+                        <Text size="sm">Subject Line:</Text>
+                        <Box
+                          sx={() => ({
+                            border: "1px solid #E0E0E0",
+                            borderRadius: "8px",
+                            backgroundColor: "#F5F5F5",
+                          })}
+                          p="xs"
+                          my="xs"
+                        >
+                          <Text fz="sm">{subject_line.completion}</Text>
+                        </Box>
+                        <Text size="sm">Body:</Text>
+                        <Box
+                          sx={() => ({
+                            border: "1px solid #E0E0E0",
+                            borderRadius: "8px",
+                            backgroundColor: "#F5F5F5",
+                          })}
+                          px="md"
+                          mt="sm"
+                        >
+                          <Text fz="sm">
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(body.completion),
+                              }}
+                            />
                           </Text>
-                          <Box
-                            sx={() => ({
-                              border: '1px solid #E0E0E0',
-                              borderRadius: '8px',
-                              backgroundColor: '#F5F5F5',
-                            })}
-                            p='xs'
-                            my='xs'
-                          >
-                            <Text fz='sm'>
-                              {subject_line.completion}
-                            </Text>
-                          </Box>
-                          <Text size="sm">
-                            Body:
-                          </Text>
-                          <Box
-                            sx={() => ({
-                              border: '1px solid #E0E0E0',
-                              borderRadius: '8px',
-                              backgroundColor: '#F5F5F5',
-                            })}
-                            px='md'
-                            mt='sm'
-                          >
-                            <Text fz="sm">
-                              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(body.completion) }} />
-                            </Text>
-                          </Box>
-                        </>
-                      )
-                    }
+                        </Box>
+                      </>
+                    )}
                   </HoverCard.Dropdown>
                 </HoverCard>
-              )
-            }
-          }
+              );
+            },
+          },
         ]}
       />
       {/* <Stack>

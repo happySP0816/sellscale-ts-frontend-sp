@@ -27,6 +27,8 @@ import { API_URL } from "@constants/data";
 import SegmentV2 from "./SegmentV2/SegmentV2";
 import { useDisclosure } from "@mantine/hooks";
 import OpenCV from "./OpenCV";
+import SegmentV3 from "@pages/SegmentV3/SegmentV3";
+import FileDropLinkedinURLFinderPreview from "@modals/upload-prospects/FileDropLinkedinURLFinderPreview";
 
 type Segment = {
   id: number;
@@ -180,6 +182,13 @@ export default function FindContactsPage() {
           </Tabs.Tab>
           <Tabs.Tab value="opencv" icon={<IconBrandLinkedin size="0.9rem" />} onClick={() => setTab("opencv")}>
             OpenCV
+          </Tabs.Tab>
+          <Tabs.Tab
+            value="linkedin-url-finder"
+            icon={<IconBrandLinkedin size="0.9rem" />}
+            onClick={() => setTab("linkedin-url-finder")}
+          >
+            URL Finder
           </Tabs.Tab>
           {/* <Tabs.Tab
             value="individuals"
@@ -344,6 +353,96 @@ export default function FindContactsPage() {
           <OpenCV />
         </Tabs.Panel>
 
+        <Tabs.Panel
+          value="linkedin-url-finder"
+          pt="xs"
+          style={{ position: "relative" }}>
+          <Card maw="600px" ml="auto" mr="auto">
+            <Title order={3}>LinkedIn URL Finder</Title>
+            <Text mb="md" color="gray">
+              <ul>
+                <li>Upload CSV or Excel file with format: name, company name, title</li>
+                <li>LinkedIn URLs will be automatically parsed</li>
+                <li>Can add to segments automatically</li>
+                <li>Can extract emails as needed</li>
+              </ul>
+            </Text>
+
+            {/* Segment Selector */}
+            <Flex align="flex-end">
+              <Flex w="90%">
+                <Select
+                  mb="md"
+                  mt="md"
+                  w="100%"
+                  placeholder="Select Segment"
+                  label="(optional) Select Segment"
+                  description="Select a segment to add these prospects to"
+                  value={selectedSegmentId}
+                  onChange={(value: any) => {
+                    setSelectedSegmentId(value);
+                  }}
+                  data={
+                    segments?.map((segment: Segment) => ({
+                      value: segment.id,
+                      label: segment.segment_title,
+                    })) ?? []
+                  }
+                />
+              </Flex>
+              <Flex w="10%" align="center" justify={"center"}>
+                <Tooltip label="Create a new Segment" withArrow withinPortal>
+                  <ActionIcon
+                    onClick={() => {
+                      openCreateSegment();
+                    }}
+                    mb="lg"
+                    variant="filled"
+                  >
+                    <IconPlus size="1.5rem" />
+                  </ActionIcon>
+                </Tooltip>
+                <Modal
+                  opened={createSegmentOpened}
+                  onClose={closeCreateSegment}
+                  title="Create a New Segment"
+                >
+                  <TextInput
+                    label="Segment Title"
+                    value={createSegmentName}
+                    onChange={(e) =>
+                      setCreateSegmentName(e.currentTarget.value)
+                    }
+                  />
+                  <Text size="xs" mt="md">
+                    You can add filters from the Segments page
+                  </Text>
+                  <Flex mt="xl" justify="flex-end">
+                    <Button
+                      loading={createSegmentLoading}
+                      disabled={createSegmentName.length === 0}
+                      onClick={createSegment}
+                    >
+                      Create New Segment
+                    </Button>
+                  </Flex>
+                </Modal>
+              </Flex>
+            </Flex>
+
+            <FileDropLinkedinURLFinderPreview
+              segmentId={selectedSegmentId}
+              personaId={activePersona + ""}
+              onUploadSuccess={() => {
+                showNotification({
+                  title: "Success",
+                  message: "File uploaded successfully",
+                  color: "teal",
+                });
+              }}
+            />
+          </Card>
+        </Tabs.Panel>
         {/* <Tabs.Panel value='csv-beta' pt='xs' style={{ position: 'relative' }}>
           <Card ml='auto' mr='auto'>
             <FileDropAndPreviewV2

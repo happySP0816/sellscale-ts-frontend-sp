@@ -519,7 +519,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                                     {AIinboxPerformance.num_revivals_attempted}
                                   </Badge>
                                   <Text color="gray" size={"sm"} fw={500}>
-                                    AI Revival Attempted
+                                    AI Revivals Attempted
                                   </Text>
                                 </Flex>
                               </Box>

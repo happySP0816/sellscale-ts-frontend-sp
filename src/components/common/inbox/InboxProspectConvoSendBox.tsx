@@ -1369,6 +1369,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       setSnoozeDay(date);
                     },
                   })}
+                  onPointerEnterCapture={() => {}}
+                  onPointerLeaveCapture={() => {}}
                 />
               </Popover.Dropdown>
             </Popover>
@@ -1442,6 +1444,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       setScheduleDay(newDate);
                     },
                   })}
+                  onPointerEnterCapture={() => {}}
+                  onPointerLeaveCapture={() => {}}
                 />
                 <Flex
                   mt="xs"

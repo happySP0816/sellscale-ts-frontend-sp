@@ -1,4 +1,18 @@
-import { Box, Button, Flex, Group, Image, Paper, Badge, Progress, rem, Text, useMantineTheme, Select, ActionIcon } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Flex,
+  Group,
+  Image,
+  Paper,
+  Badge,
+  Progress,
+  rem,
+  Text,
+  useMantineTheme,
+  Select,
+  ActionIcon,
+} from "@mantine/core";
 import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import {
   IconChevronLeft,
@@ -91,6 +105,7 @@ export default function OpenCV() {
             setDrop(false);
             setFiles([]);
             setLoading(false);
+            setExtractedData([]);
           }}
         >
           Reset
@@ -98,19 +113,38 @@ export default function OpenCV() {
       </Flex>
       <Dropzone
         mt={"md"}
-        onDrop={(files) => handleDropDown(files)}
+        onDrop={(files) => {
+          console.log(files);
+          handleDropDown(files);
+        }}
         onReject={(files) => console.log("rejected files", files)}
-        maxSize={4 * 1024 ** 2}
+        // maxSize={4 * 1024 ** 2}
         accept={IMAGE_MIME_TYPE}
         multiple
       >
-        <Group position="center" spacing="xl" style={{ minHeight: rem(220), pointerEvents: "none" }}>
+        <Group
+          position="center"
+          spacing="xl"
+          style={{ minHeight: rem(220), pointerEvents: "none" }}
+        >
           <Image src={OpenCVImage} width={"300px"} />
           <Dropzone.Accept>
-            <IconCloudUpload size="4rem" stroke={1.5} color={theme.colors[theme.primaryColor][theme.colorScheme === "dark" ? 4 : 6]} />
+            <IconCloudUpload
+              size="4rem"
+              stroke={1.5}
+              color={
+                theme.colors[theme.primaryColor][
+                  theme.colorScheme === "dark" ? 4 : 6
+                ]
+              }
+            />
           </Dropzone.Accept>
           <Dropzone.Reject>
-            <IconX size="4rem" stroke={1.5} color={theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]} />
+            <IconX
+              size="4rem"
+              stroke={1.5}
+              color={theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]}
+            />
           </Dropzone.Reject>
           <Dropzone.Idle>
             <IconCloudUpload size="4rem" stroke={1.5} color="#228be6" />
@@ -118,7 +152,8 @@ export default function OpenCV() {
 
           <div>
             <Text size="xl" inline fw={600}>
-              Drag & Drop files or <span className="text-[#228be6] underline">Browse</span> <br />
+              Drag & Drop files or{" "}
+              <span className="text-[#228be6] underline">Browse</span> <br />
               photos of company names to start extraction
             </Text>
             <Text size="sm" c="dimmed" inline mt={7}>
@@ -127,7 +162,7 @@ export default function OpenCV() {
           </div>
         </Group>
       </Dropzone>
-      {files && files.length > 1 && (
+      {files && drop && (
         <Box mt={"md"}>
           <Flex align={"center"} justify={"space-between"}>
             <Text fw={500} size={"sm"}>
@@ -162,8 +197,17 @@ export default function OpenCV() {
                       <Text color="#228be6" size={"xs"} fw={500}>
                         {78}% completed
                       </Text>
-                      <Text size={"xs"} color="gray" fw={500} className="flex items-center gap-2">
-                        <IconClock size={"0.9rem"} color="gray" className="mb-[2px]" />
+                      <Text
+                        size={"xs"}
+                        color="gray"
+                        fw={500}
+                        className="flex items-center gap-2"
+                      >
+                        <IconClock
+                          size={"0.9rem"}
+                          color="gray"
+                          className="mb-[2px]"
+                        />
                         {6}sec left
                       </Text>
                     </Flex>
@@ -212,7 +256,14 @@ export default function OpenCV() {
                 ),
                 cell: (cell) => {
                   return (
-                    <Flex w={"100%"} h={"100%"} px={"sm"} py={"xs"} align={"center"} justify={"start"}>
+                    <Flex
+                      w={"100%"}
+                      h={"100%"}
+                      px={"sm"}
+                      py={"xs"}
+                      align={"center"}
+                      justify={"start"}
+                    >
                       <Text size={"sm"} fw={500} color="gray">
                         {cell.row.index + 1}
                       </Text>
@@ -234,7 +285,14 @@ export default function OpenCV() {
                   const { company_name } = cell.row.original;
 
                   return (
-                    <Flex w={"100%"} h={"100%"} px={"sm"} py={"xs"} align={"center"} justify={"start"}>
+                    <Flex
+                      w={"100%"}
+                      h={"100%"}
+                      px={"sm"}
+                      py={"xs"}
+                      align={"center"}
+                      justify={"start"}
+                    >
                       <Text size={"sm"} fw={500}>
                         {company_name}
                       </Text>
@@ -255,7 +313,14 @@ export default function OpenCV() {
                   const { source } = cell.row.original;
 
                   return (
-                    <Flex w={"100%"} h={"100%"} px={"sm"} py={"xs"} align={"center"} justify={"start"}>
+                    <Flex
+                      w={"100%"}
+                      h={"100%"}
+                      px={"sm"}
+                      py={"xs"}
+                      align={"center"}
+                      justify={"start"}
+                    >
                       <Text lineClamp={1} size={"sm"} fw={500}>
                         {source}
                       </Text>
@@ -275,7 +340,13 @@ export default function OpenCV() {
                   const { status } = cell.row.original;
 
                   return (
-                    <Flex gap={"sm"} w={"100%"} px={"sm"} h={"100%"} align={"center"}>
+                    <Flex
+                      gap={"sm"}
+                      w={"100%"}
+                      px={"sm"}
+                      h={"100%"}
+                      align={"center"}
+                    >
                       <Badge tt={"initial"}>{status}</Badge>
                     </Flex>
                   );
@@ -315,10 +386,12 @@ export default function OpenCV() {
                       <Select
                         maw={100}
                         value={`${table.getState().pagination.pageIndex + 1}`}
-                        data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                          label: String(idx + 1),
-                          value: String(idx + 1),
-                        }))}
+                        data={new Array(table.getPageCount())
+                          .fill(0)
+                          .map((i, idx) => ({
+                            label: String(idx + 1),
+                            value: String(idx + 1),
+                          }))}
                         onChange={(v) => {
                           table.setPageIndex(Number(v) - 1);
                         }}
@@ -347,7 +420,9 @@ export default function OpenCV() {
                         h={36}
                         disabled={table.getState().pagination.pageIndex === 0}
                         onClick={() => {
-                          table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                          table.setPageIndex(
+                            table.getState().pagination.pageIndex - 1
+                          );
                         }}
                       >
                         <IconChevronLeft stroke={theme.colors.gray[4]} />
@@ -356,9 +431,14 @@ export default function OpenCV() {
                         variant="default"
                         color="gray.4"
                         h={36}
-                        disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                        disabled={
+                          table.getState().pagination.pageIndex ===
+                          table.getPageCount() - 1
+                        }
                         onClick={() => {
-                          table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                          table.setPageIndex(
+                            table.getState().pagination.pageIndex + 1
+                          );
                         }}
                       >
                         <IconChevronRight stroke={theme.colors.gray[4]} />

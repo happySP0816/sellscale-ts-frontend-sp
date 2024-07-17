@@ -51,7 +51,7 @@ type DeanonymizationType = {
   visit_date: string;
   total_visit: number;
   intent_score: string;
-  tag: string[];
+  tag: string;
 };
 
 export default function WebsiteOverview() {
@@ -62,6 +62,8 @@ export default function WebsiteOverview() {
   const [loading, setLoading] = useState(false);
   const [trackHistory, setTrackHistory] = useState<any[]>([]);
   const [locations, setLocations] = useState<any[]>([]);
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   const {
     isLoading,
@@ -74,6 +76,7 @@ export default function WebsiteOverview() {
     createIcpRoute,
     updateIcpRoute,
     getAllIcpRoutes,
+    autoClassifyDeanonymizedContacts,
   } = useTrackApi(userToken);
 
   const [udPageSize, setUdPageSize] = useState("25");
@@ -85,7 +88,7 @@ export default function WebsiteOverview() {
   //   },
   // ]);
 
-  const [deanonymData, setDeanonymData] = useState<DeanonymizationType[]>([
+  const [deanonymData, setDeanonymData]: any = useState<DeanonymizationType[]>([
     // {
     //   avatar: "",
     //   sdr_name: "Benn TK",
@@ -110,10 +113,12 @@ export default function WebsiteOverview() {
   };
 
   const handleGetDeanonymizedContacts = async () => {
+    setLoading(true);
     const data = await getDeanonomizedContacts(parseInt(dateRange));
     console.log("SWAG");
     console.log(data);
     setDeanonymData(data ? data : []);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -189,6 +194,13 @@ export default function WebsiteOverview() {
   };
 
   const [selected, setSelected] = useState<any>({});
+
+  let filteredData = deanonymData.filter((item: any) => {
+    return (
+      item.sdr_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.company.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
   return (
     <Box mt={"lg"}>
@@ -354,20 +366,22 @@ export default function WebsiteOverview() {
             >
               Refresh
             </Button>
-
             <TextInput
               placeholder="Search contacts"
               w={240}
               rightSection={<IconSearch size={"0.9rem"} color="gray" />}
-              onChange={(e) => {}}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSelected({});
+              }}
             />
           </Flex>
         </Flex>
         <DataGrid
-          data={deanonymData}
+          data={filteredData}
           highlightOnHover
           mt={"sm"}
-          withPagination
+          // withPagination
           withSorting
           withColumnBorders
           withBorder
@@ -388,7 +402,7 @@ export default function WebsiteOverview() {
                   <Text color="gray">Visitor Name</Text>
                 </Flex>
               ),
-              maxSize: 210,
+              minSize: 210,
               cell: (cell) => {
                 const {
                   sdr_name,
@@ -396,7 +410,7 @@ export default function WebsiteOverview() {
                   job,
                   linkedin,
                   email,
-                } = cell.row.original;
+                }: any = cell.row.original;
 
                 return (
                   <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
@@ -560,7 +574,7 @@ export default function WebsiteOverview() {
                 </Flex>
               ),
               enableResizing: true,
-              maxSize: 120,
+              minSize: 120,
               cell: (cell) => {
                 const { tag } = cell.row.original as any[""];
 
@@ -573,14 +587,15 @@ export default function WebsiteOverview() {
                     h={"100%"}
                   >
                     <Flex gap={"sm"}>
-                      {tag?.length > 0 ? (
-                        tag.map((item: any, index: number) => {
-                          return (
-                            <Badge key={index} tt={"initial"}>
-                              {item}
-                            </Badge>
-                          );
-                        })
+                      {tag ? (
+                        <Badge
+                          key={tag}
+                          tt={"initial"}
+                          size="md"
+                          color={deterministicMantineColor(tag)}
+                        >
+                          {tag}
+                        </Badge>
                       ) : (
                         <Button
                           size="xs"

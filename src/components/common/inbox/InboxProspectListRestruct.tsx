@@ -37,7 +37,7 @@ import {
   IconSparkles,
   IconRobotFace,
 } from "@tabler/icons-react";
-import _ from "lodash";
+import _, { set } from "lodash";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { forwardRef, useEffect, useState } from "react";
 import { HEADER_HEIGHT } from "./InboxProspectConvo";
@@ -75,7 +75,7 @@ import {
   openedProspectListState,
 } from "@atoms/inboxAtoms";
 import { useDisclosure } from "@mantine/hooks";
-import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
+import { API_URL, NAV_BAR_SIDE_WIDTH } from "@constants/data";
 import { ProspectConvoCard } from "./InboxProspectList";
 import { currentInboxCountState } from "@atoms/personaAtoms";
 import { openContextModal } from "@mantine/modals";
@@ -100,6 +100,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const [searchFilter, setSearchFilter] = useState("");
   const [mainTab, setMainTab] = useRecoilState(mainTabState);
   const [selectedUser, setSelectedUser] = useState("all");
+  const [AIinboxPerformance, setAIinboxPerformance] = useState<any>({});
 
   const inboxTab = (() => {
     if (mainTab === "manual_bucket") return "manual";
@@ -184,6 +185,24 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
       // if (group[0].toLowerCase().includes('email_opened')) return false;
       return true;
     });
+
+  useEffect(() => {
+    const fetchAIinboxPerformance = () => {
+      fetch(`${API_URL}/analytics/inbox_performance`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setAIinboxPerformance(data.data);
+        });
+    };
+
+    fetchAIinboxPerformance();
+  }, []);
 
   return (
     <>
@@ -443,7 +462,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                   <>
                     <Box bg={"#E4E5E6"} p={"md"}>
                       <Text size={"sm"} color="gray">
-                        AI index performance revival rate
+                        AI inbox performance
                       </Text>
                       <Flex
                         align={"center"}
@@ -462,7 +481,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                           justify={"space-between"}
                         >
                           <Text fw={600} size={"sm"}>
-                            Revival Rate: {25}%
+                            Revival Rate: {AIinboxPerformance.num_revivals_attempted ? Math.floor(AIinboxPerformance.actual_revivals * 100 / AIinboxPerformance.num_revivals_attempted) : 0}%
                           </Text>
                           <Tooltip
                             arrowOffset={10}
@@ -480,7 +499,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                                       />
                                     }
                                   >
-                                    {5}
+                                    {AIinboxPerformance.actual_revivals}
                                   </Badge>
                                   <Text color="gray" size={"sm"} fw={500}>
                                     Prospects Responded
@@ -497,10 +516,10 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                                       />
                                     }
                                   >
-                                    {25}
+                                    {AIinboxPerformance.num_revivals_attempted}
                                   </Badge>
                                   <Text color="gray" size={"sm"} fw={500}>
-                                    AI Revival Attempted
+                                    AI Revivals Attempted
                                   </Text>
                                 </Flex>
                               </Box>

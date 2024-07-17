@@ -38,6 +38,8 @@ import { useTrackApi } from "@common/settings/Traffic/WebTrafficRoutingApi";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import moment from "moment";
+import { deterministicMantineColor } from "@utils/requests/utils";
+import { showNotification } from "@mantine/notifications";
 
 type DeanonymizationType = {
   avatar: string;
@@ -327,6 +329,32 @@ export default function WebsiteOverview() {
             >
               Add 5 visitors to Segment
             </Button> */}
+            {Object.keys(selected)?.length !== 0 && (
+              <Button
+                onClick={() => {
+                  const selectedContacts = Object.keys(selected).map(
+                    (index: any) => deanonymData[index].id
+                  );
+                  autoClassifyDeanonymizedContacts(selectedContacts);
+                  showNotification({
+                    title: "Classifying...",
+                    message:
+                      "Contacts are being classified. Please refresh to see the changes.",
+                    color: "teal",
+                  });
+                }}
+              >
+                Classify {Object.keys(selected).length} Visitors
+              </Button>
+            )}
+            <Button
+              color="gray"
+              onClick={handleGetDeanonymizedContacts}
+              loading={loading}
+            >
+              Refresh
+            </Button>
+
             <TextInput
               placeholder="Search contacts"
               w={240}

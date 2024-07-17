@@ -208,6 +208,26 @@ export const useTrackApi = (userToken: string) => {
     return data.segments;
   };
 
+  const autoClassifyDeanonymizedContacts = async (
+    deanonymized_contact_ids: number[]
+  ) => {
+    setIsLoading(true);
+    const url = new URL(`${API_URL}/track/auto_classify_deanonymized_contacts`);
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        deanonymized_contact_ids: deanonymized_contact_ids,
+      }),
+    });
+    const data = await response.json();
+    setIsLoading(false);
+    return data;
+  };
+
   return {
     isLoading,
     getTrackSourceMetadata,
@@ -221,5 +241,6 @@ export const useTrackApi = (userToken: string) => {
     getAllIcpRoutes,
     getIcpRouteDetails,
     getSegments,
+    autoClassifyDeanonymizedContacts,
   };
 };

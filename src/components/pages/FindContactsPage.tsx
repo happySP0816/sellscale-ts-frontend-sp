@@ -1,25 +1,17 @@
 import { userTokenState } from "@atoms/userAtoms";
-import {
-  Card,
-  Flex,
-  Tabs,
-  Title,
-  Text,
-  TextInput,
-  Tooltip,
-  Button,
-  ActionIcon,
-  Select,
-  rem,
-  Modal,
-} from "@mantine/core";
+import { Card, Flex, Tabs, Title, Text, TextInput, Tooltip, Button, ActionIcon, Select, rem, Modal, Group, useMantineTheme, Image, Paper } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import {
   IconBrandLinkedin,
+  IconCloudUpload,
+  IconCornerRightDown,
   IconDatabase,
+  IconPhoto,
   IconPlus,
+  IconRefresh,
   IconTable,
   IconUpload,
+  IconX,
 } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { useEffect, useState } from "react";
@@ -34,6 +26,7 @@ import _ from "lodash";
 import { API_URL } from "@constants/data";
 import SegmentV2 from "./SegmentV2/SegmentV2";
 import { useDisclosure } from "@mantine/hooks";
+import OpenCV from "./OpenCV";
 
 type Segment = {
   id: number;
@@ -45,6 +38,8 @@ type Segment = {
 export default function FindContactsPage() {
   setPageTitle("Find Contacts");
 
+  const theme = useMantineTheme();
+
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const activePersona = currentProject?.id;
@@ -54,11 +49,7 @@ export default function FindContactsPage() {
   const [segments, setSegments]: any = useState<Segment[]>([]);
   const urlParams = new URLSearchParams(window.location.search);
 
-  const [selectedSegmentId, setSelectedSegmentId]: any = useState<
-    number | null
-  >(
-    urlParams.get("segment_id") ? parseInt(urlParams.get("segment_id")!) : null
-  );
+  const [selectedSegmentId, setSelectedSegmentId]: any = useState<number | null>(urlParams.get("segment_id") ? parseInt(urlParams.get("segment_id")!) : null);
 
   const fetchSegments = async () => {
     const response = await fetch(`${API_URL}/segment/all`, {
@@ -76,10 +67,7 @@ export default function FindContactsPage() {
     fetchSegments();
   }, []);
 
-  const [
-    createSegmentOpened,
-    { open: openCreateSegment, close: closeCreateSegment },
-  ] = useDisclosure(false);
+  const [createSegmentOpened, { open: openCreateSegment, close: closeCreateSegment }] = useDisclosure(false);
   const [createSegmentName, setCreateSegmentName] = useState("");
   const [createSegmentLoading, setCreateSegmentLoading] = useState(false);
   const createSegment = async () => {
@@ -171,44 +159,27 @@ export default function FindContactsPage() {
       >
         <Tabs.List grow>
           <Tooltip label="Advanced - SellScale Database" position="bottom">
-            <Tabs.Tab
-              value="sellscale-db"
-              icon={<IconDatabase size="0.9rem" />}
-              onClick={() => setTab("sellscale-db")}
-            >
+            <Tabs.Tab value="sellscale-db" icon={<IconDatabase size="0.9rem" />} onClick={() => setTab("sellscale-db")}>
               Contact Database
             </Tabs.Tab>
           </Tooltip>
           <Tooltip label="Segments" position="bottom">
-            <Tabs.Tab
-              value="segments"
-              icon={<IconTable size="0.9rem" />}
-              onClick={() => setTab("sellscale-db")}
-            >
+            <Tabs.Tab value="segments" icon={<IconTable size="0.9rem" />} onClick={() => setTab("sellscale-db")}>
               Segments
             </Tabs.Tab>
           </Tooltip>
-          <Tabs.Tab
-            value="by-csv"
-            icon={<IconUpload size="0.9rem" />}
-            onClick={() => setTab("by-csv")}
-          >
+          <Tabs.Tab value="by-csv" icon={<IconUpload size="0.9rem" />} onClick={() => setTab("by-csv")}>
             Upload CSV
           </Tabs.Tab>
 
-          <Tabs.Tab
-            value="linkedin-url"
-            icon={<IconBrandLinkedin size="0.9rem" />}
-            onClick={() => setTab("linkedin-url")}
-          >
+          <Tabs.Tab value="linkedin-url" icon={<IconBrandLinkedin size="0.9rem" />} onClick={() => setTab("linkedin-url")}>
             LinkedIn URL
           </Tabs.Tab>
-          <Tabs.Tab
-            value="linkedin-sales-navigator"
-            icon={<IconBrandLinkedin size="0.9rem" />}
-            onClick={() => setTab("linkedin-sales-navigator")}
-          >
+          <Tabs.Tab value="linkedin-sales-navigator" icon={<IconBrandLinkedin size="0.9rem" />} onClick={() => setTab("linkedin-sales-navigator")}>
             SalesNav Search
+          </Tabs.Tab>
+          <Tabs.Tab value="opencv" icon={<IconBrandLinkedin size="0.9rem" />} onClick={() => setTab("opencv")}>
+            OpenCV
           </Tabs.Tab>
           {/* <Tabs.Tab
             value="individuals"
@@ -245,9 +216,8 @@ export default function FindContactsPage() {
           <Card maw="600px" ml="auto" mr="auto">
             <Title order={3}>Upload Prospect from One LinkedIn URL</Title>
             <Text mb="md" color="gray">
-              Upload a LinkedIn URL to add a prospect to your database. This can
-              be a Sales Navigator link (i.e. /sales) or a regular LinkedIn
-              profile link (i.e. /in).
+              Upload a LinkedIn URL to add a prospect to your database. This can be a Sales Navigator link (i.e. /sales) or a regular LinkedIn profile link
+              (i.e. /in).
             </Text>
             <LinkedInURLUpload
               afterUpload={() => {
@@ -309,27 +279,13 @@ export default function FindContactsPage() {
                     <IconPlus size="1.5rem" />
                   </ActionIcon>
                 </Tooltip>
-                <Modal
-                  opened={createSegmentOpened}
-                  onClose={closeCreateSegment}
-                  title="Create a New Segment"
-                >
-                  <TextInput
-                    label="Segment Title"
-                    value={createSegmentName}
-                    onChange={(e) =>
-                      setCreateSegmentName(e.currentTarget.value)
-                    }
-                  />
+                <Modal opened={createSegmentOpened} onClose={closeCreateSegment} title="Create a New Segment">
+                  <TextInput label="Segment Title" value={createSegmentName} onChange={(e) => setCreateSegmentName(e.currentTarget.value)} />
                   <Text size="xs" mt="md">
                     You can add filters from the Segments page
                   </Text>
                   <Flex mt="xl" justify="flex-end">
-                    <Button
-                      loading={createSegmentLoading}
-                      disabled={createSegmentName.length === 0}
-                      onClick={createSegment}
-                    >
+                    <Button loading={createSegmentLoading} disabled={createSegmentName.length === 0} onClick={createSegment}>
                       Create New Segment
                     </Button>
                   </Flex>
@@ -374,23 +330,18 @@ export default function FindContactsPage() {
           )} */}
         </Tabs.Panel>
 
-        <Tabs.Panel
-          value="sellscale-db"
-          pt="xs"
-          style={{ position: "relative" }}
-        >
+        <Tabs.Panel value="sellscale-db" pt="xs" style={{ position: "relative" }}>
           {userToken && (
             <iframe
-              src={
-                "https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=" +
-                userToken +
-                "&campaign_id=" +
-                activePersona
-              }
+              src={"https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=" + userToken + "&campaign_id=" + activePersona}
               style={{ width: "100%", height: window.innerHeight + 120 }}
               frameBorder={0}
             />
           )}
+        </Tabs.Panel>
+
+        <Tabs.Panel value="opencv" pt="xs" style={{ position: "relative" }}>
+          <OpenCV />
         </Tabs.Panel>
 
         {/* <Tabs.Panel value='csv-beta' pt='xs' style={{ position: 'relative' }}>

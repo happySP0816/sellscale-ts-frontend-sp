@@ -271,9 +271,8 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
         return mappedRow;
         // Remove prospects that don't have a linkedin_url or email column
       })
-      .filter((row: any) => row.linkedin_url || row.email || (row.title && row.company && row.full_name));
+      .filter((row: any) => row.linkedin_url || row.email || (row.company && row.full_name) || (row.company && row.first_name && row.last_name));
 
-    console.log('uploadJSON: ', uploadJSON);
 
     const result = await uploadProspects(
       +(archetype_id as string),

@@ -1,19 +1,19 @@
 import {
+  ActionIcon,
+  Badge,
   Box,
   Button,
   Flex,
   Group,
   Image,
   Paper,
-  Badge,
   Progress,
   rem,
+  Select,
   Text,
   useMantineTheme,
-  Select,
-  ActionIcon,
 } from "@mantine/core";
-import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
+import {Dropzone, FileWithPath, IMAGE_MIME_TYPE} from "@mantine/dropzone";
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -27,57 +27,103 @@ import {
   IconX,
 } from "@tabler/icons";
 import OpenCVImage from "../../assets/images/opencv_upload.png";
-import { useState } from "react";
-import { s } from "@fullcalendar/core/internal-common";
-import { DataGrid } from "mantine-data-grid";
-import { IconFileTypeJpg, IconFileTypePng } from "@tabler/icons-react";
+import {useState} from "react";
+import {DataGrid} from "mantine-data-grid";
+import {IconFileTypeJpg, IconFileTypePng} from "@tabler/icons-react";
+import {API_URL} from "@constants/data";
+import {useRecoilValue} from "recoil";
+import {userTokenState} from "@atoms/userAtoms";
+import {showNotification} from "@mantine/notifications";
+
+type ReturnList = string[];
 
 export default function OpenCV() {
   const theme = useMantineTheme();
   const [drop, setDrop] = useState(false);
-  const [files, setFiles] = useState(null || []);
+  const [files, setFiles] = useState<FileWithPath[]>([]);
   const [extractedData, setExtractedData] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState("25");
 
-  const handleDropDown = (files: any) => {
+  const userToken = useRecoilValue(userTokenState);
+
+  const handleDropDown = (files: FileWithPath[]) => {
     setDrop(true);
-    setFiles(files);
-    setLoading(true);
-    setExtractedData([]);
-    setTimeout(() => {
-      handleExtract();
-    }, 5000);
+    setFiles((prevState) => {
+      return [...prevState, ...files];
+    });
   };
 
-  const handleExtract = () => {
-    setExtractedData([
-      {
-        company_name: "Scale",
-        source: "Crunchbasescreenshot1.jpeg",
-        status: "extracted",
+  const uploadFiles = async () => {
+    const formData = new FormData();
+
+    files.forEach((file) => {
+      formData.append("files", file);
+    })
+
+    const response = await fetch(`${API_URL}/contacts/image_company_extract`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
       },
-      {
-        company_name: "Retool",
-        source: "Crunchbasescreenshot1.jpeg",
-        status: "extracted",
-      },
-      {
-        company_name: "Deloitte",
-        source: "Crunchbasescreenshot1.jpeg",
-        status: "extracted",
-      },
-      {
-        company_name: "Nubik",
-        source: "Crunchbasescreenshot2.jpeg",
-        status: "extracted",
-      },
-      {
-        company_name: "Accenture",
-        source: "Crunchbasescreenshot2.jpeg",
-        status: "extracted",
-      },
-    ]);
+      body: formData
+    })
+
+    if (response.ok) {
+      return await response.json();
+    }
+  }
+
+  const handleCopyClipboard = async () => {
+    let textToCopy = "";
+
+
+    extractedData.forEach((item: any) => {
+      textToCopy += item.company_name + "\n";
+    })
+
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      showNotification({
+        id: "copy-to-clipboard-success",
+        title: "Copied to clipboard",
+        message: "List of companies is sent to your clipboard.",
+        color: "green",
+        autoClose: 5000,
+      });
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  }
+
+  const handleExtract = async () => {
+    setLoading(true);
+    // Will Perform the extractions here.
+    const data = await uploadFiles();
+
+    const list: string[][] = data["data"];
+
+    console.log("LIST: ", list);
+
+    setExtractedData((prevState: any[]) => {
+      const prev = [...prevState];
+
+      list.forEach(item => {
+        if (prev.filter((prevItem) =>
+        {
+          return prevItem.company_name === item[1]
+        }).length === 0) {
+          prev.push({
+            company_name: item[1],
+            source: item[0],
+            status: "extracted",
+          })
+        }
+      })
+
+      return prev;
+    });
+
     setLoading(false);
   };
 
@@ -168,7 +214,9 @@ export default function OpenCV() {
             <Text fw={500} size={"sm"}>
               Uploaded Files:
             </Text>
-            <Button size="xs">Extract Company Names</Button>
+            <Button size="xs"
+                    onClick={() => handleExtract()}>
+              Extract Company Names</Button>
           </Flex>
           {files.map((item: any, index) => {
             console.log("item", item);
@@ -195,7 +243,7 @@ export default function OpenCV() {
                   <Box w={300}>
                     <Flex justify={"space-between"} align={"center"}>
                       <Text color="#228be6" size={"xs"} fw={500}>
-                        {78}% completed
+                        {100}% completed
                       </Text>
                       <Text
                         size={"xs"}
@@ -208,10 +256,10 @@ export default function OpenCV() {
                           color="gray"
                           className="mb-[2px]"
                         />
-                        {6}sec left
+                        {0}sec left
                       </Text>
                     </Flex>
-                    <Progress value={78} />
+                    <Progress value={100} />
                   </Box>
                 </Flex>
               </Paper>
@@ -219,9 +267,11 @@ export default function OpenCV() {
           })}
           <Flex align={"center"} justify={"space-between"} mt={"md"}>
             <Text fw={500} size={"sm"}>
-              Extractetd Companies
+              Extracted Companies
             </Text>
-            <Button size="xs" disabled={loading}>
+            <Button size="xs" disabled={loading}
+                    onClick={() => handleCopyClipboard()}
+            >
               Copy / Paste Company Names
             </Button>
           </Flex>

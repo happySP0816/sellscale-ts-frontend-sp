@@ -21,7 +21,7 @@ import {
   Image,
   Tooltip,
   Select,
-  NumberInput,
+  NumberInput, Loader,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -81,18 +81,55 @@ export default function DomainManagement() {
     sortDomains();
   }, [sortStatus]);
 
-  const triggerGetDomains = async () => {
+  const [switchLoading, setSwitchLoading] = useState<number | null>(null);
+
+  const triggerGetDomains = async (showNotif = false) => {
     const result = await getDomainDetails(userToken, true);
     if (result.status == "success") {
       const data = result.data.domain_details;
       setDomains(data);
       setAllDomains(data);
       setSelected(data[0]);
+
+      if (showNotif) {
+        showNotification({
+          title: "Domain Updated",
+          message: "Domain has been updated.",
+          color: "green",
+        });
+      }
+
+      setSwitchLoading(null);
     }
   };
   useEffect(() => {
     triggerGetDomains();
   }, []);
+
+  const triggerToggleDomain = async(active: boolean, domain_id: number) => {
+    setSwitchLoading(domain_id);
+    const response = await fetch(`${API_URL}/domains/toggle_domain`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        domain_id,
+        toggle_on: !allDomains.find((domain) => domain.id == domain_id)?.active,
+      }),
+    });
+    if (response.ok) {
+      triggerGetDomains(true);
+    } else {
+      showNotification({
+        title: "Domain Update Failed",
+        message: "Please try again later.",
+        color: "red",
+      });
+      setSwitchLoading(null);
+    }
+  }
 
   const [searchInput, setSearchInput] = useState("");
 
@@ -447,6 +484,30 @@ export default function DomainManagement() {
                         );
                       },
                     },
+                    {
+                      accessor: "active",
+                      sortable: true,
+                      title: (
+                        <Flex
+                          color={theme.colors.gray[6]}
+                          align={"center"}
+                          gap={"xs"}
+                        >
+                          <Text color={theme.colors.gray[6]}>Use Domain</Text>
+                        </Flex>
+                      ),
+                      width: 140,
+                      render: ({active, id: domain_id}) => {
+                        return (
+                          <Flex
+                            gap={"xs"}
+                          >
+                            <Switch checked={active} onClick={() => triggerToggleDomain(active, domain_id)} size={"md"} offLabel={"OFF"} onLabel={"ON"}/>
+                            {switchLoading && switchLoading === domain_id && <Loader />}
+                          </Flex>
+                        );
+                      }
+                    }
                   ]}
                 />
               </Grid.Col>

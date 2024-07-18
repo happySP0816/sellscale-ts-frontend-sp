@@ -53,7 +53,7 @@ import { PersonaOverview, SubjectLineTemplate } from "src";
 import OutreachSlider from "../../CampaignShell/OutreachSlider";
 import Personalizers from "./Personalizers";
 import Sequences from "./Sequences";
-import ToneAdjuster from "./ToneAdjuster";
+// import ToneAdjuster from "./ToneAdjuster";
 
 interface StatsData {
   id: number;
@@ -571,22 +571,22 @@ export default function CampaignLandingV2() {
         <Grid gutter="md">
           <Grid.Col span={6}>
             <Paper shadow="sm" p="md" style={{ backgroundColor: "white", display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <ToneAdjuster xAxisLabel="Warmth" setVoiceParam={setVoiceParam1} voiceParam={voiceParam1} yAxisLabel="Confidence" />
+              {/* <ToneAdjuster xAxisLabel="Warmth" setVoiceParam={setVoiceParam1} voiceParam={voiceParam1} yAxisLabel="Confidence" /> */}
             </Paper>
           </Grid.Col>
           <Grid.Col span={6}>
             <Paper shadow="sm" p="md" style={{ backgroundColor: "white", display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <ToneAdjuster xAxisLabel="Humor" setVoiceParam={setVoiceParam2} voiceParam={voiceParam2} yAxisLabel="Seriousness" />
+              {/* <ToneAdjuster xAxisLabel="Humor" setVoiceParam={setVoiceParam2} voiceParam={voiceParam2} yAxisLabel="Seriousness" /> */}
             </Paper>
           </Grid.Col>
           <Grid.Col span={6}>
             <Paper shadow="sm" p="md" style={{ backgroundColor: "white", display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <ToneAdjuster xAxisLabel="Assertiveness" setVoiceParam={setVoiceParam3} voiceParam={voiceParam3} yAxisLabel="Empathy" />
+              {/* <ToneAdjuster xAxisLabel="Assertiveness" setVoiceParam={setVoiceParam3} voiceParam={voiceParam3} yAxisLabel="Empathy" /> */}
             </Paper>
           </Grid.Col>
           <Grid.Col span={6}>
             <Paper shadow="sm" p="md" style={{ backgroundColor: "white", display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <ToneAdjuster xAxisLabel="Optimism" setVoiceParam={setVoiceParam4} voiceParam={voiceParam4} yAxisLabel="Professionalism" />
+              {/* <ToneAdjuster xAxisLabel="Optimism" setVoiceParam={setVoiceParam4} voiceParam={voiceParam4} yAxisLabel="Professionalism" /> */}
             </Paper>
           </Grid.Col>
         </Grid>

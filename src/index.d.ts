@@ -921,6 +921,7 @@ export interface Domain {
   last_refreshed: string;
   spf_record: string;
   spf_record_valid: boolean;
+  active: boolean;
 }
 
 export interface EmailBankItem {

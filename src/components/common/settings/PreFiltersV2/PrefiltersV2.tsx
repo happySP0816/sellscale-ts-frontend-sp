@@ -4,6 +4,7 @@ import { ActionIcon, Button, Divider, Flex, Paper, Switch, Text, Title } from "@
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconEdit, IconFilter, IconPlus, IconTrash, IconUsers } from "@tabler/icons";
+import { debounce } from "lodash";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 
@@ -15,58 +16,55 @@ export default function PreFilterV2() {
   const userData = useRecoilValue(userDataState);
 
   //fetch all pre-filters 
+  const fetchPreFilters = async () => {
+    try {
+      const response = await fetch(`${API_URL}/contacts/all_prefilters`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   useEffect(() => {
-    
-    const fetchPreFilters = async () => {
-      try {
-        const response = await fetch(`${API_URL}/contacts/all_prefilters`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-        });
-        const data = await response.json();
-        console.log(data);
-      } catch (error) {
-        console.log(error);
-      }
-    }
     fetchPreFilters();
-
-
   }, [userData]);
 
   const [prefilters, setPrefilters] = useState<any>([]);
 
-  useEffect(() => {
-    const fetchSavedQueries = async () => {
-      try {
-        const response = await fetch(`${API_URL}/apollo/get_all_saved_queries`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-        });
-        const data = await response.json();
-        if (data.status === "success") {
-          const formattedPrefilters = data.data.map((query: any) => ({
-            title: query.custom_name,
-            id: query.id,
-            prospects: query.num_results,
-            status: true, // Assuming all fetched queries are active by default
-          }));
-          setPrefilters(formattedPrefilters);
-        } else {
-          console.error("Failed to fetch saved queries:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching saved queries:", error);
+  const fetchSavedQueries = async () => {
+    try {
+      const response = await fetch(`${API_URL}/apollo/get_all_saved_queries`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      if (data.status === "success") {
+        const formattedPrefilters = data.data.map((query: any) => ({
+          title: query.custom_name,
+          id: query.id,
+          prospects: query.num_results,
+          status: true, // Assuming all fetched queries are active by default
+        }));
+        setPrefilters(formattedPrefilters);
+      } else {
+        console.error("Failed to fetch saved queries:", data);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching saved queries:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchSavedQueries();
   }, [userToken]);
   return (
@@ -91,6 +89,10 @@ export default function PreFilterV2() {
                 content: {
                   minWidth: "930px",
                 },
+              },
+              onClose: () => {
+                // Reload the prefilters when the modal is closed
+                debounce(fetchSavedQueries, 500)();
               },
             });
           }}
@@ -136,6 +138,10 @@ export default function PreFilterV2() {
                       content: {
                         minWidth: "930px",
                       },
+                    },
+                    onClose: () => {
+                      // Reload the prefilters when the modal is closed
+                      debounce(fetchSavedQueries, 500)();
                     },
                   });
                 }}

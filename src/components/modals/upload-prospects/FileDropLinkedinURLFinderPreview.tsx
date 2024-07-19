@@ -23,10 +23,10 @@ import {
   HoverCard,
   List,
   LoadingOverlay,
-  Title, Table,
+  Title, Table, Checkbox, Space, Modal,
 } from "@mantine/core";
 import { Dropzone, DropzoneProps, MIME_TYPES } from "@mantine/dropzone";
-import { useForceUpdate } from "@mantine/hooks";
+import {useDisclosure, useForceUpdate } from "@mantine/hooks";
 import { closeAllModals, openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import {
@@ -41,7 +41,7 @@ import {
 } from "@tabler/icons";
 import { convertFileToJSON } from "@utils/fileProcessing";
 import createPersona from "@utils/requests/createPersona";
-import uploadProspects from "@utils/requests/uploadProspects";
+import uploadProspects, {getDuplicateProspects} from "@utils/requests/uploadProspects";
 import _ from "lodash";
 import { DataTable } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
@@ -49,6 +49,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { QueryCache } from "@tanstack/react-query";
 import { MaxHeap } from "@datastructures-js/heap";
+import {CHECKBOX} from "html2canvas/dist/types/dom/replaced-elements/input-element-container";
 
 const MAX_FILE_SIZE_MB = 2;
 const PREVIEW_FIRST_N_ROWS = 5;
@@ -58,6 +59,7 @@ const PROSPECT_DB_COLUMNS = [
   "first_name",
   "last_name",
   "title",
+  "override",
 ];
 
 function findBestPreviewRows(fileJSON: any[], previewAmount: number) {
@@ -89,6 +91,7 @@ function getDefaultColumnMappings(fileJSON: any[]) {
         : "none";
       map.set(key.trim(), defaultValue);
     });
+  map.set("override", "override");
   return map;
 }
 
@@ -175,8 +178,12 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
     new Map()
   );
 
+  const [duplicateProspects, setDuplicateProspects] = useState<any[] | null>(null);
+
   const [preUploading, setPreUploading] = useState(false);
   const queryCache = new QueryCache();
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (fileJSON) {
@@ -184,10 +191,51 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
     }
   }, [fileJSON]);
 
-  /**
-   * Checks if the user can upload the file
-   * @returns an array of strings, each string is a reason why the user can't upload
-   */
+  useEffect(() => {
+    if (fileJSON && columnMappings) {
+      getDupProspects();
+    }
+  }, [fileJSON, columnMappings])
+
+
+  const setOverrideAll = (override: boolean) => {
+    if (duplicateProspects) {
+      setDuplicateProspects(prevState => prevState!.map((prospect) => {
+        return {...prospect, override: override}
+      }))
+    }
+  }
+
+  const getDupProspects = async () => {
+    if (checkCanUpload().length === 0) {
+      setLoading(true);
+      const uploadJSON = (fileJSON as any[])
+        .map((row) => {
+          const mappedRow = {};
+          // Only include columns that are mapped to a prospect db column
+          Object.keys(row)
+            .filter((key) =>
+              PROSPECT_DB_COLUMNS.includes(
+                columnMappings.get(key.trim()) as string
+              )
+            )
+            .forEach((key) => {
+              // Use the mapped prospect db column intead of the original column name
+              // @ts-ignore
+              mappedRow[columnMappings.get(key.trim())] = row[key];
+            });
+          return mappedRow;
+          // Remove prospects that don't have a linkedin_url or email column
+        })
+        .filter((row: any) => row.linkedin_url || row.email || (row.company && row.full_name) || (row.company && row.first_name && row.last_name));
+
+      const data = await getDuplicateProspects(userToken, uploadJSON ?? []);
+
+      setDuplicateProspects(data.data.data);
+      setLoading(false);
+    }
+  }
+
   const checkCanUpload = () => {
     const hasScrapeTarget = Array.from(columnMappings.values()).some(
       (value) => {
@@ -253,7 +301,17 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
       archetype_id = result.data;
     }
 
-    const uploadJSON = (fileJSON as any[])
+    const modifiedJSON = fileJSON?.map((prospect) => {
+      const duplicate = duplicateProspects?.find(dup => dup.row === prospect.id);
+
+      if (duplicate) {
+        return {...prospect, override: duplicate.override};
+      }
+
+      return prospect;
+    });
+
+    const uploadJSON = (modifiedJSON as any[])
       .map((row) => {
         const mappedRow = {};
         // Only include columns that are mapped to a prospect db column
@@ -305,7 +363,7 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
       autoClose: 10000,
     });
 
-    closeAllModals();
+    close();
     setPreUploading(false);
     // Invalidates the query for the personas data so that the new persona will be fetched
     queryClient.invalidateQueries({ queryKey: ["query-personas-data"] });
@@ -316,55 +374,122 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
     }
   };
 
-  const openModal = () =>
-    openConfirmModal({
-      title: <Title order={3}>Confirm Upload</Title>,
-      children: (
-        <>
-          <Text>We’re ready to process your file! Here’s the summary:</Text>
-          <List withPadding>
-            {Array.from(columnMappings.values())
-              .filter((value) => {
-                return value === "linkedin_url" || value === "email";
-              })
-              .map((value) => convertColumn(value))
-              .map((value) => (
-                <List.Item key={value}>
-                  {value === "linkedin_url" ? (
-                    <>
-                      You’re uploading <b>LinkedIn</b> prospects
-                    </>
-                  ) : value === "email" ? (
-                    <>
-                      You’re uploading <b>email</b> prospects
-                    </>
-                  ) : (
-                    ""
-                  )}
-                </List.Item>
-              ))}
-          </List>
-          <Text pt="xs">
-            <>
-              You’re about to upload <b>{fileJSON?.length}</b> prospects.
-            </>
-          </Text>
-          <Text fs="italic" pt="xs">
-            Looks good?
-          </Text>
-        </>
-      ),
-      confirmProps: { color: "teal", variant: "outline" },
-      labels: { confirm: `Yes, let's do it! 🚀`, cancel: "Nevermind" },
-      onCancel: () => {
-        closeAllModals();
-      },
-      onConfirm: () => startUpload(),
-    });
+  const [opened, { open, close }] = useDisclosure(false);
 
   return (
     <>
-      <LoadingOverlay visible={preUploading} overlayBlur={2} />
+      <Modal  opened={opened} onClose={close} title="Ready To Upload?" size={'auto'}>
+        <LoadingOverlay visible={preUploading} />
+        {duplicateProspects && duplicateProspects.length !== 0 &&<>
+            <Text>We have found some prospects that are already added to your prospect database.</Text>
+            <Text>Please check the prospects that you want to overwrite and move to your new segment/campaign.</Text>
+            <Text>We will also reset the prospect's status</Text>
+            <Space h={'xl'} />
+            <Text>Click "Yes, let's do it! 🚀" whenever you are ready.</Text>
+            <Space h={'xl'} />
+            <Table>
+                <thead>
+                <tr>
+                    <th>
+                        <Checkbox onChange={(event) => setOverrideAll(event.currentTarget.checked)}
+                                  checked={duplicateProspects.every(item => item.override)}
+                        />
+                    </th>
+                    <th>Name</th>
+                    <th>Company</th>
+                    <th>Title</th>
+                    <th>SDR</th>
+                    <th>Segment</th>
+                    <th>Campaign</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                {
+                  duplicateProspects.map((prospect) => {
+                    return (
+                      <tr key={prospect.row}>
+                        <td>
+                          <Checkbox checked={prospect.override} onChange={(event) => {
+                            setDuplicateProspects(prevState => {
+                              return prevState!.map(item => {
+                                if (item.row === prospect.row) {
+                                  return {...item, override: event.currentTarget.checked};
+                                }
+
+                                return item;
+                              })
+                            })
+                          }}/>
+                        </td>
+                        <td>
+                          {prospect.full_name}
+                        </td>
+                        <td>
+                          {prospect.company}
+                        </td>
+                        <td>
+                          {prospect.title}
+                        </td>
+                        <td>
+                          {prospect.sdr}
+                        </td>
+                        <td>
+                          {prospect.segment ?? "None"}
+                        </td>
+                        <td>
+                          {prospect.archetype}
+                        </td>
+                        <td>
+                          {prospect.status}
+                        </td>
+                      </tr>
+                    )
+                  })
+                }
+                </tbody>
+            </Table>
+        </>}
+        {duplicateProspects && duplicateProspects.length === 0 && <>
+            <Text>We’re ready to process your file! Here’s the summary:</Text>
+            <List withPadding>
+              {Array.from(columnMappings.values())
+                .filter((value) => {
+                  return value === "linkedin_url" || value === "email";
+                })
+                .map((value) => convertColumn(value))
+                .map((value) => (
+                  <List.Item key={value}>
+                    {value === "linkedin_url" ? (
+                      <>
+                        You’re uploading <b>LinkedIn</b> prospects
+                      </>
+                    ) : value === "email" ? (
+                      <>
+                        You’re uploading <b>email</b> prospects
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </List.Item>
+                ))}
+            </List>
+            <Text pt="xs">
+                <>
+                    You’re about to upload <b>{fileJSON?.length}</b> prospects.
+                </>
+            </Text>
+            <Text fs="italic" pt="xs">
+                Looks good?
+            </Text>
+        </>
+        }
+        <Space h={'96px'} />
+        <Flex justify={'space-between'}>
+          <Button onClick={() => close()} variant={'outline'} color={'gray'}>Nevermind</Button>
+          <Button onClick={() => startUpload()}>Yes, let's do it! 🚀</Button>
+        </Flex>
+      </Modal>
       {!fileJSON && (
         <Dropzone
           loading={false}
@@ -499,6 +624,7 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
               onClick={() => {
                 setFileJSON(null);
                 setColumnMappings(new Map());
+                setDuplicateProspects(null);
               }}
             >
               <IconTrashX size="0.875rem" />
@@ -528,9 +654,12 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
                   color={checkCanUpload().length > 0 ? "red" : "teal"}
                   onClick={() => {
                     if (checkCanUpload().length === 0) {
-                      openModal();
+                      getDupProspects();
+                      // openModal();
+                      open();
                     }
                   }}
+                  disabled={loading}
                 >
                   Start Upload!
                 </Button>

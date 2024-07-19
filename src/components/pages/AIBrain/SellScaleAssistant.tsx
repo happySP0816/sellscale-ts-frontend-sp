@@ -219,6 +219,7 @@ const SegmentAIGeneration = (props:any) => {
   const [active, setActive] = useState(1);
   const [assets, setAssets] = useState(["Important-sales-asset.pdf", "extra-asset-1.pdf"]);
   const [generatingFilters, setGeneratingFilters] = useState(false);
+  const [loadingIndex, setLoadingIndex] = useState<number>(0);
   const userToken = useRecoilValue(userTokenState);
 
 const updateSegment = (index: number, field: any, value: any) => {
@@ -275,76 +276,6 @@ const updateSegment = (index: number, field: any, value: any) => {
             },
           }}
         >
-          {/* <Timeline.Item bullet={active ? <IconCheck size={"1rem"} /> : <IconLoader size={"1rem"} color="orange" />} title="Understanding your Project">
-            <Box w={"100%"}>
-              <Flex
-                w={"100%"}
-                px={"sm"}
-                align={"center"}
-                justify={"space-between"}
-                py={5}
-                gap={"xs"}
-                className="border-[2px] border-solid border-[#e7ebef] rounded-md"
-                wrap={"wrap"}
-              >
-                <Flex align={"center"} gap={"xs"}>
-                  <IconLink size={"1rem"} />
-                  <Text fw={500} size={"sm"}>
-                    Website:
-                  </Text>
-                  <Text color="gray" fw={500} size={"sm"}>
-                    https://www.poweredbyash.com
-                  </Text>
-                </Flex>
-                <Text color="gray" fw={500} size={"xs"}>
-                  28 Pages Analyzed
-                </Text>
-              </Flex>
-              <Flex
-                w={"100%"}
-                align={"center"}
-                justify={"space-between"}
-                px={"sm"}
-                mt={"xs"}
-                py={5}
-                gap={"xs"}
-                className="border-[2px] border-solid border-[#e7ebef] rounded-md"
-                wrap={"wrap"}
-              >
-                <Flex align={"center"} gap={"xs"}>
-                  <IconFile size={"1rem"} />
-                  <Text fw={500} size={"sm"}>
-                    Sales Asset:
-                  </Text>
-                  {assets.map((item, index) => {
-                    return (
-                      <Badge color="gray" size="sm" tt={"initial"} key={index}>
-                        {item}
-                      </Badge>
-                    );
-                  })}
-                </Flex>
-                <Text color="gray" fw={500} size={"xs"}>
-                  2 Files Analyzed
-                </Text>
-              </Flex>
-            </Box>
-          </Timeline.Item> */}
-
-          {/* <Timeline.Item
-            lineActive
-            bullet={active ? <IconCheck size={"1rem"} /> : <IconLoader size={"1rem"} color="orange" />}
-            title="This is your ideal customer Profile"
-            lineVariant={active ? "solid" : "dashed"}
-          >
-            <Paper withBorder px={"sm"} py={"lg"}>
-              <Text color="gray" size={"xs"} fw={600}>
-                AI SaaS companies with 10-100 employees, targeting tech-savvy SMBs in the healthcare and finance sectors. Focused on enhancing efficiency and
-                decision-making through advanced AI solutions, looking for scalable, user-friendly platforms with robust customer support and integration
-                capabilities.
-              </Text>
-            </Paper>
-          </Timeline.Item> */}
 
           <Timeline.Item
             lineActive={active === 2 ? true : false}
@@ -361,7 +292,7 @@ const updateSegment = (index: number, field: any, value: any) => {
                   </tr>
                 </thead>
                 <tbody style={{ backgroundColor: 'white' }}>
-                  {props.segment?.map((element: { makers: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; industry: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; pain_point: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; }, index: Key | null | undefined) => (
+                  {props.segment?.map((element: { makers: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; industry: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; pain_point: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; }, index: number) => (
                     <tr key={index}>
                       <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
                         <div
@@ -392,10 +323,11 @@ const updateSegment = (index: number, field: any, value: any) => {
                       </td>
                       <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
                         <Button
-                          loading={generatingFilters}
+                          loading={generatingFilters && loadingIndex === index}
                           color="grape"
                           leftIcon={<IconSparkles size={"1rem"} />}
                           onClick={async () => {
+                            setLoadingIndex(index);
                             setGeneratingFilters(true);
                             try {
                               const response = await fetch(`${API_URL}/contacts/magic_apollo_search`, {

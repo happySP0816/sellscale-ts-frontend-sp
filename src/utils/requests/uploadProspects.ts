@@ -36,6 +36,34 @@ export default async function uploadProspects(archetype_id: number, userToken: s
 
 }
 
+export async function getDuplicateProspects(userToken: string, json: any[]): Promise<MsgResponse> {
+  try {
+    const response = await fetch(
+      `${API_URL}/prospect/check_duplicate_prospects_from_csv_payload`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          csv_payload: json,
+        }),
+      }
+    )
+
+    if (response.ok || response.status === 200) {
+      return { status: 'success', title: `Success`, message: `No duplicate prospects found.`, data: await response.json() };
+    }
+
+    return { status: 'error', title: `Error (${response.status})`, message: await response.text() };
+  } catch (err) {
+    console.warn(err);
+    return { status: 'error', title: `Error while uploading`, message: "There was a problem uploading the csv." };
+  }
+
+}
+
 
 /**
  * Retriggers the last upload job

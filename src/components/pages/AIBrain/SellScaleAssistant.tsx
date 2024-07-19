@@ -18,8 +18,9 @@ import {
   Timeline,
   Badge,
   Table,
+  Title,
 } from "@mantine/core";
-import { IconCheck, IconCircleCheck, IconFile, IconLink, IconLoader, IconPlus, IconSend } from "@tabler/icons";
+import { IconCheck, IconCircleCheck, IconFile, IconFilter, IconLink, IconLoader, IconPlus, IconSend } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
 import moment from "moment";
 import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useRef, useState } from "react";
@@ -28,6 +29,8 @@ import { useRecoilValue } from "recoil";
 import Logo from "../../../assets/images/logo.png";
 import { DataGrid } from "mantine-data-grid";
 import { API_URL } from "@constants/data";
+import { openContextModal } from "@mantine/modals";
+import { set } from "lodash";
 
 export default function SellScaleAssistant() {
   const [history, setHistory] = useState([
@@ -215,7 +218,9 @@ const SegmentChat = (props: any) => {
 const SegmentAIGeneration = (props:any) => {
   const [active, setActive] = useState(1);
   const [assets, setAssets] = useState(["Important-sales-asset.pdf", "extra-asset-1.pdf"]);
-  
+  const [generatingFilters, setGeneratingFilters] = useState(false);
+  const userToken = useRecoilValue(userTokenState);
+
 const updateSegment = (index: number, field: any, value: any) => {
   props.setSegemnt((prevSegments: any) => {
     const updatedSegments = [...prevSegments];
@@ -352,7 +357,7 @@ const updateSegment = (index: number, field: any, value: any) => {
                     <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Segment Name</th>
                     <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Segment Description</th>
                     <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Value Proposition</th>
-                    <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Edit Pre-Filters</th>
+                    {props.segment?.length > 0 && <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Generate Pre-Filter</th>}
                   </tr>
                 </thead>
                 <tbody style={{ backgroundColor: 'white' }}>
@@ -387,11 +392,50 @@ const updateSegment = (index: number, field: any, value: any) => {
                       </td>
                       <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
                         <Button
-                          
-                          color="blue"
-                          onClick={() => window.open('/contacts/find', '_blank')}
+                          loading={generatingFilters}
+                          color="grape"
+                          leftIcon={<IconSparkles size={"1rem"} />}
+                          onClick={async () => {
+                            setGeneratingFilters(true);
+                            try {
+                              const response = await fetch(`${API_URL}/contacts/magic_apollo_search`, {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  'Authorization': `Bearer ${userToken}`,
+                                },
+                                body: JSON.stringify({
+                                  query: `I have an idea for the segment: ${element.makers}. This segment is about ${element.industry}. The value proposition is ${element.pain_point}.`
+                                }),
+                              });
+
+                              if (response.ok) {
+                                const data = await response.json();
+                                openContextModal({
+                                  modal: "prefilterEditModal",
+                                  title: (
+                                    <Title order={3} className="flex items-center gap-2">
+                                      <IconFilter size={"1.5rem"} color="#228be6" /> Edit Pre-Filter
+                                    </Title>
+                                  ),
+                                  innerProps: { id: data.saved_query_id },
+                                  centered: true,
+                                  styles: {
+                                    content: {
+                                      minWidth: "930px",
+                                    },
+                                  },
+                                });
+                              } else {
+                                console.error("Failed to fetch data from the endpoint");
+                              }
+                            } catch (error) {
+                              console.error("Error:", error);
+                            }
+                            setGeneratingFilters(false);
+                          }}
                         >
-                          Save
+                          Generate
                         </Button>
                       </td>
                     </tr>

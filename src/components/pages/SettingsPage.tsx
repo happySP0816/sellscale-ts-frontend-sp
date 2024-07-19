@@ -115,6 +115,7 @@ export default function SettingsPage() {
     <Box p={20} w="100%">
       <PageTitle title="Settings" />
       <Tabs
+        keepMounted={false}
         value={currentTab}
         orientation="vertical"
         onTabChange={(i: any) => {
@@ -195,11 +196,11 @@ export default function SettingsPage() {
           </Tabs.Tab>
 
           <Tabs.Tab value="pre-filters" icon={<IconFilter size="0.8rem" />}>
-            Pre-Filters
+            Main Pre-Filter
           </Tabs.Tab>
 
           <Tabs.Tab value="pre-filters-v2" icon={<IconFilter size="0.8rem" />}>
-            Pre-Filters (Beta)
+            Pre-filter Library
           </Tabs.Tab>
 
           <Tabs.Tab value="filters" icon={<IconTrashFilled size="0.8rem" />}>

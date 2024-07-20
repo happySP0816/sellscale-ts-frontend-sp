@@ -36,7 +36,7 @@ export default async function uploadProspects(archetype_id: number, userToken: s
 
 }
 
-export async function getDuplicateProspects(userToken: string, json: any[]): Promise<MsgResponse> {
+export async function getDuplicateProspects(userToken: string, json: any[], archetype_id?: number): Promise<MsgResponse> {
   try {
     const response = await fetch(
       `${API_URL}/prospect/check_duplicate_prospects_from_csv_payload`,
@@ -48,6 +48,7 @@ export async function getDuplicateProspects(userToken: string, json: any[]): Pro
         },
         body: JSON.stringify({
           csv_payload: json,
+          archetype_id: archetype_id,
         }),
       }
     )

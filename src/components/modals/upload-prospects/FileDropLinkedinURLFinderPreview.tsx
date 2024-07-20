@@ -23,7 +23,7 @@ import {
   HoverCard,
   List,
   LoadingOverlay,
-  Title, Table, Checkbox, Space, Modal,
+  Title, Table, Checkbox, Space, Modal, Accordion,
 } from "@mantine/core";
 import { Dropzone, DropzoneProps, MIME_TYPES } from "@mantine/dropzone";
 import {useDisclosure, useForceUpdate } from "@mantine/hooks";
@@ -198,10 +198,23 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
   }, [fileJSON, columnMappings])
 
 
-  const setOverrideAll = (override: boolean) => {
+  const setOverrideAll = (override: boolean, same_archetype: boolean) => {
     if (duplicateProspects) {
       setDuplicateProspects(prevState => prevState!.map((prospect) => {
-        return {...prospect, override: override}
+        if (same_archetype) {
+          if (prospect.same_archetype) {
+            return {...prospect, override: override}
+          }
+
+          return prospect;
+        }
+        else {
+          if (!prospect.same_archetype) {
+            return {...prospect, override: override}
+          }
+
+          return prospect;
+        }
       }))
     }
   }
@@ -229,7 +242,7 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
         })
         .filter((row: any) => row.linkedin_url || row.email || (row.company && row.full_name) || (row.company && row.first_name && row.last_name));
 
-      const data = await getDuplicateProspects(userToken, uploadJSON ?? []);
+      const data = await getDuplicateProspects(userToken, uploadJSON ?? [], props.personaId ? +props.personaId : undefined);
 
       setDuplicateProspects(data.data.data);
       setLoading(false);
@@ -378,7 +391,7 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
 
   return (
     <>
-      <Modal  opened={opened} onClose={close} title="Ready To Upload?" size={'960px'}>
+      <Modal  opened={opened} onClose={close} title="Ready To Upload?" size={'1100px'}>
         <LoadingOverlay visible={preUploading} />
         {duplicateProspects && duplicateProspects.length !== 0 &&<>
             <Text>We have found some prospects that are already added to your prospect database.</Text>
@@ -387,68 +400,148 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
             <Space h={'xl'} />
             <Text>Click "Yes, let's do it! 🚀" whenever you are ready.</Text>
             <Space h={'xl'} />
-            <Table>
-                <thead>
-                <tr>
-                    <th>
-                        <Checkbox onChange={(event) => setOverrideAll(event.currentTarget.checked)}
-                                  checked={duplicateProspects.every(item => item.override)}
-                        />
-                    </th>
-                    <th>Name</th>
-                    <th>Company</th>
-                    <th>Title</th>
-                    <th>SDR</th>
-                    <th>Segment</th>
-                    <th>Campaign</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                {
-                  duplicateProspects.map((prospect) => {
-                    return (
-                      <tr key={prospect.row}>
-                        <td>
-                          <Checkbox checked={prospect.override} onChange={(event) => {
-                            setDuplicateProspects(prevState => {
-                              return prevState!.map(item => {
-                                if (item.row === prospect.row) {
-                                  return {...item, override: event.currentTarget.checked};
-                                }
 
-                                return item;
+            <Accordion variant={'separated'} defaultValue={'duplicate-different-archetypes'}>
+                <Accordion.Item value={'duplicate-different-archetypes'}>
+                    <Accordion.Control>Prospects from different campaigns</Accordion.Control>
+                    <Accordion.Panel>
+                        <Table>
+                            <thead>
+                            <tr>
+                                <th>
+                                    <Checkbox onChange={(event) => setOverrideAll(event.currentTarget.checked, false)}
+                                              checked={duplicateProspects.filter(item => !item.same_archetype).every(item => item.override)}
+                                    />
+                                </th>
+                                <th>Name</th>
+                                <th>Company</th>
+                                <th>Title</th>
+                                <th>SDR</th>
+                                <th>Segment</th>
+                                <th>Campaign</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {
+                              duplicateProspects.filter(prospect => !prospect.same_archetype).map((prospect) => {
+                                return (
+                                  <tr key={prospect.row}>
+                                    <td>
+                                      <Checkbox checked={prospect.override} onChange={(event) => {
+                                        setDuplicateProspects(prevState => {
+                                          return prevState!.map(item => {
+                                            if (item.row === prospect.row) {
+                                              return {...item, override: event.currentTarget.checked};
+                                            }
+
+                                            return item;
+                                          })
+                                        })
+                                      }}/>
+                                    </td>
+                                    <td>
+                                      {prospect.full_name}
+                                    </td>
+                                    <td>
+                                      {prospect.company}
+                                    </td>
+                                    <td>
+                                      {prospect.title}
+                                    </td>
+                                    <td>
+                                      {prospect.sdr}
+                                    </td>
+                                    <td>
+                                      {prospect.segment ?? "None"}
+                                    </td>
+                                    <td>
+                                      {prospect.archetype}
+                                    </td>
+                                    <td>
+                                      {prospect.status}
+                                    </td>
+                                  </tr>
+                                )
                               })
-                            })
-                          }}/>
-                        </td>
-                        <td>
-                          {prospect.full_name}
-                        </td>
-                        <td>
-                          {prospect.company}
-                        </td>
-                        <td>
-                          {prospect.title}
-                        </td>
-                        <td>
-                          {prospect.sdr}
-                        </td>
-                        <td>
-                          {prospect.segment ?? "None"}
-                        </td>
-                        <td>
-                          {prospect.archetype}
-                        </td>
-                        <td>
-                          {prospect.status}
-                        </td>
-                      </tr>
-                    )
-                  })
-                }
-                </tbody>
-            </Table>
+                            }
+                            </tbody>
+                        </Table>
+                    </Accordion.Panel>
+                </Accordion.Item>
+                <Accordion.Item value={'duplicate-same-archetypes'}>
+                    <Accordion.Control>Prospects from the current campaign</Accordion.Control>
+                    <Accordion.Panel>
+                        <Table>
+                            <thead>
+                            <tr>
+                                <th>
+                                    <Checkbox onChange={(event) => setOverrideAll(event.currentTarget.checked, true)}
+                                              checked={duplicateProspects.filter(item => item.same_archetype).every(item => item.override)}
+                                    />
+                                </th>
+                                <th>Name</th>
+                                <th>Company</th>
+                                <th>Title</th>
+                                <th>SDR</th>
+                                <th>Segment</th>
+                                <th>Campaign</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {
+                              duplicateProspects.filter(prospect => prospect.same_archetype).map((prospect) => {
+                                return (
+                                  <tr key={prospect.row}>
+                                    <td>
+                                      <Checkbox checked={prospect.override} onChange={(event) => {
+                                        setDuplicateProspects(prevState => {
+                                          return prevState!.map(item => {
+                                            if (item.row === prospect.row) {
+                                              return {...item, override: event.currentTarget.checked};
+                                            }
+
+                                            return item;
+                                          })
+                                        })
+                                      }}/>
+                                    </td>
+                                    <td>
+                                      {prospect.full_name}
+                                    </td>
+                                    <td>
+                                      {prospect.company}
+                                    </td>
+                                    <td>
+                                      {prospect.title}
+                                    </td>
+                                    <td>
+                                      {prospect.sdr}
+                                    </td>
+                                    <td>
+                                      {prospect.segment ?? "None"}
+                                    </td>
+                                    <td>
+                                      {prospect.archetype}
+                                    </td>
+                                    <td>
+                                      {prospect.status}
+                                    </td>
+                                  </tr>
+                                )
+                              })
+                            }
+                            </tbody>
+                        </Table>
+                    </Accordion.Panel>
+                </Accordion.Item>
+
+            </Accordion>
+            {/*<Accordion>*/}
+
+            {/*</Accordion>*/}
+
         </>}
         {duplicateProspects && duplicateProspects.length === 0 && <>
             <Text>We’re ready to process your file! Here’s the summary:</Text>
@@ -488,7 +581,8 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
         <Flex justify={'space-between'}>
           <Button onClick={() => {
             close();
-            setOverrideAll(false);
+            setOverrideAll(false, true);
+            setOverrideAll(false, false);
           }} variant={'outline'} color={'gray'}>Skip All</Button>
           <Button onClick={() => startUpload()}>Override Selected 🚀</Button>
         </Flex>

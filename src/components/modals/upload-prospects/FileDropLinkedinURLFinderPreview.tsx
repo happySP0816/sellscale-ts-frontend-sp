@@ -198,10 +198,23 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
   }, [fileJSON, columnMappings])
 
 
-  const setOverrideAll = (override: boolean) => {
+  const setOverrideAll = (override: boolean, same_archetype: boolean) => {
     if (duplicateProspects) {
       setDuplicateProspects(prevState => prevState!.map((prospect) => {
-        return {...prospect, override: override}
+        if (same_archetype) {
+          if (prospect.same_archetype) {
+            return {...prospect, override: override}
+          }
+
+          return prospect;
+        }
+        else {
+          if (!prospect.same_archetype) {
+            return {...prospect, override: override}
+          }
+
+          return prospect;
+        }
       }))
     }
   }
@@ -396,8 +409,8 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
                             <thead>
                             <tr>
                                 <th>
-                                    <Checkbox onChange={(event) => setOverrideAll(event.currentTarget.checked)}
-                                              checked={duplicateProspects.every(item => item.override)}
+                                    <Checkbox onChange={(event) => setOverrideAll(event.currentTarget.checked, false)}
+                                              checked={duplicateProspects.filter(item => !item.same_archetype).every(item => item.override)}
                                     />
                                 </th>
                                 <th>Name</th>
@@ -463,8 +476,8 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
                             <thead>
                             <tr>
                                 <th>
-                                    <Checkbox onChange={(event) => setOverrideAll(event.currentTarget.checked)}
-                                              checked={duplicateProspects.every(item => item.override)}
+                                    <Checkbox onChange={(event) => setOverrideAll(event.currentTarget.checked, true)}
+                                              checked={duplicateProspects.filter(item => item.same_archetype).every(item => item.override)}
                                     />
                                 </th>
                                 <th>Name</th>
@@ -568,7 +581,8 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
         <Flex justify={'space-between'}>
           <Button onClick={() => {
             close();
-            setOverrideAll(false);
+            setOverrideAll(false, true);
+            setOverrideAll(false, false);
           }} variant={'outline'} color={'gray'}>Skip All</Button>
           <Button onClick={() => startUpload()}>Override Selected 🚀</Button>
         </Flex>

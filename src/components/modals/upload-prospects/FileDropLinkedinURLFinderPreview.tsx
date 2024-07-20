@@ -378,7 +378,7 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
 
   return (
     <>
-      <Modal  opened={opened} onClose={close} title="Ready To Upload?" size={'auto'}>
+      <Modal  opened={opened} onClose={close} title="Ready To Upload?" size={'960px'}>
         <LoadingOverlay visible={preUploading} />
         {duplicateProspects && duplicateProspects.length !== 0 &&<>
             <Text>We have found some prospects that are already added to your prospect database.</Text>
@@ -486,8 +486,11 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
         }
         <Space h={'96px'} />
         <Flex justify={'space-between'}>
-          <Button onClick={() => close()} variant={'outline'} color={'gray'}>Nevermind</Button>
-          <Button onClick={() => startUpload()}>Yes, let's do it! 🚀</Button>
+          <Button onClick={() => {
+            close();
+            setOverrideAll(false);
+          }} variant={'outline'} color={'gray'}>Skip All</Button>
+          <Button onClick={() => startUpload()}>Override Selected 🚀</Button>
         </Flex>
       </Modal>
       {!fileJSON && (

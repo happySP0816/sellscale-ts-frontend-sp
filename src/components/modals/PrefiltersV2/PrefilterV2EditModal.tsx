@@ -121,6 +121,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             const queryDetails = data.data;
             setName(queryDetails.data.q_person_name || "");
             setJobTitles(queryDetails.data.person_titles || []);
+            setSeniority(queryDetails.data.person_seniorities || []);
             setExcludedJobTitles(queryDetails.data.person_not_titles || []);
             const industryBreadcrumbs = queryDetails.results.breadcrumbs.filter((breadcrumb: any) => breadcrumb.label === "Industry");
             if (industryBreadcrumbs.length > 0) {
@@ -273,11 +274,12 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           organization_latest_funding_stage_cd: fundraise.length ? fundraise : undefined,
           person_seniorities: seniority,
           per_page: 100,
+          organization_num_employees_ranges: selectedNumEmployees.length ? selectedNumEmployees : undefined,
           person_not_titles: excludedJobTitles.length ? excludedJobTitles : undefined, // works
           person_titles: jobTitles.length ? jobTitles : undefined, // works
           q_person_name: name || undefined, // works
           organization_industry_tag_ids: industry.length ? industry.map(ind => industryOptionsWithIds[ind]) : undefined, // works
-          organization_num_employees_range: selectedNumEmployees.length ? selectedNumEmployees : undefined, // does not work in retool either
+          // organization_num_employees_range: selectedNumEmployees.length ? selectedNumEmployees : undefined, // does not work in retool either
           person_locations: locations.length ? locations : undefined,//works
           organization_ids: selectedCompanies.length? selectedCompanies : undefined, //works
           revenue_range: revenue.min || revenue.max ? { min: parseInt(revenue?.min?.replaceAll(',',''), 10) || undefined, max: parseInt(revenue?.max?.replaceAll(',',''), 10) || undefined } : undefined, //works

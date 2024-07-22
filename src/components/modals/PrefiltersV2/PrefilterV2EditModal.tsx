@@ -552,7 +552,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                   onChange={(event) => setName(event.currentTarget.value)}
                 />
               </CustomAccordionItem>
-              <CustomAccordionItem value="job" label="Job Title" isActive={jobTitles.length > 0 || excludedJobTitles.length > 0}>
+              <CustomAccordionItem value="job" label="Job Title" isActive={jobTitles.length > 0 || excludedJobTitles.length > 0 || seniority.length > 0}>
                 <CustomSelect
                   label="Included"
                   placeholder="Select options"
@@ -1248,6 +1248,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             disabled={(currentSavedQueryId === undefined || filterName === '')} 
             onClick={() => saved_query_id ? saveFilter(saved_query_id) : saveFilter()} 
             fullWidth
+            color="orange"
           >
             {saved_query_id ? 'Save Edits' : 'Save Pre-filter'}
           </Button>

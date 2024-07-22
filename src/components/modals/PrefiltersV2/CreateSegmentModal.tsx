@@ -28,27 +28,29 @@ export default function CreateSegmentModal(props: CreateSegment) {
   const [loading, setLoading] = useState(false);
   const [subjectLine, setSubjectLine] = useState<string>("");
 
-  useEffect(() => {
-    const fetchSegments = async () => {
-      try {
-        const response = await fetch(`${API_URL}/apollo/segments`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${userToken}`,
-          },
-        });
-        const data = await response.json();
-        if (data.status === "success") {
-          console.log("Segments fetched successfully:", data.data);
-          setSegments(data.data);
-        } else {
-          console.error("Failed to fetch segments:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching segments:", error);
+  const fetchSegments = async () => {
+    try {
+      const response = await fetch(`${API_URL}/apollo/segments`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      if (data.status === "success") {
+        console.log("Segments fetched successfully:", data.data);
+        setSegments(data.data);
+        return data.data
+      } else {
+        console.error("Failed to fetch segments:", data.message);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching segments:", error);
+    }
+  };
+
+  useEffect(() => {
       fetchSegments();
   }, [userToken]);
 
@@ -190,7 +192,7 @@ export default function CreateSegmentModal(props: CreateSegment) {
                   if (!response.ok) {
                     throw new Error('Network response was not ok');
                   }
-                  const data = await response.json();
+                  const data = await response;
                   console.log('Success:', data);
                   showNotification({
                     id: 'success',
@@ -244,7 +246,7 @@ export default function CreateSegmentModal(props: CreateSegment) {
                     },
                     body: JSON.stringify({
                       segment_title: segmentName === '' ? new Date().toISOString() : segmentName,
-                      filters: {}, // Add your filters here
+                      filters: props.filters, // Add your filters here
                       // campaign_id: 'campaign_id', // Replace with actual campaign ID
                       saved_apollo_query_id: props.saved_apollo_query_id,
                     }),
@@ -254,20 +256,45 @@ export default function CreateSegmentModal(props: CreateSegment) {
                   }
                   const data = await response.json();
                   console.log('Success:', data);
+                  
+                  // Fetch segments to get the newly created segment ID
+                  const segmentData = await fetchSegments();
+                  const newSegment = segmentData.find((segment: { segment_title: string; }) => segment.segment_title === (segmentName === '' ? new Date().toISOString() : segmentName));
+                  if (!newSegment) {
+                    throw new Error('Newly created segment not found');
+                  }
+
+                  // Call the API to add contacts to the new segment
+                  const addContactsResponse = await fetch(`${API_URL}/prospect/add_from_apollo_query_id`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${userToken}`,
+                    },
+                    body: JSON.stringify({
+                      saved_apollo_query_id: props.saved_apollo_query_id,
+                      segment_id: newSegment.id,
+                      num_contacts: 100,
+                    }),
+                  });
+                  if (!addContactsResponse.ok) {
+                    throw new Error('Network response was not ok');
+                  }
+                  const addContactsData = await addContactsResponse;
+                  console.log('Success:', addContactsData);
+
                   closeAllModals();
                   showNotification({
                     id: 'success',
                     title: 'Success',
-                    message: 'Segment created successfully',
+                    message: 'Segment created and contacts added successfully',
                     color: 'green',
                   });
-                  
-                  
                 } catch (error) {
                   showNotification({
                     id: 'error',
                     title: 'Error',
-                    message: 'Failed to add contacts to segment',
+                    message: 'Failed to create segment or add contacts',
                     color: 'red',
                   });
                   console.error('Error:', error);

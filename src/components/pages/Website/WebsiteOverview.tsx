@@ -22,6 +22,7 @@ import {
   IconBrandLinkedin,
   IconChevronLeft,
   IconChevronRight,
+  IconCirclePlus,
   IconLetterT,
   IconLoader,
   IconMail,
@@ -126,14 +127,10 @@ export default function WebsiteOverview() {
     handleGetDeanonymizedContacts();
   }, [userToken, dateRange]);
 
-  const maxDeanonymizedVisits =
-    Math.max(...trackHistory?.map((x) => x.distinct_deanonymized_visits), 0) +
-    5;
+  const maxDeanonymizedVisits = Math.max(...trackHistory?.map((x) => x.distinct_deanonymized_visits), 0) + 5;
 
   const data = {
-    labels: trackHistory
-      ?.map((x) => moment(x.label).format("MMM D YYYY"))
-      .reverse(),
+    labels: trackHistory?.map((x) => moment(x.label).format("MMM D YYYY")).reverse(),
     datasets: [
       {
         label: "Distinct Views",
@@ -147,9 +144,7 @@ export default function WebsiteOverview() {
       },
       {
         label: "Deanonomized Contact",
-        data: trackHistory
-          ?.map((x) => x.distinct_deanonymized_visits)
-          .reverse(),
+        data: trackHistory?.map((x) => x.distinct_deanonymized_visits).reverse(),
         fill: false,
         borderColor: "#D444F1",
         backgroundColor: "#D444F1",
@@ -196,10 +191,7 @@ export default function WebsiteOverview() {
   const [selected, setSelected] = useState<any>({});
 
   let filteredData = deanonymData.filter((item: any) => {
-    return (
-      item.sdr_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.company.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return item.sdr_name.toLowerCase().includes(searchQuery.toLowerCase()) || item.company.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   return (
@@ -252,16 +244,9 @@ export default function WebsiteOverview() {
                     <Flex align={"center"} justify={"space-between"}>
                       <Flex>
                         <Text size={"sm"} fw={500}>
-                          {item.location.split(",")[0]},{" "}
-                          {item.location.split(",")[1]}
+                          {item.location.split(",")[0]}, {item.location.split(",")[1]}
                         </Text>
-                        <Text
-                          size={"xs"}
-                          fw={500}
-                          color="gray"
-                          ml="4px"
-                          mt="2px"
-                        >
+                        <Text size={"xs"} fw={500} color="gray" ml="4px" mt="2px">
                           {item.location.split(",")[2]}
                         </Text>
                       </Flex>
@@ -270,15 +255,7 @@ export default function WebsiteOverview() {
                       </Text>
                     </Flex>
                     <Progress
-                      value={
-                        (item.distinct_deanonymized_visits /
-                          locations.reduce(
-                            (acc, item) =>
-                              acc + item.distinct_deanonymized_visits,
-                            1
-                          )) *
-                        100
-                      }
+                      value={(item.distinct_deanonymized_visits / locations.reduce((acc, item) => acc + item.distinct_deanonymized_visits, 1)) * 100}
                       mt={2}
                     />
                   </Box>
@@ -344,14 +321,11 @@ export default function WebsiteOverview() {
             {Object.keys(selected)?.length !== 0 && (
               <Button
                 onClick={() => {
-                  const selectedContacts = Object.keys(selected).map(
-                    (index: any) => deanonymData[index].id
-                  );
+                  const selectedContacts = Object.keys(selected).map((index: any) => deanonymData[index].id);
                   autoClassifyDeanonymizedContacts(selectedContacts);
                   showNotification({
                     title: "Classifying...",
-                    message:
-                      "Contacts are being classified. Please refresh to see the changes.",
+                    message: "Contacts are being classified. Please refresh to see the changes.",
                     color: "teal",
                   });
                 }}
@@ -359,11 +333,7 @@ export default function WebsiteOverview() {
                 Classify {Object.keys(selected).length} Visitors
               </Button>
             )}
-            <Button
-              color="gray"
-              onClick={handleGetDeanonymizedContacts}
-              loading={loading}
-            >
+            <Button color="gray" onClick={handleGetDeanonymizedContacts} loading={loading}>
               Refresh
             </Button>
             <TextInput
@@ -375,6 +345,23 @@ export default function WebsiteOverview() {
                 setSelected({});
               }}
             />
+            <Button
+              leftIcon={<IconPlus size={"1rem"} />}
+              onClick={() => {
+                openContextModal({
+                  modal: "createvisitorbucketmodal",
+                  title: (
+                    <Flex gap={"xs"} align={"center"}>
+                      <IconCirclePlus size={"1.6rem"} color="#228be6" />
+                      <Title order={3}>Create visitor bucket</Title>
+                    </Flex>
+                  ),
+                  innerProps: {},
+                });
+              }}
+            >
+              Create visitor bucket
+            </Button>
           </Flex>
         </Flex>
         <DataGrid
@@ -404,23 +391,12 @@ export default function WebsiteOverview() {
               ),
               minSize: 210,
               cell: (cell) => {
-                const {
-                  sdr_name,
-                  avatar,
-                  job,
-                  linkedin,
-                  email,
-                }: any = cell.row.original;
+                const { sdr_name, avatar, job, linkedin, email, company }: any = cell.row.original;
 
                 return (
                   <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
                     <Flex align={"center"} gap={"sm"}>
-                      <Avatar
-                        src={avatar}
-                        size={"md"}
-                        radius={"xl"}
-                        color={valueToColor(theme, sdr_name)}
-                      >
+                      <Avatar src={avatar} size={"md"} radius={"xl"} color={valueToColor(theme, sdr_name)}>
                         {nameToInitials(sdr_name)}
                       </Avatar>
                       <Box>
@@ -428,23 +404,11 @@ export default function WebsiteOverview() {
                           <Text fw={500} size={"sm"}>
                             {sdr_name}
                           </Text>
-                          {linkedin && (
-                            <IconBrandLinkedin
-                              size={"1.2rem"}
-                              fill="#228be6"
-                              color="white"
-                            />
-                          )}
-                          {email && (
-                            <IconMail
-                              size={"1.2rem"}
-                              fill="#228be6"
-                              color="white"
-                            />
-                          )}
+                          {linkedin && <IconBrandLinkedin size={"1.2rem"} fill="#228be6" color="white" />}
+                          {email && <IconMail size={"1.2rem"} fill="#228be6" color="white" />}
                         </Flex>
                         <Text color="gray" size={"xs"} fw={500}>
-                          {job}
+                          {job}@{company}
                         </Text>
                       </Box>
                     </Flex>
@@ -452,27 +416,27 @@ export default function WebsiteOverview() {
                 );
               },
             },
-            {
-              accessorKey: "company",
-              header: () => (
-                <Flex align={"center"} gap={"3px"}>
-                  <IconLetterT color="gray" size={"0.9rem"} />
-                  <Text color="gray">Company</Text>
-                </Flex>
-              ),
-              maxSize: 300,
-              cell: (cell) => {
-                const { company } = cell.row.original;
+            // {
+            //   accessorKey: "company",
+            //   header: () => (
+            //     <Flex align={"center"} gap={"3px"}>
+            //       <IconLetterT color="gray" size={"0.9rem"} />
+            //       <Text color="gray">Company</Text>
+            //     </Flex>
+            //   ),
+            //   maxSize: 300,
+            //   cell: (cell) => {
+            //     const { company } = cell.row.original;
 
-                return (
-                  <Flex w={"100%"} h={"100%"} align={"center"}>
-                    <Text lineClamp={1} fw={500}>
-                      {company}
-                    </Text>
-                  </Flex>
-                );
-              },
-            },
+            //     return (
+            //       <Flex w={"100%"} h={"100%"} align={"center"}>
+            //         <Text lineClamp={1} fw={500}>
+            //           {company}
+            //         </Text>
+            //       </Flex>
+            //     );
+            //   },
+            // },
             {
               accessorKey: "visit_date",
               header: () => (
@@ -487,48 +451,34 @@ export default function WebsiteOverview() {
                 const { visit_date } = cell.row.original;
 
                 return (
-                  <Flex
-                    align={"center"}
-                    gap={"xs"}
-                    py={"sm"}
-                    w={"100%"}
-                    h={"100%"}
-                  >
-                    <Text fw={500}>
-                      {moment(visit_date).format("MMMM Do YYYY")}
-                    </Text>
+                  <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                    <Text fw={500}>{moment(visit_date).format("MMMM Do YYYY")}</Text>
                   </Flex>
                 );
               },
             },
-            {
-              accessorKey: "total_visit",
-              header: () => (
-                <Flex align={"center"} gap={"3px"}>
-                  <Flex>
-                    <Icon123 color="gray" size={"1.2rem"} />
-                  </Flex>
-                  <Text color="gray">Total Visit</Text>
-                </Flex>
-              ),
-              maxSize: 140,
-              enableResizing: true,
-              cell: (cell) => {
-                const { total_visit } = cell.row.original;
+            // {
+            //   accessorKey: "total_visit",
+            //   header: () => (
+            //     <Flex align={"center"} gap={"3px"}>
+            //       <Flex>
+            //         <Icon123 color="gray" size={"1.2rem"} />
+            //       </Flex>
+            //       <Text color="gray">Total Visit</Text>
+            //     </Flex>
+            //   ),
+            //   maxSize: 140,
+            //   enableResizing: true,
+            //   cell: (cell) => {
+            //     const { total_visit } = cell.row.original;
 
-                return (
-                  <Flex
-                    align={"center"}
-                    gap={"xs"}
-                    py={"sm"}
-                    w={"100%"}
-                    h={"100%"}
-                  >
-                    <Text fw={500}>{total_visit} visits</Text>
-                  </Flex>
-                );
-              },
-            },
+            //     return (
+            //       <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+            //         <Text fw={500}>{total_visit} visits</Text>
+            //       </Flex>
+            //     );
+            //   },
+            // },
             {
               accessorKey: "intent_score",
               header: () => (
@@ -543,24 +493,8 @@ export default function WebsiteOverview() {
                 const { intent_score } = cell.row.original;
 
                 return (
-                  <Flex
-                    align={"center"}
-                    gap={"xs"}
-                    py={"sm"}
-                    w={"100%"}
-                    h={"100%"}
-                  >
-                    <Badge
-                      color={
-                        intent_score == "MEDIUM"
-                          ? "yellow"
-                          : intent_score == "HIGH"
-                          ? "blue"
-                          : "green"
-                      }
-                    >
-                      {intent_score}
-                    </Badge>
+                  <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                    <Badge color={intent_score == "MEDIUM" ? "yellow" : intent_score == "HIGH" ? "blue" : "green"}>{intent_score}</Badge>
                   </Flex>
                 );
               },
@@ -579,30 +513,14 @@ export default function WebsiteOverview() {
                 const { tag } = cell.row.original as any[""];
 
                 return (
-                  <Flex
-                    align={"center"}
-                    gap={"xs"}
-                    py={"sm"}
-                    w={"100%"}
-                    h={"100%"}
-                  >
+                  <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
                     <Flex gap={"sm"}>
                       {tag ? (
-                        <Badge
-                          key={tag}
-                          tt={"initial"}
-                          size="md"
-                          color={deterministicMantineColor(tag)}
-                        >
+                        <Badge key={tag} tt={"initial"} size="md" color={deterministicMantineColor(tag)}>
                           {tag}
                         </Badge>
                       ) : (
-                        <Button
-                          size="xs"
-                          radius={"xl"}
-                          variant="outline"
-                          leftIcon={<IconPlus size={"0.9rem"} />}
-                        >
+                        <Button size="xs" radius={"xl"} variant="outline" leftIcon={<IconPlus size={"0.9rem"} />}>
                           Add
                         </Button>
                       )}
@@ -645,12 +563,10 @@ export default function WebsiteOverview() {
                     <Select
                       maw={100}
                       value={`${table.getState().pagination.pageIndex + 1}`}
-                      data={new Array(table.getPageCount())
-                        .fill(0)
-                        .map((i, idx) => ({
-                          label: String(idx + 1),
-                          value: String(idx + 1),
-                        }))}
+                      data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
+                        label: String(idx + 1),
+                        value: String(idx + 1),
+                      }))}
                       onChange={(v) => {
                         table.setPageIndex(Number(v) - 1);
                       }}
@@ -679,9 +595,7 @@ export default function WebsiteOverview() {
                       h={36}
                       disabled={table.getState().pagination.pageIndex === 0}
                       onClick={() => {
-                        table.setPageIndex(
-                          table.getState().pagination.pageIndex - 1
-                        );
+                        table.setPageIndex(table.getState().pagination.pageIndex - 1);
                       }}
                     >
                       <IconChevronLeft stroke={theme.colors.gray[4]} />
@@ -690,14 +604,9 @@ export default function WebsiteOverview() {
                       variant="default"
                       color="gray.4"
                       h={36}
-                      disabled={
-                        table.getState().pagination.pageIndex ===
-                        table.getPageCount() - 1
-                      }
+                      disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
                       onClick={() => {
-                        table.setPageIndex(
-                          table.getState().pagination.pageIndex + 1
-                        );
+                        table.setPageIndex(table.getState().pagination.pageIndex + 1);
                       }}
                     >
                       <IconChevronRight stroke={theme.colors.gray[4]} />

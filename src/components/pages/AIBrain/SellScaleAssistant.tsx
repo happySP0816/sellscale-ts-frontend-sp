@@ -444,7 +444,7 @@ const SegmentAIGeneration = (props: any) => {
                                 centered: true,
                                 styles: {
                                   content: {
-                                    minWidth: "930px",
+                                    minWidth: "90%",
                                   },
                                 },
                               });
@@ -549,7 +549,7 @@ const SegmentAIGeneration = (props: any) => {
                                 centered: true,
                                 styles: {
                                   content: {
-                                    minWidth: "930px",
+                                    minWidth: "90%",
                                   },
                                 },
                               });

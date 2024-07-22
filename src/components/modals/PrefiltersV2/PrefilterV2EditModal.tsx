@@ -89,6 +89,20 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
   const [loadingProspects, setLoadingProsepcts] = useState(false);
   const [totalFound, setTotalFound] = useState(innerProps.numResults || 0);
 
+
+  // return (
+  //   <iframe
+  //     src={
+  //       "https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=" +
+  //       userToken + "&id=" + saved_query_id
+  //     }
+  //     width={"100%"}
+  //     height={window.innerHeight}
+  //     frameBorder={0}
+  //     allowFullScreen
+  //   />
+  // )
+
   useEffect(() => {
     const fetchSavedQuery = async () => {
       if (saved_query_id !== undefined) {
@@ -114,7 +128,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                 acc[breadcrumb.display_name] = breadcrumb.value;
                 return acc;
               }, {});
-              
+
               setIndustry(industryNames);
               setIndustryOptions((prevOptions: string[]) => Array.from(new Set([...prevOptions, ...industryNames])));
               setIndustryOptionsWithIds((prevOptions: any) => ({
@@ -137,7 +151,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                 value: breadcrumb.value,
                 logo_url: breadcrumb.logo_url || ""
               }));
-              
+
               setselectedCompanies(companyNames);
               setCompanyOptions((prevOptions: any[]) => Array.from(new Set([...prevOptions, ...companyOptions])));
             } else {
@@ -151,14 +165,14 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             setAiPrompt(queryDetails.data.api_key || "");
             setSelectedNumEmployees(queryDetails.data.organization_num_employees_ranges || []);
             const technologyBreadcrumbs = queryDetails.results.breadcrumbs.filter((breadcrumb: any) => breadcrumb.label === "Use at least one of");
-            
+
             if (technologyBreadcrumbs.length > 0) {
               const technologyNames = technologyBreadcrumbs.map((breadcrumb: any) => breadcrumb.display_name);
               const technologyUids = technologyBreadcrumbs.reduce((acc: any, breadcrumb: any) => {
                 acc[breadcrumb.display_name] = breadcrumb.value;
                 return acc;
               }, {});
-              
+
               setTechnology(technologyNames);
               setTechnologyOptions((prevOptions: string[]) => Array.from(new Set([...prevOptions, ...technologyNames])));
               setTechnologyOptionsWithUids((prevOptions: any) => ({
@@ -408,7 +422,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         },
       });
       const data = await response.json();
-      
+
       if (data.status === "success" && Array.isArray(data.data.tags)) {
         const newOptions = data.data.tags.map((tag: any) => tag.cleaned_name);
         const newOptionsWithUids = data.data.tags?.reduce((acc: any, tag: any) => {
@@ -423,7 +437,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         setTechnologyOptions((prevOptions) => Array.from(new Set([...prevOptions, ...newOptions])));
         console.log('current options are ', technologyOptions);
       }
-      
+
       return data;
     } catch (error) {
       console.log(error);
@@ -440,7 +454,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         },
       });
       const data = await response.json();
-      
+
       if (data.status === "success" && Array.isArray(data.data.tags)) {
         const newOptions = data.data.tags.map((tag: any) => tag.cleaned_name);
         const newOptionsWithIds = data.data.tags?.reduce((acc: any, tag: any) => {
@@ -455,7 +469,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         setIndustryOptions((prevOptions) => Array.from(new Set([...prevOptions, ...newOptions])));
         console.log('current options are ', industryOptions);
       }
-      
+
       return data;
     } catch (error) {
       console.log(error);
@@ -720,7 +734,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                       </div>
                     );
                   }}
-                
+
                   itemComponent={({ value, label, ...others }) => {
                     const company = companyOptions.find((option: any) => option.value === value) as any;
                     return (
@@ -1197,18 +1211,25 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           </Stack>
         </Paper>
         <Paper withBorder radius={"sm"} w={"100%"}>
-        <Button 
-          loading={loadingProspects}
-          mb="sm" 
-          mt="sm" 
-          color="blue" 
-          fullWidth 
-          leftIcon={<IconSearch size={16} />} 
-          style={{ padding: '10px 20px', fontSize: '16px', borderRadius: '5px' }}
-          onClick={searchProspects}
-        >
-         Search
-        </Button>
+        <Flex gap="sm" mb="sm" mt="sm">
+          <Button 
+            loading={loadingProspects}
+            color="blue" 
+            fullWidth 
+            leftIcon={<IconSearch size={16} />} 
+            style={{ padding: '10px 20px', fontSize: '16px', borderRadius: '5px' }}
+            onClick={searchProspects}
+          >
+            Search
+          </Button>
+          <Button 
+            disabled={(currentSavedQueryId === undefined || filterName === '')} 
+            onClick={() => saved_query_id ? saveFilter(saved_query_id) : saveFilter()} 
+            fullWidth
+          >
+            {saved_query_id ? 'Save Edits' : 'Save Pre-filter'}
+          </Button>
+        </Flex>
           <Flex align={"center"} gap={3} p={"sm"} bg={"#eceef1"}>
             <IconUsers size={"1rem"} color="gray" />
             <Text size={"sm"} fw={500} color="gray" tt={"uppercase"}>
@@ -1231,7 +1252,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                           </Text>
                           <IconBrandLinkedin size={"1.4rem"} fill="#228be6" color="white" />
                         </Flex>
-                        
+
                       </Flex>
                       {/* <Badge variant="light">{"very high"}</Badge> */}
                       <Text size={"xs"} fw={400} color="gray">
@@ -1264,18 +1285,10 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         <Button variant="outline" color="gray" fullWidth>
           Cancel
         </Button>
-        <Button 
-          disabled={(currentSavedQueryId === undefined || filterName === '')} 
-          onClick={() => saved_query_id ? saveFilter(saved_query_id) : saveFilter()} 
-          fullWidth
-        >
-          {saved_query_id ? 'Save Edits' : 'Save Pre-filter'}
-        </Button>
-        
           <Button disabled={(currentSavedQueryId === undefined || filterName === '') } leftIcon={<IconPlus size={"1rem"} />}>
             {'Attach to segment'}
           </Button>
-        
+
       </Flex>
     </Box>
   );

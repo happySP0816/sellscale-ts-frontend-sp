@@ -22,8 +22,8 @@ export const useStrategiesApi = (userToken: string) => {
     name: string,
     description: string,
     clientArchetypeIds: number[],
-    startDate: Date,
-    endDate: Date,
+    startDate?: Date,
+    endDate?: Date,
   ) => {
     setIsLoading(true);
     const response = await fetch(`${API_URL}/strategies/create`, {
@@ -36,8 +36,8 @@ export const useStrategiesApi = (userToken: string) => {
         name,
         description,
         client_archetype_ids: clientArchetypeIds,
-        start_date: startDate.toISOString(),
-        end_date: endDate.toISOString(),
+        start_date: startDate?.toISOString(),
+        end_date: endDate?.toISOString(),
       }),
     });
     const data = await response.json();

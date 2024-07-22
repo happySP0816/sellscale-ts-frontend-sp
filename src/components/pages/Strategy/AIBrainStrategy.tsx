@@ -199,6 +199,7 @@ export default function AIBrainStrategy() {
                   handleGetAllStrategies();
                 },
               },
+              size: '80%',
             });
           }}
         >

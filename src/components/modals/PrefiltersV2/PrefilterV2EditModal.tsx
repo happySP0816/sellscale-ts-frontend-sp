@@ -260,6 +260,39 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
       console.error("Error:", error);
     }
   }
+  const generateQueryPayload = () => {
+    const selectedCompanyLabels = selectedCompanies.map((id: any) => {
+      const company = companyOptions.find((option: any) => option.value === id) as any;
+      return company ? company.label: id;
+    });
+    return {
+      "query_full_name": name,
+      "included_title_keywords": jobTitles,
+      "excluded_title_keywords": excludedJobTitles,
+      "query_titles": name,
+      "included_seniority_keywords": seniority,
+      "excluded_seniority_keywords": [],
+      "included_industries_keywords": industry.map(ind => industryOptionsWithIds[ind]),
+      "excluded_industries_keywords": [],
+      "included_company_keywords": selectedCompanyLabels,
+      "excluded_company_keywords": [],
+      "included_education_keywords": [],
+      "excluded_education_keywords": [],
+      "included_bio_keywords": [],
+      "excluded_bio_keywords": [],
+      "included_location_keywords": locations,
+      "excluded_location_keywords": [],
+      "included_skills_keywords": [],
+      "excluded_skills_keywords": [],
+      "years_of_experience_start": [],
+      "years_of_experience_end": [],
+      "included_fundraise": fundraise,
+      "included_company_size": selectedNumEmployees,
+      "included_revenue": { 'min': revenue.min, 'max': revenue.max },
+      "included_technology": technology.map(tech => technologyOptionsWithUids[tech]),
+      "included_news_event_type": eventTypes
+    };
+  };
 
   const searchProspects = async () => {
     setLoadingProsepcts(true);
@@ -487,6 +520,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
   return (
     <Box>
       <CreateSegmentModal
+        filters={generateQueryPayload()}
         saved_apollo_query_id={currentSavedQueryId || saved_query_id}
         modalOpened={createSegmentOpened}
         openModal={()=>{}}

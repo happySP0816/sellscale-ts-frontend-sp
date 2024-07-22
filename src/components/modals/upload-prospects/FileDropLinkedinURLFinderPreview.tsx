@@ -198,6 +198,8 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
   }, [fileJSON, columnMappings])
 
 
+  console.log('duplicateProspects', duplicateProspects);
+
   const setOverrideAll = (override: boolean, same_archetype: boolean) => {
     if (duplicateProspects) {
       setDuplicateProspects(prevState => prevState!.map((prospect) => {
@@ -453,7 +455,7 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
                                       {prospect.sdr}
                                     </td>
                                     <td>
-                                      {prospect.segment ?? "None"}
+                                      {prospect.segment_title ?? "None"}
                                     </td>
                                     <td>
                                       {prospect.archetype}
@@ -520,7 +522,7 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
                                       {prospect.sdr}
                                     </td>
                                     <td>
-                                      {prospect.segment ?? "None"}
+                                      {prospect.segment_title ?? "None"}
                                     </td>
                                     <td>
                                       {prospect.archetype}

@@ -22,7 +22,7 @@ import {
 } from "@mantine/core";
 import { closeAllModals } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconBrandLinkedin, IconCircleCheck, IconPlus, IconSearch, IconUsers } from "@tabler/icons";
+import { IconBrandLinkedin, IconCircleCheck, IconLink, IconPlus, IconSearch, IconUsers } from "@tabler/icons";
 import { nameToInitials, valueToColor } from "@utils/general";
 import e from "cors";
 import { debounce } from "lodash";
@@ -1261,8 +1261,17 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             onClick={() => saved_query_id ? saveFilter(saved_query_id) : saveFilter()} 
             fullWidth
             color="orange"
+            leftIcon={<IconCircleCheck size={16} />}
           >
-            {saved_query_id ? 'Save Edits' : 'Save Pre-filter'}
+            {saved_query_id ? 'Save Filter' : 'Save Pre-filter'}
+          </Button>
+          <Button 
+            color="green"
+            disabled={(currentSavedQueryId === undefined || filterName === '') } 
+            leftIcon={<IconLink size={"1rem"} />}
+            onClick={() => setCreateSegmentOpened(true)}
+          >
+            {'Attach to segment'}
           </Button>
         </Flex>
           <Flex align={"center"} gap={3} p={"sm"} bg={"#eceef1"}>
@@ -1320,14 +1329,6 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         <Button variant="outline" color="gray" fullWidth>
           Cancel
         </Button>
-          <Button 
-            disabled={((currentSavedQueryId === undefined && !saved_query_id)|| filterName === '') } 
-            leftIcon={<IconPlus size={"1rem"} />}
-            onClick={() => setCreateSegmentOpened(true)}
-          >
-            {'Attach to segment'}
-          </Button>
-
       </Flex>
     </Box>
   );

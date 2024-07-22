@@ -28,6 +28,7 @@ import e from "cors";
 import { debounce } from "lodash";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
+import CreateSegmentModal from "./CreateSegmentModal";
 
 
 interface AccordionItemProps {
@@ -85,6 +86,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
   const [departmentMinCount, setDepartmentMinCount] = useState<number>(0);
   const [departmentMaxCount, setDepartmentMaxCount] = useState<number>(0);
   const [currentSavedQueryId, setCurrentSavedQueryId] = useState<number | undefined>(undefined);
+  const [createSegmentOpened, setCreateSegmentOpened] = useState(false);
 
   const [prospects, setProspects] = useState([]);
   const [loadingProspects, setLoadingProsepcts] = useState(false);
@@ -484,6 +486,16 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
 
   return (
     <Box>
+      <CreateSegmentModal
+        saved_apollo_query_id={currentSavedQueryId || saved_query_id}
+        modalOpened={createSegmentOpened}
+        openModal={()=>{}}
+        closeModal={()=>{setCreateSegmentOpened(false)}}
+        backFunction={() => {
+          // props.refetch();
+        }}
+        archetypeID={-1}
+          />
       <TextInput 
         label="Filter Name" 
         value={filterName}
@@ -1308,7 +1320,11 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         <Button variant="outline" color="gray" fullWidth>
           Cancel
         </Button>
-          <Button disabled={(currentSavedQueryId === undefined || filterName === '') } leftIcon={<IconPlus size={"1rem"} />}>
+          <Button 
+            disabled={((currentSavedQueryId === undefined && !saved_query_id)|| filterName === '') } 
+            leftIcon={<IconPlus size={"1rem"} />}
+            onClick={() => setCreateSegmentOpened(true)}
+          >
             {'Attach to segment'}
           </Button>
 

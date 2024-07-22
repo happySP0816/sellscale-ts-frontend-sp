@@ -194,10 +194,10 @@ export default function SettingsPage() {
           <Tabs.Tab value="messages" icon={<IconMessage2Bolt size="0.8rem" />}>
             Message Automation
           </Tabs.Tab>
-
+{/* 
           <Tabs.Tab value="pre-filters" icon={<IconFilter size="0.8rem" />}>
             Main Pre-Filter
-          </Tabs.Tab>
+          </Tabs.Tab> */}
 
           <Tabs.Tab value="pre-filters-v2" icon={<IconFilter size="0.8rem" />}>
             Pre-filter Library

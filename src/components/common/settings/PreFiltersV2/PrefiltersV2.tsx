@@ -15,26 +15,26 @@ export default function PreFilterV2() {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
 
-  //fetch all pre-filters 
-  const fetchPreFilters = async () => {
-    try {
-      const response = await fetch(`${API_URL}/contacts/all_prefilters`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
-      const data = await response.json();
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  // //fetch all pre-filters 
+  // const fetchPreFilters = async () => {
+  //   try {
+  //     const response = await fetch(`${API_URL}/contacts/all_prefilters`, {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${userToken}`,
+  //       },
+  //     });
+  //     const data = await response.json();
+  //     console.log(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
-  useEffect(() => {
-    fetchPreFilters();
-  }, [userData]);
+  // useEffect(() => {
+  //   fetchPreFilters();
+  // }, [userData]);
 
   const [prefilters, setPrefilters] = useState<any>([]);
 

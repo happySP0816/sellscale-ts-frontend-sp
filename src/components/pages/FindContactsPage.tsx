@@ -1,5 +1,24 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { Card, Flex, Tabs, Title, Text, TextInput, Tooltip, Button, ActionIcon, Select, rem, Modal, Group, useMantineTheme, Image, Paper } from "@mantine/core";
+import {
+  Card,
+  Flex,
+  Tabs,
+  Title,
+  Text,
+  TextInput,
+  Tooltip,
+  Button,
+  ActionIcon,
+  Select,
+  rem,
+  Modal,
+  Group,
+  useMantineTheme,
+  Image,
+  Paper,
+  Box,
+  Divider,
+} from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import {
   IconBrandLinkedin,
@@ -8,6 +27,7 @@ import {
   IconDatabase,
   IconPhoto,
   IconPlus,
+  IconPropeller,
   IconRefresh,
   IconTable,
   IconUpload,
@@ -104,6 +124,8 @@ export default function FindContactsPage() {
       });
   };
 
+  const [tabHover, setTabHover] = useState(false);
+
   return (
     <Flex p="lg" direction="column" h="100%">
       <Title order={4}>
@@ -113,18 +135,27 @@ export default function FindContactsPage() {
           </Text>
         </Card>
       </Title>
+      <Box mt={"sm"}>
+        <Title order={4} color="gray">
+          Add Contacts
+        </Title>
+        <Divider mt={"sm"} />
+      </Box>
       <Tabs
         defaultValue="sellscale-db"
         mt="md"
+        orientation="vertical"
         keepMounted={false}
         h="100%"
         variant="unstyled"
         styles={(theme) => ({
           tabsList: {
             // backgroundColor: theme.colors.blue[theme.fn.primaryShade()],
-
-            height: "44px",
-            marginInline: "20px",
+            // height: "44px",
+            // marginInline: "20px",
+            marginRight: "20px",
+            height: "fit-content",
+            gap: "10px",
           },
           panel: {
             backgroundColor: theme.white,
@@ -159,36 +190,32 @@ export default function FindContactsPage() {
           },
         })}
       >
-        <Tabs.List grow>
+        <Tabs.List grow onMouseOver={() => setTabHover(true)} onMouseLeave={() => setTabHover(false)}>
           <Tooltip label="Advanced - SellScale Database" position="bottom">
             <Tabs.Tab value="sellscale-db" icon={<IconDatabase size="0.9rem" />} onClick={() => setTab("sellscale-db")}>
-              Contact Database
+              {tabHover && "Contact Database"}
             </Tabs.Tab>
           </Tooltip>
           <Tooltip label="Segments" position="bottom">
             <Tabs.Tab value="segments" icon={<IconTable size="0.9rem" />} onClick={() => setTab("sellscale-db")}>
-              Segments
+              {tabHover && "Segments"}
             </Tabs.Tab>
           </Tooltip>
           <Tabs.Tab value="by-csv" icon={<IconUpload size="0.9rem" />} onClick={() => setTab("by-csv")}>
-            Upload CSV
+            {tabHover && "Upload CSV"}
           </Tabs.Tab>
 
           <Tabs.Tab value="linkedin-url" icon={<IconBrandLinkedin size="0.9rem" />} onClick={() => setTab("linkedin-url")}>
-            LinkedIn URL
+            {tabHover && "LinkedIn URL"}
           </Tabs.Tab>
           <Tabs.Tab value="linkedin-sales-navigator" icon={<IconBrandLinkedin size="0.9rem" />} onClick={() => setTab("linkedin-sales-navigator")}>
-            SalesNav Search
+            {tabHover && "SalesNav Search"}
           </Tabs.Tab>
-          <Tabs.Tab value="opencv" icon={<IconBrandLinkedin size="0.9rem" />} onClick={() => setTab("opencv")}>
-            OpenCV
+          <Tabs.Tab value="opencv" icon={<IconPropeller size="0.9rem" />} onClick={() => setTab("opencv")}>
+            {tabHover && "OpenCV"}
           </Tabs.Tab>
-          <Tabs.Tab
-            value="linkedin-url-finder"
-            icon={<IconBrandLinkedin size="0.9rem" />}
-            onClick={() => setTab("linkedin-url-finder")}
-          >
-            URL Finder
+          <Tabs.Tab value="linkedin-url-finder" icon={<IconBrandLinkedin size="0.9rem" />} onClick={() => setTab("linkedin-url-finder")}>
+            {tabHover && "URL Finder"}
           </Tabs.Tab>
           {/* <Tabs.Tab
             value="individuals"
@@ -353,10 +380,7 @@ export default function FindContactsPage() {
           <OpenCV />
         </Tabs.Panel>
 
-        <Tabs.Panel
-          value="linkedin-url-finder"
-          pt="xs"
-          style={{ position: "relative" }}>
+        <Tabs.Panel value="linkedin-url-finder" pt="xs" style={{ position: "relative" }}>
           <Card maw="600px" ml="auto" mr="auto">
             <Title order={3}>LinkedIn URL Finder</Title>
             <Text mb="md" color="gray">
@@ -402,27 +426,13 @@ export default function FindContactsPage() {
                     <IconPlus size="1.5rem" />
                   </ActionIcon>
                 </Tooltip>
-                <Modal
-                  opened={createSegmentOpened}
-                  onClose={closeCreateSegment}
-                  title="Create a New Segment"
-                >
-                  <TextInput
-                    label="Segment Title"
-                    value={createSegmentName}
-                    onChange={(e) =>
-                      setCreateSegmentName(e.currentTarget.value)
-                    }
-                  />
+                <Modal opened={createSegmentOpened} onClose={closeCreateSegment} title="Create a New Segment">
+                  <TextInput label="Segment Title" value={createSegmentName} onChange={(e) => setCreateSegmentName(e.currentTarget.value)} />
                   <Text size="xs" mt="md">
                     You can add filters from the Segments page
                   </Text>
                   <Flex mt="xl" justify="flex-end">
-                    <Button
-                      loading={createSegmentLoading}
-                      disabled={createSegmentName.length === 0}
-                      onClick={createSegment}
-                    >
+                    <Button loading={createSegmentLoading} disabled={createSegmentName.length === 0} onClick={createSegment}>
                       Create New Segment
                     </Button>
                   </Flex>

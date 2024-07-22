@@ -1,19 +1,5 @@
-import {
-  ActionIcon,
-  Badge,
-  Box,
-  Button,
-  Flex,
-  Group,
-  Image,
-  Paper,
-  Progress,
-  rem,
-  Select,
-  Text,
-  useMantineTheme,
-} from "@mantine/core";
-import {Dropzone, FileWithPath, IMAGE_MIME_TYPE} from "@mantine/dropzone";
+import { ActionIcon, Badge, Box, Button, Flex, Group, Image, Paper, Progress, rem, Select, Text, useMantineTheme } from "@mantine/core";
+import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -27,13 +13,13 @@ import {
   IconX,
 } from "@tabler/icons";
 import OpenCVImage from "../../assets/images/opencv_upload.png";
-import {useState} from "react";
-import {DataGrid} from "mantine-data-grid";
-import {IconFileTypeJpg, IconFileTypePng} from "@tabler/icons-react";
-import {API_URL} from "@constants/data";
-import {useRecoilValue} from "recoil";
-import {userTokenState} from "@atoms/userAtoms";
-import {showNotification} from "@mantine/notifications";
+import { useState } from "react";
+import { DataGrid } from "mantine-data-grid";
+import { IconFileTypeJpg, IconFileTypePng } from "@tabler/icons-react";
+import { API_URL } from "@constants/data";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import { showNotification } from "@mantine/notifications";
 
 type ReturnList = string[];
 
@@ -59,28 +45,27 @@ export default function OpenCV() {
 
     files.forEach((file) => {
       formData.append("files", file);
-    })
+    });
 
     const response = await fetch(`${API_URL}/contacts/image_company_extract`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`,
       },
-      body: formData
-    })
+      body: formData,
+    });
 
     if (response.ok) {
       return await response.json();
     }
-  }
+  };
 
   const handleCopyClipboard = async () => {
     let textToCopy = "";
 
-
     extractedData.forEach((item: any) => {
       textToCopy += item.company_name + "\n";
-    })
+    });
 
     try {
       await navigator.clipboard.writeText(textToCopy);
@@ -92,9 +77,9 @@ export default function OpenCV() {
         autoClose: 5000,
       });
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      console.error("Failed to copy text: ", err);
     }
-  }
+  };
 
   const handleExtract = async () => {
     setLoading(true);
@@ -108,18 +93,19 @@ export default function OpenCV() {
     setExtractedData((prevState: any[]) => {
       const prev = [...prevState];
 
-      list.forEach(item => {
-        if (prev.filter((prevItem) =>
-        {
-          return prevItem.company_name === item[1]
-        }).length === 0) {
+      list.forEach((item) => {
+        if (
+          prev.filter((prevItem) => {
+            return prevItem.company_name === item[1];
+          }).length === 0
+        ) {
           prev.push({
             company_name: item[1],
             source: item[0],
             status: "extracted",
-          })
+          });
         }
-      })
+      });
 
       return prev;
     });
@@ -166,31 +152,16 @@ export default function OpenCV() {
         onReject={(files) => console.log("rejected files", files)}
         // maxSize={4 * 1024 ** 2}
         accept={IMAGE_MIME_TYPE}
+        bg={"#F8F9FA"}
         multiple
       >
-        <Group
-          position="center"
-          spacing="xl"
-          style={{ minHeight: rem(220), pointerEvents: "none" }}
-        >
+        <Group position="center" spacing="xl" style={{ minHeight: rem(220), pointerEvents: "none" }}>
           <Image src={OpenCVImage} width={"300px"} />
           <Dropzone.Accept>
-            <IconCloudUpload
-              size="4rem"
-              stroke={1.5}
-              color={
-                theme.colors[theme.primaryColor][
-                  theme.colorScheme === "dark" ? 4 : 6
-                ]
-              }
-            />
+            <IconCloudUpload size="4rem" stroke={1.5} color={theme.colors[theme.primaryColor][theme.colorScheme === "dark" ? 4 : 6]} />
           </Dropzone.Accept>
           <Dropzone.Reject>
-            <IconX
-              size="4rem"
-              stroke={1.5}
-              color={theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]}
-            />
+            <IconX size="4rem" stroke={1.5} color={theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]} />
           </Dropzone.Reject>
           <Dropzone.Idle>
             <IconCloudUpload size="4rem" stroke={1.5} color="#228be6" />
@@ -198,8 +169,7 @@ export default function OpenCV() {
 
           <div>
             <Text size="xl" inline fw={600}>
-              Drag & Drop files or{" "}
-              <span className="text-[#228be6] underline">Browse</span> <br />
+              Drag & Drop files or <span className="text-[#228be6] underline">Browse</span> <br />
               photos of company names to start extraction
             </Text>
             <Text size="sm" c="dimmed" inline mt={7}>
@@ -214,9 +184,9 @@ export default function OpenCV() {
             <Text fw={500} size={"sm"}>
               Uploaded Files:
             </Text>
-            <Button size="xs"
-                    onClick={() => handleExtract()}>
-              Extract Company Names</Button>
+            <Button size="xs" onClick={() => handleExtract()}>
+              Extract Company Names
+            </Button>
           </Flex>
           {files.map((item: any, index) => {
             console.log("item", item);
@@ -245,17 +215,8 @@ export default function OpenCV() {
                       <Text color="#228be6" size={"xs"} fw={500}>
                         {100}% completed
                       </Text>
-                      <Text
-                        size={"xs"}
-                        color="gray"
-                        fw={500}
-                        className="flex items-center gap-2"
-                      >
-                        <IconClock
-                          size={"0.9rem"}
-                          color="gray"
-                          className="mb-[2px]"
-                        />
+                      <Text size={"xs"} color="gray" fw={500} className="flex items-center gap-2">
+                        <IconClock size={"0.9rem"} color="gray" className="mb-[2px]" />
                         {0}sec left
                       </Text>
                     </Flex>
@@ -269,9 +230,7 @@ export default function OpenCV() {
             <Text fw={500} size={"sm"}>
               Extracted Companies
             </Text>
-            <Button size="xs" disabled={loading}
-                    onClick={() => handleCopyClipboard()}
-            >
+            <Button size="xs" disabled={loading} onClick={() => handleCopyClipboard()}>
               Copy / Paste Company Names
             </Button>
           </Flex>
@@ -306,14 +265,7 @@ export default function OpenCV() {
                 ),
                 cell: (cell) => {
                   return (
-                    <Flex
-                      w={"100%"}
-                      h={"100%"}
-                      px={"sm"}
-                      py={"xs"}
-                      align={"center"}
-                      justify={"start"}
-                    >
+                    <Flex w={"100%"} h={"100%"} px={"sm"} py={"xs"} align={"center"} justify={"start"}>
                       <Text size={"sm"} fw={500} color="gray">
                         {cell.row.index + 1}
                       </Text>
@@ -335,14 +287,7 @@ export default function OpenCV() {
                   const { company_name } = cell.row.original;
 
                   return (
-                    <Flex
-                      w={"100%"}
-                      h={"100%"}
-                      px={"sm"}
-                      py={"xs"}
-                      align={"center"}
-                      justify={"start"}
-                    >
+                    <Flex w={"100%"} h={"100%"} px={"sm"} py={"xs"} align={"center"} justify={"start"}>
                       <Text size={"sm"} fw={500}>
                         {company_name}
                       </Text>
@@ -363,14 +308,7 @@ export default function OpenCV() {
                   const { source } = cell.row.original;
 
                   return (
-                    <Flex
-                      w={"100%"}
-                      h={"100%"}
-                      px={"sm"}
-                      py={"xs"}
-                      align={"center"}
-                      justify={"start"}
-                    >
+                    <Flex w={"100%"} h={"100%"} px={"sm"} py={"xs"} align={"center"} justify={"start"}>
                       <Text lineClamp={1} size={"sm"} fw={500}>
                         {source}
                       </Text>
@@ -390,13 +328,7 @@ export default function OpenCV() {
                   const { status } = cell.row.original;
 
                   return (
-                    <Flex
-                      gap={"sm"}
-                      w={"100%"}
-                      px={"sm"}
-                      h={"100%"}
-                      align={"center"}
-                    >
+                    <Flex gap={"sm"} w={"100%"} px={"sm"} h={"100%"} align={"center"}>
                       <Badge tt={"initial"}>{status}</Badge>
                     </Flex>
                   );
@@ -436,12 +368,10 @@ export default function OpenCV() {
                       <Select
                         maw={100}
                         value={`${table.getState().pagination.pageIndex + 1}`}
-                        data={new Array(table.getPageCount())
-                          .fill(0)
-                          .map((i, idx) => ({
-                            label: String(idx + 1),
-                            value: String(idx + 1),
-                          }))}
+                        data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
+                          label: String(idx + 1),
+                          value: String(idx + 1),
+                        }))}
                         onChange={(v) => {
                           table.setPageIndex(Number(v) - 1);
                         }}
@@ -470,9 +400,7 @@ export default function OpenCV() {
                         h={36}
                         disabled={table.getState().pagination.pageIndex === 0}
                         onClick={() => {
-                          table.setPageIndex(
-                            table.getState().pagination.pageIndex - 1
-                          );
+                          table.setPageIndex(table.getState().pagination.pageIndex - 1);
                         }}
                       >
                         <IconChevronLeft stroke={theme.colors.gray[4]} />
@@ -481,14 +409,9 @@ export default function OpenCV() {
                         variant="default"
                         color="gray.4"
                         h={36}
-                        disabled={
-                          table.getState().pagination.pageIndex ===
-                          table.getPageCount() - 1
-                        }
+                        disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
                         onClick={() => {
-                          table.setPageIndex(
-                            table.getState().pagination.pageIndex + 1
-                          );
+                          table.setPageIndex(table.getState().pagination.pageIndex + 1);
                         }}
                       >
                         <IconChevronRight stroke={theme.colors.gray[4]} />

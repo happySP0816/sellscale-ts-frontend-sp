@@ -20,7 +20,7 @@ import {
   Table,
   Title,
 } from "@mantine/core";
-import { IconCheck, IconCircleCheck, IconFile, IconFilter, IconLink, IconLoader, IconPlus, IconSend } from "@tabler/icons";
+import { IconCheck, IconCircleCheck, IconFile, IconFilter, IconLink, IconLoader, IconPlus, IconSend, IconTrash } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
 import moment from "moment";
 import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useRef, useState } from "react";
@@ -46,7 +46,7 @@ export default function SellScaleAssistant() {
     <Box>
       <Flex mt={"md"} gap={"xl"}>
         <SegmentChat setSegment={setSegment} segment={segment} />
-        <SegmentAIGeneration setSegemnt={setSegment} segment={segment}/>
+        <SegmentAIGeneration setSegment={setSegment} segment={segment} />
       </Flex>
     </Box>
   );
@@ -90,10 +90,6 @@ const SegmentChat = (props: any) => {
   const handleResponse = async () => {
     setLoading(true);
 
-    const currentSegmentsAsCSV = props?.segment?.map((segment: any) => {
-      return `${segment.makers},${segment.industry},${segment.pain_point}`;
-    }
-    ).join('\n');
 
     // Add a placeholder loading message
     const loadingMessage = {
@@ -105,13 +101,13 @@ const SegmentChat = (props: any) => {
     setChatContent((chatContent: any) => [...chatContent, loadingMessage]);
 
     try {
-      const response = await fetch(`${API_URL}/ml/chat-icp`, {
+      const response = await fetch(`${API_URL}/contacts/chat-icp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${userToken}`,
         },
-        body: JSON.stringify({ prompt, chatContent,   currentCSV: currentSegmentsAsCSV, }),
+        body: JSON.stringify({ prompt, chatContent, }),
       });
 
       const data = (await response.json());
@@ -123,28 +119,27 @@ const SegmentChat = (props: any) => {
         created_at: moment().format("MMMM D, h:mm a"),
       };
       // Replace the loading message with the actual response
-      setChatContent((chatContent: any) => 
-        chatContent.map((message: any) => 
+      setChatContent((chatContent: any) =>
+        chatContent.map((message: any) =>
           message.id === loadingMessage.id ? chatbotMessage : message
         )
       );
       viewport.current?.scrollTo({ top: viewport.current.scrollHeight });
       setLoading(false);
 
-      const csvData = data?.csv;
 
-      //parse the CSV and set it to segments 
+      console.log('data is', data.data)
 
-      if (csvData) {
-        const rows = csvData.split('\n')
-        const parsedData = rows.map((row: string) => row.split(','));
-
-        props.setSegment(parsedData.map((data: any) => ({
-          makers: data[0],
-          industry: data[1],
-          pain_point: data[2],
-        })));
-      }
+      props.setSegment((prevSegments: any) => [
+        ...prevSegments,
+        {
+          makers: data['makers'],
+          industry: data['industry'],
+          pain_point: data['pain_point'],
+          id: data?.data?.saved_query_id,
+          total_entries: data?.data?.pagination?.total_entries
+        }
+      ]);
 
     } catch (error) {
       console.error("Error fetching prediction:", error);
@@ -176,7 +171,7 @@ const SegmentChat = (props: any) => {
                 </Flex>
                 <Flex className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none" px={"sm"} py={7}>
                   <Text size={"sm"} fw={500}>
-                    {item.sender === "user" ? item.query : item.query === 'loading' ? <Loader color = "black" variant="dots" /> : item.query}
+                    {item.sender === "user" ? item.query : item.query === 'loading' ? <Loader color="black" variant="dots" /> : item.query}
                   </Text>
                 </Flex>
                 <Text color="gray" size={"xs"} ml={item.sender === "user" ? "auto" : "0"}>
@@ -215,23 +210,114 @@ const SegmentChat = (props: any) => {
   );
 };
 
-const SegmentAIGeneration = (props:any) => {
+const SegmentAIGeneration = (props: any) => {
   const [active, setActive] = useState(1);
   const [assets, setAssets] = useState(["Important-sales-asset.pdf", "extra-asset-1.pdf"]);
   const [generatingFilters, setGeneratingFilters] = useState(false);
   const [loadingIndex, setLoadingIndex] = useState<number>(0);
   const userToken = useRecoilValue(userTokenState);
 
-const updateSegment = (index: number, field: any, value: any) => {
-  props.setSegemnt((prevSegments: any) => {
-    const updatedSegments = [...prevSegments];
-    updatedSegments[index] = {
-      ...updatedSegments[index],
-      [field]: value,
-    };
-    return updatedSegments;
-  });
-};
+  const updateSegment = (index: number, field: any, value: any) => {
+
+    fetch(`${API_URL}/apollo/update_segment`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        id: props.segment[index].id,
+        field: field,
+        value: value
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status !== "success") {
+          console.error("Failed to update segment:", data);
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating segment:", error);
+      });
+
+    props.setSegment((prevSegments: any) => {
+      const updatedSegments = [...prevSegments];
+      updatedSegments[index] = {
+        ...updatedSegments[index],
+        [field]: value,
+      };
+      return updatedSegments;
+    });
+  };
+
+  const [prefilters, setPrefilters] = useState<any>([]);
+
+  const updateExistingSegment = (index: number, field: any, value: any) => {
+
+    fetch(`${API_URL}/apollo/update_segment`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        id: prefilters[index].id,
+        field: field,
+        value: value
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status !== "success") {
+          console.error("Failed to update segment:", data);
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating segment:", error);
+      });
+
+    setPrefilters((prevPrefilters: any) => {
+      const updatedPrefilters = [...prevPrefilters];
+      updatedPrefilters[index] = {
+        ...updatedPrefilters[index],
+        [field]: value,
+      };
+      return updatedPrefilters;
+    }
+
+    );
+  };
+
+  const fetchSavedQueries = async () => {
+    try {
+      const response = await fetch(`${API_URL}/apollo/get_all_saved_queries`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      if (data.status === "success") {
+        const formattedPrefilters = data.data.map((query: any) => ({
+          ...query
+        }));
+        setPrefilters(formattedPrefilters);
+      } else {
+        console.error("Failed to fetch saved queries:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching saved queries:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedQueries();
+  }
+    , [userToken]);
+
+
 
 
   return (
@@ -282,98 +368,230 @@ const updateSegment = (index: number, field: any, value: any) => {
             bullet={active === 2 ? <IconCheck size={"1rem"} /> : <IconLoader size={"1rem"} color="orange" />}
             title="Generated Segments"
           >
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                <thead style={{ backgroundColor: '#f7f8fa', textAlign: 'left' }}>
-                  <tr>
-                    <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Segment Name</th>
-                    <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Segment Description</th>
-                    <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Value Proposition</th>
-                    {props.segment?.length > 0 && <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Generate Pre-Filter</th>}
-                  </tr>
-                </thead>
-                <tbody style={{ backgroundColor: 'white' }}>
-                  {props.segment?.map((element: { makers: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; industry: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; pain_point: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; }, index: number) => (
-                    <tr key={index}>
-                      <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+              <thead style={{ backgroundColor: '#f7f8fa', textAlign: 'left' }}>
+                <tr>
+                  <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Segment Name</th>
+                  <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Segment Description</th>
+                  <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Value Proposition</th>
+                  {(props.segment?.length || prefilters?.length) && <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Filter</th>}
+                </tr>
+              </thead>
+              <tbody style={{ backgroundColor: 'white' }}>
+                {props.segment?.map((element: { total_entries: any, id: any, makers: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; industry: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; pain_point: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; }, index: number) => (
+                  <tr key={index}>
+                    <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
+                      <div>
+                        <Badge color="green" variant="filled" mb={4}>New</Badge>
                         <div
                           contentEditable="true"
+                          style={{ whiteSpace: 'pre-wrap' }}
                           suppressContentEditableWarning={true}
-                          onBlur={(e) => updateSegment(index as number, 'makers', e.target.innerText)}
+                          onBlur={(e) => updateSegment(index as number, 'segment_name', e.target.innerText)}
                         >
                           {element.makers}
                         </div>
-                      </td>
-                      <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
-                        <div
-                          contentEditable="true"
-                          suppressContentEditableWarning={true}
-                          onBlur={(e) => updateSegment(index as number, 'industry', e.target.innerText)}
-                        >
-                          {element.industry}
-                        </div>
-                      </td>
-                      <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
-                        <div
-                          contentEditable="true"
-                          suppressContentEditableWarning={true}
-                          onBlur={(e) => updateSegment(index as number, 'pain_point', e.target.innerText)}
-                        >
-                          {element.pain_point}
-                        </div>
-                      </td>
-                      <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
+                      </div>
+                    </td>
+                    <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
+                      <div
+                        contentEditable="true"
+                        style={{ whiteSpace: 'pre-wrap' }}
+                        suppressContentEditableWarning={true}
+                        onBlur={(e) => updateSegment(index as number, 'segment_description', e.target.innerText)}
+                      >
+                        {element.industry}
+                      </div>
+                    </td>
+                    <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
+                      <div
+                        contentEditable="true"
+                        style={{ whiteSpace: 'pre-wrap' }}
+                        suppressContentEditableWarning={true}
+                        onBlur={(e) => updateSegment(index as number, 'value_proposition', e.target.innerText)}
+                      >
+                        {element.pain_point}
+                      </div>
+                    </td>
+                    <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
+                      <Flex align="center" gap="sm">
                         <Button
                           loading={generatingFilters && loadingIndex === index}
                           color="grape"
-                          leftIcon={<IconSparkles size={"1rem"} />}
                           onClick={async () => {
                             setLoadingIndex(index);
                             setGeneratingFilters(true);
                             try {
-                              const response = await fetch(`${API_URL}/contacts/magic_apollo_search`, {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                  'Authorization': `Bearer ${userToken}`,
+                              // const response = await fetch(`${API_URL}/contacts/magic_apollo_search`, {
+                              //   method: 'POST',
+                              //   headers: {
+                              //     'Content-Type': 'application/json',
+                              //     'Authorization': `Bearer ${userToken}`,
+                              //   },
+                              //   body: JSON.stringify({
+                              //     query: `I have an idea for the segment: ${element.makers}. This segment is about ${element.industry}. The value proposition is ${element.pain_point}.`
+                              //   }),
+                              // });
+
+                              openContextModal({
+                                modal: "prefilterEditModal",
+                                title: (
+                                  <Title order={3} className="flex items-center gap-2">
+                                    <IconFilter size={"1.5rem"} color="#228be6" /> Edit Pre-Filter
+                                  </Title>
+                                ),
+                                innerProps: { id: element.id },
+                                centered: true,
+                                styles: {
+                                  content: {
+                                    minWidth: "930px",
+                                  },
                                 },
-                                body: JSON.stringify({
-                                  query: `I have an idea for the segment: ${element.makers}. This segment is about ${element.industry}. The value proposition is ${element.pain_point}.`
-                                }),
                               });
 
-                              if (response.ok) {
-                                const data = await response.json();
-                                openContextModal({
-                                  modal: "prefilterEditModal",
-                                  title: (
-                                    <Title order={3} className="flex items-center gap-2">
-                                      <IconFilter size={"1.5rem"} color="#228be6" /> Edit Pre-Filter
-                                    </Title>
-                                  ),
-                                  innerProps: { id: data.saved_query_id },
-                                  centered: true,
-                                  styles: {
-                                    content: {
-                                      minWidth: "930px",
-                                    },
-                                  },
-                                });
-                              } else {
-                                console.error("Failed to fetch data from the endpoint");
-                              }
                             } catch (error) {
                               console.error("Error:", error);
                             }
                             setGeneratingFilters(false);
                           }}
                         >
-                          Generate
+                          Edit
                         </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        <ActionIcon
+                          variant="outline"
+                          color="red"
+                          radius={"xl"}
+                          size={"sm"}
+                          onClick={() => {
+                            props.setSegment((prevPrefilters: any) => prevPrefilters.filter((filter: any) => filter.id !== element.id));
+                            fetch(`${API_URL}/apollo/${element.id}`, {
+                              method: "DELETE",
+                              headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${userToken}`,
+                              },
+                            });
+                          }}
+                        >
+                          <IconTrash size={"1rem"} />
+                        </ActionIcon>
+                      </Flex>
+
+                      <Badge mt="sm" color="blue" variant="light">
+                        {element.total_entries?.toLocaleString() || 0}
+                      </Badge>
+                      <Text size="xs" color="blue">
+                        prospects
+                      </Text>
+                    </td>
+                  </tr>
+                ))}
+                {prefilters?.map((element: any, index: number) => (
+                  <tr key={index}>
+                    <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
+                      <div
+                        contentEditable="true"
+                        suppressContentEditableWarning={true}
+                        onBlur={(e) => updateExistingSegment(index as number, 'custom_name', e.target.innerText)}
+                        style={{ whiteSpace: 'pre-wrap' }}
+                      >
+                        {element.custom_name}
+                      </div>
+                    </td>
+                    <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
+                      <div
+                        contentEditable="true"
+                        suppressContentEditableWarning={true}
+                        onBlur={(e) => updateExistingSegment(index as number, 'segment_description', e.target.innerText)}
+                        style={{ whiteSpace: 'pre-wrap' }}
+                      >
+                        {element.segment_description}
+                      </div>
+                    </td>
+                    <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
+                      <div
+                        contentEditable="true"
+                        suppressContentEditableWarning={true}
+                        onBlur={(e) => updateExistingSegment(index as number, 'value_proposition', e.target.innerText)}
+                        style={{ whiteSpace: 'pre-wrap' }}
+                      >
+                        {element.value_proposition}
+                      </div>
+                    </td>
+                    <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
+                      <Flex align="center" gap="sm">
+                        <Button
+                          loading={generatingFilters && loadingIndex === index}
+                          color="grape"
+                          onClick={async () => {
+                            setLoadingIndex(index);
+                            setGeneratingFilters(true);
+                            try {
+                              // const response = await fetch(`${API_URL}/contacts/magic_apollo_search`, {
+                              //   method: 'POST',
+                              //   headers: {
+                              //     'Content-Type': 'application/json',
+                              //     'Authorization': `Bearer ${userToken}`,
+                              //   },
+                              //   body: JSON.stringify({
+                              //     query: `I have an idea for the segment: ${element.makers}. This segment is about ${element.industry}. The value proposition is ${element.pain_point}.`
+                              //   }),
+                              // });
+
+                              openContextModal({
+                                modal: "prefilterEditModal",
+                                title: (
+                                  <Title order={3} className="flex items-center gap-2">
+                                    <IconFilter size={"1.5rem"} color="#228be6" /> Edit Pre-Filter
+                                  </Title>
+                                ),
+                                innerProps: { id: element.id },
+                                centered: true,
+                                styles: {
+                                  content: {
+                                    minWidth: "930px",
+                                  },
+                                },
+                              });
+
+                            } catch (error) {
+                              console.error("Error:", error);
+                            }
+                            setGeneratingFilters(false);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <ActionIcon
+                          variant="outline"
+                          color="red"
+                          radius={"xl"}
+                          size={"sm"}
+                          onClick={() => {
+                            setPrefilters((prevPrefilters: any) => prevPrefilters.filter((filter: any) => filter.id !== element.id));
+                            fetch(`${API_URL}/apollo/${element.id}`, {
+                              method: "DELETE",
+                              headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${userToken}`,
+                              },
+                            });
+                          }}
+                        >
+                          <IconTrash size={"1rem"} />
+                        </ActionIcon>
+                      </Flex>
+                      <Badge mt="sm" color="blue" variant="light">
+                        {element.num_results?.toLocaleString() || 0}
+                      </Badge>
+                      <Text size="xs" color="blue">
+                        prospects
+                      </Text>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </Timeline.Item>
 
           {/* <Timeline.Item

@@ -195,6 +195,8 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                 ...(eventTypes.length && { event_category: person.organization.event_category }),
               },
             }));
+            // console.log('pagination is ', queryDetails.results.);
+            setTotalFound(((queryDetails.results.pagination.total_entries > 100? queryDetails.results.pagination.total_entries: queryDetails.results.people.length)) || 0);
             setProspects(newProspects || []);
           } else {
             console.error("Failed to fetch saved query:", data);

@@ -59,6 +59,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
 
   const [name, setName] = useState<string>("");
   const [jobTitles, setJobTitles] = useState<string[]>([]);
+  const [seniority, setSeniority] = useState<string[]>([]);
   const [excludedJobTitles, setExcludedJobTitles] = useState<string[]>([]);
   const [industry, setIndustry] = useState<string[]>([]);
   const [industryOptions, setIndustryOptions] = useState<string[]>([]);
@@ -120,6 +121,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             const queryDetails = data.data;
             setName(queryDetails.data.q_person_name || "");
             setJobTitles(queryDetails.data.person_titles || []);
+            setSeniority(queryDetails.data.person_seniorities || []);
             setExcludedJobTitles(queryDetails.data.person_not_titles || []);
             const industryBreadcrumbs = queryDetails.results.breadcrumbs.filter((breadcrumb: any) => breadcrumb.label === "Industry");
             if (industryBreadcrumbs.length > 0) {
@@ -269,12 +271,15 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         body: JSON.stringify({
           editing_query: currentSavedQueryId,
           num_contacts: 100,
+          organization_latest_funding_stage_cd: fundraise.length ? fundraise : undefined,
+          person_seniorities: seniority,
           per_page: 100,
+          organization_num_employees_ranges: selectedNumEmployees.length ? selectedNumEmployees : undefined,
           person_not_titles: excludedJobTitles.length ? excludedJobTitles : undefined, // works
           person_titles: jobTitles.length ? jobTitles : undefined, // works
           q_person_name: name || undefined, // works
           organization_industry_tag_ids: industry.length ? industry.map(ind => industryOptionsWithIds[ind]) : undefined, // works
-          organization_num_employees_range: selectedNumEmployees.length ? selectedNumEmployees : undefined, // does not work in retool either
+          // organization_num_employees_range: selectedNumEmployees.length ? selectedNumEmployees : undefined, // does not work in retool either
           person_locations: locations.length ? locations : undefined,//works
           organization_ids: selectedCompanies.length? selectedCompanies : undefined, //works
           revenue_range: revenue.min || revenue.max ? { min: parseInt(revenue?.min?.replaceAll(',',''), 10) || undefined, max: parseInt(revenue?.max?.replaceAll(',',''), 10) || undefined } : undefined, //works
@@ -549,7 +554,6 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
               </CustomAccordionItem>
               <CustomAccordionItem value="job" label="Job Title" isActive={jobTitles.length > 0 || excludedJobTitles.length > 0}>
                 <CustomSelect
-                  maxWidth="30vw"
                   label="Included"
                   placeholder="Select options"
                   value={jobTitles || []}
@@ -557,8 +561,26 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                   data={jobTitles?.filter(option => option) || []}
                   setData={setJobTitles}
                 />
+                <MultiSelect
+                  label="Seniority"
+                  placeholder="Select options"
+                  value={seniority}
+                  onChange={setSeniority}
+                  data={[
+                    { value: "owner", label: "Owner" },
+                    { value: "founder", label: "Founder" },
+                    { value: "c_suite", label: "C-Suite" },
+                    { value: "partner", label: "Partner" },
+                    { value: "vp", label: "VP" },
+                    { value: "head", label: "Head" },
+                    { value: "director", label: "Director" },
+                    { value: "manager", label: "Manager" },
+                    { value: "senior", label: "Senior" },
+                    { value: "entry", label: "Entry" },
+                    { value: "intern", label: "Intern" }
+                  ]}
+                />
                 <CustomSelect
-                  maxWidth="30vw"
                   value={excludedJobTitles || []}
                   label="Excluded"
                   placeholder="Select options"

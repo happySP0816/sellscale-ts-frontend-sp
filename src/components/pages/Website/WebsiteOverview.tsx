@@ -193,6 +193,8 @@ export default function WebsiteOverview() {
 
   const [selected, setSelected] = useState<any>({});
 
+  console.log("-------", deanonymData);
+
   let filteredData = deanonymData.filter((item: any) => {
     return item.sdr_name.toLowerCase().includes(searchQuery.toLowerCase()) || item.company.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -373,7 +375,7 @@ export default function WebsiteOverview() {
               <Flex gap={"sm"} align={"center"}>
                 <Text>COMPETITOR</Text>
                 <Badge variant="filled" tt={"initial"} size="sm">
-                  {5} new
+                  {deanonymData.filter((item: any) => item.tag !== "").length} new
                 </Badge>
               </Flex>
             }
@@ -382,7 +384,7 @@ export default function WebsiteOverview() {
             fw={700}
           />
           <DataGrid
-            data={filteredData}
+            data={deanonymData.filter((item: any) => item.tag !== "")}
             highlightOnHover
             mt={"sm"}
             withPagination
@@ -443,9 +445,16 @@ export default function WebsiteOverview() {
                 ),
                 minSize: 170,
                 cell: (cell) => {
+                  const { visit_date } = cell.row.original as any;
+
+                  const visitDate = moment(visit_date);
+                  const currentDate = moment();
+
+                  const timeDifference = visitDate.from(currentDate);
+
                   return (
                     <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                      <Text fw={500}>{"30 seconds ago"}</Text>
+                      <Text fw={500}>{timeDifference}</Text>
                     </Flex>
                   );
                 },
@@ -494,11 +503,19 @@ export default function WebsiteOverview() {
                 ),
                 minSize: 180,
                 cell: (cell) => {
+                  const { tag } = cell.row.original as any[""];
+
                   return (
                     <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                      <Badge variant="light" tt={"initial"} radius="md">
-                        {"Uncategorized"}
-                      </Badge>
+                      {tag ? (
+                        <Badge key={tag} tt={"initial"} size="md" color={deterministicMantineColor(tag)}>
+                          {tag}
+                        </Badge>
+                      ) : (
+                        <Button size="xs" radius={"xl"} variant="outline" leftIcon={<IconPlus size={"0.9rem"} />}>
+                          Add
+                        </Button>
+                      )}
                     </Flex>
                   );
                 },
@@ -623,7 +640,7 @@ export default function WebsiteOverview() {
         <Box mt={"sm"}>
           <Divider label="UNCATEGORIZED" labelPosition="left" color="gray" fw={700} />
           <DataGrid
-            data={filteredData}
+            data={deanonymData.filter((item: any) => item.tag === "")}
             highlightOnHover
             mt={"sm"}
             withPagination
@@ -684,9 +701,16 @@ export default function WebsiteOverview() {
                 ),
                 minSize: 170,
                 cell: (cell) => {
+                  const { visit_date } = cell.row.original as any;
+
+                  const visitDate = moment(visit_date);
+                  const currentDate = moment();
+
+                  const timeDifference = visitDate.from(currentDate);
+
                   return (
                     <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                      <Text fw={500}>{"30 seconds ago"}</Text>
+                      <Text fw={500}>{timeDifference}</Text>
                     </Flex>
                   );
                 },

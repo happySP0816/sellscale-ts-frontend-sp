@@ -6,13 +6,17 @@ import { showNotification } from "@mantine/notifications";
 import { useEffect, useState } from "react";
 import { closeAllModals, openConfirmModal } from "@mantine/modals";
 import { useRecoilState, useRecoilValue } from "recoil";
+import { set } from "lodash";
 
 
 interface CreateSegment extends Record<string, unknown> {
   modalOpened: boolean;
   openModal: () => void;
   closeModal: () => void;
+  saved_apollo_query_id: number;
   backFunction: () => void;
+  filters: any;
+  numContactsLimit: number;
   archetypeID: number | null;
 }
 
@@ -20,10 +24,22 @@ export default function CreateSegmentModal(props: CreateSegment) {
 
   const [userToken] = useRecoilState(userTokenState);
 
-
+  const numContactsLimit = props.numContactsLimit;
   const [segments, setSegments] = useState<any[]>([]);
   const [selectedSegment, setSelectedSegment] = useState<string>("");
   const [segmentName, setSegmentName] = useState<string>("");
+  const [numContacts, setNumContacts] = useState<string>(numContactsLimit < 100 ? "10" : "100");
+
+  const contactSelectNums = [
+    { value: '10', label: '10' },
+    { value: '50', label: '50' },
+    { value: '100', label: '100' },
+    { value: '200', label: '200' },
+    { value: '500', label: '500' },
+    { value: '1000', label: '1000' },
+    { value: '2000', label: '2000' },
+    ...(numContactsLimit < 2000 ? [{ value: numContactsLimit.toString(), label: numContactsLimit.toString() + ' (all found contacts)' }] : [])
+  ].filter(option => parseInt(option.value, 10) <= Math.min(numContactsLimit, 2000));
 
   const [loading, setLoading] = useState(false);
   const [subjectLine, setSubjectLine] = useState<string>("");
@@ -53,36 +69,6 @@ export default function CreateSegmentModal(props: CreateSegment) {
   useEffect(() => {
       fetchSegments();
   }, [userToken]);
-
-  const triggerCreateSegmentTemplate = async () => {
-    setLoading(true);
-
-    // const result = await CreateSegmentTemplate(userToken, props.archetypeID as number, subjectLine);
-    // if (result.status != 'success') {
-    //   showNotification({
-    //     title: 'Error',
-    //     message: result.message,
-    //     color: 'red',
-    //   })
-    //   setLoading(false);
-    //   return;
-    // } else {
-    //   showNotification({
-    //     title: 'Success',
-    //     message: 'Successfully created email subject line',
-    //     color: 'green',
-    //   })
-    //   setLoading(false);
-    //   if (setEmailSubjectLines) {
-    //     setEmailSubjectLines((prev: any) => [...prev, result.data]);
-    //   }
-    //   props.backFunction();
-    //   props.closeModal();
-    //   setSubjectLine("");
-    // }
-
-    return;
-  }
 
   const [screen, setScreen] = useState<'choice' | 'newSegment' | 'existingSegment'>('choice');
 
@@ -162,6 +148,7 @@ export default function CreateSegmentModal(props: CreateSegment) {
      
             </Flex>
             <Select
+              withinPortal
               label="Segment"
               placeholder="Select an option"
               onChange={(value) => setSelectedSegment(value ?? "")}
@@ -171,11 +158,21 @@ export default function CreateSegmentModal(props: CreateSegment) {
                 label: `${segment.segment_title} (${segment.prospect_count} prospects)`
               }))}
             />
+            <Select
+              withinPortal
+              label="Number of Contacts to Import"
+              placeholder="Pick one"
+              value={numContacts}
+              onChange={(value) => setNumContacts(value ?? '')}
+              data={contactSelectNums}
+              mt="md"
+            />
             <Text align="center" size="sm" color="dimmed" mt="sm">
               Note: This action is not reversible. Once segment is created, contacts will start uploading. This will use your upload credits.
             </Text>
             <Flex justify="center" mt="xl">
-              <Button color="blue" onClick={async () => {
+              <Button loading={loading} color="blue" onClick={async () => {
+                setLoading(true);
                 try {
                   const response = await fetch(`${API_URL}/prospect/add_from_apollo_query_id`, {
                     method: 'POST',
@@ -186,7 +183,7 @@ export default function CreateSegmentModal(props: CreateSegment) {
                     body: JSON.stringify({
                       saved_apollo_query_id: props.saved_apollo_query_id,
                       segment_id: segments.find(segment => segment.id.toString() === selectedSegment)?.id,
-                      num_contacts: 100,
+                      num_contacts: parseInt(numContacts, 10)
                     }),
                   });
                   if (!response.ok) {
@@ -210,6 +207,7 @@ export default function CreateSegmentModal(props: CreateSegment) {
                   });
                   console.error('Error:', error);
                 }
+                setLoading(false);
               }}>
                 Add & Upload 100 Contacts to Segment
               </Button>
@@ -232,11 +230,20 @@ export default function CreateSegmentModal(props: CreateSegment) {
               placeholder="Diverse contacts, various interests and industries."
               mt="md"
             />
+            <Select
+              label="Number of Contacts to Import"
+              placeholder="Pick one"
+              value={numContacts}
+              onChange={(value) => setNumContacts(value ?? '')}
+              data={contactSelectNums}
+              mt="md"
+            />
             <Text align="center" size="sm" color="dimmed" mt="sm">
               Note: This action is not reversible. Once segment is created, contacts will start uploading. This will use your upload credits.
             </Text>
             <Flex justify="center" mt="xl">
-              <Button color="blue" onClick={async () => {
+              <Button loading={loading} color="blue" onClick={async () => {
+                setLoading(true);
                 try {
                   const response = await fetch(`${API_URL}/segment/create`, {
                     method: 'POST',
@@ -254,14 +261,16 @@ export default function CreateSegmentModal(props: CreateSegment) {
                   if (!response.ok) {
                     throw new Error('Network response was not ok');
                   }
+                  //get the segmnet id from the response
+
                   const data = await response.json();
                   console.log('Success:', data);
-                  
+                  const segmentId = data.id;
                   // Fetch segments to get the newly created segment ID
-                  const segmentData = await fetchSegments();
-                  const newSegment = segmentData.find((segment: { segment_title: string; }) => segment.segment_title === (segmentName === '' ? new Date().toISOString() : segmentName));
-                  if (!newSegment) {
-                    throw new Error('Newly created segment not found');
+                  // const segmentData = await fetchSegments();
+                  // const newSegment = segmentData.find((segment: { segment_title: string; }) => segment.segment_title === (segmentName === '' ? new Date().toISOString() : segmentName));
+                  if (!segmentId) {
+                    throw new Error('Newly created segment not found'); 
                   }
 
                   // Call the API to add contacts to the new segment
@@ -273,8 +282,8 @@ export default function CreateSegmentModal(props: CreateSegment) {
                     },
                     body: JSON.stringify({
                       saved_apollo_query_id: props.saved_apollo_query_id,
-                      segment_id: newSegment.id,
-                      num_contacts: 100,
+                      segment_id: segmentId,
+                      num_contacts: parseInt(numContacts, 10)
                     }),
                   });
                   if (!addContactsResponse.ok) {
@@ -299,8 +308,9 @@ export default function CreateSegmentModal(props: CreateSegment) {
                   });
                   console.error('Error:', error);
                 }
+                setLoading(false);
               }}>
-                Create & Upload 100 Contacts
+                Create & Upload {numContacts} Contacts
               </Button>
             </Flex>
           </>

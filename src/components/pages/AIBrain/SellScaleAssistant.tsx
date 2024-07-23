@@ -171,7 +171,12 @@ const SegmentChat = (props: any) => {
                 </Flex>
                 <Flex className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none" px={"sm"} py={7}>
                   <Text size={"sm"} fw={500}>
-                    {item.sender === "user" ? item.query : item.query === 'loading' ? <Loader color="black" variant="dots" /> : item.query}
+                    {item.sender === "user" ? item.query : item.query === 'loading' ? (
+                      <Flex align="center" gap="xs">
+                        <Loader color="black" variant="dots" />
+                        <Text size={"sm"} fw={500} color="gray">Generating segment...</Text>
+                      </Flex>
+                    ) : item.query}
                   </Text>
                 </Flex>
                 <Text color="gray" size={"xs"} ml={item.sender === "user" ? "auto" : "0"}>

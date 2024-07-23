@@ -166,7 +166,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             setFundraise(queryDetails.data.organization_latest_funding_stage_cd || []);
             setFilterName(queryDetails.custom_name || "");
             setCompanyDomain(queryDetails.data.q_organization_search_list_id || "");
-            setAiPrompt(queryDetails.data.api_key || "");
+            setAiPrompt("");
             setSelectedNumEmployees(queryDetails.data.organization_num_employees_ranges || []);
             const technologyBreadcrumbs = queryDetails.results.breadcrumbs.filter((breadcrumb: any) => breadcrumb.label === "Use at least one of");
 
@@ -318,7 +318,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           person_locations: locations.length ? locations : undefined,//works
           organization_ids: selectedCompanies.length? selectedCompanies : undefined, //works
           revenue_range: revenue.min || revenue.max ? { min: parseInt(revenue?.min?.replaceAll(',',''), 10) || undefined, max: parseInt(revenue?.max?.replaceAll(',',''), 10) || undefined } : undefined, //works
-          organization_latest_funding_stages: fundraise.length ? fundraise : undefined, 
+          // organization_latest_funding_stages: fundraise.length ? fundraise : undefined, 
           currently_using_any_of_technology_uids: technology.length ? technology.map(tech => technologyOptionsWithUids[tech]) : undefined,
           // person_seniorities: experience.length ? experience : undefined,
           published_at_date_range: days ? { "min": String(days) + "_days_ago" } : undefined, // works
@@ -520,6 +520,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
   return (
     <Box>
       <CreateSegmentModal
+        numContactsLimit={totalFound}
         filters={generateQueryPayload()}
         saved_apollo_query_id={currentSavedQueryId || saved_query_id}
         modalOpened={createSegmentOpened}
@@ -715,21 +716,21 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                 <MultiSelect
                   label="Funding Stages"
                   placeholder="Select funding stages"
-                  data={[
-                    { label: "Seed", value: "0" },
-                    { label: "Angel", value: "1" },
-                    { label: "Venture (Round not specified)", value: "10" },
-                    { label: "Series A", value: "2" },
-                    { label: "Series B", value: "3" },
-                    { label: "Series C", value: "4" },
-                    { label: "Series D", value: "5" },
-                    { label: "Series E", value: "6" },
-                    { label: "Series F", value: "7" },
-                    { label: "Debt Financing", value: "13" },
-                    { label: "Equity Crowdfunding", value: "14" },
-                    { label: "Convertible Note", value: "15" },
-                    { label: "Private Equity", value: "11" },
-                    { label: "Other", value: "12" }
+                  data={ [
+                    { "label": "Seed", "value": "0" },
+                    { "label": "Angel", "value": "1" },
+                    { "label": "Venture (Round not specified)", "value": "10" },
+                    { "label": "Series A", "value": "2" },
+                    { "label": "Series B", "value": "3" },
+                    { "label": "Series C", "value": "4" },
+                    { "label": "Series D", "value": "5" },
+                    { "label": "Series E", "value": "6" },
+                    { "label": "Series F", "value": "7" },
+                    { "label": "Debt Financing", "value": "13" },
+                    { "label": "Equity Crowdfunding", "value": "14" },
+                    { "label": "Convertible Note", "value": "15" },
+                    { "label": "Private Equity", "value": "11" },
+                    { "label": "Other", "value": "12" }
                   ]}
                   value={fundraise || []}
                   onChange={(value) => setFundraise(value)}
@@ -1301,7 +1302,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           </Button>
           <Button 
             color="green"
-            disabled={(currentSavedQueryId === undefined || filterName === '') } 
+            disabled={saved_query_id ? false : ((currentSavedQueryId === undefined) || filterName === '')}
             leftIcon={<IconLink size={"1rem"} />}
             onClick={() => setCreateSegmentOpened(true)}
           >

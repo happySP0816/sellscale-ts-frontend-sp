@@ -37,7 +37,7 @@ import { DataGrid } from "mantine-data-grid";
 import { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { openContextModal } from "@mantine/modals";
-import { IconUsersPlus } from "@tabler/icons-react";
+import { IconProgress, IconUsersPlus } from "@tabler/icons-react";
 import { useTrackApi } from "@common/settings/Traffic/WebTrafficRoutingApi";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -159,7 +159,7 @@ export default function WebsiteOverview() {
         backgroundColor: "#D444F1",
         width: 4,
         borderDash: [5, 5],
-        yAxisID: "y1",
+        yAxisID: "y",
       },
     ],
   };
@@ -178,15 +178,18 @@ export default function WebsiteOverview() {
     },
     scales: {
       x: {
+        stacked: true,
         grid: {
           borderDash: [5, 5],
         },
       },
       y: {
+        stacked: true,
         type: "linear",
         position: "left",
       },
       y1: {
+        stacked: true,
         type: "linear",
         position: "right",
         max: maxDeanonymizedVisits,
@@ -210,15 +213,31 @@ export default function WebsiteOverview() {
       <Paper withBorder radius={"sm"} p={"md"}>
         <Flex justify={"space-between"}>
           <Box w={"70%"}>
-            <Flex>
-              <Text size={"xl"} fw={700}>
-                Traffic Analysis
-              </Text>
-              {loading && <Loader size="sm" ml="md" variant="dots" />}
+            <Flex justify={"space-between"} align={"sm"}>
+              <Box>
+                <Flex>
+                  <Text size={"xl"} fw={700}>
+                    Traffic Analysis
+                  </Text>
+                  {loading && <Loader size="sm" ml="md" variant="dots" />}
+                </Flex>
+                <Text size={"sm"} color="gray" fw={400}>
+                  Track visitor numbers to better understand audience engagement.
+                </Text>
+              </Box>
+              <Badge
+                styles={{
+                  inner: {
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  },
+                }}
+              >
+                <IconProgress size={"0.8rem"} />
+                {11}% deanoymized
+              </Badge>
             </Flex>
-            <Text size={"sm"} color="gray" fw={400}>
-              Track visitor numbers to better understand audience engagement.
-            </Text>
             <Card h={300}>
               <Bar options={options} data={data} />
             </Card>

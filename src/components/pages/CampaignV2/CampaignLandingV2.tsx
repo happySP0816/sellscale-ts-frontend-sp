@@ -66,6 +66,7 @@ interface StatsData {
   created_at: string;
   emoji: string;
   testing_volume: number;
+  template_mode: boolean;
   active: boolean;
   email_to_linkedin_connection?: string;
   ai_researcher_id?: number;
@@ -166,7 +167,7 @@ export default function CampaignLandingV2() {
       lookalike_profile_3: "",
       lookalike_profile_4: "",
       lookalike_profile_5: "",
-      template_mode: false,
+      template_mode: statsData.template_mode,
       smartlead_campaign_id: undefined,
       meta_data: statsData.meta_data,
       first_message_delay_days: undefined,

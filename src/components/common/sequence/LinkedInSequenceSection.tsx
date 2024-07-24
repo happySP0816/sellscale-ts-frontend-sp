@@ -1100,7 +1100,7 @@ function BumpFrameworkSelect(props: {
   );
 }
 
-function IntroMessageSection(props: {
+export function IntroMessageSection(props: {
   prospectId: number;
   setProspectId: (prospectId: number) => void;
 }) {
@@ -1261,24 +1261,24 @@ function IntroMessageSection(props: {
     });
   }, [prospectId, selectedTemplateId]);
 
-  if (!currentProject) return <></>;
+  // if (!currentProject) return <></>;
   return (
-    <Stack ml="xl" spacing={0}>
-      <Group position="apart">
+    <Stack ml="xl" spacing={0} sx={{ width: "100%" }}>
+      <Group position="apart" sx={{ width: "100%" }}>
         <Group>
           <Title order={3}>Invite Message</Title>
           {/* {ctasItemsCount !== undefined && (
             <Badge color="blue" fw={500}>{ctasItemsCount} CTAs Active</Badge>
           )} */}
         </Group>
-        {!currentProject.template_mode && (
+        {/* {!currentProject?.template_mode && selectedTemplateId && (
           <VoiceSelect
-            personaId={currentProject.id}
+            personaId={currentProject?.id || -1}
             onChange={(voice) => {}}
             onFinishLoading={(voices) => {}}
             autoSelect
           />
-        )}
+        )} */}
       </Group>
       <Box my={5}>
         <Text fz="xs" c="dimmed">
@@ -1338,7 +1338,7 @@ function IntroMessageSection(props: {
                   Regenerate
                 </Button>
                 <ProspectSelect
-                  personaId={currentProject.id}
+                  personaId={currentProject?.id || -1}
                   onChange={(prospect) => {
                     if (prospect) {
                       setProspectId(prospect.id);
@@ -1381,7 +1381,7 @@ function IntroMessageSection(props: {
                 />
               )}
             </Box>
-            {messageMetaData && !currentProject.template_mode && (
+            {messageMetaData && !currentProject?.template_mode && (
               <Group py="xs" noWrap>
                 <HoverCard width={280} shadow="md">
                   <HoverCard.Target>
@@ -1428,7 +1428,7 @@ function IntroMessageSection(props: {
           </Box>
         )}
 
-        {currentProject.template_mode ? (
+        {currentProject?.template_mode ? (
           <>
             <CTAGeneratorSuggestedModal
               templateMode={true}
@@ -1447,7 +1447,7 @@ function IntroMessageSection(props: {
               ) => {
                 createLiTemplate(
                   userToken,
-                  currentProject.id,
+                  currentProject?.id || -1,
                   template.name,
                   template.raw_prompt,
                   false,
@@ -1559,7 +1559,7 @@ function IntroMessageSection(props: {
 
             <Tabs.Panel value="personalization">
               <PersonalizationSection
-                blocklist={currentProject.transformer_blocklist_initial ?? []}
+                blocklist={currentProject?.transformer_blocklist_initial ?? []}
                 onItemsChange={async (items) => {
                   setPersonalizationItemsCount(
                     items.filter((x: any) => x.checked).length
@@ -1568,12 +1568,12 @@ function IntroMessageSection(props: {
                   // Update transformer blocklist
                   const result = await updateInitialBlocklist(
                     userToken,
-                    currentProject.id,
+                    currentProject?.id || -1,
                     items.filter((x) => !x.checked).map((x) => x.id)
                   );
 
                   setCurrentProject(
-                    await getFreshCurrentProject(userToken, currentProject.id)
+                    await getFreshCurrentProject(userToken, currentProject?.id || -1)
                   );
                 }}
               />
@@ -2516,7 +2516,7 @@ function FrameworkSection(props: {
     }
   };
 
-  if (!currentProject) return <></>;
+  // if (!currentProject) return <></>;
 
   return (
     <>
@@ -2691,7 +2691,7 @@ function FrameworkSection(props: {
                           Regenerate
                         </Button>
                         <ProspectSelect
-                          personaId={currentProject.id}
+                          personaId={currentProject?.id || -1}
                           onChange={(prospect) => {
                             if (prospect) {
                               setProspectId(prospect.id);

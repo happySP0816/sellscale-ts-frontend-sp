@@ -196,6 +196,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
               avatar: person.photo_url,
               name: `${person.first_name} ${person.last_name}`,
               linkedin: !!person.linkedin_url,
+              linkedin_url: person.linkedin_url,
               email: !!person.email,
               prospects: "",
               job: person.headline,
@@ -1319,7 +1320,13 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             <Stack spacing={"sm"} px={"md"} py={"sm"}>
               {prospects?.map((item: any, index: number) => {
                 return (
-                  <Flex align={"start"} gap={"xs"} key={index}>
+                  <Flex 
+                    align={"start"} 
+                    gap={"xs"} 
+                    key={index} 
+                    onClick={() => item.linkedin && window.open(item.linkedin_url, '_blank')}
+                    style={{ cursor: item.linkedin ? 'pointer' : 'default' }}
+                  >
                     <Avatar src={item.avatar} color={valueToColor(theme, item.name)} radius="lg" size={30}>
                       {nameToInitials(item.name)}
                     </Avatar>

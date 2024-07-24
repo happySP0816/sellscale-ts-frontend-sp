@@ -111,6 +111,7 @@ import ResetSegmentModal from "@modals/SegmentV3/ResetSegmentModal";
 import SellScaleAssistModal from "@modals/SellScaleAssistModal";
 import { IconWand } from "@tabler/icons";
 import ICPRoutingCreateModal from "@modals/website/ICPRoutingCreateModal";
+import CreateCampaignWithVoiceModal from "@modals/CreateCampaignWithVoiceModal";
 import CreateVisitorBucketModal from "@modals/website/CreateVisitorBucketModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
@@ -820,6 +821,7 @@ export default function App() {
               editStrategy: StrategyEditModal,
               previewStrategy: StrategyPreviewModal,
               strategySelectModal: SelectStrategyModal,
+              createCampaignWithVoiceModal: CreateCampaignWithVoiceModal,
               prefilterEditModal: PreFiltersV2EditModal,
               assistmodal: SellScaleAssistModal,
               createICProutingModal: ICPRoutingCreateModal,

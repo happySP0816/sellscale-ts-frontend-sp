@@ -111,6 +111,7 @@ import ResetSegmentModal from "@modals/SegmentV3/ResetSegmentModal";
 import SellScaleAssistModal from "@modals/SellScaleAssistModal";
 import { IconWand } from "@tabler/icons";
 import ICPRoutingCreateModal from "@modals/website/ICPRoutingCreateModal";
+import CreateVisitorBucketModal from "@modals/website/CreateVisitorBucketModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -405,7 +406,7 @@ export default function App() {
   /* Quick Prompt */
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const modalElement = document.querySelector('.mantine-Paper-root.mantine-Modal-content');
+      const modalElement = document.querySelector(".mantine-Paper-root.mantine-Modal-content");
       if (acceptRef.current === true && modalElement && event.key === "Enter" && !event.shiftKey) {
         handleAccept();
       }
@@ -446,10 +447,9 @@ export default function App() {
 
   ////
   const onKeyDown = (e: any) => {
-
-    if (e.target.value.length === 0 && e.key >= '0' && e.key <= '9') {
+    if (e.target.value.length === 0 && e.key >= "0" && e.key <= "9") {
       const keyIndex = parseInt(e.key, 10);
-      const keyItem = keyData.find(item => item.keyboard === keyIndex);
+      const keyItem = keyData.find((item) => item.keyboard === keyIndex);
       if (keyItem) {
         setLoading(true);
         typeUserInput(previousFocusedElementRef.current, keyItem.prompt, getContextualInformation());
@@ -536,7 +536,6 @@ export default function App() {
         console.error("Error:", error);
       });
   };
-
 
   // const getContextualInformation = (element: HTMLElement): string => {
   const getContextualInformation = (): string => {
@@ -686,52 +685,52 @@ export default function App() {
     {
       title: "Linkedin CTA",
       keyboard: 1,
-      prompt: "Please write a compelling call-to-action for LinkedIn. Do not use any placeholders."
+      prompt: "Please write a compelling call-to-action for LinkedIn. Do not use any placeholders.",
     },
     {
       title: "Linkedin Initial Message",
       keyboard: 2,
-      prompt: "Please draft an engaging initial message for LinkedIn. Do not use any placeholders."
+      prompt: "Please draft an engaging initial message for LinkedIn. Do not use any placeholders.",
     },
     {
       title: "Linkedin Follow Up",
       keyboard: 3,
-      prompt: "Please create a follow-up message for LinkedIn. Do not use any placeholders."
+      prompt: "Please create a follow-up message for LinkedIn. Do not use any placeholders.",
     },
     {
       title: "Linkedin Break Up",
       keyboard: 4,
-      prompt: "Please write a break-up message for LinkedIn. Do not use any placeholders."
+      prompt: "Please write a break-up message for LinkedIn. Do not use any placeholders.",
     },
     {
       title: "Linkedin Subject",
       keyboard: 5,
-      prompt: "Please provide a subject line for a LinkedIn message.  Do not use any placeholders."
+      prompt: "Please provide a subject line for a LinkedIn message.  Do not use any placeholders.",
     },
     {
       title: "Email Initial Message",
       keyboard: 6,
-      prompt: "Please draft an initial email message. Do not use any placeholders."
+      prompt: "Please draft an initial email message. Do not use any placeholders.",
     },
     {
       title: "Email Follow Up",
       keyboard: 7,
-      prompt: "Please create a follow-up email message. Do not use any placeholders."
+      prompt: "Please create a follow-up email message. Do not use any placeholders.",
     },
     {
       title: "Email Break Up",
       keyboard: 8,
-      prompt: "Please write a break-up email message. Do not use any placeholders."
+      prompt: "Please write a break-up email message. Do not use any placeholders.",
     },
     {
       title: "Email Linkedin",
       keyboard: 9,
-      prompt: "Please draft an email response that references LinkedIn. Do not use any placeholders."
+      prompt: "Please draft an email response that references LinkedIn. Do not use any placeholders.",
     },
     {
       title: "Email Email",
       keyboard: 0,
-      prompt: "Please draft an email message response given the context. Do not use any placeholders."
+      prompt: "Please draft an email message response given the context. Do not use any placeholders.",
     },
   ]);
 
@@ -824,6 +823,7 @@ export default function App() {
               prefilterEditModal: PreFiltersV2EditModal,
               assistmodal: SellScaleAssistModal,
               createICProutingModal: ICPRoutingCreateModal,
+              createvisitorbucketmodal: CreateVisitorBucketModal,
             }}
             modalProps={{
               closeOnClickOutside: false,
@@ -862,7 +862,7 @@ export default function App() {
                 zIndex: 1000,
               },
               overlay: {
-                backgroundColor: 'transparent',
+                backgroundColor: "transparent",
               },
             }}
           >

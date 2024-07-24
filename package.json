@@ -25,6 +25,7 @@
   "dependencies": {
     "@datastructures-js/heap": "^4.3.2",
     "@emotion/react": "^11.11.4",
+    "@esbuild/win32-x64": "^0.23.0",
     "@fullcalendar/core": "^6.1.8",
     "@fullcalendar/daygrid": "^6.1.8",
     "@fullcalendar/list": "^6.1.8",
@@ -45,7 +46,7 @@
     "@mergeapi/react-merge-link": "^2.1.2",
     "@nivo/bar": "^0.83.0",
     "@nivo/line": "^0.83.0",
-    "@react-email/components": "0.0.11",
+    "@react-email/components": "^0.0.11",
     "@react-icons/all-files": "^4.1.0",
     "@react-spring/web": "^9.6.1",
     "@sentry/react": "^7.40.0",

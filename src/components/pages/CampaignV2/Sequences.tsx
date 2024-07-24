@@ -1,7 +1,7 @@
-import { emailSequenceState, linkedinSequenceState, userDataState, userTokenState } from "@atoms/userAtoms";
+import { currentProjectState } from "@atoms/personaAtoms";
+import { campaignContactsState, emailSequenceState, linkedinSequenceState, userDataState, userTokenState } from "@atoms/userAtoms";
 import SubjectDropdown from "@common/campaigns/SubjectDropdown";
 import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
-import { constrainPoint } from "@fullcalendar/core/internal";
 import {
   ActionIcon,
   Avatar,
@@ -41,7 +41,7 @@ import { fetchCampaignSequences } from "@utils/requests/campaignOverview";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { SubjectLineTemplate } from "src";
+import{ IntroMessageSection } from "@common/sequence/LinkedInSequenceSection";
 
 interface linkedinSequence {
   active: boolean;
@@ -67,6 +67,7 @@ export type emailSequencesDataType = Array<Array<emailSequence>>;
 export default function Sequences(props: any) {
   const id = Number(useParams().id);
   const userToken = useRecoilValue(userTokenState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const [loadingSequences, setLoadingSequences] = useState(true);
   const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] = useState<any>(0);
@@ -88,6 +89,9 @@ export default function Sequences(props: any) {
 
   const clientArchetypeId = Number(id);
   const userData = useRecoilValue(userDataState);
+
+  const campaignContacts = useRecoilValue(campaignContactsState);
+  const [selectedCampaignContactId, setSelectedCampaignContactId] = useState<any>(campaignContacts?.[0]?.id); 
 
   const refetchSequenceData = async (clientArchetypeId: number) => {
     setLoadingSequences(true);
@@ -348,7 +352,12 @@ export default function Sequences(props: any) {
               </Text>
             </Flex>
           </Flex>
-        ) : (sequences && sequences.length > 0) || (linkedinInitialMessages?.length > 0 && type === "linkedin") ? (
+        ) : 
+        
+        (type === "linkedin" && currentProject?.template_mode === false && currentProject?.id) ? (
+           <IntroMessageSection prospectId={selectedCampaignContactId} setProspectId={setSelectedCampaignContactId} />
+        ) :
+        (sequences && sequences.length > 0) || (linkedinInitialMessages?.length > 0 && type === "linkedin") ? (
           <Flex direction={"column"} h={"fit-content"} w={"100%"}>
             <Flex w={"100%"} gap={"md"} direction={"column"} p={"lg"}>
               {type === "linkedin" && linkedinInitialMessages && linkedinInitialMessages.length > 0 && (

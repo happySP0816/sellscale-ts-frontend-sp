@@ -481,7 +481,14 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                           justify={"space-between"}
                         >
                           <Text fw={600} size={"sm"}>
-                            Revival Rate: {AIinboxPerformance.num_revivals_attempted ? Math.floor(AIinboxPerformance.actual_revivals * 100 / AIinboxPerformance.num_revivals_attempted) : 0}%
+                            Revival Rate:{" "}
+                            {AIinboxPerformance.num_revivals_attempted
+                              ? Math.floor(
+                                  (AIinboxPerformance.actual_revivals * 100) /
+                                    AIinboxPerformance.num_revivals_attempted
+                                )
+                              : 0}
+                            %
                           </Text>
                           <Tooltip
                             arrowOffset={10}
@@ -657,11 +664,27 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                                 title={prospect.title}
                                 img_url={""}
                                 latest_msg={
-                                  prospect.email_last_message_from_prospect ??
+                                  (prospect.email_last_message_from_prospect &&
+                                  prospect.li_last_message_from_prospect &&
+                                  prospect.email_last_message_timestamp &&
+                                  prospect.li_last_message_timestamp
+                                    ? prospect.email_last_message_timestamp >
+                                      prospect.li_last_message_timestamp
+                                      ? prospect.email_last_message_from_prospect
+                                      : prospect.li_last_message_from_prospect
+                                    : prospect.email_last_message_from_prospect ??
+                                      prospect.li_last_message_from_prospect) ??
                                   ""
                                 }
                                 latest_msg_time={
-                                  prospect.li_last_message_timestamp ?? ""
+                                  (prospect.email_last_message_timestamp &&
+                                  prospect.li_last_message_timestamp
+                                    ? prospect.email_last_message_timestamp >
+                                      prospect.li_last_message_timestamp
+                                      ? prospect.email_last_message_timestamp
+                                      : prospect.li_last_message_timestamp
+                                    : prospect.email_last_message_timestamp ??
+                                      prospect.li_last_message_timestamp) ?? ""
                                 }
                                 icp_fit={-1}
                                 new_msg_count={0}

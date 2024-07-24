@@ -70,6 +70,37 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
 
   const [tab, setTab] = useState("scratch");
 
+
+  // This will be Temporary display for v1 of default voices
+  // In the future we will have internal tools to create default voices
+  const defaultVoicesOptions = [
+    {
+      title: "Conference",
+      archetype_id: 1024,
+      description: "The Conference voice is a proven voice that is used to engage with prospects who are attending a conference.",
+      enabled: true,
+    },
+    {
+      title: "Cold Outreach",
+      archetype_id: 1024,
+      description: "Cold Outreach voice.",
+      enabled: false,
+    },
+    {
+      title: "Product Feedback",
+      archetype_id: 1024,
+      description: "Product Feedback voice.",
+      enabled: false,
+    },
+    {
+      title: "Alumni",
+      archetype_id: 1024,
+      description: "Alumni voice.",
+      enabled: false,
+    },
+  ]
+
+
   const [loadingPersonaBuyReasonGeneration, setLoadingPersonaBuyReasonGeneration] = useState(false);
   const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
     setLoadingPersonaBuyReasonGeneration(true);
@@ -202,6 +233,8 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
     }
   }, [defaultPersonas.current]);
 
+  console.log("CTAs: ", ctas);
+
   return (
     <Paper
       p={0}
@@ -226,12 +259,12 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
             ),
           },
           {
-            value: "strategy",
-            disabled: true,
+            value: "voice",
+            disabled: false,
             label: (
               <Center>
                 <IconBulb size="1rem" />
-                <Box ml={10}>Create from Strategy</Box>
+                <Box ml={10}>Create from Voice</Box>
               </Center>
             ),
           },
@@ -442,28 +475,31 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
         </Stack>
       ) : (
         <Stack spacing="xs" mt={"md"}>
-          <TextInput placeholder="Search strategies" rightSection={<IconSearch size={"1rem"} color="gray" />} />
+          {/*<TextInput placeholder="Search strategies" rightSection={<IconSearch size={"1rem"} color="gray" />} />*/}
           <SimpleGrid cols={2}>
-            {strategies.slice(pages * 4, pages * 4 + 4).map((item, index) => {
+            {defaultVoicesOptions.slice(pages * 4, pages * 4 + 4).map((item, index) => {
               return (
-                <Paper withBorder radius={"sm"} p={"sm"} key={index}>
-                  <Flex align={"center"} justify={"space-between"}>
-                    <Text fw={600} size={"md"}>
-                      {item.title}
+                <Paper withBorder radius={"sm"} p={"sm"} key={index} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
+                  <>
+                    <Flex align={"center"} justify={"space-between"}>
+                      <Text fw={600} size={"md"}>
+                        {item.title}
+                      </Text>
+                      <ActionIcon variant="light" color="blue" radius={"xl"} size={"sm"}>
+                        <IconEye size={"0.9rem"} />
+                      </ActionIcon>
+                    </Flex>
+                    <Text fw={600} size={"xs"} mt={"sm"}>
+                      Description: <span className="text-gray-400">{item.description}</span>
                     </Text>
-                    <ActionIcon variant="light" color="blue" radius={"xl"} size={"sm"}>
-                      <IconEye size={"0.9rem"} />
-                    </ActionIcon>
-                  </Flex>
-                  <Text fw={600} size={"xs"} mt={"sm"}>
-                    Goal: <span className="text-gray-400">{item.goal}</span>
-                  </Text>
+                  </>
                   <Button
                     fullWidth
                     mt={"sm"}
+                    disabled={!item.enabled}
                     onClick={() => {
                       openContextModal({
-                        modal: "strategySelectModal",
+                        modal: "createCampaignWithVoiceModal",
                         title: (
                           <Title
                             order={3}
@@ -473,13 +509,10 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                               gap: "5px",
                             }}
                           >
-                            <ActionIcon variant="light" color="blue" radius={"xl"}>
-                              <IconArrowLeft size={"1rem"} />
-                            </ActionIcon>
-                            <span className="text-gray-600">Go back to</span> Create Campaign
+                            Voice Options for: {item.title}
                           </Title>
                         ),
-                        innerProps: { title: item.title },
+                        innerProps: { title: item.title, voice_id: item.archetype_id, userToken: userToken },
                         styles: {
                           content: {
                             minWidth: "800px",
@@ -512,7 +545,7 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
               />
               <Divider orientation="vertical" />
               <Text w={"100%"} size={"sm"} color="gray" align="center">
-                of {Math.ceil(strategies.length / 4)} pages
+                of {Math.ceil(defaultVoicesOptions.length / 4)} pages
               </Text>
               <Divider orientation="vertical" />
               <ActionIcon
@@ -529,7 +562,7 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
               <ActionIcon
                 variant="transparent"
                 onClick={() => {
-                  if (pages < Math.ceil(strategies.length / 4) - 1) {
+                  if (pages < Math.ceil(defaultVoicesOptions.length / 4) - 1) {
                     setPages((pages) => (pages = pages + 1));
                   }
                 }}

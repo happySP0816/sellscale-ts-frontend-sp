@@ -445,6 +445,7 @@ const SegmentAIGeneration = (props: any) => {
                                     <IconFilter size={"1.5rem"} color="#228be6" /> Edit Pre-Filter
                                   </Title>
                                 ),
+                                onClose: () => {props.setSegment([]); fetchSavedQueries()},
                                 innerProps: { id: element.id },
                                 centered: true,
                                 styles: {
@@ -550,6 +551,7 @@ const SegmentAIGeneration = (props: any) => {
                                     <IconFilter size={"1.5rem"} color="#228be6" /> Edit Pre-Filter
                                   </Title>
                                 ),
+                                onClose: () => {props.setSegment([]); fetchSavedQueries()},
                                 innerProps: { id: element.id },
                                 centered: true,
                                 styles: {

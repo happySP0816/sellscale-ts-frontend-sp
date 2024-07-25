@@ -32,6 +32,9 @@ import {
   Popover,
   Indicator,
   MultiSelect,
+  Divider,
+  Radio,
+  Avatar,
 } from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { hideNotification, showNotification } from "@mantine/notifications";
@@ -53,41 +56,17 @@ import {
   IconTags,
   IconEdit,
   IconAdjustmentsHorizontal,
+  IconArrowsMoveVertical,
 } from "@tabler/icons";
-import {
-  IconClock24,
-  IconMessage2Cog,
-  IconSettingsFilled,
-  IconWand,
-  IconMessageDots,
-  IconSparkles,
-} from "@tabler/icons-react";
+import { IconClock24, IconMessage2Cog, IconSettingsFilled, IconWand, IconMessageDots, IconSparkles, IconCalendarDollar } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { deleteAutoBumpMessage } from "@utils/requests/autoBumpMessage";
 import { sendLinkedInMessage } from "@utils/requests/sendMessage";
 import _, { debounce, get, set } from "lodash";
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import {
-  BumpFramework,
-  EmailReplyFramework,
-  EmailSequenceStep,
-  EmailThread,
-  LinkedInMessage,
-  Prospect,
-} from "src";
-import {
-  generateAIEmailReply,
-  generateAIFollowup,
-} from "./InboxProspectConvoBumpFramework";
+import { BumpFramework, EmailReplyFramework, EmailSequenceStep, EmailThread, LinkedInMessage, Prospect } from "src";
+import { generateAIEmailReply, generateAIFollowup } from "./InboxProspectConvoBumpFramework";
 import AutoBumpFrameworkInfo from "@common/prospectDetails/AutoBumpFrameworkInfo";
 import { ratio as fuzzratio } from "fuzzball";
 import { sendEmail } from "@utils/requests/sendEmail";
@@ -169,9 +148,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           //   }
           // }
         },
-        setEmailReplyFrameworks: (
-          emailReplyFrameworks: EmailReplyFramework[]
-        ) => {
+        setEmailReplyFrameworks: (emailReplyFrameworks: EmailReplyFramework[]) => {
           // Only set the sequence step to the selected substatus
           setEmailReplyFrameworks(emailReplyFrameworks);
           // Set the default bump framework
@@ -196,47 +173,23 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const userData = useRecoilValue(userDataState);
   const [scheduleDay, setScheduleDay] = useState<Date | undefined>(undefined);
   const [showSchedulePopup, setShowSchedulePopup] = useState(false);
-  const [snoozeDay, setSnoozeDay] = useState(
-    moment(new Date()).add(4, "days").toDate()
-  );
+  const [snoozeDay, setSnoozeDay] = useState(moment(new Date()).add(4, "days").toDate());
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const openedOutboundChannel = useRecoilValue(currentConvoChannelState);
-  const [fetchingProspectId, setFetchingProspectId] = useRecoilState(
-    fetchingProspectIdState
-  );
+  const [fetchingProspectId, setFetchingProspectId] = useRecoilState(fetchingProspectIdState);
   const [showCalendarPopup, setShowCalendarPopup] = useState(false);
-  const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(
-    openedBumpFameworksState
-  );
-  const [
-    setOpenBumpFrameworksSubstatus,
-    setSetOpenBumpFrameworksSubstatus,
-  ] = useRecoilState(bumpFrameworkSelectedSubstatusState);
-  const [selectedBumpFramework, setBumpFramework] = useRecoilState(
-    selectedBumpFrameworkState
-  ); // LinkedIn
-  const [selectedEmailReplyFramework, setEmailReplyFramework] = useRecoilState(
-    selectedEmailReplyFrameworkState
-  ); // Email
-  const [currentConvoLiMessages, setCurrentConvoLiMessages] = useRecoilState(
-    currentConvoLiMessageState
-  );
-  const [
-    currentConvoEmailMessages,
-    setCurrentConvoEmailMessages,
-  ] = useRecoilState(currentConvoEmailMessageState);
-  const [currentConvoEmailThread, setCurrentConvoEmailThread] = useRecoilState(
-    selectedEmailThread
-  );
+  const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(openedBumpFameworksState);
+  const [setOpenBumpFrameworksSubstatus, setSetOpenBumpFrameworksSubstatus] = useRecoilState(bumpFrameworkSelectedSubstatusState);
+  const [selectedBumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState); // LinkedIn
+  const [selectedEmailReplyFramework, setEmailReplyFramework] = useRecoilState(selectedEmailReplyFrameworkState); // Email
+  const [currentConvoLiMessages, setCurrentConvoLiMessages] = useRecoilState(currentConvoLiMessageState);
+  const [currentConvoEmailMessages, setCurrentConvoEmailMessages] = useRecoilState(currentConvoEmailMessageState);
+  const [currentConvoEmailThread, setCurrentConvoEmailThread] = useRecoilState(selectedEmailThread);
 
-  const [tempHiddenProspects, setTempHiddenProspects] = useRecoilState(
-    tempHiddenProspectsState
-  );
+  const [tempHiddenProspects, setTempHiddenProspects] = useRecoilState(tempHiddenProspectsState);
 
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
-  const [emailReplyFrameworks, setEmailReplyFrameworks] = useState<
-    EmailReplyFramework[]
-  >([]);
+  const [emailReplyFrameworks, setEmailReplyFrameworks] = useState<EmailReplyFramework[]>([]);
   const isValidEmail = (email: string) => {
     return /\S+@\S+\.\S+/.test(email);
   };
@@ -304,9 +257,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         scheduleDay
       ).then(() => {
         queryClient.refetchQueries({
-          queryKey: [
-            `query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`,
-          ],
+          queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
         });
       });
       if (true) {
@@ -318,15 +269,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
           yourMessage.date = new Date().toUTCString();
           yourMessage.ai_generated = false;
           yourMessage.is_sending = true;
-          setCurrentConvoLiMessages([
-            ...(currentConvoLiMessages || []),
-            yourMessage,
-          ]);
+          setCurrentConvoLiMessages([...(currentConvoLiMessages || []), yourMessage]);
         } else {
           queryClient.refetchQueries({
-            queryKey: [
-              `query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`,
-            ],
+            queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
           });
           queryClient.refetchQueries({
             queryKey: ["query-prospects-list"],
@@ -349,14 +295,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       }
     } else if (openedOutboundChannel === "SMARTLEAD") {
       const prospectid = props.prospectId;
-      const response = await postSmartleadReply(
-        userToken,
-        prospectid,
-        messageDraftEmail.current,
-        scheduleDay,
-        ccEmails,
-        bccEmails
-      );
+      const response = await postSmartleadReply(userToken, prospectid, messageDraftEmail.current, scheduleDay, ccEmails, bccEmails);
       if (response.status !== "success") {
         showNotification({
           title: "Error",
@@ -381,8 +320,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         } else {
           showNotification({
             title: "Success",
-            message:
-              "Email sent. It may take a few minutes to appear in your inbox.",
+            message: "Email sent. It may take a few minutes to appear in your inbox.",
             color: "green",
           });
         }
@@ -394,10 +332,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       }
       setScheduleDay(undefined);
     } else {
-      if (
-        currentConvoEmailMessages === undefined ||
-        currentConvoEmailMessages.length === 0
-      ) {
+      if (currentConvoEmailMessages === undefined || currentConvoEmailMessages.length === 0) {
         showNotification({
           id: "send-email-message-error",
           title: "Error",
@@ -422,17 +357,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
       }
 
       // Get the last message
-      const replyToMessageID =
-        currentConvoEmailMessages[currentConvoEmailMessages.length - 1]
-          .nylas_message_id;
-      const result = await sendEmail(
-        userToken,
-        props.prospectId,
-        `Re: ${currentConvoEmailThread?.subject}`,
-        msg,
-        aiGenerated,
-        replyToMessageID
-      );
+      const replyToMessageID = currentConvoEmailMessages[currentConvoEmailMessages.length - 1].nylas_message_id;
+      const result = await sendEmail(userToken, props.prospectId, `Re: ${currentConvoEmailThread?.subject}`, msg, aiGenerated, replyToMessageID);
       if (result.status === "success") {
         let yourMessage = _.cloneDeep(currentConvoEmailMessages || [])
           .reverse()
@@ -441,15 +367,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
           yourMessage.body = msg;
           yourMessage.date_received = new Date().toUTCString();
           yourMessage.ai_generated = false;
-          setCurrentConvoEmailMessages([
-            ...(currentConvoEmailMessages || []),
-            yourMessage,
-          ]);
+          setCurrentConvoEmailMessages([...(currentConvoEmailMessages || []), yourMessage]);
         } else {
           queryClient.refetchQueries({
-            queryKey: [
-              `query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`,
-            ],
+            queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
           });
         }
         messageDraftEmail.current = "";
@@ -488,21 +409,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   useEffect(() => {
     (async () => {
-      const result = await getBumpFrameworks(
-        userToken,
-        ["ACTIVE_CONVO"],
-        [],
-        [],
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        props.archetypeId
-      );
+      const result = await getBumpFrameworks(userToken, ["ACTIVE_CONVO"], [], [], undefined, undefined, undefined, undefined, props.archetypeId);
 
       let bumpFrameworkArray = [] as BumpFramework[];
-      for (const bumpFramework of result.data
-        .bump_frameworks as BumpFramework[]) {
+      for (const bumpFramework of result.data.bump_frameworks as BumpFramework[]) {
         if (bumpFramework.default) {
           bumpFrameworkArray.unshift(bumpFramework);
         } else {
@@ -511,29 +421,24 @@ export default forwardRef(function InboxProspectConvoSendBox(
       }
 
       setBumpFrameworks(bumpFrameworkArray);
-      setBumpFramework(
-        bumpFrameworkArray.length > 0 ? bumpFrameworkArray[0] : undefined
-      );
+      setBumpFramework(bumpFrameworkArray.length > 0 ? bumpFrameworkArray[0] : undefined);
     })();
   }, [props.prospectId, props.archetypeId, replyLabel]);
 
   const smartGenerate = async (additional_instructions: string) => {
     setMsgLoading(true);
     if (openedOutboundChannel === "LINKEDIN") {
-      const result = fetch(
-        `${API_URL}/li_conversation/prospect/generate_smart_response`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-          body: JSON.stringify({
-            prospect_id: props.prospectId,
-            additional_instructions: additional_instructions,
-          }),
-        }
-      )
+      const result = fetch(`${API_URL}/li_conversation/prospect/generate_smart_response`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          prospect_id: props.prospectId,
+          additional_instructions: additional_instructions,
+        }),
+      })
         .then((res) => res.json())
         .then((j) => {
           const message = j["message"];
@@ -625,33 +530,20 @@ export default forwardRef(function InboxProspectConvoSendBox(
               return a.title.localeCompare(b.title);
             })
             .filter((i) => {
-              if (
-                !replyLabel &&
-                replyLabel !== "ACTIVE_CONVO_CONTINUE_SEQUENCE"
-              ) {
+              if (!replyLabel && replyLabel !== "ACTIVE_CONVO_CONTINUE_SEQUENCE") {
                 return i;
               }
 
               if (replyLabel === "ACTIVE_CONVO_CONTINUE_SEQUENCE") {
-                return (
-                  i.overall_status === "ACCEPTED" ||
-                  i.overall_status === "BUMPED"
-                );
+                return i.overall_status === "ACCEPTED" || i.overall_status === "BUMPED";
               }
 
               return i.substatus === replyLabel;
             })
             .map((bf: BumpFramework) => {
               let title = bf.title;
-              if (
-                bf.overall_status === "ACCEPTED" ||
-                bf.overall_status === "BUMPED"
-              ) {
-                title =
-                  "(step #" +
-                  (bf.bumped_count ? bf.bumped_count + 1 : 1) +
-                  ") " +
-                  bf.title;
+              if (bf.overall_status === "ACCEPTED" || bf.overall_status === "BUMPED") {
+                title = "(step #" + (bf.bumped_count ? bf.bumped_count + 1 : 1) + ") " + bf.title;
               }
 
               return {
@@ -706,9 +598,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         <Group spacing={0} position="apart">
           <Flex wrap="nowrap" align="center">
             <Text color="white" fz={14} fw={500} pl={15} pt={5}>
-              {openedOutboundChannel === "LINKEDIN"
-                ? "Message via LinkedIn"
-                : "Reply via Email"}
+              {openedOutboundChannel === "LINKEDIN" ? "Message via LinkedIn" : "Reply via Email"}
             </Text>
             <Text
               pl={10}
@@ -719,11 +609,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
               component="a"
               target="_blank"
               rel="noopener noreferrer"
-              href={
-                openedOutboundChannel === "LINKEDIN"
-                  ? `https://www.linkedin.com/in/${props.linkedin_public_id}`
-                  : `mailto:${props.email}`
-              }
+              href={openedOutboundChannel === "LINKEDIN" ? `https://www.linkedin.com/in/${props.linkedin_public_id}` : `mailto:${props.email}`}
             >
               {openedOutboundChannel === "LINKEDIN"
                 ? `linkedin.com/in/${_.truncate(props.linkedin_public_id, {
@@ -764,12 +650,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           )} */}
             {true && ( // TODO: Added chat box expanding
               <div style={{ paddingRight: 5 }}>
-                <ActionIcon
-                  color="gray.0"
-                  size="lg"
-                  variant="transparent"
-                  onClick={props.minimizedSendBox}
-                >
+                <ActionIcon color="gray.0" size="lg" variant="transparent" onClick={props.minimizedSendBox}>
                   <IconChevronDown size="1rem" />
                 </ActionIcon>
               </div>
@@ -787,12 +668,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       >
         {openedOutboundChannel === "EMAIL" && (
           <Flex mt={"xs"} justify={"space-between"} gap={"md"} align={"center"}>
-            <Flex
-              w={"100%"}
-              h={36}
-              style={{ border: "1px solid #ced4da", borderRadius: "5px" }}
-              align={"center"}
-            >
+            <Flex w={"100%"} h={36} style={{ border: "1px solid #ced4da", borderRadius: "5px" }} align={"center"}>
               <span
                 style={{
                   borderRadius: "4px",
@@ -804,9 +680,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 From:
               </span>
               <Flex w={"100%"} my={7} mx={4}>
-                <div className="bg-[#ECEEF1] px-2 py-[3px] rounded-md text-[14px]">
-                  {props.email}
-                </div>
+                <div className="bg-[#ECEEF1] px-2 py-[3px] rounded-md text-[14px]">{props.email}</div>
               </Flex>
               {/* <Flex h={"100%"} px={4} sx={{ borderLeft: "1px solid #ced4da" }}>
               <ActionIcon className="m-auto ">
@@ -823,11 +697,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
               >
                 CC
                 {ccEmails.length > 0 && (
-                  <Badge
-                    color="blue"
-                    variant="filled"
-                    style={{ marginLeft: "8px" }}
-                  >
+                  <Badge color="blue" variant="filled" style={{ marginLeft: "8px" }}>
                     {ccEmails.length}
                   </Badge>
                 )}
@@ -840,11 +710,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
               >
                 BCC
                 {bccEmails.length > 0 && (
-                  <Badge
-                    color="blue"
-                    variant="filled"
-                    style={{ marginLeft: "8px" }}
-                  >
+                  <Badge color="blue" variant="filled" style={{ marginLeft: "8px" }}>
                     {bccEmails.length}
                   </Badge>
                 )}
@@ -951,7 +817,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         )}
 
         <Flex justify={"space-between"} mt={10} gap={"xs"}>
-          <Flex align={"center"} gap={"xs"} w="35%">
+          {/* <Flex align={"center"} gap={"xs"} w="35%">
             <Text fw={700} fz={"10px"} color="gray.6" w="35%">
               Reply Label
             </Text>
@@ -1005,22 +871,52 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     ),
                 }))}
             />
-          </Flex>
-          <Flex gap={"xs"} align={"center"} w="70%" justify={"space-between"}>
+          </Flex> */}
+          <Flex gap={"xs"} align={"center"} justify={"space-between"}>
             {/* only show for linkedin */}
-            <IconSparkles size={"0.9rem"} />
-            <Text fw={700} fz={"10px"} color="gray.6" w="25%">
-              AI Response
-            </Text>
-            <Flex align={"center"} pos={"relative"} w="75%">
+            <Flex gap={4} align={"center"}>
+              <IconSparkles size={"0.9rem"} />
+              <Flex w={"100%"}>
+                <Text fw={700} fz={"10px"} color="gray.6" w={"100%"}>
+                  AI Response
+                </Text>
+              </Flex>
+            </Flex>
+            <Select
+              w={200}
+              size="xs"
+              onChange={(val) => {
+                setReplyLabel(val || "");
+                setBumpFramework(bumpFrameworks.find((bf) => bf.substatus === val) || bumpFrameworks[0]);
+
+                updateChannelStatus(openedProspectId, userToken, "LINKEDIN", val || "", false, true).then((res) => {
+                  showNotification({
+                    id: "update-channel-status",
+                    title: "Status updated",
+                    message: "",
+                    color: "green",
+                    autoClose: 3000,
+                  });
+
+                  queryClient.refetchQueries({
+                    queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
+                  });
+                });
+              }}
+              value={replyLabel}
+              withinPortal
+              data={replyLabels
+                .filter((label) => label)
+                .map((label) => ({
+                  value: label,
+                  label: labelEmoji(label) + " " + convertToTitleCase(label?.replaceAll("ACTIVE_CONVO_", "").replaceAll("_", " ").toLowerCase()),
+                }))}
+            />
+            {/* <Flex align={"center"} pos={"relative"} w="75%">
               <Select
                 rightSection={
                   <Tooltip
-                    label={
-                      selectedBumpFramework
-                        ? `Manage '${selectedBumpFramework.title}'`
-                        : `Configure Msg Gen`
-                    }
+                    label={selectedBumpFramework ? `Manage '${selectedBumpFramework.title}'` : `Configure Msg Gen`}
                     withArrow
                     disabled={openedOutboundChannel != "LINKEDIN"}
                   >
@@ -1041,27 +937,15 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       }}
                       disabled={openedOutboundChannel != "LINKEDIN"}
                     >
-                      {selectedBumpFramework ? (
-                        <IconSettingsFilled size="0.8rem" />
-                      ) : (
-                        <IconSettings size="0.8rem" />
-                      )}
+                      {selectedBumpFramework ? <IconSettingsFilled size="0.8rem" /> : <IconSettings size="0.8rem" />}
                     </Button>
                   </Tooltip>
                 }
                 withinPortal
-                placeholder={
-                  filteredFrameworkData.length > 0
-                    ? "Select Framework"
-                    : "No Frameworks"
-                }
+                placeholder={filteredFrameworkData.length > 0 ? "Select Framework" : "No Frameworks"}
                 size="xs"
                 disabled={filteredFrameworkData.length === 0}
-                defaultValue={
-                  filteredFrameworkData.length > 0
-                    ? filteredFrameworkData[0] + ""
-                    : undefined
-                }
+                defaultValue={filteredFrameworkData.length > 0 ? filteredFrameworkData[0] + "" : undefined}
                 data={filteredFrameworkData}
                 // styles={{
                 //   input: {
@@ -1073,9 +957,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 // }}
                 onChange={(value) => {
                   if (openedOutboundChannel === "LINKEDIN") {
-                    const selected = bumpFrameworks.find(
-                      (bf) => bf.id === parseInt(value as string)
-                    );
+                    const selected = bumpFrameworks.find((bf) => bf.id === parseInt(value as string));
                     if (selected) {
                       setBumpFramework(selected);
                       if (selected.substatus) {
@@ -1083,35 +965,22 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       }
                     }
 
-                    const substatus =
-                      bumpFrameworks.length > 0
-                        ? bumpFrameworks[0].substatus
-                        : undefined;
+                    const substatus = bumpFrameworks.length > 0 ? bumpFrameworks[0].substatus : undefined;
                     setSetOpenBumpFrameworksSubstatus(substatus);
-                  } else if (
-                    openedOutboundChannel === "EMAIL" ||
-                    openedOutboundChannel === "SMARTLEAD"
-                  ) {
-                    const selected = emailReplyFrameworks.find(
-                      (step) => step.id === parseInt(value as string)
-                    );
+                  } else if (openedOutboundChannel === "EMAIL" || openedOutboundChannel === "SMARTLEAD") {
+                    const selected = emailReplyFrameworks.find((step) => step.id === parseInt(value as string));
                     if (selected) {
                       setEmailReplyFramework(selected);
                     }
                   }
                 }}
-                value={
-                  openedOutboundChannel === "LINKEDIN"
-                    ? selectedBumpFramework?.id + ""
-                    : selectedEmailReplyFramework?.id + ""
-                }
+                value={openedOutboundChannel === "LINKEDIN" ? selectedBumpFramework?.id + "" : selectedEmailReplyFramework?.id + ""}
               />
-            </Flex>
+            </Flex> */}
 
             <Button
               leftIcon={<IconPencil size="1rem" />}
               variant="outline"
-              color="gray.6"
               sx={{
                 "&[data-disabled]": {
                   backgroundColor: "white",
@@ -1121,29 +990,18 @@ export default forwardRef(function InboxProspectConvoSendBox(
               }}
               size="xs"
               disabled={
-                (openedOutboundChannel === "LINKEDIN" &&
-                  (bumpFrameworks === undefined ||
-                    bumpFrameworks?.length === 0)) ||
-                (openedOutboundChannel != "LINKEDIN" &&
-                  (emailReplyFrameworks === undefined ||
-                    emailReplyFrameworks?.length === 0))
+                (openedOutboundChannel === "LINKEDIN" && (bumpFrameworks === undefined || bumpFrameworks?.length === 0)) ||
+                (openedOutboundChannel != "LINKEDIN" && (emailReplyFrameworks === undefined || emailReplyFrameworks?.length === 0))
               }
               onClick={async () => {
                 setMsgLoading(true);
                 if (openedOutboundChannel === "LINKEDIN") {
                   // If the substatus is breakup, then we want to generate slightly different message:
-                  const result = await generateAIFollowup(
-                    userToken,
-                    props.prospectId,
-                    selectedBumpFramework
-                  );
+                  const result = await generateAIFollowup(userToken, props.prospectId, selectedBumpFramework);
                   setMessageDraft(result.msg);
                   setAiMessage(result.msg);
                   setAiGenerated(result.aiGenerated);
-                } else if (
-                  openedOutboundChannel === "EMAIL" ||
-                  openedOutboundChannel === "SMARTLEAD"
-                ) {
+                } else if (openedOutboundChannel === "EMAIL" || openedOutboundChannel === "SMARTLEAD") {
                   // if (!currentConvoEmailThread) {
                   //   showNotification({
                   //     id: "send-email-message-error",
@@ -1167,11 +1025,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     return;
                   }
 
-                  const result = await postGenerateEmailReplyUsingFramework(
-                    userToken,
-                    selectedEmailReplyFramework?.id,
-                    props.prospectId
-                  );
+                  const result = await postGenerateEmailReplyUsingFramework(userToken, selectedEmailReplyFramework?.id, props.prospectId);
 
                   // Clean the result
                   const email_body = result.data.message;
@@ -1198,6 +1052,84 @@ export default forwardRef(function InboxProspectConvoSendBox(
               Generate {openedOutboundChannel === "LINKEDIN" ? "" : "Email"}
             </Button>
           </Flex>
+          <Popover
+            width={200}
+            position="bottom"
+            withArrow
+            shadow="md"
+            styles={{
+              dropdown: {
+                paddingInline: "0px",
+              },
+            }}
+          >
+            <Popover.Target>
+              <Button
+                color="gray"
+                variant="outline"
+                radius={"md"}
+                leftIcon={<IconCalendar size={"1rem"} />}
+                rightIcon={<IconArrowsMoveVertical size={"1rem"} />}
+              >
+                Choose Calendar
+              </Button>
+            </Popover.Target>
+            <Popover.Dropdown>
+              <Text size="sm" className="flex gap-1 items-center" mb={"sm"} ml={"md"} fw={500} color="gray">
+                <IconCalendar size={"1rem"} color="gray" />
+                Choose Calendar
+              </Text>
+              <Divider />
+              <Radio.Group withAsterisk>
+                <Radio
+                  label={
+                    <Flex align={"center"} gap={4}>
+                      <Avatar size={"sm"} radius={"xl"} />
+                      <Text size={"sm"} fw={500}>
+                        Patiwat
+                      </Text>
+                    </Flex>
+                  }
+                  styles={{
+                    radio: {
+                      width: "18px",
+                      height: "18px",
+                    },
+                    inner: {
+                      marginTop: "3px",
+                    },
+                  }}
+                  value="react"
+                  ml={"sm"}
+                  my={6}
+                />
+                <Divider />
+                <Radio
+                  value="react"
+                  label={
+                    <Flex align={"center"} gap={4}>
+                      <Avatar size={"sm"} radius={"xl"} />
+                      <Text size={"sm"} fw={500}>
+                        Patiwat
+                      </Text>
+                    </Flex>
+                  }
+                  styles={{
+                    radio: {
+                      width: "18px",
+                      height: "18px",
+                    },
+                    inner: {
+                      marginTop: "3px",
+                    },
+                  }}
+                  ml={"sm"}
+                  my={6}
+                />
+                <Divider />
+              </Radio.Group>
+            </Popover.Dropdown>
+          </Popover>
         </Flex>
 
         <Box pos={"relative"}>
@@ -1236,34 +1168,19 @@ export default forwardRef(function InboxProspectConvoSendBox(
             <AutoBumpFrameworkInfo
               useBumpFramework={selectedBumpFramework !== undefined}
               bump_title={selectedBumpFramework?.title || "None"}
-              bump_description={
-                selectedBumpFramework?.description || "No framework"
-              }
+              bump_description={selectedBumpFramework?.description || "No framework"}
               bump_length={selectedBumpFramework?.bump_length || "No length"}
-              account_research_points={
-                selectedBumpFramework?.account_research || []
-              }
+              account_research_points={selectedBumpFramework?.account_research || []}
               bump_number_sent={selectedBumpFramework?.etl_num_times_used}
-              bump_number_converted={
-                selectedBumpFramework?.etl_num_times_converted
-              }
+              bump_number_converted={selectedBumpFramework?.etl_num_times_converted}
             />
           )}
         </Box>
 
-        <Flex
-          align="center"
-          direction="row"
-          justify={"space-between"}
-          wrap="wrap"
-        >
+        <Flex align="center" direction="row" justify={"space-between"} wrap="wrap">
           <Flex mt="xs" align="center">
             {openedOutboundChannel === "LINKEDIN" && (
-              <Tooltip
-                withArrow
-                position="bottom"
-                label="Smart Generate with AI"
-              >
+              <Tooltip withArrow position="bottom" label="Smart Generate with AI">
                 <Button
                   leftIcon={<IconWand size="0.8rem" />}
                   color="grape"
@@ -1284,11 +1201,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 </Button>
               </Tooltip>
             )}
-            <Tooltip
-              label="Co-pilot a response by providing feedback"
-              withArrow
-              position="bottom"
-            >
+            <Tooltip label="Co-pilot a response by providing feedback" withArrow position="bottom">
               <Button
                 variant="outline"
                 color="grape"
@@ -1335,13 +1248,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           </Flex>
 
           <Flex mt="xs" align="center" direction="row" justify={"end"}>
-            <Popover
-              position="bottom"
-              withArrow
-              shadow="md"
-              trapFocus
-              opened={showCalendarPopup}
-            >
+            <Popover position="bottom" withArrow shadow="md" trapFocus opened={showCalendarPopup}>
               <Popover.Target>
                 <Tooltip label="Set a custom snooze day" withArrow withinPortal>
                   <Flex>
@@ -1394,33 +1301,14 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 },
               })}
             >
-              {scheduleDay
-                ? "Schedule for [" +
-                  moment(scheduleDay).format("MMM Do h:mmA") +
-                  "] "
-                : "Send"}{" "}
-              and Snooze for {moment(snoozeDay).diff(new Date(), "days") + 1}{" "}
-              days
+              {scheduleDay ? "Schedule for [" + moment(scheduleDay).format("MMM Do h:mmA") + "] " : "Send"} and Snooze for{" "}
+              {moment(snoozeDay).diff(new Date(), "days") + 1} days
             </Button>
-            <Popover
-              position="bottom"
-              withArrow
-              shadow="md"
-              trapFocus
-              opened={showSchedulePopup}
-            >
+            <Popover position="bottom" withArrow shadow="md" trapFocus opened={showSchedulePopup}>
               <Popover.Target>
-                <Tooltip
-                  label="Schedule a send time into the future"
-                  withArrow
-                  withinPortal
-                >
+                <Tooltip label="Schedule a send time into the future" withArrow withinPortal>
                   <Flex>
-                    <Button
-                      onClick={() => setShowSchedulePopup((v) => !v)}
-                      size="xs"
-                      sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-                    >
+                    <Button onClick={() => setShowSchedulePopup((v) => !v)} size="xs" sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}>
                       <IconClock24 size={"1rem"} />
                     </Button>
                   </Flex>
@@ -1437,22 +1325,14 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       // Preserve the time
                       const hour = moment(scheduleDay).hour();
                       const minute = moment(scheduleDay).minute();
-                      const newDate = moment(date)
-                        .set("hour", hour)
-                        .set("minute", minute)
-                        .toDate();
+                      const newDate = moment(date).set("hour", hour).set("minute", minute).toDate();
                       setScheduleDay(newDate);
                     },
                   })}
                   onPointerEnterCapture={() => {}}
                   onPointerLeaveCapture={() => {}}
                 />
-                <Flex
-                  mt="xs"
-                  direction="row"
-                  justify={"space-between"}
-                  align="flex-end"
-                >
+                <Flex mt="xs" direction="row" justify={"space-between"} align="flex-end">
                   <TimeInput
                     w="100%"
                     label="Custom Time"
@@ -1462,10 +1342,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       const value = event.currentTarget.value; // Format is HH:MM
                       const hour = parseInt(value.split(":")[0]);
                       const minute = parseInt(value.split(":")[1]);
-                      const newDate = moment(scheduleDay)
-                        .set("hour", hour)
-                        .set("minute", minute)
-                        .toDate();
+                      const newDate = moment(scheduleDay).set("hour", hour).set("minute", minute).toDate();
                       setScheduleDay(newDate);
                     }}
                   />

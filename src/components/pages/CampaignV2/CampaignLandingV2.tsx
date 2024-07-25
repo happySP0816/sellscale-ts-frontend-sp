@@ -209,7 +209,7 @@ export default function CampaignLandingV2() {
   // const [linkedinSequenceData, setLinkedinSequenceData] = useState<any[]>([]);
   const [analyticsData, setAnalyticsData] = useState<any>([]);
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>([]);
-  
+
   const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<SubjectLineTemplate[]>(emailSubjectLinesState);
 
   const [statsData, setStatsData] = useState<StatsData | null>(null);
@@ -351,20 +351,17 @@ export default function CampaignLandingV2() {
   };
 
   const updateCampaignName = (newName: string, campaignId: number) => {
-    fetch(
-      `${API_URL}/client/archetype/${campaignId}/update_description_and_fit`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          updated_persona_name: newName,
-        }),
-      }
-    )
-  }
+    fetch(`${API_URL}/client/archetype/${campaignId}/update_description_and_fit`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        updated_persona_name: newName,
+      }),
+    });
+  };
 
   const updateConnectionType = (newConnectionType: string, campaignId: number) => {
     setLoadingStats(true);
@@ -525,6 +522,7 @@ export default function CampaignLandingV2() {
   };
 
   const handleModal = (type: string, id: number, campaign_name: string, statsData: any) => {
+    console.log("000000000000", type, id, campaign_name, statsData);
     openContextModal({
       modal: "campaignDrilldownModal",
       withCloseButton: false,
@@ -549,7 +547,7 @@ export default function CampaignLandingV2() {
 
   return (
     <Paper p={"lg"} maw={1150} h="100%" ml="auto" mr="auto" style={{ backgroundColor: "transparent" }}>
-      <Flex align="center" mb="md" onClick={() => navigate('/campaigns')} style={{ cursor: "pointer" }}>
+      <Flex align="center" mb="md" onClick={() => navigate("/campaigns")} style={{ cursor: "pointer" }}>
         <ActionIcon size="lg" variant="transparent">
           <IconArrowLeft size={24} />
         </ActionIcon>
@@ -776,7 +774,7 @@ export default function CampaignLandingV2() {
                           updateCampaignName(editableText, currentProject?.id || -1);
                         }}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
+                          if (e.key === "Enter") {
                             setIsEditingCampaignName(false);
                             setStatsData((prevData: any) => ({
                               ...prevData,
@@ -1006,7 +1004,7 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("sent");
-                        handleModal("sent", id, currentProject?.name || "", statsData);
+                        handleModal("sent", id, currentProject?.name || "", analyticsData);
                       }}
                     >
                       <Flex align={"center"} gap={"xs"}>
@@ -1042,7 +1040,7 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("open");
-                        handleModal("open", id, currentProject?.name || "", statsData);
+                        handleModal("open", id, currentProject?.name || "", analyticsData);
                       }}
                     >
                       <Flex align={"center"} gap={6}>
@@ -1078,7 +1076,7 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("reply");
-                        handleModal("reply", id, currentProject?.name || "", statsData);
+                        handleModal("reply", id, currentProject?.name || "", analyticsData);
                       }}
                     >
                       <Flex align={"center"} gap={6}>
@@ -1114,7 +1112,7 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("pos_reply");
-                        handleModal("pos_reply", id, currentProject?.name || "", statsData);
+                        handleModal("pos_reply", id, currentProject?.name || "", analyticsData);
                       }}
                     >
                       <Flex align={"center"} gap={6}>
@@ -1150,7 +1148,7 @@ export default function CampaignLandingV2() {
                       }}
                       onClick={() => {
                         setValue("demo");
-                        handleModal("demo", id, "aaaa", statsData);
+                        handleModal("demo", id, "aaaa", analyticsData);
                       }}
                     >
                       <Flex align={"center"} gap={6}>

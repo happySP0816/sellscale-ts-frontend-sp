@@ -1271,14 +1271,14 @@ export function IntroMessageSection(props: {
             <Badge color="blue" fw={500}>{ctasItemsCount} CTAs Active</Badge>
           )} */}
         </Group>
-        {/* {!currentProject?.template_mode && selectedTemplateId && (
+        {!currentProject?.template_mode && (
           <VoiceSelect
             personaId={currentProject?.id || -1}
             onChange={(voice) => {}}
             onFinishLoading={(voices) => {}}
             autoSelect
           />
-        )} */}
+        )}
       </Group>
       <Box my={5}>
         <Text fz="xs" c="dimmed">

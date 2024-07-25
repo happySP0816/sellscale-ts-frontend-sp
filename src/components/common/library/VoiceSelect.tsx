@@ -62,6 +62,11 @@ interface VoiceName {
 interface Voices {
   id: number,
   name: string,
+  full_name: string,
+  created_at: string,
+  always_enable: boolean,
+  icp_fit: number,
+  active: boolean,
 }
 
 export default function VoiceSelect(props: {

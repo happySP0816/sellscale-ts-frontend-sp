@@ -67,9 +67,9 @@ export default function CreateCampaignWithVoiceModal({ context, id, innerProps }
 
     setCurrentProject(response.data);
 
-    window.location.reload();
-
     context.closeContextModal(id);
+
+    window.location.reload();
 
     return response.data as number;
   }

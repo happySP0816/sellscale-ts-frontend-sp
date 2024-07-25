@@ -53,6 +53,17 @@ import { IconCheck, IconX } from "@tabler/icons";
 import postEditStackRankedConfigurationName from "@utils/requests/postEditStackRankedConfigurationName";
 import { showNotification } from "@mantine/notifications";
 
+interface VoiceName {
+  id: number,
+  name: string,
+  editingName: boolean,
+}
+
+interface Voices {
+  id: number,
+  name: string,
+}
+
 export default function VoiceSelect(props: {
   personaId: number;
   onChange: (voice: any | undefined) => void;
@@ -67,6 +78,52 @@ export default function VoiceSelect(props: {
   const [baselineVoice, setBaselineVoice] = useState<any>();
 
   const [voiceBuilderOpen, setVoiceBuilderOpen] = useState(false);
+
+  const [voicesNames, setVoicesNames] = useState<VoiceName[]>( []);
+
+  const triggerEditVoiceNameWrapper = async (voice_id: number) => {
+    const voice = voicesNames.find(voice => voice.id === voice_id);
+
+    if (voice) {
+      const success = await triggerEditVoiceName(voice.id, voice.name);
+      if (success) {
+        setVoicesNames(prevState => {
+          return prevState.map(item => {
+            if (item.id === voice_id) {
+              return {...item, editingName: false}
+            }
+
+            return item;
+          })
+        });
+      }
+    }
+  }
+
+  const setName = function (voice_id: number, name: string) {
+    setVoicesNames(prevState => {
+      return prevState.map(item => {
+        if (item.id === voice_id) {
+          return {...item, name: name}
+        }
+
+        return {...item};
+      })
+    })
+  }
+
+  const setEditingName = function (voice_id: number, editingName: boolean) {
+    setVoicesNames(prevState => {
+      return prevState.map(item => {
+        if (item.id === voice_id) {
+          return {...item, editingName: editingName}
+        }
+
+        return {...item};
+      })
+    })
+  }
+
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-voices`],
@@ -107,11 +164,22 @@ export default function VoiceSelect(props: {
           props.onChange(baselineVoice);
         }
       }
-      return voices;
+      return voices as Voices[];
     },
     refetchOnWindowFocus: false,
   });
   const voices = data ?? [];
+
+  useEffect(() => {
+    if (data) {
+      const newArray: VoiceName[] = []
+      data.forEach(item => {
+        newArray.push({id: item.id, name: item.name, editingName: false});
+      })
+
+      setVoicesNames(newArray);
+    }
+  }, [data]);
 
   const updateActive = async (voiceId: number, active: boolean) => {
     return await fetch(
@@ -202,15 +270,10 @@ export default function VoiceSelect(props: {
         loading={isFetching}
         activeItemId={selectedVoice?.id}
         items={voices.map((voice) => {
-          const [editing_name, setEditingName] = useState(false);
-          const [edited_name, setEditedName] = useState(voice.name);
+          const voiceName = voicesNames.find(item => item.id === voice.id);
+          const editing_name = voiceName?.editingName;
+          const edited_name = voiceName?.name;
 
-          const triggerEditVoiceNameWrapper = async () => {
-            const success = await triggerEditVoiceName(voice.id, edited_name);
-            if (success) {
-              setEditingName(false);
-            }
-          }
           return {
             id: voice.id,
             name: voice.full_name,
@@ -239,7 +302,7 @@ export default function VoiceSelect(props: {
                                 e.stopPropagation();
                               }}
                               onChange={(e) => {
-                                setEditedName(e.currentTarget.value);
+                                setName(voice.id, e.currentTarget.value);
                               }}
                             />
                             <ActionIcon
@@ -247,7 +310,7 @@ export default function VoiceSelect(props: {
                               ml="4px"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                triggerEditVoiceNameWrapper();
+                                triggerEditVoiceNameWrapper(voice.id);
                               }}
                             >
                               <IconCheck
@@ -263,8 +326,8 @@ export default function VoiceSelect(props: {
                               ml="4px"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setEditingName(false);
-                                setEditedName(voice.name);
+                                setEditingName(voice.id, false);
+                                setName(voice.id, voice.name);
                               }}
                             >
                               <IconX
@@ -287,7 +350,8 @@ export default function VoiceSelect(props: {
                               ml="2px"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setEditingName(true);
+                                console.log('clicking');
+                                setEditingName(voice.id, true);
                               }}
                             >
                               <IconPencil size={12} />

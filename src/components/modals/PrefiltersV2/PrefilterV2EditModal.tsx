@@ -229,7 +229,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
     fetchSavedQuery();
   }, [saved_query_id, userToken]);
 
-  const saveFilter = async (saved_query_id?: number) => {
+  const saveFilter = async (saved_query_id?: number, prev_query?: number) => {
     try {
       console.log('recent a',currentSavedQueryId);
       const response = await fetch(`${API_URL}/apollo/save_query`, {
@@ -241,7 +241,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         body: JSON.stringify({
           //saved query id is if its editing
           editingQuery: saved_query_id,
-          currentSavedQueryId: currentSavedQueryId,
+          currentSavedQueryId: prev_query || currentSavedQueryId,
           name: filterName,
         }),
       });
@@ -253,7 +253,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           color: 'green',
         });
         // Assuming you have a function to close all modals
-        closeAllModals();
+        // closeAllModals();
       } else {
         console.error("Error:", data);
       }
@@ -335,7 +335,9 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
       });
       const data = await response.json();
       if (response.ok) {
+        saveFilter(saved_query_id, data?.saved_query_id);
         setCurrentSavedQueryId(data?.saved_query_id);
+        //search & save filter
         const newProspects = data.people.map((person: { photo_url: any; first_name: any; last_name: any; linkedin_url: any; email: any; headline: any; name: any; organization: { organization_num_employees_ranges: any; name: any; revenue: any; latest_funding_stage: any; technology: any; published_at: any; event_category: any; }; seniority: any; city: any; }) => ({
           avatar: person.photo_url,
           name: `${person.first_name} ${person.last_name}`,
@@ -1290,9 +1292,9 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             style={{ padding: '10px 20px', fontSize: '16px', borderRadius: '5px' }}
             onClick={searchProspects}
           >
-            Search
+            Search & Save Filter
           </Button>
-          <Button 
+          {/* <Button 
             disabled={(currentSavedQueryId === undefined || filterName === '')} 
             onClick={() => saved_query_id ? saveFilter(saved_query_id) : saveFilter()} 
             fullWidth
@@ -1300,15 +1302,17 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             leftIcon={<IconCircleCheck size={16} />}
           >
             {saved_query_id ? 'Save Filter' : 'Save Pre-filter'}
-          </Button>
-          <Button 
-            color="green"
-            disabled={saved_query_id ? false : ((currentSavedQueryId === undefined) || filterName === '')}
-            leftIcon={<IconLink size={"1rem"} />}
-            onClick={() => setCreateSegmentOpened(true)}
-          >
-            {'Attach to segment'}
-          </Button>
+          </Button> */}
+          {!window.location.href.includes('/analytics') && (
+            <Button 
+              color="green"
+              disabled={saved_query_id ? false : ((currentSavedQueryId === undefined) || filterName === '')}
+              leftIcon={<IconLink size={"1rem"} />}
+              onClick={() => setCreateSegmentOpened(true)}
+            >
+              {'Attach to segment'}
+            </Button>
+          )}
         </Flex>
           <Flex align={"center"} gap={3} p={"sm"} bg={"#eceef1"}>
             <IconUsers size={"1rem"} color="gray" />

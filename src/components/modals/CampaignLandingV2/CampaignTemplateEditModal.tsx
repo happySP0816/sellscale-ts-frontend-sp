@@ -458,6 +458,34 @@ export default function CampaignTemplateEditModal({
               <Text size={"xs"} fw={500}>
                 Steps
               </Text>
+              {sequenceType === "linkedin" && (
+                <>
+                  <Paper
+                    withBorder
+                    radius={"sm"}
+                    p={6}
+                    px={10}
+                    onClick={() => {
+                      setCurrentStepNum(0);
+                    }}
+                    bg={currentStepNum === 0 ? "#f9fbfe" : ""}
+                    style={{
+                      border: currentStepNum === 0 ? "1px solid #228be6 " : "",
+                    }}
+                  >
+                    <Flex align={"center"} justify={"space-between"}>
+                      <Text color="gray" size={"sm"} className="flex items-center gap-2">
+                        {" "}
+                        <ThemeIcon size={"sm"}>
+                          <IconMail fill="white" color="#228be6" style={{ width: "90%", height: "90%" }} />
+                        </ThemeIcon>
+                        Initial Messages
+                      </Text>
+                    </Flex>
+                  </Paper>
+                  <Divider orientation="vertical" h={30} variant="dashed" ml={20} />
+                </>
+              )}
               {steps &&
                 Array.from({ length: Number(steps) }, (_, index) => {
                   const tabValue = (index + 1).toString();
@@ -490,12 +518,14 @@ export default function CampaignTemplateEditModal({
                             </ActionIcon>
                           )}
                         </Flex>
-                        <Flex gap={5} ml={30} mt={6}>
-                          <ThemeIcon size={14} variant="outline" color="green" radius={"xl"}>
+                        <Flex gap={5} ml={30} mt={6} align={"center"}>
+                          <ThemeIcon size={14} variant="outline" color="green" radius={"xl"} mb={2}>
                             <IconPoint fill="#40C057" color="#40C057" size={"3rem"} />
                           </ThemeIcon>
                           <Text size={"xs"} fw={600}>
-                            {2} Templates Active
+                            {(stagingData[sequenceType]?.filter((asset: any) => asset.step_num === index + 1).length || 0) +
+                              (sequenceType === "email" ? emailSequenceData[index]?.length || 0 : linkedinSequenceData[index]?.length || 0)}{" "}
+                            Templates Active
                           </Text>
                         </Flex>
                       </Paper>
@@ -503,6 +533,34 @@ export default function CampaignTemplateEditModal({
                     </>
                   );
                 })}
+              {sequenceType === "email" && (
+                <>
+                  <Paper
+                    withBorder
+                    radius={"sm"}
+                    p={6}
+                    px={10}
+                    onClick={() => {
+                      setCurrentStepNum("subjectLines");
+                    }}
+                    bg={currentStepNum === "subjectLines" ? "#f9fbfe" : ""}
+                    style={{
+                      border: currentStepNum === "subjectLines" ? "1px solid #228be6 " : "",
+                    }}
+                  >
+                    <Flex align={"center"} justify={"space-between"}>
+                      <Text color="gray" size={"sm"} className="flex items-center gap-2">
+                        {" "}
+                        <ThemeIcon size={"sm"}>
+                          <IconMail fill="white" color="#228be6" style={{ width: "90%", height: "90%" }} />
+                        </ThemeIcon>
+                        Subject Lines
+                      </Text>
+                    </Flex>
+                  </Paper>
+                  <Divider orientation="vertical" h={30} variant="dashed" ml={20} />
+                </>
+              )}
               <Paper withBorder radius={"sm"} p={6} px={10}>
                 <Flex
                   align={"center"}
@@ -712,7 +770,7 @@ export default function CampaignTemplateEditModal({
                   </Flex>
                 </ScrollArea>
               )}
-              {steps && (
+              {steps && currentStepNum !== "subjectLines" && currentStepNum !== 0 && (
                 <ScrollArea viewportRef={viewport} h={"100%"}>
                   <Flex p={"lg"} h={"100%"} direction={"column"}>
                     {/* existing assets */}
@@ -744,18 +802,18 @@ export default function CampaignTemplateEditModal({
                   {/* STAGING DATA DIVIDER */}
                   {stagingData[sequenceType]?.filter((asset: any) => asset.step_num === currentStepNum).length > 0 && (
                     <Flex justify="center" align="center">
-                      <Divider orientation="horizontal" color="salmon" size={"2px"} style={{ margin: "0 25px", flex: 1 }} />
-                      <Text color="salmon" size="xs" fw={500}>
+                      <Divider orientation="horizontal" color="yellow" size={"2px"} style={{ margin: "0 25px", flex: 1 }} />
+                      <Badge variant="outline" color="yellow" tt={"initial"}>
                         New
-                      </Text>
-                      <Divider orientation="horizontal" color="salmon" size={"2px"} style={{ margin: "0 25px", flex: 1 }} />
+                      </Badge>
+                      <Divider orientation="horizontal" color="yellow" size={"2px"} style={{ margin: "0 25px", flex: 1 }} />
                     </Flex>
                   )}
                   {/* STAGING DATA */}
                   <Flex p={"lg"} h={"100%"} direction={"column"}>
                     <>
                       {stagingData[sequenceType]
-                        ?.filter((asset: any) => asset.step_num === currentStepNum + 1)
+                        ?.filter((asset: any) => asset.step_num === currentStepNum)
                         .map((asset: any, index: number) => {
                           return (
                             <SequenceVariant
@@ -796,9 +854,9 @@ export default function CampaignTemplateEditModal({
                     {suggestionData?.length > 0 && (
                       <Flex mb="md" justify="center" align="center">
                         <Divider orientation="horizontal" color="grape" size={"2px"} style={{ margin: "0 25px", flex: 1 }} />
-                        <Text color="grape" size="xs" fw={500}>
+                        <Badge variant="outline" tt={"initial"} color="grape">
                           Suggestions
-                        </Text>
+                        </Badge>
                         <Divider orientation="horizontal" color="grape" size={"2px"} style={{ margin: "0 25px", flex: 1 }} />
                       </Flex>
                     )}
@@ -841,6 +899,116 @@ export default function CampaignTemplateEditModal({
                 </ScrollArea>
               )}
 
+              {sequenceType === "email" && currentStepNum === "subjectLines" && (
+                <ScrollArea viewportRef={viewport} h={350} px="sm" style={{ position: "relative" }}>
+                  {emailSubjectLines.map((subjectLine: SubjectLineTemplate) => {
+                    return <SubjectLineItem subjectLine={subjectLine} refetch={async () => await innerProps.refetchSequenceData(innerProps.campaignId)} />;
+                  })}
+                  <CreateEmailSubjectLineModal
+                    modalOpened={emailSubjectLineModalOpened}
+                    openModal={() => console.log("Open Modal")}
+                    closeModal={() => {
+                      setEmailSubjectLineModalOpened(false);
+                      innerProps.refetchSequenceData(Number(currentProject?.id || -1));
+                    }}
+                    backFunction={() => {
+                      setEmailSubjectLineModalOpened(false);
+                      innerProps.refetchSequenceData(Number(currentProject?.id || -1));
+                    }}
+                    archetypeID={currentProject?.id || -1}
+                  />
+                  <div
+                    style={{
+                      position: "sticky",
+                      bottom: 0,
+                      background: "white",
+                      padding: "8px 0",
+                    }}
+                  >
+                    <Button color="blue" leftIcon={<IconPlus size={"0.9rem"} />} onClick={() => setEmailSubjectLineModalOpened(true)} fullWidth>
+                      Add Subject line
+                    </Button>
+                    {emailSequenceData.length > 0 && (
+                      <Button
+                        loading={generatingSubjectLines}
+                        mt="sm"
+                        color="grape"
+                        leftIcon={<IconPlus size={"0.9rem"} />}
+                        onClick={generateEmailSubjectLines}
+                        fullWidth
+                      >
+                        Generate Subject Lines
+                      </Button>
+                    )}
+                    <Flex align="center" mt="xl">
+                      {!addedTheMagic && (
+                        <Button
+                          disabled={addedTheMagic}
+                          style={{
+                            background:
+                              !currentProject?.ai_researcher_id || !currentProject.is_ai_research_personalization_enabled
+                                ? "grey"
+                                : "linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))",
+                            color: "white",
+                            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                            backdropFilter: "blur(10px)",
+                            padding: "10px 20px",
+                            transition: "background 0.3s ease, box-shadow 0.3s ease",
+                            border: "1px solid grey",
+                          }}
+                          leftIcon={<IconSparkles size={"0.9rem"} />}
+                          loading={loadingMagicSubjectLine}
+                          onClick={async () => {
+                            if (!currentProject?.ai_researcher_id || !currentProject.is_ai_research_personalization_enabled) {
+                              showNotification({
+                                title: "Action Required",
+                                message: "Please enable AI Personalization and attach an AI Researcher with research questions.",
+                                color: "red",
+                              });
+                              return;
+                            }
+                            setLoadingMagicSubjectLine(true);
+                            try {
+                              await createEmailSubjectLineTemplate(userToken, currentProject?.id || -1, "", true);
+                              await innerProps.refetchSequenceData(Number(currentProject?.id || -1));
+                            } finally {
+                              setLoadingMagicSubjectLine(false);
+                              // closeAllModals();
+                            }
+                          }}
+                          fullWidth
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = "linear-gradient(135deg, rgba(75,0,130,1), rgba(0,255,255,1))";
+                            e.currentTarget.style.boxShadow = "0 6px 8px rgba(0, 0, 0, 0.2)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget.style.background = "linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))"),
+                              (e.currentTarget.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)");
+                          }}
+                        >
+                          Add Magic Subject Line
+                          <Tooltip
+                            multiline
+                            label={
+                              <Text size="sm">
+                                SellScale will generate a clever subject line <br></br>
+                                using its research and contextual knowledge <br></br>
+                                about the campaign, prospect, and the chosen sequence.
+                              </Text>
+                            }
+                            withArrow
+                            position="top"
+                          >
+                            <Text color="white" size="xl" style={{ marginLeft: "30px" }}>
+                              <IconQuestionMark size={"1rem"} color="white" />
+                            </Text>
+                          </Tooltip>
+                        </Button>
+                      )}
+                    </Flex>
+                  </div>
+                </ScrollArea>
+              )}
               {/* {sequenceType === "email" && (
                 <ScrollArea viewportRef={viewport} h={350} px="sm" style={{ position: "relative" }}>
                   {emailSubjectLines.map((subjectLine: SubjectLineTemplate) => {
@@ -1090,7 +1258,7 @@ export const OneshotModal = (props: any) => {
         </Collapse>
 
         <Flex gap={"lg"}>
-          <Button variant="outline" color="gray" fullWidth>
+          <Button variant="outline" color="gray" fullWidth onClick={close}>
             Cancel
           </Button>
           <Button fullWidth>Generate</Button>

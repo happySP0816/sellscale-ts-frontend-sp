@@ -32,6 +32,9 @@ import {
   Popover,
   Indicator,
   MultiSelect,
+  Divider,
+  Radio,
+  Avatar,
 } from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { hideNotification, showNotification } from "@mantine/notifications";
@@ -53,6 +56,7 @@ import {
   IconTags,
   IconEdit,
   IconAdjustmentsHorizontal,
+  IconArrowsMoveVertical,
 } from "@tabler/icons";
 import {
   IconClock24,
@@ -61,6 +65,7 @@ import {
   IconWand,
   IconMessageDots,
   IconSparkles,
+  IconCalendarDollar,
 } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { deleteAutoBumpMessage } from "@utils/requests/autoBumpMessage";
@@ -951,7 +956,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         )}
 
         <Flex justify={"space-between"} mt={10} gap={"xs"}>
-          <Flex align={"center"} gap={"xs"} w="35%">
+          {/* <Flex align={"center"} gap={"xs"} w="35%">
             <Text fw={700} fz={"10px"} color="gray.6" w="35%">
               Reply Label
             </Text>
@@ -1005,22 +1010,72 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     ),
                 }))}
             />
-          </Flex>
-          <Flex gap={"xs"} align={"center"} w="70%" justify={"space-between"}>
+          </Flex> */}
+          <Flex gap={"xs"} align={"center"} justify={"space-between"}>
             {/* only show for linkedin */}
-            <IconSparkles size={"0.9rem"} />
-            <Text fw={700} fz={"10px"} color="gray.6" w="25%">
-              AI Response
-            </Text>
-            <Flex align={"center"} pos={"relative"} w="75%">
+            <Flex gap={4} align={"center"}>
+              <IconSparkles size={"0.9rem"} />
+              <Flex w={"100%"}>
+                <Text fw={700} fz={"10px"} color="gray.6" w={"100%"}>
+                  AI Response
+                </Text>
+              </Flex>
+            </Flex>
+            <Select
+              w={200}
+              size="xs"
+              onChange={(val) => {
+                setReplyLabel(val || "");
+                setBumpFramework(
+                  bumpFrameworks.find((bf) => bf.substatus === val) ||
+                    bumpFrameworks[0]
+                );
+
+                updateChannelStatus(
+                  openedProspectId,
+                  userToken,
+                  "LINKEDIN",
+                  val || "",
+                  false,
+                  true
+                ).then((res) => {
+                  showNotification({
+                    id: "update-channel-status",
+                    title: "Status updated",
+                    message: "",
+                    color: "green",
+                    autoClose: 3000,
+                  });
+
+                  queryClient.refetchQueries({
+                    queryKey: [
+                      `query-get-dashboard-prospect-${openedProspectId}`,
+                    ],
+                  });
+                });
+              }}
+              value={replyLabel}
+              withinPortal
+              data={replyLabels
+                .filter((label) => label)
+                .map((label) => ({
+                  value: label,
+                  label:
+                    labelEmoji(label) +
+                    " " +
+                    convertToTitleCase(
+                      label
+                        ?.replaceAll("ACTIVE_CONVO_", "")
+                        .replaceAll("_", " ")
+                        .toLowerCase()
+                    ),
+                }))}
+            />
+            {/* <Flex align={"center"} pos={"relative"} w="75%">
               <Select
                 rightSection={
                   <Tooltip
-                    label={
-                      selectedBumpFramework
-                        ? `Manage '${selectedBumpFramework.title}'`
-                        : `Configure Msg Gen`
-                    }
+                    label={selectedBumpFramework ? `Manage '${selectedBumpFramework.title}'` : `Configure Msg Gen`}
                     withArrow
                     disabled={openedOutboundChannel != "LINKEDIN"}
                   >
@@ -1041,27 +1096,15 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       }}
                       disabled={openedOutboundChannel != "LINKEDIN"}
                     >
-                      {selectedBumpFramework ? (
-                        <IconSettingsFilled size="0.8rem" />
-                      ) : (
-                        <IconSettings size="0.8rem" />
-                      )}
+                      {selectedBumpFramework ? <IconSettingsFilled size="0.8rem" /> : <IconSettings size="0.8rem" />}
                     </Button>
                   </Tooltip>
                 }
                 withinPortal
-                placeholder={
-                  filteredFrameworkData.length > 0
-                    ? "Select Framework"
-                    : "No Frameworks"
-                }
+                placeholder={filteredFrameworkData.length > 0 ? "Select Framework" : "No Frameworks"}
                 size="xs"
                 disabled={filteredFrameworkData.length === 0}
-                defaultValue={
-                  filteredFrameworkData.length > 0
-                    ? filteredFrameworkData[0] + ""
-                    : undefined
-                }
+                defaultValue={filteredFrameworkData.length > 0 ? filteredFrameworkData[0] + "" : undefined}
                 data={filteredFrameworkData}
                 // styles={{
                 //   input: {
@@ -1073,9 +1116,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 // }}
                 onChange={(value) => {
                   if (openedOutboundChannel === "LINKEDIN") {
-                    const selected = bumpFrameworks.find(
-                      (bf) => bf.id === parseInt(value as string)
-                    );
+                    const selected = bumpFrameworks.find((bf) => bf.id === parseInt(value as string));
                     if (selected) {
                       setBumpFramework(selected);
                       if (selected.substatus) {
@@ -1083,35 +1124,22 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       }
                     }
 
-                    const substatus =
-                      bumpFrameworks.length > 0
-                        ? bumpFrameworks[0].substatus
-                        : undefined;
+                    const substatus = bumpFrameworks.length > 0 ? bumpFrameworks[0].substatus : undefined;
                     setSetOpenBumpFrameworksSubstatus(substatus);
-                  } else if (
-                    openedOutboundChannel === "EMAIL" ||
-                    openedOutboundChannel === "SMARTLEAD"
-                  ) {
-                    const selected = emailReplyFrameworks.find(
-                      (step) => step.id === parseInt(value as string)
-                    );
+                  } else if (openedOutboundChannel === "EMAIL" || openedOutboundChannel === "SMARTLEAD") {
+                    const selected = emailReplyFrameworks.find((step) => step.id === parseInt(value as string));
                     if (selected) {
                       setEmailReplyFramework(selected);
                     }
                   }
                 }}
-                value={
-                  openedOutboundChannel === "LINKEDIN"
-                    ? selectedBumpFramework?.id + ""
-                    : selectedEmailReplyFramework?.id + ""
-                }
+                value={openedOutboundChannel === "LINKEDIN" ? selectedBumpFramework?.id + "" : selectedEmailReplyFramework?.id + ""}
               />
-            </Flex>
+            </Flex> */}
 
             <Button
               leftIcon={<IconPencil size="1rem" />}
               variant="outline"
-              color="gray.6"
               sx={{
                 "&[data-disabled]": {
                   backgroundColor: "white",
@@ -1198,6 +1226,91 @@ export default forwardRef(function InboxProspectConvoSendBox(
               Generate {openedOutboundChannel === "LINKEDIN" ? "" : "Email"}
             </Button>
           </Flex>
+          <Popover
+            width={200}
+            position="bottom"
+            withArrow
+            shadow="md"
+            styles={{
+              dropdown: {
+                paddingInline: "0px",
+              },
+            }}
+          >
+            <Popover.Target>
+              <Button
+                color="gray"
+                variant="outline"
+                radius={"md"}
+                leftIcon={<IconCalendar size={"1rem"} />}
+                rightIcon={<IconArrowsMoveVertical size={"1rem"} />}
+              >
+                Choose Calendar
+              </Button>
+            </Popover.Target>
+            <Popover.Dropdown>
+              <Text
+                size="sm"
+                className="flex gap-1 items-center"
+                mb={"sm"}
+                ml={"md"}
+                fw={500}
+                color="gray"
+              >
+                <IconCalendar size={"1rem"} color="gray" />
+                Choose Calendar
+              </Text>
+              <Divider />
+              <Radio.Group withAsterisk>
+                <Radio
+                  label={
+                    <Flex align={"center"} gap={4}>
+                      <Avatar size={"sm"} radius={"xl"} />
+                      <Text size={"sm"} fw={500}>
+                        Test User
+                      </Text>
+                    </Flex>
+                  }
+                  styles={{
+                    radio: {
+                      width: "18px",
+                      height: "18px",
+                    },
+                    inner: {
+                      marginTop: "3px",
+                    },
+                  }}
+                  value="react"
+                  ml={"sm"}
+                  my={6}
+                />
+                <Divider />
+                <Radio
+                  value="react"
+                  label={
+                    <Flex align={"center"} gap={4}>
+                      <Avatar size={"sm"} radius={"xl"} />
+                      <Text size={"sm"} fw={500}>
+                        Test User
+                      </Text>
+                    </Flex>
+                  }
+                  styles={{
+                    radio: {
+                      width: "18px",
+                      height: "18px",
+                    },
+                    inner: {
+                      marginTop: "3px",
+                    },
+                  }}
+                  ml={"sm"}
+                  my={6}
+                />
+                <Divider />
+              </Radio.Group>
+            </Popover.Dropdown>
+          </Popover>
         </Flex>
 
         <Box pos={"relative"}>

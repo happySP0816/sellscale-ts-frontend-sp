@@ -341,6 +341,10 @@ export interface ProspectDetails {
   };
   referrals: { id: number; full_name: string }[];
   referred: { id: number; full_name: string }[];
+  phone: {
+    phone_number?: string,
+    reveal_phone_number: boolean,
+  }
 }
 
 export interface DemoFeedback {

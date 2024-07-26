@@ -30,7 +30,7 @@ import {
   Radio,
   TextInput,
   Checkbox,
-  SimpleGrid,
+  SimpleGrid, HoverCard,
 } from "@mantine/core";
 import {
   IconBriefcase,
@@ -42,7 +42,7 @@ import {
   IconTrash,
   IconExternalLink,
   IconPencil,
-  IconUserEdit,
+  IconUserEdit, IconPhone,
 } from "@tabler/icons-react";
 import { openedProspectIdState, currentConvoChannelState } from "@atoms/inboxAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
@@ -144,7 +144,7 @@ export default function ProjectDetails(props: {
 
   let showCRM = userData?.client_sync_crm !== null;
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, refetch: refetchProspectDetails } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
     queryFn: async () => {
       const response = await getProspectByID(userToken, openedProspectId);
@@ -170,6 +170,46 @@ export default function ProjectDetails(props: {
     },
     enabled: openedProspectId !== -1,
   });
+
+  const onClickRevealNumber = async () => {
+    const response = await fetch(`${API_URL}/prospect/get-phone-number/${openedProspectId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      }
+    })
+
+    const jsonResponse = await response.json();
+
+    if (jsonResponse.ok || jsonResponse.status === 200) {
+      if (jsonResponse.fetching) {
+        showNotification({
+          title: "Fetching the Number",
+          message: "We are currently fetching the number in the background. It might take a while.",
+          color: "blue",
+        });
+      }
+      else {
+        showNotification({
+          title: "Success Fetching the Number",
+          message: "We have fetched the number successfully!",
+          color: "blue",
+        });
+
+        refetchProspectDetails();
+      }
+    } else {
+      if (jsonResponse.status === 400 && !jsonResponse.fetching) {
+        showNotification({
+          title: "Success Fetching the Number",
+          message: "We could not find the phone number.",
+          color: "red",
+        });
+
+        refetchProspectDetails();
+      }
+    }
+  }
 
   let statusValue = data?.details?.linkedin_status || "ACCEPTED";
 
@@ -284,6 +324,26 @@ export default function ProjectDetails(props: {
       setOpenedProspectId(-1);
     }
   };
+
+  function formatPhoneNumber(phoneNumber: string) {
+    // Remove any non-numeric characters except for the plus sign at the start
+    phoneNumber = phoneNumber.replace(/[^\d+]/g, '');
+
+    // Check if the phone number starts with +1 and has the correct length
+    if (phoneNumber.startsWith('+1') && phoneNumber.length === 12) {
+      // Extract parts of the phone number
+      const countryCode = phoneNumber.substring(0, 2); // +1
+      const areaCode = phoneNumber.substring(2, 5); // 234
+      const centralOfficeCode = phoneNumber.substring(5, 8); // 567
+      const lineNumber = phoneNumber.substring(8, 12); // 8910
+
+      // Format the phone number
+      return `${countryCode} (${areaCode})-${centralOfficeCode}-${lineNumber}`;
+    } else {
+      // Return the original phone number if it's not in the expected format
+      return phoneNumber;
+    }
+  }
 
   if (!openedProspectId || openedProspectId == -1) {
     return (
@@ -442,6 +502,51 @@ export default function ProjectDetails(props: {
                 //   </Text>
                 // </Group>
               )}
+
+              {
+                // User did not click reveal phone number yet
+                !data?.phone.reveal_phone_number && (
+                  <Group noWrap spacing={10} mt={5}>
+                    <IconPhone stroke={1.5} size={18} className={classes.icon} />
+                    <HoverCard width={280} shadow="md" closeDelay={200}>
+                      <HoverCard.Target>
+                        <Button size={'xs'} variant={'outline'} onClick={() => onClickRevealNumber()}>Click here to reveal phone number</Button>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown>
+                        <Text size="sm">
+                          We will try to find the prospect's phone number, and if successful, will use Apollo Credits.
+                        </Text>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  </Group>
+                )
+              }
+              {
+                // User clicked reveal, but there is no phone number
+                data?.phone.reveal_phone_number && !data?.phone.phone_number && (
+                  <Group noWrap spacing={10} mt={5}>
+                    <IconPhone stroke={1.5} size={18} className={classes.icon} />
+                    <HoverCard width={280} shadow="md" closeDelay={200}>
+                      <HoverCard.Target>
+                        <Text size={'xs'} variant={'outline'}>Phone number not founded</Text>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown>
+                        <Text size="sm">
+                          We could not retrieve the phone number at this time. Please contact the SellScale team for further details.
+                        </Text>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  </Group>
+                )
+              }
+              {
+                data?.phone.reveal_phone_number && data?.phone.phone_number && (
+                  <Group noWrap spacing={10} mt={5}>
+                    <IconPhone stroke={1.5} size={18} className={classes.icon} />
+                    <Text>{formatPhoneNumber(data?.phone.phone_number)}</Text>
+                  </Group>
+                )
+              }
 
               {data?.details.address && (
                 <Group noWrap spacing={10} mt={5}>

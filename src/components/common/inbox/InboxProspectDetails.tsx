@@ -325,6 +325,26 @@ export default function ProjectDetails(props: {
     }
   };
 
+  function formatPhoneNumber(phoneNumber: string) {
+    // Remove any non-numeric characters except for the plus sign at the start
+    phoneNumber = phoneNumber.replace(/[^\d+]/g, '');
+
+    // Check if the phone number starts with +1 and has the correct length
+    if (phoneNumber.startsWith('+1') && phoneNumber.length === 12) {
+      // Extract parts of the phone number
+      const countryCode = phoneNumber.substring(0, 2); // +1
+      const areaCode = phoneNumber.substring(2, 5); // 234
+      const centralOfficeCode = phoneNumber.substring(5, 8); // 567
+      const lineNumber = phoneNumber.substring(8, 12); // 8910
+
+      // Format the phone number
+      return `${countryCode} (${areaCode})-${centralOfficeCode}-${lineNumber}`;
+    } else {
+      // Return the original phone number if it's not in the expected format
+      return phoneNumber;
+    }
+  }
+
   if (!openedProspectId || openedProspectId == -1) {
     return (
       <Flex direction="column" align="left" p="sm" mt="lg" h={`calc(${INBOX_PAGE_HEIGHT} - 100px)`}>
@@ -523,16 +543,7 @@ export default function ProjectDetails(props: {
                 data?.phone.reveal_phone_number && data?.phone.phone_number && (
                   <Group noWrap spacing={10} mt={5}>
                     <IconPhone stroke={1.5} size={18} className={classes.icon} />
-                    <HoverCard width={280} shadow="md" closeDelay={200}>
-                      <HoverCard.Target>
-                        <Button size={'xs'} variant={'outline'}>Click here to reveal phone number</Button>
-                      </HoverCard.Target>
-                      <HoverCard.Dropdown>
-                        <Text size="sm">
-                          {}
-                        </Text>
-                      </HoverCard.Dropdown>
-                    </HoverCard>
+                    <Text>{formatPhoneNumber(data?.phone.phone_number)}</Text>
                   </Group>
                 )
               }

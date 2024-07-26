@@ -58,7 +58,7 @@ type DeanonymizationType = {
   tag: string;
 };
 
-export default function WebsiteOverview() {
+export default function WebsiteOverview(props: any) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
 
@@ -377,18 +377,7 @@ export default function WebsiteOverview() {
             /> */}
             <Button
               leftIcon={<IconPlus size={"1rem"} />}
-              onClick={() => {
-                openContextModal({
-                  modal: "createvisitorbucketmodal",
-                  title: (
-                    <Flex gap={"xs"} align={"center"}>
-                      <IconCirclePlus size={"1.6rem"} color="#228be6" />
-                      <Title order={3}>Create visitor bucket</Title>
-                    </Flex>
-                  ),
-                  innerProps: {},
-                });
-              }}
+              onClick={()=>{props.setActiveTab("icp_routing")}}
             >
               Create visitor bucket
             </Button>

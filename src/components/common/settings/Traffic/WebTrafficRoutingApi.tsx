@@ -11,7 +11,9 @@ export type IcpRouteData = {
   segment_id?: number;
   send_slack?: boolean;
   id?: number;
-
+  ai_mode: boolean;
+  rules?: any;
+  segment_title?: string;
   icpRouteId?: number;
   status?: boolean;
   routeTo?: string;
@@ -39,6 +41,20 @@ export const useTrackApi = (userToken: string) => {
     setIsLoading(false);
     return data;
   };
+
+  const getWebVisits = async (userToken: string) => {
+    const url = new URL(`${API_URL}/track/get_user_web_visits`);
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    const data = await response.json();
+    return data;
+  }
+  
 
   const verifySource = async () => {
     setIsLoading(true);
@@ -233,6 +249,7 @@ export const useTrackApi = (userToken: string) => {
     getTrackSourceMetadata,
     getScript,
     verifySource,
+    getWebVisits,
     getMostRecentTrackEvent,
     getTrackEventHistory,
     getDeanonomizedContacts,

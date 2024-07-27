@@ -5,6 +5,7 @@ import {
   UpdateIcpRouteData,
   useTrackApi,
 } from "@common/settings/Traffic/WebTrafficRoutingApi";
+import { API_URL } from "@constants/data";
 import {
   Accordion,
   Box,
@@ -23,10 +24,12 @@ import {
   Text,
   Textarea,
   TextInput,
+  Title,
 } from "@mantine/core";
-import { ContextModalProps, closeAllModals } from "@mantine/modals";
+import { ContextModalProps, closeAllModals, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconArrowRight, IconMinus, IconPlus } from "@tabler/icons";
+import { IconArrowRight, IconFilter, IconMinus, IconPencil, IconPlus } from "@tabler/icons";
+import e from "cors";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 
@@ -74,6 +77,7 @@ export default function ICPRoutingCreateModal({
   const [includedCompanies, setIncludedCompanies] = useState<string[]>([]);
   const [includedTitles, setIncludedTitles] = useState<string[]>([]);
   const [includedLocations, setIncludedLocations] = useState<string[]>([]);
+  const [icpQueries, setIcpQueries] = useState<[]>([]);
   const [includedCompanySizes, setIncludedCompanySizes] = useState<string[]>(
     []
   );
@@ -83,6 +87,20 @@ export default function ICPRoutingCreateModal({
   const [rules, setRules] = useState<{ segment: string; condition: string; value: string; }[]>([]);
 
   const [segmentOptions, setSegmentOptions] = useState<Segment[]>([]);
+
+  const fetchIcpQueries = async () => {
+    const url = new URL(`${API_URL}/apollo/get_all_icp_queries`);
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    const data = await response.json();
+    setIcpQueries(data.data);
+    return data;
+  };
 
   const {
     isLoading,
@@ -217,6 +235,7 @@ export default function ICPRoutingCreateModal({
     };
 
     fetchSegments();
+    fetchIcpQueries();
   }, [userToken]);
 
   return (
@@ -308,13 +327,6 @@ export default function ICPRoutingCreateModal({
 
           {rules.map((rule, index) => (
             <Flex key={index} align="center" mt="md" gap="md">
-              <Select
-                withinPortal
-                disabled
-                value="Add to segment"
-                data={[{ value: "Add to segment", label: "Add to segment" }]}
-                style={{ width: "170px" }}
-              />
               <TextInput
                 value="if"
                 disabled
@@ -329,26 +341,118 @@ export default function ICPRoutingCreateModal({
                   setRules(newRules);
                 }}
                 data={[
+                  { value: "filter_matches", label: "Filter Matches" },
                   { value: "title_contains", label: "Title contains" },
                   { value: "title_not_contains", label: "Title does not contain" },
                   { value: "company_name_is", label: "Company name is" },
+                  { value: "company_name_is_not", label: "Company name is not" },
                   { value: "person_name_is", label: "Person name is" },
                   { value: "has_clicked_on_page", label: "Has clicked on page" },
+                  { value: "has_not_clicked_on_page", label: "Has not clicked on page" },
                   // Add more options as needed
                 ]}
                 placeholder="Select condition"
-                style={{ width: "170px" }}
+                style={{ width: "220px" }}
               />
-              <TextInput
-                value={rule.value}
-                onChange={(event) => {
-                  const newRules = [...rules];
-                  newRules[index].value = event.currentTarget.value;
-                  setRules(newRules);
-                }}
-                placeholder="Enter value"
-                style={{ width: "150px" }}
-              />
+              {rule.condition === "filter_matches" ? (
+                <Select
+                  withinPortal
+                  value={rule.value}
+                  onChange={(value) => {
+                    const newRules = [...rules];
+                    newRules[index].value = value ?? "";
+                    setRules(newRules);
+                  }}
+                  itemComponent={({ value, label }) => (
+                    <Flex
+                      align="center"
+                      gap="xs"
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#d3d3d3';
+                        e.currentTarget.style.cursor = 'pointer';
+                        const textElement = e.currentTarget.querySelector('Text');
+                        if (textElement instanceof HTMLElement) {
+                          textElement.style.color = '#000000';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        const textElement = e.currentTarget.querySelector('Text');
+                        if (textElement instanceof HTMLElement) {
+                          textElement.style.color = '#000000';
+                        }
+                      }}
+                      onClick={() => {
+                        if (value === "create_new") {
+                          openContextModal({
+                            modal: "prefilterEditModal",
+                            title: (
+                              <Title order={3} className="flex items-center gap-2">
+                                <IconFilter size={"1.5rem"} color="#228be6" /> Edit Pre-Filter
+                              </Title>
+                            ),
+                            innerProps: {isIcpFilter: true},
+                            centered: true,
+                            styles: {
+                              content: {
+                                minWidth: "80%",
+                              },
+                            },
+                          });
+                          console.log("Create new item clicked");
+                        } else {
+                          const newRules = [...rules];
+                          newRules[index].value = value;
+                          setRules(newRules);
+                        }
+                      }}
+                    >
+                      <Text>{label}</Text>
+                      {value !== "create_new" && (
+                        <Button
+                          onClick={(e) => { e.stopPropagation(); 
+                            openContextModal({
+                              modal: "prefilterEditModal",
+                              title: (
+                                <Title order={3} className="flex items-center gap-2">
+                                  <IconFilter size={"1.5rem"} color="#228be6" /> Edit Pre-Filter
+                                </Title>
+                              ),
+                              innerProps: {isIcpFilter: true, id: value},
+                              centered: true,
+                              styles: {
+                                content: {
+                                  minWidth: "80%",
+                                },
+                              },
+                            });
+                            }
+                          }
+                          variant="subtle"
+                          color="blue"
+                          style={{ padding: 0, marginLeft: 'auto' }}
+                        >
+                          <IconPencil size={16} />
+                        </Button>
+                      )}
+                    </Flex>
+                  )}
+                  data={icpQueries.map((item: { id: string; custom_name: string }) => ({ value: item.id, label: item.custom_name })).concat({ value: "create_new", label: "+ Create New" })}
+                  placeholder="Select value"
+                  style={{ width: "150px" }}
+                />
+              ) : (
+                <TextInput
+                  value={rule.value}
+                  onChange={(event) => {
+                    const newRules = [...rules];
+                    newRules[index].value = event.currentTarget.value;
+                    setRules(newRules);
+                  }}
+                  placeholder="Enter value"
+                  style={{ width: "150px" }}
+                />
+              )}
               <Button
                 color="red"
                 onClick={() => {
@@ -358,8 +462,14 @@ export default function ICPRoutingCreateModal({
               >
                 <IconMinus />
               </Button>
+              {index < rules.length - 1 && (
+              <Text style={{ margin: '10px 0' }}>
+                or
+              </Text>
+            )}
             </Flex>
           ))}
+          
           <Button
             mt="xl"
             leftIcon={<IconPlus size={"1rem"} />}
@@ -390,148 +500,7 @@ export default function ICPRoutingCreateModal({
         >
           {innerProps.icpRouteId ? "Save & Close" : "Save & Close"}
         </Button>
-        <Button
-          mt="lg"
-          rightIcon={<IconArrowRight size={"1rem"} />}
-          variant="outline"
-          fullWidth
-          disabled
-        >
-          Do an Example Test
-        </Button>
       </Flex>
     </Paper>
   );
 }
-
-const ICPAccount = ({
-  includedCompanies,
-  setIncludedCompanies,
-  includedTitles,
-  setIncludedTitles,
-  includedLocations,
-  setIncludedLocations,
-  includedCompanySizes,
-  setIncludedCompanySizes,
-}: {
-  includedCompanies: string[];
-  setIncludedCompanies: React.Dispatch<React.SetStateAction<string[]>>;
-  includedTitles: string[];
-  setIncludedTitles: React.Dispatch<React.SetStateAction<string[]>>;
-  includedLocations: string[];
-  setIncludedLocations: React.Dispatch<React.SetStateAction<string[]>>;
-  includedCompanySizes: string[];
-  setIncludedCompanySizes: React.Dispatch<React.SetStateAction<string[]>>;
-}) => {
-  return (
-    <Card withBorder pt={"0px"}>
-      <Stack>
-        <Accordion
-          defaultValue={"job"}
-          mt={"sm"}
-          styles={{
-            control: {
-              paddingTop: "3px",
-              paddingBottom: "3px",
-              paddingLeft: "0px",
-              paddingRight: "0px",
-            },
-            content: {
-              paddingLeft: "0px",
-              paddingRight: "0px",
-            },
-          }}
-        >
-          <Accordion.Item value="companies">
-            <Accordion.Control>
-              Companies ({includedCompanies.length})
-            </Accordion.Control>
-            <Accordion.Panel>
-              <MultiSelect
-                searchable
-                creatable
-                value={includedCompanies}
-                label="Included"
-                placeholder="Select or create options"
-                onChange={setIncludedCompanies}
-                data={includedCompanies}
-                getCreateLabel={(query) => `+ Create ${query}`}
-                onCreate={(query) => {
-                  const newItem = query;
-                  setIncludedCompanies((current) => [...current, newItem]);
-                  return newItem;
-                }}
-              />
-            </Accordion.Panel>
-          </Accordion.Item>
-          <Accordion.Item value="title">
-            <Accordion.Control>
-              Title ({includedTitles.length})
-            </Accordion.Control>
-            <Accordion.Panel>
-              <MultiSelect
-                searchable
-                creatable
-                value={includedTitles}
-                label="Included"
-                placeholder="Select or create options"
-                onChange={setIncludedTitles}
-                data={includedTitles}
-                getCreateLabel={(query) => `+ Create ${query}`}
-                onCreate={(query) => {
-                  const newItem = query;
-                  setIncludedTitles((current) => [...current, newItem]);
-                  return newItem;
-                }}
-              />
-            </Accordion.Panel>
-          </Accordion.Item>
-          <Accordion.Item value="location">
-            <Accordion.Control>
-              Location ({includedLocations.length})
-            </Accordion.Control>
-            <Accordion.Panel>
-              <MultiSelect
-                searchable
-                creatable
-                value={includedLocations}
-                label="Included"
-                placeholder="Select or create options"
-                onChange={setIncludedLocations}
-                data={includedLocations}
-                getCreateLabel={(query) => `+ Create ${query}`}
-                onCreate={(query) => {
-                  const newItem = query;
-                  setIncludedLocations((current) => [...current, newItem]);
-                  return newItem;
-                }}
-              />
-            </Accordion.Panel>
-          </Accordion.Item>
-          <Accordion.Item value="company_size">
-            <Accordion.Control>
-              Company Size ({includedCompanySizes.length})
-            </Accordion.Control>
-            <Accordion.Panel>
-              <MultiSelect
-                searchable
-                creatable
-                value={includedCompanySizes}
-                label="Included"
-                placeholder="Select or create options"
-                onChange={setIncludedCompanySizes}
-                data={includedCompanySizes}
-                getCreateLabel={(query) => `+ Create ${query}`}
-                onCreate={(query) => {
-                  const newItem = query;
-                  setIncludedCompanySizes((current) => [...current, newItem]);
-                  return newItem;
-                }}
-              />
-            </Accordion.Panel>
-          </Accordion.Item>
-        </Accordion>
-      </Stack>
-    </Card>
-  );
-};

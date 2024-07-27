@@ -16,6 +16,9 @@ import {
   Group,
   Title,
   Loader,
+  ScrollArea,
+  Table,
+  Popover,
 } from "@mantine/core";
 import {
   Icon123,
@@ -66,6 +69,20 @@ export default function WebsiteOverview(props: any) {
   const [loading, setLoading] = useState(false);
   const [trackHistory, setTrackHistory] = useState<any[]>([]);
   const [locations, setLocations] = useState<any[]>([]);
+  const [webVisits, setWebVisits] = useState<any[]>([]);
+
+  const fetchWebVisits = async () => {
+    setLoading(true);
+    try {
+      const webVisits = await getWebVisits(userToken);
+      console.log('data', webVisits);
+      setWebVisits(webVisits);
+    } catch (error) {
+      console.error("Error fetching ICP routes:", error);
+    }
+    setLoading(false
+    );
+  }
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -80,6 +97,7 @@ export default function WebsiteOverview(props: any) {
     createIcpRoute,
     updateIcpRoute,
     getAllIcpRoutes,
+    getWebVisits,
     autoClassifyDeanonymizedContacts,
   } = useTrackApi(userToken);
 
@@ -134,6 +152,7 @@ export default function WebsiteOverview(props: any) {
   useEffect(() => {
     handleGetTrackHistory();
     handleGetDeanonymizedContacts();
+    fetchWebVisits();
   }, [userToken, dateRange]);
 
   const maxDeanonymizedVisits = Math.max(...trackHistory?.map((x) => x.distinct_deanonymized_visits), 0) + 5;
@@ -296,734 +315,163 @@ export default function WebsiteOverview(props: any) {
         </Flex>
       </Paper>
       <Paper mt={"md"} p={"lg"} withBorder>
-        <Flex align={"end"} justify={"space-between"}>
-          <Box>
-            <Text size={"lg"} fw={700}>
-              Deanonymization Data
-            </Text>
-            <Text size={"sm"} color="gray" fw={400}>
-              Re-identifying individuals from anonymized data.
-            </Text>
-          </Box>
-          <Flex align={"center"} gap={"sm"}>
-            {Object.keys(selected)?.length !== 0 && (
-              <Button variant="outline" onClick={() => alert("Show Modal")}>
-                Add Tag
-              </Button>
-            )}
-            {/* <Button
-              leftIcon={<IconPlus size={"0.9rem"} />}
-              onClick={() =>
-                openContextModal({
-                  modal: "createSegmentModal",
-                  title: (
-                    <Group position="apart">
-                      <div>
-                        <Title
-                          order={3}
-                          sx={{
-                            display: "flex",
-                            gap: "8px",
-                            alignItems: "center",
-                          }}
-                        >
-                          <IconUsersPlus
-                            color="#228be6"
-                            style={{ marginTop: "-5px" }}
-                          />
-                          Create Segment
-                        </Title>
-                      </div>
-                    </Group>
-                  ),
-                  styles: {
-                    content: {
-                      minWidth: "750px",
-                    },
-                  },
-                  innerProps: {},
-                  centered: true,
-                })
-              }
-            >
-              Add 5 visitors to Segment
-            </Button> */}
-            {Object.keys(selected)?.length !== 0 && (
-              <Button
-                onClick={() => {
-                  const selectedContacts = Object.keys(selected).map((index: any) => deanonymData[index].id);
-                  autoClassifyDeanonymizedContacts(selectedContacts);
-                  showNotification({
-                    title: "Classifying...",
-                    message: "Contacts are being classified. Please refresh to see the changes.",
-                    color: "teal",
-                  });
-                }}
-              >
-                Classify {Object.keys(selected).length} Visitors
-              </Button>
-            )}
-            {/* <Button color="gray" onClick={handleGetDeanonymizedContacts} loading={loading}>
-              Refresh
-            </Button>
-            <TextInput
-              placeholder="Search contacts"
-              w={240}
-              rightSection={<IconSearch size={"0.9rem"} color="gray" />}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setSelected({});
-              }}
-            /> */}
-            <Button
-              leftIcon={<IconPlus size={"1rem"} />}
-              onClick={()=>{props.setActiveTab("icp_routing")}}
-            >
-              Create visitor bucket
-            </Button>
-          </Flex>
-        </Flex>
-        <Box mt={"sm"}>
-          <Divider label="UNCATEGORIZED" labelPosition="left" color="gray" fw={700} />
-          <DataGrid
-            data={deanonymData.filter((item: any) => item.tag === "")}
-            highlightOnHover
-            mt={"sm"}
-            withPagination
-            withSorting
-            withColumnBorders
-            withBorder
-            withRowSelection
-            onRowSelectionChange={setSelected}
-            sx={{
-              cursor: "pointer",
-              "& tr": {
-                background: "white",
-              },
-            }}
-            columns={[
-              {
-                accessorKey: "visitor_name",
-                header: () => (
-                  <Flex align={"center"} gap={"3px"}>
-                    <IconLetterT color="gray" size={"0.9rem"} />
-                    <Text color="gray">Visitor Name</Text>
-                  </Flex>
-                ),
-                minSize: 260,
-                cell: (cell) => {
-                  const { sdr_name, avatar, job, linkedin, email, company }: any = cell.row.original;
-
-                  return (
-                    <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                      <Flex align={"center"} gap={"sm"}>
-                        <Avatar src={avatar} size={"md"} radius={"xl"} color={valueToColor(theme, sdr_name)}>
-                          {nameToInitials(sdr_name)}
-                        </Avatar>
-                        <Box>
-                          <Flex gap={5} align={"center"}>
-                            <Text fw={500} size={"sm"}>
-                              {sdr_name}
-                            </Text>
-                            {linkedin && <IconBrandLinkedin size={"1.2rem"} fill="#228be6" color="white" />}
-                            {email && <IconMail size={"1.2rem"} fill="#228be6" color="white" />}
-                          </Flex>
-                          <Text color="gray" size={"xs"} fw={500}>
-                            {job}@{company}
-                          </Text>
-                        </Box>
-                      </Flex>
-                    </Flex>
-                  );
-                },
-              },
-              {
-                accessorKey: "time",
-                header: () => (
-                  <Flex align={"center"} gap={"3px"}>
-                    <IconClock color="gray" size={"0.9rem"} />
-                    <Text color="gray">Time</Text>
-                  </Flex>
-                ),
-                minSize: 170,
-                cell: (cell) => {
-                  const { visit_date } = cell.row.original as any;
-
-                  const visitDate = moment(visit_date);
-                  const currentDate = moment();
-
-                  const timeDifference = visitDate.from(currentDate);
-
-                  return (
-                    <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                      <Text fw={500}>{timeDifference}</Text>
-                    </Flex>
-                  );
-                },
-              },
-              {
-                accessorKey: "page",
-                header: () => (
-                  <Flex align={"center"} gap={"3px"}>
-                    <IconFile color="gray" size={"0.9rem"} />
-                    <Text color="gray">Page</Text>
-                  </Flex>
-                ),
-                minSize: 180,
-                cell: (cell) => {
-                  return (
-                    <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                      <Badge
-                        variant="outline"
-                        tt={"initial"}
-                        color="gray"
-                        radius="md"
-                        leftSection={<IconPoint fill="#228be6" color="white" className="mt-1 mx-[-8px]" />}
-                      >
-                        Home
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        color="gray"
-                        tt={"initial"}
-                        radius="md"
-                        leftSection={<IconPoint fill="#228be6" color="white" className="mt-1 mx-[-8px]" />}
-                      >
-                        Pricing
-                      </Badge>
-                    </Flex>
-                  );
-                },
-              },
-              {
-                accessorKey: "status",
-                header: () => (
-                  <Flex align={"center"} gap={"3px"}>
-                    <IconFile color="gray" size={"0.9rem"} />
-                    <Text color="gray">Status</Text>
-                  </Flex>
-                ),
-                minSize: 180,
-                cell: (cell) => {
-                  return (
-                    <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                      <Badge variant="light" tt={"initial"} radius="md">
-                        {"Uncategorized"}
-                      </Badge>
-                    </Flex>
-                  );
-                },
-              },
-
-              // {
-              //   accessorKey: "company",
-              //   header: () => (
-              //     <Flex align={"center"} gap={"3px"}>
-              //       <IconLetterT color="gray" size={"0.9rem"} />
-              //       <Text color="gray">Company</Text>
-              //     </Flex>
-              //   ),
-              //   maxSize: 300,
-              //   cell: (cell) => {
-              //     const { company } = cell.row.original;
-
-              //     return (
-              //       <Flex w={"100%"} h={"100%"} align={"center"}>
-              //         <Text lineClamp={1} fw={500}>
-              //           {company}
-              //         </Text>
-              //       </Flex>
-              //     );
-              //   },
-              // },
-              // {
-              //   accessorKey: "visit_date",
-              //   header: () => (
-              //     <Flex align={"center"} gap={"3px"}>
-              //       <IconLetterT color="gray" size={"0.9rem"} />
-              //       <Text color="gray">Last Visit</Text>
-              //     </Flex>
-              //   ),
-              //   maxSize: 160,
-              //   enableResizing: true,
-              //   cell: (cell) => {
-              //     const { visit_date } = cell.row.original;
-
-              //     return (
-              //       <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
-              //         <Text fw={500}>{moment(visit_date).format("MMMM Do YYYY")}</Text>
-              //       </Flex>
-              //     );
-              //   },
-              // },
-              // {
-              //   accessorKey: "total_visit",
-              //   header: () => (
-              //     <Flex align={"center"} gap={"3px"}>
-              //       <Flex>
-              //         <Icon123 color="gray" size={"1.2rem"} />
-              //       </Flex>
-              //       <Text color="gray">Total Visit</Text>
-              //     </Flex>
-              //   ),
-              //   maxSize: 140,
-              //   enableResizing: true,
-              //   cell: (cell) => {
-              //     const { total_visit } = cell.row.original;
-
-              //     return (
-              //       <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
-              //         <Text fw={500}>{total_visit} visits</Text>
-              //       </Flex>
-              //     );
-              //   },
-              // },
-              // {
-              //   accessorKey: "intent_score",
-              //   header: () => (
-              //     <Flex align={"center"} gap={"3px"}>
-              //       <IconLoader color="gray" size={"0.9rem"} />
-              //       <Text color="gray">Intent Score</Text>
-              //     </Flex>
-              //   ),
-              //   maxSize: 160,
-              //   enableResizing: true,
-              //   cell: (cell) => {
-              //     const { intent_score } = cell.row.original;
-
-              //     return (
-              //       <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
-              //         <Badge color={intent_score == "MEDIUM" ? "yellow" : intent_score == "HIGH" ? "blue" : "green"}>{intent_score}</Badge>
-              //       </Flex>
-              //     );
-              //   },
-              // },
-              // {
-              //   accessorKey: "tag",
-              //   header: () => (
-              //     <Flex align={"center"} gap={"3px"}>
-              //       <IconLoader color="gray" size={"0.9rem"} />
-              //       <Text color="gray">Tag</Text>
-              //     </Flex>
-              //   ),
-              //   enableResizing: true,
-              //   minSize: 120,
-              //   cell: (cell) => {
-              //     const { tag } = cell.row.original as any[""];
-
-              //     return (
-              //       <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
-              //         <Flex gap={"sm"}>
-              //           {tag ? (
-              //             <Badge key={tag} tt={"initial"} size="md" color={deterministicMantineColor(tag)}>
-              //               {tag}
-              //             </Badge>
-              //           ) : (
-              //             <Button size="xs" radius={"xl"} variant="outline" leftIcon={<IconPlus size={"0.9rem"} />}>
-              //               Add
-              //             </Button>
-              //           )}
-              //         </Flex>
-              //       </Flex>
-              //     );
-              //   },
-              // },
-            ]}
-            options={{
-              enableFilters: true,
-            }}
-            components={{
-              pagination: ({ table }) => (
-                <Flex
-                  justify={"space-between"}
-                  align={"center"}
-                  px={"sm"}
-                  py={"1.25rem"}
-                  sx={(theme) => ({
-                    border: `1px solid ${theme.colors.gray[4]}`,
-                    borderTopWidth: 0,
-                  })}
+      <Flex justify={"space-between"} align={"center"}>
+        <Text size={"md"} fw={600}>
+          Bucketed Contacts
+        </Text>
+        <Select
+          w={200}
+          defaultValue={"dummy1"}
+          onChange={(v: any) => console.log(v)}
+          data={[
+            { label: "Dummy Data 1", value: "dummy1" },
+            { label: "Dummy Data 2", value: "dummy2" },
+            { label: "Dummy Data 3", value: "dummy3" },
+          ]}
+        />
+      </Flex>
+    <ScrollArea style={{ height: "40vh" }}>
+      <Table mt={"md"} withBorder withColumnBorders style={{ height: "400px", overflowY: "auto" }}>
+        <thead>
+          <tr>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Name</Text>
+              </Flex>
+            </th>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Company</Text>
+              </Flex>
+            </th>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Title</Text>
+              </Flex>
+            </th>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray"># Visits</Text>
+              </Flex>
+            </th>
+            <th style={{ maxWidth: "300px" }}>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Visited Page</Text>
+              </Flex>
+            </th>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Last Visit</Text>
+              </Flex>
+            </th>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Routed Segment</Text>
+              </Flex>
+            </th>
+           
+          </tr>
+        </thead>
+        <tbody>
+          {webVisits.map((prospect) => (
+            <tr key={prospect.id}>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Avatar radius="xl" src={prospect.img_url} alt={prospect.full_name} size="md" mr="sm" />
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {prospect.full_name}
+                    </Text>
+                  </Box>
+                <ActionIcon
+                  component="a"
+                  href={prospect.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="LinkedIn Profile"
                 >
-                  <Select
-                    style={{ width: "150px" }}
-                    data={[
-                      { label: "Show 1 rows", value: "1" },
-                      { label: "Show 2 rows", value: "2" },
-                      { label: "Show 3 rows", value: "3" },
-                    ]}
-                    value={udPageSize}
-                    onChange={(v) => {
-                      setUdPageSize(v ?? "3");
-                    }}
-                  />
-
-                  <Flex align={"center"} gap={"sm"}>
-                    <Flex align={"center"}>
-                      <Select
-                        maw={100}
-                        value={`${table.getState().pagination.pageIndex + 1}`}
-                        data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                          label: String(idx + 1),
-                          value: String(idx + 1),
-                        }))}
-                        onChange={(v) => {
-                          table.setPageIndex(Number(v) - 1);
-                        }}
-                      />
-                      <Flex
-                        sx={(theme) => ({
-                          borderTop: `1px solid ${theme.colors.gray[4]}`,
-                          borderRight: `1px solid ${theme.colors.gray[4]}`,
-                          borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                          marginLeft: "-2px",
-                          paddingLeft: "1rem",
-                          paddingRight: "1rem",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: "0.25rem",
-                        })}
-                        h={36}
-                      >
-                        <Text color="gray.5" fw={500} fz={14}>
-                          of {table.getPageCount()} pages
-                        </Text>
-                      </Flex>
-                      <ActionIcon
-                        variant="default"
-                        color="gray.4"
-                        h={36}
-                        disabled={table.getState().pagination.pageIndex === 0}
-                        onClick={() => {
-                          table.setPageIndex(table.getState().pagination.pageIndex - 1);
-                        }}
-                      >
-                        <IconChevronLeft stroke={theme.colors.gray[4]} />
-                      </ActionIcon>
-                      <ActionIcon
-                        variant="default"
-                        color="gray.4"
-                        h={36}
-                        disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
-                        onClick={() => {
-                          table.setPageIndex(table.getState().pagination.pageIndex + 1);
-                        }}
-                      >
-                        <IconChevronRight stroke={theme.colors.gray[4]} />
-                      </ActionIcon>
-                    </Flex>
-                  </Flex>
+                  <IconBrandLinkedin size={16} color="#0077B5" />
+                </ActionIcon>
                 </Flex>
-              ),
-            }}
-            w={"100%"}
-            pageSizes={[udPageSize]}
-            styles={(theme) => ({
-              thead: {
-                height: "44px",
-                backgroundColor: theme.colors.gray[0],
-                "::after": {
-                  backgroundColor: "transparent",
-                },
-              },
-
-              wrapper: {
-                gap: 0,
-              },
-              scrollArea: {
-                paddingBottom: 0,
-                gap: 0,
-              },
-
-              dataCellContent: {
-                width: "100%",
-              },
-              td: {
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-              },
-            })}
-          />
-        </Box>
-        {routes &&
-          routes.map((item: any, index: any) => {
-            let filteredData = deanonymData.filter((data: any) => data.tag === item.title);
-            console.log("---------", filteredData);
-            return (
-              <Box mt={"sm"}>
-                <Divider
-                  label={
-                    <Flex gap={"sm"} align={"center"}>
-                      <Text>{item.title}</Text>
-                      <Badge variant="filled" tt={"initial"} size="sm">
-                        {filteredData.length} new
-                      </Badge>
-                    </Flex>
-                  }
-                  labelPosition="left"
-                  color="gray"
-                  fw={700}
-                />
-
-                {filteredData.length > 0 && (
-                  <DataGrid
-                    data={filteredData}
-                    highlightOnHover
-                    mt={"sm"}
-                    withPagination
-                    withSorting
-                    withColumnBorders
-                    withBorder
-                    withRowSelection
-                    onRowSelectionChange={setSelected}
-                    sx={{
-                      cursor: "pointer",
-                      "& tr": {
-                        background: "white",
-                      },
-                    }}
-                    columns={[
-                      {
-                        accessorKey: "visitor_name",
-                        header: () => (
-                          <Flex align={"center"} gap={"3px"}>
-                            <IconLetterT color="gray" size={"0.9rem"} />
-                            <Text color="gray">Visitor Name</Text>
-                          </Flex>
-                        ),
-                        minSize: 260,
-                        cell: (cell) => {
-                          const { sdr_name, avatar, job, linkedin, email, company }: any = cell.row.original;
-
-                          return (
-                            <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                              <Flex align={"center"} gap={"sm"}>
-                                <Avatar src={avatar} size={"md"} radius={"xl"} color={valueToColor(theme, sdr_name)}>
-                                  {nameToInitials(sdr_name)}
-                                </Avatar>
-                                <Box>
-                                  <Flex gap={5} align={"center"}>
-                                    <Text fw={500} size={"sm"}>
-                                      {sdr_name}
-                                    </Text>
-                                    {linkedin && <IconBrandLinkedin size={"1.2rem"} fill="#228be6" color="white" />}
-                                    {email && <IconMail size={"1.2rem"} fill="#228be6" color="white" />}
-                                  </Flex>
-                                  <Text color="gray" size={"xs"} fw={500}>
-                                    {job}@{company}
-                                  </Text>
-                                </Box>
-                              </Flex>
-                            </Flex>
-                          );
-                        },
-                      },
-                      {
-                        accessorKey: "time",
-                        header: () => (
-                          <Flex align={"center"} gap={"3px"}>
-                            <IconClock color="gray" size={"0.9rem"} />
-                            <Text color="gray">Time</Text>
-                          </Flex>
-                        ),
-                        minSize: 170,
-                        cell: (cell) => {
-                          const { visit_date } = cell.row.original as any;
-
-                          const visitDate = moment(visit_date);
-                          const currentDate = moment();
-
-                          const timeDifference = visitDate.from(currentDate);
-
-                          return (
-                            <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                              <Text fw={500}>{timeDifference}</Text>
-                            </Flex>
-                          );
-                        },
-                      },
-                      {
-                        accessorKey: "page",
-                        header: () => (
-                          <Flex align={"center"} gap={"3px"}>
-                            <IconFile color="gray" size={"0.9rem"} />
-                            <Text color="gray">Page</Text>
-                          </Flex>
-                        ),
-                        minSize: 180,
-                        cell: (cell) => {
-                          return (
-                            <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                              <Badge
-                                variant="outline"
-                                tt={"initial"}
-                                color="gray"
-                                radius="md"
-                                leftSection={<IconPoint fill="#228be6" color="white" className="mt-1 mx-[-8px]" />}
-                              >
-                                Home
-                              </Badge>
-                              <Badge
-                                variant="outline"
-                                color="gray"
-                                tt={"initial"}
-                                radius="md"
-                                leftSection={<IconPoint fill="#228be6" color="white" className="mt-1 mx-[-8px]" />}
-                              >
-                                Pricing
-                              </Badge>
-                            </Flex>
-                          );
-                        },
-                      },
-                      {
-                        accessorKey: "status",
-                        header: () => (
-                          <Flex align={"center"} gap={"3px"}>
-                            <IconFile color="gray" size={"0.9rem"} />
-                            <Text color="gray">Status</Text>
-                          </Flex>
-                        ),
-                        minSize: 180,
-                        cell: (cell) => {
-                          const { tag } = cell.row.original as any[""];
-
-                          return (
-                            <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                              {tag ? (
-                                <Badge key={tag} tt={"initial"} size="md" color={deterministicMantineColor(tag)}>
-                                  {tag}
-                                </Badge>
-                              ) : (
-                                <Button size="xs" radius={"xl"} variant="outline" leftIcon={<IconPlus size={"0.9rem"} />}>
-                                  Add
-                                </Button>
-                              )}
-                            </Flex>
-                          );
-                        },
-                      },
-                    ]}
-                    options={{
-                      enableFilters: true,
-                    }}
-                    components={{
-                      pagination: ({ table }) => (
-                        <Flex
-                          justify={"space-between"}
-                          align={"center"}
-                          px={"sm"}
-                          py={"1.25rem"}
-                          sx={(theme) => ({
-                            border: `1px solid ${theme.colors.gray[4]}`,
-                            borderTopWidth: 0,
-                          })}
-                        >
-                          <Select
-                            style={{ width: "150px" }}
-                            data={[
-                              { label: "Show 1 rows", value: "1" },
-                              { label: "Show 2 rows", value: "2" },
-                              { label: "Show 3 rows", value: "3" },
-                            ]}
-                            value={udPageSize}
-                            onChange={(v) => {
-                              setUdPageSize(v ?? "3");
-                            }}
-                          />
-
-                          <Flex align={"center"} gap={"sm"}>
-                            <Flex align={"center"}>
-                              <Select
-                                maw={100}
-                                value={`${table.getState().pagination.pageIndex + 1}`}
-                                data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                                  label: String(idx + 1),
-                                  value: String(idx + 1),
-                                }))}
-                                onChange={(v) => {
-                                  table.setPageIndex(Number(v) - 1);
-                                }}
-                              />
-                              <Flex
-                                sx={(theme) => ({
-                                  borderTop: `1px solid ${theme.colors.gray[4]}`,
-                                  borderRight: `1px solid ${theme.colors.gray[4]}`,
-                                  borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                                  marginLeft: "-2px",
-                                  paddingLeft: "1rem",
-                                  paddingRight: "1rem",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  borderRadius: "0.25rem",
-                                })}
-                                h={36}
-                              >
-                                <Text color="gray.5" fw={500} fz={14}>
-                                  of {table.getPageCount()} pages
-                                </Text>
-                              </Flex>
-                              <ActionIcon
-                                variant="default"
-                                color="gray.4"
-                                h={36}
-                                disabled={table.getState().pagination.pageIndex === 0}
-                                onClick={() => {
-                                  table.setPageIndex(table.getState().pagination.pageIndex - 1);
-                                }}
-                              >
-                                <IconChevronLeft stroke={theme.colors.gray[4]} />
-                              </ActionIcon>
-                              <ActionIcon
-                                variant="default"
-                                color="gray.4"
-                                h={36}
-                                disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
-                                onClick={() => {
-                                  table.setPageIndex(table.getState().pagination.pageIndex + 1);
-                                }}
-                              >
-                                <IconChevronRight stroke={theme.colors.gray[4]} />
-                              </ActionIcon>
-                            </Flex>
-                          </Flex>
-                        </Flex>
-                      ),
-                    }}
-                    w={"100%"}
-                    pageSizes={[udPageSize]}
-                    styles={(theme) => ({
-                      thead: {
-                        height: "44px",
-                        backgroundColor: theme.colors.gray[0],
-                        "::after": {
-                          backgroundColor: "transparent",
-                        },
-                      },
-
-                      wrapper: {
-                        gap: 0,
-                      },
-                      scrollArea: {
-                        paddingBottom: 0,
-                        gap: 0,
-                      },
-
-                      dataCellContent: {
-                        width: "100%",
-                      },
-                      td: {
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center",
-                      },
-                    })}
-                  />
-                )}
-              </Box>
-            );
-          })}
-      </Paper>
+              </td>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {prospect.company}
+                    </Text>
+                  </Box>
+                </Flex>
+              </td>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {prospect.title}
+                    </Text>
+                  </Box>
+                </Flex>
+              </td>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {prospect.window_locations.length}
+                    </Text>
+                  </Box>
+                </Flex>
+              </td>
+              <td>
+                <Flex style={{ maxWidth: "300px" }} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {prospect.window_locations.map((location: any) => (
+                        <Popover position="top" withArrow shadow="md">
+                          <Popover.Target>
+                            <Badge size="sm" color="blue" variant="light" key={location}>
+                              {location.length > 40 ? `${location.slice(0, 37)}...` : location}
+                            </Badge>
+                          </Popover.Target>
+                          <Popover.Dropdown>
+                            <Text size="sm">{location}</Text>
+                          </Popover.Dropdown>
+                        </Popover>
+                      ))}
+                    </Text>
+                  </Box>
+                </Flex>
+              </td>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {new Date(prospect.most_recent_visit).toLocaleString('en-US', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Text>
+                  </Box>
+                </Flex>
+              </td>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Badge size="sm" color={prospect.segment_name ? "green" : "gray"} variant="light">
+                      {prospect.segment_name || "No Segment"}
+                    </Badge>
+                  </Box>
+                </Flex>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </ScrollArea>
+       </Paper>
     </Box>
   );
 }

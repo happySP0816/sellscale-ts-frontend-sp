@@ -280,7 +280,7 @@ export default function ICPRouting() {
               <td>
                 <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
                   <Box>
-                    <Badge color={row.ai_mode === true ? "blue" : "green"} variant="filled">
+                    <Badge color={row.ai_mode === true ? "grape" : "green"} variant="filled">
                       {row.ai_mode === true ? "AI Mode" : "Rule Mode"}
                     </Badge>
                   </Box>

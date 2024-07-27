@@ -324,9 +324,9 @@ export default function WebsiteOverview(props: any) {
           defaultValue={"dummy1"}
           onChange={(v: any) => console.log(v)}
           data={[
-            { label: "Dummy Data 1", value: "dummy1" },
-            { label: "Dummy Data 2", value: "dummy2" },
-            { label: "Dummy Data 3", value: "dummy3" },
+            { label: "Bucket 1", value: "bucket_1" },
+            { label: "Bucket 2", value: "bucket_2" },
+            { label: "Bucket 3", value: "bucket_3" },
           ]}
         />
       </Flex>

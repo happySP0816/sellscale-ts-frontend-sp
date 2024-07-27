@@ -53,6 +53,7 @@ const CustomAccordionItem = ({ value, label, isActive, children }: AccordionItem
 
 export default function PreFiltersV2EditModal({ innerProps, context, id }: { innerProps: any, context: any, id: string }) {
   const saved_query_id = innerProps.id;
+  const isIcpFilter = innerProps.isIcpFilter || false;
 
   const theme = useMantineTheme();
 
@@ -305,6 +306,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           "Authorization": `Bearer ${userToken}`,
         },
         body: JSON.stringify({
+          is_icp_filter: isIcpFilter,
           editing_query: currentSavedQueryId,
           num_contacts: 100,
           organization_latest_funding_stage_cd: fundraise.length ? fundraise : undefined,
@@ -1303,7 +1305,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           >
             {saved_query_id ? 'Save Filter' : 'Save Pre-filter'}
           </Button> */}
-          {!window.location.href.includes('/analytics') && (
+          {!window.location.href.includes('/analytics') && !window.location.href.includes('/website') && (
             <Button 
               color="green"
               disabled={saved_query_id ? false : ((currentSavedQueryId === undefined) || filterName === '')}

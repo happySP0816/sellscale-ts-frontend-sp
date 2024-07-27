@@ -21,6 +21,9 @@ import {
   Table,
   ScrollArea,
   Avatar,
+  Popover,
+  Modal,
+  TextInput,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import {
@@ -30,6 +33,7 @@ import {
   IconChevronRight,
   IconCircleCheck,
   IconCircleX,
+  IconFilter,
   IconLetterT,
   IconPencil,
   IconPlus,
@@ -37,6 +41,7 @@ import {
   IconToggleRight,
   IconTrash,
 } from "@tabler/icons";
+import { IconSparkles } from "@tabler/icons-react";
 import { on } from "events";
 import { DataGrid } from "mantine-data-grid";
 import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
@@ -47,16 +52,12 @@ export default function ICPRouting() {
   const theme = useMantineTheme();
   const [loading, setLoading] = useState(false);
   const [acPageSize, setAcPageSize] = useState("25");
+  const [showTextBucketModal, setShowTextBucketModal] = useState(false);
+  const [linkedInUrl, setLinkedInUrl] = useState("");
+  const [simulationData, setSimulationData] = useState<any>();
+  
 
   const {
-    isLoading,
-    getTrackSourceMetadata,
-    getScript,
-    verifySource,
-    getMostRecentTrackEvent,
-    getTrackEventHistory,
-    getDeanonomizedContacts,
-    createIcpRoute,
     updateIcpRoute,
     getAllIcpRoutes,
     getWebVisits,
@@ -111,6 +112,8 @@ export default function ICPRouting() {
     linkedin_url: string;
     num_visits: number;
     window_locations: string[];
+    title: string;
+    company: string;
     most_recent_visit: string;
     segment_name?: string;
   };
@@ -119,121 +122,48 @@ export default function ICPRouting() {
 
   return (
     <div style={{ overflowY: "hidden" }}>
-    <Flex justify={"space-between"}>
-        <Box mt="sm">
-          <Text size={"md"} fw={600}>
-            Web Visits
-          </Text>
-        </Box>
-      </Flex>
-    <ScrollArea style={{ height: "40vh" }}>
-    <Paper withBorder radius={"sm"} p={"md"} mt={"md"} style={{ height: "40%" }}>
-      <Table mt={"md"} withBorder withColumnBorders style={{ height: "400px", overflowY: "auto" }}>
-        <thead>
-          <tr>
-            <th>
-              <Flex align={"center"} gap={"3px"}>
-                <Text color="gray">Name</Text>
-              </Flex>
-            </th>
-            <th>
-              <Flex align={"center"} gap={"3px"}>
-                <Text color="gray"># Visits</Text>
-              </Flex>
-            </th>
-            <th>
-              <Flex align={"center"} gap={"3px"}>
-                <Text color="gray">Visited Page</Text>
-              </Flex>
-            </th>
-            <th>
-              <Flex align={"center"} gap={"3px"}>
-                <Text color="gray">Last Visit</Text>
-              </Flex>
-            </th>
-            <th>
-              <Flex align={"center"} gap={"3px"}>
-                <Text color="gray">Routed Segment</Text>
-              </Flex>
-            </th>
-           
-          </tr>
-        </thead>
-        <tbody>
-          {webVisits.map((prospect) => (
-            <tr key={prospect.id}>
-              <td>
-                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
-                  <Avatar radius="xl" src={prospect.img_url} alt={prospect.full_name} size="md" mr="sm" />
-                  <Box>
-                    <Text size={"sm"} fw={500}>
-                      {prospect.full_name}
-                    </Text>
-                  </Box>
-                <ActionIcon
-                  component="a"
-                  href={prospect.linkedin_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="LinkedIn Profile"
-                >
-                  <IconBrandLinkedin size={16} color="#0077B5" />
-                </ActionIcon>
-                </Flex>
-              </td>
-              <td>
-                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
-                  <Box>
-                    <Text size={"sm"} fw={500}>
-                      {prospect.num_visits}
-                    </Text>
-                  </Box>
-                </Flex>
-              </td>
-              <td>
-                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
-                  <Box>
-                    <Text size={"sm"} fw={500}>
-                      {prospect.window_locations.map((location) => (
-                        <Badge size="sm" color="blue" variant="light" key={location}>
-                          {location}
-                        </Badge>
-                      ))}
-                    </Text>
-                  </Box>
-                </Flex>
-              </td>
-              <td>
-                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
-                  <Box>
-                    <Text size={"sm"} fw={500}>
-                      {new Date(prospect.most_recent_visit).toLocaleString('en-US', {
-                        weekday: 'short',
-                        year: 'numeric',
-                        month: 'short',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </Text>
-                  </Box>
-                </Flex>
-              </td>
-              <td>
-                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
-                  <Box>
-                    <Badge size="sm" color={prospect.segment_name ? "green" : "gray"} variant="light">
-                      {prospect.segment_name || "No Segment"}
-                    </Badge>
-                  </Box>
-                </Flex>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    </Paper>
-    </ScrollArea>
+      {showTextBucketModal && (
+        <Modal opened={showTextBucketModal} onClose={() => setShowTextBucketModal(false)}>
+          <Paper style={{ padding: "md" }}>
+            <Box mb="md">
+              <Title order={4}>Simulate Visitor Bucketing</Title>
+              <Text size="sm" color="gray">
+                Enter a LinkedIn URL to simulate how a visitor would be bucketed based on their profile.
+              </Text>
+            </Box>
+            <TextInput
+              label="LinkedIn URL"
+              placeholder="https://www.linkedin.com/in/username"
+              onChange={(event) => setLinkedInUrl(event.currentTarget.value)}
+              error={linkedInUrl && !linkedInUrl.includes("linkedin.com") ? "Invalid LinkedIn URL" : null}
+              autoComplete="off"
+            />
+            <Flex justify="flex-end" mt="md">
+              <Button
+                color="grape"
+                onClick={async () => {
+                  try {
+                    const response = await fetch('/api/simulate', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ url: linkedInUrl }),
+                    });
+                    const result = await response.json();
+                    setSimulationData(result);
+                  } catch (error) {
+                    console.error("Error simulating bucketing:", error);
+                  }
+                }}
+              >
+                Simulate
+              </Button>
+            </Flex>
+          </Paper>
+        </Modal>
+        
+      )}
     <Flex justify={"space-between"}>
         <Box mt="sm">
           <Text size={"md"} fw={600}>
@@ -243,32 +173,42 @@ export default function ICPRouting() {
             Define how your visitors are bucketed
           </Text>
         </Box>
-        <Button
-          mt="sm"
-          leftIcon={<IconPlus size={"1rem"} />}
-          onClick={() =>
-            openContextModal({
-              modal: "createICProutingModal",
-              title: (
-                <Flex>
-                  <Title order={3}>Create ICP Routing</Title>
-                </Flex>
-              ),
-              innerProps: {
-                onClose: () => {
-                  fetchData();
+        <Flex gap="sm" mt="sm">
+          <Button
+            leftIcon={<IconPlus size={"1rem"} />}
+            onClick={() =>
+              openContextModal({
+                modal: "createICProutingModal",
+                title: (
+                  <Flex>
+                    <Title order={3}>Create ICP Routing</Title>
+                  </Flex>
+                ),
+                innerProps: {
+                  onClose: () => {
+                    fetchData();
+                  },
                 },
-              },
-              styles: {
-                content: {
-                  minWidth: "700px",
+                styles: {
+                  content: {
+                    minWidth: "700px",
+                  },
                 },
-              },
-            })
-          }
-        >
-          Create Visitor Bucket
-        </Button>
+              })
+            }
+          >
+            Create Visitor Bucket
+          </Button>
+          <Button
+            leftIcon={<IconSparkles size={"1rem"} />}
+            color="grape"
+            onClick={() => {
+              setShowTextBucketModal(true);
+            }}
+          >
+            Simulate Bucketing
+          </Button>
+        </Flex>
       </Flex>
     <ScrollArea style={{ height: "40vh" }}>
     <Paper withBorder radius={"sm"} p={"md"} mt={"md"} style={{ height: "50%", overflowY: "auto" }}>
@@ -358,7 +298,37 @@ export default function ICPRouting() {
                             <Badge mb="sm" mt="sm" color="teal" variant="light">
                               {rule.condition.replace(/_/g, " ")}
                             </Badge>
-                            <Text mb="sm" mt="sm">{'"'}{rule.value}{'"'}</Text>
+                            {rule.condition === "filter_matches" ? (
+                              <Flex align="center" gap="xs">
+                                <Badge mb="sm" mt="sm" color="grape" variant="light" rightSection={
+                                  <ActionIcon
+                                    onClick={() => {
+                                      openContextModal({
+                                        modal: "prefilterEditModal",
+                                        title: (
+                                          <Title order={3} className="flex items-center gap-2">
+                                            <IconFilter size={"1.5rem"} color="#228be6" /> Edit Pre-Filter
+                                          </Title>
+                                        ),
+                                        innerProps: { isIcpFilter: true, id: rule.value },
+                                        centered: true,
+                                        styles: {
+                                          content: {
+                                            minWidth: "80%",
+                                          },
+                                        },
+                                      });
+                                    }}
+                                  >
+                                    <IconPencil color='purple' size={16} />
+                                  </ActionIcon>
+                                }>
+                                  {'FILTER'}
+                                </Badge>
+                              </Flex>
+                            ) : (
+                              <Text mb="sm" mt="sm">{'"'}{rule.value}{'"'}</Text>
+                            )}
                           </Flex>
                         ))}
                       </Box>
@@ -406,9 +376,9 @@ export default function ICPRouting() {
                   <Button
                     size="xs"
                     radius={"xl"}
-                    color="yellow"
+                    color="green"
                     variant="light"
-                    leftIcon={<IconPencil color="orange" size={"1rem"} />}
+                    leftIcon={<IconPencil color="green" size={"1rem"} />}
                     onClick={() => {
                       openContextModal({
                         modal: "createICProutingModal",
@@ -469,6 +439,156 @@ export default function ICPRouting() {
                     Delete
                   </Button>
                   </Flex>
+                </Flex>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </Paper>
+    </ScrollArea>
+    <Flex justify={"space-between"}>
+        <Box >
+          <Text size={"md"} fw={600}>
+            Web Visits
+          </Text>
+        </Box>
+      </Flex>
+    <ScrollArea style={{ height: "40vh" }}>
+    <Paper withBorder radius={"sm"} p={"md"} mt={"md"} style={{ height: "40%" }}>
+      <Table mt={"md"} withBorder withColumnBorders style={{ height: "400px", overflowY: "auto" }}>
+        <thead>
+          <tr>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Name</Text>
+              </Flex>
+            </th>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Company</Text>
+              </Flex>
+            </th>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Title</Text>
+              </Flex>
+            </th>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray"># Visits</Text>
+              </Flex>
+            </th>
+            <th style={{ maxWidth: "300px" }}>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Visited Page</Text>
+              </Flex>
+            </th>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Last Visit</Text>
+              </Flex>
+            </th>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Routed Segment</Text>
+              </Flex>
+            </th>
+           
+          </tr>
+        </thead>
+        <tbody>
+          {webVisits.map((prospect) => (
+            <tr key={prospect.id}>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Avatar radius="xl" src={prospect.img_url} alt={prospect.full_name} size="md" mr="sm" />
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {prospect.full_name}
+                    </Text>
+                  </Box>
+                <ActionIcon
+                  component="a"
+                  href={prospect.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="LinkedIn Profile"
+                >
+                  <IconBrandLinkedin size={16} color="#0077B5" />
+                </ActionIcon>
+                </Flex>
+              </td>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {prospect.company}
+                    </Text>
+                  </Box>
+                </Flex>
+              </td>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {prospect.title}
+                    </Text>
+                  </Box>
+                </Flex>
+              </td>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {prospect.window_locations.length}
+                    </Text>
+                  </Box>
+                </Flex>
+              </td>
+              <td>
+                <Flex style={{ maxWidth: "300px" }} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {prospect.window_locations.map((location) => (
+                        <Popover position="top" withArrow shadow="md">
+                          <Popover.Target>
+                            <Badge size="sm" color="blue" variant="light" key={location}>
+                              {location.length > 40 ? `${location.slice(0, 37)}...` : location}
+                            </Badge>
+                          </Popover.Target>
+                          <Popover.Dropdown>
+                            <Text size="sm">{location}</Text>
+                          </Popover.Dropdown>
+                        </Popover>
+                      ))}
+                    </Text>
+                  </Box>
+                </Flex>
+              </td>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Text size={"sm"} fw={500}>
+                      {new Date(prospect.most_recent_visit).toLocaleString('en-US', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Text>
+                  </Box>
+                </Flex>
+              </td>
+              <td>
+                <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
+                  <Box>
+                    <Badge size="sm" color={prospect.segment_name ? "green" : "gray"} variant="light">
+                      {prospect.segment_name || "No Segment"}
+                    </Badge>
+                  </Box>
                 </Flex>
               </td>
             </tr>

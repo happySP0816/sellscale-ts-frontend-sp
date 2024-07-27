@@ -41,6 +41,7 @@ import {
   IconArrowRight,
   IconChevronDown,
   IconChevronUp,
+  IconClock,
   IconEdit,
   IconMail,
   IconMessages,
@@ -512,7 +513,7 @@ export default function CampaignTemplateEditModal({
                             </ThemeIcon>
                             Step {index + 1}
                           </Text>
-                          {index > 0 && (
+                          {index === Number(steps) - 1 && (
                             <ActionIcon color="red" onClick={() => setSteps((item) => (item = item - 1))}>
                               <IconTrash size={"1rem"} />
                             </ActionIcon>
@@ -526,6 +527,12 @@ export default function CampaignTemplateEditModal({
                             {(stagingData[sequenceType]?.filter((asset: any) => asset.step_num === index + 1).length || 0) +
                               (sequenceType === "email" ? emailSequenceData[index]?.length || 0 : linkedinSequenceData[index]?.length || 0)}{" "}
                             Templates Active
+                          </Text>
+                        </Flex>
+                        <Flex gap={5} ml={30} mt={6} align={"center"}>
+                          <IconClock color="orange" size={"1rem"} />
+                          <Text size={"xs"} fw={600} color="gray">
+                            {stagingData[sequenceType]?.filter((asset: any) => asset.step_num === index + 1).length + " "} template pending save
                           </Text>
                         </Flex>
                       </Paper>

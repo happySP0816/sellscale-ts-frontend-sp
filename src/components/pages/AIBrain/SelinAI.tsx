@@ -38,6 +38,7 @@ import {
   IconPoint,
   IconSend,
   IconTrash,
+  IconX,
 } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
 import moment from "moment";
@@ -50,6 +51,7 @@ import { API_URL, SITE_NAME } from "@constants/data";
 import { openContextModal } from "@mantine/modals";
 import { set } from "lodash";
 import { useDisclosure } from "@mantine/hooks";
+import SelinAIPlanner from "./SelinAIPlanner";
 
 export default function SelinAI() {
   const [history, setHistory] = useState([
@@ -606,7 +608,7 @@ const SegmentAIGeneration = (props: any) => {
           ]}
         />
       </Paper>
-      <ScrollArea h={500} scrollHideDelay={4000} px={"md"}>
+      <ScrollArea bg={"#f7f8fa"} h={500} scrollHideDelay={4000} p={"md"}>
         {aiType === "browser" ? (
           <Text>This is Broswer AI Generation Component</Text>
         ) : aiType === "segment" ? (
@@ -616,7 +618,7 @@ const SegmentAIGeneration = (props: any) => {
         ) : aiType === "analytics" ? (
           <Text>This is Analytics AI Generation Component</Text>
         ) : (
-          <Text>This is Planner/logs AI Generation Component</Text>
+          <SelinAIPlanner />
         )}
       </ScrollArea>
     </Paper>

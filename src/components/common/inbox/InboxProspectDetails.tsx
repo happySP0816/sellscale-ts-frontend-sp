@@ -198,8 +198,6 @@ export default function ProjectDetails(props: {
           message: "We have fetched the number successfully!",
           color: "blue",
         });
-
-        refetchProspectDetails();
       }
     } else {
       if (jsonResponse.status === 400 && !jsonResponse.fetching) {
@@ -208,11 +206,10 @@ export default function ProjectDetails(props: {
           message: "We could not find the phone number.",
           color: "red",
         });
-
-        refetchProspectDetails();
       }
     }
 
+    refetchProspectDetails();
     setLoadingStateFindPhoneNumber(false);
   }
 

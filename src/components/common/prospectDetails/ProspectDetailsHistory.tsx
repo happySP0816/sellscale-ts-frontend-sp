@@ -207,9 +207,9 @@ function historyEventToDescription(theme: MantineTheme, item: HistoryItem) {
             {formatToLabel(item.to)}
           </Badge>
           {item.additional_context && (
-            <Badge color={"grey"} size={"xs"}>
+            <Text color={"grey"} size={"xs"}>
               {item.additional_context}
-            </Badge>
+            </Text>
           )}
         </>
       );

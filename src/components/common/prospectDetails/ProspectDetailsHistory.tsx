@@ -206,6 +206,11 @@ function historyEventToDescription(theme: MantineTheme, item: HistoryItem) {
           <Badge color={valueToColor(theme, formatToLabel(item.to))} size="xs">
             {formatToLabel(item.to)}
           </Badge>
+          {item.additional_context && (
+            <Badge color={"grey"} size={"xs"}>
+              {item.additional_context}
+            </Badge>
+          )}
         </>
       );
     case "DEMO_FEEDBACK":
@@ -229,28 +234,19 @@ export default function ProspectDetailsHistory(props: {
   const [historyFetchedForId, setHistoryFetchedForId] = useState<number>(-1);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
-  if (historyFetchedForId !== props.prospectId) {
-    setHistoryFetchedForId(props.prospectId);
-    setLoadingHistory(true);
-    (async () => {
-      const response = await getProspectHistory(userToken, props.prospectId);
-      setLinkedInHistory(response.data.linkedin);
-      setEmailHistory(response.data.email);
-      setLoadingHistory(false);
-    })();
-  }
-
   useEffect(() => {
-    setHistoryFetchedForId(props.prospectId);
-    setLoadingHistory(true);
-    (async () => {
-      const response = await getProspectHistory(userToken, props.prospectId);
-      setLinkedInHistory(response.data.linkedin);
-      setEmailHistory(response.data.email);
-      setEngagementHistory(response.data.engagements);
-      setLoadingHistory(false);
-    })();
-  }, [props.forceRefresh]);
+    if (props.prospectId && (!historyFetchedForId || historyFetchedForId !== props.prospectId)) {
+      setHistoryFetchedForId(props.prospectId);
+      setLoadingHistory(true);
+      (async () => {
+        const response = await getProspectHistory(userToken, props.prospectId);
+        setLinkedInHistory(response.data.linkedin);
+        setEmailHistory(response.data.email);
+        setEngagementHistory(response.data.engagements);
+        setLoadingHistory(false);
+      })();
+    }
+  }, [props.prospectId]);
 
   // Format the events into a sortable timeline
   let events: HistoryItem[] = [];

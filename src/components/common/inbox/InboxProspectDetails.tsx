@@ -30,7 +30,7 @@ import {
   Radio,
   TextInput,
   Checkbox,
-  SimpleGrid, HoverCard,
+  SimpleGrid, HoverCard, Loader,
 } from "@mantine/core";
 import {
   IconBriefcase,
@@ -142,6 +142,8 @@ export default function ProjectDetails(props: {
   const [demoSetType, setDemoSetType] = useState("DIRECT");
   const [handoffText, setHandoffText] = useState("");
 
+  const [loadingStateFindPhoneNumber, setLoadingStateFindPhoneNumber] = useState(false);
+
   let showCRM = userData?.client_sync_crm !== null;
 
   const { data, isFetching, refetch: refetchProspectDetails } = useQuery({
@@ -172,6 +174,7 @@ export default function ProjectDetails(props: {
   });
 
   const onClickRevealNumber = async () => {
+    setLoadingStateFindPhoneNumber(true);
     const response = await fetch(`${API_URL}/prospect/get-phone-number/${openedProspectId}`, {
       method: 'GET',
       headers: {
@@ -209,6 +212,8 @@ export default function ProjectDetails(props: {
         refetchProspectDetails();
       }
     }
+
+    setLoadingStateFindPhoneNumber(false);
   }
 
   let statusValue = data?.details?.linkedin_status || "ACCEPTED";
@@ -510,11 +515,15 @@ export default function ProjectDetails(props: {
                     <IconPhone stroke={1.5} size={18} className={classes.icon} />
                     <HoverCard width={280} shadow="md" closeDelay={200}>
                       <HoverCard.Target>
-                        <Button size={'xs'} variant={'outline'} onClick={() => onClickRevealNumber()}>Click here to reveal phone number</Button>
+                        <Button size={'xs'} variant={'outline'}
+                                disabled={loadingStateFindPhoneNumber}
+                                onClick={() => onClickRevealNumber()}>
+                          {loadingStateFindPhoneNumber ? <Loader /> : "Click here to reveal phone number" }
+                        </Button>
                       </HoverCard.Target>
                       <HoverCard.Dropdown>
                         <Text size="sm">
-                          We will try to find the prospect's phone number, and if successful, will use Apollo Credits.
+                          We will try to find the prospect's phone number.
                         </Text>
                       </HoverCard.Dropdown>
                     </HoverCard>
@@ -528,7 +537,7 @@ export default function ProjectDetails(props: {
                     <IconPhone stroke={1.5} size={18} className={classes.icon} />
                     <HoverCard width={280} shadow="md" closeDelay={200}>
                       <HoverCard.Target>
-                        <Text size={'xs'} variant={'outline'}>Phone number not founded</Text>
+                        <Text size={'xs'} variant={'outline'}>Phone number not found</Text>
                       </HoverCard.Target>
                       <HoverCard.Dropdown>
                         <Text size="sm">
@@ -543,7 +552,7 @@ export default function ProjectDetails(props: {
                 data?.phone.reveal_phone_number && data?.phone.phone_number && (
                   <Group noWrap spacing={10} mt={5}>
                     <IconPhone stroke={1.5} size={18} className={classes.icon} />
-                    <Text>{formatPhoneNumber(data?.phone.phone_number)}</Text>
+                    <Text>{data?.phone.phone_number === "finding" ? "currently finding phone number in the background." : formatPhoneNumber(data?.phone.phone_number)}</Text>
                   </Group>
                 )
               }

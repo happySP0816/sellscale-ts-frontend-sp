@@ -70,6 +70,8 @@ export default function WebsiteOverview(props: any) {
   const [trackHistory, setTrackHistory] = useState<any[]>([]);
   const [locations, setLocations] = useState<any[]>([]);
   const [webVisits, setWebVisits] = useState<any[]>([]);
+  const [filteredWebVisits, setFilteredWebVisits] = useState<any[]>([]);
+  const [buckets, setBuckets] = useState<any[]>([]);
 
   const fetchWebVisits = async () => {
     setLoading(true);
@@ -77,6 +79,20 @@ export default function WebsiteOverview(props: any) {
       const webVisits = await getWebVisits(userToken);
       console.log('data', webVisits);
       setWebVisits(webVisits);
+      setFilteredWebVisits(webVisits);
+    } catch (error) {
+      console.error("Error fetching ICP routes:", error);
+    }
+    setLoading(false
+    );
+  }
+
+  const fetchBuckets = async () => {
+    setLoading(true);
+    try {
+      const buckets = await fetchUserBuckets(userToken);
+      console.log('data', buckets);
+      setBuckets(buckets);
     } catch (error) {
       console.error("Error fetching ICP routes:", error);
     }
@@ -98,6 +114,7 @@ export default function WebsiteOverview(props: any) {
     updateIcpRoute,
     getAllIcpRoutes,
     getWebVisits,
+    fetchUserBuckets,
     autoClassifyDeanonymizedContacts,
   } = useTrackApi(userToken);
 
@@ -153,6 +170,7 @@ export default function WebsiteOverview(props: any) {
     handleGetTrackHistory();
     handleGetDeanonymizedContacts();
     fetchWebVisits();
+    fetchBuckets();
   }, [userToken, dateRange]);
 
   const maxDeanonymizedVisits = Math.max(...trackHistory?.map((x) => x.distinct_deanonymized_visits), 0) + 5;
@@ -321,14 +339,12 @@ export default function WebsiteOverview(props: any) {
         </Text>
         <Select
           w={200}
-          defaultValue={"dummy1"}
-          onChange={(v: any) => console.log(v)}
-          data={[
-            { label: "Bucket 1", value: "bucket_1" },
-            { label: "Bucket 2", value: "bucket_2" },
-            { label: "Bucket 3", value: "bucket_3" },
-          ]}
+          label="Filter by bucket"
+          defaultValue={"all"}
+          onChange={(v: any) => setFilteredWebVisits(v === "all" ? webVisits : webVisits.filter((contact) => contact.icp_routing_id === v))}
+          data={[{ label: "All Buckets", value: "all" }, ...buckets.map((bucket) => ({ label: bucket.title, value: bucket.id }))]}
         />
+      
       </Flex>
     <ScrollArea style={{ height: "40vh" }}>
       <Table mt={"md"} withBorder withColumnBorders style={{ height: "400px", overflowY: "auto" }}>
@@ -366,14 +382,14 @@ export default function WebsiteOverview(props: any) {
             </th>
             <th>
               <Flex align={"center"} gap={"3px"}>
-                <Text color="gray">Routed Segment</Text>
+                <Text color="gray">Bucket</Text>
               </Flex>
             </th>
            
           </tr>
         </thead>
         <tbody>
-          {webVisits.map((prospect) => (
+          {filteredWebVisits.map((prospect) => (
             <tr key={prospect.id}>
               <td>
                 <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
@@ -460,8 +476,8 @@ export default function WebsiteOverview(props: any) {
               <td>
                 <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
                   <Box>
-                    <Badge size="sm" color={prospect.segment_name ? "green" : "gray"} variant="light">
-                      {prospect.segment_name || "No Segment"}
+                    <Badge size="sm" color={prospect.icp_routing_id !== null ? "green" : "gray"} variant="light">
+                      {prospect.icp_routing_id !== null ? "Caught" : "Uncaught"}
                     </Badge>
                   </Box>
                 </Flex>

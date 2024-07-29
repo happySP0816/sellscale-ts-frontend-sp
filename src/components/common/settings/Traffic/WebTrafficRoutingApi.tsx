@@ -42,6 +42,21 @@ export const useTrackApi = (userToken: string) => {
     return data;
   };
 
+  const fetchUserBuckets = async (userToken: string) => {
+    setIsLoading(true);
+    const url = new URL(`${API_URL}/track/fetch_user_buckets`);
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    const data = await response.json();
+    setIsLoading(false);
+    return data;
+  }
+
   const getWebVisits = async (userToken: string) => {
     const url = new URL(`${API_URL}/track/get_user_web_visits`);
     const response = await fetch(url.toString(), {
@@ -250,6 +265,7 @@ export const useTrackApi = (userToken: string) => {
     getScript,
     verifySource,
     getWebVisits,
+    fetchUserBuckets,
     getMostRecentTrackEvent,
     getTrackEventHistory,
     getDeanonomizedContacts,

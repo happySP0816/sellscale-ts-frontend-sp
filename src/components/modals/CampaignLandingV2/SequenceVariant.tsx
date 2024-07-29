@@ -95,6 +95,8 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
     setManuallyAddedTemplate,
   } = props;
 
+  console.log("----------", text)
+
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
@@ -103,12 +105,17 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
   const [showEditor, setShowEditor] = useState(false);
   const bodyRich = useRef<JSONContent | null>(null);
   const bodyRef = useRef<string | null>(null);
+  const [textState, setTextState] = useState<string>(text);
 
-  const [textState, setTextState] = useState<string>(
-    assetType === "linkedin" && text.startsWith("<p>") && text.endsWith("</p>")
-      ? text.slice(3, -4)
-      : text
-  );
+  useEffect(() => {
+    setTextState(text);
+  }, [text]);
+
+  // const [textState, setTextState] = useState<string>(
+  //   assetType === "linkedin" && text.startsWith("<p>") && text.endsWith("</p>")
+  //     ? text.slice(3, -4)
+  //     : text
+  // );
 
   useEffect(() => {
     if (typeof text === 'string') {

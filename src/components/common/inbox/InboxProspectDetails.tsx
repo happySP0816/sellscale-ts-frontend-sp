@@ -552,7 +552,7 @@ export default function ProjectDetails(props: {
                 data?.phone.reveal_phone_number && data?.phone.phone_number && (
                   <Group noWrap spacing={10} mt={5}>
                     <IconPhone stroke={1.5} size={18} className={classes.icon} />
-                    <Text>{formatPhoneNumber(data?.phone.phone_number)}</Text>
+                    <Text>{data?.phone.phone_number === "finding" ? "currently finding phone number in the background." : formatPhoneNumber(data?.phone.phone_number)}</Text>
                   </Group>
                 )
               }

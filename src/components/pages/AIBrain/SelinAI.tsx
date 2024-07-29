@@ -30,6 +30,7 @@ import {
   IconChevronDown,
   IconChevronUp,
   IconCircleCheck,
+  IconClock,
   IconFile,
   IconFilter,
   IconLink,
@@ -619,6 +620,17 @@ const SegmentAIGeneration = (props: any) => {
           <Text>This is Planner/logs AI Generation Component</Text>
         )}
       </ScrollArea>
+      <Paper withBorder bg={"#fffcf5"} radius={"sm"} p={"sm"} style={{ borderColor: "#fab005" }}>
+        <Flex align={"center"} justify={"space-between"}>
+          <Text color="yellow" size={"sm"} fw={600} tt={"uppercase"} className="flex gap-2 items-center">
+            <IconClock size={"1rem"} />
+            estimated completion time:
+          </Text>
+          <Text size={"sm"} color="yellow" fw={600}>
+            10 hrs, 28 min
+          </Text>
+        </Flex>
+      </Paper>
     </Paper>
   );
 };

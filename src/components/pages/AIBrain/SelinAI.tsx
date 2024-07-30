@@ -44,6 +44,7 @@ import ComingSoonCard from "@common/library/ComingSoonCard";
 import SegmentV3 from "@pages/SegmentV3/SegmentV3";
 import CampaignLandingV2 from "@pages/CampaignV2/CampaignLandingV2";
 import WhatHappenedLastWeek from "./WhatHappenedLastWeek";
+import AIBrainStrategy from "@pages/Strategy/AIBrainStrategy";
 
 export default function SelinAI() {
   const [history, setHistory] = useState([
@@ -126,9 +127,18 @@ export default function SelinAI() {
   return (
     <Card withBorder p="lg" maw={"1500px"} ml="auto" mr="auto" mt="lg">
       <Paper withBorder shadow="md" radius={"sm"} p={"sm"}>
-        <Flex align={"center"} justify={"space-between"} onClick={toggle} className="hover:cursor-pointer">
+        <Flex
+          align={"center"}
+          justify={"space-between"}
+          onClick={toggle}
+          className="hover:cursor-pointer"
+        >
           <Text fw={600}>{chats.length} other active tasks</Text>
-          {opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}
+          {opened ? (
+            <IconChevronUp size={"1rem"} />
+          ) : (
+            <IconChevronDown size={"1rem"} />
+          )}
         </Flex>
         <Collapse in={opened}>
           <Flex mt={"md"} gap={"sm"}>
@@ -145,17 +155,32 @@ export default function SelinAI() {
                 New Chat
               </Text>
             </Paper>
-            <Flex align={"center"} gap={"sm"} ref={containerRef} style={{ overflow: "hidden" }}>
+            <Flex
+              align={"center"}
+              gap={"sm"}
+              ref={containerRef}
+              style={{ overflow: "hidden" }}
+            >
               {chats.map((item, index) => {
                 return (
                   <Paper withBorder radius={"sm"} p={"sm"} miw={400}>
                     <Flex align={"center"} gap={"sm"}>
                       {item.status === "Live" ? (
-                        <ThemeIcon color="green" radius={"xl"} size={"xs"} p={0} variant="light">
+                        <ThemeIcon
+                          color="green"
+                          radius={"xl"}
+                          size={"xs"}
+                          p={0}
+                          variant="light"
+                        >
                           <IconPoint fill="green" color="white" size={"4rem"} />
                         </ThemeIcon>
                       ) : item.status === "Completed" ? (
-                        <IconCircleCheck size={"1rem"} fill="green" color="white" />
+                        <IconCircleCheck
+                          size={"1rem"}
+                          fill="green"
+                          color="white"
+                        />
                       ) : (
                         <></>
                       )}{" "}
@@ -164,7 +189,9 @@ export default function SelinAI() {
                       </Text>
                     </Flex>
                     <Text fw={600}>{item.title}</Text>
-                    <Text color="gray">Time Remaining: {item.time_remaining}</Text>
+                    <Text color="gray">
+                      Time Remaining: {item.time_remaining}
+                    </Text>
                   </Paper>
                 );
               })}
@@ -247,7 +274,11 @@ const SegmentChat = (props: any) => {
         created_at: moment().format("MMMM D, h:mm a"),
       };
       // Replace the loading message with the actual response
-      setChatContent((chatContent: any) => chatContent.map((message: any) => (message.id === loadingMessage.id ? chatbotMessage : message)));
+      setChatContent((chatContent: any) =>
+        chatContent.map((message: any) =>
+          message.id === loadingMessage.id ? chatbotMessage : message
+        )
+      );
       viewport.current?.scrollTo({ top: viewport.current.scrollHeight });
       setLoading(false);
 
@@ -276,7 +307,8 @@ const SegmentChat = (props: any) => {
   const [chat2, setChat2] = useState([
     {
       status: true,
-      title: "Gather information about your medical Scribe AI Product by researching on",
+      title:
+        "Gather information about your medical Scribe AI Product by researching on",
       content: `"www.junipero.com/scribe"`,
     },
     {
@@ -314,14 +346,32 @@ const SegmentChat = (props: any) => {
       </Flex>
       <Divider bg="gray" />
       <ScrollArea h={500} viewportRef={viewport} scrollHideDelay={4000}>
-        <Flex direction={"column"} gap={"sm"} p={"md"} h={"100%"} className=" overflow-auto">
+        <Flex
+          direction={"column"}
+          gap={"sm"}
+          p={"md"}
+          h={"100%"}
+          className=" overflow-auto"
+        >
           {chatContent.map((item: any, index: number) => {
             return (
-              <Flex direction={"column"} w={"80%"} gap={4} key={index} ml={item.sender === "user" ? "auto" : "0"}>
+              <Flex
+                direction={"column"}
+                w={"80%"}
+                gap={4}
+                key={index}
+                ml={item.sender === "user" ? "auto" : "0"}
+              >
                 <Flex gap={4} align={"center"}>
-                  <Avatar src={item.sender === "user" ? userData.img_url : Logo} size={"xs"} radius={"xl"} />
+                  <Avatar
+                    src={item.sender === "user" ? userData.img_url : Logo}
+                    size={"xs"}
+                    radius={"xl"}
+                  />
                   <Text fw={600} size={"xs"}>
-                    {item.sender === "user" ? userData.sdr_name : "SellScale AI"}
+                    {item.sender === "user"
+                      ? userData.sdr_name
+                      : "SellScale AI"}
                   </Text>
                 </Flex>
                 {/* <Flex className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none" px={"sm"} py={7}>
@@ -340,7 +390,11 @@ const SegmentChat = (props: any) => {
                     )}
                   </Text>
                 </Flex> */}
-                <Flex className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none" px={"sm"} py={7}>
+                <Flex
+                  className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none"
+                  px={"sm"}
+                  py={7}
+                >
                   <Text size={"sm"} fw={500}>
                     {item.sender === "user" ? (
                       item.query
@@ -360,14 +414,26 @@ const SegmentChat = (props: any) => {
                         ) : (
                           <Flex className="flex-col gap-1" px={"sm"} py={7}>
                             <Text size={"sm"} fw={600}>
-                              Perfect! Here's how I will proceed on executing on this strategy.
+                              Perfect! Here's how I will proceed on executing on
+                              this strategy.
                             </Text>
                             {chat2.map((subItem, subIndex) => {
                               return (
-                                <Paper key={subIndex} bg={"#f9fbfe"} withBorder radius={"sm"} p={"sm"}>
+                                <Paper
+                                  key={subIndex}
+                                  bg={"#f9fbfe"}
+                                  withBorder
+                                  radius={"sm"}
+                                  p={"sm"}
+                                >
                                   <Flex align={"start"} gap={"sm"}>
                                     <Box>
-                                      <IconCircleCheck fill={subItem.status ? "#228be6" : "gray"} color={"white"} />
+                                      <IconCircleCheck
+                                        fill={
+                                          subItem.status ? "#228be6" : "gray"
+                                        }
+                                        color={"white"}
+                                      />
                                     </Box>
                                     <Box>
                                       <Text size={"xs"} fw={500} color="gray">
@@ -379,7 +445,8 @@ const SegmentChat = (props: any) => {
                               );
                             })}
                             <Text size={"sm"} fw={600}>
-                              I will let you know once the campaign is ready to lanuch!
+                              I will let you know once the campaign is ready to
+                              lanuch!
                             </Text>
                           </Flex>
                         )}
@@ -387,7 +454,11 @@ const SegmentChat = (props: any) => {
                     )}
                   </Text>
                 </Flex>
-                <Text color="gray" size={"xs"} ml={item.sender === "user" ? "auto" : "0"}>
+                <Text
+                  color="gray"
+                  size={"xs"}
+                  ml={item.sender === "user" ? "auto" : "0"}
+                >
                   {item.created_at}
                 </Text>
               </Flex>
@@ -396,7 +467,14 @@ const SegmentChat = (props: any) => {
           {/* {loading && <Loader color="blue" type="dots" />} */}
         </Flex>
       </ScrollArea>
-      <Paper p={"sm"} withBorder radius={"md"} className="bg-[#f7f8fa]" my={"lg"} mx={"md"}>
+      <Paper
+        p={"sm"}
+        withBorder
+        radius={"md"}
+        className="bg-[#f7f8fa]"
+        my={"lg"}
+        mx={"md"}
+      >
         <TextInput
           multiple
           value={prompt}
@@ -407,14 +485,29 @@ const SegmentChat = (props: any) => {
         />
         <Flex justify={"space-between"} mt={"sm"} align={"center"}>
           <Flex gap={"sm"}>
-            <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
+            <ActionIcon
+              variant="outline"
+              color="gray"
+              radius={"xl"}
+              size={"sm"}
+            >
               <IconPlus size={"1rem"} />
             </ActionIcon>
-            <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
+            <ActionIcon
+              variant="outline"
+              color="gray"
+              radius={"xl"}
+              size={"sm"}
+            >
               <IconLink size={"1rem"} />
             </ActionIcon>
           </Flex>
-          <Button size="xs" color="grape" rightIcon={<IconSend size={"1rem"} />} onClick={handleSubmit}>
+          <Button
+            size="xs"
+            color="grape"
+            rightIcon={<IconSend size={"1rem"} />}
+            onClick={handleSubmit}
+          >
             Ask AI
           </Button>
         </Flex>
@@ -425,12 +518,15 @@ const SegmentChat = (props: any) => {
 
 const SegmentAIGeneration = (props: any) => {
   const [active, setActive] = useState(1);
-  const [assets, setAssets] = useState(["Important-sales-asset.pdf", "extra-asset-1.pdf"]);
+  const [assets, setAssets] = useState([
+    "Important-sales-asset.pdf",
+    "extra-asset-1.pdf",
+  ]);
   const [generatingFilters, setGeneratingFilters] = useState(false);
   const [loadingIndex, setLoadingIndex] = useState<number>(0);
   const userToken = useRecoilValue(userTokenState);
 
-  const [aiType, setAIType] = useState("browser");
+  const [aiType, setAIType] = useState("strategy");
 
   const updateSegment = (index: number, field: any, value: any) => {
     fetch(`${API_URL}/apollo/update_segment`, {
@@ -529,7 +625,13 @@ const SegmentAIGeneration = (props: any) => {
 
   return (
     <Paper withBorder shadow="sm" w={"65%"} radius={"md"}>
-      <Flex p={"md"} align={"center"} gap={5} bg={"grape"} className=" rounded-t-md">
+      <Flex
+        p={"md"}
+        align={"center"}
+        gap={5}
+        bg={"grape"}
+        className=" rounded-t-md"
+      >
         <IconSparkles size={"1rem"} color="white" />
         <Text fw={600} color="white">
           AI Generation
@@ -553,11 +655,13 @@ const SegmentAIGeneration = (props: any) => {
           }}
           data={[
             {
-              value: "browser",
+              value: "strategy",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {aiType === "browser" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
-                  <span>Browser</span>
+                  {aiType === "strategy" && (
+                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
+                  )}
+                  <span>Strategy</span>
                 </Center>
               ),
             },
@@ -565,7 +669,9 @@ const SegmentAIGeneration = (props: any) => {
               value: "segment",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {aiType === "segment" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  {aiType === "segment" && (
+                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
+                  )}
                   <span>Segments</span>
                 </Center>
               ),
@@ -574,7 +680,9 @@ const SegmentAIGeneration = (props: any) => {
               value: "campaign",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {aiType === "campaign" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  {aiType === "campaign" && (
+                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
+                  )}
                   <span>Campaigns</span>
                 </Center>
               ),
@@ -583,7 +691,9 @@ const SegmentAIGeneration = (props: any) => {
               value: "analytics",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {aiType === "analytics" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  {aiType === "analytics" && (
+                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
+                  )}
                   <span>Analytics</span>
                 </Center>
               ),
@@ -592,7 +702,9 @@ const SegmentAIGeneration = (props: any) => {
               value: "planner",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {aiType === "planner" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  {aiType === "planner" && (
+                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
+                  )}
                   <span>Planner/Logs</span>
                 </Center>
               ),
@@ -601,8 +713,8 @@ const SegmentAIGeneration = (props: any) => {
         />
       </Paper>
       <ScrollArea bg={"#f7f8fa"} h={400} scrollHideDelay={4000} p={"md"}>
-        {aiType === "browser" ? (
-          <ComingSoonCard />
+        {aiType === "strategy" ? (
+          <AIBrainStrategy />
         ) : aiType === "segment" ? (
           <Box maw="900px">
             <SegmentV3 />
@@ -619,9 +731,22 @@ const SegmentAIGeneration = (props: any) => {
           <SelinAIPlanner />
         )}
       </ScrollArea>
-      <Paper withBorder bg={"#fffcf5"} radius={"sm"} p={"sm"} style={{ borderColor: "#fab005" }} m="xs">
+      <Paper
+        withBorder
+        bg={"#fffcf5"}
+        radius={"sm"}
+        p={"sm"}
+        style={{ borderColor: "#fab005" }}
+        m="xs"
+      >
         <Flex align={"center"} justify={"space-between"}>
-          <Text color="yellow" size={"sm"} fw={600} tt={"uppercase"} className="flex gap-2 items-center">
+          <Text
+            color="yellow"
+            size={"sm"}
+            fw={600}
+            tt={"uppercase"}
+            className="flex gap-2 items-center"
+          >
             <IconClock size={"1rem"} />
             estimated completion time:
           </Text>
@@ -648,7 +773,9 @@ const TimelineComponent = () => {
     for (let hour = 0; hour <= 24; hour++) {
       for (let minute = 0; minute < 60; minute += 10) {
         data.push({
-          time: `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`,
+          time: `${hour
+            .toString()
+            .padStart(2, "0")}:${minute.toString().padStart(2, "0")}`,
           isMainGraduation: minute === 0,
           label: minute === 0 ? `${hour.toString().padStart(2, "0")}:00` : "",
         });
@@ -720,8 +847,18 @@ const TimelineComponent = () => {
         <div className="absolute top-[-15px]">
           <IconTriangleInverted size={"1rem"} fill="gray" color="white" />
         </div>
-        <div className="absolute left-0 top-[-10px] h-[50px] w-[120px]" style={{ backgroundImage: "linear-gradient(90deg, white, transparent)" }}></div>
-        <div className="absolute right-0 top-[-10px] h-[50px] w-[120px]" style={{ backgroundImage: "linear-gradient(90deg, transparent, white)" }}></div>
+        <div
+          className="absolute left-0 top-[-10px] h-[50px] w-[120px]"
+          style={{
+            backgroundImage: "linear-gradient(90deg, white, transparent)",
+          }}
+        ></div>
+        <div
+          className="absolute right-0 top-[-10px] h-[50px] w-[120px]"
+          style={{
+            backgroundImage: "linear-gradient(90deg, transparent, white)",
+          }}
+        ></div>
       </div>
       <div
         ref={containerRef}
@@ -739,7 +876,12 @@ const TimelineComponent = () => {
             return (
               <>
                 {index < timelineData.length - 5 && (
-                  <Flex key={index} direction={"column"} align={"center"} w={item.isMainGraduation ? "2px" : "10px"}>
+                  <Flex
+                    key={index}
+                    direction={"column"}
+                    align={"center"}
+                    w={item.isMainGraduation ? "2px" : "10px"}
+                  >
                     <div
                       style={{
                         height: item.isMainGraduation ? "15px" : "8px",
@@ -756,7 +898,12 @@ const TimelineComponent = () => {
                       }}
                     />
                     {item.label && (
-                      <Text size="xs" color="dimmed" ml={index === 0 ? "45px" : ""} mr={index === timelineData.length - 6 ? "46px" : ""}>
+                      <Text
+                        size="xs"
+                        color="dimmed"
+                        ml={index === 0 ? "45px" : ""}
+                        mr={index === timelineData.length - 6 ? "46px" : ""}
+                      >
                         {item.label}
                       </Text>
                     )}

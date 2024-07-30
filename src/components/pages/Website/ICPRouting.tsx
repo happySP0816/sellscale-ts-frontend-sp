@@ -26,9 +26,11 @@ import {
   TextInput,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
+import { showNotification } from "@mantine/notifications";
 import {
   IconBell,
   IconBrandLinkedin,
+  IconCheck,
   IconChevronLeft,
   IconChevronRight,
   IconCircleCheck,
@@ -54,7 +56,53 @@ export default function ICPRouting() {
   const [acPageSize, setAcPageSize] = useState("25");
   const [showTextBucketModal, setShowTextBucketModal] = useState(false);
   const [linkedInUrl, setLinkedInUrl] = useState("");
-  const [simulationData, setSimulationData] = useState<any>();
+  const [visitedPage, setVisitedPage] = useState("");
+  type IcpRoute = {
+    active: boolean;
+    ai_mode: boolean;
+    description: string;
+    filter_company: string;
+    filter_company_size: string;
+    filter_location: string;
+    filter_title: string;
+    id: number;
+    rules: any[];
+    segment_id: number | null;
+    send_slack: boolean;
+    title: string;
+  };
+
+  type Prospect = {
+    company_location: string;
+    company_name: string;
+    company_url: string;
+    connections_count: number;
+    education_1: string;
+    education_2: string;
+    employee_count: string;
+    first_name: string;
+    followers_count: number;
+    full_name: string;
+    industry: string;
+    last_name: string;
+    linkedin_bio: string | null;
+    linkedin_url: string;
+    location: string;
+    position_groups: any[];
+    profile_picture: string;
+    prospect_location: string;
+    skills: string[];
+    title: string;
+    twitter_url: string | null;
+  };
+
+  type SimulationData = {
+    icp_route: IcpRoute;
+    met_conditions: string[];
+    prospect: Prospect;
+  };
+
+  const [simulationData, setSimulationData] = useState<SimulationData | null>(null);
   
 
   const {
@@ -99,6 +147,35 @@ export default function ICPRouting() {
     );
   }
 
+  const simulateLinkedInBucketing = async (linkedInUrl: string, visited_page?: string) => {
+    setLoading(true);
+    try {
+      const url = new URL(`${API_URL}/track/simulate_linkedin_bucketing`);
+      const response = await fetch(url.toString(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({ linkedin_url: linkedInUrl, visited_page  }),
+      });
+      const data = await response.json();
+      console.log('data', data);
+      setSimulationData(data);
+      setShowResults(true);
+    } catch (error) {
+      console.error("Error fetching ICP routes:", error);
+      showNotification({
+        title: "Error",
+        message: "Could not find a bucket for this visitor",
+        color: "red",
+        icon: <IconCircleX />,
+      });
+    }
+    setLoading(false);
+  }
+
+
   useEffect(() => {
     fetchData();
     fetchWebVisits();
@@ -119,11 +196,12 @@ export default function ICPRouting() {
   };
 
   const [webVisits, setWebVisits] = useState<WebVisit[]>([]);
+  const [showResults, setShowResults] = useState(false);
 
   return (
     <div style={{ overflowY: "hidden" }}>
       {showTextBucketModal && (
-        <Modal opened={showTextBucketModal} onClose={() => setShowTextBucketModal(false)}>
+        <Modal opened={showTextBucketModal} onClose={() => {setShowTextBucketModal(false); setSimulationData(null); setShowResults(false)}} size="lg">
           <Paper style={{ padding: "md" }}>
             <Box mb="md">
               <Title order={4}>Simulate Visitor Bucketing</Title>
@@ -138,28 +216,77 @@ export default function ICPRouting() {
               error={linkedInUrl && !linkedInUrl.includes("linkedin.com") ? "Invalid LinkedIn URL" : null}
               autoComplete="off"
             />
-            <Flex justify="flex-end" mt="md">
-              <Button
-                color="grape"
-                onClick={async () => {
-                  try {
-                    const response = await fetch('/api/simulate', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({ url: linkedInUrl }),
-                    });
-                    const result = await response.json();
-                    setSimulationData(result);
-                  } catch (error) {
-                    console.error("Error simulating bucketing:", error);
-                  }
-                }}
-              >
-                Simulate
-              </Button>
-            </Flex>
+            <TextInput
+              label="Simulate page visited"
+              placeholder="/home"
+              onChange={(event) => setVisitedPage(event.currentTarget.value)}
+              autoComplete="off"
+            />
+            <Button
+              loading={loading}
+              color="grape"
+              fullWidth
+              mt="md"
+              onClick={() => {setSimulationData(null); setShowResults(false); simulateLinkedInBucketing(linkedInUrl, visitedPage)}}
+            >
+              Simulate
+            </Button>
+            {showResults && (
+              <>
+                <Box mb="md" mt="md">
+                  <Flex direction="column" align="flex-start" justify="center" gap="sm">
+                    <Title order={4}>Rule Set: {simulationData?.icp_route?.title} ✅</Title>
+                    <Text size="sm" color="gray">{simulationData?.icp_route?.description}</Text>
+                    {/* <Button variant="outline" size="sm">Example Prospect</Button> */}
+                  </Flex>
+                  <Flex align="center" mt="sm">
+                    <Avatar src={simulationData?.prospect.profile_picture} radius="xl" size="md" mr="sm" />
+                    <Box>
+                      <Text size="sm" fw={500}>{simulationData?.prospect.full_name}</Text>
+                      <Text size="xs" color="gray">{simulationData?.prospect?.title}</Text>
+                    </Box>
+                  </Flex>
+                </Box>
+               {simulationData?.icp_route?.ai_mode === false && <>
+                {simulationData?.met_conditions?.map((condition: any, index) => (
+                  <Box mb="md" key={index}>
+                    <Text size="sm" color="gray">Condition Met:</Text>
+                    {typeof condition === 'string' ? (
+                      <>
+                        <TextInput value={condition} disabled mt="xs" />
+                        <Text size="sm" mt="xs" color="green">condition</Text>
+                      </>
+                    ) : (
+                      <>
+                        <TextInput value={condition.condition} disabled mt="xs" />
+                        {/* <Text size="sm" mt="xs" color="green">condition</Text> */}
+                        <Box mt="xs">
+                          {condition.company_breadcrumbs && (
+                            <>
+                              <Text size="sm" color="gray" mt="xs">Company Breadcrumbs:</Text>
+                              <Flex align="center" gap="xs" mt="xs">
+                                <TextInput value={condition.company_breadcrumbs} disabled />
+                                <IconCheck size={16} color="green" />
+                              </Flex>
+                            </>
+                          )}
+                         
+                        </Box>
+                      </>
+                    )}
+                  </Box>
+                ))}
+                <Box mt="md">
+                  {/* <Button color="grape" fullWidth>
+                    <Flex align="center" gap="xs">
+                      <IconBrandLinkedin size={16} />
+                      <Text size="sm">Slack notification sent!</Text>
+                    </Flex>
+                  </Button> */}
+                </Box>
+                </>}
+              </>
+            )}
           </Paper>
         </Modal>
         

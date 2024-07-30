@@ -1258,7 +1258,7 @@ export default function SegmentV3(props: PropsType) {
                                 });
                               }}
                             >
-                              <IconTopologyRing2 size={"0.9rem"} />
+                              <IconWebhook size={"0.9rem"} />
                               Connect to Segment
                             </Menu.Item>
                             <Menu.Item

@@ -21,20 +21,11 @@ import {
   Image,
   Tooltip,
   Select,
-  NumberInput, Loader,
+  NumberInput,
+  Loader,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import {
-  IconCircleCheck,
-  IconCircleX,
-  IconDiamond,
-  IconFlag,
-  IconInbox,
-  IconPlus,
-  IconRefresh,
-  IconSearch,
-  IconWorld,
-} from "@tabler/icons";
+import { IconCircleCheck, IconCircleX, IconDiamond, IconFlag, IconInbox, IconLoader, IconPlus, IconRefresh, IconSearch, IconWorld } from "@tabler/icons";
 import { IconGrid4x4 } from "@tabler/icons-react";
 import getDomainDetails from "@utils/requests/getDomainDetails";
 import { sortBy } from "lodash";
@@ -56,14 +47,8 @@ export default function DomainManagement() {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
 
-  const [
-    addMoreOpened,
-    { open: openAddMore, close: closeAddMore },
-  ] = useDisclosure(false);
-  const [
-    requestMoreOpened,
-    { open: openRequestMore, close: closeRequestMore },
-  ] = useDisclosure(false);
+  const [addMoreOpened, { open: openAddMore, close: closeAddMore }] = useDisclosure(false);
+  const [requestMoreOpened, { open: openRequestMore, close: closeRequestMore }] = useDisclosure(false);
   const [selected, setSelected] = useState<Domain>();
 
   const [allDomains, setAllDomains] = useState<Domain[]>([]);
@@ -106,7 +91,7 @@ export default function DomainManagement() {
     triggerGetDomains();
   }, []);
 
-  const triggerToggleDomain = async(active: boolean, domain_id: number) => {
+  const triggerToggleDomain = async (active: boolean, domain_id: number) => {
     setSwitchLoading(domain_id);
     const response = await fetch(`${API_URL}/domains/toggle_domain`, {
       method: "POST",
@@ -129,7 +114,7 @@ export default function DomainManagement() {
       });
       setSwitchLoading(null);
     }
-  }
+  };
 
   const [searchInput, setSearchInput] = useState("");
 
@@ -148,35 +133,16 @@ export default function DomainManagement() {
                 py={2}
                 px={5}
                 style={{
-                  border:
-                    allDomains.length >= MAX_DOMAINS
-                      ? `1px dashed ${theme.colors.green[8]}`
-                      : `1px dashed ${theme.colors.orange[6]}`,
+                  border: allDomains.length >= MAX_DOMAINS ? `1px dashed ${theme.colors.green[8]}` : `1px dashed ${theme.colors.orange[6]}`,
                   borderRadius: "6px",
                 }}
                 ml="md"
               >
                 <Flex align={"center"} gap={4} mr={5}>
-                  <IconDiamond
-                    size={"1rem"}
-                    color={
-                      allDomains.length >= MAX_DOMAINS
-                        ? theme.colors.green[8]
-                        : theme.colors.orange[6]
-                    }
-                  />
+                  <IconDiamond size={"1rem"} color={allDomains.length >= MAX_DOMAINS ? theme.colors.green[8] : theme.colors.orange[6]} />
                 </Flex>
-                <Text
-                  color={
-                    allDomains.length >= MAX_DOMAINS
-                      ? theme.colors.green[8]
-                      : theme.colors.orange[6]
-                  }
-                  size={"sm"}
-                  fw={500}
-                >
-                  {allDomains.length} /{" "}
-                  {Math.max(allDomains.length, MAX_DOMAINS)} Domains
+                <Text color={allDomains.length >= MAX_DOMAINS ? theme.colors.green[8] : theme.colors.orange[6]} size={"sm"} fw={500}>
+                  {allDomains.length} / {Math.max(allDomains.length, MAX_DOMAINS)} Domains
                 </Text>
               </Flex>
             </Flex>
@@ -186,30 +152,20 @@ export default function DomainManagement() {
                 <Button
                   fullWidth
                   onClick={() => {
-                    allDomains.length < MAX_DOMAINS
-                      ? openAddMore()
-                      : openRequestMore();
+                    allDomains.length < MAX_DOMAINS ? openAddMore() : openRequestMore();
                   }}
                   rightIcon={<IconPlus size="1rem" />}
                 >
-                  {allDomains.length < MAX_DOMAINS
-                    ? "Get More"
-                    : "Request More"}
+                  {allDomains.length < MAX_DOMAINS ? "Get More" : "Request More"}
                 </Button>
               </Flex>
               <InboxAddModal
                 opened={addMoreOpened}
                 close={closeAddMore}
                 refresh={() => triggerGetDomains()}
-                inboxQuotaRemaining={Math.max(
-                  MAX_INBOXES - allDomains.length * 2,
-                  0
-                )}
+                inboxQuotaRemaining={Math.max(MAX_INBOXES - allDomains.length * 2, 0)}
               />
-              <InboxRequestModal
-                opened={requestMoreOpened}
-                close={closeRequestMore}
-              />
+              <InboxRequestModal opened={requestMoreOpened} close={closeRequestMore} />
             </Flex>
           </Flex>
           <Flex>
@@ -232,13 +188,7 @@ export default function DomainManagement() {
                     if (e.target.value == "") {
                       setDomains(allDomains);
                     } else {
-                      setDomains(
-                        domains.filter((domain) =>
-                          domain.domain
-                            .toLowerCase()
-                            .includes(e.target.value.toLowerCase())
-                        )
-                      );
+                      setDomains(domains.filter((domain) => domain.domain.toLowerCase().includes(e.target.value.toLowerCase())));
                     }
 
                     setSearchInput(e.target.value);
@@ -260,15 +210,8 @@ export default function DomainManagement() {
                       accessor: "domain",
                       sortable: true,
                       title: (
-                        <Flex
-                          color={theme.colors.gray[6]}
-                          align={"center"}
-                          gap={"xs"}
-                        >
-                          <IconWorld
-                            color={theme.colors.gray[6]}
-                            size={"0.8rem"}
-                          />
+                        <Flex color={theme.colors.gray[6]} align={"center"} gap={"xs"}>
+                          <IconWorld color={theme.colors.gray[6]} size={"0.8rem"} />
                           <Text color={theme.colors.gray[6]}>Domain</Text>
                         </Flex>
                       ),
@@ -277,18 +220,11 @@ export default function DomainManagement() {
                           <Flex>
                             {selected && selected.domain === domain && (
                               <Flex mr="2px">
-                                <IconCircleCheck
-                                  fill={theme.colors.green[4]}
-                                  stroke={theme.white}
-                                  color={theme.white}
-                                />
+                                <IconCircleCheck fill={theme.colors.green[4]} stroke={theme.white} color={theme.white} />
                               </Flex>
                             )}
                             <Text fz={"sm"} fw={500} mr={"md"}>
-                              <Anchor
-                                target="_blank"
-                                href={`https://www.${domain}`}
-                              >
+                              <Anchor target="_blank" href={`https://www.${domain}`}>
                                 {domain}
                               </Anchor>
                             </Text>
@@ -300,15 +236,8 @@ export default function DomainManagement() {
                       accessor: "email_banks.length",
                       sortable: true,
                       title: (
-                        <Flex
-                          color={theme.colors.gray[6]}
-                          align={"center"}
-                          gap={"xs"}
-                        >
-                          <IconInbox
-                            color={theme.colors.gray[6]}
-                            size={"0.8rem"}
-                          />
+                        <Flex color={theme.colors.gray[6]} align={"center"} gap={"xs"}>
+                          <IconInbox color={theme.colors.gray[6]} size={"0.8rem"} />
                           <Text color={theme.colors.gray[6]}>Inboxes</Text>
                         </Flex>
                       ),
@@ -319,15 +248,9 @@ export default function DomainManagement() {
                             {email_banks.length > 0 ? (
                               <>
                                 {email_banks
-                                  .sort((a, b) =>
-                                    a.email_address.localeCompare(
-                                      b.email_address
-                                    )
-                                  )
+                                  .sort((a, b) => a.email_address.localeCompare(b.email_address))
                                   .map((bank: EmailBankItem, index: number) => (
-                                    <Badge mb="xs">
-                                      {bank.email_address.split("@")[0]}
-                                    </Badge>
+                                    <Badge mb="xs">{bank.email_address.split("@")[0]}</Badge>
                                   ))}
                               </>
                             ) : (
@@ -342,37 +265,19 @@ export default function DomainManagement() {
                       accessor: "reputation",
                       sortable: true,
                       title: (
-                        <Flex
-                          color={theme.colors.gray[6]}
-                          align={"center"}
-                          gap={"xs"}
-                        >
-                          <IconFlag
-                            color={theme.colors.gray[6]}
-                            size={"0.8rem"}
-                          />
+                        <Flex color={theme.colors.gray[6]} align={"center"} gap={"xs"}>
+                          <IconFlag color={theme.colors.gray[6]} size={"0.8rem"} />
                           <Text color={theme.colors.gray[6]}>Reputation</Text>
                         </Flex>
                       ),
                       render: ({ email_banks }) => {
                         if (!email_banks) return <></>;
-                        let reputation = email_banks.reduce(
-                          (acc, bank) => acc + bank.smartlead_reputation,
-                          0
-                        );
+                        let reputation = email_banks.reduce((acc, bank) => acc + bank.smartlead_reputation, 0);
                         reputation = reputation / email_banks.length;
 
                         return (
                           <Flex w="100%" justify="center">
-                            <Badge
-                              color={
-                                reputation == 100
-                                  ? theme.colors.green[4]
-                                  : "red"
-                              }
-                            >
-                              {reputation}%
-                            </Badge>
+                            <Badge color={reputation == 100 ? theme.colors.green[4] : "red"}>{reputation}%</Badge>
                           </Flex>
                         );
                       },
@@ -381,27 +286,13 @@ export default function DomainManagement() {
                       accessor: "infrastructure",
                       sortable: true,
                       title: (
-                        <Flex
-                          color={theme.colors.gray[6]}
-                          align={"center"}
-                          gap={"xs"}
-                        >
-                          <IconGrid4x4
-                            color={theme.colors.gray[6]}
-                            size={"0.8rem"}
-                          />
-                          <Text color={theme.colors.gray[6]}>
-                            Infrastructure
-                          </Text>
+                        <Flex color={theme.colors.gray[6]} align={"center"} gap={"xs"}>
+                          <IconGrid4x4 color={theme.colors.gray[6]} size={"0.8rem"} />
+                          <Text color={theme.colors.gray[6]}>Infrastructure</Text>
                         </Flex>
                       ),
                       width: 480,
-                      render: ({
-                        dkim_record_valid,
-                        dmarc_record_valid,
-                        spf_record_valid,
-                        forwarding_enabled,
-                      }) => {
+                      render: ({ dkim_record_valid, dmarc_record_valid, spf_record_valid, forwarding_enabled }) => {
                         return (
                           <Flex gap={"xs"}>
                             <Group>
@@ -409,17 +300,9 @@ export default function DomainManagement() {
                                 DKIM:{" "}
                               </Text>
                               {dkim_record_valid ? (
-                                <IconCircleCheck
-                                  fill={theme.colors.green[4]}
-                                  stroke={theme.white}
-                                  color={theme.white}
-                                />
+                                <IconCircleCheck fill={theme.colors.green[4]} stroke={theme.white} color={theme.white} />
                               ) : (
-                                <IconCircleX
-                                  fill={theme.colors.red[4]}
-                                  stroke={theme.white}
-                                  color={theme.white}
-                                />
+                                <IconCircleX fill={theme.colors.red[4]} stroke={theme.white} color={theme.white} />
                               )}
                               <Divider orientation="vertical" />
                             </Group>
@@ -429,17 +312,9 @@ export default function DomainManagement() {
                                 SPF:{" "}
                               </Text>
                               {spf_record_valid ? (
-                                <IconCircleCheck
-                                  fill={theme.colors.green[4]}
-                                  stroke={theme.white}
-                                  color={theme.white}
-                                />
+                                <IconCircleCheck fill={theme.colors.green[4]} stroke={theme.white} color={theme.white} />
                               ) : (
-                                <IconCircleX
-                                  fill={theme.colors.red[4]}
-                                  stroke={theme.white}
-                                  color={theme.white}
-                                />
+                                <IconCircleX fill={theme.colors.red[4]} stroke={theme.white} color={theme.white} />
                               )}
                               <Divider orientation="vertical" />
                             </Group>
@@ -448,17 +323,9 @@ export default function DomainManagement() {
                                 DMARC:{" "}
                               </Text>
                               {dmarc_record_valid ? (
-                                <IconCircleCheck
-                                  fill={theme.colors.green[4]}
-                                  stroke={theme.white}
-                                  color={theme.white}
-                                />
+                                <IconCircleCheck fill={theme.colors.green[4]} stroke={theme.white} color={theme.white} />
                               ) : (
-                                <IconCircleX
-                                  fill={theme.colors.red[4]}
-                                  stroke={theme.white}
-                                  color={theme.white}
-                                />
+                                <IconCircleX fill={theme.colors.red[4]} stroke={theme.white} color={theme.white} />
                               )}
                               <Divider orientation="vertical" />
                             </Group>
@@ -467,17 +334,9 @@ export default function DomainManagement() {
                                 Forwarding:{" "}
                               </Text>
                               {forwarding_enabled ? (
-                                <IconCircleCheck
-                                  fill={theme.colors.green[4]}
-                                  stroke={theme.white}
-                                  color={theme.white}
-                                />
+                                <IconCircleCheck fill={theme.colors.green[4]} stroke={theme.white} color={theme.white} />
                               ) : (
-                                <IconCircleX
-                                  fill={theme.colors.red[4]}
-                                  stroke={theme.white}
-                                  color={theme.white}
-                                />
+                                <IconCircleX fill={theme.colors.red[4]} stroke={theme.white} color={theme.white} />
                               )}
                             </Group>
                           </Flex>
@@ -488,44 +347,49 @@ export default function DomainManagement() {
                       accessor: "active",
                       sortable: true,
                       title: (
-                        <Flex
-                          color={theme.colors.gray[6]}
-                          align={"center"}
-                          gap={"xs"}
-                        >
+                        <Flex color={theme.colors.gray[6]} align={"center"} gap={"xs"}>
                           <Text color={theme.colors.gray[6]}>Use Domain</Text>
                         </Flex>
                       ),
                       width: 140,
-                      render: ({active, id: domain_id}) => {
+                      render: ({ active, id: domain_id }) => {
                         return (
-                          <Flex
-                            gap={"xs"}
-                          >
-                            <Switch checked={active} onClick={() => triggerToggleDomain(active, domain_id)} size={"md"} offLabel={"OFF"} onLabel={"ON"}/>
+                          <Flex gap={"xs"}>
+                            <Switch checked={active} onClick={() => triggerToggleDomain(active, domain_id)} size={"md"} offLabel={"OFF"} onLabel={"ON"} />
                             {switchLoading && switchLoading === domain_id && <Loader />}
                           </Flex>
                         );
-                      }
-                    }
+                      },
+                    },
+                    {
+                      accessor: "status",
+                      sortable: true,
+                      title: (
+                        <Flex color={theme.colors.gray[6]} align={"center"} gap={"xs"}>
+                          <IconLoader color={theme.colors.gray[6]} size={"0.8rem"} />
+                          <Text color={theme.colors.gray[6]}>Status</Text>
+                        </Flex>
+                      ),
+                      width: 140,
+                      render: ({ active, id: domain_id }) => {
+                        return (
+                          <Flex gap={"xs"}>
+                            <Badge color={domain_id % 3 === 0 ? "green" : domain_id % 3 === 2 ? "orange" : "gray"} variant="light">
+                              {domain_id % 3 === 0 ? "ready to use" : domain_id % 3 === 2 ? "warning 80%" : "setting up"}
+                            </Badge>
+                          </Flex>
+                        );
+                      },
+                    },
                   ]}
                 />
               </Grid.Col>
               <Grid.Col span={4}>
                 <Paper withBorder radius={"sm"}>
-                  <Flex
-                    align={"center"}
-                    justify={"space-between"}
-                    className=" border-b-[1px] border-[#eceaee]"
-                    px={"md"}
-                    py={"sm"}
-                  >
+                  <Flex align={"center"} justify={"space-between"} className=" border-b-[1px] border-[#eceaee]" px={"md"} py={"sm"}>
                     <Text size="sm" fw="bold">
                       {selected ? (
-                        <Anchor
-                          target="_blank"
-                          href={`https://www.${selected.domain}`}
-                        >
+                        <Anchor target="_blank" href={`https://www.${selected.domain}`}>
                           {selected.domain}
                         </Anchor>
                       ) : (
@@ -544,17 +408,9 @@ export default function DomainManagement() {
                         DKIM:
                       </Text>
                       {selected?.dkim_record_valid ? (
-                        <IconCircleCheck
-                          color="white"
-                          fill={theme.colors.green[4]}
-                          size={"1.6rem"}
-                        />
+                        <IconCircleCheck color="white" fill={theme.colors.green[4]} size={"1.6rem"} />
                       ) : (
-                        <IconCircleX
-                          color="white"
-                          fill={theme.colors.red[4]}
-                          size={"1.6rem"}
-                        />
+                        <IconCircleX color="white" fill={theme.colors.red[4]} size={"1.6rem"} />
                       )}
                     </Flex>
                     <Flex justify="space-between">
@@ -562,17 +418,9 @@ export default function DomainManagement() {
                         SPF:
                       </Text>
                       {selected?.spf_record_valid ? (
-                        <IconCircleCheck
-                          color="white"
-                          fill={theme.colors.green[4]}
-                          size={"1.6rem"}
-                        />
+                        <IconCircleCheck color="white" fill={theme.colors.green[4]} size={"1.6rem"} />
                       ) : (
-                        <IconCircleX
-                          color="white"
-                          fill={theme.colors.red[4]}
-                          size={"1.6rem"}
-                        />
+                        <IconCircleX color="white" fill={theme.colors.red[4]} size={"1.6rem"} />
                       )}
                     </Flex>
                     <Flex justify="space-between">
@@ -580,17 +428,9 @@ export default function DomainManagement() {
                         DMARC:
                       </Text>
                       {selected?.dmarc_record_valid ? (
-                        <IconCircleCheck
-                          color="white"
-                          fill={theme.colors.green[4]}
-                          size={"1.6rem"}
-                        />
+                        <IconCircleCheck color="white" fill={theme.colors.green[4]} size={"1.6rem"} />
                       ) : (
-                        <IconCircleX
-                          color="white"
-                          fill={theme.colors.red[4]}
-                          size={"1.6rem"}
-                        />
+                        <IconCircleX color="white" fill={theme.colors.red[4]} size={"1.6rem"} />
                       )}
                     </Flex>
                     <Flex justify="space-between">
@@ -598,55 +438,28 @@ export default function DomainManagement() {
                         Forwarding:
                       </Text>
                       {selected?.forwarding_enabled ? (
-                        <IconCircleCheck
-                          color="white"
-                          fill={theme.colors.green[4]}
-                          size={"1.6rem"}
-                        />
+                        <IconCircleCheck color="white" fill={theme.colors.green[4]} size={"1.6rem"} />
                       ) : (
-                        <IconCircleX
-                          color="white"
-                          fill={theme.colors.red[4]}
-                          size={"1.6rem"}
-                        />
+                        <IconCircleX color="white" fill={theme.colors.red[4]} size={"1.6rem"} />
                       )}
                     </Flex>
                     <Text fw={400} size="xs" mt="sm">
-                      Last Refreshed:{" "}
-                      {selected
-                        ? moment(selected.last_refreshed).format(
-                            "MMMM d, YYYY, h:mm a"
-                          )
-                        : ""}
+                      Last Refreshed: {selected ? moment(selected.last_refreshed).format("MMMM d, YYYY, h:mm a") : ""}
                     </Text>
                   </Flex>
                   <Divider mt="sm" />
                   <Flex direction={"column"} gap={"sm"}>
                     <Flex p={"sm"} mt="sm" ml="sm" direction="column">
                       <Text fw={500} size={"sm"}>
-                        {(selected &&
-                          selected.email_banks &&
-                          selected.email_banks.length) ||
-                          "..."}{" "}
-                        / 2 Inboxes Setup
+                        {(selected && selected.email_banks && selected.email_banks.length) || "..."} / 2 Inboxes Setup
                       </Text>
-                      <Text size="xs">
-                        We recommend using a maximum of 2 inboxes per domain to
-                        preserve reputation.
-                      </Text>
+                      <Text size="xs">We recommend using a maximum of 2 inboxes per domain to preserve reputation.</Text>
                     </Flex>
 
-                    <Flex
-                      px={"md"}
-                      justify={"space-between"}
-                      direction="column"
-                      mb="sm"
-                    >
+                    <Flex px={"md"} justify={"space-between"} direction="column" mb="sm">
                       {selected?.email_banks &&
                         selected?.email_banks
-                          .sort((a, b) =>
-                            b.email_address.localeCompare(a.email_address)
-                          )
+                          .sort((a, b) => b.email_address.localeCompare(a.email_address))
                           .map((bank: EmailBankItem, index: number) => (
                             <Flex
                               align={"center"}
@@ -693,12 +506,7 @@ export default function DomainManagement() {
   );
 }
 
-const InboxAddModal = (props: {
-  opened: boolean;
-  close: () => void;
-  refresh: () => void;
-  inboxQuotaRemaining: number;
-}) => {
+const InboxAddModal = (props: { opened: boolean; close: () => void; refresh: () => void; inboxQuotaRemaining: number }) => {
   const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
 
@@ -750,25 +558,21 @@ const InboxAddModal = (props: {
   const addInboxes = async () => {
     setSubmitLoading(true);
     const formValues = sellscaleManagedForm.values;
-    const response = await fetch(
-      `${API_URL}/domains/workflow/domain_and_inbox`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${selectedSDR?.auth_token}`,
-        },
-        body: JSON.stringify({
-          number_inboxes: formValues.numberInboxes,
-        }),
-      }
-    );
+    const response = await fetch(`${API_URL}/domains/workflow/domain_and_inbox`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${selectedSDR?.auth_token}`,
+      },
+      body: JSON.stringify({
+        number_inboxes: formValues.numberInboxes,
+      }),
+    });
 
     if (response.ok) {
       showNotification({
         title: "Inboxes Added",
-        message:
-          "Inboxes are being added, please allow up to 1 hour for the inboxes to be setup.",
+        message: "Inboxes are being added, please allow up to 1 hour for the inboxes to be setup.",
         color: "green",
       });
       props.refresh();
@@ -801,26 +605,17 @@ const InboxAddModal = (props: {
       }}
     >
       <Text size={"xs"} fw={600}>
-        Specify the number of inboxes you wish to add and we will dynamically
-        create domains and inboxes for you.
+        Specify the number of inboxes you wish to add and we will dynamically create domains and inboxes for you.
       </Text>
       <Text size={"xs"} fw={500} color="gray">
         Important notes regarding domain / inbox creation:
       </Text>
       <List size="xs" styles={{ item: { color: "gray" } }}>
         <List.Item>Each domain can only hold 2 inboxes.</List.Item>
+        <List.Item>It may take 1 hour for a new domain to be setup and inboxes created.</List.Item>
+        <List.Item>Domains will be permutations of your primary domain, unless manually selected.</List.Item>
         <List.Item>
-          It may take 1 hour for a new domain to be setup and inboxes created.
-        </List.Item>
-        <List.Item>
-          Domains will be permutations of your primary domain, unless manually
-          selected.
-        </List.Item>
-        <List.Item>
-          <b>
-            The cost of setting up a new domain and inboxes will be reflected in
-            your usage bill.
-          </b>
+          <b>The cost of setting up a new domain and inboxes will be reflected in your usage bill.</b>
         </List.Item>
       </List>
       <Select
@@ -832,9 +627,7 @@ const InboxAddModal = (props: {
         }))}
         onSelect={(event) => {
           const value = event.currentTarget.value;
-          const selected = allSDRs.find(
-            (sdr) => `${sdr.sdr_name} (${sdr.sdr_email})` == value
-          );
+          const selected = allSDRs.find((sdr) => `${sdr.sdr_name} (${sdr.sdr_email})` == value);
 
           if (selected) {
             setSelectedSDR(selected);
@@ -847,13 +640,7 @@ const InboxAddModal = (props: {
         label="SDR:"
       />
       <Divider mt="md" />
-      <Flex
-        w="100%"
-        justify={"space-between"}
-        direction={"row"}
-        align="center"
-        mt="sm"
-      >
+      <Flex w="100%" justify={"space-between"} direction={"row"} align="center" mt="sm">
         {sellscaleManaged ? (
           <Flex direction="column" w="100%">
             <form
@@ -870,32 +657,21 @@ const InboxAddModal = (props: {
                 required
                 {...sellscaleManagedForm.getInputProps("numberInboxes")}
               />
-              {(sellscaleManagedForm.getInputProps("numberInboxes").value > 0 ||
-                sellscaleManagedForm.isTouched()) && (
+              {(sellscaleManagedForm.getInputProps("numberInboxes").value > 0 || sellscaleManagedForm.isTouched()) && (
                 <>
                   {" "}
                   <Text size="xs" mt={4}>
-                    {`Domain(s) to be purchased: ${Math.round(
-                      sellscaleManagedForm.getInputProps("numberInboxes")
-                        .value / 2
-                    )} domain(s)`}
+                    {`Domain(s) to be purchased: ${Math.round(sellscaleManagedForm.getInputProps("numberInboxes").value / 2)} domain(s)`}
                   </Text>
                   <Text size="sm" mt={8}>
-                    <span style={{ fontWeight: "500" }}>Estimated Volume:</span>{" "}
-                    {sellscaleManagedForm.getInputProps("numberInboxes").value *
-                      5 *
-                      30}{" "}
-                    emails / week
+                    <span style={{ fontWeight: "500" }}>Estimated Volume:</span> {sellscaleManagedForm.getInputProps("numberInboxes").value * 5 * 30} emails /
+                    week
                   </Text>
                   <Text fz="xs">
                     {`Calculation: ${
-                      sellscaleManagedForm.getInputProps("numberInboxes")
-                        .value || 0
+                      sellscaleManagedForm.getInputProps("numberInboxes").value || 0
                     } inboxes\n x 30 emails per inbox per day x 5 days per week = ${
-                      sellscaleManagedForm.getInputProps("numberInboxes")
-                        .value *
-                      5 *
-                      30
+                      sellscaleManagedForm.getInputProps("numberInboxes").value * 5 * 30
                     } emails per week`}
                   </Text>
                 </>
@@ -932,12 +708,7 @@ const InboxAddModal = (props: {
       </Flex>
 
       <Flex gap={"md"} mt={"lg"}>
-        <Button
-          variant="outline"
-          fullWidth
-          color="gray"
-          onClick={() => props.close()}
-        >
+        <Button variant="outline" fullWidth color="gray" onClick={() => props.close()}>
           Go Back
         </Button>
         <Button
@@ -946,15 +717,8 @@ const InboxAddModal = (props: {
           disabled={
             submitLoading ||
             (sellscaleManaged
-              ? !(
-                  selectedSDR &&
-                  sellscaleManagedForm.getInputProps("numberInboxes").value > 0
-                )
-              : !(
-                  selectedSDR &&
-                  manualForm.getInputProps("domain").value &&
-                  manualForm.getInputProps("numberInboxes").value > 0
-                ))
+              ? !(selectedSDR && sellscaleManagedForm.getInputProps("numberInboxes").value > 0)
+              : !(selectedSDR && manualForm.getInputProps("domain").value && manualForm.getInputProps("numberInboxes").value > 0))
           }
           onClick={() => {
             sellscaleManaged ? addInboxes() : console.log("manual add");

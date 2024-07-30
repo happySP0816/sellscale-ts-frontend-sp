@@ -113,6 +113,7 @@ import { IconWand } from "@tabler/icons";
 import ICPRoutingCreateModal from "@modals/website/ICPRoutingCreateModal";
 import CreateCampaignWithVoiceModal from "@modals/CreateCampaignWithVoiceModal";
 import CreateVisitorBucketModal from "@modals/website/CreateVisitorBucketModal";
+import ConnectSegmentModal from "@modals/SegmentV3/ConnectSegmentModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -826,6 +827,7 @@ export default function App() {
               assistmodal: SellScaleAssistModal,
               createICProutingModal: ICPRoutingCreateModal,
               createvisitorbucketmodal: CreateVisitorBucketModal,
+              connectSegment: ConnectSegmentModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

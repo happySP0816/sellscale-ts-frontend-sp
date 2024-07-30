@@ -45,6 +45,7 @@ import {
   IconDotsVertical,
   IconEdit,
   IconEye,
+  IconFileDownload,
   IconFilter,
   IconLetterT,
   IconLoader,
@@ -58,10 +59,12 @@ import {
   IconTag,
   IconTargetArrow,
   IconTemplate,
+  IconTopologyRing2,
   IconTrash,
   IconUserPlus,
   IconUsers,
   IconWand,
+  IconWebhook,
   IconX,
 } from "@tabler/icons";
 import { DataGrid } from "mantine-data-grid";
@@ -70,7 +73,7 @@ import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import { IconArrowsSplit2, IconUsersMinus, IconUsersPlus } from "@tabler/icons-react";
-import {closeAllModals, openConfirmModal, openContextModal} from "@mantine/modals";
+import { closeAllModals, openConfirmModal, openContextModal } from "@mantine/modals";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
 import { showNotification } from "@mantine/notifications";
 import { RequestCampaignModal } from "@modals/SegmentV2/RequestCampaignModal";
@@ -99,7 +102,6 @@ export default function SegmentV3(props: PropsType) {
   const [showConnectCampaignModal, setShowConnectCampaignModal] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
-
 
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
   const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(false);
@@ -446,6 +448,8 @@ export default function SegmentV3(props: PropsType) {
       setShowAutoDownloadFeature(true);
     }
   }, [false, showAllSegments, currentTime, type]);
+
+  const [selected, setSelected] = useState<any>([]);
 
   return (
     <Box>
@@ -1067,14 +1071,7 @@ export default function SegmentV3(props: PropsType) {
             <Text sx={{ whiteSpace: "nowrap" }} fw={600}>
               Existing Segments
             </Text>
-            <Flex align={"center"}>
-              {
-                loading ? <Loader /> :
-                <Badge variant="filled">
-                {data.length}
-                </Badge>
-              }
-            </Flex>
+            <Flex align={"center"}>{loading ? <Loader /> : <Badge variant="filled">{data.length}</Badge>}</Flex>
             <Divider w={"100%"} />
             {/* <ActionIcon onClick={unusedToggle}>{openedUnUsed ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon> */}
           </Flex>
@@ -1141,6 +1138,13 @@ export default function SegmentV3(props: PropsType) {
                         </ActionIcon>
                       </Flex>
                       <Flex gap={1}>
+                        {selected && selected.includes(item.id) && (
+                          <Tooltip label="Webhook Connected" withArrow>
+                            <ActionIcon radius={"xl"} variant="light" color="green">
+                              <IconWebhook size={"1rem"} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
                         <Tooltip
                           color="white"
                           arrowPosition="center"
@@ -1227,6 +1231,38 @@ export default function SegmentV3(props: PropsType) {
 
                             <Menu.Item
                               onClick={() => {
+                                openContextModal({
+                                  modal: "connectSegment",
+                                  title: (
+                                    <Group position="apart">
+                                      <div>
+                                        <Title
+                                          order={3}
+                                          sx={{
+                                            display: "flex",
+                                            gap: "8px",
+                                            alignItems: "center",
+                                          }}
+                                        >
+                                          <IconFileDownload color="#228be6" style={{ marginTop: "-5px" }} />
+                                          Auto Import Prospects via Webhook
+                                        </Title>
+                                      </div>
+                                    </Group>
+                                  ),
+                                  innerProps: {
+                                    id: item.id,
+                                    setSelected: setSelected,
+                                    selected: selected,
+                                  },
+                                });
+                              }}
+                            >
+                              <IconTopologyRing2 size={"0.9rem"} />
+                              Connect to Segment
+                            </Menu.Item>
+                            <Menu.Item
+                              onClick={() => {
                                 duplicateSegment(item.id, true);
                               }}
                             >
@@ -1237,19 +1273,19 @@ export default function SegmentV3(props: PropsType) {
                               onClick={() => {
                                 setSelectedSegmentId(item.id);
                                 openContextModal({
-                                  modal: 'splitSegment',
+                                  modal: "splitSegment",
                                   title: (
-                                    <Group position='apart'>
+                                    <Group position="apart">
                                       <div>
                                         <Title
                                           order={3}
                                           sx={{
-                                            display: 'flex',
-                                            gap: '8px',
-                                            alignItems: 'center',
+                                            display: "flex",
+                                            gap: "8px",
+                                            alignItems: "center",
                                           }}
                                         >
-                                          <IconButterfly color='#228be6' style={{ marginTop: '-5px' }} />
+                                          <IconButterfly color="#228be6" style={{ marginTop: "-5px" }} />
                                           Split Segment
                                         </Title>
                                       </div>
@@ -1262,8 +1298,8 @@ export default function SegmentV3(props: PropsType) {
                                     onSplit: (segmentId: any, numberOfBatches: any) => {
                                       createNSubsegments(segmentId, numberOfBatches, true);
                                     },
-                                  }
-                                })
+                                  },
+                                });
                               }}
                             >
                               Split Segment
@@ -1319,7 +1355,7 @@ export default function SegmentV3(props: PropsType) {
                                     },
                                     onClick: (segment_id: number, segment_title: string) => {
                                       resetSegment(segment_id, segment_title, true);
-                                    }
+                                    },
                                   },
                                 })
                               }

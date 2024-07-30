@@ -111,6 +111,7 @@ import WebsiteIntent from "./websiteIntent/WebsiteIntent";
 import ChampionChange from "./champion/Championchange";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import { deterministicMantineColor } from "@utils/requests/utils";
+import { useStrategiesApi } from "@pages/Strategy/StrategyApi";
 
 export type CampaignPersona = {
   id: number;
@@ -1278,6 +1279,16 @@ export function PersonCampaignCard(props: {
 
   const [tieopened, setTieOpened] = useState(false);
 
+  const [strategies, setStrategies] = useState([]);
+
+  const { getAllStrategies } = useStrategiesApi(userToken);
+
+  const handleStrategy = async () => {
+    setTieOpened(!tieopened);
+    const response = await getAllStrategies();
+    setStrategies(response);
+  };
+
   return (
     <Paper ref={ref} id="child">
       <ChannelModal />
@@ -1616,7 +1627,7 @@ export function PersonCampaignCard(props: {
                       </ActionIcon>
                     )}
                     {props.persona.sdr_id == userData?.id && (
-                      <Popover withArrow width={200} position="right" offset={{ mainAxis: 7, crossAxis: 16 }}>
+                      <Popover withArrow width={300} position="right" offset={{ mainAxis: 7, crossAxis: 16 }} opened={tieopened} onChange={setTieOpened}>
                         <Popover.Target>
                           <Badge
                             variant="filled"
@@ -1630,6 +1641,7 @@ export function PersonCampaignCard(props: {
                                 fontWeight: "lighter",
                               },
                             }}
+                            onClick={handleStrategy}
                           >
                             <IconBulb size={"0.9rem"} />
                             <Text size={"xs"} mt={3}>
@@ -1645,9 +1657,22 @@ export function PersonCampaignCard(props: {
                             </Text>
                           </Flex>
                           <Paper mt={"sm"} withBorder radius={"sm"} p={"sm"}>
-                            <Checkbox label="Alumni" size={"xs"} />
-                            <Checkbox label="CTAL" mt={"sm"} size={"xs"} />
-                            <Checkbox label="PTAL" mt={"sm"} size={"xs"} />
+                            <ScrollArea h={300}>
+                              {strategies &&
+                                strategies.map((item: any, index) => {
+                                  return (
+                                    <Checkbox
+                                      label={item.title}
+                                      mt={"sm"}
+                                      size={"xs"}
+                                      key={index}
+                                      onClick={() => {
+                                        if (item.title === "Khoa Testing 3" || item.title === "General Pul") alert("Attaching to 2 Strategies");
+                                      }}
+                                    />
+                                  );
+                                })}
+                            </ScrollArea>
                           </Paper>
                           <Button fullWidth mt={"sm"} size="sm">
                             Save

@@ -320,6 +320,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           // organization_num_employees_range: selectedNumEmployees.length ? selectedNumEmployees : undefined, // does not work in retool either
           person_locations: locations.length ? locations : undefined,//works
           organization_ids: selectedCompanies.length? selectedCompanies : undefined, //works
+          companyName: companyName || undefined, //sent alongside organization_ids so we can add company names to our db. caching purposes
           revenue_range: revenue.min || revenue.max ? { min: parseInt(revenue?.min?.replaceAll(',',''), 10) || undefined, max: parseInt(revenue?.max?.replaceAll(',',''), 10) || undefined } : undefined, //works
           // organization_latest_funding_stages: fundraise.length ? fundraise : undefined, 
           currently_using_any_of_technology_uids: technology.length ? technology.map(tech => technologyOptionsWithUids[tech]) : undefined,

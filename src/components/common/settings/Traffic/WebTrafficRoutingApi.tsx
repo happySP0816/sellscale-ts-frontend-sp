@@ -7,6 +7,7 @@ export type IcpRouteData = {
   filter_company: string;
   filter_title: string;
   filter_location: string;
+  count?: number;
   filter_company_size: string;
   segment_id?: number;
   send_slack?: boolean;

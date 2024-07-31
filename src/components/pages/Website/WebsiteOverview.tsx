@@ -272,7 +272,8 @@ export default function WebsiteOverview(props: any) {
                 }}
               >
                 <IconProgress size={"0.8rem"} />
-                {11}% deanoymized
+                {/* percent deanonymized of total */}
+                  {((trackHistory.reduce((acc, item) => acc + item.distinct_deanonymized_visits, 0) / trackHistory.reduce((acc, item) => acc + item.distinct_visits, 0)) * 100).toFixed(2)}% Deanonymized
               </Badge>
             </Flex>
             <Card h={300}>
@@ -477,7 +478,7 @@ export default function WebsiteOverview(props: any) {
                 <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
                   <Box>
                     <Badge size="sm" color={prospect.icp_routing_id !== null ? "green" : "gray"} variant="light">
-                      {prospect.icp_routing_id !== null ? "Caught" : "Uncaught"}
+                      {prospect.icp_routing_id !== null ? prospect.icp_routing_title : "Uncaught"}
                     </Badge>
                   </Box>
                 </Flex>

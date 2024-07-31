@@ -18,7 +18,7 @@ import {
   Box,
   SimpleGrid,
   ActionIcon,
-  Title,
+  Title, Badge,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useEffect, useRef, useState } from "react";
@@ -39,7 +39,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
-import { Archetype, MsgResponse } from "src";
+import {Archetype, DefaultVoices, MsgResponse} from "src";
 import { API_URL } from "@constants/data";
 import CreatePersona from "@common/persona/CreatePersona";
 import Hook from "@pages/channels/components/Hook";
@@ -70,36 +70,22 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
 
   const [tab, setTab] = useState("scratch");
 
+  const [defaultVoicesOptions, setDefaultVoicesOptions] = useState<DefaultVoices[]>([]);
 
-  // This will be Temporary display for v1 of default voices
-  // In the future we will have internal tools to create default voices
-  const defaultVoicesOptions = [
-    {
-      title: "Conference",
-      archetype_id: 1024,
-      description: "The Conference voice is a proven voice that is used to engage with prospects who are attending a conference.",
-      enabled: true,
-    },
-    {
-      title: "Cold Outreach",
-      archetype_id: 1024,
-      description: "Cold Outreach voice.",
-      enabled: false,
-    },
-    {
-      title: "Product Feedback",
-      archetype_id: 1024,
-      description: "Product Feedback voice.",
-      enabled: false,
-    },
-    {
-      title: "Alumni",
-      archetype_id: 1024,
-      description: "Alumni voice.",
-      enabled: false,
-    },
-  ]
+  useEffect(() => {
+    const getVoices = async () => {
+      const res = await fetch(`${API_URL}/internal_voices`)
 
+      if (res.status === 200) {
+        const data = await res.json()
+        setDefaultVoicesOptions(data)
+      }
+    }
+
+    getVoices();
+  }, [])
+
+  console.log("Default voices options: ", defaultVoicesOptions);
 
   const [loadingPersonaBuyReasonGeneration, setLoadingPersonaBuyReasonGeneration] = useState(false);
   const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
@@ -492,11 +478,14 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                     <Text fw={600} size={"xs"} mt={"sm"}>
                       Description: <span className="text-gray-400">{item.description}</span>
                     </Text>
+                    <Flex gap={'4px'} mt={'8px'}>
+                      <Badge color={'purple'}># CTAs: {item.count_ctas}</Badge>
+                      <Badge color={'green'}># Bumps: {item.count_bumps}</Badge>
+                    </Flex>
                   </>
                   <Button
                     fullWidth
                     mt={"sm"}
-                    disabled={!item.enabled}
                     onClick={() => {
                       openContextModal({
                         modal: "createCampaignWithVoiceModal",
@@ -512,7 +501,7 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                             Voice Options for: {item.title}
                           </Title>
                         ),
-                        innerProps: { title: item.title, voice_id: item.archetype_id, userToken: userToken },
+                        innerProps: { title: item.title, voice_id: item.id, userToken: userToken },
                         styles: {
                           content: {
                             minWidth: "800px",

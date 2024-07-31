@@ -389,6 +389,16 @@ export interface CTA {
   auto_mark_as_scheduling_on_acceptance: boolean;
 }
 
+
+export interface DefaultVoices {
+  id: number,
+  count_ctas: number,
+  count_bumps: number,
+  title: string,
+  description: string,
+}
+
+
 export interface Archetype {
   active: boolean;
   archetype: string;

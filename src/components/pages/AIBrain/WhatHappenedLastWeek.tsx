@@ -3,6 +3,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import logotrial from "../../../components/PersonaCampaigns/Logo-Trial-3.gif";
 import RichTextArea from "@common/library/RichTextArea";
+import {socket} from '../../App';
 import {
   ActionIcon,
   Box,
@@ -42,10 +43,13 @@ import { Key, useEffect, useState, useRef } from "react";
 import { Line } from "react-chartjs-2";
 import { useRecoilValue } from "recoil";
 import AnalyticsItem from "./AnalyticsItem";
+import { set } from "lodash";
 
 export default function WhatHappenedLastWeek() {
   const [cycleDataCache, setCycleDataCache] = useState<{ [key: number]: any }>({});
   const [sentimentPage, setSentimentPage] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [receivedObjects, setReceivedObjects] = useState(0);
 
   const Spendingoptions: any = {
     responsive: true,
@@ -104,6 +108,7 @@ export default function WhatHappenedLastWeek() {
   const [cycleDates, setCycleDates] = useState<{ start: string, end: string }[]>([]);
   const [generatingReport, setGeneratingReport] = useState(false);
   const dataFetchedRef = useRef(false);
+  const roomIDref = useRef<string>('');
 
   const getCumulativeData = (data: any) => {
     if (!data) return [];
@@ -113,6 +118,22 @@ export default function WhatHappenedLastWeek() {
       return cumulative;
     });
   };
+
+  useEffect(() => {
+    const handleData = (incomingData: any) => {
+      // console.log('handling data', incomingData);
+      // console.log('room id', roomIDref.current);
+      if (incomingData.room_id === roomIDref.current) {
+        setReceivedObjects(prev => prev + 1);
+      }
+    };
+
+    socket.on("+1", handleData);
+
+    return () => {
+      socket.off("+1", handleData);
+    };
+  }, [roomIDref.current]);
 
   useEffect(() => {
     if (dataFetchedRef.current) return;
@@ -130,7 +151,7 @@ export default function WhatHappenedLastWeek() {
         const data = await response.json();
         // Assuming data is an array of objects with start and end properties
         setCycleDates(data);
-        console.log('dates are', data);
+        // console.log('dates are', data);
         console.log(data);
 
         // Initialize cycleDataCache with the length of cycle dates
@@ -206,7 +227,7 @@ export default function WhatHappenedLastWeek() {
     const cycle = cycleDates[index];
 
     // Initiate fetch requests for three different endpoints
-    const analyticsData = fetch(`http://localhost:8000/client/campaign_analytics?start_date=${cycle.start}&end_date=${cycle.end}&verbose=true`, {
+    const analyticsData = fetch(`http://localhost:8000/client/campaign_analytics?start_date=${cycle.start}&end_date=${cycle.end}&verbose=true&room_id=${roomIDref.current}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -215,24 +236,12 @@ export default function WhatHappenedLastWeek() {
     }).catch(error => {
       console.error('Error fetching analytics data:', error);
       return null;
-    });
-    const template_analytics_data = fetch(`${API_URL}/analytics/template_analytics?archetype_id=${currentProject?.id}&start_date=${cycle.start}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userToken}`,
-      },
-    }).catch(error => {
-      console.error('Error fetching template analytics data:', error);
-      return null;
-    });
+    })
 
     // Wait for all fetch requests to complete
     const [
-      template_analytics_data_response,
       analyticsDataResponse,
     ] = await Promise.all([
-      template_analytics_data,
       analyticsData,
     ]);
 
@@ -247,19 +256,17 @@ export default function WhatHappenedLastWeek() {
       }
     };
 
-    const templateAnalyticsDataJson = await parseJsonResponse(template_analytics_data_response);
     const analyticsDataJson = await parseJsonResponse(analyticsDataResponse);
-    console.log('analyticsDataJson', analyticsDataJson)
 
     // Return the results as an object
     return {
-      templateAnalytics: templateAnalyticsDataJson,
       analyticsData: analyticsDataJson,
     };
   };
 
   // Function to handle the toggle action for cycle data
   const handleToggle = async (index: number) => {
+    setReceivedObjects(0);
     // If the selected step is already open, toggle its state
     if (selectStep === index) {
       setOpened(!opened);
@@ -270,12 +277,19 @@ export default function WhatHappenedLastWeek() {
 
       // If the data for the selected cycle is not cached, fetch and cache it
       if (!cycleDataCache[index]) {
+      const room_id = Array.from({ length: 16 }, () => Math.random().toString(36)[2]).join('');
+      roomIDref.current = room_id;
+      socket.emit("join-room", {
+        payload: { room_id: room_id },
+      });
+        setLoading(true);
       const data = await fetchCycleData(index);
       console.log('data is', data);
       setCycleDataCache(prevCache => ({
         ...prevCache,
         [index]: data,
       }));
+      setLoading(false); 
        }
     }
   };
@@ -341,8 +355,11 @@ export default function WhatHappenedLastWeek() {
                     <Text size={"sm"} fw={600} color="gray">
                       Cycle {cycleDates.length - index}:
                     </Text>
-                    <Text fw={600} size={"sm"}>
-                      {new Date(cycleDates[index]?.start ?? '').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })} - {new Date(cycleDates[index]?.end ?? '').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}
+                      <Text size="sm" color="blue">
+                        Start: {new Date(cycleDates[index]?.start).toLocaleDateString()}
+                      </Text>
+                      <Text size="sm" color="blue">
+                        End: {new Date(cycleDates[index]?.end).toLocaleDateString()}
                     </Text>
                   </Flex>
                 </Flex>
@@ -358,7 +375,7 @@ export default function WhatHappenedLastWeek() {
               </Flex>
             </Flex>
             <Collapse in={selectStep === index && opened}>
-              {cycleDataCache?.[index]?.analyticsData ?
+              {!loading && cycleDataCache[index]?.analyticsData ?
                 cycleDataCache[index].analyticsData.map((dataItem: { daily: any; templateAnalytics: any; top_icp_people: any; summary:any }, dataIndex: Key | null | undefined) => (
                   <AnalyticsItem
                     key={dataIndex}
@@ -369,22 +386,27 @@ export default function WhatHappenedLastWeek() {
                   />
                 )) : (
                   <Center mt="xl" mb="xl">
-                    <Text
-                      mr="xl"
-                      color="grape"
-                      mt="sm"
-                      sx={{
-                        animation: 'pulse 2s infinite',
-                        '@keyframes pulse': {
-                          '0%': { transform: 'scale(1)' },
-                          '50%': { transform: 'scale(1.5)' },
-                          '100%': { transform: 'scale(1)' },
-                        },
-                      }}
-                    >
-                      Loading analytics...
+                    <Flex direction="column" align="center">
+                      <Text
+                        mr="xl"
+                        color="grape"
+                        mt="sm"
+                        sx={{
+                          animation: 'pulse 2s infinite',
+                          '@keyframes pulse': {
+                            '0%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.5)' },
+                            '100%': { transform: 'scale(1)' },
+                          },
+                        }}
+                      >
+                        Loading analytics...
                       </Text>
                       <img src={logotrial} alt="Loading..." width="75px" />
+                      <Text mt="sm" color="grape">
+                        Calculated analytics for {receivedObjects} campaigns...
+                      </Text>
+                    </Flex>
                   </Center>
                 )}
 

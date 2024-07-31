@@ -456,7 +456,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
               )}
             </Box>
           </Flex>
-          {/* thereExistsICPData && <Paper>
+          { thereExistsICPData && <Paper>
             <Flex align={"center"} gap={"5px"}>
               <Text
                 style={{
@@ -511,12 +511,27 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
                                       icpItem.icp_fit_score == 4 ? "Very High" : "Not Scored"
                             }</Badge>
                         </Flex>
+                        <Badge
+                                tt={"initial"}
+                                variant="filled"
+                                rightSection={<IconExternalLink size={"0.9rem"} style={{ marginTop: "5px" }} />}
+                                styles={{
+                                  root: {
+                                    fontWeight: 400,
+                                  },
+                                }}
+                                component="a"
+                                href={`/prospects/${icpItem.id}`}
+                                target="_blank"
+                              >
+                                View Conversation
+                              </Badge>
                       </Flex>
                     </Paper>
                   );
                 })}
             </SimpleGrid>
-          </Paper> */}
+          </Paper> }
         </Flex>
       ) : (
        <></>

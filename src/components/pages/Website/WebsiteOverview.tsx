@@ -272,7 +272,8 @@ export default function WebsiteOverview(props: any) {
                 }}
               >
                 <IconProgress size={"0.8rem"} />
-                {11}% deanoymized
+                {/* percent deanonymized of total */}
+                  {((trackHistory.reduce((acc, item) => acc + item.distinct_deanonymized_visits, 0) / trackHistory.reduce((acc, item) => acc + item.distinct_visits, 0)) * 100).toFixed(2)}% Deanonymized
               </Badge>
             </Flex>
             <Card h={300}>

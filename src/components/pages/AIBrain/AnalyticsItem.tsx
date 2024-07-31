@@ -7,8 +7,6 @@ import { DataGrid } from "mantine-data-grid";
 
 const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData }: any) => {
 
-    console.log('summary data is', summaryData);
-
   const thereExistsICPData = topIcpPeople && topIcpPeople.length > 0;
   const thereExistsPositiveReplies = dailyData && dailyData.reduce((total: any, day: { num_pos_replies: any; }) => total + day.num_pos_replies, 0) > 0;
   const getCumulativeData = (data: any[]) => {

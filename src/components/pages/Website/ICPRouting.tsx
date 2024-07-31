@@ -119,6 +119,7 @@ export default function ICPRouting() {
         icpRouteTitle: route.title,
         description: route.description,
         id: route.id,
+        count: route.count,
         ai_mode: route.ai_mode,
         rules: route.rules,
         routeTo: route.segment_id ? `${route.segment_title} ✅` : "no segment connected",
@@ -161,12 +162,23 @@ export default function ICPRouting() {
       });
       const data = await response.json();
       console.log('data', data);
+      if (data.met_conditions.length === 0) {
+        showNotification({
+          title: "No Rules Met",
+          message: "Could not find a bucket for this visitor",
+          color: "red",
+          icon: <IconCircleX />,
+        });
+        setLoading(false);
+        return;
+      }
+
       setSimulationData(data);
       setShowResults(true);
     } catch (error) {
       console.error("Error fetching ICP routes:", error);
       showNotification({
-        title: "Error",
+        title: "No Rules Met",
         message: "Could not find a bucket for this visitor",
         color: "red",
         icon: <IconCircleX />,
@@ -400,7 +412,7 @@ export default function ICPRouting() {
               <td>
                 <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"start"}>
                   <Box>
-                    <Text size={"sm"}>{row.icpRouteId}</Text>
+                    <Text size={"sm"}>{row.count}</Text>
                   </Box>
                 </Flex>
               </td>

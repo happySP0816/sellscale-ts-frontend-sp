@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import CustomSelect from "@common/persona/ICPFilter/CustomSelect";
 import {
   IcpRouteData,
@@ -333,7 +333,7 @@ export default function ICPRoutingCreateModal({
                 style={{ width: "50px", textAlign: "center" }}
               />
               <Select
-                withinPortal
+                withinPortal        
                 value={rule.condition}
                 onChange={(value) => {
                   const newRules = [...rules];
@@ -443,13 +443,22 @@ export default function ICPRoutingCreateModal({
                 />
               ) : (
                 <TextInput
+                  placeholder={
+                    rule.condition === 'has_not_clicked_on_page' || rule.condition === 'has_clicked_on_page' 
+                      ? '/home' // Hint: Enter the page URL
+                      : rule.condition === 'title_contains' || rule.condition === 'title_not_contains' 
+                      ? 'Director' // Hint: Enter the job title
+                      : rule.condition === 'company_name_is' || rule.condition === 'company_name_is_not' 
+                      ? 'Company Name' // Hint: Enter the company name
+                      : rule.condition === 'person_name_is'? 'Steve'
+                      : 'Enter Value' 
+                  }
                   value={rule.value}
                   onChange={(event) => {
                     const newRules = [...rules];
                     newRules[index].value = event.currentTarget.value;
                     setRules(newRules);
                   }}
-                  placeholder="Enter value"
                   style={{ width: "150px" }}
                 />
               )}
@@ -464,7 +473,7 @@ export default function ICPRoutingCreateModal({
               </Button>
               {index < rules.length - 1 && (
               <Text style={{ margin: '10px 0' }}>
-                or
+                and
               </Text>
             )}
             </Flex>

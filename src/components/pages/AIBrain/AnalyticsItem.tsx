@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollArea, Flex, Text, Button, Paper, Box, Divider, Center, Loader, Badge, SimpleGrid, ActionIcon } from '@mantine/core';
+import { ScrollArea, Flex, Text, Button, Paper, Box, Divider, Center, Loader, Badge, SimpleGrid, ActionIcon, Popover } from '@mantine/core';
 import { Line } from 'react-chartjs-2';
 import { IconSparkles, IconSend, IconChecks, IconMessageCheck, IconCalendar, IconChevronLeft, IconChevronRight, IconUser, IconMessages, IconLetterT, IconToggleRight, IconExternalLink, IconBallpen } from '@tabler/icons-react';
 import { openContextModal } from '@mantine/modals';
 import { DataGrid } from "mantine-data-grid";
+import { useDisclosure } from '@mantine/hooks';
 
 const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData }: any) => {
 
@@ -71,6 +72,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
   };
 
   const [sentimentPage, setSentimentPage] = useState(0);
+  const [openedPopover, setOpenedPopover] = useState<string | null>(null);
 
   return (
     <Box>
@@ -87,7 +89,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
             <Text fw={700} size="xl">Analytics for {summaryData?.archetype}</Text>
           </Flex>
           <Flex gap={"sm"}>
-            <Paper w={"100%"} h={300} withBorder radius={"md"}>
+            <Paper h={300} w={"43%"}withBorder radius={"md"}>
               {dailyData ? (
                 <Line
                   typeof="linear"
@@ -378,11 +380,18 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
                           let { reply } = cell.row.original;
 
                           return (
-                            <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
-                              <Text color="gray" size={"sm"}>
-                                {reply}
-                              </Text>
-                            </Flex>
+                            <Popover withinPortal width={200} position="bottom" withArrow shadow="md" opened={openedPopover === reply} onClose={() => setOpenedPopover(null)}>
+                              <Popover.Target>
+                                  <Flex onMouseEnter={() => setOpenedPopover(reply)} onMouseLeave={() => setOpenedPopover(null)} gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
+                                    <Text color="gray" size={"sm"}>
+                                      {reply}
+                                    </Text>
+                                  </Flex>
+                              </Popover.Target>
+                              <Popover.Dropdown style={{ pointerEvents: 'none' }}>
+                                <Text size="sm">{reply}</Text>
+                              </Popover.Dropdown>
+                            </Popover>
                           );
                         },
                       },

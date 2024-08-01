@@ -22,6 +22,7 @@ const Sidebar: FC<{
       }}
     >
       <SidebarHeader
+        refresh={() => {}}
         sideBarVisible={sideBarVisible}
         toggleSideBar={toggleSideBar}
         isTesting={isTesting}

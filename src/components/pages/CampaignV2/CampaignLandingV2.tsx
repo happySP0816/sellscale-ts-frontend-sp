@@ -814,7 +814,20 @@ export default function CampaignLandingV2() {
                       {status}
                     </Badge>
                   </Flex>
-                  <Button disabled size="sm" color="blue" onClick={() => setOpenGenerationCenter(true)}>
+                  <Modal
+                    opened={openGenerationCenter}
+                    onClose={() => setOpenGenerationCenter(false)}
+                    title="Generation Center"
+                    size="85%"
+                    >
+                    <iframe 
+                      src={`https://sellscale.retool.com/embedded/public/ccfec2c8-2f92-42f4-97a2-d7c6dcf603ce#client_id=${userToken}`}
+                      width="100%" 
+                      height="800px"
+                      style={{ border: "none" }}
+                    />
+                  </Modal>
+                  <Button disabled={!window.location.href.includes('ishan')} size="sm" color="blue" onClick={() => setOpenGenerationCenter(true)}>
                     Generate & Send
                   </Button>
                 </Flex>

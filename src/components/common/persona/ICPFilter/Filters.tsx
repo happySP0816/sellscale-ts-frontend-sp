@@ -29,7 +29,7 @@ import {
   getICPRuleSet,
   updateICPFiltersBySalesNavURL,
 } from "@utils/requests/icpScoring";
-import { userTokenState } from "@atoms/userAtoms";
+import { userTokenState, queryTriggerState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { getFiltersAutofill } from "@utils/requests/getFiltersAutofill";
 import { openConfirmModal, openContextModal } from "@mantine/modals";
@@ -48,6 +48,7 @@ function Filters(props: {
   const [globalRuleSetData, setGlobalRuleSetData] =
     useRecoilState(filterRuleSetState);
   const icpProspects = useRecoilValue(filterProspectsState);
+  const queryTrigger = useRecoilValue(queryTriggerState);
 
   const [
     included_individual_title_keywords,
@@ -145,7 +146,7 @@ function Filters(props: {
   ] = useState<string[]>([]);
 
   useQuery({
-    queryKey: [`get-icp-filters`, { currentProject }],
+    queryKey: [`get-icp-filters`, { currentProject, queryTrigger }],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line

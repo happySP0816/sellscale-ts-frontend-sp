@@ -13,6 +13,11 @@ const userDataState = atom({
   default: (JSON.parse(localStorage.getItem("user-data") ?? "{}") || {}) as ClientSDR,
 });
 
+const queryTriggerState = atom({
+  key: "queryTriggerState",
+  default: 0, // You can use a number to trigger re-renders
+});
+
 const campaignContactsState = atom({
   key: "user-contacts",
   default: (JSON.parse(localStorage.getItem("userContacts") ?? "{}") || {}) as Contact[],
@@ -38,4 +43,4 @@ const adminDataState = atom({
   default: (JSON.parse(localStorage.getItem("admin-data") ?? "{}") || {}) as ClientSDR | null,
 });
 
-export { userTokenState, userDataState, adminDataState, campaignContactsState, linkedinSequenceState, emailSequenceState, emailSubjectLinesState };
+export { userTokenState, userDataState, adminDataState, campaignContactsState, linkedinSequenceState, emailSequenceState, emailSubjectLinesState, queryTriggerState };

@@ -27,7 +27,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { filterProspectsState, filterRuleSetState } from '@atoms/icpFilterAtoms';
 import { getICPRuleSet, runScoringICP, updateICPRuleSet } from '@utils/requests/icpScoring';
-import { userTokenState } from '@atoms/userAtoms';
+import { queryTriggerState, userTokenState } from '@atoms/userAtoms';
 import { showNotification } from '@mantine/notifications';
 import { getICPScoringJobs } from '@utils/requests/getICPScoringJobs';
 import { navConfettiState } from '@atoms/navAtoms';
@@ -37,6 +37,7 @@ import { set } from 'lodash';
 import { API_URL } from '@constants/data';
 
 type Props = {
+  refresh: () => void;
   sideBarVisible: boolean;
   toggleSideBar: () => void;
   isTesting: boolean;
@@ -48,15 +49,23 @@ const SwitchWrapper = forwardRef<HTMLDivElement, { children: React.ReactNode }>(
     {props.children}
   </div>
 ));
-export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsTesting }: Props) {
+export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsTesting, refresh }: Props) {
   const [value, setValue] = useState('');
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
   const [_confetti, dropConfetti] = useRecoilState(navConfettiState);
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [showApplyButton, setShowApplyButton] = useState(false);
+  const [queryTrigger, setQueryTrigger] = useRecoilState(queryTriggerState);
+
+  const handleTriggerQuery = () => {
+    setQueryTrigger((prev) => prev + 1); // Increment to trigger the query
+  };
 
   const currentProject = useRecoilValue(currentProjectState);
-  const globalRuleSetData = useRecoilValue(filterRuleSetState);
   const icpProspects = useRecoilValue(filterProspectsState);
+  const [globalRuleSetData, setGlobalRuleSetData] =
+    useRecoilState(filterRuleSetState);
 
   const TRIGGER_REFRESH_INTERVAL = 1000; // = 1 seconds
   const TIME_PER_PROSPECT = 0.1; // 0.1 seconds
@@ -65,6 +74,87 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
   const [scoringTimeRemaining, setScoringTimeRemaining] = useState<number>(0);
   const [scoringProgress, setScoringProgress] = useState<number>(0);
   const [prefilters, setPrefilters] = useState<any[]>([]);
+
+  const fetchICPRuleSet = async (userToken: string) => {
+    if (!currentProject) return null;
+
+    let response: any = null;
+    try{
+      response = await getICPRuleSet(userToken, currentProject.id);
+      console.log('response', response);
+    }
+    catch (error) {
+      console.error('Error fetching ICP Rule Set:', error);
+    }
+
+
+    if (true) {
+      const data = response?.data ?? {};
+
+      const {
+        included_individual_title_keywords,
+        excluded_individual_title_keywords,
+        included_individual_seniority_keywords,
+        excluded_individual_seniority_keywords,
+        included_individual_industry_keywords,
+        excluded_individual_industry_keywords,
+        individual_years_of_experience_start,
+        individual_years_of_experience_end,
+        included_individual_skills_keywords,
+        excluded_individual_skills_keywords,
+        included_individual_locations_keywords,
+        excluded_individual_locations_keywords,
+        included_individual_generalized_keywords,
+        excluded_individual_generalized_keywords,
+        included_individual_education_keywords,
+        excluded_individual_education_keywords,
+        included_company_name_keywords,
+        excluded_company_name_keywords,
+        included_company_locations_keywords,
+        excluded_company_locations_keywords,
+        company_size_start,
+        company_size_end,
+        included_company_industries_keywords,
+        excluded_company_industries_keywords,
+        included_company_generalized_keywords,
+        excluded_company_generalized_keywords,
+      } = data;
+
+      console.log('setting global rule set data', data);
+      console.log('included individual title keywords', included_individual_title_keywords);
+
+      setGlobalRuleSetData({
+        included_individual_title_keywords: included_individual_title_keywords || [],
+        excluded_individual_title_keywords: excluded_individual_title_keywords || [],
+        included_individual_seniority_keywords: included_individual_seniority_keywords || [],
+        excluded_individual_seniority_keywords: excluded_individual_seniority_keywords || [],
+        included_individual_industry_keywords: included_individual_industry_keywords || [],
+        excluded_individual_industry_keywords: excluded_individual_industry_keywords || [],
+        individual_years_of_experience_start: individual_years_of_experience_start || 0,
+        individual_years_of_experience_end: individual_years_of_experience_end || 0,
+        included_individual_skills_keywords: included_individual_skills_keywords || [],
+        excluded_individual_skills_keywords: excluded_individual_skills_keywords || [],
+        included_individual_locations_keywords: included_individual_locations_keywords || [],
+        excluded_individual_locations_keywords: excluded_individual_locations_keywords || [],
+        included_individual_generalized_keywords: included_individual_generalized_keywords || [],
+        excluded_individual_generalized_keywords: excluded_individual_generalized_keywords || [],
+        included_individual_education_keywords: included_individual_education_keywords || [],
+        excluded_individual_education_keywords: excluded_individual_education_keywords || [],
+        included_company_name_keywords: included_company_name_keywords || [],
+        excluded_company_name_keywords: excluded_company_name_keywords || [],
+        included_company_locations_keywords: included_company_locations_keywords || [],
+        excluded_company_locations_keywords: excluded_company_locations_keywords || [],
+        company_size_start: company_size_start || 0,
+        company_size_end: company_size_end || 0,
+        included_company_industries_keywords: included_company_industries_keywords || [],
+        excluded_company_industries_keywords: excluded_company_industries_keywords || [],
+        included_company_generalized_keywords: included_company_generalized_keywords || [],
+        excluded_company_generalized_keywords: excluded_company_generalized_keywords || [],
+      });
+    }
+    return null;
+  };
+
 
   const [scoring, setScoring] = useState(false);
 
@@ -175,6 +265,36 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
     refetchInterval: TRIGGER_REFRESH_INTERVAL,
   });
 
+  const handleApply = async () => {
+    if (!selectedFilter) return;
+
+    const response = await fetch(`${API_URL}/contacts/add_apollo_filters_to_icp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        saved_apollo_query_id: selectedFilter,
+        campaign_id: currentProject?.id,
+      }),
+    });
+
+    const result = await response.json();
+    if (result.status === 'success') {
+      console.log('Filters added successfully:', result.message);
+      // Placeholder function call
+      handleTriggerQuery();
+      // Reset the select to None
+      setSelectedFilter(null);
+      // Hide the apply button
+      setShowApplyButton(false);
+      refresh();
+    } else {
+      console.error('Error adding filters:', result.message);
+    }
+  };
+
   return (
     <>
       <Flex
@@ -199,13 +319,26 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
             </ActionIcon>
           </Tooltip> */}
         </Flex>
-        <Select
-            mb={'sm'}
-            label="Select Filters"
-            placeholder="Pick one"
-            data={prefilters.map((prefilter) => ({ value: prefilter.id, label: prefilter.title }))}
-            onChange={(value) => console.log('Selected:', value)}
-          />
+            <Flex align="end" mb={'sm'}>
+              <Select
+                label="Select Filters"
+                placeholder="Pick one"
+                data={prefilters.map((prefilter) => ({ value: prefilter.id, label: prefilter.title }))}
+                value={selectedFilter}
+                onChange={(value) => {
+                  setSelectedFilter(value);
+                  setShowApplyButton(true);
+                }}
+                rightSection={showApplyButton && (
+                  <Button onClick={handleApply} size="xs" style={{ marginLeft: '-60px' }}>
+                    Apply
+                  </Button>
+                )}
+                style={{ width: '90%' }}
+              />
+            </Flex>
+
+            
         <Flex align={'start'} gap={'0.5rem'} direction={'row'}>
           <Button
             rightIcon={isTesting ? null : <IconArrowNarrowRight size={24} />}
@@ -320,9 +453,9 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
               </Box>
             </SwitchWrapper>
           </Tooltip>
-          <Text style={{ textDecoration: 'underline', textDecorationStyle: 'dashed' }} color='gray'>
+          {/* <Text style={{ textDecoration: 'underline', textDecorationStyle: 'dashed' }} color='gray'>
             Clear Filters
-          </Text>
+          </Text> */}
         </Flex>
 
         <Flex align={'center'} gap={14} mt={'sm'} px={10}>

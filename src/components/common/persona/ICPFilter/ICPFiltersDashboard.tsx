@@ -893,6 +893,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                     })}
                   >
                     <SidebarHeader
+                      refresh={refetch}
                       sideBarVisible={sideBarVisible}
                       toggleSideBar={toggleSideBar}
                       isTesting={isTesting}

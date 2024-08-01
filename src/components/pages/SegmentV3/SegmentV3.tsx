@@ -26,7 +26,7 @@ import {
   SimpleGrid,
   SegmentedControl,
   Center,
-  Tooltip,
+  Tooltip, Switch,
 } from "@mantine/core";
 import posthog from "posthog-js";
 
@@ -82,16 +82,39 @@ import { createSegmentTag, getAllSegmentTags, addTagToSegment, removeTagFromSegm
 import { deterministicMantineColor } from "@utils/requests/utils";
 import SegmentV3Overview from "./SegmentV3Overview";
 import SegmentAutodownload from "@pages/SegmentV2/SegmentAutodownload";
+import ContactAccountFilterModal from "@modals/ContactAccountFilterModal";
 
 type PropsType = {
   onDownloadHistoryClick?: () => void;
 };
+
+export interface TransformedSegment {
+  id: number;
+  person_name: string;
+  segment_title: string;
+  progress: string;
+  campaign: string;
+  contacts: number;
+  filters: number;
+  sub_segments: any[]; // Assuming this is an array; adjust if necessary
+  client_archetype: string;
+  parent_segment_id: string;
+  client_sdr: string;
+  num_prospected: number;
+  num_contacted: number;
+  apollo_query: string;
+  segment_tags: string[];
+  autoscrape_enabled: boolean;
+  current_scrape_page: number;
+  is_market_map: boolean;
+}
 
 export default function SegmentV3(props: PropsType) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const [createSegmentName, setCreateSegmentName] = useState("");
+  const [isMarketMapSegment, setIsMarketMapSegment] = useState(false);
   const [totalProspected, setTotalProspected] = useState(0);
   const [totalContacted, setTotalContacted] = useState(0);
   const [totalUniqueCompanies, setTotalUniqueCompanies] = useState(0);
@@ -131,7 +154,7 @@ export default function SegmentV3(props: PropsType) {
   const [connectCampaignView, setConnectCampaignView] = useState("SELECT_METHOD");
 
   const [arrow, setArrow] = useState(false);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<TransformedSegment[]>([]);
   let FilteredData: any = [];
 
   const [expandedRows, setExpandedRows] = useState<any>([]);
@@ -156,7 +179,7 @@ export default function SegmentV3(props: PropsType) {
     });
   };
 
-  function transformData(segments: any[]) {
+  function transformData(segments: any[]): TransformedSegment[] {
     return segments.map((segment, index) => {
       // Assume progress, campaign, contacts, filters, assets are derived somehow
       return {
@@ -180,6 +203,7 @@ export default function SegmentV3(props: PropsType) {
         segment_tags: segment.attached_segments,
         autoscrape_enabled: segment.autoscrape_enabled,
         current_scrape_page: segment.current_scrape_page,
+        is_market_map: segment.is_market_map ?? false,
       };
     });
   }
@@ -314,6 +338,7 @@ export default function SegmentV3(props: PropsType) {
       },
       body: JSON.stringify({
         segment_title: segmentName ? segmentName : createSegmentName,
+        is_market_map: isMarketMapSegment,
         filters: {},
       }),
     })
@@ -346,7 +371,7 @@ export default function SegmentV3(props: PropsType) {
     }
     fetch(
       `${API_URL}/segment/all` +
-        (type === "company" ? "?include_all_in_client=true" : "") +
+        (type === "company" ? "?include_all_in_client=true" : (type === "marketMap" ? "?only_market_map=true" : "")) +
         (tagFilter !== -1 ? `${type === "company" ? "&" : "?"}tag_filter=${tagFilter}` : ""),
       {
         method: "GET",
@@ -366,11 +391,19 @@ export default function SegmentV3(props: PropsType) {
         setTotalProspected(totalProspected);
         setTotalContacted(totalContacted);
         setTotalUniqueCompanies(totalUniqueCompanies);
+
+        const transformedSegments = transformData(data.segments);
+
         setTotalInFilters(totalProspectsInPreFilters);
-        setData(transformData(data.segments) as any);
+
+        if (type === "marketMap") {
+          setData(transformedSegments.filter(segment => segment.is_market_map));
+        }
+        else {
+          setData(transformedSegments.filter(segment => !segment.is_market_map));
+        }
       })
       .finally(() => {
-        console.log("Stopping");
         setLoading(false);
       });
   };
@@ -454,14 +487,40 @@ export default function SegmentV3(props: PropsType) {
   return (
     <Box>
       {/* Create Segment Modal */}
-      <Modal onClose={() => setShowCreateSegmentModal(false)} opened={showCreateSegmentModal} size="sm">
-        <Title order={4}>Create Segment</Title>
+      <Modal
+        onClose={() => {
+          if (isMarketMapSegment) {
+            setIsMarketMapSegment(false);
+          }
+          setShowCreateSegmentModal(false)
+        }}
+        opened={showCreateSegmentModal} size="sm">
+        <Title order={4}>{isMarketMapSegment ? "Create Market Map" : "Create Segment"}</Title>
         <Text size={"sm"} color="gray" fw={500} mt={"sm"} mb={"md"}>
-          Create a new segment to organize your contacts and campaigns
+          {isMarketMapSegment ? "Create a market map to filter and rank your clients and campaigns" :
+            "Create a new segment to organize your contacts and campaigns"}
         </Text>
-        <TextInput label="Segment Name" placeholder="Enter Segment Name" required mb={"sm"} onChange={(e) => setCreateSegmentName(e.target.value)} />
+        <TextInput
+          label={isMarketMapSegment ? "Market Map Name" : "Segment Name"}
+          placeholder={isMarketMapSegment ? "Enter Market Map Name" : "Enter Segment Name"}
+          required
+          mb={"sm"}
+          onChange={(e) => setCreateSegmentName(e.target.value)} />
         <Flex gap={"md"} mt="xl">
-          <Button fullWidth size="xs" radius={"md"} variant="outline" color="gray">
+          <Button
+            fullWidth size="xs"
+            radius={"md"}
+            variant="outline"
+            color="gray"
+            onClick={() => {
+              if (isMarketMapSegment) {
+                setIsMarketMapSegment(false);
+              }
+
+              setShowCreateSegmentModal(false);
+              setCreateSegmentName("");
+            }}
+          >
             Cancel
           </Button>
           <Button
@@ -473,7 +532,7 @@ export default function SegmentV3(props: PropsType) {
               setShowCreateSegmentModal(false);
             }}
           >
-            Create New Segment
+            {isMarketMapSegment ? "Create New Market Map" : "Create New Segment"}
           </Button>
         </Flex>
       </Modal>
@@ -671,25 +730,30 @@ export default function SegmentV3(props: PropsType) {
       </Modal>
 
       {/* View Prospects Modal */}
-      <Modal
-        opened={showViewProspectsModal}
-        onClose={() => {
-          setShowViewProspectsModal(false);
-          getAllSegments(true);
-        }}
-        size="1200px"
-        // h={"500px"}
-        padding="md"
-        title="View Prospects"
-      >
-        <iframe
-          // Edit URL: https://sellscale.retool.com/editor/0037d48c-00df-11ef-9943-1fa602cbecb8/Segments%20v2%20Modules/View%20Prospect%20in%20Segment
-          src={`https://sellscale.retool.com/embedded/public/639c4389-18d5-42a5-ad68-e84fd643b5ee#authToken=${userToken}&segmentId=${selectedSegmentId}`}
-          width="100%"
-          height="700px"
-          style={{ border: "none" }}
-        ></iframe>
-      </Modal>
+      <ContactAccountFilterModal
+        showContactAccountFilterModal={showViewProspectsModal}
+        setShowContactAccountFilterModal={setShowViewProspectsModal}
+        segment={data.find(item => item.id === selectedSegmentId)}
+      />
+      {/*<Modal*/}
+      {/*  opened={showViewProspectsModal}*/}
+      {/*  onClose={() => {*/}
+      {/*    setShowViewProspectsModal(false);*/}
+      {/*    getAllSegments(true);*/}
+      {/*  }}*/}
+      {/*  size="1200px"*/}
+      {/*  // h={"500px"}*/}
+      {/*  padding="md"*/}
+      {/*  title="View Prospects"*/}
+      {/*>*/}
+      {/*  <iframe*/}
+      {/*    // Edit URL: https://sellscale.retool.com/editor/0037d48c-00df-11ef-9943-1fa602cbecb8/Segments%20v2%20Modules/View%20Prospect%20in%20Segment*/}
+      {/*    src={`https://sellscale.retool.com/embedded/public/639c4389-18d5-42a5-ad68-e84fd643b5ee#authToken=${userToken}&segmentId=${selectedSegmentId}`}*/}
+      {/*    width="100%"*/}
+      {/*    height="700px"*/}
+      {/*    style={{ border: "none" }}*/}
+      {/*  ></iframe>*/}
+      {/*</Modal>*/}
       <Flex direction={"column"} w={"100%"} mx={"auto"} pt={"lg"}>
         <Flex align={"center"} justify={"space-between"} mb={"md"}>
           <Flex gap={"sm"} align={"center"}>
@@ -733,30 +797,19 @@ export default function SegmentV3(props: PropsType) {
                       </Center>
                     ),
                   },
+                  {
+                    value: "marketMap",
+                    label: (
+                      <Center style={{ gap: 4}}>
+                        <Text fw={500}>Market Maps</Text>
+                      </Center>
+                    )
+                  }
                 ]}
               />
             </Flex>
 
             <Flex gap={"sm"}>
-              {/* <Select
-                w={200}
-                data={["test1", "test2", "test3", "Q1 STRATEGY"]}
-                value={seletedTag}
-                placeholder="Filter by Tags"
-                onChange={(value) => {
-                  setSelectedTag(value);
-                  let newFilteredByTagData;
-                  if (value) {
-                    newFilteredByTagData = data.filter(
-                      (item: any) =>
-                        item.segment_tags.map((tag: any) => tag?.name.toLowerCase()).includes(value.toLowerCase()) || item.segment_tags.length === 0
-                    );
-                  } else {
-                    newFilteredByTagData = data;
-                  }
-                  getNestedRows(newFilteredByTagData);
-                }}
-              /> */}
               <TextInput
                 w={200}
                 placeholder="Search"
@@ -774,27 +827,17 @@ export default function SegmentV3(props: PropsType) {
                 onClick={() => {
                   setShowCreateSegmentModal(true);
                 }}
-                // onClick={() => {
-                //   openContextModal({
-                //     modal: "createsegmentV3",
-                //     title: (
-                //       <Flex gap={"xs"} align={"center"}>
-                //         <IconUserPlus color="#228BE6" />
-                //         <Title order={3}>Create Segment</Title>
-                //       </Flex>
-                //     ),
-                //     innerProps: {},
-                //     centered: true,
-                //     styles: {
-                //       content: {
-                //         minWidth: "1000px",
-                //       },
-                //     },
-                //     onClose: () => {},
-                //   });
-                // }}
               >
                 Create Segment
+              </Button>
+              <Button
+                leftIcon={<IconPlus size={"0.9rem"} />}
+                onClick={() => {
+                  setIsMarketMapSegment(true);
+                  setShowCreateSegmentModal(true);
+                }}
+              >
+                Create Market Map
               </Button>
             </Flex>
           </Flex>
@@ -1069,7 +1112,7 @@ export default function SegmentV3(props: PropsType) {
             ))}
           <Flex gap={"sm"} align={"center"} w={"100%"} mt={"md"}>
             <Text sx={{ whiteSpace: "nowrap" }} fw={600}>
-              Existing Segments
+              {type === "marketMap" ? "Existing Market Map" : "Existing Segments"}
             </Text>
             <Flex align={"center"}>{loading ? <Loader /> : <Badge variant="filled">{data.length}</Badge>}</Flex>
             <Divider w={"100%"} />
@@ -1099,6 +1142,7 @@ export default function SegmentV3(props: PropsType) {
                   num_prospected: number;
                   segment_tags: any[];
                   sub_segments: any[];
+                  is_market_map: boolean;
                 },
                 index: number
               ) => {
@@ -1107,25 +1151,7 @@ export default function SegmentV3(props: PropsType) {
                     <Flex justify={"space-between"} align={"center"}>
                       <Flex align={"center"} gap={1}>
                         <Text fw={700} lineClamp={1}>
-                          {/* TYPESCRIPT FTW */}
-                          {item.parent_segment_id &&
-                            `(${(
-                              (
-                                data.find((parent: { id: number; person_name?: string }) => parent.id === item.parent_segment_id) as unknown as {
-                                  person_name?: string;
-                                }
-                              )?.person_name ?? ""
-                            ).slice(0, 20)}${
-                              (
-                                (
-                                  data.find((parent: { id: number; person_name?: string }) => parent.id === item.parent_segment_id) as unknown as {
-                                    person_name?: string;
-                                  }
-                                )?.person_name ?? ""
-                              ).length > 15
-                                ? "..."
-                                : ""
-                            })`}{" "}
+                          {item.is_market_map ? "Market Map: " : ""}
                           {item.person_name ?? ""}
                         </Text>
                         <ActionIcon
@@ -1229,7 +1255,7 @@ export default function SegmentV3(props: PropsType) {
                             <Menu.Divider />
                             <Menu.Label>Change</Menu.Label>
 
-                            <Menu.Item
+                            {!item.is_market_map && <Menu.Item
                               onClick={() => {
                                 openContextModal({
                                   modal: "connectSegment",
@@ -1260,7 +1286,7 @@ export default function SegmentV3(props: PropsType) {
                             >
                               <IconWebhook size={"0.9rem"} />
                               Connect to Segment
-                            </Menu.Item>
+                            </Menu.Item>}
                             <Menu.Item
                               onClick={() => {
                                 duplicateSegment(item.id, true);
@@ -1269,7 +1295,8 @@ export default function SegmentV3(props: PropsType) {
                               <IconCopy size={"0.9rem"} />
                               Duplicate Segment
                             </Menu.Item>
-                            <Menu.Item
+                            {!item.is_market_map &&
+                              <Menu.Item
                               onClick={() => {
                                 setSelectedSegmentId(item.id);
                                 openContextModal({
@@ -1304,7 +1331,7 @@ export default function SegmentV3(props: PropsType) {
                             >
                               Split Segment
                             </Menu.Item>
-
+                            }
                             <Menu.Divider />
                             <Menu.Label color="red">Danger zone</Menu.Label>
                             <Menu.Item
@@ -1317,7 +1344,8 @@ export default function SegmentV3(props: PropsType) {
                               <IconUsersMinus size={"0.9rem"} />
                               Transfer to Teammate
                             </Menu.Item>
-                            <Menu.Item
+                            {!item.is_market_map &&
+                              <Menu.Item
                               color="red"
                               onClick={() =>
                                 openContextModal({
@@ -1363,6 +1391,7 @@ export default function SegmentV3(props: PropsType) {
                               <IconRefresh size={"0.9rem"} />
                               Reset Segment
                             </Menu.Item>
+                            }
                             <Menu.Item
                               color="red"
                               onClick={() =>
@@ -1482,7 +1511,7 @@ export default function SegmentV3(props: PropsType) {
                       {/* <Button rightIcon={<IconArrowRight size={"0.9rem"} />} mt={"sm"}>
                       Create Campaign
                     </Button> */}
-                      <Button
+                      {!item.is_market_map && <Button
                         variant={item.client_archetype?.archetype ? "outline" : "filled"}
                         color="blue"
                         mt={"sm"}
@@ -1500,7 +1529,7 @@ export default function SegmentV3(props: PropsType) {
                         {item.client_archetype?.archetype
                           ? item.client_archetype.archetype?.substring(0, 22) + (item.client_archetype.archetype.length > 22 ? "..." : "")
                           : "Connect to Campaign"}
-                      </Button>
+                      </Button>}
                     </Box>
                   </Paper>
                 );
@@ -1553,7 +1582,10 @@ const SegmentTags = (props: any) => {
               <IconPlus size={"0.9rem"} />
             </ActionIcon>
           ) : (
-            <Button leftIcon={<IconPlus size={"0.9rem"} />} size="xs" onClick={() => setPopoverOpened(true)}>
+            <Button leftIcon={<IconPlus size={"0.9rem"} />}
+                    color={props.item?.is_market_map ? "violet" : "blue"}
+                    size="xs"
+                    onClick={() => setPopoverOpened(true)}>
               Add Tag
             </Button>
           )}

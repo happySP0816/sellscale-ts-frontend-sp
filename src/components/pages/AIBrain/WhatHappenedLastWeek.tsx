@@ -227,7 +227,7 @@ export default function WhatHappenedLastWeek() {
     const cycle = cycleDates[index];
 
     // Initiate fetch requests for three different endpoints
-    const analyticsData = fetch(`http://localhost:8000/client/campaign_analytics?start_date=${cycle.start}&end_date=${cycle.end}&verbose=true&room_id=${roomIDref.current}`, {
+    const analyticsData = fetch(`${API_URL}/client/campaign_analytics?start_date=${cycle.start}&end_date=${cycle.end}&verbose=true&room_id=${roomIDref.current}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

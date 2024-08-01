@@ -152,7 +152,7 @@ export default function AnalyticsModal() {
     const cycle = cycleDates[index];
 
     // Initiate fetch requests for three different endpoints
-    const analyticsData = fetch(`http://localhost:8000/client/campaign_analytics?client_archetype_id=${currentProject?.id}&start_date=${cycle.start}&end_date=${cycle.end}&verbose=true`, {
+    const analyticsData = fetch(`${API_URL}/client/campaign_analytics?client_archetype_id=${currentProject?.id}&start_date=${cycle.start}&end_date=${cycle.end}&verbose=true`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

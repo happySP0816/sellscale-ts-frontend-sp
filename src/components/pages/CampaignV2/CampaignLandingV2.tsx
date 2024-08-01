@@ -199,6 +199,7 @@ export default function CampaignLandingV2() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingAnalytics, setLoadingAnalytics] = useState(true);
   const [activeStep, setActiveStep] = useState(0);
+  const [openGenerationCenter, setOpenGenerationCenter] = useState(false);
 
   const userToken = useRecoilValue(userTokenState);
 
@@ -735,82 +736,87 @@ export default function CampaignLandingV2() {
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
             <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>
               <Flex gap={"sm"} align={"center"} justify="space-between" w="100%">
-                <Flex>
-                  <Tooltip
-                    arrowPosition="center"
-                    position="top-start"
-                    withArrow
-                    label={
-                      <Flex align={"center"} gap={"sm"} px={"sm"} py={5}>
-                        <Text color="gray" size={"xs"} fw={600}>
-                          Created by:
-                        </Text>
-                        <Avatar size={"sm"} src={userData.img_url} sx={{ borderRadius: "50%" }} />
-                        <Text fw={600} size={"xs"}>
-                          {statsData?.sdr_name}
-                        </Text>
-                        <Divider orientation="vertical" />
-                        <Text color="gray" size={"xs"} fw={600}>
-                          Created:
-                        </Text>
-                        <Text fw={600} size={"xs"}>
-                          {new Date(statsData.created_at).toLocaleString("en-US", {
-                            dateStyle: "full",
-                          })}
-                        </Text>
-                      </Flex>
-                    }
-                  >
-                    {isEditingCampaignName ? (
-                      <TextInput
-                        value={editableText}
-                        onChange={(e) => setEditableText(e.currentTarget.value)}
-                        onBlur={() => {
-                          setIsEditingCampaignName(false);
-                          setStatsData((prevData: any) => ({
-                            ...prevData,
-                            archetype_name: editableText,
-                          }));
-                          updateCampaignName(editableText, currentProject?.id || -1);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
+                <Flex justify="space-between" w="100%">
+                  <Flex>
+                    <Tooltip
+                      arrowPosition="center"
+                      position="top-start"
+                      withArrow
+                      label={
+                        <Flex align={"center"} gap={"sm"} px={"sm"} py={5}>
+                          <Text color="gray" size={"xs"} fw={600}>
+                            Created by:
+                          </Text>
+                          <Avatar size={"sm"} src={userData.img_url} sx={{ borderRadius: "50%" }} />
+                          <Text fw={600} size={"xs"}>
+                            {statsData?.sdr_name}
+                          </Text>
+                          <Divider orientation="vertical" />
+                          <Text color="gray" size={"xs"} fw={600}>
+                            Created:
+                          </Text>
+                          <Text fw={600} size={"xs"}>
+                            {new Date(statsData.created_at).toLocaleString("en-US", {
+                              dateStyle: "full",
+                            })}
+                          </Text>
+                        </Flex>
+                      }
+                    >
+                      {isEditingCampaignName ? (
+                        <TextInput
+                          value={editableText}
+                          onChange={(e) => setEditableText(e.currentTarget.value)}
+                          onBlur={() => {
                             setIsEditingCampaignName(false);
                             setStatsData((prevData: any) => ({
                               ...prevData,
                               archetype_name: editableText,
                             }));
                             updateCampaignName(editableText, currentProject?.id || -1);
-                          }
-                        }}
-                        autoFocus
-                        style={{ width: `${editableText.length + 2}ch` }}
-                      />
-                    ) : (
-                      <Text
-                        fw={600}
-                        size={20}
-                        onClick={() => {
-                          setEditableText(`${statsData?.emoji} ${statsData?.archetype_name}`);
-                          setIsEditingCampaignName(true);
-                        }}
-                        style={{ cursor: "text" }}
-                      >
-                        {statsData?.emoji} {statsData?.archetype_name?.substring(0, 70)}
-                        {statsData?.archetype_name?.length > 70 && "..."}
-                      </Text>
-                    )}
-                  </Tooltip>
-                  <Badge
-                    data-tour="campaign-status"
-                    tt={"uppercase"}
-                    variant="outline"
-                    size="lg"
-                    color={status === "SETUP" ? "orange" : status === "ACTIVE" ? "green" : status === "INACTIVE" ? "red" : "gray"}
-                    ml={"sm"}
-                  >
-                    {status}
-                  </Badge>
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              setIsEditingCampaignName(false);
+                              setStatsData((prevData: any) => ({
+                                ...prevData,
+                                archetype_name: editableText,
+                              }));
+                              updateCampaignName(editableText, currentProject?.id || -1);
+                            }
+                          }}
+                          autoFocus
+                          style={{ width: `${editableText.length + 2}ch` }}
+                        />
+                      ) : (
+                        <Text
+                          fw={600}
+                          size={20}
+                          onClick={() => {
+                            setEditableText(`${statsData?.emoji} ${statsData?.archetype_name}`);
+                            setIsEditingCampaignName(true);
+                          }}
+                          style={{ cursor: "text" }}
+                        >
+                          {statsData?.emoji} {statsData?.archetype_name?.substring(0, 70)}
+                          {statsData?.archetype_name?.length > 70 && "..."}
+                        </Text>
+                      )}
+                    </Tooltip>
+                    <Badge
+                      data-tour="campaign-status"
+                      tt={"uppercase"}
+                      variant="outline"
+                      size="lg"
+                      color={status === "SETUP" ? "orange" : status === "ACTIVE" ? "green" : status === "INACTIVE" ? "red" : "gray"}
+                      ml={"sm"}
+                    >
+                      {status}
+                    </Badge>
+                  </Flex>
+                  <Button disabled size="sm" color="blue" onClick={() => setOpenGenerationCenter(true)}>
+                    Generate & Send
+                  </Button>
                 </Flex>
               </Flex>
               <Flex align={"center"} w={"100%"} gap={"xs"}>

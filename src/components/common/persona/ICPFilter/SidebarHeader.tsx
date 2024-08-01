@@ -13,6 +13,7 @@ import {
   Switch,
   Text,
   Progress,
+  Select,
 } from '@mantine/core';
 import {
   IconArrowNarrowLeft,
@@ -33,6 +34,7 @@ import { navConfettiState } from '@atoms/navAtoms';
 import { getProspectsForICP } from '@utils/requests/getProspects';
 import { ProspectICP } from '../Pulse';
 import { set } from 'lodash';
+import { API_URL } from '@constants/data';
 
 type Props = {
   sideBarVisible: boolean;
@@ -62,6 +64,7 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
   const [currentScoringJob, setCurrentScoringJob] = useState<any>(null);
   const [scoringTimeRemaining, setScoringTimeRemaining] = useState<number>(0);
   const [scoringProgress, setScoringProgress] = useState<number>(0);
+  const [prefilters, setPrefilters] = useState<any[]>([]);
 
   const [scoring, setScoring] = useState(false);
 
@@ -95,6 +98,36 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
   // useEffect(() => {
   //   triggerGetScoringJobs();
   // }, []);
+
+  const fetchSavedQueries = async () => {
+    try {
+      const response = await fetch(`${API_URL}/apollo/get_all_saved_queries`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      if (data.status === "success") {
+        const formattedPrefilters = data.data.map((query: any) => ({
+          title: query.custom_name,
+          id: query.id,
+          prospects: query.num_results,
+          status: true, // Assuming all fetched queries are active by default
+        }));
+        setPrefilters(formattedPrefilters);
+      } else {
+        console.error("Failed to fetch saved queries:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching saved queries:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedQueries();
+  }, [userToken]);
 
   const { data } = useQuery({
     queryKey: [`query-check-scoring-job-status`],
@@ -166,6 +199,13 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
             </ActionIcon>
           </Tooltip> */}
         </Flex>
+        <Select
+            mb={'sm'}
+            label="Select Filters"
+            placeholder="Pick one"
+            data={prefilters.map((prefilter) => ({ value: prefilter.id, label: prefilter.title }))}
+            onChange={(value) => console.log('Selected:', value)}
+          />
         <Flex align={'start'} gap={'0.5rem'} direction={'row'}>
           <Button
             rightIcon={isTesting ? null : <IconArrowNarrowRight size={24} />}

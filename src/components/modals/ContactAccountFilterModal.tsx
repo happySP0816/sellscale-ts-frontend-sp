@@ -1,4 +1,4 @@
-import {Modal, Switch, Table, Title} from "@mantine/core";
+import {Flex, Modal, Switch, Table, Title} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {Prospect} from "../../index";
 import {useQuery} from "@tanstack/react-query";
@@ -101,18 +101,20 @@ const ContactAccountFilterModal = function (
       size={'1000px'}
     >
       <Title order={4}>
-        {viewMode === "ACCOUNT" ? "Account Market Map" : "Contact Market Map"}
-        <Switch
-          onLabel="Account View"
-          offLabel="Contact View"
-          onChange={(event) =>{
-          if (event.currentTarget.checked) {
-            setViewMode("ACCOUNT")
-          } else {
-            setViewMode("CONTACT")
-          }}}
-          checked={viewMode === "ACCOUNT"}
-        />
+        <Flex justify={'space-between'}>
+          {viewMode === "ACCOUNT" ? "Account Market Map" : "Contact Market Map"}
+          <Switch size={'xl'}
+            onLabel="Account View"
+            offLabel="Contact View"
+            onChange={(event) =>{
+              if (event.currentTarget.checked) {
+                setViewMode("ACCOUNT")
+              } else {
+                setViewMode("CONTACT")
+              }}}
+            checked={viewMode === "ACCOUNT"}
+          />
+        </Flex>
       </Title>
       {viewMode === "ACCOUNT" ? (
         <Table>

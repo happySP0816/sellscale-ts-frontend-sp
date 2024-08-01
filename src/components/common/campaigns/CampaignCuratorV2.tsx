@@ -27,29 +27,13 @@ import { IconSparkles } from "@tabler/icons-react";
 import { deterministicMantineColor } from "@utils/requests/utils";
 import Logo from "../../../assets/images/logo.png";
 import moment from "moment";
-
-export async function campaignCurator(
-  userToken: string,
-  additional_instructions: string
-): Promise<any> {
-  const response = await fetch(`${API_URL}/ml/campaigns/campaign_curator`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${userToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      additional_instructions: additional_instructions,
-    }),
-  });
-  return await response.json();
-}
-
+import useGenerativeRequest from "@utils/requests/GenerativeRequest";
+import { useSpring, animated } from 'react-spring';
 
 const SegmentChat = (props: any) => {
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
-  const [loading, setLoading] = useState(false);
+  const loading = props.loading;
   const setAdditionalInstructions = props.setAdditionalInstructions;
 
   const [prompt, setPrompt] = useState("");
@@ -65,78 +49,23 @@ const SegmentChat = (props: any) => {
   const viewport = useRef<any>(null);
 
   const handleSubmit = () => {
-    if (prompt !== "") {
+    if (props.additionalInstructions !== "") {
       const newChatPrompt = {
         sender: "user",
-        query: prompt,
+        query: props.additionalInstructions,
         created_at: moment().format("MMMM D, h:mm a"),
       };
       setChatContent((chatContent: any) => [...chatContent, newChatPrompt]);
-      setPrompt("");
-      handleResponse();
+      setAdditionalInstructions("");
+      // handleResponse();
     } else console.log("--------");
   };
 
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter") {
-      handleSubmit();
-    }
-  };
-
-  const handleResponse = async () => {
-    setLoading(true);
-
-    // Add a placeholder loading message
-    const loadingMessage = {
-      sender: "chatbot",
-      query: "loading",
-      id: Date.now(),
-      created_at: moment().format("MMMM D, h:mm a"),
-    };
-    setChatContent((chatContent: any) => [...chatContent, loadingMessage]);
-
-    try {
-      const response = await fetch(`${API_URL}/contacts/chat-icp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({ prompt, chatContent }),
-      });
-
-      const data = await response.json();
-      const res = data?.response;
-      const chatbotMessage = {
-        sender: "chatbot",
-        query: res,
-        id: loadingMessage.id, // Use the same id to replace the loading message
-        created_at: moment().format("MMMM D, h:mm a"),
-      };
-      // Replace the loading message with the actual response
-      setChatContent((chatContent: any) =>
-        chatContent.map((message: any) =>
-          message.id === loadingMessage.id ? chatbotMessage : message
-        )
-      );
-      viewport.current?.scrollTo({ top: viewport.current.scrollHeight });
-      setLoading(false);
-
-      console.log("data is", data.data);
-
-      props.setSegment((prevSegments: any) => [
-        ...prevSegments,
-        {
-          makers: data["makers"],
-          industry: data["industry"],
-          pain_point: data["pain_point"],
-          id: data?.data?.saved_query_id,
-          total_entries: data?.data?.pagination?.total_entries,
-        },
-      ]);
-    } catch (error) {
-      console.error("Error fetching prediction:", error);
-      setLoading(false);
+      props.runCampaignCurator();
+        handleSubmit();
+        // Ensure no early return by using a state update
     }
   };
 
@@ -179,19 +108,19 @@ const SegmentChat = (props: any) => {
   ]);
 
   return (
-    <Paper withBorder shadow="sm" radius={"md"} w={"35%"}>
+    <Paper withBorder shadow="sm" radius={"md"} w={"35%"} h={'100%'} style={{ display: 'flex', flexDirection: 'column' }}>
       <Flex p={"md"} align={"center"} gap={5}>
         <IconSparkles size={"1rem"} color="#be4bdb" />
         <Text fw={600}>Generation Assistant</Text>
       </Flex>
       <Divider bg="gray" />
-      <ScrollArea h={500} viewportRef={viewport} scrollHideDelay={4000}>
+      <ScrollArea h={500} viewportRef={viewport} scrollHideDelay={4000} style={{ flexGrow: 1 }}>
         <Flex
           direction={"column"}
           gap={"sm"}
           p={"md"}
           h={"100%"}
-          className=" overflow-auto"
+          className="overflow-auto"
         >
           {chatContent.map((item: any, index: number) => {
             return (
@@ -214,22 +143,6 @@ const SegmentChat = (props: any) => {
                       : "SellScale AI"}
                   </Text>
                 </Flex>
-                {/* <Flex className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none" px={"sm"} py={7}>
-                  <Text size={"sm"} fw={500}>
-                    {item.sender === "user" ? (
-                      item.query
-                    ) : item.query === "loading" ? (
-                      <Flex align="center" gap="xs">
-                        <Loader color="black" variant="dots" />
-                        <Text size={"sm"} fw={500} color="gray">
-                          Generating segment...
-                        </Text>
-                      </Flex>
-                    ) : (
-                      item.query
-                    )}
-                  </Text>
-                </Flex> */}
                 <Flex
                   className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none"
                   px={"sm"}
@@ -304,7 +217,6 @@ const SegmentChat = (props: any) => {
               </Flex>
             );
           })}
-          {/* {loading && <Loader color="blue" type="dots" />} */}
         </Flex>
       </ScrollArea>
       <Paper
@@ -312,8 +224,9 @@ const SegmentChat = (props: any) => {
         withBorder
         radius={"md"}
         className="bg-[#f7f8fa]"
-        my={"lg"}
+        mt={"auto"}
         mx={"md"}
+        mb={'lg'}
       >
         <TextInput
           multiple
@@ -346,9 +259,14 @@ const SegmentChat = (props: any) => {
             size="xs"
             color="grape"
             rightIcon={<IconSend size={"1rem"} />}
-            onClick={handleSubmit}
+            loading={loading}
+            onClick={() => {
+              props.runCampaignCurator();
+              handleSubmit();
+              // Ensure no early return by using a state update
+            }}
           >
-            Ask AI
+            Generate with AI
           </Button>
         </Flex>
       </Paper>
@@ -357,167 +275,129 @@ const SegmentChat = (props: any) => {
 };
 
 export default function CampaignCurator() {
-  const userToken = useRecoilValue(userTokenState);
-  const [campaignData, setCampaignData] = useState<any>({
-    data: {
-      company_name: "Placeholder Company",
-      description: "This is a placeholder description for the company.",
-      tagline: "Innovating the Future",
-      user_name: "John Doe",
-      user_role: "Marketing Manager",
-      recent_news: "- Placeholder news item 1\n- Placeholder news item 2",
-      top_colleague_campaigns: "Colleague Campaign 1\nColleague Campaign 2",
-    },
-    response: [
-      {
-        emoji: "🚀",
-        campaign_title: "Launch Campaign",
-        icp_target: "Tech Enthusiasts",
-        strategy: "Social Media Blitz",
-        assets: ["Video", "Blog Post"],
-        reason: "High engagement on social platforms",
-      },
-      {
-        emoji: "📈",
-        campaign_title: "Growth Campaign",
-        icp_target: "Small Businesses",
-        strategy: "Email Marketing",
-        assets: ["Newsletter", "Case Study"],
-        reason: "Proven ROI from email campaigns",
-      },
-    ],
-  });
-  const [secondsSinceLaunch, setSecondsSinceLaunch] = useState(200);
-  const [loading, setLoading] = useState(false);
   const [additionalInstructions, setAdditionalInstructions] = useState("");
+  const [campaignData, setCampaignData] = useState<any[]>([]);
+  const [newCampaign, setNewCampaign] = useState<any>(null);
 
-  const runCampaignCurator = async () => {
-    setLoading(true);
-    const data = await campaignCurator(userToken, additionalInstructions);
-    setCampaignData(data);
-    setLoading(false);
-  };
+  const { data, setData, loading: isLoading, setLoading: setIsLoading, triggerGenerativeRequest } = useGenerativeRequest({
+    endpoint: "/ml/campaigns/campaign_curator",
+  });
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setSecondsSinceLaunch((prev) => prev + 1);
-    }, 1000);
+    if (data.length > 0) {
+      setCampaignData(data);
+      setNewCampaign(data[data.length - 1]);
+    }
+  }, [data]);
 
-    return () => clearInterval(timer);
-  }, []);
+  const runCampaignCurator = async () => {
+    setData([]);
+    setCampaignData([]);
+    await triggerGenerativeRequest({ additional_instructions: additionalInstructions });
+  };
 
-  if (loading) {
-    return (
-      <Card
-        withBorder
-        p="xl"
-        ml="auto"
-        mr="auto"
-        mt="xl"
-        mb="xl"
-        w="500px"
-        sx={{ textAlign: "center" }}
-      >
-        <Text size="xl">Loading...</Text>
-        <Loader variant="dots" />
-      </Card>
-    );
-  }
+  const animationProps = useSpring({
+    from: { opacity: 0, transform: 'translateY(-20px)', scale: 0.9 },
+    to: { opacity: 1, transform: 'translateY(0)', scale: 1 },
+    config: { tension: 170, friction: 26 }, // Slower animation
+    reset: true,
+  });
 
-  if (campaignData === null) {
-    return (
-      <Card
-        withBorder
-        p="xl"
-        ml="auto"
-        mr="auto"
-        mt="xl"
-        mb="xl"
-        w="500px"
-        sx={{ textAlign: "center" }}
-      >
-        <Title order={4}>Campaign Curator</Title>
-        <Text size="xs">Run the campaign curator to get campaign ideas</Text>
+  const fadeInProps = useSpring({
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+    config: { duration: 700 }, // Slower fade-in
+    reset: true,
+  });
 
-        <Textarea
-          mt="md"
-          placeholder="Additional Instructions"
-          minRows={3}
-          onChange={(e) => setAdditionalInstructions(e.currentTarget.value)}
-        />
-        <Button
-          mt="md"
-          onClick={() => runCampaignCurator()}
-          loading={loading}
-          leftIcon={<IconSparkles size="0.9rem" />}
-        >
-          Run Campaign Curator
-        </Button>
+  const slideInProps = useSpring({
+    from: { transform: 'translateX(-100%)' },
+    to: { transform: 'translateX(0)' },
+    config: { tension: 170, friction: 26 }, // Slower slide-in
+    reset: true,
+  });
 
-        <Divider label="OR" mt="sm" mb="sm" labelPosition="center" />
-
-        <Button leftIcon={<IconMicrophone size="0.9rem" />} color="grape">
-          Intake Strategy with Selina AI
-        </Button>
-      </Card>
-    );
-  }
-
-  const { data, response } = campaignData;
-  const [segment, setSegment] = useState([]);
+  const scaleProps = useSpring({
+    from: { transform: 'scale(0.8)' },
+    to: { transform: 'scale(1)' },
+    config: { tension: 170, friction: 26 }, // Scale effect
+    reset: true,
+  });
 
   return (
-    <Box p="xl">
-      <Grid>
-        <SegmentChat setSegment={setSegment} additionalInstructions = {additionalInstructions} setAdditionalInstructions={setAdditionalInstructions} segment={segment} />
-        <Grid.Col span={7}>
-          {secondsSinceLaunch >= 50 && (
-            <Card withBorder padding="lg" mb="xs">
-              <Title order={4}>Campaign Ideas</Title>
+    <Flex p="xl">
+      <SegmentChat
+        loading={isLoading}
+        runCampaignCurator={runCampaignCurator}
+        additionalInstructions={additionalInstructions}
+        setAdditionalInstructions={setAdditionalInstructions}
+      />
+      <Box w="70%" ml="md">
+        <Card withBorder padding="lg" mb="xs">
+          <Group position="left" spacing="xs">
+            <Title order={4}>Campaign Ideas</Title>
+            {isLoading && <Loader ml='xs' size="xs" mb='sm' color="grape" />}
+          </Group>
+          <ScrollArea style={{ height: 600 }}>
+            {campaignData.length === 0 && !isLoading ? (
+              <Flex justify="center" align="center" style={{ height: 600 }}>
+                <Button color="grape" onClick={()=>{triggerGenerativeRequest({ additional_instructions: additionalInstructions });}} leftIcon={<IconSparkles size={16} />}>
+                  Auto-Generate
+                </Button>
+              </Flex>
+            ) : (
               <List spacing="xs">
-                {response.map((campaign: any, index: number) => (
-                  <Card withBorder padding="lg" mb="sm" key={index}>
-                    <Flex>
-                      <Box w="85%">
-                        <Group position="apart">
-                          <Text size="md" mb="xs">
-                            {campaign.emoji}{" "}
-                            <strong>{campaign.campaign_title}</strong>
+                {campaignData.slice().reverse().map((campaign: any, index: number) => (
+                  <animated.div 
+                    style={newCampaign === campaign && isLoading ? animationProps : {}} 
+                    key={index} 
+                    {...(newCampaign === campaign && isLoading ? fadeInProps : {})} 
+                    {...(newCampaign === campaign && isLoading ? slideInProps : {})}
+                    {...(newCampaign === campaign && isLoading ? scaleProps : {})}
+                  >
+                    <Card withBorder padding="lg" mb="sm">
+                      <Flex>
+                        <Box w="85%">
+                          <Group position="apart">
+                            <Text size="md" mb="xs">
+                              {campaign.emoji} <strong>{campaign.campaign_title}</strong>
+                            </Text>
+                          </Group>
+                          <Text size="xs" mb="xs">
+                            <strong>ICP Target:</strong> {campaign.icp_target}
                           </Text>
-                        </Group>
-                        <Text size="xs" mb="xs">
-                          <strong>ICP Target:</strong> {campaign.icp_target}
-                        </Text>
-                        <Text size="xs" mb="xs">
-                          <strong>Strategy:</strong> {campaign.strategy}
-                        </Text>
-                        <Text size="xs" mb="xs">
-                          <strong>Assets:</strong>{" "}
-                          {campaign.assets.map((x: any) => (
-                            <Badge
-                              color={deterministicMantineColor(x)}
-                              size="sm"
-                              ml="xs"
-                            >
-                              {x}
-                            </Badge>
-                          ))}
-                        </Text>
-                        <Text size="xs" mb="xs">
-                          <strong>Reason:</strong> {campaign.reason}
-                        </Text>
-                      </Box>
-                      <Button size="xs" variant="light" ml="auto">
-                        Use Strategy
-                      </Button>
-                    </Flex>
-                  </Card>
+                          <Text size="xs" mb="xs">
+                            <strong>Strategy:</strong> {campaign.strategy}
+                          </Text>
+                          <Text size="xs" mb="xs">
+                            <strong>Assets:</strong>{" "}
+                            {campaign.assets.map((x: any) => (
+                              <Badge
+                                color={deterministicMantineColor(x)}
+                                size="sm"
+                                ml="xs"
+                                key={x}
+                              >
+                                {x}
+                              </Badge>
+                            ))}
+                          </Text>
+                          <Text size="xs" mb="xs">
+                            <strong>Reason:</strong> {campaign.reason}
+                          </Text>
+                        </Box>
+                        <Button size="xs" variant="light" ml="auto">
+                          Use Strategy
+                        </Button>
+                      </Flex>
+                    </Card>
+                  </animated.div>
                 ))}
               </List>
-            </Card>
-          )}
-        </Grid.Col>
-      </Grid>
-    </Box>
+            )}
+          </ScrollArea>
+        </Card>
+      </Box>
+    </Flex>
   );
 }

@@ -232,6 +232,11 @@ export interface Prospect {
   matched_filter_words?: string[];
   matched_filters?: string[];
   meta_data?: Record<string, any>;
+
+  icp_company_fit_score: number;
+  // putting string for now
+  icp_fit_reason_v2: string;
+  icp_company_fit_reason: string;
 }
 
 export interface ProspectShallow {

@@ -13,9 +13,12 @@ interface ICustomSelect {
   color?: "green" | "red";
   maxWidth?: string;
   minHeight?: string;
-  setData: React.Dispatch<React.SetStateAction<string[]>>;
+  setData?: React.Dispatch<React.SetStateAction<string[]>>;
+  setDataSegment?:  (key: string, values: string | string[] | number, dealbreaker?: boolean, is_personalizer?: boolean) => void;
   value: string[];
-  setValue: React.Dispatch<React.SetStateAction<string[]>>;
+  setValue?: React.Dispatch<React.SetStateAction<string[]>>;
+  setValueSegment?: (key: string, values: string | string[] | number, dealbreaker?: boolean, is_personalizer?: boolean) => void;
+  key?: string;
 }
 
 const CustomSelect = ({
@@ -32,6 +35,9 @@ const CustomSelect = ({
   maxWidth = "100%",
   minHeight = "",
   setData,
+  key,
+  setValueSegment,
+  setDataSegment,
 }: ICustomSelect) => {
   const [searchValue, onSearchChange] = useState("");
   const [isIncludeSelected, setIsIncludeSelected] = useState(false);
@@ -42,7 +48,7 @@ const CustomSelect = ({
       <MultiSelect
         data={data}
         value={value}
-        onChange={(value) => setValue(value)}
+        onChange={(value) => setValueSegment ? setValueSegment(key ?? "", value) : setValue!(value)}
         description={description}
         label={
           label ? (
@@ -87,7 +93,12 @@ const CustomSelect = ({
         getCreateLabel={(query) => `+ Create ${query}`}
         onCreate={(query) => {
           const item = { value: query, label: query };
-          setData((current) => [...current, query]);
+          if (setData) {
+            setData((current) => [...current, query]);
+          }
+          if (setDataSegment) {
+            setDataSegment(key ?? "", [...value, query])
+          }
           return item;
         }}
         zIndex={9999}

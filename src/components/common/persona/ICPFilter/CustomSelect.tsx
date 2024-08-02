@@ -4,7 +4,7 @@ import { useState } from "react";
 
 interface ICustomSelect {
   data: string[];
-  label?: string;
+  label?: string | JSX.Element;
   description?: string;
   placeholder?: string;
   includeCurrent?: boolean;

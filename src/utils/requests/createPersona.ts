@@ -19,6 +19,28 @@ export default async function createPersona(
     emailChecked?: boolean;
     connectionType?: string;
     purpose?: string;
+  },
+  autoGenerationPayload?: {
+    emailSequenceState?: {
+      howItWorks: boolean;
+      varyIntroMessages: boolean;
+      breakupMessage: boolean;
+      uniqueOffer: boolean;
+      conferenceOutreach: boolean;
+      cityChat: boolean;
+      formerWorkAlum: boolean;
+      feedbackBased: boolean;
+    };
+    linkedinSequenceState?: {
+      howItWorks: boolean;
+      varyIntroMessages: boolean;
+      breakupMessage: boolean;
+      uniqueOffer: boolean;
+      conferenceOutreach: boolean;
+      cityChat: boolean;
+      formerWorkAlum: boolean;
+      feedbackBased: boolean;
+    };
   }
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/client/archetype`, {
@@ -40,6 +62,7 @@ export default async function createPersona(
       email_active: extras.emailChecked,
       email_to_linkedin_connection: extras.connectionType,
       purpose: extras.purpose,
+      auto_generation_payload: autoGenerationPayload,
     }),
   });
   if (response.status === 401) {

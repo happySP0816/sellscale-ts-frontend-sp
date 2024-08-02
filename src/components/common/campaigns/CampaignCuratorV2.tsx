@@ -22,13 +22,16 @@ import {
   Avatar,
   ActionIcon,
 } from "@mantine/core";
-import { IconCircleCheck, IconLink, IconMicrophone, IconNews, IconPlus, IconSend, IconWriting } from "@tabler/icons";
+import { IconBulb, IconChevronRight, IconCircleCheck, IconLink, IconMicrophone, IconNews, IconPlus, IconSend, IconWriting } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
 import { deterministicMantineColor } from "@utils/requests/utils";
 import Logo from "../../../assets/images/logo.png";
 import moment from "moment";
 import useGenerativeRequest from "@utils/requests/GenerativeRequest";
 import { useSpring, animated } from 'react-spring';
+import { openContextModal } from "@mantine/modals";
+import { useStrategiesApi } from "@pages/Strategy/StrategyApi";
+import { showNotification } from "@mantine/notifications";
 
 const SegmentChat = (props: any) => {
   const userData = useRecoilValue(userDataState);
@@ -283,6 +286,12 @@ export default function CampaignCurator() {
     endpoint: "/ml/campaigns/campaign_curator",
   });
 
+  const userToken = useRecoilValue(userTokenState);
+
+  const {
+    postCreateStrategy,
+  } = useStrategiesApi(userToken);
+
   useEffect(() => {
     if (data.length > 0) {
       setCampaignData(data);
@@ -386,9 +395,107 @@ export default function CampaignCurator() {
                             <strong>Reason:</strong> {campaign.reason}
                           </Text>
                         </Box>
-                        <Button size="xs" variant="light" ml="auto">
-                          Use Strategy
-                        </Button>
+                        <Button
+                            size="xs" variant="light" ml="auto"
+                            rightIcon={<IconChevronRight size={"0.9rem"} />}
+                            onClick={() => {
+                              openContextModal({
+                                modal: "createStrategy",
+                                title: (
+                                  <Flex align={"center"} gap={"sm"}>
+                                    <IconBulb color="#228be6" size={"1.6rem"} />
+                                    <Title order={2}>Create Strategy</Title>
+                                  </Flex>
+                                ),
+                                innerProps: {
+                                  onSubmit: async (title: string, description: string, archetypes: number[], startDate: Date, endDate: Date) => {
+                                    await postCreateStrategy(title, description, archetypes, startDate, endDate);
+                                    showNotification({
+                                      title: "Strategy created!",
+                                      message: "Your strategy has been created successfully.",
+                                      color: "teal",
+                                    });
+                                  },
+                                  prefilledData: {
+                                    title: campaign.campaign_title,
+                                    description: `
+                                      <h4>Campaign Details</h4>
+                                      <p>Target: ${campaign.icp_target}</p>
+                                      <h4>Strategy Overview</h4>
+                                      <p>${campaign.strategy}</p>
+                                      <h4>Reason</h4>
+                                      <p>${campaign.reason}</p>
+                                    `,
+                                    descriptionRaw: {
+                                      type: 'doc',
+                                      content: [
+                                        {
+                                          type: 'heading',
+                                          attrs: { level: 4 },
+                                          content: [
+                                            {
+                                              type: 'text',
+                                              text: 'Campaign Details',
+                                            },
+                                          ],
+                                        },
+                                        {
+                                          type: 'paragraph',
+                                          content: [
+                                            {
+                                              type: 'text',
+                                              text: `Target: ${campaign.icp_target}`,
+                                            },
+                                          ],
+                                        },
+                                        {
+                                          type: 'heading',
+                                          attrs: { level: 4 },
+                                          content: [
+                                            {
+                                              type: 'text',
+                                              text: 'Strategy Overview',
+                                            },
+                                          ],
+                                        },
+                                        {
+                                          type: 'paragraph',
+                                          content: [
+                                            {
+                                              type: 'text',
+                                              text: `${campaign.strategy}`,
+                                            },
+                                          ],
+                                        },
+                                        {
+                                          type: 'heading',
+                                          attrs: { level: 4 },
+                                          content: [
+                                            {
+                                              type: 'text',
+                                              text: 'Reason',
+                                            },
+                                          ],
+                                        },
+                                        {
+                                          type: 'paragraph',
+                                          content: [
+                                            {
+                                              type: 'text',
+                                              text: `${campaign.reason}`,
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  },
+                                },
+                                size: '60%',
+                              });
+                            }}
+                          >
+                            Use Strategy
+                          </Button>
                       </Flex>
                     </Card>
                   </animated.div>

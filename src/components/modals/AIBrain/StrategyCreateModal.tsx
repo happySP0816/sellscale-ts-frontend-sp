@@ -23,6 +23,7 @@ import { useRecoilValue } from "recoil";
 import moment from "moment/moment";
 import {IconSparkles, IconCopy} from "@tabler/icons-react";
 import Logo from "@assets/images/logo.png";
+import { JSONContent } from "@tiptap/react";
 
 export default function StrategyCreateModal({
   innerProps,
@@ -30,9 +31,15 @@ export default function StrategyCreateModal({
   id,
 }: ContextModalProps<{
   onSubmit: (title: string, description: string, archetypes: number[], startDate: Date | null, endDate: Date | null) => Promise<void>;
+  prefilledData?: {
+    title: string;
+    description: string;
+    descriptionRaw: string;
+  };
 }>) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState(innerProps.prefilledData?.title || "");
+  const description = useRef(innerProps.prefilledData?.description || "");
+  const descriptionRaw = useRef<JSONContent | string>(innerProps.prefilledData?.descriptionRaw || "");
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [archetypes, setArchetypes]: any = useState([]);
@@ -244,17 +251,24 @@ export default function StrategyCreateModal({
 
   return (
     <Flex gap={'24px'}>
-      <Paper w={'35%'}>
-        {StrategiesChat(innerProps)}
-      </Paper>
-      <Paper w={'65%'} withBorder shadow={"sm"} radius={"md"} p={'16px'}>
+      {innerProps.prefilledData ? (
+        <></>
+      ) : (
+        <Paper w={'35%'}>
+          {StrategiesChat(innerProps)}
+        </Paper>
+      )}
+      <Paper w={innerProps.prefilledData ? '100%' : '65%'} withBorder shadow={"sm"} radius={"md"} p={'16px'}>
         <TextInput label="Strategy Name" placeholder="Eg. Product managers in chicago" value={title} onChange={(event) => setTitle(event.currentTarget.value)} />
         <Text mt="xs">Description</Text>
         <RichTextArea
-          onChange={(value) => {
-            setDescription(value);
+          onChange={(value, rawValue) => {
+            descriptionRaw.current = rawValue;
+            description.current = value;
+            // setDescription(value);
             console.log(value);
           }}
+          value={descriptionRaw.current}
         />
         <MultiSelect
           withinPortal
@@ -283,10 +297,10 @@ export default function StrategyCreateModal({
           <Button
             fullWidth
             loading={loading}
-            disabled={loading || !title || !description}
+            disabled={loading || !title || !description.current}
             onClick={async () => {
               setLoading(true);
-              await innerProps.onSubmit(title, description, archetypes, startDate, endDate);
+              await innerProps.onSubmit(title, description.current, archetypes, startDate, endDate);
               context.closeAll();
               setLoading(false);
             }}

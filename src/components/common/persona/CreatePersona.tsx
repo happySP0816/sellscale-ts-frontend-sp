@@ -36,6 +36,40 @@ type PropsType = {
     contractSize: number;
     templateMode: boolean;
     purpose: string;
+    autoGenerationPayload?: {
+      findSampleProspects?: boolean;
+      writeEmailSequenceDraft?: boolean;
+      writeLISequenceDraft?: boolean;
+      emailSequenceOpened?: boolean;
+      emailSequenceKeywords?: string[];
+      liSequenceOpened?: boolean;
+      liGeneralAngle?: string;
+      emailGeneralAngle?: string;
+      liSequenceKeywords?: string[];
+      liAssetIngestor?: string;
+      liCtaGenerator?: boolean;
+      liPainPoint?: string;
+      liSequenceState?: {
+        howItWorks: boolean;
+        varyIntroMessages: boolean;
+        breakupMessage: boolean;
+        uniqueOffer: boolean;
+        conferenceOutreach: boolean;
+        cityChat: boolean;
+        formerWorkAlum: boolean;
+        feedbackBased: boolean;
+      };
+      emailSequenceState?: {
+        howItWorks: boolean;
+        varyIntroMessages: boolean;
+        breakupMessage: boolean;
+        uniqueOffer: boolean;
+        conferenceOutreach: boolean;
+        cityChat: boolean;
+        formerWorkAlum: boolean;
+        feedbackBased: boolean;
+      };
+    }
   };
 };
 
@@ -53,20 +87,10 @@ export default function CreatePersona(props: PropsType) {
   const [emailChecked, setEmailChecked] = useState(false);
   const [linkedinChecked, setLinkedinChecked] = useState(false);
 
-  const { data: researchPointTypes } = useQuery({
-    queryKey: [`query-get-research-point-types`],
-    queryFn: async () => {
-      const response = await getResearchPointTypes(userToken);
-      return response.status === "success"
-        ? (response.data as ResearchPointType[])
-        : [];
-    },
-    refetchOnWindowFocus: false,
-  });
-
   const createPersonaHandler = async (
     linkedinChecked?: boolean,
-    emailChecked?: boolean
+    emailChecked?: boolean,
+    autoGenerationPayload?: PropsType["createPersona"]["autoGenerationPayload"]
   ) => {
     setCreatingPersona(true);
     const result = await createPersona(
@@ -83,7 +107,8 @@ export default function CreatePersona(props: PropsType) {
         emailChecked,
         connectionType,
         purpose: props.createPersona.purpose,
-      }
+      },
+      autoGenerationPayload
     );
     if (result.status === "error") {
       console.error("Failed to create persona & CTAs");
@@ -146,7 +171,7 @@ export default function CreatePersona(props: PropsType) {
         </Button>
         <Button
           // disabled={!props.createPersona?.name || !props.createPersona.contactObjective}
-          onClick={() => createPersonaHandler(linkedinChecked, emailChecked)}
+          onClick={() => createPersonaHandler(linkedinChecked, emailChecked, props.createPersona?.autoGenerationPayload)}
           loading={creatingPersona}
           fullWidth
         >

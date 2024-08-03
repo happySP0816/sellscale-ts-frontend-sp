@@ -450,6 +450,8 @@ export interface PersonaOverview {
   cta_framework_persona: string;
   cta_framework_action: string;
   use_cases: string;
+  email_seq_generation_in_progress?: boolean;
+  li_seq_generation_in_progress?: boolean;
   filters: string;
   lookalike_profile_1: string;
   lookalike_profile_2: string;

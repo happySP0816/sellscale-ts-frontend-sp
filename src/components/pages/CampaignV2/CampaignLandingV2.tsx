@@ -61,6 +61,8 @@ interface StatsData {
     linkedin_has_been_active?: boolean;
     email_has_been_active?: boolean;
   };
+  li_seq_generation_in_progress?: boolean;
+  email_seq_generation_in_progress?: boolean;
   is_setting_up: boolean;
   archetype_name: string;
   created_at: string;
@@ -151,6 +153,8 @@ export default function CampaignLandingV2() {
       persona_fit_reason: "",
       persona_contact_objective: "",
       uploads: [],
+      li_seq_generation_in_progress: statsData.li_seq_generation_in_progress,
+      email_seq_generation_in_progress: statsData.email_seq_generation_in_progress,
       contract_size: 0,
       transformer_blocklist: [],
       transformer_blocklist_initial: [],

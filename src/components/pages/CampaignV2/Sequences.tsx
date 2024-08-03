@@ -80,6 +80,8 @@ export default function Sequences(props: any) {
   const setEmailSubjectLines = props.setEmailSubjectLines;
   const setLinkedinInitialMessages = props.setLinkedinInitialMessages;
   const linkedinInitialMessages = props.linkedinInitialMessages;
+  const [emailSequenceGenerationInProgress, setEmailSequenceGenerationInProgress] = useState(false);
+  const [linkedinSequenceGenerationInProgress, setLinkedinSequenceGenerationInProgress] = useState(false);
 
   const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(linkedinSequenceState);
   const [emailSequenceData, setEmailSequenceData] = useRecoilState(emailSequenceState);
@@ -98,6 +100,9 @@ export default function Sequences(props: any) {
     const sequencesPromise = fetchCampaignSequences(userToken, clientArchetypeId);
     sequencesPromise
       .then((sequencesData) => {
+        setEmailSequenceGenerationInProgress(sequencesData.email_seq_generation_in_progress);
+        setLinkedinSequenceGenerationInProgress(sequencesData.li_seq_generation_in_progress);
+
         setEmailSubjectLines(sequencesData.email_subject_lines);
         setLinkedinInitialMessages(sequencesData.initial_message_templates);
         setLinkedinInitialMessageViewing(sequencesData.initial_message_templates?.[0]?.title);
@@ -340,7 +345,7 @@ export default function Sequences(props: any) {
         )}
       </Flex>
       <Flex h={"20%"} mt={"md"}>
-        {loadingSequences ? (
+        {loadingSequences || emailSequenceGenerationInProgress || linkedinSequenceGenerationInProgress ? (
           <Flex direction="column" align="center" justify="center" m="auto" mt="sm">
             <Skeleton height={30} radius="xl" width="80%" />
             <Skeleton height={20} radius="xl" width="60%" mt="sm" />
@@ -348,7 +353,7 @@ export default function Sequences(props: any) {
             <Flex align="center" gap="sm" mt="sm">
               <Loader color="gray" variant="dots" size="md" />
               <Text color="gray" size="md" className="loading-animation">
-                Loading sequences...
+                {emailSequenceGenerationInProgress || linkedinSequenceGenerationInProgress ? "Generating sequences... Please refresh to see updates." : "Loading sequences..."}
               </Text>
             </Flex>
           </Flex>

@@ -19,10 +19,11 @@ import {
   Select,
   MultiSelect,
   Textarea,
+  Title,
 } from "@mantine/core";
-import { closeAllModals } from "@mantine/modals";
+import { closeAllModals, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconBrandLinkedin, IconCircleCheck, IconLink, IconPlus, IconSearch, IconUsers } from "@tabler/icons";
+import { IconBrandLinkedin, IconCircleCheck, IconFilter, IconLink, IconPlus, IconSearch, IconUsers } from "@tabler/icons";
 import { nameToInitials, valueToColor } from "@utils/general";
 import e from "cors";
 import { debounce } from "lodash";
@@ -68,6 +69,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
   const [industryOptionsWithIds, setIndustryOptionsWithIds] = useState<any>({});
   const [revenue, setRevenue] = useState<{ min: string; max: string }>({ min: "", max: "" });
   const [companyName, setcompanyName] = useState<string>("");
+  const [companyKeywords, setCompanyKeywords] = useState<string[]>([]);
   const [selectedCompanies, setselectedCompanies] = useState<string[]>([]);
   const [fetchingCompanyOptions, setFetchingCompanyOptions] = useState<boolean>(false);
   const [companyOptions, setCompanyOptions] = useState<string[]>([]);
@@ -88,6 +90,9 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
   const [departmentMaxCount, setDepartmentMaxCount] = useState<number>(0);
   const [currentSavedQueryId, setCurrentSavedQueryId] = useState<number | undefined>(undefined);
   const [createSegmentOpened, setCreateSegmentOpened] = useState(false);
+  const [prefilters, setPrefilters] = useState<any[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [showApplyButton, setShowApplyButton] = useState(false);
 
   const [prospects, setProspects] = useState([]);
   const [loadingProspects, setLoadingProsepcts] = useState(false);
@@ -106,6 +111,42 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
   //     allowFullScreen
   //   />
   // )
+
+  const handleApply = async () => {
+    if (!selectedFilter) return;
+    innerProps.id = selectedFilter;
+    setShowApplyButton(false);
+  };
+
+  const fetchSavedQueries = async () => {
+    try {
+      const response = await fetch(`${API_URL}/apollo/get_all_saved_queries`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      if (data.status === "success") {
+        const formattedPrefilters = data.data.map((query: any) => ({
+          title: query.custom_name,
+          id: query.id,
+          prospects: query.num_results,
+          status: true, // Assuming all fetched queries are active by default
+        }));
+        setPrefilters(formattedPrefilters);
+      } else {
+        console.error("Failed to fetch saved queries:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching saved queries:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedQueries();
+  }, [userToken]);
 
   useEffect(() => {
     const fetchSavedQuery = async () => {
@@ -148,6 +189,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
               max: queryDetails.data.revenue_range?.max ? String(queryDetails.data.revenue_range.max) : ""
             });
             setcompanyName(queryDetails.data.q_person_title || "");
+            setCompanyKeywords(queryDetails.data.q_organization_keyword_tags || "");
             const companyBreadcrumbs = queryDetails.results.breadcrumbs.filter((breadcrumb: any) => breadcrumb.label === "Companies");
             if (companyBreadcrumbs.length > 0) {
               const companyNames = companyBreadcrumbs.map((breadcrumb: any) => breadcrumb.value);
@@ -246,6 +288,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           name: filterName,
         }),
       });
+      setCurrentSavedQueryId(prev_query || currentSavedQueryId);
       const data = await response.json();
       if (response.ok) {
         showNotification({
@@ -309,6 +352,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           is_icp_filter: isIcpFilter,
           editing_query: currentSavedQueryId,
           num_contacts: 100,
+          q_organization_keyword_tags: companyKeywords.length ? companyKeywords : undefined,
           organization_latest_funding_stage_cd: fundraise.length ? fundraise : undefined,
           person_seniorities: seniority,
           per_page: 100,
@@ -552,6 +596,24 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         }}
         onChange={(event) => setFilterName(event.currentTarget.value)}
       />
+      <Flex align="end" mb={'sm'}>
+        <Select
+          label="Saved filters"
+          placeholder="Pick one"
+          data={prefilters.map((prefilter) => ({ value: prefilter.id, label: prefilter.title }))}
+          value={selectedFilter}
+          onChange={(value) => {
+            setSelectedFilter(value);
+            setShowApplyButton(true);
+          }}
+          rightSection={showApplyButton && (
+            <Button onClick={handleApply} size="xs" style={{ marginLeft: '-60px' }}>
+              Switch
+            </Button>
+          )}
+          style={{ width: '50%' }}
+        />
+      </Flex>
       <Flex mt={"sm"} gap={"md"}>
         <Paper withBorder radius={"sm"} w={"100%"}>
           {/* <Box w={"100%"} bg={"#eceef1"} p={3}>
@@ -757,7 +819,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                   }}
                 />
               </CustomAccordionItem>
-              <CustomAccordionItem value="company" label="Company" isActive={selectedCompanies.length > 0}>
+              <CustomAccordionItem value="company" label="Company" isActive={selectedCompanies.length > 0 || !!companyName || !!companyDomain || !!aiPrompt || companyKeywords.length > 0}>
                 <MultiSelect
                   label="Selected Companies"
                   placeholder="Enter company"
@@ -842,7 +904,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
               <Button 
                   mt="sm" 
                   variant="outline" 
-                  onClick={() => {setselectedCompanies([]); setcompanyName(""); setCompanyDomain(""); setAiPrompt(""); setCompanyOptions([])}}
+                  onClick={() => {setselectedCompanies([]); setcompanyName(""); setCompanyDomain(""); setAiPrompt(""); setCompanyOptions([]); setCompanyKeywords([]);}}
                 >
                   Reset
                 </Button>
@@ -858,6 +920,32 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                   onChange={(event) => setcompanyName(event.currentTarget.value)}
                   autosize
                   minRows={3}
+                />
+                <MultiSelect
+                  label="Company Keywords"
+                  placeholder="Select or type keywords"
+                  data={Array.isArray(companyKeywords) ? companyKeywords.map(keyword => ({ label: keyword, value: keyword })) : []}
+                  value={companyKeywords}
+                  onChange={(value) => setCompanyKeywords(value)}
+                  searchable
+                  creatable
+                  getCreateLabel={(query) => `+ Create ${query}`}
+                  onCreate={(query) => {
+                    setCompanyKeywords((prev) => [...prev, query]);
+                    return query;
+                  }}
+                  styles={{
+                    rightSection: { pointerEvents: "none" },
+                    label: { width: "100%" },
+                    value: {
+                      backgroundColor: "#e0e0e0",
+                      border: "0.6px solid gray",
+                      borderRadius: "3px",
+                    },
+                    input: {
+                      minHeight: "",
+                    },
+                  }}
                 />
                 <Textarea 
                   label="Company Domain" 
@@ -1006,7 +1094,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                     { value: "corporate_challenges", label: "Corporate Challenges" },
                     { value: "relational", label: "Relational" },
                   ]}
-                  value={eventTypes?.filter(option => option) || []}
+                  value={Array.isArray(eventTypes) ? eventTypes.filter(option => option) : []}
                   onChange={(value) => setEventTypes(value)}
                   searchable
                   nothingFound="Nothing found"

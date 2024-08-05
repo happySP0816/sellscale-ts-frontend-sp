@@ -436,46 +436,47 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
   });
   const displayProspects = useMemo(() => {
     let filteredProspects = icpProspects;
-
+  
     filteredProspects = filteredProspects.filter((prospect) => {
+      const searchTerm = globalSearch.toLowerCase();
       return (
-        prospect.full_name?.includes(globalSearch) ||
-        prospect.title?.includes(globalSearch) ||
-        prospect.company?.includes(globalSearch)
+        prospect.full_name?.toLowerCase().includes(searchTerm) ||
+        prospect.title?.toLowerCase().includes(searchTerm) ||
+        prospect.company?.toLowerCase().includes(searchTerm)
       );
     });
-
+  
     filteredProspects = filteredProspects
       // .filter((p) => p.status !== 'REMOVED')
       .filter((prospect) => {
         switch (selectedProspectStatusFilter) {
           case "Prospected":
             return prospect.status === "PROSPECTED";
-
+  
           case "Sent Outreach":
             return prospect.status === "SENT_OUTREACH";
-
+  
           case "Accepted":
             return prospect.status === "ACCEPTED";
-
+  
           case "Bumped":
             return prospect.status === "BUMPED";
-
+  
           case "Active Convo":
             return prospect.status === "ACTIVE_CONVO";
-
+  
           case "Demo":
             return prospect.status === "DEMO";
           case "Do Not Contact":
             return prospect.status === "REMOVED";
           case "All Contacts":
             return true;
-
+  
           default:
             return true;
         }
       });
-
+  
     return filteredProspects;
   }, [globalSearch, icpProspects, selectedProspectStatusFilter]);
 

@@ -49,6 +49,7 @@ import { useDisclosure } from "@mantine/hooks";
 import OpenCV from "./OpenCV";
 import SegmentV3 from "@pages/SegmentV3/SegmentV3";
 import FileDropLinkedinURLFinderPreview from "@modals/upload-prospects/FileDropLinkedinURLFinderPreview";
+import PreFiltersV2EditModal from "@modals/PrefiltersV2/PrefilterV2EditModal";
 
 type Segment = {
   id: number;
@@ -191,6 +192,11 @@ export default function FindContactsPage() {
         })}
       >
         <Tabs.List grow onMouseOver={() => setTabHover(true)} onMouseLeave={() => setTabHover(false)}>
+          <Tooltip label="Advanced - SellScale Database V2" position="bottom">
+            <Tabs.Tab value="sellscale-db-v2" icon={<IconDatabase size="0.9rem" />} onClick={() => setTab("sellscale-db-v2")}>
+              {tabHover && "Contact Database V2"}
+            </Tabs.Tab>
+          </Tooltip>
           <Tooltip label="Advanced - SellScale Database" position="bottom">
             <Tabs.Tab value="sellscale-db" icon={<IconDatabase size="0.9rem" />} onClick={() => setTab("sellscale-db")}>
               {tabHover && "Contact Database"}
@@ -373,6 +379,12 @@ export default function FindContactsPage() {
               style={{ width: "100%", height: window.innerHeight + 120 }}
               frameBorder={0}
             />
+          )}
+        </Tabs.Panel>
+
+        <Tabs.Panel value="sellscale-db-v2" pt="xs" style={{ position: "relative", padding: "30px" }}>
+          {userToken && (
+            <PreFiltersV2EditModal innerProps={{}} context={{}} id={''} />
           )}
         </Tabs.Panel>
 

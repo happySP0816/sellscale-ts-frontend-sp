@@ -52,7 +52,7 @@ export function LineChart() {
   const [currentMode, setCurrentMode] = useState("month");
   const [modes, setModes]: any = useState({});
   const [fetchedModes, setFetchedModes] = useState(false);
-  const [isCumulativeMode, setIsCumulativeMode] = useState(false);
+  const [isCumulativeMode, setIsCumulativeMode] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const userToken = useRecoilState(userTokenState);

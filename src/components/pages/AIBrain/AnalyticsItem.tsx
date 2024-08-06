@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollArea, Flex, Text, Button, Paper, Box, Divider, Center, Loader, Badge, SimpleGrid, ActionIcon, Popover } from '@mantine/core';
+import { ScrollArea, Flex, Text, Button, Paper, Box, Divider, Center, Loader, Badge, SimpleGrid, ActionIcon, Popover, Pagination, NumberInput } from '@mantine/core';
 import { Line } from 'react-chartjs-2';
 import { IconSparkles, IconSend, IconChecks, IconMessageCheck, IconCalendar, IconChevronLeft, IconChevronRight, IconUser, IconMessages, IconLetterT, IconToggleRight, IconExternalLink, IconBallpen } from '@tabler/icons-react';
 import { openContextModal } from '@mantine/modals';
 import { DataGrid } from "mantine-data-grid";
 import { useDisclosure } from '@mantine/hooks';
 
-const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData }: any) => {
+const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData, showCumulative }: any) => {
 
   const thereExistsICPData = topIcpPeople && topIcpPeople.length > 0;
   const thereExistsPositiveReplies = dailyData && dailyData.reduce((total: any, day: { num_pos_replies: any; }) => total + day.num_pos_replies, 0) > 0;
@@ -86,7 +86,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
           direction={"column"}
         >
           <Flex align={"center"} justify={"space-between"} w={"100%"}>
-            <Text fw={700} size="xl">Analytics for {summaryData?.archetype}</Text>
+            {showCumulative? <Text fw={700} size="xl">Overall Cycle Analytics</Text>: <Text fw={700} size="xl">{summaryData?.archetype}</Text>}
           </Flex>
           <Flex gap={"sm"}>
             <Paper h={300} w={"43%"}withBorder radius={"md"}>
@@ -323,136 +323,163 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
                       </ActionIcon>
                     </Flex> */}
                   </Flex>
-                  {dailyData && <DataGrid
-                    data={dailyData
-                      .filter((day: any) => day.positive_reply_details)
-                      .map((day: any) => {
-                        const [id, name, intent, reply] = day.positive_reply_details[0].split("###");
-                        return { id, name, intent, reply };
-                      })
-                      .slice(sentimentPage * 2, sentimentPage * 2 + 2)}
-                    highlightOnHover
-                    withSorting
-                    withColumnBorders
-                    withBorder
-                    mt={"md"}
-                    sx={{
-                      cursor: "pointer",
-                      "& .mantine-10xyzsm>tbody>tr>td": {
-                        padding: "0px",
-                      },
-                      "& tr": {
-                        background: "white",
-                      },
-                    }}
-                    columns={[
-                      {
-                        accessorKey: "name",
-                        header: () => (
-                          <Flex align={"center"} gap={"3px"}>
-                            <IconUser color="gray" size={"0.9rem"} />
-                            <Text color="gray">Name</Text>
+                  {dailyData && (
+                    <DataGrid
+                      data={dailyData
+                        .filter((day: any) => day.positive_reply_details)
+                        .map((day: any) => {
+                          const [id, name, intent, reply] = day.positive_reply_details[0].split("###");
+                          return { id, name, intent, reply };
+                        })}
+                      withColumnBorders
+                      withBorder
+                      striped
+                      mt={"md"}
+                      withPagination
+                      pageSizes={['2']}
+                      components={{
+                        pagination: ({ table }) => (
+                          <Flex justify={'center'} align={'center'} py={'0.5rem'}>
+                            <Button
+                              variant='default'
+                              size='xs'
+                              disabled={table.getState().pagination.pageIndex === 0}
+                              onClick={() => table.previousPage()}
+                            >
+                              <IconChevronLeft size={16} />
+                            </Button>
+                            <Text mx={'xs'} size='sm'>
+                              {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
+                            </Text>
+                            <Button
+                              variant='default'
+                              size='xs'
+                              disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                              onClick={() => table.nextPage()}
+                            >
+                              <IconChevronRight size={16} />
+                            </Button>
                           </Flex>
                         ),
-                        minSize: 200,
-                        cell: (cell) => {
-                          let { name } = cell.row.original;
-
-                          return (
-                            <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
-                              <Text color="gray" size={"sm"}>
-                                {name}
-                              </Text>
-                            </Flex>
-                          );
+                      }}
+                      sx={{
+                        cursor: "pointer",
+                        "& .mantine-10xyzsm>tbody>tr>td": {
+                          padding: "0px",
                         },
-                      },
-                      {
-                        accessorKey: "reply",
-                        header: () => (
-                          <Flex align={"center"} gap={"3px"}>
-                            <IconMessages color="gray" size={"0.9rem"} />
-                            <Text color="gray">Replies</Text>
-                          </Flex>
-                        ),
-                        minSize: 200,
-                        cell: (cell) => {
-                          let { reply } = cell.row.original;
+                        "& tr": {
+                          background: "white",
+                        },
+                      }}
+                      columns={[
+                        {
+                          accessorKey: "name",
+                          header: () => (
+                            <Flex align={"center"} gap={"3px"}>
+                              <IconUser color="gray" size={"0.9rem"} />
+                              <Text color="gray">Name</Text>
+                            </Flex>
+                          ),
+                          minSize: 200,
+                          cell: (cell) => {
+                            let { name } = cell.row.original;
 
-                          return (
-                            <Popover withinPortal width={200} position="bottom" withArrow shadow="md" opened={openedPopover === reply} onClose={() => setOpenedPopover(null)}>
-                              <Popover.Target>
+                            return (
+                              <Flex gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
+                                <Text color="gray" size={"sm"}>
+                                  {name}
+                                </Text>
+                              </Flex>
+                            );
+                          },
+                        },
+                        {
+                          accessorKey: "reply",
+                          header: () => (
+                            <Flex align={"center"} gap={"3px"}>
+                              <IconMessages color="gray" size={"0.9rem"} />
+                              <Text color="gray">Replies</Text>
+                            </Flex>
+                          ),
+                          minSize: 200,
+                          cell: (cell) => {
+                            let { reply } = cell.row.original;
+
+                            return (
+                              <Popover withinPortal width={200} position="bottom" withArrow shadow="md" opened={openedPopover === reply} onClose={() => setOpenedPopover(null)}>
+                                <Popover.Target>
                                   <Flex onMouseEnter={() => setOpenedPopover(reply)} onMouseLeave={() => setOpenedPopover(null)} gap={"xs"} w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"space-between"}>
                                     <Text color="gray" size={"sm"}>
                                       {reply}
                                     </Text>
                                   </Flex>
-                              </Popover.Target>
-                              <Popover.Dropdown style={{ pointerEvents: 'none' }}>
-                                <Text size="sm">{reply}</Text>
-                              </Popover.Dropdown>
-                            </Popover>
-                          );
+                                </Popover.Target>
+                                <Popover.Dropdown style={{ pointerEvents: 'none' }}>
+                                  <Text size="sm">{reply}</Text>
+                                </Popover.Dropdown>
+                              </Popover>
+                            );
+                          },
                         },
-                      },
-                      {
-                        accessorKey: "intent",
-                        minSize: 40,
-                        maxSize: 120,
-                        header: () => (
-                          <Flex align={"center"} gap={"3px"}>
-                            <IconLetterT color="gray" size={"0.9rem"} />
-                            <Text color="gray">Intent</Text>
-                          </Flex>
-                        ),
-                        cell: (cell) => {
-                          let { intent } = cell.row.original;
+                        {
+                          accessorKey: "intent",
+                          minSize: 40,
+                          maxSize: 120,
+                          header: () => (
+                            <Flex align={"center"} gap={"3px"}>
+                              <IconLetterT color="gray" size={"0.9rem"} />
+                              <Text color="gray">Intent</Text>
+                            </Flex>
+                          ),
+                          cell: (cell) => {
+                            let { intent } = cell.row.original;
 
-                          return (
-                            <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
-                              <Badge color={'green'} tt={"initial"}>
-                                {intent}
-                              </Badge>
-                            </Flex>
-                          );
+                            return (
+                              <Flex gap={"sm"} w={"100%"} h={"100%"} px={"sm"} align={"center"}>
+                                <Badge color={'green'} tt={"initial"}>
+                                  {intent}
+                                </Badge>
+                              </Flex>
+                            );
+                          },
                         },
-                      },
-                      {
-                        accessorKey: "action",
-                        header: () => (
-                          <Flex align={"center"} gap={"3px"}>
-                            <IconToggleRight color="gray" size={"0.9rem"} />
-                            <Text color="gray">Action</Text>
-                          </Flex>
-                        ),
-                        minSize: 180,
-                        maxSize: 200,
-                        enableResizing: true,
-                        cell: (cell) => {
-                          let { id } = cell.row.original as any;
-                          return (
-                            <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
-                              <Badge
-                                tt={"initial"}
-                                variant="filled"
-                                rightSection={<IconExternalLink size={"0.9rem"} style={{ marginTop: "5px" }} />}
-                                styles={{
-                                  root: {
-                                    fontWeight: 400,
-                                  },
-                                }}
-                                component="a"
-                                href={`/prospects/${id}`}
-                                target="_blank"
-                              >
-                                View Conversation
-                              </Badge>
+                        {
+                          accessorKey: "action",
+                          header: () => (
+                            <Flex align={"center"} gap={"3px"}>
+                              <IconToggleRight color="gray" size={"0.9rem"} />
+                              <Text color="gray">Action</Text>
                             </Flex>
-                          );
+                          ),
+                          minSize: 180,
+                          maxSize: 200,
+                          enableResizing: true,
+                          cell: (cell) => {
+                            let { id } = cell.row.original as any;
+                            return (
+                              <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} px={"lg"} w={"100%"} h={"100%"}>
+                                <Badge
+                                  tt={"initial"}
+                                  variant="filled"
+                                  rightSection={<IconExternalLink size={"0.9rem"} style={{ marginTop: "5px" }} />}
+                                  styles={{
+                                    root: {
+                                      fontWeight: 400,
+                                    },
+                                  }}
+                                  component="a"
+                                  href={`/prospects/${id}`}
+                                  target="_blank"
+                                >
+                                  View Conversation
+                                </Badge>
+                              </Flex>
+                            );
+                          },
                         },
-                      },
-                    ]}
-                  />}
+                      ]}
+                    />
+                  )}
                 </Box>
               ) : (
                 <Box mt={"sm"}>
@@ -482,7 +509,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
               </Flex>
             </Flex>
             <SimpleGrid cols={5} mt={"sm"}>
-              {Array.from(new Set(topIcpPeople?.map((icpItem: { full_name: any; }) => icpItem.full_name)))
+              {Array.from(new Set(topIcpPeople?.map((icpItem: { full_name: string }) => icpItem.full_name)))
                 .map((uniqueName) => {
                   if (typeof uniqueName === 'string') {
                     return topIcpPeople?.find((icpItem: { full_name: string; }) => icpItem.full_name === uniqueName);
@@ -490,6 +517,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
                   return undefined;
                 })
                 .filter(icpItem => icpItem !== undefined) // Ensure no undefined values
+                .sort((a, b) => b.icp_fit_score - a.icp_fit_score).slice(0,5)
                 .map((icpItem, icpIndex) => {
                   return (
                     <Paper withBorder radius={"md"} key={icpIndex}>
@@ -497,12 +525,15 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
                         <Text size={"sm"} align="center" fw={600}>
                           {icpItem.full_name}
                         </Text>
+                        <Text size={"xs"} align="center" fw={300}>
+                          {icpItem.title} at {icpItem.company}
+                        </Text>
                         <Text color="gray" size={"xs"} align="center" fw={600}>
                           {icpItem.job}
                         </Text>
                         <Flex align={"center"} gap={"xs"}>
                           <Text size={"sm"} color="gray">
-                            ICP Fit Score:
+                            ICP Score:
                           </Text>
                           <Badge size="xs" color={
                             icpItem.icp_fit_score == 0 ? "red" :

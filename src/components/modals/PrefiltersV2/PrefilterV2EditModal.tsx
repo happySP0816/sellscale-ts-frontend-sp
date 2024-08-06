@@ -673,7 +673,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                   placeholder="Select options"
                   value={jobTitles || []}
                   setValue={setJobTitles}
-                  data={jobTitles?.filter(option => option) || []}
+                  data={Array.isArray(jobTitles) ? jobTitles.filter(option => option) : []}
                   setData={setJobTitles}
                 />
                 <MultiSelect

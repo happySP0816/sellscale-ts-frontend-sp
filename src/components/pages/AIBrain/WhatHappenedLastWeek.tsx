@@ -20,6 +20,7 @@ import {
   Title,
   Center,
   Loader,
+  Stack,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import {
@@ -44,12 +45,17 @@ import { Line } from "react-chartjs-2";
 import { useRecoilValue } from "recoil";
 import AnalyticsItem from "./AnalyticsItem";
 import { set } from "lodash";
+import DOMPurify from "dompurify";
+import { showNotification } from "@mantine/notifications";
 
 export default function WhatHappenedLastWeek() {
   const [cycleDataCache, setCycleDataCache] = useState<{ [key: number]: any }>({});
+  console.log('cycle data cache:', cycleDataCache);
+
   const [sentimentPage, setSentimentPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [receivedObjects, setReceivedObjects] = useState(0);
+  const [showCumulative, setShowCumulative] = useState(true);
 
   const Spendingoptions: any = {
     responsive: true,
@@ -159,7 +165,10 @@ export default function WhatHappenedLastWeek() {
           acc[index] = null;
           return acc;
         }, {});
-        setCycleDataCache(initialCache);
+        setCycleDataCache(prevCache => ({
+          ...initialCache,
+          ...prevCache,
+        }));
       } catch (error) {
         console.error('Error fetching cycle dates:', error);
       }
@@ -180,7 +189,7 @@ export default function WhatHappenedLastWeek() {
       },
     }));
     setGeneratingReport(true);
-    const cycleData = cycleDataCache[index];
+    const cycleData = cycleDataCache[index]?.originalData;
 
     if (!cycleData) {
       console.error('No data found for cycle:', index);
@@ -198,7 +207,7 @@ export default function WhatHappenedLastWeek() {
           Authorization: `Bearer ${userToken}`,
         },
         body: JSON.stringify({
-          cycleData,
+          cycleData: {analyticsData: cycleData},
         }),
       });
       const data = await response.json();
@@ -220,6 +229,40 @@ export default function WhatHappenedLastWeek() {
     }
   }
   reportGeneration(cycleData);
+  }
+
+  const fetchCycleReport = async (index: number) => {
+    try {
+      const response = await fetch(`${API_URL}/analytics/fetch_report?cycle_number=${cycleDates.length - index}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error fetching report: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.message !== "Success") {
+        throw new Error(`Error fetching report: ${data.message}`);
+      }
+
+      setCycleDataCache(prevCache => ({
+        ...prevCache,
+        [index]: {
+          ...prevCache[index],
+          generatedReport: {report: data.report.report}
+        },
+      }));
+
+      console.log('Report fetch response:', data);
+    } catch (error) {
+      console.error('Error fetching report:', error);
+    }
   }
 
   // Function to fetch data for a specific cycle
@@ -283,12 +326,35 @@ export default function WhatHappenedLastWeek() {
         payload: { room_id: room_id },
       });
         setLoading(true);
-      const data = await fetchCycleData(index);
-      console.log('data is', data);
+      const [_, data] = await Promise.all([
+        fetchCycleReport(index),
+        fetchCycleData(index)
+      ]);
+      // Combine the relevant data into a single object
+      const combinedCycleAnalyticsData = (data.analyticsData || []).reduce((acc: any, current: any) => {
+        Object.keys(current).forEach(key => {
+          if (typeof current[key] === 'number') {
+            acc[key] = (acc[key] || 0) + current[key];
+          } else if (Array.isArray(current[key])) {
+            acc[key] = (acc[key] || []).concat(current[key]);
+          } else if (typeof current[key] === 'object' && current[key] !== null) {
+            acc[key] = { ...acc[key], ...current[key] };
+          } else {
+            acc[key] = current[key];
+          }
+        });
+        return acc;
+      }, {});
       setCycleDataCache(prevCache => ({
         ...prevCache,
-        [index]: data,
+        [index]: {
+          ...prevCache[index],
+          analyticsData: [combinedCycleAnalyticsData],
+          originalData: data.analyticsData,
+        },
       }));
+
+      console.log('cycle data cache:', cycleDataCache);
       setLoading(false); 
        }
     }
@@ -315,7 +381,31 @@ export default function WhatHappenedLastWeek() {
                     position: 'relative' 
                   }} 
                 >
-                  <div dangerouslySetInnerHTML={{ __html: cycleDataCache[index]?.generatedReport?.report }} />
+                  {/* <RichTextArea
+                    onChange={(value, rawValue) => {
+                      // descriptionRaw.current = rawValue;
+                      // description.current = value;
+                      // // setDescription(value);
+                      // console.log(value);
+                    }}
+                    value={cycleDataCache[index]?.generatedReport?.report}
+                  /> */}
+                  <div 
+                    contentEditable 
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(cycleDataCache[index]?.generatedReport?.report, { ALLOWED_ATTR: ['style', 'th', 'table', 'tr', 'td', 'thead', 'tbody', 'tfoot', 'class', 'id', 'data-*', 'role', 'aria-*', 'head', 'body', 'h1', 'h2', 'p', 'border', 'cellpadding', 'cellspacing', 'width', 'align', 'meta', 'title'] }) }} 
+                    onInput={(e) => {setCycleDataCache(prevCache => ({
+                      ...prevCache,
+                      [index]: {
+                        ...prevCache[index],
+                          editedReport: e.currentTarget?.innerHTML,
+                      },
+                    })
+                  
+                  )
+                } 
+                    
+                  }
+                  />
                   <Button 
                     style={{ 
                       position: 'absolute', 
@@ -325,18 +415,49 @@ export default function WhatHappenedLastWeek() {
                     size="xs" 
                     color="blue" 
                     onClick={() => {
-                      try {
-                        const element = document.createElement('a');
-                        const file = new Blob([cycleDataCache[index]?.generatedReport?.report || ''], { type: 'text/html' });
-                        element.href = URL.createObjectURL(file);
-                        const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
-                        element.download = `report_cycle_${index}_${currentDate}.html`;
-                        document.body.appendChild(element);
-                        element.click();
-                        document.body.removeChild(element);
-                      } catch (error) {
-                        console.error('Failed to create HTML document:', error);
-                      }
+
+                      //call endpoint to save the report
+
+                      const saveReport = async () => {
+                        try {
+                          const response = await fetch(`${API_URL}/analytics/save_report`, {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              Authorization: `Bearer ${userToken}`,
+                            },
+                            body: JSON.stringify({
+                              cycle_number: cycleDates.length - index, //this is pretty derpy
+                              report: cycleDataCache[index]?.editedReport || cycleDataCache[index]?.generatedReport?.report,
+                            }),
+                          });
+                          const data = await response.json();
+                          console.log('Report save response:', data);
+                          showNotification({
+                            title: 'Report saved',
+                            message: 'The report has been saved successfully',
+                            color: 'teal',
+                          }
+                          )
+                        } catch (error) {
+                          console.error('Error saving report:', error);
+                        }
+                      };
+
+                      saveReport();
+                    
+                      // try {
+                      //   const element = document.createElement('a');
+                      //   const file = new Blob([cycleDataCache[index]?.generatedReport?.report || ''], { type: 'text/html' });
+                      //   element.href = URL.createObjectURL(file);
+                      //   const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+                      //   element.download = `report_cycle_${index}_${currentDate}.html`;
+                      //   document.body.appendChild(element);
+                      //   element.click();
+                      //   document.body.removeChild(element);
+                      // } catch (error) {
+                      //   console.error('Failed to create HTML document:', error);
+                      // }
                     }}
                   >
                     Save
@@ -346,7 +467,7 @@ export default function WhatHappenedLastWeek() {
             <Flex align={"center"} justify={"space-between"} px={"sm"} py={"xs"}>
               <Flex align={"center"} gap={"xs"} justify={"space-between"}>
                 <Flex align={"center"} gap={"xs"} direction="column">
-                  {cycleDataCache[index] && opened && (selectStep === index) && (
+                  {cycleDataCache[index]?.analyticsData && opened && (selectStep === index) && (
                     <Button mt="sm" loading={generatingReport} color="grape" size="xs" ml="md" onClick={() => { handleGenerateReport(index) }}>
                       Generate Report
                     </Button>
@@ -356,10 +477,10 @@ export default function WhatHappenedLastWeek() {
                       Cycle {cycleDates.length - index}:
                     </Text>
                       <Text size="sm" color="blue">
-                        Start: {new Date(cycleDates[index]?.start).toLocaleDateString()}
+                        Sun {new Date(new Date(cycleDates[index]?.start).setDate(new Date(cycleDates[index]?.start).getDate() + 1)).toLocaleDateString()}
                       </Text>
                       <Text size="sm" color="blue">
-                        End: {new Date(cycleDates[index]?.end).toLocaleDateString()}
+                        Mon {new Date(new Date(cycleDates[index]?.end).setDate(new Date(cycleDates[index]?.end).getDate() + 1)).toLocaleDateString()}
                     </Text>
                   </Flex>
                 </Flex>
@@ -374,10 +495,30 @@ export default function WhatHappenedLastWeek() {
                 </ActionIcon>
               </Flex>
             </Flex>
-            <Collapse in={selectStep === index && opened}>
+            {selectStep === index && opened && cycleDataCache[index]?.analyticsData &&  <Flex mr="sm" mb="sm" align="center" gap="xs" justify="flex-end">
+              <Stack spacing="sm">
+                <Flex align="center">
+                  <Text size="sm" mr="sm" fw={600} color="gray">Show Cumulative:</Text>
+                  <Switch size="sm" checked={showCumulative} onChange={() => setShowCumulative(!showCumulative)} />
+                </Flex>
+              </Stack>
+            </Flex>}
+            <Collapse 
+              in={selectStep === index && opened} 
+              transitionDuration={500} 
+              transitionTimingFunction="ease-in-out"
+              style={{
+
+                borderRadius: '8px',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                padding: '10px',
+                backgroundColor: '#f8fbff',
+              }}
+            >
               {!loading && cycleDataCache[index]?.analyticsData ?
-                cycleDataCache[index].analyticsData.map((dataItem: { daily: any; templateAnalytics: any; top_icp_people: any; summary:any }, dataIndex: Key | null | undefined) => (
+                (showCumulative ? cycleDataCache[index].analyticsData : cycleDataCache[index].originalData).map((dataItem: { daily: any; templateAnalytics: any; top_icp_people: any; summary:any }, dataIndex: Key | null | undefined) => (
                   <AnalyticsItem
+                    showCumulative={showCumulative}
                     key={dataIndex}
                     dailyData={dataItem?.daily}
                     templateAnalytics={dataItem?.templateAnalytics}

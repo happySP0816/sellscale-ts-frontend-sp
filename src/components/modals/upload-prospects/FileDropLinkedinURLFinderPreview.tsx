@@ -60,6 +60,7 @@ const PROSPECT_DB_COLUMNS = [
   "last_name",
   "title",
   "override",
+  "linkedin_url",
 ];
 
 function findBestPreviewRows(fileJSON: any[], previewAmount: number) {
@@ -121,7 +122,7 @@ function determineColumns(
                     ),
                     value: column,
                     group:
-                      column === "linkedin_url" || column === "email"
+                      column === "full_name" || column === "company"
                         ? "Required Fields"
                         : "Additional Fields",
                   };

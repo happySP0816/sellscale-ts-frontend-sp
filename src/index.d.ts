@@ -235,8 +235,16 @@ export interface Prospect {
 
   icp_company_fit_score: number;
   // putting string for now
-  icp_fit_reason_v2: string;
-  icp_company_fit_reason: string;
+  icp_fit_reason_v2: ICPFitReasonV2[];
+  icp_company_fit_reason: ICPFitReasonV2[];
+}
+
+interface ICPFitReasonV2 {
+  [key: string]: {
+    score: string,
+    reason: string,
+    citation: string,
+  }
 }
 
 export interface ProspectShallow {

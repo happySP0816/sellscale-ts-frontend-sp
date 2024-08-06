@@ -1,4 +1,4 @@
-import {Box, Flex, Loader, Modal, Switch, Table, Title} from "@mantine/core";
+import {Box, Checkbox, Flex, Loader, Modal, Switch, Table, Title, Text} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {Prospect} from "../../index";
 import {useQuery} from "@tanstack/react-query";
@@ -26,91 +26,6 @@ export interface ProspectAccounts {
 }
 
 export interface IndividualFilters {
-  // included_individual_title_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // excluded_individual_title_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // included_individual_seniority_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // excluded_individual_seniority_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // included_individual_industry_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // excluded_individual_industry_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // individual_years_of_experience_start: {
-  //   value: number,
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // individual_years_of_experience_end: {
-  //   value: number,
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // included_individual_skills_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // excluded_individual_skills_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // included_individual_locations_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // excluded_individual_locations_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // included_individual_generalized_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // excluded_individual_generalized_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // included_individual_education_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // excluded_individual_education_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // ai_filters: {
-  //   value: string | string[] | number,
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // }[]
   [key: string]: {
     value: string | string[] | number,
     dealbreaker: boolean,
@@ -118,80 +33,28 @@ export interface IndividualFilters {
   },
 }
 
-type CompanyFilterKeys = "included_company_name_keywords" | "excluded_company_name_keywords" | "included_company_locations_keywords" | "excluded_company_locations_keywords" | "company_size_start" | "company_size_end" | "included_company_industries_keywords" | "excluded_company_industries_keywords" | "included_company_generalized_keywords" | "excluded_company_generalized_keywords"
-
 export interface CompanyFilters {
-  // included_company_name_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // excluded_company_name_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // included_company_locations_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // excluded_company_locations_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // company_size_start: {
-  //   value: number,
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // company_size_end: {
-  //   value: number,
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // included_company_industries_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // excluded_company_industries_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // included_company_generalized_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // excluded_company_generalized_keywords: {
-  //   value: string[],
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // },
-  // ai_filters: {
-  //   value: string | string[] | number,
-  //   dealbreaker: boolean,
-  //   is_personalizer: boolean,
-  // }[]
     [key: string]: {
       value: string | string[] | number,
       dealbreaker: boolean,
       is_personalizer: boolean,
     },
+}
 
+export interface AIFilters {
+  key: string,
+  title: string,
+  prompt: string,
 }
 
 export interface ICPScoringRuleset extends ICPScoringRulesetKeys {
   client_archetype_id: number;
   dealbreakers: string[] | null;
-  company_ai_filters: string[] | null;
+  company_ai_filters: AIFilters[] | null;
   company_personalizers: string[] | null;
   hash: string | null;
   id: number;
-  individual_ai_filters: string[];
+  individual_ai_filters: AIFilters[];
   individual_personalizers: string[];
   segment_id: number;
 }
@@ -240,15 +103,77 @@ const ContactAccountFilterModal = function (
 
   const [contactTableHeaders, setContactTableHeaders] = useState<TableHeader[]>(
     [{key: "full_name", title: "Full Name"},
-      {key: "title", title: "Title"},
-      {key: "company", title: "Company"},
-      {key: "icp_fit_score", title: "score"},]
+      {key: "icp_fit_score", title: "Score"},
+      {key: "icp_company_fit_score", title: "Company Score"}
+    ]
   );
 
   const [companyTableHeaders, setCompanyTableHeaders] = useState<TableHeader[]>(
     [{key: "company", title: "Account Name"},
       {key: "icp_company_fit_score", title: "Score"}]
   );
+
+  const [selectedContacts, setSelectedContacts] = useState<Set<number>>(new Set());
+  const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set());
+
+  // This selection is the set of columns that we want the score to be "yes" or 1.
+  // Only select the prospects or companies that have a score of 1 or "yes" for this column.
+  // We can select both individual or company columns
+  const [selectedIndividualColumns, setSelectedIndividualColumns] = useState<Set<string>>(new Set());
+  const [selectedCompanyColumns, setSelectedCompanyColumns] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    // In here, we will select the reasons that says yes.
+  }, [selectedIndividualColumns, selectedCompanyColumns]);
+
+  // Checkbox Handlers for selecting contacts
+  const handleSelectContact = (contactId: number) => {
+    if (selectedContacts.has(contactId)) {
+      setSelectedContacts(prevState => {
+        prevState.delete(contactId);
+        return new Set(prevState);
+      })
+    }
+    else {
+      setSelectedContacts(prevState => {
+        prevState.add(contactId);
+        return new Set(prevState);
+      })
+    }
+  }
+
+  const handleSelectAllContacts = () => {
+    if (selectedContacts.size === prospects.length) {
+      setSelectedContacts(new Set());
+    }
+    else {
+      setSelectedContacts(new Set(prospects.map(prospect => prospect.id)));
+    }
+  }
+
+  // Checkbox Handlers for selecting companies
+  const handleSelectCompany = (companyName: string) => {
+    if (selectedCompanies.has(companyName)) {
+      setSelectedCompanies(prevState => {
+        prevState.delete(companyName);
+        return new Set(prevState);
+      });
+    }
+    else {
+      setSelectedCompanies(prevState => {
+        prevState.add(companyName);
+        return new Set(prevState);
+      });
+    }
+  }
+
+  const handleSelectAllCompanies = () => {
+    if (selectedCompanies.size === prospectAccounts.length) {
+      setSelectedCompanies(new Set());
+    } else {
+      setSelectedCompanies(new Set(prospectAccounts.map(prospectAccount => "" + prospectAccount.company)));
+    }
+  }
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['segmentProspects', segment?.id],
@@ -289,14 +214,12 @@ const ContactAccountFilterModal = function (
       }
     },
     enabled: !!segment,
-  })
+  });
+
+  const icp_scoring_ruleset_typed = icp_scoring_ruleset as ICPScoringRuleset;
 
   useEffect(() => {
-    if (icp_scoring_ruleset) {
-      const icp_scoring_ruleset_typed = icp_scoring_ruleset as ICPScoringRuleset;
-      const individual_personalizers = icp_scoring_ruleset_typed.individual_personalizers ?? [];
-      const company_personalizers = icp_scoring_ruleset_typed.company_personalizers ?? [];
-      const dealbreakers = icp_scoring_ruleset_typed.dealbreakers ?? [];
+    if (icp_scoring_ruleset_typed) {
       const company_ai_filters = icp_scoring_ruleset_typed.company_ai_filters ?? [];
       const individual_ai_filters = icp_scoring_ruleset_typed.individual_ai_filters ?? [];
 
@@ -315,33 +238,39 @@ const ContactAccountFilterModal = function (
       icp_scoring_ruleset_keys.forEach(key => {
         const keyType = key as keyof ICPScoringRulesetKeys;
 
-        // if it exists, add them to the table as well
-        // retrieve icp_score from prospect
-        // retrieve icp_reason from prospect
-
-        // retrieve icp_company_score from prospect
-        // retrieve icp_company_reason from prospect
-
-        // Assume that icp_reason is formatted as a JSON
-        /**
-         * {
-         *   [key_as_header]: {
-         *     answer: "yes/no or maybe/type","
-         *     reasoning: "short 1 sentence explanation"
-         *   }
-         * }
-         */
         if (icp_scoring_ruleset_typed[keyType]) {
+          const title = keyType.split("_").join(" ");
 
+          if (keyType.includes("individual")) {
+            setContactTableHeaders(prevState => {
+              return [...prevState, {key: keyType, title: title}]
+            })
+          }
+          else if (keyType.includes("company")) {
+            setCompanyTableHeaders(prevState => {
+              return [...prevState, {key: keyType, title: title}]
+           })
+          }
         }
       })
 
       // Handling AI filters
+      individual_ai_filters.forEach(ai_filter => {
+        setContactTableHeaders(prevState => {
+          return [...prevState, {key: ai_filter.key, title: ai_filter.title}]
+        })
+      })
+
+      company_ai_filters.forEach(ai_filter => {
+        setCompanyTableHeaders(prevState => {
+          return [...prevState, {key: ai_filter.key, title: ai_filter.title}]
+        })
+      })
       // Working with the assumption that AI questions will ask
       // two things at creation:
       // key / title (will be used as the headers)
     }
-  }, [icp_scoring_ruleset])
+  }, [icp_scoring_ruleset]);
 
   useEffect(() => {
     if (data) {
@@ -357,7 +286,6 @@ const ContactAccountFilterModal = function (
 
         if (!companySet.has(prospectCompanyName)) {
           companySet.add(prospectCompanyName);
-          console.log("prospect: ", prospect);
           // Add to final Company Data
           // Have columns for them like scoring
           // Make new column for icp_fit_reason_v2
@@ -375,45 +303,77 @@ const ContactAccountFilterModal = function (
     <Modal
       onClose={() => setShowContactAccountFilterModal(false)}
       opened={showContactAccountFilterModal}
-      size={'1000px'}
-      style={{height: "700px"}}
-    >
-      <Title order={4}>
-        <Flex justify={'space-between'}>
+      size={'1100px'}
+      style={{maxHeight: "700px"}}
+      title={
+      <Flex justify={'space-between'} gap={'24px'}>
+        <Title order={3}>
           {viewMode === "ACCOUNT" ? "Account Market Map" : "Contact Market Map"}
-          <Switch size={'xl'}
-            onLabel="Account View"
-            offLabel="Contact View"
-            onChange={(event) =>{
-              if (event.currentTarget.checked) {
-                setViewMode("ACCOUNT")
-              } else {
-                setViewMode("CONTACT")
-              }}}
-            checked={viewMode === "ACCOUNT"}
-          />
-        </Flex>
-      </Title>
-      <Flex style={{maxHeight: "700px"}}>
+        </Title>
+        <Switch size={'xl'}
+                onLabel="Account View"
+                offLabel="Contact View"
+                onChange={(event) =>{
+                  if (event.currentTarget.checked) {
+                    setViewMode("ACCOUNT")
+                  } else {
+                    setViewMode("CONTACT")
+                  }}}
+                checked={viewMode === "ACCOUNT"}
+        />
+      </Flex>
+      }
+    >
+      <Flex>
         {isLoading && <Loader />}
         {!isLoading && icp_scoring_ruleset &&
           (
             <MarketMapFilters
               prospects={prospects}
-              prospectAccounts={prospectAccounts}
               viewMode={viewMode}
               icp_scoring_ruleset={icp_scoring_ruleset}
+              selectedContacts={selectedContacts}
+              segment_id={segment?.id}
             />
           )}
-        <Box style={{height: "600px", overflow: "scroll", width: '100%'}}>
+        <Box style={{height: "700px", overflow: "scroll", maxWidth: '100%'}}>
           {!isLoading && viewMode === "ACCOUNT" ? (
-            <Table>
+            <Table style={{overflow: 'scroll'}} verticalSpacing={"sm"}>
               <thead>
               <tr>
-                {companyTableHeaders.map(item => {
+                <th>
+                  <Checkbox
+                    checked={selectedCompanies.size === prospectAccounts.length}
+                    onChange={() => handleSelectAllCompanies()}
+                  />
+                </th>
+                {icp_scoring_ruleset_typed && companyTableHeaders.map(item => {
                   return (
-                    <th>
-                      {item.title}
+                    <th key={item.title}>
+                      <Flex direction={'column'}>
+                        {item.title}
+                        {item.key !== "company" && item.key !==  "icp_company_fit_score" && (
+                          <Checkbox
+                            checked={selectedIndividualColumns.has(item.key)}
+                            onChange={() => {
+                              if (selectedIndividualColumns.has(item.key)) {
+                                setSelectedIndividualColumns(prevState => {
+                                  prevState.delete(item.key);
+                                  return new Set(prevState);
+                                })
+                              }
+                              else {
+                                setSelectedIndividualColumns(prevState => {
+                                  prevState.add(item.key);
+                                  return new Set(prevState);
+                                })
+                              }
+                            }}
+                          />
+                        )}
+                        {icp_scoring_ruleset_typed.company_personalizers?.includes(item.key) && "Personalizer: ✅"}
+                        {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && "Dealbreaker: ✅"}
+                      </Flex>
                     </th>
                   )
                 })}
@@ -424,12 +384,19 @@ const ContactAccountFilterModal = function (
                 const keys = companyTableHeaders.map(h => h.key);
 
                 return (
-                  <tr>
+                  <tr key={prospectAccount.company}
+                      style={{ backgroundColor: selectedCompanies.has("" + prospectAccount.company) ? "lightcyan" : "white"}}>
+                    <td>
+                      <Checkbox
+                        checked={selectedCompanies.has( "" + prospectAccount.company)}
+                        onChange={() => handleSelectCompany("" + prospectAccount.company)}
+                      />
+                    </td>
                     {keys.map(key => {
                       const keyType = key as keyof ProspectAccounts;
 
                       return (
-                        <td>
+                        <td key={prospectAccount[keyType]} style={{maxWidth: "300px"}}>
                           {prospectAccount[keyType]}
                         </td>
                       )
@@ -440,13 +407,42 @@ const ContactAccountFilterModal = function (
               </tbody>
             </Table>
           ) : (
-            <Table>
+            <Table style={{overflow: 'scroll'}} verticalSpacing={"sm"}>
               <thead>
               <tr>
-                {contactTableHeaders.map(item => {
+                <th>
+                  <Checkbox
+                    checked={selectedContacts.size === prospects.length}
+                    onChange={() => handleSelectAllContacts()}
+                  />
+                </th>
+                {icp_scoring_ruleset_typed && contactTableHeaders.map(item => {
                   return (
-                    <th>
-                      {item.title}
+                    <th key={item.title}>
+                      <Flex direction={'column'} justify={'center'}>
+                        {item.title}
+                        {item.key !== "full_name" && item.key !==  "icp_fit_score" && item.key !== "icp_company_fit_score" && (
+                          <Checkbox
+                            checked={selectedCompanyColumns.has(item.key)}
+                            onChange={() => {
+                              if (selectedCompanyColumns.has(item.key)) {
+                                setSelectedCompanyColumns(prevState => {
+                                  prevState.delete(item.key);
+                                  return new Set(prevState);
+                                })
+                              }
+                              else {
+                                setSelectedCompanyColumns(prevState => {
+                                  prevState.add(item.key);
+                                  return new Set(prevState);
+                                })
+                              }
+                            }}
+                          />
+                        )}
+                        {icp_scoring_ruleset_typed.company_personalizers?.includes(item.key) && "Personalizer: ✅"}
+                        {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && "Dealbreaker: ✅"}
+                      </Flex>
                     </th>
                   )
                 })}
@@ -457,11 +453,18 @@ const ContactAccountFilterModal = function (
                 const keys: string[] = contactTableHeaders.map(h => h.key);
 
                 return (
-                  <tr>
+                  <tr key={prospect.id}
+                      style={{ backgroundColor: selectedContacts.has(prospect.id) ? "lightcyan" : "white"}}>
+                    <td>
+                      <Checkbox
+                        checked={selectedContacts.has(prospect.id)}
+                        onChange={() => handleSelectContact(prospect.id)}
+                      />
+                    </td>
                     {keys.map(key => {
                       const keyType = key as keyof Prospect;
                       return (
-                        <td>
+                        <td key={prospect[keyType]} style={{maxWidth: "300px"}}>
                           {prospect[keyType]}
                         </td>
                       )

@@ -129,13 +129,6 @@ export default function FindContactsPage() {
 
   return (
     <Flex p="lg" direction="column" h="100%">
-      <Title order={4}>
-        <Card withBorder>
-          <Text color="gray">
-            Find Contacts: {activePersonaEmoji} {activePersonaName}
-          </Text>
-        </Card>
-      </Title>
       <Box mt={"sm"}>
         <Title order={4} color="gray">
           Add Contacts

@@ -487,6 +487,35 @@ export default function CampaignTemplateEditModal({
                   <Divider orientation="vertical" h={30} variant="dashed" ml={20} />
                 </>
               )}
+              {sequenceType === "email" && (
+                <>
+                  <Paper
+                    withBorder
+                    radius={"sm"}
+                    p={6}
+                    px={10}
+                    onClick={() => {
+                      setCurrentStepNum("subjectLines");
+                    }}
+                    bg={currentStepNum === "subjectLines" ? "#f9fbfe" : ""}
+                    style={{
+                      border: currentStepNum === "subjectLines" ? "1px solid #228be6 " : "",
+                      boxShadow: emailSubjectLines.length === 1 ? "0 0 0 2px rgba(255, 0, 0, 0.5)" : "",
+                    }}
+                  >
+                    <Flex align={"center"} justify={"space-between"}>
+                      <Text color="gray" size={"sm"} className="flex items-center gap-2">
+                        {" "}
+                        <ThemeIcon size={"sm"}>
+                          <IconMail fill="white" color="#228be6" style={{ width: "90%", height: "90%" }} />
+                        </ThemeIcon>
+                        Subject Lines
+                      </Text>
+                    </Flex>
+                  </Paper>
+                  <Divider orientation="vertical" h={30} variant="dashed" ml={20} />
+                </>
+              )}
               {steps &&
                 Array.from({ length: Number(steps) }, (_, index) => {
                   const tabValue = (index + 1).toString();
@@ -540,34 +569,7 @@ export default function CampaignTemplateEditModal({
                     </>
                   );
                 })}
-              {sequenceType === "email" && (
-                <>
-                  <Paper
-                    withBorder
-                    radius={"sm"}
-                    p={6}
-                    px={10}
-                    onClick={() => {
-                      setCurrentStepNum("subjectLines");
-                    }}
-                    bg={currentStepNum === "subjectLines" ? "#f9fbfe" : ""}
-                    style={{
-                      border: currentStepNum === "subjectLines" ? "1px solid #228be6 " : "",
-                    }}
-                  >
-                    <Flex align={"center"} justify={"space-between"}>
-                      <Text color="gray" size={"sm"} className="flex items-center gap-2">
-                        {" "}
-                        <ThemeIcon size={"sm"}>
-                          <IconMail fill="white" color="#228be6" style={{ width: "90%", height: "90%" }} />
-                        </ThemeIcon>
-                        Subject Lines
-                      </Text>
-                    </Flex>
-                  </Paper>
-                  <Divider orientation="vertical" h={30} variant="dashed" ml={20} />
-                </>
-              )}
+                
               <Paper withBorder radius={"sm"} p={6} px={10}>
                 <Flex
                   align={"center"}

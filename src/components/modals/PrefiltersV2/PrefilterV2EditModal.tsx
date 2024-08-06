@@ -349,6 +349,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           "Authorization": `Bearer ${userToken}`,
         },
         body: JSON.stringify({
+          is_prefilter: !isIcpFilter, //this may cause problems if we don't want to save the filter
           is_icp_filter: isIcpFilter,
           editing_query: currentSavedQueryId,
           num_contacts: 100,

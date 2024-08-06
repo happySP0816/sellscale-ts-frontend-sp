@@ -76,7 +76,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
 
   return (
     <Box>
-      {dailyData.reduce((total: any, day: { num_sent: any; }) => total + day.num_sent, 0) ? (
+      {dailyData?.reduce((total: any, day: { num_sent: any; }) => total + day.num_sent, 0) ? (
         <Flex
           gap={"sm"}
           p={"sm"}

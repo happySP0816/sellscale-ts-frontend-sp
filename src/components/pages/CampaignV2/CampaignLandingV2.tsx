@@ -797,7 +797,7 @@ export default function CampaignLandingV2() {
                           fw={600}
                           size={20}
                           onClick={() => {
-                            setEditableText(`${statsData?.emoji} ${statsData?.archetype_name}`);
+                            setEditableText(`${statsData?.archetype_name}`);
                             setIsEditingCampaignName(true);
                           }}
                           style={{ cursor: "text" }}

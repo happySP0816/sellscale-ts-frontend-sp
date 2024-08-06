@@ -523,7 +523,7 @@ export default function WhatHappenedLastWeek() {
                     dailyData={dataItem?.daily}
                     templateAnalytics={dataItem?.templateAnalytics}
                     topIcpPeople={dataItem?.top_icp_people}
-                    summaryData={dataItem?.summary[0]}
+                    summaryData={dataItem?.summary?.[0] || []}
                   />
                 )) : (
                   <Center mt="xl" mb="xl">

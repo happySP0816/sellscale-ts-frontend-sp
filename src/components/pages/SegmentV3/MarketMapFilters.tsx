@@ -2057,7 +2057,7 @@ const MarketMapFilters = function (
                       <Button
                         color={'red'}
                         onClick={() => {
-                          setContactTableHeaders(prevState => prevState.filter(item => item.key !== aiFilter.key));
+                          setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== aiFilter.key));
                           setCompanyAIFilters(prevState => prevState.filter(item => item.key !== aiFilter.key))
                         }}>
                         Delete

@@ -1359,6 +1359,8 @@ const MarketMapFilters = function (
                         color={'red'}
                         onClick={() => {
                           setContactTableHeaders(prevState => prevState.filter(item => item.key !== aiFilter.key));
+                          setDealBreakers(prevState => prevState.filter(x => x !== aiFilter.key));
+                          setIndividualPersonalizers(prevState => prevState.filter(x => x !== aiFilter.key));
                           setIndividualAIFilters(prevState => prevState.filter(item => item.key !== aiFilter.key))
                         }}>
                         Delete
@@ -2058,6 +2060,8 @@ const MarketMapFilters = function (
                         color={'red'}
                         onClick={() => {
                           setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== aiFilter.key));
+                          setDealBreakers(prevState => prevState.filter(x => x !== aiFilter.key));
+                          setCompanyPersonalizers(prevState => prevState.filter(x => x !== aiFilter.key));
                           setCompanyAIFilters(prevState => prevState.filter(item => item.key !== aiFilter.key))
                         }}>
                         Delete

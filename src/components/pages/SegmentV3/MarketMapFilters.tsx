@@ -454,14 +454,6 @@ const MarketMapFilters = function (
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'included_individual_title_keywords']));
 
-                      if (included_individual_title_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "included_individual_title_keywords", title: "included title"}])
-                      }
-                      else if (included_individual_title_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_title_keywords"))
-                      }
-
                       setIncludedIndividualTitleKeywords(valueArray);
                     }}
                     // setValue={setIncludedIndividualTitleKeywords}
@@ -513,14 +505,6 @@ const MarketMapFilters = function (
 
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'excluded_individual_title_keywords']));
-
-                      if (excluded_individual_title_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "excluded_individual_title_keywords", title: "excluded title"}])
-                      }
-                      else if (excluded_individual_title_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_title_keywords"))
-                      }
 
                       setExcludedIndividualTitleKeywords(valueArray);
                     }}
@@ -577,14 +561,6 @@ const MarketMapFilters = function (
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'included_individual_seniority_keywords']));
 
-                      if (included_individual_seniority_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "included_individual_seniority_keywords", title: "included seniority"}])
-                      }
-                      else if (included_individual_seniority_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_seniority_keywords"))
-                      }
-
                       setIncludedIndividualSeniorityKeywords(valueArray);
                     }}
                   />
@@ -633,14 +609,6 @@ const MarketMapFilters = function (
 
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'excluded_individual_seniority_keywords']));
-
-                      if (excluded_individual_seniority_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "excluded_individual_seniority_keywords", title: "excluded seniority"}])
-                      }
-                      else if (excluded_individual_seniority_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_seniority_keywords"))
-                      }
 
                       setExcludedIndividualSeniorityKeywords(valueArray);
                     }}
@@ -700,14 +668,6 @@ const MarketMapFilters = function (
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'included_individual_industry_keywords']));
 
-                      if (included_individual_industry_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "included_individual_industry_keywords", title: "included industry"}])
-                      }
-                      else if (included_individual_industry_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_industry_keywords"))
-                      }
-
                       setIncludedIndividualIndustryKeywords(valueArray);
                     }}
                   />
@@ -758,14 +718,6 @@ const MarketMapFilters = function (
 
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'excluded_individual_industry_keywords']));
-
-                      if (excluded_individual_industry_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "excluded_individual_industry_keywords", title: "excluded industry"}])
-                      }
-                      else if (excluded_individual_industry_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_industry_keywords"))
-                      }
 
                       setExcludedIndividualIndustryKeywords(valueArray);
                     }}
@@ -823,14 +775,6 @@ const MarketMapFilters = function (
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'included_individual_skills_keywords']));
 
-                      if (included_individual_skills_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "included_individual_skills_keywords", title: "included skills"}])
-                      }
-                      else if (included_individual_skills_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_skills_keywords"))
-                      }
-
                       setIncludedIndividualSkillsKeywords(valueArray);
                     }}
                   />
@@ -863,14 +807,6 @@ const MarketMapFilters = function (
 
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'excluded_individual_skills_keywords']));
-
-                      if (excluded_individual_skills_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "excluded_individual_skills_keywords", title: "excluded skills"}])
-                      }
-                      else if (excluded_individual_skills_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_skills_keywords"))
-                      }
 
                       setExcludedIndividualSkillsKeywords(valueArray);
                     }}
@@ -945,14 +881,6 @@ const MarketMapFilters = function (
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'included_individual_locations_keywords']));
 
-                      if (included_individual_locations_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "included_individual_locations_keywords", title: "included locations"}])
-                      }
-                      else if (included_individual_locations_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_locations_keywords"))
-                      }
-
                       setIncludedIndividualLocationsKeywords(valueArray);
                     }}
                   />
@@ -1003,14 +931,6 @@ const MarketMapFilters = function (
 
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'excluded_individual_locations_keywords']));
-
-                      if (excluded_individual_locations_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "excluded_individual_locations_keywords", title: "excluded locations"}])
-                      }
-                      else if (excluded_individual_locations_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_locations_keywords"))
-                      }
 
                       setExcludedIndividualLocationsKeywords(valueArray);
                     }}
@@ -1067,14 +987,6 @@ const MarketMapFilters = function (
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'included_individual_generalized_keywords']));
 
-                      if (included_individual_generalized_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "included_individual_generalized_keywords", title: "included generalized"}])
-                      }
-                      else if (included_individual_generalized_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_generalized_keywords"))
-                      }
-
                       setIncludedIndividualGeneralizedKeywords(valueArray);
                     }}
                   />
@@ -1123,14 +1035,6 @@ const MarketMapFilters = function (
 
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'excluded_individual_generalized_keywords']));
-
-                      if (excluded_individual_generalized_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "excluded_individual_generalized_keywords", title: "excluded generalized"}])
-                      }
-                      else if (excluded_individual_generalized_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_generalized_keywords"))
-                      }
 
                       setExcludedIndividualGeneralizedKeywords(valueArray);
                     }}
@@ -1188,14 +1092,6 @@ const MarketMapFilters = function (
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'included_individual_education_keywords']));
 
-                      if (included_individual_education_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "included_individual_education_keywords", title: "included education"}])
-                      }
-                      else if (included_individual_education_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_education_keywords"))
-                      }
-
                       setIncludedIndividualEducationKeywords(valueArray);
                     }}
                   />
@@ -1244,14 +1140,6 @@ const MarketMapFilters = function (
 
                       setUpdatedIndividualColumns(prevState =>
                         new Set([...prevState, 'excluded_individual_education_keywords']));
-
-                      if (excluded_individual_education_keywords.length === 0) {
-                        setContactTableHeaders(prevState => [...prevState,
-                          {key: "excluded_individual_education_keywords", title: "excluded education"}])
-                      }
-                      else if (excluded_individual_education_keywords.length !== 0 && valueArray.length === 0) {
-                        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_education_keywords"))
-                      }
 
                       setExcludedIndividualEducationKeywords(valueArray);
                     }}
@@ -1527,14 +1415,6 @@ const MarketMapFilters = function (
                       setUpdatedCompanyColumns(prevState =>
                         new Set([...prevState, 'included_company_name_keywords']));
 
-                      if (included_company_name_keywords.length === 0) {
-                        setCompanyTableHeaders(prevState => [...prevState,
-                          {key: "included_company_name_keywords", title: "included name"}])
-                      }
-                      else if (included_company_name_keywords.length !== 0 && valueArray.length === 0) {
-                        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_name_keywords"))
-                      }
-
                       setIncludedCompanyNameKeywords(valueArray);
                     }}
                   />
@@ -1583,14 +1463,6 @@ const MarketMapFilters = function (
 
                       setUpdatedCompanyColumns(prevState =>
                         new Set([...prevState, 'excluded_company_name_keywords']));
-
-                      if (excluded_company_name_keywords.length === 0) {
-                        setCompanyTableHeaders(prevState => [...prevState,
-                          {key: "excluded_company_name_keywords", title: "excluded name"}])
-                      }
-                      else if (excluded_company_name_keywords.length !== 0 && valueArray.length === 0) {
-                        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_name_keywords"))
-                      }
 
                       setExcludedCompanyNameKeywords(valueArray);
                     }}
@@ -1649,14 +1521,6 @@ const MarketMapFilters = function (
                       setUpdatedCompanyColumns(prevState =>
                         new Set([...prevState, 'included_company_locations_keywords']));
 
-                      if (included_company_locations_keywords.length === 0) {
-                        setCompanyTableHeaders(prevState => [...prevState,
-                          {key: "included_company_locations_keywords", title: "included locations"}])
-                      }
-                      else if (included_company_locations_keywords.length !== 0 && valueArray.length === 0) {
-                        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_locations_keywords"))
-                      }
-
                       setIncludedCompanyLocationsKeywords(valueArray);
                     }}
                   />
@@ -1707,14 +1571,6 @@ const MarketMapFilters = function (
 
                       setUpdatedCompanyColumns(prevState =>
                         new Set([...prevState, 'excluded_company_locations_keywords']));
-
-                      if (excluded_company_locations_keywords.length === 0) {
-                        setCompanyTableHeaders(prevState => [...prevState,
-                          {key: "excluded_company_locations_keywords", title: "excluded locations"}])
-                      }
-                      else if (excluded_company_locations_keywords.length !== 0 && valueArray.length === 0) {
-                        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_locations_keywords"))
-                      }
 
                       setExcludedCompanyLocationsKeywords(valueArray);
                     }}
@@ -1841,14 +1697,6 @@ const MarketMapFilters = function (
                       setUpdatedCompanyColumns(prevState =>
                         new Set([...prevState, 'included_company_industries_keywords']));
 
-                      if (included_company_industries_keywords.length === 0) {
-                        setCompanyTableHeaders(prevState => [...prevState,
-                          {key: "included_company_industries_keywords", title: "included industries"}])
-                      }
-                      else if (included_company_industries_keywords.length !== 0 && valueArray.length === 0) {
-                        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_industries_keywords"))
-                      }
-
                       setIncludedCompanyIndustriesKeywords(valueArray);
                     }}
                   />
@@ -1899,14 +1747,6 @@ const MarketMapFilters = function (
 
                       setUpdatedCompanyColumns(prevState =>
                         new Set([...prevState, 'excluded_company_industries_keywords']));
-
-                      if (excluded_company_industries_keywords.length === 0) {
-                        setCompanyTableHeaders(prevState => [...prevState,
-                          {key: "excluded_company_industries_keywords", title: "excluded industries"}])
-                      }
-                      else if (excluded_company_industries_keywords.length !== 0 && valueArray.length === 0) {
-                        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_industries_keywords"))
-                      }
 
                       setExcludedCompanyIndustriesKeywords(valueArray);
                     }}
@@ -1963,14 +1803,6 @@ const MarketMapFilters = function (
                       setUpdatedCompanyColumns(prevState =>
                         new Set([...prevState, 'included_company_generalized_keywords']));
 
-                      if (included_company_generalized_keywords.length === 0) {
-                        setCompanyTableHeaders(prevState => [...prevState,
-                          {key: "included_company_generalized_keywords", title: "included generalized"}])
-                      }
-                      else if (included_company_generalized_keywords.length !== 0 && valueArray.length === 0) {
-                        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_generalized_keywords"))
-                      }
-
                       setIncludedCompanyGeneralizedKeywords(valueArray);
                     }}
                   />
@@ -2019,14 +1851,6 @@ const MarketMapFilters = function (
 
                       setUpdatedCompanyColumns(prevState =>
                         new Set([...prevState, 'excluded_company_generalized_keywords']));
-
-                      if (excluded_company_generalized_keywords.length === 0) {
-                        setCompanyTableHeaders(prevState => [...prevState,
-                          {key: "excluded_company_generalized_keywords", title: "excluded generalized"}])
-                      }
-                      else if (excluded_company_generalized_keywords.length !== 0 && valueArray.length === 0) {
-                        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_generalized_keywords"))
-                      }
 
                       setExcludedCompanyGeneralizedKeywords(valueArray);
                     }}

@@ -37,14 +37,16 @@ interface AccordionItemProps {
   label: string;
   isActive: boolean;
   children: React.ReactNode;
+  amount?: number;
 }
 
-const CustomAccordionItem = ({ value, label, isActive, children }: AccordionItemProps) => (
+const CustomAccordionItem = ({ value, label, isActive, children, amount }: AccordionItemProps) => (
   <Accordion.Item value={value}>
     <Accordion.Control>
       <Flex align="center" gap="xs">
         <span>{label}</span>
         {isActive && <Badge color="green">Active</Badge>}
+        {amount !== undefined && amount !== 0 && <Badge>{amount} entries</Badge>}
       </Flex>
     </Accordion.Control>
     <Accordion.Panel>{children}</Accordion.Panel>
@@ -55,6 +57,7 @@ const CustomAccordionItem = ({ value, label, isActive, children }: AccordionItem
 export default function PreFiltersV2EditModal({ innerProps, context, id }: { innerProps: any, context: any, id: string }) {
   const saved_query_id = innerProps.id;
   const isIcpFilter = innerProps.isIcpFilter || false;
+  const hideSaveFeature = innerProps.hide_save_feature || false;
 
   const theme = useMantineTheme();
 
@@ -349,9 +352,9 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           "Authorization": `Bearer ${userToken}`,
         },
         body: JSON.stringify({
-          is_prefilter: !isIcpFilter, //this may cause problems if we don't want to save the filter
+          is_prefilter: !isIcpFilter && !hideSaveFeature,
           is_icp_filter: isIcpFilter,
-          editing_query: currentSavedQueryId,
+          editing_query: hideSaveFeature ? undefined : currentSavedQueryId,
           num_contacts: 100,
           q_organization_keyword_tags: companyKeywords.length ? companyKeywords : undefined,
           organization_latest_funding_stage_cd: fundraise.length ? fundraise : undefined,
@@ -383,7 +386,9 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
       });
       const data = await response.json();
       if (response.ok) {
-        saveFilter(saved_query_id, data?.saved_query_id);
+        if (!hideSaveFeature) {
+          saveFilter(saved_query_id, data?.saved_query_id);
+        }
         setCurrentSavedQueryId(data?.saved_query_id);
         //search & save filter
         const newProspects = data.people.map((person: { photo_url: any; first_name: any; last_name: any; linkedin_url: any; email: any; headline: any; name: any; organization: { organization_num_employees_ranges: any; name: any; revenue: any; latest_funding_stage: any; technology: any; published_at: any; event_category: any; }; seniority: any; city: any; }) => ({
@@ -582,7 +587,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         }}
         archetypeID={-1}
           />
-      <TextInput 
+      {!hideSaveFeature && <TextInput 
         label="Filter Name" 
         value={filterName}
         required={filterName === ''}
@@ -596,7 +601,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           },
         }}
         onChange={(event) => setFilterName(event.currentTarget.value)}
-      />
+      />}
       <Flex align="end" mb={'sm'}>
         <Select
           label="Saved filters"
@@ -609,7 +614,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           }}
           rightSection={showApplyButton && (
             <Button onClick={handleApply} size="xs" style={{ marginLeft: '-60px' }}>
-              Switch
+              Apply
             </Button>
           )}
           style={{ width: '50%' }}
@@ -820,7 +825,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                   }}
                 />
               </CustomAccordionItem>
-              <CustomAccordionItem value="company" label="Company" isActive={selectedCompanies.length > 0 || !!companyName || !!companyDomain || !!aiPrompt || companyKeywords.length > 0}>
+              <CustomAccordionItem amount={selectedCompanies.length} value="company" label="Company" isActive={selectedCompanies.length > 0 || !!companyName || !!companyDomain || !!aiPrompt || companyKeywords.length > 0}>
                 <MultiSelect
                   label="Selected Companies"
                   placeholder="Enter company"
@@ -914,60 +919,65 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                   label="Keywords" 
                   onChange={(event) => setselectedCompanies(event.currentTarget.value)}
                 /> */}
-                <Textarea 
-                  label="Company Name" 
-                  placeholder={"e.g.\nCisco\nApple\nDell" }
-                  value={companyName}
-                  onChange={(event) => setcompanyName(event.currentTarget.value)}
-                  autosize
-                  minRows={3}
-                />
-                <MultiSelect
-                  label="Company Keywords"
-                  placeholder="Select or type keywords"
-                  data={Array.isArray(companyKeywords) ? companyKeywords.map(keyword => ({ label: keyword, value: keyword })) : []}
-                  value={companyKeywords}
-                  onChange={(value) => setCompanyKeywords(value)}
-                  searchable
-                  creatable
-                  getCreateLabel={(query) => `+ Create ${query}`}
-                  onCreate={(query) => {
-                    setCompanyKeywords((prev) => [...prev, query]);
-                    return query;
-                  }}
-                  styles={{
-                    rightSection: { pointerEvents: "none" },
-                    label: { width: "100%" },
-                    value: {
-                      backgroundColor: "#e0e0e0",
-                      border: "0.6px solid gray",
-                      borderRadius: "3px",
-                    },
-                    input: {
-                      minHeight: "",
-                    },
-                  }}
-                />
-                <Textarea 
-                  label="Company Domain" 
-                  placeholder={"e.g. http://cisco.com\njohn@apple.com\nsalesforce.com"} 
-                  value={companyDomain}
-                  onChange={(event) => setCompanyDomain(event.currentTarget.value)}
-                  autosize
-                  minRows={3}
-                />
-                <Textarea 
-                  label="AI Prompt" 
-                  placeholder="e.g. give me the top 50 Tech companies in CSV form" 
-                  value={aiPrompt}
-                  onChange={(event) => setAiPrompt(event.currentTarget.value)}
-                  autosize
-                  minRows={1}
-                  mb="xl"
-                />
-                <Button loading={fetchingCompanyOptions} mt="sm" style={{ float: 'right' }} onClick={() => {fetchCompanyOptions()}}>
+                <Accordion.Item value="advanced">
+                  <Accordion.Control>Advanced</Accordion.Control>
+                  <Accordion.Panel>
+                    <Textarea 
+                      label="Company Name List" 
+                      placeholder={"e.g.\nCisco\nApple\nDell" }
+                      value={companyName}
+                      onChange={(event) => setcompanyName(event.currentTarget.value)}
+                      autosize
+                      minRows={3}
+                    />
+                    <MultiSelect
+                      label="Company Keywords"
+                      placeholder="Select or type keywords"
+                      data={Array.isArray(companyKeywords) ? companyKeywords.map(keyword => ({ label: keyword, value: keyword })) : []}
+                      value={companyKeywords}
+                      onChange={(value) => setCompanyKeywords(value)}
+                      searchable
+                      creatable
+                      getCreateLabel={(query) => `+ Create ${query}`}
+                      onCreate={(query) => {
+                        setCompanyKeywords((prev) => [...prev, query]);
+                        return query;
+                      }}
+                      styles={{
+                        rightSection: { pointerEvents: "none" },
+                        label: { width: "100%" },
+                        value: {
+                          backgroundColor: "#e0e0e0",
+                          border: "0.6px solid gray",
+                          borderRadius: "3px",
+                        },
+                        input: {
+                          minHeight: "",
+                        },
+                      }}
+                    />
+                    <Textarea 
+                      label="Company Domain" 
+                      placeholder={"e.g. http://cisco.com\njohn@apple.com\nsalesforce.com"} 
+                      value={companyDomain}
+                      onChange={(event) => setCompanyDomain(event.currentTarget.value)}
+                      autosize
+                      minRows={3}
+                    />
+                    <Textarea 
+                      label="AI Prompt" 
+                      placeholder="e.g. give me the top 50 Tech companies in CSV form" 
+                      value={aiPrompt}
+                      onChange={(event) => setAiPrompt(event.currentTarget.value)}
+                      autosize
+                      minRows={1}
+                      mb="xl"
+                    />
+                    <Button loading={fetchingCompanyOptions} mt="sm" style={{ float: 'right' }} onClick={() => {fetchCompanyOptions()}}>
                   Apply
                 </Button>
+                  </Accordion.Panel>
+                </Accordion.Item>
               </CustomAccordionItem>
               <CustomAccordionItem value="employees" label="# Employees" isActive={selectedNumEmployees.length > 0}>
                 <MultiSelect
@@ -1384,7 +1394,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             style={{ padding: '10px 20px', fontSize: '16px', borderRadius: '5px' }}
             onClick={searchProspects}
           >
-            Search & Save Filter
+            Search
           </Button>
           {/* <Button 
             disabled={(currentSavedQueryId === undefined || filterName === '')} 
@@ -1462,11 +1472,6 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             </Stack>
           </ScrollArea>
         </Paper>
-      </Flex>
-      <Flex gap={"xl"} mt={"xl"}>
-        <Button variant="outline" color="gray" fullWidth>
-          Cancel
-        </Button>
       </Flex>
     </Box>
   );

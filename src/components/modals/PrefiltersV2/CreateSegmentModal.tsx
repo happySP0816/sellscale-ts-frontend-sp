@@ -148,15 +148,16 @@ export default function CreateSegmentModal(props: CreateSegment) {
      
             </Flex>
             <Select
-              withinPortal
               label="Segment"
+              withinPortal
               placeholder="Select an option"
               onChange={(value) => setSelectedSegment(value ?? "")}
               mt="md"
-              data={segments.map(segment => ({
+              data={segments?.map(segment => ({
                 value: segment.id.toString(),
                 label: `${segment.segment_title} (${segment.prospect_count} prospects)`
               }))}
+              zIndex={9999}
             />
             <Select
               withinPortal

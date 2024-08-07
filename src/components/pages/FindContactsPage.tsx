@@ -377,7 +377,7 @@ export default function FindContactsPage() {
 
         <Tabs.Panel value="sellscale-db-v2" pt="xs" style={{ position: "relative", padding: "30px" }}>
           {userToken && (
-            <PreFiltersV2EditModal innerProps={{}} context={{}} id={''} />
+            <PreFiltersV2EditModal innerProps={{hide_save_feature: true}} context={{}} id={''} />
           )}
         </Tabs.Panel>
 

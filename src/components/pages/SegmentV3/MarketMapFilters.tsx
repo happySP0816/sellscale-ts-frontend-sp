@@ -291,7 +291,7 @@ const MarketMapFilters = function (
       setScoreLoading(false);
       showNotification({
         title: "Success",
-        message: "Successfully scored the market map with the ICP ruleset",
+        message: "Successfully scored the market map with the ICP ruleset. AI Filters will take a while to show up.",
         color: "blue",
       })
     } else {

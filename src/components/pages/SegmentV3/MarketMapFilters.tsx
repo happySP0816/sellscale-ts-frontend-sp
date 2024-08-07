@@ -233,7 +233,6 @@ const MarketMapFilters = function (
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_locations_keywords"))}
         if (!company_size_start && !company_size_end) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "company_size"))}
-        }
         if (company_size_end && !company_size_start) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "company_size"))}
         if (included_company_industries_keywords.length === 0) {

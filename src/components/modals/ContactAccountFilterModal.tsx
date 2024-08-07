@@ -620,6 +620,45 @@ const ContactAccountFilterModal = function (
                       if (notFilters.includes(key)) {
                         const keyType = key as keyof ProspectAccounts;
 
+                        if (key === "icp_company_fit_score") {
+                          const prospect = prospects.find(item => item.id === prospectAccount.prospect_id);
+
+                          if (!prospect) {
+                            return (
+                              <td key={key + prospectAccount.company}
+                                  style={{minWidth: "100px", maxWidth: "300px"}}>
+                                <Text color={'orange'} weight={'bold'}>
+                                  Not Scored
+                                </Text>
+                              </td>);
+                          }
+
+                          const trueScore = prospect.icp_company_fit_reason && Object.keys(prospect.icp_company_fit_reason).length > 0;
+
+                          let humanReadableScore = "Not Scored";
+
+                          if (prospectAccount[keyType] === 0) {
+                            humanReadableScore = "Very Low"
+                          } else if (prospectAccount[keyType] === 1) {
+                            humanReadableScore = "Low"
+                          } else if (prospectAccount[keyType] === 2) {
+                            humanReadableScore = "Medium"
+                          } else if (prospectAccount[keyType] === 3) {
+                            humanReadableScore = "High"
+                          } else {
+                            humanReadableScore = "Very High"
+                          }
+
+                          return (
+                            <td key={key + prospectAccount.company}
+                                style={{minWidth: "100px", maxWidth: "300px"}}>
+                              <Text>
+                                {trueScore ? humanReadableScore : "Not Scored"}
+                              </Text>
+                            </td>
+                          )
+                        }
+
                         return (
                           <td key={key + prospectAccount.company}
                               style={{minWidth: "100px", maxWidth: "300px"}}>
@@ -747,6 +786,32 @@ const ContactAccountFilterModal = function (
                     {keys.map(key => {
                       if (notFilters.includes(key)) {
                         const keyType = key as keyof typeof p;
+                        if (key === "icp_fit_score") {
+                          const trueScore = prospect.icp_fit_reason_v2 && Object.keys(prospect.icp_fit_reason_v2).length > 0;
+
+                          let humanReadableScore = "Not Scored";
+
+                          if (p[keyType] === 0) {
+                            humanReadableScore = "Very Low"
+                          } else if (p[keyType] === 1) {
+                            humanReadableScore = "Low"
+                          } else if (p[keyType] === 2) {
+                            humanReadableScore = "Medium"
+                          } else if (p[keyType] === 3) {
+                            humanReadableScore = "High"
+                          } else if (p[keyType] === 4) {
+                            humanReadableScore = "Very High"
+                          }
+
+                          return (
+                            <td key={key + p.id}
+                                style={{minWidth: "100px", maxWidth: "300px"}}>
+                              <Text>
+                                {trueScore ? humanReadableScore : "Not Scored"}
+                              </Text>
+                            </td>
+                          )
+                        }
                         return (
                           <td key={key + p.id}
                               style={{minWidth: "100px", maxWidth: "300px"}}>

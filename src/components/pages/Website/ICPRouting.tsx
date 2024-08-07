@@ -271,9 +271,16 @@ export default function ICPRouting() {
                     ) : (
                       <>
                         <TextInput value={condition.condition} disabled mt="xs" />
-                        {/* <Text size="sm" mt="xs" color="green">condition</Text> */}
                         <Box mt="xs">
-                          {condition.company_breadcrumbs && (
+                          {condition.value ? (
+                            <>
+                              <Text size="sm" color="gray" mt="xs">Value:</Text>
+                              <Flex align="center" gap="xs" mt="xs">
+                                <TextInput value={condition.value} disabled />
+                                <IconCheck size={16} color="green" />
+                              </Flex>
+                            </>
+                          ) : condition.company_breadcrumbs ? (
                             <>
                               <Text size="sm" color="gray" mt="xs">Company Breadcrumbs:</Text>
                               <Flex align="center" gap="xs" mt="xs">
@@ -281,8 +288,7 @@ export default function ICPRouting() {
                                 <IconCheck size={16} color="green" />
                               </Flex>
                             </>
-                          )}
-                         
+                          ) : <></>}
                         </Box>
                       </>
                     )}

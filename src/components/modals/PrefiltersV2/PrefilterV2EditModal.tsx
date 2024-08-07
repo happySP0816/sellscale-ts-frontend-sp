@@ -1394,7 +1394,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             style={{ padding: '10px 20px', fontSize: '16px', borderRadius: '5px' }}
             onClick={searchProspects}
           >
-            Search
+            {hideSaveFeature ? "Search" : "Search & Save"}
           </Button>
           {/* <Button 
             disabled={(currentSavedQueryId === undefined || filterName === '')} 

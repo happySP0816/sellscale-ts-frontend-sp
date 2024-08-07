@@ -192,10 +192,12 @@ const ContactAccountFilterModal = function (
   useEffect(() => {
     if (selectedCompanyColumns.size === 0 && selectedIndividualColumns.size === 0) {
       setSelectedContacts(new Set());
+      setSelectedCompanies(new Set());
       return;
     }
 
     let finalProspects: Prospect[] = prospects;
+    let finalProspectAccounts: string[] = [];
 
     selectedIndividualColumns.forEach(column => {
       finalProspects = finalProspects.filter(prospect => {
@@ -233,8 +235,11 @@ const ContactAccountFilterModal = function (
         return false;
       })
     })
+    finalProspectAccounts = finalProspects.map(prospect => prospect.company);
 
     setSelectedContacts(new Set(finalProspects.map(prospect => prospect.id)));
+    setSelectedCompanies(new Set(finalProspectAccounts));
+
   }, [selectedIndividualColumns, selectedCompanyColumns]);
 
   // Checkbox Handlers for selecting contacts

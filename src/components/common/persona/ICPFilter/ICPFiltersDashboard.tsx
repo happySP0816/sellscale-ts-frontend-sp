@@ -436,7 +436,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
   });
   const displayProspects = useMemo(() => {
     let filteredProspects = icpProspects;
-  
+
     filteredProspects = filteredProspects.filter((prospect) => {
       const searchTerm = globalSearch.toLowerCase();
       return (
@@ -445,38 +445,38 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
         prospect.company?.toLowerCase().includes(searchTerm)
       );
     });
-  
+
     filteredProspects = filteredProspects
       // .filter((p) => p.status !== 'REMOVED')
       .filter((prospect) => {
         switch (selectedProspectStatusFilter) {
           case "Prospected":
             return prospect.status === "PROSPECTED";
-  
+
           case "Sent Outreach":
             return prospect.status === "SENT_OUTREACH";
-  
+
           case "Accepted":
             return prospect.status === "ACCEPTED";
-  
+
           case "Bumped":
             return prospect.status === "BUMPED";
-  
+
           case "Active Convo":
             return prospect.status === "ACTIVE_CONVO";
-  
+
           case "Demo":
             return prospect.status === "DEMO";
           case "Do Not Contact":
             return prospect.status === "REMOVED";
           case "All Contacts":
             return true;
-  
+
           default:
             return true;
         }
       });
-  
+
     return filteredProspects;
   }, [globalSearch, icpProspects, selectedProspectStatusFilter]);
 
@@ -795,18 +795,43 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
               </Flex>
             </Flex>
 
-            <Button
-              ml="auto"
-              size="sm"
-              disabled={!currentProject?.id}
-              leftIcon={<IconPlus size="0.8rem" />}
-              color={"blue"}
-              onClick={() => {
-                navigateToPage(navigate, "/contacts/overview");
-              }}
-            >
-              Add Prospects
-            </Button>
+            <Flex>
+              <Tooltip label="Upload custom data points to your prospects.">
+                <Button
+                  size="xs"
+                  onClick={customPointHandlers.open}
+                  color="gray"
+                  variant="outline"
+                >
+                  <IconMagnet size={16} />
+                </Button>
+              </Tooltip>
+
+              <Modal
+                opened={openedCustomPoint}
+                onClose={customPointHandlers.close}
+                size="xl"
+                title="Custom Data Point Importer"
+              >
+                <Text size="xs" color="gray">
+                  Upload custom data points to your prospects.
+                </Text>
+                <CustomResearchPointCard />
+              </Modal>
+
+              <Button
+                ml="xs"
+                size="sm"
+                disabled={!currentProject?.id}
+                leftIcon={<IconPlus size="0.8rem" />}
+                color={"blue"}
+                onClick={() => {
+                  navigateToPage(navigate, "/contacts/overview");
+                }}
+              >
+                Add Prospects
+              </Button>
+            </Flex>
           </Flex>
           {Object.keys(selectedRows).length > 0 && (
             <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>

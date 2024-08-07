@@ -331,6 +331,7 @@ const ContactAccountFilterModal = function (
       }
     },
     enabled: !!segment,
+    refetchInterval: 10000,
   });
 
   const icp_scoring_ruleset_typed = icp_scoring_ruleset as ICPScoringRuleset;
@@ -379,10 +380,10 @@ const ContactAccountFilterModal = function (
 
           const title = keyType.split("_").join(" ").replace("keywords", "");
 
-          if (keyType.includes("individual") && contactTableHeaders.find(item => item.key === keyType) === undefined) {
+          if (keyType.includes("individual")) {
             programmaticContactHeaders.push({key: keyType.replace("_start", "").replace("_end", ""), title: title.replace("individual", "")});
           }
-          else if (keyType.includes("company") && companyTableHeaders.find(item => item.key === keyType) === undefined) {
+          else if (keyType.includes("company")) {
             programmaticCompanyHeaders.push({key: keyType.replace("_start", "").replace("_end", ""), title: title.replace("company", "")});
           }
         }
@@ -400,8 +401,8 @@ const ContactAccountFilterModal = function (
         companyAIHeaders.push({key: ai_filter.key, title: ai_filter.title});
       })
 
-      setContactTableHeaders([...newContactHeaders, ...programmaticContactHeaders, ...individualAIHeaders]);
-      setCompanyTableHeaders([...newCompanyHeaders, ...programmaticCompanyHeaders, ...companyAIHeaders]);
+      setContactTableHeaders([...new Set(newContactHeaders), ...new Set(programmaticContactHeaders), ...new Set(individualAIHeaders)]);
+      setCompanyTableHeaders([...new Set(newCompanyHeaders), ...new Set(programmaticCompanyHeaders), ...new Set(companyAIHeaders)]);
       // Working with the assumption that AI questions will ask
       // two things at creation:
       // key / title (will be used as the headers)
@@ -580,8 +581,7 @@ const ContactAccountFilterModal = function (
                     <th key={item.key}>
                       <Flex direction={'column'}>
                         {item.title}
-                        {icp_scoring_ruleset_typed.company_personalizers?.includes(item.key) && "Personalizer: ✅"}
-                        {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && "Dealbreaker: ✅"}
+
                         {!notFilters.includes(item.key) && (
                           <Checkbox
                             checked={selectedCompanyColumns.has(item.key)}
@@ -601,7 +601,8 @@ const ContactAccountFilterModal = function (
                             }}
                           />
                         )}
-
+                        {icp_scoring_ruleset_typed.company_personalizers?.includes(item.key) && "Personalizer: ✅"}
+                        {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && "Dealbreaker: ✅"}
                       </Flex>
                     </th>
                   )

@@ -27,7 +27,11 @@ import {
 import { useRecoilState, useRecoilValue } from "recoil";
 import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
 import ProfileIcon from "@nav/ProfileIcon";
-import { adminDataState, userDataState, userTokenState } from "@atoms/userAtoms";
+import {
+  adminDataState,
+  userDataState,
+  userTokenState,
+} from "@atoms/userAtoms";
 import { isLoggedIn } from "@auth/core";
 import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
@@ -43,6 +47,7 @@ import { getPreOnboardingData } from "@pages/PreOnboarding";
 import {
   IconBrain,
   IconHome,
+  IconList,
   IconPencil,
   IconTarget,
   IconWorld,
@@ -170,7 +175,10 @@ export default function SideNavbar(props: {}) {
       // const response = await getInboxCounts(userToken);
       // const data = response.status === 'success' ? response.data : null;
 
-      const response = await getProspectBucketsForInbox(userToken, adminData?.role === 'ADMIN');
+      const response = await getProspectBucketsForInbox(
+        userToken,
+        adminData?.role === "ADMIN"
+      );
       const buckets =
         response.status === "success"
           ? (response.data as ProspectBuckets)
@@ -316,6 +324,11 @@ export default function SideNavbar(props: {}) {
           )} */}
 
           <Divider color="dark.4" mt="lg" mb="sm" />
+          <SideNavbarItem
+            icon={<IconList size="1.0rem" />}
+            label="Selix"
+            tabKey="selix"
+          />
           <SideNavbarItem
             icon={<IconSearch size="1.0rem" />}
             label="Search"

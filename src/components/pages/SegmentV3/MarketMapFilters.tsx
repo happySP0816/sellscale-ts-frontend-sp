@@ -19,7 +19,7 @@ import {
   Divider,
   Checkbox, Card, Loader, Switch
 } from "@mantine/core";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useRecoilValue} from "recoil";
 import {userTokenState} from "@atoms/userAtoms";
 import {API_URL} from "@constants/data";
@@ -188,6 +188,96 @@ const MarketMapFilters = function (
   const [company_ai_dealbreaker, setCompanyAIDealbreaker] = useState<boolean>(false);
   const [company_ai_personalizer, setCompanyAIPersonalizer] = useState<boolean>(false);
   const [company_ai_use_linkedin, setCompanyAIUseLinkedin] = useState<boolean>(false);
+
+  useEffect(() => {
+        if (included_individual_title_keywords.length === 0) {
+          setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_title_keywords"))
+        }
+        if (excluded_individual_title_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_title_keywords"))}
+        if (included_individual_industry_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_industry_keywords"))}
+        if (excluded_individual_industry_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_industry_keywords"))}
+        if (!individual_years_of_experience_start && !individual_years_of_experience_end) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "individual_years_of_experience"))}
+        if (individual_years_of_experience_end && !individual_years_of_experience_start) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "individual_years_of_experience"))}
+        if (included_individual_skills_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_skills_keywords"))}
+        if (excluded_individual_skills_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_skills_keywords"))}
+        if (included_individual_locations_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_locations_keywords"))}
+        if (excluded_individual_locations_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_locations_keywords"))}
+        if (included_individual_generalized_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_generalized_keywords"))}
+        if (excluded_individual_generalized_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_generalized_keywords"))}
+        if (included_individual_education_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_education_keywords"))}
+        if (excluded_individual_education_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_education_keywords"))}
+        if (included_individual_seniority_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_seniority_keywords"))}
+        if (excluded_individual_seniority_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_seniority_keywords"))}
+        if (included_company_name_keywords.length === 0) {
+        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_name_keywords"))}
+        if (excluded_company_name_keywords.length === 0) {
+        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_name_keywords"))}
+        if (included_company_locations_keywords.length === 0) {
+        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_locations_keywords"))}
+        if (excluded_company_locations_keywords.length === 0) {
+        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_locations_keywords"))}
+        if (!company_size_start && !company_size_end) {
+        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "company_size"))}
+        }
+        if (company_size_end && !company_size_start) {
+        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "company_size"))}
+        if (included_company_industries_keywords.length === 0) {
+        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_industries_keywords"))}
+        if (excluded_company_industries_keywords.length === 0) {
+        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_industries_keywords"))}
+        if (included_company_generalized_keywords.length === 0) {
+        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_generalized_keywords"))}
+        if (excluded_company_generalized_keywords.length === 0) {
+        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_generalized_keywords"))}
+  },
+[
+    included_individual_title_keywords,
+    excluded_individual_title_keywords,
+    included_individual_industry_keywords,
+    excluded_individual_industry_keywords,
+    individual_years_of_experience_start,
+    individual_years_of_experience_end,
+    included_individual_skills_keywords,
+    excluded_individual_skills_keywords,
+    included_individual_locations_keywords,
+    excluded_individual_locations_keywords,
+    included_individual_generalized_keywords,
+    excluded_individual_generalized_keywords,
+    included_individual_education_keywords,
+    excluded_individual_education_keywords,
+    included_individual_seniority_keywords,
+    excluded_individual_seniority_keywords,
+    included_company_name_keywords,
+    excluded_company_name_keywords,
+    included_company_locations_keywords,
+    excluded_company_locations_keywords,
+    company_size_start,
+    company_size_end,
+    included_company_industries_keywords,
+    excluded_company_industries_keywords,
+    included_company_generalized_keywords,
+    excluded_company_generalized_keywords,
+    individual_personalizers,
+    company_personalizers,
+    dealbreakers,
+    individual_ai_filters,
+    company_ai_filters,
+    ]);
 
   const [scoreLoading, setScoreLoading] = useState(false);
 

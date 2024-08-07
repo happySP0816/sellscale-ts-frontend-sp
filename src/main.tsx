@@ -89,6 +89,7 @@ import ProspectPuller from "@pages/ProspectPuller";
 import WebsitePage from "@pages/Website/WebsitePage";
 import SelinAI from "@pages/AIBrain/SelinAI";
 import { SelixAIRetool } from "@pages/AIBrain/SelixAIRetool";
+import { SelixTaskPuppet } from "@pages/AIBrain/SelixTaskPuppet";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -333,8 +334,12 @@ const router = sentryCreateBrowserRouter([
         element: <SetupPersonaCard />,
       },
       {
-        path: "selix",
+        path: "selix_ai",
         element: <RestrictedRoute page={<SelixAIRetool />} />,
+      },
+      {
+        path: "selix",
+        element: <RestrictedRoute page={<SelixTaskPuppet />} />,
       },
       {
         path: "all/inboxes",

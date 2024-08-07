@@ -7,7 +7,7 @@ export default function SelinAIPlanner() {
   const [type, setType] = useState("planner");
   return (
     <>
-      <SegmentedControl
+      {/* <SegmentedControl
         onChange={(value) => setType(value)}
         w={"50%"}
         data={[
@@ -30,7 +30,7 @@ export default function SelinAIPlanner() {
             ),
           },
         ]}
-      />
+      /> */}
       {type === "planner" ? <PlannerComponent /> : type === "logs" ? <LogsComponent /> : <></>}
     </>
   );
@@ -59,7 +59,7 @@ export const PlannerComponent = () => {
   return (
     <Paper p={"sm"} withBorder radius={"sm"}>
       <Flex w={"100%"} align={"center"} gap={"xs"}>
-        <Divider label="Next in-line" labelPosition="left" w={"100%"} color="gray" fw={500} />
+        <Divider label="Next in line" labelPosition="left" w={"100%"} color="gray" fw={500} />
         <ActionIcon onClick={toggle}>{opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}</ActionIcon>
       </Flex>
       <Collapse in={opened} p={"sm"}>

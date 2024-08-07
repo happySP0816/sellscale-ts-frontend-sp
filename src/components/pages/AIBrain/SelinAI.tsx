@@ -304,8 +304,8 @@ export default function SelinAI() {
   };
 
   return (
-    <Card withBorder p="lg" maw={"1500px"} ml="auto" mr="auto" mt="lg">
-      <Paper withBorder shadow="md" radius={"sm"} p={"sm"}>
+    <Card withBorder p="lg" maw={"85%"} ml="auto" mr="auto" mt="lg">
+      {/* <Paper withBorder shadow="md" radius={"sm"} p={"sm"}>
         <Flex align={"center"} justify={"space-between"} onClick={toggle} className="hover:cursor-pointer">
           <Text fw={600}>{chats.length} other active tasks</Text>
           {opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}
@@ -351,7 +351,7 @@ export default function SelinAI() {
             </Flex>
           </Flex>
         </Collapse>
-      </Paper>
+      </Paper> */}
       <Flex mt={"md"} gap={"xl"}>
         <SegmentChat
           setSegment={setSegment}
@@ -574,11 +574,11 @@ const SegmentChat = (props: any) => {
   }, [shouldSubmit]);
 
   return (
-    <Paper withBorder shadow="sm" radius={"md"} w={"35%"}>
-      <Flex p={"md"} align={"center"} gap={5}>
+    <Paper withBorder shadow="sm" radius={"md"} w={"30%"}>
+      {/* <Flex p={"md"} align={"center"} gap={5}>
         <IconSparkles size={"1rem"} color="#be4bdb" />
-        <Text fw={600}>Generation Assistant</Text>
-      </Flex>
+        <Text fw={600}>Prompt</Text>
+      </Flex> */}
       <Divider bg="gray" />
       <ScrollArea h={500} viewportRef={viewport} scrollHideDelay={4000}>
         {chatContent.length > 0 ? (
@@ -739,15 +739,20 @@ const SegmentChat = (props: any) => {
         />
         <Flex justify={"space-between"} mt={"sm"} align={"center"}>
           <Flex gap={"sm"}>
-            <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
+            {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
               <IconPlus size={"1rem"} />
             </ActionIcon>
             <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
               <IconLink size={"1rem"} />
-            </ActionIcon>
+            </ActionIcon> */}
           </Flex>
-          <Button size="xs" color="grape" rightIcon={<IconSend size={"1rem"} />} onClick={handleSubmit}>
-            Ask AI
+          <Button 
+            size="xs" 
+            color="grape" 
+            rightIcon={<IconSend size={"1rem"} />} 
+            onClick={handleSubmit}
+            >
+            Send
           </Button>
         </Flex>
       </Paper>
@@ -860,9 +865,9 @@ const SegmentAIGeneration = (props: any) => {
   return (
     <Paper withBorder shadow="sm" w={"65%"} radius={"md"}>
       <Flex p={"md"} align={"center"} gap={5} bg={"grape"} className=" rounded-t-md">
-        <IconSparkles size={"1rem"} color="white" />
+        {/* <IconSparkles size={"1rem"} color="white" /> */}
         <Text fw={600} color="white">
-          AI Generation
+          Selix Computer
         </Text>
       </Flex>
       <Divider bg="gray" />
@@ -896,19 +901,19 @@ const SegmentAIGeneration = (props: any) => {
               label: (
                 <Center style={{ gap: 10 }}>
                   {props.aiType === "strategy" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
-                  <span>Strategy</span>
+                  <span>Strategies</span>
                 </Center>
               ),
             },
-            {
-              value: "segment",
-              label: (
-                <Center style={{ gap: 10 }}>
-                  {props.aiType === "segment" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
-                  <span>Segments</span>
-                </Center>
-              ),
-            },
+            // {
+            //   value: "segment",
+            //   label: (
+            //     <Center style={{ gap: 10 }}>
+            //       {props.aiType === "segment" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+            //       <span>Segments</span>
+            //     </Center>
+            //   ),
+            // },
             {
               value: "campaign",
               label: (
@@ -954,11 +959,15 @@ const SegmentAIGeneration = (props: any) => {
           <Box maw="900px">
             <WhatHappenedLastWeek />
           </Box>
-        ) : (
+        ) : props.aiType === "planner" ? (
           <SelinAIPlanner />
+        ) : (
+          <Center style={{ height: '100%' }}>
+            <Text>No activity selected. Please choose an option from the menu.</Text>
+          </Center>
         )}
       </ScrollArea>
-      <Paper withBorder bg={"#fffcf5"} radius={"sm"} p={"sm"} style={{ borderColor: "#fab005" }} m="xs">
+      {/* <Paper withBorder bg={"#fffcf5"} radius={"sm"} p={"sm"} style={{ borderColor: "#fab005" }} m="xs">
         <Flex align={"center"} justify={"space-between"}>
           <Text color="yellow" size={"sm"} fw={600} tt={"uppercase"} className="flex gap-2 items-center">
             <IconClock size={"1rem"} />
@@ -969,7 +978,7 @@ const SegmentAIGeneration = (props: any) => {
           </Text>
         </Flex>
       </Paper>
-      <TimelineComponent />
+      <TimelineComponent /> */}
     </Paper>
   );
 };

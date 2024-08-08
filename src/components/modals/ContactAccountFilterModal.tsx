@@ -136,6 +136,8 @@ const ContactAccountFilterModal = function (
 
   const [segmentName, setSegmentName] = useState<string>("");
 
+  const [headerSet, setHeaderSet] = useState<Set<string>>(new Set());
+
   // We want to pass in the set column header to the filter component
   // if we add a new filter, we want to add it to the column
   // if we clear a filter we want to remove it from the header
@@ -367,6 +369,8 @@ const ContactAccountFilterModal = function (
       const programmaticContactHeaders: TableHeader[] = [];
       const programmaticCompanyHeaders: TableHeader[] = [];
 
+      const set = new Set([...headerSet]);
+
       icp_scoring_ruleset_keys.forEach(key => {
         const keyType = key as keyof ICPScoringRulesetKeys;
 
@@ -381,10 +385,18 @@ const ContactAccountFilterModal = function (
           const title = keyType.split("_").join(" ").replace("keywords", "").replace("start", "").replace("end", "");
 
           if (keyType.includes("individual")) {
-            programmaticContactHeaders.push({key: keyType.replace("_start", "").replace("_end", ""), title: title.replace("individual", "")});
+            const key = keyType.replace("_start", "").replace("_end", "");
+            if (!set.has(key)) {
+              set.add(key);
+              programmaticContactHeaders.push({key: key, title: title.replace("individual", "").replace(" ", "")});
+            }
           }
           else if (keyType.includes("company")) {
-            programmaticCompanyHeaders.push({key: keyType.replace("_start", "").replace("_end", ""), title: title.replace("company", "")});
+            const key = keyType.replace("_start", "").replace("_end", "");
+            if (!set.has(key)) {
+              set.add(key);
+              programmaticCompanyHeaders.push({key: key, title: title.replace("company", "").replace(" ", "")});
+            }
           }
         }
       })
@@ -394,20 +406,24 @@ const ContactAccountFilterModal = function (
 
       // Handling AI filters
       individual_ai_filters.forEach(ai_filter => {
-        individualAIHeaders.push({key: ai_filter.key, title: ai_filter.title});
+        if (!set.has(ai_filter.key)) {
+          set.add(ai_filter.key);
+          individualAIHeaders.push({key: ai_filter.key, title: ai_filter.title});
+        }
       })
 
       company_ai_filters.forEach(ai_filter => {
-        companyAIHeaders.push({key: ai_filter.key, title: ai_filter.title});
+        if (!set.has(ai_filter.key)) {
+          set.add(ai_filter.key);
+          companyAIHeaders.push({key: ai_filter.key, title: ai_filter.title});
+        }
       })
 
-      setContactTableHeaders([...new Set(newContactHeaders), ...new Set(programmaticContactHeaders), ...new Set(individualAIHeaders)]);
-      setCompanyTableHeaders([...new Set(newCompanyHeaders), ...new Set(programmaticCompanyHeaders), ...new Set(companyAIHeaders)]);
-      // Working with the assumption that AI questions will ask
-      // two things at creation:
-      // key / title (will be used as the headers)
+      setContactTableHeaders([...newContactHeaders, ...programmaticContactHeaders, ...individualAIHeaders]);
+      setCompanyTableHeaders([...newCompanyHeaders, ...programmaticCompanyHeaders, ...companyAIHeaders]);
+      setHeaderSet(set);
     }
-  }, [icp_scoring_ruleset]);
+  }, [icp_scoring_ruleset, icp_scoring_ruleset_typed]);
 
   useEffect(() => {
     if (data) {

@@ -378,7 +378,7 @@ const ContactAccountFilterModal = function (
             }
           }
 
-          const title = keyType.split("_").join(" ").replace("keywords", "");
+          const title = keyType.split("_").join(" ").replace("keywords", "").replace("start", "").replace("end", "");
 
           if (keyType.includes("individual")) {
             programmaticContactHeaders.push({key: keyType.replace("_start", "").replace("_end", ""), title: title.replace("individual", "")});

@@ -203,9 +203,7 @@ const MarketMapFilters = function (
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_industry_keywords"))}
         if (excluded_individual_industry_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_industry_keywords"))}
-        if (!individual_years_of_experience_start && !individual_years_of_experience_end) {
-        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "individual_years_of_experience"))}
-        if (individual_years_of_experience_end && !individual_years_of_experience_start) {
+        if ((!individual_years_of_experience_start && individual_years_of_experience_start !== 0) && (!individual_years_of_experience_end && individual_years_of_experience_end !== 0)) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "individual_years_of_experience"))}
         if (included_individual_skills_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_skills_keywords"))}
@@ -235,9 +233,7 @@ const MarketMapFilters = function (
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_locations_keywords"))}
         if (excluded_company_locations_keywords.length === 0) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_locations_keywords"))}
-        if (!company_size_start && !company_size_end) {
-        setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "company_size"))}
-        if (company_size_end && !company_size_start) {
+        if ((!company_size_start && company_size_start !== 0)  && (!company_size_end && company_size_end !== 0)) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "company_size"))}
         if (included_company_industries_keywords.length === 0) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_industries_keywords"))}
@@ -1325,12 +1321,12 @@ const MarketMapFilters = function (
                       direction={'column'}
                     >
                       <NumberInput
-                        value={individual_years_of_experience_start ?? 0}
+                        value={individual_years_of_experience_start ?? ""}
                         label={"min"}
                         placeholder="Min"
                         hideControls
                         onChange={(value) => {
-                          if (value === 0 && individual_years_of_experience_end === 0) {
+                          if ((value === 0 || value === "") && individual_years_of_experience_end === 0) {
                             if (headerSet.has("individual_years_of_experience")) {
                               setHeaderSet(prevState => {
                                 prevState.delete("individual_years_of_experience")
@@ -1339,7 +1335,7 @@ const MarketMapFilters = function (
                             }
                             setContactTableHeaders(prevState => prevState.filter(item => item.key !== "individual_years_of_experience"))
                           }
-                          else if (value !== 0) {
+                          else if (value !== 0 && value !== "") {
                             if (!headerSet.has("individual_years_of_experience")) {
                               setContactTableHeaders(prevState => [...prevState, {
                                 key: 'individual_years_of_experience',
@@ -1349,23 +1345,28 @@ const MarketMapFilters = function (
                             }
                           }
 
-                          setIndividualYearsOfExperienceStart(+value)
+                          if (value === "") {
+                            setIndividualYearsOfExperienceStart(null)
+                          }
+                          else {
+                            setIndividualYearsOfExperienceStart(+value)
+                          }
                         }}
                       />
                       <NumberInput
-                        value={individual_years_of_experience_end ?? 0}
+                        value={individual_years_of_experience_end ?? ""}
                         label={"max"}
                         placeholder="Max"
                         hideControls
                         onChange={(value) => {
-                          if (value === 0 && individual_years_of_experience_start === 0) {
+                          if ((value === 0 || value === "") && individual_years_of_experience_start === 0) {
                             setHeaderSet(prevState => {
                               prevState.delete("individual_years_of_experience")
                               return new Set([...prevState]);
                             });
                             setContactTableHeaders(prevState => prevState.filter(item => item.key !== "individual_years_of_experience"))
                           }
-                          else if (value !== 0) {
+                          else if (value !== 0 && value !== "") {
                             if (!headerSet.has("individual_years_of_experience")) {
                               setContactTableHeaders(prevState => [...prevState, {
                                 key: 'individual_years_of_experience',
@@ -1374,8 +1375,12 @@ const MarketMapFilters = function (
                               setHeaderSet(prevState => new Set([...prevState, "individual_years_of_experience"]));
                             }
                           }
-
-                          setIndividualYearsOfExperienceEnd(+value)
+                          if (value === "") {
+                            setIndividualYearsOfExperienceEnd(null)
+                          }
+                          else {
+                            setIndividualYearsOfExperienceEnd(+value)
+                          }
                         }}
                       />
                       <Checkbox
@@ -1819,12 +1824,12 @@ const MarketMapFilters = function (
                       }}
                     >
                       <NumberInput
-                        value={company_size_start ?? 0}
+                        value={company_size_start ?? ""}
                         placeholder="Min"
                         label={"Min"}
                         hideControls
                         onChange={(value) => {
-                          if (value === 0 && company_size_end === 0) {
+                          if ((value === 0 || value === "") && company_size_end === 0) {
                             if (headerSet.has("company_size")) {
                               setHeaderSet(prevState => {
                                 prevState.delete("company_size")
@@ -1833,7 +1838,7 @@ const MarketMapFilters = function (
                             }
                             setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "company_size"))
                           }
-                          else if (value !== 0) {
+                          else if (value !== 0 && value !== "") {
                             if (!headerSet.has("company_size")) {
                               setCompanyTableHeaders(prevState => {
                                 const set = new Set([...prevState, {key: 'company_size', title: 'company size'}]);
@@ -1843,23 +1848,28 @@ const MarketMapFilters = function (
                             }
                           }
 
-                          setCompanySizeStart(+value)
+                          if (value === "") {
+                            setCompanySizeStart(null);
+                          }
+                          else {
+                            setCompanySizeStart(+value)
+                          }
                         }}
                       />
                       <NumberInput
-                        value={company_size_end ?? 0}
+                        value={company_size_end ?? ""}
                         placeholder="Max"
                         label={"Max"}
                         hideControls
                         onChange={(value) => {
-                          if (value === 0 && company_size_start === 0) {
+                          if ((value === "" || value === 0) && company_size_start === 0) {
                             setHeaderSet(prevState => {
                               prevState.delete("company_size")
                               return new Set([...prevState]);
                             });
                             setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "company_size"))
                           }
-                          else if (value !== 0) {
+                          else if (value !== 0 && value !== "") {
                             if (!headerSet.has("company_size")) {
                               setCompanyTableHeaders(prevState => {
                                 const set = new Set([...prevState, {key: 'company_size', title: 'company size'}]);
@@ -1868,7 +1878,13 @@ const MarketMapFilters = function (
                               setHeaderSet(prevState => new Set([...prevState, "company_size"]));
                             }
                           }
-                          setCompanySizeEnd(+value)
+
+                          if (value === "") {
+                            setCompanySizeEnd(null);
+                          }
+                          else {
+                            setCompanySizeEnd(+value);
+                          }
                         }}
                       />
                     </Box>

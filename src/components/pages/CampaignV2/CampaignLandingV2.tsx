@@ -98,6 +98,7 @@ const steps = [
   {
     selector: '[data-tour="outreach-volume"]',
     content: "This slider allows you to set the outreach volume for your campaign.",
+
   },
   {
     selector: '[data-tour="campaign-progress"]',
@@ -735,7 +736,7 @@ export default function CampaignLandingV2() {
             borderRadius: "6px",
           }}
         >
-          <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour} />
+          <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour}/>
           <Flex direction={"column"} w={"100%"}>
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
             <Flex justify={"space-between"} p={"lg"} pb={0} direction={"column"}>

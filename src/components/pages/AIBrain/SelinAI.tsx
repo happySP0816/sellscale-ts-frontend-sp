@@ -757,7 +757,6 @@ const SegmentChat = (props: any) => {
                   
                   : (
                     <div className=" border border-[#be4bdb] border-solid m-auto rounded-md">
-                      {console.log('message is', message)}
                       <div className="w-full bg-[#be4bdb] py-2 text-center text-white text-semibold">{message.type}</div>
                       <div className="p-3">{message.action_description}</div>
                     </div>

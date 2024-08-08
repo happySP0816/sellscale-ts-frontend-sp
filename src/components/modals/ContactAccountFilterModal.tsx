@@ -369,7 +369,7 @@ const ContactAccountFilterModal = function (
       const programmaticContactHeaders: TableHeader[] = [];
       const programmaticCompanyHeaders: TableHeader[] = [];
 
-      const set = new Set([...headerSet]);
+      const set = new Set<string>();
 
       icp_scoring_ruleset_keys.forEach(key => {
         const keyType = key as keyof ICPScoringRulesetKeys;

@@ -1326,7 +1326,7 @@ const MarketMapFilters = function (
                         placeholder="Min"
                         hideControls
                         onChange={(value) => {
-                          if ((value === 0 || value === "") && individual_years_of_experience_end === 0) {
+                          if ((value === 0 || value === "") && (individual_years_of_experience_end === null || individual_years_of_experience_end === 0)) {
                             if (headerSet.has("individual_years_of_experience")) {
                               setHeaderSet(prevState => {
                                 prevState.delete("individual_years_of_experience")
@@ -1359,7 +1359,7 @@ const MarketMapFilters = function (
                         placeholder="Max"
                         hideControls
                         onChange={(value) => {
-                          if ((value === 0 || value === "") && individual_years_of_experience_start === 0) {
+                          if ((value === 0 || value === "") && (individual_years_of_experience_start === null || individual_years_of_experience_start === 0)) {
                             setHeaderSet(prevState => {
                               prevState.delete("individual_years_of_experience")
                               return new Set([...prevState]);
@@ -1829,7 +1829,7 @@ const MarketMapFilters = function (
                         label={"Min"}
                         hideControls
                         onChange={(value) => {
-                          if ((value === 0 || value === "") && company_size_end === 0) {
+                          if ((value === 0 || value === "") && (!company_size_end || company_size_end === 0)) {
                             if (headerSet.has("company_size")) {
                               setHeaderSet(prevState => {
                                 prevState.delete("company_size")
@@ -1862,7 +1862,7 @@ const MarketMapFilters = function (
                         label={"Max"}
                         hideControls
                         onChange={(value) => {
-                          if ((value === "" || value === 0) && company_size_start === 0) {
+                          if ((value === "" || value === 0) && (company_size_start === null || company_size_start === 0)) {
                             setHeaderSet(prevState => {
                               prevState.delete("company_size")
                               return new Set([...prevState]);

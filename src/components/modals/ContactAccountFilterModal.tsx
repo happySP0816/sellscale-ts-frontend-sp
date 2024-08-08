@@ -579,6 +579,8 @@ const ContactAccountFilterModal = function (
               setCompanyTableHeaders={setCompanyTableHeaders}
               setContactTableHeaders={setContactTableHeaders}
               setUpdatedCompanyColumns={setUpdatedCompanyColumns}
+              setHeaderSet={setHeaderSet}
+              headerSet={headerSet}
               setUpdatedIndividualColumns={setUpdatedIndividualColumns}/>
           )}
         <Box style={{height: "700px", overflow: "scroll", maxWidth: '100%'}}>

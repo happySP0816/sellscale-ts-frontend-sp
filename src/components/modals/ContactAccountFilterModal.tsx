@@ -155,41 +155,6 @@ const ContactAccountFilterModal = function (
     setSelectedContacts(new Set(finalProspects));
   }, [selectedCompanies]);
 
-  useEffect(() => {
-    setProspects(prevState => prevState.sort((a, b) => {
-        const individual_fit_score = b.icp_fit_score - a.icp_fit_score
-
-        if (individual_fit_score !== 0) {
-          return individual_fit_score;
-        }
-
-        const company_fit_score = b.icp_company_fit_score - a.icp_company_fit_score;
-
-        if (company_fit_score !== 0) {
-          return company_fit_score;
-        }
-
-        const individual_fit_reason = (a.icp_fit_reason_v2 && !b.icp_fit_reason_v2) ? -1 :
-          (!a.icp_fit_reason_v2 && b.icp_fit_reason_v2) ? 1 : (!a.icp_fit_reason_v2 && !b.icp_fit_reason_v2) ? 0 :
-            Object.keys(b.icp_fit_reason_v2).length - Object.keys(a.icp_fit_reason_v2).length;
-
-        if (individual_fit_reason !== 0) {
-          return individual_fit_reason;
-        }
-
-        const company_fit_reason = (a.icp_company_fit_reason && !b.icp_company_fit_reason) ? -1 :
-          (!a.icp_company_fit_reason && b.icp_company_fit_reason) ? 1 : (!a.icp_company_fit_reason && !b.icp_company_fit_reason) ? 0 :
-            Object.keys(b.icp_company_fit_reason).length - Object.keys(a.icp_company_fit_reason).length;
-
-        if (company_fit_reason !== 0) {
-          return company_fit_reason;
-        }
-
-        return a.full_name.localeCompare(b.full_name);
-      }
-    ))
-  }, [selectedContacts]);
-
   // In here, we will select the reasons that says yes.
   useEffect(() => {
     if (selectedCompanyColumns.size === 0 && selectedIndividualColumns.size === 0) {
@@ -423,37 +388,42 @@ const ContactAccountFilterModal = function (
       setCompanyTableHeaders([...newCompanyHeaders, ...programmaticCompanyHeaders, ...companyAIHeaders]);
       setHeaderSet(set);
     }
-  }, [icp_scoring_ruleset, icp_scoring_ruleset_typed]);
+  }, [icp_scoring_ruleset, icp_scoring_ruleset_typed, prospects]);
 
   useEffect(() => {
-    if (data) {
-      const prospectData = data as Prospect[];
+    const prospectData = prospects;
 
-      setProspects(prospectData
-        .sort((a, b) => {
+    const prospectSorted = [...prospectData]
+      .sort((a, b) => {
           const individual_fit_score = b.icp_fit_score - a.icp_fit_score
 
           if (individual_fit_score !== 0) {
             return individual_fit_score;
           }
 
+          const individual_fit_reason: number = (a.icp_fit_reason_v2 && !b.icp_fit_reason_v2) ? -1 :
+            (!a.icp_fit_reason_v2 && b.icp_fit_reason_v2) ? 1 : (!a.icp_fit_reason_v2 && !b.icp_fit_reason_v2) ? 0 :
+              Object.keys(b.icp_fit_reason_v2).length - Object.keys(a.icp_fit_reason_v2).length;
+
+          if (individual_fit_reason !== 0) {
+            return individual_fit_reason;
+          }
+
+          return a.full_name.localeCompare(b.full_name);
+        }
+      )
+
+    const accountSorted = [...prospectData]
+      .sort((a, b) => {
           const company_fit_score = b.icp_company_fit_score - a.icp_company_fit_score;
 
           if (company_fit_score !== 0) {
             return company_fit_score;
           }
 
-          const individual_fit_reason = (a.icp_fit_reason_v2 && !b.icp_fit_reason_v2) ? -1 :
-            (!a.icp_fit_reason_v2 && b.icp_fit_reason_v2) ? 1 : (!a.icp_fit_reason_v2 && !b.icp_fit_reason_v2) ? 0 :
-            Object.keys(b.icp_fit_reason_v2).length - Object.keys(a.icp_fit_reason_v2).length;
-
-          if (individual_fit_reason !== 0) {
-            return individual_fit_reason;
-          }
-
           const company_fit_reason = (a.icp_company_fit_reason && !b.icp_company_fit_reason) ? -1 :
             (!a.icp_company_fit_reason && b.icp_company_fit_reason) ? 1 : (!a.icp_company_fit_reason && !b.icp_company_fit_reason) ? 0 :
-            Object.keys(b.icp_company_fit_reason).length - Object.keys(a.icp_company_fit_reason).length;
+              Object.keys(b.icp_company_fit_reason).length - Object.keys(a.icp_company_fit_reason).length;
 
           if (company_fit_reason !== 0) {
             return company_fit_reason;
@@ -461,12 +431,81 @@ const ContactAccountFilterModal = function (
 
           return a.full_name.localeCompare(b.full_name);
         }
-      ));
+      )
+
+    setProspects(prospectSorted);
+
+    const companySet = new Set();
+    const finalCompanyData: ProspectAccounts[] = [];
+
+    accountSorted.forEach(prospect => {
+      const prospectCompanyName = prospect.company;
+
+      if (!companySet.has(prospectCompanyName)) {
+        companySet.add(prospectCompanyName);
+        // Add to final Company Data
+        // Have columns for them like scoring
+        // Make new column for icp_fit_reason_v2
+        // Json key value pair of header_key, and reasoning
+
+        finalCompanyData.push({"company": prospectCompanyName,
+          "icp_company_fit_score": prospect.icp_company_fit_score, "prospect_id": prospect.id});
+      }
+    })
+
+    setProspectAccounts(finalCompanyData);
+  }, [prospects]);
+
+  useEffect(() => {
+    if (data) {
+      const prospectData = data as Prospect[];
+
+      const prospectSorted = [...prospectData]
+        .sort((a, b) => {
+            const individual_fit_score = b.icp_fit_score - a.icp_fit_score
+
+            if (individual_fit_score !== 0) {
+              return individual_fit_score;
+            }
+
+            const individual_fit_reason: number = (a.icp_fit_reason_v2 && !b.icp_fit_reason_v2) ? -1 :
+              (!a.icp_fit_reason_v2 && b.icp_fit_reason_v2) ? 1 : (!a.icp_fit_reason_v2 && !b.icp_fit_reason_v2) ? 0 :
+                Object.keys(b.icp_fit_reason_v2).length - Object.keys(a.icp_fit_reason_v2).length;
+
+            if (individual_fit_reason !== 0) {
+              return individual_fit_reason;
+            }
+
+            return a.full_name.localeCompare(b.full_name);
+          }
+        )
+
+      const accountSorted = [...prospectData]
+        .sort((a, b) => {
+            const company_fit_score = b.icp_company_fit_score - a.icp_company_fit_score;
+
+            if (company_fit_score !== 0) {
+              return company_fit_score;
+            }
+
+            const company_fit_reason = (a.icp_company_fit_reason && !b.icp_company_fit_reason) ? -1 :
+              (!a.icp_company_fit_reason && b.icp_company_fit_reason) ? 1 : (!a.icp_company_fit_reason && !b.icp_company_fit_reason) ? 0 :
+                Object.keys(b.icp_company_fit_reason).length - Object.keys(a.icp_company_fit_reason).length;
+
+            if (company_fit_reason !== 0) {
+              return company_fit_reason;
+            }
+
+            return a.full_name.localeCompare(b.full_name);
+          }
+        )
+
+      setProspects(prospectSorted);
 
       const companySet = new Set();
       const finalCompanyData: ProspectAccounts[] = [];
 
-      prospectData.forEach(prospect => {
+      accountSorted.forEach(prospect => {
         const prospectCompanyName = prospect.company;
 
         if (!companySet.has(prospectCompanyName)) {

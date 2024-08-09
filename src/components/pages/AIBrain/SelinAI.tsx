@@ -138,6 +138,7 @@ interface MessageType {
 export default function SelinAI() {
 
   const [threads, setThreads] = useState<ThreadType[]>([]);
+  const [tasks, setTasks] = useState<TaskType[]>([]);
   const [messages, setMessages] = useState<MessageType[]>([]);
   const roomIDref = useRef<string>('');
   const [currentSessionId, setCurrentSessionId] = useState<Number | null>(null);
@@ -243,6 +244,9 @@ export default function SelinAI() {
 
       const currentThread = threads.find((thread) => thread.thread_id === thread_id);
       const memory: MemoryType | undefined = currentThread?.memory;
+      if (currentThread?.tasks) {
+        setTasks(currentThread.tasks);
+      }
       if (memory) {
         setAIType(memory.tab || 'PLANNER');
       } else {
@@ -291,7 +295,6 @@ export default function SelinAI() {
 
     if (data.thread_id === roomIDref.current) {
 
-      console.log('data is', data);
       if (data.message) {
         setMessages((chatContent: MessageType[]) => [
           ...chatContent,
@@ -354,15 +357,21 @@ export default function SelinAI() {
 
     console.log('task is', task);
     // Ensure the task is added correctly to the current session
-    setThreads((prevThreads) =>
-      prevThreads.map((thread) => {
+    setThreads((prevThreads) => {
+      const updatedThreads = prevThreads.map((thread) => {
         if (thread.id === currentSessionId) {
           const updatedTasks = Array.isArray(thread.tasks) ? [...thread.tasks, task] : [task];
           return { ...thread, tasks: updatedTasks };
         }
         return thread;
-      })
-    );
+      });
+
+      // Ensure the updated threads object is correctly reflected for children components
+      const currentThread = updatedThreads.find(thread => thread.id === currentSessionId);
+      setTasks(currentThread?.tasks || []);
+
+      return updatedThreads;
+    });
   }
 
   const handleNewSession = async (data: { session: ThreadType }) => {
@@ -613,6 +622,7 @@ export default function SelinAI() {
           // setChatContent={setChatContent}
           />
           <SelixControlCenter
+            tasks={tasks}
             setPrompt={setPrompt}
             handleSubmit={handleSubmit}
             setAIType={setAIType}
@@ -916,6 +926,7 @@ const SegmentChat = (props: any) => {
 const SelixControlCenter = ({
   setAIType,
   aiType,
+  tasks,
   messages,
   setMessages,
   setPrompt,
@@ -925,6 +936,7 @@ const SelixControlCenter = ({
 }: {
   setAIType: React.Dispatch<React.SetStateAction<string>>;
   aiType: string;
+  tasks: any,
   threads: ThreadType[];
   messages: MessageType[];
   setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
@@ -948,7 +960,7 @@ const SelixControlCenter = ({
         setSelectedCitation(citations[0]);
       }
     }
-  }, [{...currentThreadMemory}]);
+  }, [messages.length]);
 
 
 
@@ -1039,13 +1051,15 @@ const SelixControlCenter = ({
       <ScrollArea bg={"#f7f8fa"} h={'100%'} scrollHideDelay={4000} p={"md"}>
         {aiType === "STRATEGY_CREATOR" ? (
           <SelinStrategy
+            messages={messages}
             threads={threads}
             currentSessionId={currentSessionId}
             setPrompt={setPrompt}
             handleSubmit={handleSubmit}
           />
         ) : aiType === "PLANNER" ? (
-          <PlannerComponent threads={threads} currentSessionId={currentSessionId} />
+          // passing in messages length to trigger renders
+          <PlannerComponent messagesLength={messages.length} threads={threads} tasks={tasks} currentSessionId={currentSessionId} />
         )
           : aiType === "segment" ? (
             <Box maw="900px">
@@ -1246,24 +1260,16 @@ const SelixControlCenter = ({
 //   );
 // };
 
-const PlannerComponent = ({ threads, currentSessionId }: { threads: ThreadType[], currentSessionId: Number | null }) => {
+const PlannerComponent = ({ threads, currentSessionId, messagesLength, tasks }: { threads: ThreadType[], currentSessionId: Number | null, messagesLength: number, tasks:any }) => {
   const [opened, { toggle }] = useDisclosure(true);
-  const [tasks, setTasks] = useState(
-    threads.find(thread => thread.id === currentSessionId)?.tasks || []
-  );
 
-  console.log('current tasks are', tasks);
+  // useEffect(() => {
+  //   console.log('current session id is', currentSessionId);
+  //   const currentThread: ThreadType = threads.find(thread => thread.id === currentSessionId) as ThreadType;
+  //   setTasks(currentThread?.tasks);
+  // }, [threads, currentSessionId, messagesLength]);
 
-  // Hacky way to force re-render when tasks change
-  useEffect(() => {
-    setTimeout(() => {
-      setTasks(threads.find(thread => thread.id === currentSessionId)?.tasks || []);
-    }, 100);
-  }, [threads, currentSessionId]);
-
-  if (!tasks || tasks.length === 0) { return null; }
-
-  if (tasks.length > 0 && !tasks[1]?.title) { return null; }
+  console.log('tasks are', tasks);
 
   return (
     <Paper p={"sm"} withBorder radius={"sm"}>
@@ -1272,7 +1278,7 @@ const PlannerComponent = ({ threads, currentSessionId }: { threads: ThreadType[]
         <ActionIcon onClick={toggle}>{opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}</ActionIcon> */}
       </Flex>
       <Collapse in={opened} p={"sm"}>
-        {tasks.filter(task => task).map((task: TaskType, index) => {
+        {tasks?.filter(task => task.title).map((task: TaskType, index) => {
           const statusColors = {
             ACTIVE: "blue",
             COMPLETE: "green",
@@ -1312,7 +1318,7 @@ const PlannerComponent = ({ threads, currentSessionId }: { threads: ThreadType[]
   );
 };
 
-const SelinStrategy = ({ setPrompt, handleSubmit, threads, currentSessionId }: { setPrompt: React.Dispatch<React.SetStateAction<string>>, handleSubmit: () => void, threads: ThreadType[], currentSessionId: Number | null }) => {
+const SelinStrategy = ({ messages, setPrompt, handleSubmit, threads, currentSessionId }: { messages: any[], setPrompt: React.Dispatch<React.SetStateAction<string>>, handleSubmit: () => void, threads: ThreadType[], currentSessionId: Number | null }) => {
 
 
   const memory = threads.find(thread => thread.id === currentSessionId)?.memory;
@@ -1348,20 +1354,17 @@ const SelinStrategy = ({ setPrompt, handleSubmit, threads, currentSessionId }: {
 
 
   useEffect(() => {
-    console.log(strategy, 'is the strategy');
     if (memory?.strategy_id) {
       getStrategy(memory.strategy_id)
         .then((res) => {
           console.log(res);
-          setStrategy(res)
+          setStrategy(res);
         })
         .catch((err) => {
           console.log(err);
         });
     }
-
-  }
-    , [{ ...memory }]);
+  }, [messages.length]);
 
 
 
@@ -1391,7 +1394,7 @@ const SelinStrategy = ({ setPrompt, handleSubmit, threads, currentSessionId }: {
           <Stack spacing={"sm"}>
             <Box>
               <Text fw={600} size={"xs"}>
-                Goal:
+                Description:
               </Text>
               <Text fw={500} size={"xs"}>
                 <Text fw={500} size={"xs"} dangerouslySetInnerHTML={{ __html: strategy?.description || '' }} />

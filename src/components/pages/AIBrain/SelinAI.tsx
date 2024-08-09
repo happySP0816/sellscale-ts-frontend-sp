@@ -1278,7 +1278,7 @@ const PlannerComponent = ({ threads, currentSessionId, messagesLength, tasks }: 
         <ActionIcon onClick={toggle}>{opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}</ActionIcon> */}
       </Flex>
       <Collapse in={opened} p={"sm"}>
-        {tasks?.filter(task => task.title).map((task: TaskType, index) => {
+        {tasks?.filter((task: { title: any; }) => task.title).map((task: TaskType, index) => {
           const statusColors = {
             ACTIVE: "blue",
             COMPLETE: "green",

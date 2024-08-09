@@ -948,7 +948,7 @@ const SelixControlCenter = ({
         setSelectedCitation(citations[0]);
       }
     }
-  }, [currentThreadMemory, availableCitations]);
+  }, [{...currentThreadMemory}]);
 
 
 
@@ -1007,7 +1007,7 @@ const SelixControlCenter = ({
 
             },
             {
-              value: "NOT_AVAILABLE",
+              value: "NOT_AVAILABLE3",
               label: (
                 <Center style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}>
                   {aiType === "campaign" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
@@ -1075,7 +1075,7 @@ const SelixControlCenter = ({
             <Center style={{ height: '100%' }}>
               <Text style={{ fontFamily: 'Arial, sans-serif', fontSize: '16px' }}>Not Currently Available.</Text>
             </Center>
-          ) : aiType === "NOT_AVAILABLE2" ? (
+          ) : aiType === "NOT_AVAILABLE2" || aiType === 'NOT_AVAILABLE3' ? (
             <Center style={{ height: '100%' }}>
               <Text style={{ fontFamily: 'Arial, sans-serif', fontSize: '16px' }}>Not Currently Available.</Text>
             </Center>

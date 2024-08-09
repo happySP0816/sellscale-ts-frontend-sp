@@ -469,20 +469,6 @@ const MarketMapFilters = function (
                     data={included_individual_title_keywords.concat(titleOptions)}
                     // setData={setIncludedIndividualTitleKeywords}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('included_individual_title_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'included_individual_title_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'included_individual_title_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'included_individual_title_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={included_individual_title_keywords.length === 0}
-                  />
                   <Divider />
                   <CustomSelect
                     maxWidth="30vw"
@@ -526,20 +512,6 @@ const MarketMapFilters = function (
 
                       setExcludedIndividualTitleKeywords(valueArray);
                     }}
-                  />
-                  <Checkbox
-                    checked={dealbreakers.includes('excluded_individual_title_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'excluded_individual_title_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'excluded_individual_title_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'excluded_individual_title_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={excluded_individual_title_keywords.length === 0}
                   />
                 </ItemCollapse>
                 <ItemCollapse
@@ -591,20 +563,6 @@ const MarketMapFilters = function (
                       setIncludedIndividualSeniorityKeywords(valueArray);
                     }}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('included_individual_seniority_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'included_individual_seniority_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'included_individual_seniority_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'included_individual_seniority_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={included_individual_seniority_keywords.length === 0}
-                  />
                   <Divider />
                   <CustomSelect
                     maxWidth="30vw"
@@ -648,20 +606,6 @@ const MarketMapFilters = function (
 
                       setExcludedIndividualSeniorityKeywords(valueArray);
                     }}
-                  />
-                  <Checkbox
-                    checked={dealbreakers.includes('excluded_individual_seniority_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'excluded_individual_seniority_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'excluded_individual_seniority_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'excluded_individual_seniority_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={excluded_individual_seniority_keywords.length === 0}
                   />
                 </ItemCollapse>
 
@@ -719,20 +663,6 @@ const MarketMapFilters = function (
                       setIncludedIndividualIndustryKeywords(valueArray);
                     }}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('included_individual_industry_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'included_individual_industry_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'included_individual_industry_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'included_individual_industry_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={included_individual_industry_keywords.length === 0}
-                  />
                   <Divider />
                   <CustomSelect
                     maxWidth="30vw"
@@ -780,20 +710,6 @@ const MarketMapFilters = function (
 
                       setExcludedIndividualIndustryKeywords(valueArray);
                     }}
-                  />
-                  <Checkbox
-                    checked={dealbreakers.includes('excluded_individual_industry_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'excluded_individual_industry_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'excluded_individual_industry_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'excluded_individual_industry_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={excluded_individual_industry_keywords.length === 0}
                   />
                 </ItemCollapse>
 
@@ -848,20 +764,6 @@ const MarketMapFilters = function (
                       setIncludedIndividualSkillsKeywords(valueArray);
                     }}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('included_individual_skills_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'included_individual_skills_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'included_individual_skills_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'included_individual_skills_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={included_individual_skills_keywords.length === 0}
-                  />
                   <Divider />
                   <CustomSelect
                     maxWidth="30vw"
@@ -907,20 +809,6 @@ const MarketMapFilters = function (
 
                       setExcludedIndividualSkillsKeywords(valueArray);
                     }}
-                  />
-                  <Checkbox
-                    checked={dealbreakers.includes('excluded_individual_skills_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'excluded_individual_skills_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'excluded_individual_skills_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'excluded_individual_skills_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={excluded_individual_skills_keywords.length === 0}
                   />
                 </ItemCollapse>
                 <ItemCollapse
@@ -976,20 +864,6 @@ const MarketMapFilters = function (
                       setIncludedIndividualLocationsKeywords(valueArray);
                     }}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('included_individual_locations_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'included_individual_locations_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'included_individual_locations_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'included_individual_locations_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={included_individual_locations_keywords.length === 0}
-                  />
                   <Divider />
                   <CustomSelect
                     maxWidth="30vw"
@@ -1037,20 +911,6 @@ const MarketMapFilters = function (
 
                       setExcludedIndividualLocationsKeywords(valueArray);
                     }}
-                  />
-                  <Checkbox
-                    checked={dealbreakers.includes('excluded_individual_locations_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'excluded_individual_locations_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'excluded_individual_locations_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'excluded_individual_locations_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={excluded_individual_locations_keywords.length === 0}
                   />
                 </ItemCollapse>
                 <ItemCollapse
@@ -1104,20 +964,6 @@ const MarketMapFilters = function (
                       setIncludedIndividualGeneralizedKeywords(valueArray);
                     }}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('included_individual_generalized_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'included_individual_generalized_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'included_individual_generalized_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'included_individual_generalized_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={included_individual_generalized_keywords.length === 0}
-                  />
                   <Divider />
                   <CustomSelect
                     maxWidth="30vw"
@@ -1163,20 +1009,6 @@ const MarketMapFilters = function (
 
                       setExcludedIndividualGeneralizedKeywords(valueArray);
                     }}
-                  />
-                  <Checkbox
-                    checked={dealbreakers.includes('excluded_individual_generalized_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'excluded_individual_generalized_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'excluded_individual_generalized_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'excluded_individual_generalized_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={excluded_individual_generalized_keywords.length === 0}
                   />
                 </ItemCollapse>
 
@@ -1231,20 +1063,6 @@ const MarketMapFilters = function (
                       setIncludedIndividualEducationKeywords(valueArray);
                     }}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('included_individual_education_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'included_individual_education_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'included_individual_education_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'included_individual_education_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={included_individual_education_keywords.length === 0}
-                  />
                   <Divider />
                   <CustomSelect
                     maxWidth="30vw"
@@ -1290,20 +1108,6 @@ const MarketMapFilters = function (
 
                       setExcludedIndividualEducationKeywords(valueArray);
                     }}
-                  />
-                  <Checkbox
-                    checked={dealbreakers.includes('excluded_individual_education_keywords')}
-                    onChange={(event) => {
-                      setUpdatedIndividualColumns(prevState => new Set([...prevState, 'excluded_individual_education_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'excluded_individual_education_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'excluded_individual_education_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={excluded_individual_education_keywords.length === 0}
                   />
                 </ItemCollapse>
                 <ItemCollapse title={"Experience"} numberOfItem={0}>
@@ -1383,20 +1187,6 @@ const MarketMapFilters = function (
                           }
                         }}
                       />
-                      <Checkbox
-                        checked={dealbreakers.includes('individual_years_of_experience')}
-                        onChange={(event) => {
-                          setUpdatedIndividualColumns(prevState => new Set([...prevState, 'individual_years_of_experience']));
-                          if (event.currentTarget.checked) {
-                            setDealBreakers([...dealbreakers, 'individual_years_of_experience'])
-                          }
-                          else {
-                            setDealBreakers(dealbreakers.filter(x => x !== 'individual_years_of_experience'))
-                          }
-                        }}
-                        label={'Dealbreaker'}
-                        disabled={!individual_years_of_experience_start && !individual_years_of_experience_end}
-                      />
                     </Flex>
                     <Button
                       mt={"0.5rem"}
@@ -1452,7 +1242,7 @@ const MarketMapFilters = function (
                 <Button
                   disabled={!individual_ai_title || !individual_ai_prompt}
                   onClick={() => {
-                    const key = individual_ai_title.toLowerCase().split(" ").join("_");
+                    const key = "aiind_" + individual_ai_title.toLowerCase().split(" ").join("_");
 
                     setHeaderSet(prevState => new Set([...prevState, key]));
                     setContactTableHeaders(prevState => {
@@ -1613,20 +1403,6 @@ const MarketMapFilters = function (
                       setIncludedCompanyNameKeywords(valueArray);
                     }}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('included_company_name_keywords')}
-                    onChange={(event) => {
-                      setUpdatedCompanyColumns(prevState => new Set([...prevState, 'included_company_name_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'included_company_name_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'included_company_name_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={included_company_name_keywords.length === 0}
-                  />
                   <Divider />
                   <CustomSelect
                     maxWidth="30vw"
@@ -1672,20 +1448,6 @@ const MarketMapFilters = function (
 
                       setExcludedCompanyNameKeywords(valueArray);
                     }}
-                  />
-                  <Checkbox
-                    checked={dealbreakers.includes('excluded_company_name_keywords')}
-                    onChange={(event) => {
-                      setUpdatedCompanyColumns(prevState => new Set([...prevState, 'excluded_company_name_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'excluded_company_name_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'excluded_company_name_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={excluded_company_name_keywords.length === 0}
                   />
                 </ItemCollapse>
                 <ItemCollapse
@@ -1741,20 +1503,6 @@ const MarketMapFilters = function (
                       setIncludedCompanyLocationsKeywords(valueArray);
                     }}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('included_company_locations_keywords')}
-                    onChange={(event) => {
-                      setUpdatedCompanyColumns(prevState => new Set([...prevState, 'included_company_locations_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'included_company_locations_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'included_company_locations_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={included_company_locations_keywords.length === 0}
-                  />
                   <Divider />
                   <CustomSelect
                     maxWidth="30vw"
@@ -1796,20 +1544,6 @@ const MarketMapFilters = function (
 
                       setExcludedCompanyLocationsKeywords(valueArray);
                     }}
-                  />
-                  <Checkbox
-                    checked={dealbreakers.includes('excluded_company_locations_keywords')}
-                    onChange={(event) => {
-                      setUpdatedCompanyColumns(prevState => new Set([...prevState, 'excluded_company_locations_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'excluded_company_locations_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'excluded_company_locations_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={excluded_company_locations_keywords.length === 0}
                   />
                 </ItemCollapse>
                 <ItemCollapse title="Employee Count" numberOfItem={company_size_start && company_size_end ? 1 : 0}>
@@ -1888,19 +1622,6 @@ const MarketMapFilters = function (
                         }}
                       />
                     </Box>
-                    <Checkbox
-                      checked={dealbreakers.includes('company_size')}
-                      onChange={(event) => {
-                        setUpdatedCompanyColumns(prevState => new Set([...prevState, 'company_size']));
-                        if (event.currentTarget.checked) {
-                          setDealBreakers([...dealbreakers, 'company_size'])
-                        }
-                        else {
-                          setDealBreakers(dealbreakers.filter(x => x !== 'company_size'))
-                        }
-                      }}
-                      label={'Dealbreaker'}
-                    />
                     <Button
                       mt={"0.5rem"}
                       size="sm"
@@ -1964,20 +1685,6 @@ const MarketMapFilters = function (
                       setIncludedCompanyIndustriesKeywords(valueArray);
                     }}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('included_company_industries_keywords')}
-                    onChange={(event) => {
-                      setUpdatedCompanyColumns(prevState => new Set([...prevState, 'included_company_industries_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'included_company_industries_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'included_company_industries_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={included_company_industries_keywords.length === 0}
-                  />
                   <Divider />
                   <CustomSelect
                     maxWidth="30vw"
@@ -2025,20 +1732,6 @@ const MarketMapFilters = function (
 
                       setExcludedCompanyIndustriesKeywords(valueArray);
                     }}
-                  />
-                  <Checkbox
-                    checked={dealbreakers.includes('excluded_company_industries_keywords')}
-                    onChange={(event) => {
-                      setUpdatedCompanyColumns(prevState => new Set([...prevState, 'excluded_company_industries_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'excluded_company_industries_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'excluded_company_industries_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={excluded_company_industries_keywords.length === 0}
                   />
                 </ItemCollapse>
                 <ItemCollapse
@@ -2092,20 +1785,6 @@ const MarketMapFilters = function (
                       setIncludedCompanyGeneralizedKeywords(valueArray);
                     }}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('included_company_generalized_keywords')}
-                    onChange={(event) => {
-                      setUpdatedCompanyColumns(prevState => new Set([...prevState, 'included_company_generalized_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'included_company_generalized_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'included_company_generalized_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={included_company_generalized_keywords.length === 0}
-                  />
                   <Divider />
                   <CustomSelect
                     maxWidth="30vw"
@@ -2152,20 +1831,6 @@ const MarketMapFilters = function (
                       setExcludedCompanyGeneralizedKeywords(valueArray);
                     }}
                   />
-                  <Checkbox
-                    checked={dealbreakers.includes('excluded_company_generalized_keywords')}
-                    onChange={(event) => {
-                      setUpdatedCompanyColumns(prevState => new Set([...prevState, 'excluded_company_generalized_keywords']));
-                      if (event.currentTarget.checked) {
-                        setDealBreakers([...dealbreakers, 'excluded_company_generalized_keywords'])
-                      }
-                      else {
-                        setDealBreakers(dealbreakers.filter(x => x !== 'excluded_company_generalized_keywords'))
-                      }
-                    }}
-                    label={'Dealbreaker'}
-                    disabled={excluded_company_generalized_keywords.length === 0}
-                  />
                 </ItemCollapse>
               </Flex>
             </Accordion.Panel>
@@ -2202,16 +1867,10 @@ const MarketMapFilters = function (
                   checked={company_ai_personalizer}
                   onChange={(event) => setCompanyAIPersonalizer(event.currentTarget.checked)}
                 />
-                <Switch
-                  onLabel="Use Linkedin"
-                  offLabel="Use Search"
-                  size={'lg'}
-                  onChange={(event) => setCompanyAIUseLinkedin(event.currentTarget.checked)}
-                />
                 <Button
                   disabled={!company_ai_title || !company_ai_prompt}
                   onClick={() => {
-                    const key = company_ai_title.toLowerCase().split(" ").join("_");
+                    const key = "aicomp_" + company_ai_title.toLowerCase().split(" ").join("_");
 
                     if (!headerSet.has(key)) {
                       setHeaderSet(prevState => new Set([...prevState, key]));

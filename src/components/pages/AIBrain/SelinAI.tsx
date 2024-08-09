@@ -139,12 +139,16 @@ export default function SelinAI() {
 
   const [threads, setThreads] = useState<ThreadType[]>([]);
   const [tasks, setTasks] = useState<TaskType[]>([]);
+  const [counter, setCounter] = useState<number>(0);
   const [messages, setMessages] = useState<MessageType[]>([]);
   const roomIDref = useRef<string>('');
-  const [currentSessionId, setCurrentSessionId] = useState<Number | null>(null);
+  const [ currentSessionId, setCurrentSessionId] = useState<Number | null>(null);
+  const sessionIDRef = useRef<Number>(-1);
   const [loadingNewChat, setLoadingNewChat] = useState(false);
   const [prompt, setPrompt] = useState("");
 
+
+  console.log('current session is', currentSessionId)
 
   const handleSubmit = async () => {
 
@@ -221,6 +225,8 @@ export default function SelinAI() {
       // create new room_id
 
       setCurrentSessionId(session_id);
+      console.log('meowww 2',session_id)
+      sessionIDRef.current = session_id;
       roomIDref.current = thread_id;
 
       socket.emit("join-room", {
@@ -359,15 +365,18 @@ export default function SelinAI() {
     // Ensure the task is added correctly to the current session
     setThreads((prevThreads) => {
       const updatedThreads = prevThreads.map((thread) => {
-        if (thread.id === currentSessionId) {
+        if (task.selix_session_id === sessionIDRef.current) {
           const updatedTasks = Array.isArray(thread.tasks) ? [...thread.tasks, task] : [task];
+          console.log('updated tasks are', updatedTasks)
           return { ...thread, tasks: updatedTasks };
+        } else {
+          console.log('found no match for the current session. we compared', task.selix_session_id, 'and', sessionIDRef.current)
         }
         return thread;
       });
 
       // Ensure the updated threads object is correctly reflected for children components
-      const currentThread = updatedThreads.find(thread => thread.id === currentSessionId);
+      const currentThread = updatedThreads.find(thread => thread.id === sessionIDRef.current);
       setTasks(currentThread?.tasks || []);
 
       return updatedThreads;
@@ -380,6 +389,8 @@ export default function SelinAI() {
     setThreads((prevThreads) => [...prevThreads, data.session]);
     getMessages(data.session.thread_id, data.session.id);
     setCurrentSessionId(data.session.id);
+    console.log('meowww', data.session.id)
+    sessionIDRef.current=  data.session.id;
     roomIDref.current = data.session.thread_id;
 
     showNotification({
@@ -406,7 +417,7 @@ export default function SelinAI() {
     console.log('updating task and action', data);
     setThreads((prevThreads) =>
       prevThreads.map((thread) =>
-        thread.id === currentSessionId
+        data.task.selix_session_id === sessionIDRef.current
           ? { ...thread, tasks: Array.isArray(thread.tasks) ? [...thread.tasks, data.task] : [data.task] }
           : thread
       )
@@ -436,7 +447,7 @@ export default function SelinAI() {
       // just update the local state
       setThreads((prevThreads) =>
         prevThreads.map((thread) =>
-          thread.id === currentSessionId
+          thread.id === sessionIDRef.current
             ? { ...thread, ...data.session }
             : thread
         )
@@ -444,6 +455,11 @@ export default function SelinAI() {
     }
 
 
+  }
+
+  const handleIncrementCounter = async () => {
+    console.log('heyyy counter')
+    setCounter((prev) => (counter + 1));
   }
 
 
@@ -456,6 +472,7 @@ export default function SelinAI() {
     socket.on("new-session", handleNewSession);
     socket.on("update-action", handleUpdateTaskAndAction);
     socket.on("update-session", handleUpdateSession);
+    socket.on("increment-counter", handleIncrementCounter);
 
     return () => {
       socket.off("incoming-message", handleNewMessage);
@@ -464,6 +481,7 @@ export default function SelinAI() {
       socket.off("new-session", handleNewSession);
       socket.off("update-action", handleUpdateTaskAndAction);
       socket.off("update-session", handleUpdateSession);
+      socket.off("increment-counter", handleIncrementCounter);
 
     };
   }, []);
@@ -568,10 +586,10 @@ export default function SelinAI() {
                           style={{
                             display: "inline-block",
                             minWidth: "400px",
-                            backgroundColor: currentSessionId === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
-                            borderColor: currentSessionId === thread.id ? "#00796b" : "#ced4da" // Change border color if current thread
+                            backgroundColor: sessionIDRef.current === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
+                            borderColor: sessionIDRef.current === thread.id ? "#00796b" : "#ced4da" // Change border color if current thread
                           }}
-                          className={`transition duration-300 ease-in-out transform ${currentSessionId === thread.id ? "scale-105 shadow-2xl" : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
+                          className={`transition duration-300 ease-in-out transform ${sessionIDRef.current === thread.id ? "scale-105 shadow-2xl" : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
                             }`}
                           onClick={() => { getMessages(thread.thread_id, thread.id); toggle() }}
                         >
@@ -616,12 +634,13 @@ export default function SelinAI() {
             segment={segment}
             setAIType={setAIType}
             aiType={aiType}
-            currentSessionId={currentSessionId}
+            currentSessionId={sessionIDRef.current}
           // generateResponse={generateResponse}
           // chatContent={chatContent}
           // setChatContent={setChatContent}
           />
           <SelixControlCenter
+            counter={counter}
             tasks={tasks}
             setPrompt={setPrompt}
             handleSubmit={handleSubmit}
@@ -630,7 +649,7 @@ export default function SelinAI() {
             threads={threads}
             messages={messages}
             setMessages={setMessages}
-            currentSessionId={currentSessionId}
+            currentSessionId={sessionIDRef.current}
           />
         </Flex>}
       </Card>
@@ -780,7 +799,7 @@ const SegmentChat = (props: any) => {
               return (
                 <>
                   {message.type === 'message' ? (
-                    <Flex direction={"column"} w={"80%"} gap={4} key={index} ml={message.role === "user" ? "auto" : "0"}>
+                    <Flex direction={"column"} w={"50%"} gap={4} key={index} ml={message.role === "user" ? "auto" : "0"}>
                       <Flex gap={4} align={"center"}>
                         <Avatar src={message.role === "user" ? userData.img_url : Logo} size={"xs"} radius={"xl"} />
                         <Text fw={600} size={"xs"}>
@@ -927,6 +946,7 @@ const SelixControlCenter = ({
   setAIType,
   aiType,
   tasks,
+  counter,
   messages,
   setMessages,
   setPrompt,
@@ -938,6 +958,7 @@ const SelixControlCenter = ({
   aiType: string;
   tasks: any,
   threads: ThreadType[];
+  counter: Number,
   messages: MessageType[];
   setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
   currentSessionId: Number | null;
@@ -1051,6 +1072,7 @@ const SelixControlCenter = ({
       <ScrollArea bg={"#f7f8fa"} h={'100%'} scrollHideDelay={4000} p={"md"}>
         {aiType === "STRATEGY_CREATOR" ? (
           <SelinStrategy
+            counter={counter}
             messages={messages}
             threads={threads}
             currentSessionId={currentSessionId}
@@ -1059,7 +1081,7 @@ const SelixControlCenter = ({
           />
         ) : aiType === "PLANNER" ? (
           // passing in messages length to trigger renders
-          <PlannerComponent messagesLength={messages.length} threads={threads} tasks={tasks} currentSessionId={currentSessionId} />
+          <PlannerComponent counter={counter} messagesLength={messages.length} threads={threads} tasks={tasks} currentSessionId={currentSessionId} />
         )
           : aiType === "segment" ? (
             <Box maw="900px">
@@ -1260,7 +1282,7 @@ const SelixControlCenter = ({
 //   );
 // };
 
-const PlannerComponent = ({ threads, currentSessionId, messagesLength, tasks }: { threads: ThreadType[], currentSessionId: Number | null, messagesLength: number, tasks:any }) => {
+const PlannerComponent = ({ threads, counter, currentSessionId, messagesLength, tasks }: { threads: ThreadType[], currentSessionId: Number | null, messagesLength: number, tasks:any, counter: Number }) => {
   const [opened, { toggle }] = useDisclosure(true);
 
   // useEffect(() => {
@@ -1318,7 +1340,7 @@ const PlannerComponent = ({ threads, currentSessionId, messagesLength, tasks }: 
   );
 };
 
-const SelinStrategy = ({ messages, setPrompt, handleSubmit, threads, currentSessionId }: { messages: any[], setPrompt: React.Dispatch<React.SetStateAction<string>>, handleSubmit: () => void, threads: ThreadType[], currentSessionId: Number | null }) => {
+const SelinStrategy = ({ messages, counter, setPrompt, handleSubmit, threads, currentSessionId }: { messages: any[], setPrompt: React.Dispatch<React.SetStateAction<string>>, handleSubmit: () => void, threads: ThreadType[], currentSessionId: Number | null, counter: Number }) => {
 
 
   const memory = threads.find(thread => thread.id === currentSessionId)?.memory;

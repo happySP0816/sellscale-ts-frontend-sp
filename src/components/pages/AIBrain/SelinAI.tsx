@@ -40,7 +40,7 @@ import {
 } from "@tabler/icons";
 import { IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, Key, useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { proxyURL } from "@utils/general";
 
@@ -1278,7 +1278,7 @@ const PlannerComponent = ({ threads, currentSessionId, messagesLength, tasks }: 
         <ActionIcon onClick={toggle}>{opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}</ActionIcon> */}
       </Flex>
       <Collapse in={opened} p={"sm"}>
-        {tasks?.filter((task: { title: any; }) => task.title).map((task: TaskType, index) => {
+        {tasks?.filter((task: { title: any; }) => task.title).map((task: TaskType, index: number) => {
           const statusColors = {
             ACTIVE: "blue",
             COMPLETE: "green",

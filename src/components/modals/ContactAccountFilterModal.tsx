@@ -107,11 +107,12 @@ const ContactAccountFilterModal = function (
       {key: "title", title: "Title"},
       {key: "company", title: "Company"},
       {key: "icp_fit_score", title: "Score"},
-      {key: "icp_company_fit_score", title: "Company Score"}
+      {key: "icp_company_fit_score", title: "Company Score"},
+      {key: "linkedin_url", title: "Linkedin URL"}
     ]
   );
 
-  const notFilters = ["full_name", "title", "company", "icp_fit_score", "icp_company_fit_score"];
+  const notFilters = ["full_name", "title", "company", "icp_fit_score", "icp_company_fit_score", "linkedin_url"];
 
   const [companyTableHeaders, setCompanyTableHeaders] = useState<TableHeader[]>(
     [{key: "company", title: "Account Name"},
@@ -311,6 +312,7 @@ const ContactAccountFilterModal = function (
         {key: "title", title: "Title"},
         {key: "company", title: "Company"},
         {key: "icp_fit_score", title: "Score"},
+        {key: "linkedin_url", title: "Linkedin URL"},
       ];
 
       const newCompanyHeaders = [{key: "company", title: "Account Name"},
@@ -334,7 +336,7 @@ const ContactAccountFilterModal = function (
       const programmaticContactHeaders: TableHeader[] = [];
       const programmaticCompanyHeaders: TableHeader[] = [];
 
-      const set = new Set<string>();
+      const set = new Set<string>(headerSet);
 
       icp_scoring_ruleset_keys.forEach(key => {
         const keyType = key as keyof ICPScoringRulesetKeys;
@@ -381,6 +383,38 @@ const ContactAccountFilterModal = function (
         if (!set.has(ai_filter.key)) {
           set.add(ai_filter.key);
           companyAIHeaders.push({key: ai_filter.key, title: ai_filter.title});
+        }
+      })
+
+      const tempIndividualSet = new Set<string>([...newContactHeaders, ...programmaticContactHeaders, ...individualAIHeaders].map(item => item.key));
+      const tempCompanySet = new Set<string>([...newCompanyHeaders, ...programmaticCompanyHeaders, ...companyAIHeaders].map(item => item.key));
+      const tempCompanyAISet = new Set<string>(companyAIHeaders.map(item => item.key));
+      const tempIndividualAISet = new Set<string>(individualAIHeaders.map(item => item.key));
+
+      set.forEach(item => {
+        const keyType = item as keyof ICPScoringRulesetKeys;
+
+        if (item.includes("aicomp") && !tempCompanyAISet.has(item)) {
+          const title = item.replace("aicomp_", "").split('_').join(' ')
+
+          companyAIHeaders.push({key: keyType, title: title});
+        }
+        else if (item.includes("aiind") && !tempIndividualAISet.has(item)) {
+          const title = item.replace("aiind_", "").split('_').join(' ')
+
+          individualAIHeaders.push({key: keyType, title: title});
+        }
+        else if (item.includes("individual") && !tempIndividualSet.has(item)) {
+          const title = item.split("_").join(" ").replace("keywords", "").replace("start", "").replace("end", "");
+          const key = keyType.replace("_start", "").replace("_end", "");
+
+          programmaticContactHeaders.push({key: key, title: title.replace("individual", "").replace(" ", "")});
+        }
+        else if (item.includes("company") && !tempCompanySet.has(item)) {
+          const title = item.split("_").join(" ").replace("keywords", "").replace("start", "").replace("end", "");
+          const key = keyType.replace("_start", "").replace("_end", "");
+
+          programmaticCompanyHeaders.push({key: key, title: title.replace("company", "").replace(" ", "")});
         }
       })
 

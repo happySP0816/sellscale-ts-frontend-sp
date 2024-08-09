@@ -1,8 +1,41 @@
 import { Badge, Box, Button, Flex, Paper, Stack, Text } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function SelinStrategy(props: any) {
+import { MemoryType } from "../AIBrain/SelinAI";
+import { useStrategiesApi } from "./StrategyApi";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+
+export default function SelinStrategy({ memory }: { memory: MemoryType | undefined }) {
   const [edit, setEdit] = useState(false);
+
+  // const userToken = useRecoilValue(userTokenState);
+
+  //  const {
+  //   getStrategy,
+  // } = useStrategiesApi(userToken);
+
+  // const [strategy, setStrategy] = useState({});
+
+
+  // useEffect(() => {
+  //   console.log(strategy , 'is the strategy');
+  //   if (memory?.strategy_id) {
+  //     getStrategy(memory.strategy_id)
+  //     .then((res) => {
+  //       console.log(res);
+  //       setStrategy(res)
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  //   }
+    
+  // }
+  // , [memory]);
+
+
+  
 
   return (
     <Paper withBorder radius={"sm"}>
@@ -17,7 +50,7 @@ export default function SelinStrategy(props: any) {
             Strategy Name:
           </Text>
           <Text fw={500} size={"xs"}>
-            {"MachineCon NYC 24 - Booth Invitation"}
+            {'test'}
           </Text>
         </Flex>
         <Flex>
@@ -77,9 +110,9 @@ export default function SelinStrategy(props: any) {
           <Button variant="outline" color="gray" fullWidth>
             Edit
           </Button>
-          <Button fullWidth onClick={() => props.handleSpecialEvent()}>
+          {/* <Button fullWidth onClick={() => props.handleSpecialEvent()}>
             Execute Strategy
-          </Button>
+          </Button> */}
         </Flex>
       </Stack>
     </Paper>

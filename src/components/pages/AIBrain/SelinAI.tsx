@@ -19,8 +19,11 @@ import {
   ThemeIcon,
   Stack,
   List,
+  Select,
+  Title,
 } from "@mantine/core";
 import {
+  IconBulb,
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
@@ -37,20 +40,27 @@ import {
 } from "@tabler/icons";
 import { IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
+import { proxyURL } from "@utils/general";
 
 import Logo from "../../../assets/images/logo.png";
 import { API_URL } from "@constants/data";
 import { useDisclosure } from "@mantine/hooks";
-import SelinAIPlanner from "./SelinAIPlanner";
+// import SelinAIPlanner from "./SelinAIPlanner";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import SegmentV3 from "@pages/SegmentV3/SegmentV3";
 import CampaignLandingV2 from "@pages/CampaignV2/CampaignLandingV2";
 import WhatHappenedLastWeek from "./WhatHappenedLastWeek";
 import AIBrainStrategy from "@pages/Strategy/AIBrainStrategy";
-import SelinStrategy from "@pages/Strategy/Selinstrategy";
+// import SelinStrategy from "@pages/Strategy/Selinstrategy";
 import { title } from "process";
+import { socket } from '../../App'
+import { set } from "lodash";
+import { cu } from "@fullcalendar/core/internal-common";
+import { showNotification } from "@mantine/notifications";
+import { useStrategiesApi } from "@pages/Strategy/StrategyApi";
+import { openContextModal } from "@mantine/modals";
 
 interface CustomCursorWrapperProps {
   children: React.ReactNode;
@@ -67,24 +77,35 @@ const CustomCursorWrapper: React.FC<CustomCursorWrapperProps> = ({ children }) =
 interface TaskType {
   id: number;
   title: string;
-  status: string;
+  status: "ACTIVE" | "COMPLETE" | "CANCELLED" | "PENDING_OPERATOR";
   created_at: string;
   updated_at: string;
   selix_session_id: number;
 }
 
-interface MemoryType {
+export interface MemoryType {
   additional_context: string;
   counter: number;
   session_name: string;
   strategy_id: number;
-  tab: string;
+  tab: 'STRATEGY_CREATOR' | 'PLANNER' | 'BROWSER';
+  search?: {
+    query: string;
+    response: string;
+    citations: string[];
+    images: {
+      image_url: string;
+      origin_url: string;
+      height: number;
+      width: number;
+    }[];
+  }[];
 }
 
-interface ThreadType {
+export interface ThreadType {
   id: number;
   session_name: string;
-  status: string;
+  status: 'ACTIVE' | 'PENDING_OPERATOR' | 'COMPLETE';
   assistant_id: string;
   client_sdr_id: number;
   created_at: string;
@@ -115,14 +136,67 @@ interface MessageType {
 }
 
 export default function SelinAI() {
-  const [history, setHistory] = useState([
-    { title: "Early Stage SaaS founders in NYC", time: "1 hr ago" },
-    { title: "AI companies in bay area", time: "yesterday" },
-    { title: "Fintech SaaS Companies", time: "2 days ago" },
-  ]);
 
   const [threads, setThreads] = useState<ThreadType[]>([]);
   const [messages, setMessages] = useState<MessageType[]>([]);
+  const roomIDref = useRef<string>('');
+  const [currentSessionId, setCurrentSessionId] = useState<Number | null>(null);
+  const [loadingNewChat, setLoadingNewChat] = useState(false);
+  const [prompt, setPrompt] = useState("");
+
+
+  const handleSubmit = async () => {
+
+    if (prompt !== "") {
+      const newChatPrompt: MessageType = {
+        created_time: moment().format("MMMM D, h:mm a"),
+        message: prompt,
+        role: "user",
+        type: "message",
+      };
+      setMessages((chatContent: MessageType[]) => [...chatContent, newChatPrompt]);
+
+      setPrompt("");
+      // setLoading(true);
+
+      const loadingMessage: MessageType = {
+        created_time: moment().format("MMMM D, h:mm a"),
+        message: "loading",
+        role: "assistant",
+        type: "message",
+      };
+
+      setMessages((chatContent: MessageType[]) => [...chatContent, loadingMessage]);
+
+      try {
+        const response = await fetch(`${API_URL}/selix/create_message`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            session_id: currentSessionId,
+            message: prompt,
+          }),
+        });
+
+        const data = await response.json();
+        // if (data.status === "OK") {
+        //   // Fetch the updated messages
+        //   await getMessages(currentThreadID.current);
+        // }
+      } catch (error) {
+        console.error("Error creating message:", error);
+      } finally {
+        // setLoading(false);
+        setPrompt("");
+      }
+    }
+  }
+
+
+  // console.log('current session thread is', threads.find((thread) => thread.id === currentSessionId));
 
   const fetchChatHistory = async () => {
     try {
@@ -135,14 +209,23 @@ export default function SelinAI() {
       });
       const data = await response.json();
       setThreads(data);
-      console.log("data is", data);
+      // console.log("data is", data);
     }
     catch (error) {
       console.error("Error fetching chat history:", error);
     }
   }
-  const getMessages = async (thread_id: string) => {
+  const getMessages = async (thread_id: string, session_id: Number) => {
     try {
+      // create new room_id
+
+      setCurrentSessionId(session_id);
+      roomIDref.current = thread_id;
+
+      socket.emit("join-room", {
+        payload: { room_id: thread_id },
+      });
+
       const response = await fetch(`${API_URL}/selix/get_messages_in_thread`, {
         method: "POST",
         headers: {
@@ -155,7 +238,16 @@ export default function SelinAI() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setMessages(data);
+      const filteredMessages = data.filter((message: MessageType) => message.message !== 'Acknowledged.');
+      setMessages(filteredMessages);
+
+      const currentThread = threads.find((thread) => thread.thread_id === thread_id);
+      const memory: MemoryType | undefined = currentThread?.memory;
+      if (memory) {
+        setAIType(memory.tab || 'PLANNER');
+      } else {
+        setAIType('');
+      }
 
       console.log("Messages data:", messages);
       // You can add further processing of the messages here if needed
@@ -164,7 +256,208 @@ export default function SelinAI() {
     }
   }
 
+  const handleCreateNewSession = async () => {
+    setLoadingNewChat(true);
+    try {
+      const room_id = Array.from({ length: 16 }, () => Math.random().toString(36)[2]).join('');
+      roomIDref.current = room_id;
+      socket.emit("join-room", {
+        payload: { room_id: room_id },
+      });
+
+      const response = await fetch(`${API_URL}/selix/create_session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({ additional_context: '', room_id: room_id }) // Placeholder for the body
+      });
+      const data = await response.json();
+      console.log("data is", data);
+
+    } catch (error) {
+      console.error("Error creating new session:", error);
+    } finally {
+      setLoadingNewChat(false);
+    }
+
+  }
+
   const userToken = useRecoilValue(userTokenState);
+
+  const handleNewMessage = (data: { message?: string; action?: any, thread_id: string }) => {
+
+
+    if (data.thread_id === roomIDref.current) {
+
+      console.log('data is', data);
+      if (data.message) {
+        setMessages((chatContent: MessageType[]) => [
+          ...chatContent,
+          {
+            created_time: moment().format("MMMM D, h:mm a"),
+            message: data?.message || '',
+            role: "assistant",
+            type: "message",
+          },
+        ]);
+      } else if (data.action) {
+        setMessages((chatContent: MessageType[]) => [
+          ...chatContent,
+          {
+            created_time: moment().format("MMMM D, h:mm a"),
+            message: data.action.action_description,
+            role: "assistant",
+            type: "action",
+            action_title: data.action.action_title,
+            action_description: data.action.action_description,
+            action_function: data.action.action_function,
+            action_params: data.action.action_params,
+          },
+        ]);
+      }
+
+      //remove all messages that are message.message === 'loading'
+
+      setMessages((chatContent: MessageType[]) => chatContent.filter((message) => message.message !== 'loading'));
+
+
+    }
+
+  };
+
+  const handleChangeTab = (data: { tab: string }) => {
+
+    showNotification({
+      title: 'Tab changed',
+      message: `Tab changed to: ${data.tab}`,
+      color: 'blue',
+      icon: <IconEye />,
+    });
+
+
+    setAIType(data.tab);
+  };
+
+  const handleAddTaskToSession = async (data: { task: TaskType }) => {
+    console.log('adding task to session', data);
+
+    const task = data.task;
+
+    showNotification({
+      title: 'Task added',
+      message: `Task: ${task.title} has been added`,
+      color: 'green',
+      icon: <IconCircleCheck />,
+    });
+
+    console.log('task is', task);
+    // Ensure the task is added correctly to the current session
+    setThreads((prevThreads) =>
+      prevThreads.map((thread) => {
+        if (thread.id === currentSessionId) {
+          const updatedTasks = Array.isArray(thread.tasks) ? [...thread.tasks, task] : [task];
+          return { ...thread, tasks: updatedTasks };
+        }
+        return thread;
+      })
+    );
+  }
+
+  const handleNewSession = async (data: { session: ThreadType }) => {
+
+    // just update the local state
+    setThreads((prevThreads) => [...prevThreads, data.session]);
+    getMessages(data.session.thread_id, data.session.id);
+    setCurrentSessionId(data.session.id);
+    roomIDref.current = data.session.thread_id;
+
+    showNotification({
+      title: 'New Session',
+      message: `New session created: ${data.session.session_name}`,
+      color: 'blue',
+      icon: <IconEye />,
+    });
+
+  }
+
+  const handleUpdateTaskAndAction = async (data: { task: TaskType, action: MessageType }) => {
+
+    showNotification(
+      {
+        title: 'Task updated',
+        message: `Task: ${data.task.title} has been updated`,
+        color: 'green',
+        icon: <IconCircleCheck />,
+      }
+    )
+
+    // just update the local state
+    console.log('updating task and action', data);
+    setThreads((prevThreads) =>
+      prevThreads.map((thread) =>
+        thread.id === currentSessionId
+          ? { ...thread, tasks: Array.isArray(thread.tasks) ? [...thread.tasks, data.task] : [data.task] }
+          : thread
+      )
+    );
+    setMessages((chatContent: MessageType[]) =>
+      chatContent.map((message: MessageType) =>
+        message.id === data.action.id
+          ? {
+            ...data.action
+          }
+          : message
+      )
+    );
+
+  }
+
+  const handleUpdateSession = async (data: { session: ThreadType, thread_id: string }) => {
+
+    if (roomIDref.current === data.thread_id) {
+      showNotification({
+        title: 'Session updated',
+        message: `Session: ${data.session.session_name} has been updated`,
+        color: 'green',
+        icon: <IconCircleCheck />,
+      });
+
+      // just update the local state
+      setThreads((prevThreads) =>
+        prevThreads.map((thread) =>
+          thread.id === currentSessionId
+            ? { ...thread, ...data.session }
+            : thread
+        )
+      );
+    }
+
+
+  }
+
+
+
+  useEffect(() => {
+
+    socket.on("incoming-message", handleNewMessage);
+    socket.on("change-tab", handleChangeTab);
+    socket.on("add-task-to-session", handleAddTaskToSession);
+    socket.on("new-session", handleNewSession);
+    socket.on("update-action", handleUpdateTaskAndAction);
+    socket.on("update-session", handleUpdateSession);
+
+    return () => {
+      socket.off("incoming-message", handleNewMessage);
+      socket.off("change-tab", handleChangeTab);
+      socket.off("add-task-to-session", handleAddTaskToSession);
+      socket.off("new-session", handleNewSession);
+      socket.off("update-action", handleUpdateTaskAndAction);
+      socket.off("update-session", handleUpdateSession);
+
+    };
+  }, []);
 
   useEffect(() => {
     fetchChatHistory();
@@ -222,183 +515,11 @@ export default function SelinAI() {
     };
   }, []);
 
-  const [step, setStep] = useState(0);
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-  // const generateResponse = async () => {
-  //   console.log("-----------");
-  //   setStep((prevStep) => prevStep + 1);
-
-  //   console.log("step=======", step);
-  //   await delay(2000);
-  //   switch (step) {
-  //     case 0:
-  //       return {
-  //         status: "success",
-  //         data: {
-  //           message: [
-  //             `<Stack spacing={"sm"}>
-  //               <Text>That's great! Please go ahead and share the details of your campaign idea.</Text>
-  //               <List type="ordered">
-  //                 <List.Item>Any info on the audience?</List.Item>
-  //                 <List.Item>What's the purpose?</List.Item>
-  //                 <List.Item>What channel? (Email, Linkedin)</List.Item>
-  //                 <List.Item>Just go forward</List.Item>
-  //               </List>
-  //               <Text>that should be enough information to get us started.</Text>
-  //             </Stack>`,
-  //           ],
-  //           isAction: false,
-  //         },
-  //       };
-  //     case 1:
-  //       return {
-  //         status: "success",
-  //         data: {
-  //           message: [
-  //             "Perfect! You're attending MachineCon 2024 in NYC on July 26th, a prime event for connecting with top analytics leaders and potential clients.",
-  //             "It seems you'd like to invite them to your booth, Which booth number are you at? Anything else to mention?",
-  //           ],
-  //           isAction: false,
-  //           // actionData: { type: "", data: {} },
-  //         },
-  //       };
-  //     case 2:
-  //       return {
-  //         status: "success",
-  //         data: {
-  //           isAction: true,
-  //           actionData: {
-  //             title: "Creating Strategy",
-  //             type: "strategy",
-  //             content:
-  //               "Targeting all attendees of MachineCon. The goal of the campaign is to invite them to visit Booth 142 for a chat over a drink. The primary channel for outreach will be via email.",
-  //             data: {},
-  //           },
-  //         },
-  //       };
-  //     case 3:
-  //       return {
-  //         status: "success",
-  //         data: {
-  //           message: [
-  //             "I went ahead and mode a dreaft of your strategy. You can review & edit it on the right side of your screen. Please let me know when we can proceed.",
-  //           ],
-  //           isAction: false,
-  //           // actionData: { type: "", data: {} },
-  //         },
-  //       };
-  //     case 4:
-  //       return {
-  //         status: "success",
-  //         data: {
-  //           isAction: true,
-  //           actionData: {
-  //             title: "Creating Task List",
-  //             type: "task",
-  //             content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam nec turpis at eros malesuada euismod at non ante.",
-  //             data: {},
-  //           },
-  //         },
-  //       };
-  //     case 5:
-  //       return {
-  //         status: "success",
-  //         data: {
-  //           message: ["Fantastic! Here is how we will accomplish this.", "I'll get to work on this right away! You can check back in a few hours."],
-  //           isAction: false,
-  //           // actionData: { type: "", data: {} },
-  //         },
-  //       };
-  //     case 6:
-  //       return {
-  //         status: "success",
-  //         data: {
-  //           message: ["Selix is executing. You may now navigate away."],
-  //           isAction: false,
-  //           // actionData: { type: "", data: {} },
-  //         },
-  //       };
-  //   }
-  // };
-
-  // const handleSpecialEvent = async () => {
-  //   const response = await generateResponse();
-  //   if (response?.status != "success") return;
-  //   if (!response.data.isAction) {
-  //     let loadingMessage = {
-  //       sender: "chatbot",
-  //       query: [""],
-  //       id: Date.now(),
-  //       created_at: moment().format("MMMM D, h:mm a"),
-  //     };
-
-
-
-  //     if (response.data.message && Array.isArray(response.data.message)) {
-  //       for (let i = 0; i < response.data.message.length; i++) {
-  //         const message = response.data.message[i];
-  //         if (typeof message === "string") {
-  //           for (let j = 0; j < message.length; j++) {
-  //             await delay(20); // Adjust delay for desired typing speed
-  //             // setChatContent((chatContent: any) => {
-  //             //   const updatedContent = [...chatContent];
-  //             //   const lastMessage = updatedContent[updatedContent.length - 1];
-  //             //   if (i === lastMessage.query.length - 1) {
-  //             //     lastMessage.query[i] += message[j];
-  //             //   } else {
-  //             //     lastMessage.query.push(message[j]);
-  //             //   }
-  //             //   return updatedContent;
-  //             // });
-  //           }
-  //           if (i < response.data.message.length - 1) {
-  //             await delay(500); // Delay between messages
-  //             // setChatContent((chatContent: any) => {
-  //             //   const updatedContent = [...chatContent];
-  //             //   updatedContent[updatedContent.length - 1].query.push("");
-  //             //   return updatedContent;
-  //             // });
-  //           }
-  //         }
-  //       }
-  //     }
-  //   } else {
-  //     let loadingMessage = {
-  //       sender: "alert",
-  //       query: "",
-  //       title: response.data?.actionData?.title,
-  //       id: Date.now(),
-  //       created_at: moment().format("MMMM D, h:mm a"),
-  //       type: response.data?.actionData?.type,
-  //     };
-  //     // setChatContent((chatContent: any) => [...chatContent, loadingMessage]);
-  //     const message = response.data?.actionData?.content;
-  //     if (message) {
-  //       for (let i = 0; i < message.length; i++) {
-  //         await delay(20); // Adjust delay for desired typing speed
-  //         // setChatContent((chatContent: any) => {
-  //         //   const updatedContent = [...chatContent];
-  //         //   const lastMessage = updatedContent[updatedContent.length - 1];
-  //         //   lastMessage.query += message[i];
-  //         //   return updatedContent;
-  //         // });
-  //       }
-  //       await delay(500);
-  //       if (response.data?.actionData?.type === "strategy") {
-  //         setAIType("strategy");
-  //       } else if (response.data?.actionData?.type === "task") {
-  //         setAIType("task");
-  //       }
-  //     }
-  //   }
-  // };
-
   return (
 
     <CustomCursorWrapper>
 
-      <Card withBorder p="lg" maw={"85%"} ml="auto" mr="auto" mt="lg">
+      <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
         <div style={{ position: 'relative', width: '100%', zIndex: 1 }} onMouseEnter={() => setOpened(true)} onMouseLeave={() => setOpened(false)}>
           <div style={{ position: 'absolute', width: '100%', height: '100px', top: '-50px', zIndex: 2 }}></div>
           <Paper radius={"sm"}>
@@ -410,71 +531,98 @@ export default function SelinAI() {
             <Collapse in={openedChat}>
               <Flex mt={"md"} gap={"sm"}>
                 <Paper
+                  onClick={!loadingNewChat ? () => handleCreateNewSession() : undefined}
                   radius={"sm"}
                   p={"sm"}
                   bg={"#fcecfe"}
                   miw={120}
                   mr="sm"
                   className="flex flex-col items-center justify-center"
-                  onClick={() => console.log("New Chat----")}
                 >
-                  <IconPlus color="#df77f5" />
-                  {/* <Text fw={700} size={"md"} mt={"xs"} color="#df77f5">
-                  New Chat
-                </Text> */}
+                  {loadingNewChat ? (
+                    <Loader color="#df77f5" size="sm" />
+                  ) : (
+                    <IconPlus color="#df77f5" />
+                  )}
                 </Paper>
                 <div ref={containerRef} style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
-                  {threads.map((thread: ThreadType, index) => {
-                    return (
-                      <Paper
-                        key={index}
-                        withBorder
-                        mr="sm"
-                        radius={"sm"}
-                        p={"sm"}
-                        style={{ display: "inline-block", minWidth: "400px" }}
-                        className="transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg"
-                        onClick={() => { getMessages(thread.thread_id); toggle() }}
-                      >
-                                            <Flex align={"center"} gap={"sm"}>
-                      {thread.status === "ACTIVE" ? (
-                        <ThemeIcon color="green" radius={"xl"} size={"xs"} p={0} variant="light">
-                          <IconPoint fill="green" color="white" size={"4rem"} />
-                        </ThemeIcon>
-                      ) : thread.status === "Completed" ? (
-                        <IconCircleCheck size={"1rem"} fill="green" color="white" />
-                      ) : (
-                        <></>
-                      )}{" "}
-                      <Text color="green" fw={600}>
-                        {thread.status}
-                      </Text>
-                    </Flex>
-                        <Text fw={600}>{thread.session_name || "Untitled Session"}</Text>
-                        <Text color="gray">
-                          Completed on: {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}
-                        </Text>
-                      </Paper>
-                    );
-                  })}
+                  {threads
+                    .sort((a, b) => b.id - a.id)
+                    .map((thread: ThreadType, index) => {
+                      return (
+                        <Paper
+                          key={index}
+                          withBorder
+                          mr="sm"
+                          radius={"sm"}
+                          p={"sm"}
+                          style={{
+                            display: "inline-block",
+                            minWidth: "400px",
+                            backgroundColor: currentSessionId === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
+                            borderColor: currentSessionId === thread.id ? "#00796b" : "#ced4da" // Change border color if current thread
+                          }}
+                          className={`transition duration-300 ease-in-out transform ${currentSessionId === thread.id ? "scale-105 shadow-2xl" : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
+                            }`}
+                          onClick={() => { getMessages(thread.thread_id, thread.id); toggle() }}
+                        >
+                          <Flex align={"center"} gap={"sm"}>
+                            {thread.status === "ACTIVE" ? (
+                              <ThemeIcon color="green" radius={"xl"} size={"xs"} p={0} variant="light">
+                                <IconPoint fill="green" color="white" size={"4rem"} />
+                              </ThemeIcon>
+                            ) : thread.status === "COMPLETE" ? (
+                              <IconCircleCheck size={"1rem"} fill="green" color="white" />
+                            ) : thread.status === "PENDING_OPERATOR" ? (
+                              <ThemeIcon color="orange" radius={"xl"} size={"xs"} p={0} variant="light">
+                                <IconPoint fill="orange" color="white" size={"4rem"} />
+                              </ThemeIcon>
+                            ) : (
+                              <></>
+                            )}{" "}
+                            <Text color={thread.status === "PENDING_OPERATOR" ? "orange" : "green"} fw={600}>
+                              {thread.status === "PENDING_OPERATOR" ? "IN PROGRESS" : thread.status}
+                            </Text>
+                          </Flex>
+                          <Text fw={600}>{thread.session_name || "Untitled Session"}</Text>
+                          <Text color="gray">
+                            Completed on: {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}
+                          </Text>
+                        </Paper>
+                      );
+                    })}
                 </div>
               </Flex>
             </Collapse>
           </Paper>
         </div>
-        <Flex mt={"md"} gap={"xl"}>
+        {currentSessionId && <Flex mt={"md"} gap={"xl"}>
           <SegmentChat
+            handleSubmit={handleSubmit}
+            prompt={prompt}
+            setPrompt={setPrompt}
             setSegment={setSegment}
             messages={messages}
+            setMessages={setMessages}
             segment={segment}
             setAIType={setAIType}
             aiType={aiType}
-            // generateResponse={generateResponse}
+            currentSessionId={currentSessionId}
+          // generateResponse={generateResponse}
           // chatContent={chatContent}
           // setChatContent={setChatContent}
           />
-          <SegmentAIGeneration setSegment={setSegment} segment={segment} setAIType={setAIType} aiType={aiType} />
-        </Flex>
+          <SelixControlCenter
+            setPrompt={setPrompt}
+            handleSubmit={handleSubmit}
+            setAIType={setAIType}
+            aiType={aiType}
+            threads={threads}
+            messages={messages}
+            setMessages={setMessages}
+            currentSessionId={currentSessionId}
+          />
+        </Flex>}
       </Card>
 
     </CustomCursorWrapper>
@@ -482,102 +630,26 @@ export default function SelinAI() {
 }
 
 const SegmentChat = (props: any) => {
+  const handleSubmit = props.handleSubmit;
+  const prompt = props.prompt;
+  const setPrompt = props.setPrompt;
+  const currentSessionId: Number | null = props.currentSessionId;
   const messages: MessageType[] = props.messages;
-  const setMessages = props.setMessages;
+  const setMessages: React.Dispatch<React.SetStateAction<MessageType[]>> = props.setMessages;
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState(false);
 
-  const [prompt, setPrompt] = useState("");
   const { chatContent, setChatContent } = props;
 
   const viewport = useRef<any>(null);
 
-  const handleSubmit = async () => {}
+  useEffect(() => {
+    if (viewport.current) {
+      viewport.current.scrollTo({ top: viewport.current.scrollHeight, behavior: 'smooth' });
+    }
+  }, [{ ...messages }]);
 
-  // const handleSubmit = async () => {
-  //   if (prompt !== "") {
-  //     const newChatPrompt = {
-  //       sender: "user",
-  //       query: [prompt],
-  //       created_at: moment().format("MMMM D, h:mm a"),
-  //     };
-  //     setMessages((chatContent: any) => [...chatContent, newChatPrompt]);
-  //     setPrompt("");
-  //     setLoading(true);
-  //     const response = await props.generateResponse();
-  //     setLoading(false);
-  //     if (response?.status != "success") return;
-  //     if (!response.data.isAction) {
-  //       let loadingMessage = {
-  //         sender: "chatbot",
-  //         query: [""],
-  //         id: Date.now(),
-  //         created_at: moment().format("MMMM D, h:mm a"),
-  //       };
-  //       // setMessages((chatContent: any) => [...chatContent, loadingMessage]);
-
-  //       // if (response.data.message && Array.isArray(response.data.message)) {
-  //       //   for (let i = 0; i < response.data.message.length; i++) {
-  //       //     const message = response.data.message[i];
-  //       //     if (typeof message === "string") {
-  //       //       for (let j = 0; j < message.length; j++) {
-  //       //         await delay(20); // Adjust delay for desired typing speed
-  //       //         setChatContent((chatContent: any) => {
-  //       //           const updatedContent = [...chatContent];
-  //       //           const lastMessage = updatedContent[updatedContent.length - 1];
-  //       //           if (i === lastMessage.query.length - 1) {
-  //       //             lastMessage.query[i] += message[j];
-  //       //           } else {
-  //       //             lastMessage.query.push(message[j]);
-  //       //           }
-  //       //           return updatedContent;
-  //       //         });
-  //       //       }
-  //       //       if (i < response.data.message.length - 1) {
-  //       //         await delay(500); // Delay between messages
-  //       //         setChatContent((chatContent: any) => {
-  //       //           const updatedContent = [...chatContent];
-  //       //           updatedContent[updatedContent.length - 1].query.push("");
-  //       //           return updatedContent;
-  //       //         });
-  //       //       }
-  //       //     }
-  //       //   }
-  //       // }
-  //     } else {
-  //       // let loadingMessage = {
-  //       //   sender: "alert",
-  //       //   query: "",
-  //       //   title: response.data?.actionData?.title,
-  //       //   id: Date.now(),
-  //       //   created_at: moment().format("MMMM D, h:mm a"),
-  //       //   type: response.data?.actionData?.type,
-  //       // };
-  //       // setChatContent((chatContent: any) => [...chatContent, loadingMessage]);
-  //       // const message = response.data?.actionData?.content;
-  //       // if (message) {
-  //       //   for (let i = 0; i < message.length; i++) {
-  //       //     await delay(20); // Adjust delay for desired typing speed
-  //       //     setChatContent((chatContent: any) => {
-  //       //       const updatedContent = [...chatContent];
-  //       //       const lastMessage = updatedContent[updatedContent.length - 1];
-  //       //       lastMessage.query += message[i];
-  //       //       return updatedContent;
-  //       //     });
-  //       //   }
-  //       //   await delay(500);
-  //       //   if (response.data?.actionData?.type === "strategy") {
-  //       //     props.setAIType("strategy");
-  //       //   } else if (response.data?.actionData?.type === "task") {
-  //       //     props.setAIType("task");
-  //       //   }
-  //       // }
-  //     }
-  //   } else {
-  //     console.log("--------");
-  //   }
-  // };
 
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter") {
@@ -585,56 +657,56 @@ const SegmentChat = (props: any) => {
     }
   };
 
-  const handleResponse = async () => {
-    setLoading(true);
+  // const handleResponse = async () => {
+  //   setLoading(true);
 
-    // Add a placeholder loading message
-    const loadingMessage = {
-      sender: "chatbot",
-      query: "loading",
-      id: Date.now(),
-      created_at: moment().format("MMMM D, h:mm a"),
-    };
+  //   // Add a placeholder loading message
+  //   const loadingMessage = {
+  //     sender: "chatbot",
+  //     query: "loading",
+  //     id: Date.now(),
+  //     created_at: moment().format("MMMM D, h:mm a"),
+  //   };
 
-    try {
-      const response = await fetch(`${API_URL}/contacts/chat-icp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({ prompt, chatContent }),
-      });
+  //   try {
+  //     const response = await fetch(`${API_URL}/contacts/chat-icp`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${userToken}`,
+  //       },
+  //       body: JSON.stringify({ prompt, chatContent }),
+  //     });
 
-      const data = await response.json();
-      const res = data?.response;
-      const chatbotMessage = {
-        sender: "chatbot",
-        query: res,
-        id: loadingMessage.id, // Use the same id to replace the loading message
-        created_at: moment().format("MMMM D, h:mm a"),
-      };
-      // Replace the loading message with the actual response
-      viewport.current?.scrollTo({ top: viewport.current.scrollHeight });
-      setLoading(false);
+  //     const data = await response.json();
+  //     const res = data?.response;
+  //     const chatbotMessage = {
+  //       sender: "chatbot",
+  //       query: res,
+  //       id: loadingMessage.id, // Use the same id to replace the loading message
+  //       created_at: moment().format("MMMM D, h:mm a"),
+  //     };
+  //     // Replace the loading message with the actual response
+  //     viewport.current?.scrollTo({ top: viewport.current.scrollHeight });
+  //     setLoading(false);
 
-      console.log("data is", data.data);
+  //     console.log("data is", data.data);
 
-      props.setSegment((prevSegments: any) => [
-        ...prevSegments,
-        {
-          makers: data["makers"],
-          industry: data["industry"],
-          pain_point: data["pain_point"],
-          id: data?.data?.saved_query_id,
-          total_entries: data?.data?.pagination?.total_entries,
-        },
-      ]);
-    } catch (error) {
-      console.error("Error fetching prediction:", error);
-      setLoading(false);
-    }
-  };
+  //     props.setSegment((prevSegments: any) => [
+  //       ...prevSegments,
+  //       {
+  //         makers: data["makers"],
+  //         industry: data["industry"],
+  //         pain_point: data["pain_point"],
+  //         id: data?.data?.saved_query_id,
+  //         total_entries: data?.data?.pagination?.total_entries,
+  //       },
+  //     ]);
+  //   } catch (error) {
+  //     console.error("Error fetching prediction:", error);
+  //     setLoading(false);
+  //   }
+  // };
 
   const [chat2, setChat2] = useState([
     {
@@ -685,13 +757,13 @@ const SegmentChat = (props: any) => {
   }, [shouldSubmit]);
 
   return (
-    <Paper withBorder shadow="sm" radius={"md"} w={"30%"}>
+    <Paper withBorder shadow="sm" radius={"md"} w={"35%"} h={'100%'}>
       {/* <Flex p={"md"} align={"center"} gap={5}>
         <IconSparkles size={"1rem"} color="#be4bdb" />
         <Text fw={600}>Prompt</Text>
       </Flex> */}
       <Divider bg="gray" />
-      <ScrollArea h={600} viewportRef={viewport} scrollHideDelay={4000}>
+      <ScrollArea h={'70vh'} viewportRef={viewport} scrollHideDelay={4000}>
         {messages.length > 0 ? (
           <Flex direction={"column"} gap={"sm"} p={"md"} h={"100%"} className=" overflow-auto">
             {messages.map((message: MessageType, index: number) => {
@@ -712,12 +784,14 @@ const SegmentChat = (props: any) => {
                           ) : message.message === "loading" ? (
                             <Flex align="center" gap="xs">
                               <Loader color="black" variant="dots" />
-                              <Text size={"sm"} fw={500} color="gray">
-                                Generating segment...
-                              </Text>
                             </Flex>
                           ) : (
-                            message.message
+                            <Text>{message.message.split('\n').map((line, index) => (
+                              <Fragment key={index}>
+                                {line}
+                                <br />
+                              </Fragment>
+                            ))}</Text>
                           )}
                         </Text>
                       </Flex>
@@ -753,14 +827,18 @@ const SegmentChat = (props: any) => {
                         {message.created_time}
                       </Text>
                     </Flex>
-                  ) 
-                  
-                  : (
-                    <div className=" border border-[#be4bdb] border-solid m-auto rounded-md">
-                      <div className="w-full bg-[#be4bdb] py-2 text-center text-white text-semibold">{message.type}</div>
-                      <div className="p-3">{message.action_description}</div>
-                    </div>
-                  )}
+                  )
+
+                    : (
+                      <div className=" border border-[#be4bdb] border-solid m-auto rounded-md">
+                        <div className="w-full bg-[#be4bdb] py-2 text-center text-white text-semibold">✨ Executing: {message.action_title}</div>
+                        <div className="p-3 bg-purple-500 text-black shadow-md italic" style={{ background: 'white' }}>
+                          <Text size="md" fw={600} className="text-center">
+                            {message.action_description}
+                          </Text>
+                        </div>
+                      </div>
+                    )}
                 </>
               );
             })}
@@ -803,17 +881,6 @@ const SegmentChat = (props: any) => {
       </ScrollArea>
       <Paper p={"sm"} withBorder radius={"md"} className="bg-[#f7f8fa]" my={"lg"} mx={"md"}>
 
-
-
-
-
-
-
-
-
-        
-        
-        
         <TextInput
           value={prompt}
           placeholder="Chat with AI..."
@@ -846,120 +913,58 @@ const SegmentChat = (props: any) => {
   );
 };
 
-const SegmentAIGeneration = (props: any) => {
-  const [active, setActive] = useState(1);
-  const [assets, setAssets] = useState(["Important-sales-asset.pdf", "extra-asset-1.pdf"]);
-  const [generatingFilters, setGeneratingFilters] = useState(false);
-  const [loadingIndex, setLoadingIndex] = useState<number>(0);
-  const userToken = useRecoilValue(userTokenState);
+const SelixControlCenter = ({
+  setAIType,
+  aiType,
+  messages,
+  setMessages,
+  setPrompt,
+  handleSubmit,
+  threads,
+  currentSessionId
+}: {
+  setAIType: React.Dispatch<React.SetStateAction<string>>;
+  aiType: string;
+  threads: ThreadType[];
+  messages: MessageType[];
+  setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
+  currentSessionId: Number | null;
+  setPrompt: React.Dispatch<React.SetStateAction<string>>;
+  handleSubmit: () => void;
+}) => {
 
-  const updateSegment = (index: number, field: any, value: any) => {
-    fetch(`${API_URL}/apollo/update_segment`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userToken}`,
-      },
-      body: JSON.stringify({
-        id: props.segment[index].id,
-        field: field,
-        value: value,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status !== "success") {
-          console.error("Failed to update segment:", data);
-        }
-      })
-      .catch((error) => {
-        console.error("Error updating segment:", error);
-      });
 
-    props.setSegment((prevSegments: any) => {
-      const updatedSegments = [...prevSegments];
-      updatedSegments[index] = {
-        ...updatedSegments[index],
-        [field]: value,
-      };
-      return updatedSegments;
-    });
-  };
+  const [selectedCitation, setSelectedCitation] = useState<string | null>(null);
+  const currentThreadMemory = threads.find(thread => thread.id === currentSessionId)?.memory;
+  const [availableCitations, setAvailableCitations] = useState<string[]>([]);
 
-  const [prefilters, setPrefilters] = useState<any>([]);
+  useEffect(() => {
+    if (currentThreadMemory?.search) {
+      const citations = currentThreadMemory.search.flatMap((searchItem) =>
+        searchItem.citations
+      );
+      if (JSON.stringify(citations) !== JSON.stringify(availableCitations)) {
+        setAvailableCitations(citations);
+        setSelectedCitation(citations[0]);
+      }
+    }
+  }, [currentThreadMemory, availableCitations]);
 
-  const updateExistingSegment = (index: number, field: any, value: any) => {
-    fetch(`${API_URL}/apollo/update_segment`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userToken}`,
-      },
-      body: JSON.stringify({
-        id: prefilters[index].id,
-        field: field,
-        value: value,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status !== "success") {
-          console.error("Failed to update segment:", data);
-        }
-      })
-      .catch((error) => {
-        console.error("Error updating segment:", error);
-      });
 
-    setPrefilters((prevPrefilters: any) => {
-      const updatedPrefilters = [...prevPrefilters];
-      updatedPrefilters[index] = {
-        ...updatedPrefilters[index],
-        [field]: value,
-      };
-      return updatedPrefilters;
-    });
-  };
-
-  // const fetchSavedQueries = async () => {
-  //   try {
-  //     const response = await fetch(`${API_URL}/apollo/get_all_saved_queries`, {
-  //       method: "GET",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${userToken}`,
-  //       },
-  //     });
-  //     const data = await response.json();
-  //     if (data.status === "success") {
-  //       const formattedPrefilters = data.data.map((query: any) => ({
-  //         ...query,
-  //       }));
-  //       setPrefilters(formattedPrefilters);
-  //     } else {
-  //       console.error("Failed to fetch saved queries:", data);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching saved queries:", error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchSavedQueries();
-  // }, [userToken]);
 
   return (
     <Paper withBorder shadow="sm" w={"65%"} radius={"md"}>
       <Flex p={"md"} align={"center"} gap={5} bg={"grape"} className=" rounded-t-md">
         {/* <IconSparkles size={"1rem"} color="white" /> */}
         <Text fw={600} color="white">
-          Selix Computer
+          Selix AI Workspace
         </Text>
       </Flex>
       <Divider bg="gray" />
       <Paper withBorder radius={0} p={"sm"}>
         <SegmentedControl
-          onChange={(value) => props.setAIType(value)}
+          value={aiType}
+          onChange={(value) => setAIType(value)}
           w={"100%"}
           styles={{
             root: {
@@ -970,91 +975,115 @@ const SegmentAIGeneration = (props: any) => {
               "&:not(:last-of-type)": {
                 borderWidth: "0px",
               },
-              "&:hover": {
-                cursor: "default",
-              },
             },
           }}
           data={[
             {
-              value: "task",
+              value: "PLANNER",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {props.aiType === "task" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  {aiType === "PLANNER" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
                   <span>Tasks</span>
                 </Center>
               ),
             },
             {
-              value: "strategy",
+              value: "STRATEGY_CREATOR",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {props.aiType === "strategy" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
-                  <span>Strategies</span>
+                  {aiType === "STRATEGY_CREATOR" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  <span>Blueprint</span>
                 </Center>
               ),
             },
-            // {
-            //   value: "segment",
-            //   label: (
-            //     <Center style={{ gap: 10 }}>
-            //       {props.aiType === "segment" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
-            //       <span>Segments</span>
-            //     </Center>
-            //   ),
-            // },
             {
-              value: "campaign",
+              value: "NOT_AVAILABLE2",
               label: (
-                <Center style={{ gap: 10 }}>
-                  {props.aiType === "campaign" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                <Center style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}>
+                  {aiType === "segment" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  <span>Segments</span>
+                </Center>
+              )
+
+            },
+            {
+              value: "NOT_AVAILABLE",
+              label: (
+                <Center style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}>
+                  {aiType === "campaign" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
                   <span>Campaigns</span>
                 </Center>
               ),
             },
             {
-              value: "analytics",
+              value: "BROWSER",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {props.aiType === "analytics" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  {aiType === "BROWSER" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  <span>Browser</span>
+                </Center>
+              ),
+            },
+            {
+              value: "NOT_AVAILABLE",
+              label: (
+                <Center style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}>
+                  {aiType === "analytics" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
                   <span>Analytics</span>
                 </Center>
               ),
             },
-            // {
-            //   value: "planner",
-            //   label: (
-            //     <Center style={{ gap: 10 }}>
-            //       {aiType === "planner" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
-            //       <span>Planner/Logs</span>
-            //     </Center>
-            //   ),
-            // },
           ]}
         />
       </Paper>
-      <ScrollArea bg={"#f7f8fa"} h={600} scrollHideDelay={4000} p={"md"}>
-        {props.aiType === "strategy" ? (
-          <SelinStrategy handleSpecialEvent={props.handleSpecialEvent} />
-        ) : props.aiType === "segment" ? (
-          <Box maw="900px">
-            <SegmentV3 />
-          </Box>
-        ) : props.aiType === "campaign" ? (
-          <Box maw="100%">
-            <CampaignLandingV2 />
-          </Box>
-        ) : props.aiType === "analytics" ? (
-          <Box maw="900px">
-            <WhatHappenedLastWeek />
-          </Box>
-        ) : props.aiType === "planner" ? (
-          <SelinAIPlanner />
-        ) : (
-          <Center style={{ height: '100%' }}>
-            <Text style={{ fontFamily: 'Arial, sans-serif', fontSize: '16px' }}>No Tasks Created. Please create one via the chat.</Text>
-          </Center>
-        )}
+      <ScrollArea bg={"#f7f8fa"} h={'100%'} scrollHideDelay={4000} p={"md"}>
+        {aiType === "STRATEGY_CREATOR" ? (
+          <SelinStrategy
+            threads={threads}
+            currentSessionId={currentSessionId}
+            setPrompt={setPrompt}
+            handleSubmit={handleSubmit}
+          />
+        ) : aiType === "PLANNER" ? (
+          <PlannerComponent threads={threads} currentSessionId={currentSessionId} />
+        )
+          : aiType === "segment" ? (
+            <Box maw="900px">
+              <SegmentV3 />
+            </Box>
+          ) : aiType === "campaign" ? (
+            <Box maw="100%">
+              <CampaignLandingV2 />
+            </Box>
+          ) : aiType === "analytics" ? (
+            <Box maw="900px">
+              <WhatHappenedLastWeek />
+            </Box>
+          ) : aiType === "BROWSER" ? (
+            <Box maw="100%">
+
+              <Select
+                value={selectedCitation}
+                data={availableCitations}
+                placeholder="Select a citation"
+                onChange={(value) => setSelectedCitation(value)}
+              />
+
+              <iframe src={selectedCitation || undefined} style={{ width: '100%', height: 'calc(100% - 50px)', border: 'none', position: 'absolute', top: '50px', left: 0 }} />
+            </Box>
+          ) : aiType === "NOT_AVAILABLE" ? (
+            <Center style={{ height: '100%' }}>
+              <Text style={{ fontFamily: 'Arial, sans-serif', fontSize: '16px' }}>Not Currently Available.</Text>
+            </Center>
+          ) : aiType === "NOT_AVAILABLE2" ? (
+            <Center style={{ height: '100%' }}>
+              <Text style={{ fontFamily: 'Arial, sans-serif', fontSize: '16px' }}>Not Currently Available.</Text>
+            </Center>
+          ) : (
+            <Center style={{ height: '100%' }}>
+              <Text style={{ fontFamily: 'Arial, sans-serif', fontSize: '16px' }}>No Tasks Created. Please create one via the chat.</Text>
+            </Center>
+          )}
       </ScrollArea>
       {/* <Paper withBorder bg={"#fffcf5"} radius={"sm"} p={"sm"} style={{ borderColor: "#fab005" }} m="xs">
         <Flex align={"center"} justify={"space-between"}>
@@ -1072,147 +1101,397 @@ const SegmentAIGeneration = (props: any) => {
   );
 };
 
-const TimelineComponent = () => {
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+// const TimelineComponent = () => {
+//   const [scrollPosition, setScrollPosition] = useState(0);
+//   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    setScrollPosition(event.currentTarget.scrollLeft);
-  };
+//   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+//     setScrollPosition(event.currentTarget.scrollLeft);
+//   };
 
-  const generateTimelineData = () => {
-    const data = [];
-    for (let hour = 0; hour <= 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 10) {
-        data.push({
-          time: `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`,
-          isMainGraduation: minute === 0,
-          label: minute === 0 ? `${hour.toString().padStart(2, "0")}:00` : "",
-        });
-      }
-    }
-    return data;
-  };
+//   const generateTimelineData = () => {
+//     const data = [];
+//     for (let hour = 0; hour <= 24; hour++) {
+//       for (let minute = 0; minute < 60; minute += 10) {
+//         data.push({
+//           time: `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`,
+//           isMainGraduation: minute === 0,
+//           label: minute === 0 ? `${hour.toString().padStart(2, "0")}:00` : "",
+//         });
+//       }
+//     }
+//     return data;
+//   };
 
-  const timelineData = generateTimelineData();
+//   const timelineData = generateTimelineData();
 
-  let isDown = false;
-  let startX: number;
-  let scrollLeft: number;
+//   let isDown = false;
+//   let startX: number;
+//   let scrollLeft: number;
 
+//   useEffect(() => {
+//     const handleMouseDown = (e: MouseEvent) => {
+//       isDown = true;
+//       startX = e.pageX - (containerRef.current?.offsetLeft || 0);
+//       scrollLeft = containerRef.current?.scrollLeft || 0;
+//     };
+
+//     const handleMouseLeave = () => {
+//       isDown = false;
+//     };
+
+//     const handleMouseUp = () => {
+//       isDown = false;
+//     };
+
+//     const handleMouseMove = (e: MouseEvent) => {
+//       if (!isDown) return;
+//       e.preventDefault();
+//       const x = e.pageX - (containerRef.current?.offsetLeft || 0);
+//       const walk = (x - startX) * 3;
+//       if (containerRef.current) {
+//         containerRef.current.scrollLeft = scrollLeft - walk;
+//       }
+//     };
+
+//     const container = containerRef.current;
+
+//     container?.addEventListener("mousedown", handleMouseDown);
+//     container?.addEventListener("mouseleave", handleMouseLeave);
+//     container?.addEventListener("mouseup", handleMouseUp);
+//     container?.addEventListener("mousemove", handleMouseMove);
+
+//     return () => {
+//       container?.removeEventListener("mousedown", handleMouseDown);
+//       container?.removeEventListener("mouseleave", handleMouseLeave);
+//       container?.removeEventListener("mouseup", handleMouseUp);
+//       container?.removeEventListener("mousemove", handleMouseMove);
+//     };
+//   }, []);
+
+//   return (
+//     <Paper withBorder p="md" mt="md">
+//       <Flex align={"center"} justify={"space-between"}>
+//         <Flex gap={"sm"}>
+//           <ActionIcon size={"sm"} variant="outline" color="gray" radius={"sm"}>
+//             <IconChevronLeft />
+//           </ActionIcon>
+//           <ActionIcon size={"sm"} variant="outline" color="gray" radius={"sm"}>
+//             <IconChevronRight />
+//           </ActionIcon>
+//         </Flex>
+//         <Badge variant="outline">Go Live</Badge>
+//       </Flex>
+//       <div className="relative flex justify-center mt-4">
+//         <div className="absolute top-[-15px]">
+//           <IconTriangleInverted size={"1rem"} fill="gray" color="white" />
+//         </div>
+//         <div
+//           className="absolute left-0 top-[-10px] h-[50px] w-[120px]"
+//           style={{
+//             backgroundImage: "linear-gradient(90deg, white, transparent)",
+//           }}
+//         ></div>
+//         <div
+//           className="absolute right-0 top-[-10px] h-[50px] w-[120px]"
+//           style={{
+//             backgroundImage: "linear-gradient(90deg, transparent, white)",
+//           }}
+//         ></div>
+//       </div>
+//       <div
+//         ref={containerRef}
+//         style={{
+//           overflowX: "hidden",
+//           whiteSpace: "nowrap",
+//           paddingBottom: "10px",
+//           borderTop: "1px solid #ced4da",
+//         }}
+//         onScroll={handleScroll}
+//         className="mx-4"
+//       >
+//         <Flex w={"100%"} gap={"sm"}>
+//           {timelineData.map((item, index) => {
+//             return (
+//               <>
+//                 {index < timelineData.length - 5 && (
+//                   <Flex key={index} direction={"column"} align={"center"} w={item.isMainGraduation ? "2px" : "10px"}>
+//                     <div
+//                       style={{
+//                         height: item.isMainGraduation ? "15px" : "8px",
+//                         width: item.isMainGraduation ? "2px" : "1px",
+//                         backgroundColor: "#ced4da",
+//                       }}
+//                       onClick={() => {
+//                         const newPosition = index * 25;
+//                         containerRef.current?.scrollTo({
+//                           left: newPosition,
+//                           behavior: "smooth",
+//                         });
+//                       }}
+//                     />
+//                     {item.label && (
+//                       <Text size="xs" color="dimmed" ml={index === 0 ? "45px" : ""} mr={index === timelineData.length - 6 ? "46px" : ""}>
+//                         {item.label}
+//                       </Text>
+//                     )}
+//                   </Flex>
+//                 )}
+//               </>
+//             );
+//           })}
+//         </Flex>
+//       </div>
+//     </Paper>
+//   );
+// };
+
+const PlannerComponent = ({ threads, currentSessionId }: { threads: ThreadType[], currentSessionId: Number | null }) => {
+  const [opened, { toggle }] = useDisclosure(true);
+  const [tasks, setTasks] = useState(
+    threads.find(thread => thread.id === currentSessionId)?.tasks || []
+  );
+
+  console.log('current tasks are', tasks);
+
+  // Hacky way to force re-render when tasks change
   useEffect(() => {
-    const handleMouseDown = (e: MouseEvent) => {
-      isDown = true;
-      startX = e.pageX - (containerRef.current?.offsetLeft || 0);
-      scrollLeft = containerRef.current?.scrollLeft || 0;
-    };
+    setTimeout(() => {
+      setTasks(threads.find(thread => thread.id === currentSessionId)?.tasks || []);
+    }, 100);
+  }, [threads, currentSessionId]);
 
-    const handleMouseLeave = () => {
-      isDown = false;
-    };
+  if (!tasks || tasks.length === 0) { return null; }
 
-    const handleMouseUp = () => {
-      isDown = false;
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - (containerRef.current?.offsetLeft || 0);
-      const walk = (x - startX) * 3;
-      if (containerRef.current) {
-        containerRef.current.scrollLeft = scrollLeft - walk;
-      }
-    };
-
-    const container = containerRef.current;
-
-    container?.addEventListener("mousedown", handleMouseDown);
-    container?.addEventListener("mouseleave", handleMouseLeave);
-    container?.addEventListener("mouseup", handleMouseUp);
-    container?.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      container?.removeEventListener("mousedown", handleMouseDown);
-      container?.removeEventListener("mouseleave", handleMouseLeave);
-      container?.removeEventListener("mouseup", handleMouseUp);
-      container?.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, []);
+  if (tasks.length > 0 && !tasks[1]?.title) { return null; }
 
   return (
-    <Paper withBorder p="md" mt="md">
-      <Flex align={"center"} justify={"space-between"}>
-        <Flex gap={"sm"}>
-          <ActionIcon size={"sm"} variant="outline" color="gray" radius={"sm"}>
-            <IconChevronLeft />
-          </ActionIcon>
-          <ActionIcon size={"sm"} variant="outline" color="gray" radius={"sm"}>
-            <IconChevronRight />
-          </ActionIcon>
-        </Flex>
-        <Badge variant="outline">Go Live</Badge>
+    <Paper p={"sm"} withBorder radius={"sm"}>
+      <Flex w={"100%"} align={"center"} gap={"xs"}>
+        {/* <Divider label="Next in line" labelPosition="left" w={"100%"} color="gray" fw={500} />
+        <ActionIcon onClick={toggle}>{opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}</ActionIcon> */}
       </Flex>
-      <div className="relative flex justify-center mt-4">
-        <div className="absolute top-[-15px]">
-          <IconTriangleInverted size={"1rem"} fill="gray" color="white" />
-        </div>
-        <div
-          className="absolute left-0 top-[-10px] h-[50px] w-[120px]"
-          style={{
-            backgroundImage: "linear-gradient(90deg, white, transparent)",
-          }}
-        ></div>
-        <div
-          className="absolute right-0 top-[-10px] h-[50px] w-[120px]"
-          style={{
-            backgroundImage: "linear-gradient(90deg, transparent, white)",
-          }}
-        ></div>
-      </div>
-      <div
-        ref={containerRef}
-        style={{
-          overflowX: "hidden",
-          whiteSpace: "nowrap",
-          paddingBottom: "10px",
-          borderTop: "1px solid #ced4da",
-        }}
-        onScroll={handleScroll}
-        className="mx-4"
-      >
-        <Flex w={"100%"} gap={"sm"}>
-          {timelineData.map((item, index) => {
-            return (
-              <>
-                {index < timelineData.length - 5 && (
-                  <Flex key={index} direction={"column"} align={"center"} w={item.isMainGraduation ? "2px" : "10px"}>
-                    <div
-                      style={{
-                        height: item.isMainGraduation ? "15px" : "8px",
-                        width: item.isMainGraduation ? "2px" : "1px",
-                        backgroundColor: "#ced4da",
-                      }}
-                      onClick={() => {
-                        const newPosition = index * 25;
-                        containerRef.current?.scrollTo({
-                          left: newPosition,
-                          behavior: "smooth",
-                        });
-                      }}
-                    />
-                    {item.label && (
-                      <Text size="xs" color="dimmed" ml={index === 0 ? "45px" : ""} mr={index === timelineData.length - 6 ? "46px" : ""}>
-                        {item.label}
-                      </Text>
-                    )}
+      <Collapse in={opened} p={"sm"}>
+        {tasks.filter(task => task).map((task: TaskType, index) => {
+          const statusColors = {
+            ACTIVE: "blue",
+            COMPLETE: "green",
+            CANCELLED: "red",
+            PENDING_OPERATOR: "yellow",
+          };
+
+          return (
+            <Paper withBorder p={"sm"} key={index} mb={"xs"} radius={"md"}>
+              <Flex justify={"space-between"} align={"center"}>
+                <Text className="flex gap-1 items-center" fw={600} size={"sm"}>
+                  <ThemeIcon color="gray" radius={"xl"} variant="light" size={18}>
+                    {index + 1}
+                  </ThemeIcon>
+                  {task.title}
+                </Text>
+                <Flex align={"center"} gap={"xs"}>
+                  {/* <Divider orientation="vertical" /> */}
+                  <Text color="gray" size={"sm"} fw={500}>
+                    {moment(task.created_at).fromNow()}
+                  </Text>
+                  <Flex align={"center"} gap={"xs"}>
+                    <ThemeIcon color={statusColors[task.status]} radius={"xl"} size={10}>
+                      <span />
+                    </ThemeIcon>
+                    <Text color={statusColors[task.status]} size={"sm"} fw={500}>
+                      {task.status}
+                    </Text>
                   </Flex>
-                )}
-              </>
-            );
-          })}
-        </Flex>
-      </div>
+                </Flex>
+              </Flex>
+            </Paper>
+          );
+        })}
+      </Collapse>
     </Paper>
   );
 };
+
+const SelinStrategy = ({ setPrompt, handleSubmit, threads, currentSessionId }: { setPrompt: React.Dispatch<React.SetStateAction<string>>, handleSubmit: () => void, threads: ThreadType[], currentSessionId: Number | null }) => {
+
+
+  const memory = threads.find(thread => thread.id === currentSessionId)?.memory;
+
+  const hackedSubmit = () => {
+    console.log('hacked submit');
+    setPrompt("Let's do it.");
+    setTimeout(() => {
+      handleSubmit();
+    }, 500);
+  }
+
+  // console.log('memory is', memory);
+  const userToken = useRecoilValue(userTokenState);
+
+  const {
+    getStrategy,
+    patchUpdateStrategy
+  } = useStrategiesApi(userToken);
+
+  const [strategy, setStrategy] = useState<{
+    client_archetype_mappings: any[];
+    client_id: number;
+    created_by: number;
+    description: string;
+    end_date: string;
+    id: number;
+    start_date: string;
+    status: string;
+    tagged_campaigns: any | null;
+    title: string;
+  } | undefined>(undefined);
+
+
+  useEffect(() => {
+    console.log(strategy, 'is the strategy');
+    if (memory?.strategy_id) {
+      getStrategy(memory.strategy_id)
+        .then((res) => {
+          console.log(res);
+          setStrategy(res)
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+
+  }
+    , [{ ...memory }]);
+
+
+
+
+  return (
+    <Paper withBorder radius={"sm"}>
+      <Flex bg={"#37414E"} p={"sm"}>
+        <Text tt={"uppercase"} fw={600} color="white">
+          Strategy Creator: <span className="text-gray-400">{strategy?.title.replace(/['"]/g, '')}</span>
+        </Text>
+      </Flex>
+      <Stack p={"sm"}>
+        <Flex>
+          <Text color="gray" fw={500} w={160} size={"xs"}>
+            Strategy Name:
+          </Text>
+          <Text fw={500} size={"xs"}>
+            {strategy?.title.replace(/['"]/g, '')}
+          </Text>
+        </Flex>
+        <Flex>
+          <div className="w-[160px]">
+            <Text color="gray" fw={500} w={160} size={"xs"}>
+              Description:
+            </Text>
+          </div>
+          <Stack spacing={"sm"}>
+            <Box>
+              <Text fw={600} size={"xs"}>
+                Goal:
+              </Text>
+              <Text fw={500} size={"xs"}>
+                <Text fw={500} size={"xs"} dangerouslySetInnerHTML={{ __html: strategy?.description || '' }} />
+              </Text>
+            </Box>
+            <Box>
+              {/* <Text fw={600} size={"xs"}>
+                Angle:
+              </Text>
+              <Text fw={500} size={"xs"}>
+                {
+                  "The main approach for this campaign is to leverage the MachineCon conference to establish initial contact with prospects and discuss potential collaboration opportunites. The focus will be on inviting them to our booth for a personal chat."
+                }
+              </Text> */}
+              {/* <Box>
+                <Text fw={600} size={"xs"}>
+                  Prospects:
+                </Text>
+                <Text fw={500} size={"xs"}>
+                  {"We will target professionals attending MachineCon, particularly those with titles such as,"}
+                </Text>
+              </Box> */}
+            </Box>
+          </Stack>
+        </Flex>
+        <Flex>
+          <div className="w-[160px]">
+            <Text size={"xs"} color="gray" fw={500} w={160}>
+              Attached Campaigns:
+            </Text>
+          </div>
+          {strategy?.tagged_campaigns && strategy.tagged_campaigns.length > 0 ? (
+            strategy.tagged_campaigns.map((campaign: number, index: number) => (
+              <Badge key={index} color="green">
+                {campaign.toString()}
+              </Badge>
+            ))
+          ) : (
+            <Badge color="gray">None</Badge>
+          )}
+        </Flex>
+        <Flex>
+          <div className="w-[160px]">
+            <Text color="gray" fw={500} w={160} size={"xs"}>
+              Time Frame:
+            </Text>
+          </div>
+          <Text size={"xs"} color="blue" fw={600}>
+            {strategy?.start_date ? moment(strategy.start_date).format("MMMM Do, YYYY") : "N/A"} - {strategy?.end_date ? moment(strategy.end_date).format("MMMM Do, YYYY") : "N/A"}
+          </Text>
+        </Flex>
+        <Flex align={"center"} gap={"md"}>
+          <Button
+            variant="outline"
+            color="gray"
+            fullWidth
+            onClick={() => {
+              openContextModal({
+                modal: "editStrategy",
+                title: (
+                  <Flex align={"center"} gap={"sm"}>
+                    <IconBulb color="#228be6" size={"1.6rem"} />
+                    <Title order={2}>Edit Strategy</Title>
+                  </Flex>
+                ),
+                styles: {
+                  content: {
+                    minWidth: "70%",
+                  },
+                },
+                innerProps: {
+                  title: strategy?.title,
+                  description: strategy?.description,
+                  archetypes: [],
+                  status: strategy?.status,
+                  startDate: strategy?.start_date ? new Date(strategy.start_date) : null,
+                  endDate: strategy?.end_date ? new Date(strategy.end_date) : null,
+                  onSubmit: async (title: string, description: string, archetypes: number[], status: string, startDate: Date, endDate: Date) => {
+                    const response = await patchUpdateStrategy(memory?.strategy_id || -1, title, description, archetypes, status, startDate, endDate);
+                    //yolo
+                    const updatedStrategy = await getStrategy(memory?.strategy_id || -1);
+                    setStrategy(updatedStrategy);
+                    showNotification({
+                      title: "Success",
+                      message: "Strategy updated successfully",
+                      color: "green",
+                    });
+
+                  },
+                },
+              });
+            }}
+          >
+            Edit
+          </Button>
+          <Button fullWidth onClick={() => { hackedSubmit() }}>
+            Execute Strategy
+          </Button>
+        </Flex>
+      </Stack>
+    </Paper>
+  );
+}

@@ -7,30 +7,6 @@ export default function SelinAIPlanner() {
   const [type, setType] = useState("planner");
   return (
     <>
-      {/* <SegmentedControl
-        onChange={(value) => setType(value)}
-        w={"50%"}
-        data={[
-          {
-            value: "planner",
-            label: (
-              <Flex align={"center"} justify={"space-between"}>
-                <span>Planner</span>
-                <IconX size={"1rem"} />
-              </Flex>
-            ),
-          },
-          {
-            value: "logs",
-            label: (
-              <Flex align={"center"} justify={"space-between"}>
-                <span>Logs</span>
-                <IconX size={"1rem"} />
-              </Flex>
-            ),
-          },
-        ]}
-      /> */}
       {type === "planner" ? <PlannerComponent /> : type === "logs" ? <LogsComponent /> : <></>}
     </>
   );

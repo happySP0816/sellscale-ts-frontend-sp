@@ -283,7 +283,7 @@ const MarketMapFilters = function (
   const queryClient = useQueryClient();
 
   const onAddIndividualAIFilters = (title: string, prompt: string, use_linkedin: boolean) => {
-    const key = title.toLowerCase().split(" ").join("_");
+    const key = "aiind_" + title.toLowerCase().split(" ").join("_");
     setIndividualAIFilters(
       [...individual_ai_filters, {key: key, title: title, prompt: prompt, use_linkedin: use_linkedin}]);
 
@@ -301,7 +301,7 @@ const MarketMapFilters = function (
   }
 
   const onAddCompanyAIFilters = (title: string, prompt: string, use_linkedin: boolean) => {
-    const key = title.toLowerCase().split(" ").join("_");
+    const key = "aicomp_" + title.toLowerCase().split(" ").join("_");
     setCompanyAIFilters(
       [...company_ai_filters, {key: key, title: title, prompt: prompt, use_linkedin: use_linkedin}]);
 

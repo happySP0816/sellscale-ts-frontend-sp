@@ -72,7 +72,7 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
 
   const handleToggleRecording = async () => {
     if (recording) {
-      alert("Recording stopped");
+      // alert("Recording stopped");
       setRecording(false);
       setSpeaking(false);
       setTranscribing(false);
@@ -87,7 +87,7 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
-        alert("Recording started");
+        // alert("Recording started");
         setTranscribedText("");
         setLastText("");
         onTranscriptionChanged("");

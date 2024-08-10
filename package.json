@@ -23,7 +23,9 @@
     "testEnvironment": "jsdom"
   },
   "dependencies": {
+    "@chengsokdara/use-whisper": "^0.2.0",
     "@datastructures-js/heap": "^4.3.2",
+    "@deepgram/sdk": "^3.5.1",
     "@emotion/react": "^11.11.4",
     "@fullcalendar/core": "^6.1.8",
     "@fullcalendar/daygrid": "^6.1.8",
@@ -71,8 +73,10 @@
     "chart.js": "^4.3.0",
     "chartjs-plugin-annotation": "^3.0.1",
     "cors": "^2.8.5",
+    "cross-fetch": "^4.0.0",
     "dayjs": "^1.11.11",
     "diff": "^5.2.0",
+    "dotenv": "^16.4.5",
     "emoji-picker-react": "^4.4.12",
     "env-cmd": "^10.1.0",
     "fuzzball": "^2.1.2",
@@ -97,6 +101,7 @@
     "react-datasheet-grid": "^4.11.2",
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.6",
+    "react-hook-speech-to-text": "^0.8.0",
     "react-icons": "^4.7.1",
     "react-markdown": "^8.0.5",
     "react-router-dom": "^6.19.0",

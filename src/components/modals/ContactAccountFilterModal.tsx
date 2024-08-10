@@ -10,7 +10,7 @@ import {
   Text,
   HoverCard,
   Button,
-  Accordion, Popover, TextInput, Divider
+  Popover, TextInput, Divider
 } from "@mantine/core";
 import {useEffect, useState} from "react";
 import {ICPFitReasonV2, Prospect} from "../../index";
@@ -20,7 +20,6 @@ import {API_URL} from "@constants/data";
 import {useRecoilValue} from "recoil";
 import {userTokenState} from "@atoms/userAtoms";
 import MarketMapFilters from "@pages/SegmentV3/MarketMapFilters";
-import {not} from "three/examples/jsm/nodes/math/OperatorNode";
 
 interface ContactAccountFilterModalProps {
   showContactAccountFilterModal: boolean,
@@ -524,7 +523,11 @@ const ContactAccountFilterModal = function (
       title={
       <Flex justify={'space-between'} gap={'36px'}>
         <Title order={3}>
-          {viewMode === "ACCOUNT" ? "Account Market Map" : "Contact Market Map"}
+          {segment?.is_market_map ? (
+            viewMode === "ACCOUNT" ? "Account Market Map" : "Contact Market Map"
+          ) : (
+            viewMode === "ACCOUNT" ? "Account Segment View" : "Contact Segment View"
+          )}
         </Title>
         <Switch size={'xl'}
                 onLabel="Account View"

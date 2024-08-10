@@ -167,6 +167,7 @@ export default function CreateSegmentModal(props: CreateSegment) {
               onChange={(value) => setNumContacts(value ?? '')}
               data={contactSelectNums}
               mt="md"
+              zIndex={9999}
             />
             <Text align="center" size="sm" color="dimmed" mt="sm">
               Note: This action is not reversible. Once segment is created, contacts will start uploading. This will use your upload credits.
@@ -210,7 +211,7 @@ export default function CreateSegmentModal(props: CreateSegment) {
                 }
                 setLoading(false);
               }}>
-                Add & Upload 100 Contacts to Segment
+                {`Add & Upload ${numContacts} Contacts to Segment`}
               </Button>
             </Flex>
           </>
@@ -232,12 +233,14 @@ export default function CreateSegmentModal(props: CreateSegment) {
               mt="md"
             />
             <Select
+              withinPortal
               label="Number of Contacts to Import"
               placeholder="Pick one"
               value={numContacts}
               onChange={(value) => setNumContacts(value ?? '')}
               data={contactSelectNums}
               mt="md"
+              zIndex={9999}
             />
             <Text align="center" size="sm" color="dimmed" mt="sm">
               Note: This action is not reversible. Once segment is created, contacts will start uploading. This will use your upload credits.

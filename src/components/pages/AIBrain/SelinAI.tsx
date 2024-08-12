@@ -147,9 +147,7 @@ export default function SelinAI() {
   const [threads, setThreads] = useState<ThreadType[]>([]);
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [counter, setCounter] = useState<number>(0);
-  const [messages, setMessages] = useState<MessageType[]>([
-
-  ]);
+  const [messages, setMessages] = useState<MessageType[]>([]);
   const roomIDref = useRef<string>("");
   const [currentSessionId, setCurrentSessionId] = useState<Number | null>(null);
   const sessionIDRef = useRef<Number>(-1);
@@ -231,7 +229,8 @@ export default function SelinAI() {
         setCurrentSessionId(data[0].id);
         sessionIDRef.current = data[0].id;
         roomIDref.current = data[0].thread_id;
-      } if (data.length === 0){
+      }
+      if (data.length === 0) {
         handleCreateNewSession();
       }
     } catch (error) {
@@ -1702,12 +1701,7 @@ const PlannerComponent = ({
   counter: Number;
 }) => {
   const [opened, { toggle }] = useDisclosure(true);
-
-  // useEffect(() => {
-  //   console.log('current session id is', currentSessionId);
-  //   const currentThread: ThreadType = threads.find(thread => thread.id === currentSessionId) as ThreadType;
-  //   setTasks(currentThread?.tasks);
-  // }, [threads, currentSessionId, messagesLength]);
+  const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
 
   return (
     <Paper p={"sm"} withBorder radius={"sm"}>
@@ -1777,25 +1771,8 @@ const PlannerComponent = ({
                       {index + 1}
                     </ThemeIcon>
                     {task.title}
-                    <span className="mx-2">-</span>
-                    <Popover  width={500} position="bottom" withArrow shadow="md">
-                      <Popover.Target>
-                        <Text 
-                          style={{ cursor: "pointer" }}
-                          title={task?.description || ''}
-                        >
-                          {task?.description && task?.description?.length > 60
-                            ? `${task.description.substring(0, 60)}...`
-                            : task.description}
-                        </Text>
-                      </Popover.Target>
-                      <Popover.Dropdown>
-                        <Text size="sm">{task.description}</Text>
-                      </Popover.Dropdown>
-                    </Popover>
                   </Text>
                   <Flex align={"center"} gap={"xs"}>
-                    {/* <Divider orientation="vertical" /> */}
                     <Text color="gray" size={"sm"} fw={500}>
                       {moment(task.created_at).fromNow()}
                     </Text>
@@ -1815,8 +1792,25 @@ const PlannerComponent = ({
                         {task.status}
                       </Text>
                     </Flex>
+
+                    <ActionIcon
+                      onClick={() =>
+                        setOpenedTaskIndex(
+                          openedTaskIndex === index ? null : index
+                        )
+                      }
+                    >
+                      {openedTaskIndex === index ? (
+                        <IconChevronUp size={"1rem"} />
+                      ) : (
+                        <IconChevronDown size={"1rem"} />
+                      )}
+                    </ActionIcon>
                   </Flex>
                 </Flex>
+                <Collapse in={openedTaskIndex === index}>
+                  <Text mt={"sm"}>{task.description}</Text>
+                </Collapse>
               </Paper>
             );
           })}

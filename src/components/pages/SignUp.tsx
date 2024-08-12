@@ -29,45 +29,6 @@ import LoginAsset from "@assets/images/login_asset.png";
 import WhiteLogo from "@assets/images/whitelogo.png";
 import Background from "@assets/images/login_bg.png";
 
-async function sendSignup(fullName: string, email: string) {
-  const response = await fetch(`${API_URL}/client/selix_user`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      full_name: fullName,
-      email: email,
-    }),
-  });
-
-  let result = await response.json().catch((err) => {
-    console.error("Failed to parse response as JSON", err);
-    showNotification({
-      id: "auth-error",
-      title: "Error",
-      message: `Error: ${err}`,
-      color: "red",
-      autoClose: false,
-    });
-    return null;
-  });
-
-  if (response.status === 200 && result?.data?.auth_token) {
-    window.location.href = `https://app.sellscale.com/authenticate?stytch_token_type=direct&token=${result.data.auth_token}&redirect=selix_onboarding`;
-  } else {
-    showNotification({
-      id: "auth-error",
-      title: "Error",
-      message: `Error: ${result?.message || "An unexpected error occurred"}`,
-      color: "red",
-      autoClose: false,
-    });
-  }
-
-  return { status: response.status, message: result?.message };
-}
-
 export default function SignupPage() {
   setPageTitle(`SignUp`);
   const theme = useMantineTheme();
@@ -76,6 +37,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useRecoilState(userDataState);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const form = useForm({
     initialValues: {
@@ -89,6 +51,47 @@ export default function SignupPage() {
     },
   });
 
+  async function sendSignup(fullName: string, email: string) {
+    const response = await fetch(`${API_URL}/client/selix_user`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        full_name: fullName,
+        email: email,
+      }),
+    });
+  
+    let result = await response.json().catch((err) => {
+      console.error("Failed to parse response as JSON", err);
+      showNotification({
+        id: "auth-error",
+        title: "Error",
+        message: `Error: ${err}`,
+        color: "red",
+        autoClose: false,
+      });
+      // return null;
+    });
+  
+    if (response.status === 200 && result?.data?.auth_token) {
+      window.location.href = `https://app.sellscale.com/authenticate?stytch_token_type=direct&token=${result.data.auth_token}&redirect=selix_onboarding`;
+    } else {
+      console.error("Signup error:", result);
+      // showNotification({
+      //   id: "auth-error",
+      //   title: "Error",
+      //   message: `Error: ${result?.message || "An unexpected error occurred"}`,
+      //   color: "red",
+      //   autoClose: false,
+      // });
+      return { status: response.status, message: result?.data.message };
+    }
+  
+    return { status: response.status, message: result?.message };
+  }
+
   const handleSubmit = async (values: typeof form.values) => {
     if (form.validate().hasErrors) {
       return;
@@ -98,12 +101,27 @@ export default function SignupPage() {
   };
 
   const handleSignup = async (values: typeof form.values) => {
+
+    showNotification({
+      color: "gray",
+      title: "Creating Account...",
+      message: "Hang tight, this may take a little while but it's worth the wait!",
+    });
+
     setLoading(true);
 
     try {
-      const res = await sendSignup(values.fullName, values.email);
+      const { status, message } = await sendSignup(values.fullName, values.email);
+      const res = { status, message };
 
       if (res?.status === 200) {
+        console.log(status, message);
+        console.log('res is', res);
+        if (res?.message === "User already exists. Please log in instead.") {
+          setShowLoginModal(true);
+          return;
+        }
+
         showNotification({
           color: "green",
           title: "Signup Successful",
@@ -133,6 +151,35 @@ export default function SignupPage() {
 
   return (
     <Flex h={"100%"}>
+
+      <Modal
+        opened={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        title="User already exists"
+        size={"md"}
+      >
+        <Text>
+          It looks like you already have an account with this email address. Please login to continue or try a different email.
+        </Text>
+        <Flex mt="md" gap="md">
+          <Button
+            onClick={() => {
+              setShowLoginModal(false);
+              navigate("/login");
+            }}
+          >
+            Login
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setShowLoginModal(false)}
+          >
+            Try a Different Email
+          </Button>
+        </Flex>
+      </Modal>
+
+
       <Flex
         className="absolute z-10"
         w={"50%"}
@@ -157,7 +204,7 @@ export default function SignupPage() {
               Create a SellScale account
             </Text>
             <Text size={"xs"} color="gray" fw={500}>
-              You need to create an account first to chat with Selix
+              Create an account to start chatting with Selix
             </Text>
           </Box>
           <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -165,7 +212,7 @@ export default function SignupPage() {
               size="md"
               mt={"xl"}
               placeholder="John Doe"
-              label="Enter your Full Name"
+              label="Full Name"
               {...form.getInputProps("fullName")}
               required
             />
@@ -173,7 +220,7 @@ export default function SignupPage() {
               size="md"
               mt={"xl"}
               placeholder="name@xyz.com"
-              label="Enter your Email"
+              label="Email"
               {...form.getInputProps("email")}
               required
             />

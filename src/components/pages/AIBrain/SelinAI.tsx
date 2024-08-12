@@ -23,6 +23,7 @@ import {
   Title,
   Textarea,
   Popover,
+  LoadingOverlay,
 } from "@mantine/core";
 import {
   IconBulb,
@@ -39,6 +40,7 @@ import {
   IconPlus,
   IconPoint,
   IconSend,
+  IconTrash,
   IconTriangleInverted,
 } from "@tabler/icons";
 import { IconSparkles, IconUserShare } from "@tabler/icons-react";
@@ -83,10 +85,12 @@ const CustomCursorWrapper: React.FC<CustomCursorWrapperProps> = ({
 };
 
 interface TaskType {
+  order_number: number;
+  proof_of_work_img: string | null;
   id: number;
   title: string;
   description?: string;
-  status: "ACTIVE" | "COMPLETE" | "CANCELLED" | "PENDING_OPERATOR";
+  status: "QUEUED" | "IN_PROGRESS" | "IN_PROGRESS_REVIEW_NEEDED" | "COMPLETE" | "CANCELLED" | "BLOCKED";
   created_at: string;
   updated_at: string;
   selix_session_id: number;
@@ -223,12 +227,11 @@ export default function SelinAI() {
         },
       });
       const data = await response.json();
+      console.log('data is', data);
       setThreads(data);
       // console.log("data is", data);
       if (data.length > 0) {
-        setCurrentSessionId(data[0].id);
-        sessionIDRef.current = data[0].id;
-        roomIDref.current = data[0].thread_id;
+          getMessages(data[0].thread_id, data[0].id, data);
       }
       if (data.length === 0) {
         handleCreateNewSession();
@@ -237,12 +240,13 @@ export default function SelinAI() {
       console.error("Error fetching chat history:", error);
     }
   };
-  const getMessages = async (thread_id: string, session_id: Number) => {
+  const getMessages = async (thread_id: string, session_id: Number, threads_passed?: ThreadType[]) => {
+
+    setLoadingNewChat(true);
     try {
       // create new room_id
 
       setCurrentSessionId(session_id);
-      console.log("meowww 2", session_id);
       sessionIDRef.current = session_id;
       roomIDref.current = thread_id;
 
@@ -266,13 +270,21 @@ export default function SelinAI() {
         (message: MessageType) => message.message !== "Acknowledged."
       );
       setMessages(filteredMessages);
+      const currentThread = threads_passed?.find(
+        (thread) => thread.id === session_id
+      ) || threads.find((thread) => thread.id === session_id);
 
-      const currentThread = threads.find(
-        (thread) => thread.thread_id === thread_id
-      );
       const memory: MemoryType | undefined = currentThread?.memory;
       if (currentThread?.tasks) {
-        setTasks(currentThread.tasks);
+        const orderedTasks = currentThread.tasks.sort(
+          (a, b) => a.order_number - b.order_number
+        );
+        const allSameSessionId = orderedTasks.every(task => task.selix_session_id === session_id);
+        if (allSameSessionId) {
+          setTasks(orderedTasks);
+        } else {
+          setTasks([orderedTasks[orderedTasks.length - 1]]);
+        }
       }
       if (memory) {
         setAIType(memory.tab || "PLANNER");
@@ -284,6 +296,8 @@ export default function SelinAI() {
       // You can add further processing of the messages here if needed
     } catch (error) {
       console.error("Error fetching messages:", error);
+    } finally {
+      setLoadingNewChat(false);
     }
   };
 
@@ -358,111 +372,127 @@ export default function SelinAI() {
     }
   };
 
-  const handleChangeTab = (data: { tab: string }) => {
-    showNotification({
-      title: "Tab changed",
-      message: `Tab changed to: ${data.tab}`,
-      color: "blue",
-      icon: <IconEye />,
-    });
+  const handleChangeTab = (data: { tab: string, thread_id: string }) => {
+    if (data.thread_id === roomIDref.current) {
+        showNotification({
+          title: "Tab changed",
+          message: `Tab changed to: ${data.tab}`,
+          color: "blue",
+          icon: <IconEye />,
+        });
 
-    setAIType(data.tab);
-  };
+        setAIType(data.tab);
+      }
+    };
 
-  const handleAddTaskToSession = async (data: { task: TaskType }) => {
-    console.log("adding task to session", data);
+    const handleAddTaskToSession = async (data: { task: TaskType, thread_id: string }) => {
+      if (data.thread_id === roomIDref.current) {
+      console.log("adding task to session", data);
 
-    const task = data.task;
+      const task = data.task;
 
-    showNotification({
-      title: "Task added",
-      message: `Task: ${task.title} has been added`,
-      color: "green",
-      icon: <IconCircleCheck />,
-    });
-
-    console.log("task is", task);
-    // Ensure the task is added correctly to the current session
-    setThreads((prevThreads) => {
-      const updatedThreads = prevThreads.map((thread) => {
-        if (task.selix_session_id === sessionIDRef.current) {
-          const updatedTasks = Array.isArray(thread.tasks)
-            ? [...thread.tasks, task]
-            : [task];
-          console.log("updated tasks are", updatedTasks);
-          return { ...thread, tasks: updatedTasks };
-        } else {
-          console.log(
-            "found no match for the current session. we compared",
-            task.selix_session_id,
-            "and",
-            sessionIDRef.current
-          );
-        }
-        return thread;
+      showNotification({
+        title: "Task added",
+        message: `Task: ${task.title} has been added`,
+        color: "green",
+        icon: <IconCircleCheck />,
       });
 
-      // Ensure the updated threads object is correctly reflected for children components
-      const currentThread = updatedThreads.find(
-        (thread) => thread.id === sessionIDRef.current
-      );
-      setTasks(currentThread?.tasks || []);
+      console.log("task is", task);
+      // Ensure the task is added correctly to the current session
+      setThreads((prevThreads) => {
+        const updatedThreads = prevThreads.map((thread) => {
+          if (task.selix_session_id === sessionIDRef.current) {
+            const updatedTasks = Array.isArray(thread.tasks)
+              ? [...thread.tasks, task]
+              : [task];
+            console.log("updated tasks are", updatedTasks);
+            return { ...thread, tasks: updatedTasks };
+          } else {
+            console.log(
+              "found no match for the current session. we compared",
+              task.selix_session_id,
+              "and",
+              sessionIDRef.current
+            );
+          }
+          return thread;
+        });
 
-      return updatedThreads;
-    });
+        // Ensure the updated threads object is correctly reflected for children components
+        const currentThread = updatedThreads.find(
+          (thread) => thread.id === sessionIDRef.current
+        );
+        const orderedTasks = currentThread?.tasks?.sort(
+          (a, b) => a.order_number - b.order_number
+        );
+        if (orderedTasks && orderedTasks.every(task => task.selix_session_id === sessionIDRef.current)) {
+          setTasks(orderedTasks);
+        } else {
+          setTasks([task]);
+        }
+
+        return updatedThreads;
+      });
+    }
   };
 
-  const handleNewSession = async (data: { session: ThreadType }) => {
-    // just update the local state
-    setThreads((prevThreads) => [...prevThreads, data.session]);
-    getMessages(data.session.thread_id, data.session.id);
-    setCurrentSessionId(data.session.id);
-    console.log("meowww", data.session.id);
-    sessionIDRef.current = data.session.id;
-    roomIDref.current = data.session.thread_id;
+  const handleNewSession = async (data: { session: ThreadType, thread_id: string }) => {
+    // if (data.thread_id === roomIDref.current) {
+      // just update the local state
+      setThreads((prevThreads) => [...prevThreads, data.session]);
+      getMessages(data.session.thread_id, data.session.id);
+      setCurrentSessionId(data.session.id);
+      console.log("meowww", data.session.id);
+      sessionIDRef.current = data.session.id;
+      roomIDref.current = data.session.thread_id;
 
-    showNotification({
-      title: "New Session",
-      message: `New session created: ${data.session.session_name}`,
-      color: "blue",
-      icon: <IconEye />,
-    });
+      showNotification({
+        title: "New Session",
+        message: `New session created: ${data.session.session_name}`,
+        color: "blue",
+        icon: <IconEye />,
+      });
+    // }
   };
 
   const handleUpdateTaskAndAction = async (data: {
     task: TaskType;
     action: MessageType;
+    thread_id: string;
   }) => {
-    showNotification({
-      title: "Task updated",
-      message: `Task: ${data.task.title} has been updated`,
-      color: "green",
-      icon: <IconCircleCheck />,
-    });
+    if (data.thread_id === roomIDref.current) {
+      showNotification({
+        title: "Task updated",
+        message: `Task: ${data.task.title} has been updated`,
+        color: "green",
+        icon: <IconCircleCheck />,
+      });
 
-    // just update the local state
-    console.log("updating task and action", data);
-    setThreads((prevThreads) =>
-      prevThreads.map((thread) =>
-        data.task.selix_session_id === sessionIDRef.current
-          ? {
-              ...thread,
-              tasks: Array.isArray(thread.tasks)
-                ? [...thread.tasks, data.task]
-                : [data.task],
-            }
-          : thread
-      )
-    );
-    setMessages((chatContent: MessageType[]) =>
-      chatContent.map((message: MessageType) =>
-        message.id === data.action.id
-          ? {
-              ...data.action,
-            }
-          : message
-      )
-    );
+      // just update the local state
+      console.log("updating task and action", data);
+      setThreads((prevThreads) =>
+        prevThreads.map((thread) =>
+          data.task.selix_session_id === sessionIDRef.current
+            ? {
+                ...thread,
+                tasks: Array.isArray(thread.tasks)
+                  ? [...thread.tasks, data.task]
+                  : [data.task],
+              }
+            : thread
+        )
+      );
+      setMessages((chatContent: MessageType[]) =>
+        chatContent.map((message: MessageType) =>
+          message.id === data.action.id
+            ? {
+                ...data.action,
+              }
+            : message
+        )
+      );
+    }
   };
 
   const handleUpdateSession = async (data: {
@@ -488,9 +518,11 @@ export default function SelinAI() {
     }
   };
 
-  const handleIncrementCounter = async () => {
-    console.log("heyyy counter");
-    setCounter((prev) => counter + 1);
+  const handleIncrementCounter = async (data: {thread_id: string}) => {
+    if (data.thread_id === roomIDref.current) {
+      console.log("heyyy counter");
+      setCounter((prev) => counter + 1);
+  }
   };
 
   useEffect(() => {
@@ -719,6 +751,30 @@ export default function SelinAI() {
                                 ? "IN PROGRESS"
                                 : thread.status}
                             </Text>
+                            <ActionIcon
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              setThreads((prevThreads) =>
+                                prevThreads.filter(
+                                  (prevThread) => prevThread.id !== thread.id
+                                )
+                              );
+                              //query to delete thread
+                               fetch(`${API_URL}/selix/delete_thread`, {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `Bearer ${userToken}`,
+                                },
+                                body: JSON.stringify({ thread_id: thread.thread_id }),
+                              });
+
+
+                              }}
+                              style={{ marginLeft: "auto" }}
+                            >
+                              <IconTrash size={"1rem"} color="red" />
+                            </ActionIcon>
                           </Flex>
                           <Text fw={600}>
                             {thread.session_name || "Untitled Session"}
@@ -741,6 +797,7 @@ export default function SelinAI() {
         </div>
         {currentSessionId && (
           <Flex mt={"md"} gap={"xl"}>
+            <LoadingOverlay visible={loadingNewChat} />
             <SegmentChat
               handleSubmit={handleSubmit}
               prompt={prompt}
@@ -1029,7 +1086,7 @@ const SegmentChat = (props: any) => {
                       </Text>
                     </Flex>
                   ) : (
-                    <div className=" border border-[#E25DEE] border-solid m-auto rounded-md">
+                    <div key={index} className=" border border-[#E25DEE] border-solid m-auto rounded-md">
                       <div className="w-full bg-[#E25DEE] py-2 text-center text-white text-semibold">
                         ✨ Executing: {message.action_title}
                       </div>
@@ -1747,11 +1804,32 @@ const PlannerComponent = ({
         {tasks
           ?.filter((task: { title: any }) => task.title)
           .map((task: TaskType, index: number) => {
+            const SelixSessionTaskStatus = {
+              QUEUED: "QUEUED",
+              IN_PROGRESS: "IN_PROGRESS",
+              IN_PROGRESS_REVIEW_NEEDED: "IN_PROGRESS_REVIEW_NEEDED",
+              COMPLETE: "COMPLETE",
+              CANCELLED: "CANCELLED",
+              BLOCKED: "BLOCKED",
+            };
+
             const statusColors = {
-              ACTIVE: "blue",
-              COMPLETE: "green",
-              CANCELLED: "red",
-              PENDING_OPERATOR: "yellow",
+              [SelixSessionTaskStatus.QUEUED]: "blue",
+              [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
+              [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "orange",
+              [SelixSessionTaskStatus.COMPLETE]: "green",
+              [SelixSessionTaskStatus.CANCELLED]: "red",
+              [SelixSessionTaskStatus.BLOCKED]: "gray",
+            };
+
+            const humanReadableStatus = {
+              [SelixSessionTaskStatus.QUEUED]: "Queued",
+              [SelixSessionTaskStatus.IN_PROGRESS]: "In Progress",
+              [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
+                "In Progress",
+              [SelixSessionTaskStatus.COMPLETE]: "Complete",
+              [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
+              [SelixSessionTaskStatus.BLOCKED]: "Blocked",
             };
 
             return (
@@ -1789,7 +1867,7 @@ const PlannerComponent = ({
                         size={"sm"}
                         fw={500}
                       >
-                        {task.status}
+                        {humanReadableStatus[task.status]}
                       </Text>
                     </Flex>
 
@@ -1810,6 +1888,15 @@ const PlannerComponent = ({
                 </Flex>
                 <Collapse in={openedTaskIndex === index}>
                   <Text mt={"sm"}>{task.description}</Text>
+                  {task.proof_of_work_img && (
+                  <img
+                    src={task.proof_of_work_img}
+                    alt="Proof of Work"
+                    width={'100%'}
+                    height={'100%'}
+                    style={{ marginTop: "10px" }}
+                  />
+                )}
                 </Collapse>
               </Paper>
             );

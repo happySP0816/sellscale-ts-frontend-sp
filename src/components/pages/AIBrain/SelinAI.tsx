@@ -279,12 +279,7 @@ export default function SelinAI() {
         const orderedTasks = currentThread.tasks.sort(
           (a, b) => a.order_number - b.order_number
         );
-        const allSameSessionId = orderedTasks.every(task => task.selix_session_id === session_id);
-        if (allSameSessionId) {
-          setTasks(orderedTasks);
-        } else {
-          setTasks([orderedTasks[orderedTasks.length - 1]]);
-        }
+        setTasks(orderedTasks || []);
       }
       if (memory) {
         setAIType(memory.tab || "PLANNER");
@@ -426,11 +421,7 @@ export default function SelinAI() {
         const orderedTasks = currentThread?.tasks?.sort(
           (a, b) => a.order_number - b.order_number
         );
-        if (orderedTasks && orderedTasks.every(task => task.selix_session_id === sessionIDRef.current)) {
-          setTasks(orderedTasks);
-        } else {
-          setTasks([task]);
-        }
+        setTasks(orderedTasks || []);
 
         return updatedThreads;
       });

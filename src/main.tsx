@@ -93,6 +93,7 @@ import { SelixTaskPuppet } from "@pages/AIBrain/SelixTaskPuppet";
 import SignupPage from "@pages/SignUp";
 import SelixOnboarding from "@pages/AIBrain/SelixOnboarding";
 import DeepGram from "@common/DeepGram";
+import { isFreeUser } from "@auth/core";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -151,7 +152,11 @@ const router = sentryCreateBrowserRouter([
     children: [
       {
         path: "",
-        element: <RestrictedRoute page={<OverviewPage />} />,
+        element: (
+          <RestrictedRoute
+            page={isFreeUser() ? <SelinAI /> : <OverviewPage />}
+          />
+        ),
         loader: async ({ params }: { params: any }) => {
           return { prospectId: "" };
         },

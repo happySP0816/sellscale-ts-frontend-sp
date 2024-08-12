@@ -104,7 +104,7 @@ const ReviewCompanyInfo = ({
   return (
     <Stack spacing={"sm"}>
       <Text size={"sm"} fw={500}>
-        Review your company's Information below and ensure that all the data is accurate. Make any edits if necessary.
+        Confirm your company's information below and make any needed updates.
       </Text>
       <TextInput label="Tagline:" value={tagline} onChange={(e: any) => setTagLine(e.target.value)} />
       <Textarea minRows={2} label="Description:" value={description} onChange={(e: any) => setDescription(e.target.value)} />

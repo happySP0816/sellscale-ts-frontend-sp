@@ -1133,26 +1133,27 @@ const SelixControlCenter = ({
               <IconInfoCircle color="orange" size={"1rem"} />
               <Text size={"xs"} color="orange" fw={600}>
                 Disclaimer:{" "}
-                <span className="font-medium">Once executed, I will draft the campaign. You will hava a chance to review prior to any outreach.</span>
+                <span className="font-medium">Once executed, I will draft the campaign. You can review your campaign prior to any outreach.</span>
               </Text>
             </Flex>
           </Paper>
         ) : aiType === "PLANNER" ? (
-          <Paper withBorder bg={"#fffaea"} mt={"sm"} px={"sm"} py={"md"} style={{ borderColor: "#fdb93a" }}>
-            <Flex align={"center"} gap={"xs"} justify={"space-between"}>
-              <Text size={"sm"} color="orange" fw={600}>
-                Would you like to confirm the task lis tbefore getting started with Blueprint?
-              </Text>
-              <Flex gap={4}>
-                <Button variant="outline" color="orange" w={100} size="xs">
-                  No
-                </Button>
-                <Button variant="filled" color="orange" w={100} size="xs">
-                  Yes
-                </Button>
-              </Flex>
-            </Flex>
-          </Paper>
+          <></>
+          // <Paper withBorder bg={"#fffaea"} mt={"sm"} px={"sm"} py={"md"} style={{ borderColor: "#fdb93a" }}>
+          //   <Flex align={"center"} gap={"xs"} justify={"space-between"}>
+          //     <Text size={"sm"} color="orange" fw={600}>
+          //       Would you like to confirm the task lis tbefore getting started with Blueprint?
+          //     </Text>
+          //     <Flex gap={4}>
+          //       <Button variant="outline" color="orange" w={100} size="xs">
+          //         No
+          //       </Button>
+          //       <Button variant="filled" color="orange" w={100} size="xs">
+          //         Yes
+          //       </Button>
+          //     </Flex>
+          //   </Flex>
+          // </Paper>
         ) : (
           <></>
         )}
@@ -1474,17 +1475,17 @@ const SelinStrategy = ({
 
   return (
     <Paper withBorder radius={"sm"}>
-      <Flex bg={"#37414E"} p={"sm"}>
+      <Flex bg={"#1E90FF"} p={"sm"}>
         <Text tt={"uppercase"} fw={600} color="white">
-          Strategy Creator: <span className="text-gray-400">{strategy?.title.replace(/['"]/g, "")}</span>
+          Blueprint: <span className="text-gray-200">{strategy?.title.replace(/['"]/g, "")}</span>
         </Text>
       </Flex>
       <Stack p={"sm"}>
-        <Paper withBorder bg={"#fffaea"} px={"sm"} py={"xs"} style={{ borderColor: "#fdb93a" }}>
+        <Paper withBorder bg={"#F0FFF0"} px={"sm"} py={"xs"} style={{ borderColor: "#32CD32" }}>
           <Flex align={"center"} gap={"xs"}>
-            <IconInfoCircle color="orange" size={"1rem"} />
-            <Text size={"sm"} color="orange" fw={600}>
-              This is the campaign blueprint. <span className="font-medium">Please review to make sure you're aligned.</span>
+            <IconInfoCircle color="green" size={"1rem"} />
+            <Text size={"sm"} color="#228B22" fw={600}>
+              This blueprint summarizes the angle for your campaign.
             </Text>
           </Flex>
         </Paper>
@@ -1613,7 +1614,7 @@ const SelinStrategy = ({
               hackedSubmit();
             }}
           >
-            Start Campaign Creation
+            Create Campaign
           </Button>
         </Flex>
       </Stack>

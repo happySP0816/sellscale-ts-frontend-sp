@@ -1805,7 +1805,10 @@ const PlannerComponent = ({
       </Paper>
       <Collapse in={opened}>
         {tasks
-          ?.filter((task: { title: any }) => task.title)
+        // filter out duplicate tasks by title. This is a temporary fix
+          ?.filter((task: { title: any }, index: number, self: any) => 
+            task.title && self.findIndex((t: { title: any }) => t.title === task.title) === index
+          )
           .map((task: TaskType, index: number) => {
             const SelixSessionTaskStatus = {
               QUEUED: "QUEUED",

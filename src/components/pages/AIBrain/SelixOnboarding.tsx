@@ -1,13 +1,20 @@
-import { Box, Button, Center, Divider, Flex, Paper, Stack, Text, Textarea, TextInput, ThemeIcon } from "@mantine/core";
+import { Box, Button, Center, Divider, Flex, Loader, Paper, Stack, Text, Textarea, TextInput, ThemeIcon } from "@mantine/core";
 import { IconPoint, IconRefresh, IconRocket } from "@tabler/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SellScaleAssistant from "./SellScaleAssistant";
+import { useRecoilValue } from "recoil";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { useNavigate } from "react-router-dom";
+import { API_URL } from "@constants/data";
 
 export default function SelixOnboarding() {
-  const [tagline, setTagLine] = useState("");
-  const [description, setDescription] = useState("");
+  const userData = useRecoilValue(userDataState);
+
+  const [tagline, setTagLine] = useState(userData.client.tagline || '');
+  const [description, setDescription] = useState(userData.client.description || '');
   const [preFilter, setPreFilter] = useState("");
   const [hasNotGeneratedPreFilter, setHasNotGeneratedPrefilter] = useState(true);
+  const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
 
@@ -77,6 +84,9 @@ export default function SelixOnboarding() {
               disabled={step === 2 && hasNotGeneratedPreFilter}
               leftIcon={step >= 3 && <IconRocket size={"1rem"} />}
               onClick={() => {
+                if (step === 3) {
+                  navigate("/selin_ai");
+                }
                 if (step < 3) setStep(step + 1);
               }}
               w={200}
@@ -107,7 +117,7 @@ const ReviewCompanyInfo = ({
         Confirm your company's information below and make any needed updates.
       </Text>
       <TextInput label="Tagline:" value={tagline} onChange={(e: any) => setTagLine(e.target.value)} />
-      <Textarea minRows={2} label="Description:" value={description} onChange={(e: any) => setDescription(e.target.value)} />
+      <Textarea minRows={7} label="Description:" value={description} onChange={(e: any) => setDescription(e.target.value)} />
     </Stack>
   );
 };
@@ -121,6 +131,37 @@ const CreatePreFilter = ({ preFilter, setPreFilter, setHasNotGeneratedPrefilter 
 };
 
 const FinalReview = ({ preFilter, tagline, description }: { preFilter: string; tagline: string; description: string }) => {
+
+  const userToken = useRecoilValue(userTokenState);
+  const [prefilters, setPrefilters] = useState([]);
+
+  const fetchSavedQueries = async () => {
+    try {
+      const response = await fetch(`${API_URL}/apollo/get_all_saved_queries`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      if (data.status === "success") {
+        const formattedPrefilters = data.data.map((query: any) => ({
+          ...query
+        }));
+        setPrefilters(formattedPrefilters);
+      } else {
+        console.error("Failed to fetch saved queries:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching saved queries:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedQueries();
+  }, [userToken]);
+
   return (
     <Stack spacing={"sm"}>
       <Text size={"sm"} fw={500}>
@@ -151,11 +192,11 @@ const FinalReview = ({ preFilter, tagline, description }: { preFilter: string; t
           <Flex align={"start"} gap={"sm"}>
             <Box>
               <Text w={170} size={"sm"} color="gray" fw={500}>
-                Describe your pre-filter:
+                Customer description:
               </Text>
             </Box>
             <Text size={"sm"} fw={600}>
-              {preFilter}
+              {prefilters?.[0] && (prefilters[0] as any).segment_description ? (prefilters[0] as any).segment_description : <Loader size="sm"/>}
             </Text>
           </Flex>
         </Stack>

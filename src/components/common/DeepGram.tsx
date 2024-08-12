@@ -1,9 +1,25 @@
 import { useState, useRef, useEffect } from "react";
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
-import { Card, HoverCard, Text, Button, Paper, Flex, Loader, ActionIcon } from "@mantine/core";
-import { IconCircleDot, IconFileText, IconMicrophone, IconMicrophone2, IconMicrophone2Off } from "@tabler/icons";
+import {
+  Card,
+  HoverCard,
+  Text,
+  Button,
+  Paper,
+  Flex,
+  Loader,
+  ActionIcon,
+} from "@mantine/core";
+import {
+  IconCircleDot,
+  IconFileText,
+  IconMicrophone,
+  IconMicrophone2,
+  IconMicrophone2Off,
+} from "@tabler/icons";
 import { IconCircleDotFilled, IconCircleFilled } from "@tabler/icons-react";
 import { on } from "events";
+import { showNotification } from "@mantine/notifications";
 
 type DeepGramProps = {
   onTranscriptionChanged: (text: string) => void;
@@ -26,7 +42,12 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
         console.log("Microphone access granted.");
       } catch (error) {
         console.error("Error accessing media devices.", error);
-        alert("Permission denied. Please allow access to the microphone.");
+        // alert("Permission denied. Please allow access to the microphone.");
+        showNotification({
+          color: "red",
+          title: "Error accessing media devices",
+          message: "Permission denied. Please allow access to the microphone.",
+        });
       }
     };
 
@@ -48,7 +69,9 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
     live.on(LiveTranscriptionEvents.Transcript, (data) => {
       setLastText(data.channel.alternatives[0].transcript);
       if (lastText !== data.channel.alternatives[0].transcript) {
-        setTranscribedText((prevText) => prevText + " " + data.channel.alternatives[0].transcript);
+        setTranscribedText(
+          (prevText) => prevText + " " + data.channel.alternatives[0].transcript
+        );
       }
       console.log(data.channel.alternatives[0].transcript);
     });
@@ -100,7 +123,12 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
         mediaRecorder.start(1000); // Collect audio data in chunks of 1 second
       } catch (error) {
         console.error("Error accessing media devices.", error);
-        alert("Permission denied. Please allow access to the microphone.");
+        // alert("Permission denied. Please allow access to the microphone.");
+        showNotification({
+          color: "red",
+          title: "Error accessing media devices",
+          message: "Permission denied. Please allow access to the microphone.",
+        });
       }
     }
   };
@@ -109,7 +137,13 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
     <div>
       <HoverCard width={280} shadow="md" withinPortal>
         <HoverCard.Target>
-          <ActionIcon variant="filled" onClick={handleToggleRecording} size="md" mr="xs" className="bg-[#E25DEE] hover:bg-[#E25DEE]/80">
+          <ActionIcon
+            variant="filled"
+            onClick={handleToggleRecording}
+            size="md"
+            mr="xs"
+            className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
+          >
             {recording ? (
               // <IconCircleFilled size={16} />
               <Loader variant="bars" color="grape" size="xs" />

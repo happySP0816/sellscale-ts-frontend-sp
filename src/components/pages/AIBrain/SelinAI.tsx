@@ -921,7 +921,7 @@ const SegmentChat = (props: any) => {
         <Text fw={600}>Chat with Selix</Text>
       </Flex>
       <Divider bg="gray" />
-      <ScrollArea h={"70vh"} viewportRef={viewport} scrollHideDelay={4000}>
+      <ScrollArea h={"65vh"} viewportRef={viewport} scrollHideDelay={4000}>
         {messages.length > 1 ? (
           <Flex
             direction={"column"}
@@ -936,7 +936,7 @@ const SegmentChat = (props: any) => {
                   {message.type === "message" ? (
                     <Flex
                       direction={"column"}
-                      w={"50%"}
+                      w={"70%"}
                       gap={4}
                       key={index}
                       ml={message.role === "user" ? "auto" : "0"}
@@ -955,7 +955,8 @@ const SegmentChat = (props: any) => {
                             : "Selix AI"}
                         </Text>
                         {message.role !== "user" &&
-                          message.message === "loading" && (
+                          message.message !== "loading" &&
+                          index === messages.length - 1 && (
                             <Flex align="center" gap="xs">
                               <Loader
                                 variant="bars"

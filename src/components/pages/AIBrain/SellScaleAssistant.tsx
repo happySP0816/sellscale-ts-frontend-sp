@@ -184,6 +184,8 @@ const SegmentChat = (props: any) => {
         }
       ]);
 
+      props.setHasNotGeneratedPrefilter(false);
+
       props.handleShowEditTour();
 
     } catch (error) {

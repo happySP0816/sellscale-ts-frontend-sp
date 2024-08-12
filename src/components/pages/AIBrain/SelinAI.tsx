@@ -22,6 +22,7 @@ import {
   Select,
   Title,
   Textarea,
+  Popover,
 } from "@mantine/core";
 import {
   IconBulb,
@@ -84,6 +85,7 @@ const CustomCursorWrapper: React.FC<CustomCursorWrapperProps> = ({
 interface TaskType {
   id: number;
   title: string;
+  description?: string;
   status: "ACTIVE" | "COMPLETE" | "CANCELLED" | "PENDING_OPERATOR";
   created_at: string;
   updated_at: string;
@@ -145,7 +147,9 @@ export default function SelinAI() {
   const [threads, setThreads] = useState<ThreadType[]>([]);
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [counter, setCounter] = useState<number>(0);
-  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [messages, setMessages] = useState<MessageType[]>([
+
+  ]);
   const roomIDref = useRef<string>("");
   const [currentSessionId, setCurrentSessionId] = useState<Number | null>(null);
   const sessionIDRef = useRef<Number>(-1);
@@ -227,6 +231,8 @@ export default function SelinAI() {
         setCurrentSessionId(data[0].id);
         sessionIDRef.current = data[0].id;
         roomIDref.current = data[0].thread_id;
+      } if (data.length === 0){
+        handleCreateNewSession();
       }
     } catch (error) {
       console.error("Error fetching chat history:", error);
@@ -917,7 +923,7 @@ const SegmentChat = (props: any) => {
       </Flex>
       <Divider bg="gray" />
       <ScrollArea h={"70vh"} viewportRef={viewport} scrollHideDelay={4000}>
-        {messages.length > 0 ? (
+        {messages.length > 1 ? (
           <Flex
             direction={"column"}
             gap={"sm"}
@@ -1044,68 +1050,166 @@ const SegmentChat = (props: any) => {
             {/* {loading && <Loader color="blue" type="dots" />} */}
           </Flex>
         ) : (
-          <div className="absolute bottom-0 right-0 flex flex-col w-4/5 gap-1 pr-4">
-            <Paper
-              withBorder
-              p={"xs"}
-              radius={"md"}
-              className="hover:border-[#49494]"
+          <>
+            <Flex
+              direction={"column"}
+              gap={"sm"}
+              p={"md"}
+              h={"100%"}
+              className=" overflow-auto"
             >
-              <Flex
-                align={"center"}
-                gap={"xs"}
-                onClick={() =>
-                  handleListClick(
-                    "I have a prospect list - Find the best way to reach them"
-                  )
-                }
+              {messages.map((message: MessageType, index: number) => {
+                return (
+                  <>
+                    {message.type === "message" ? (
+                      <Flex
+                        direction={"column"}
+                        w={"50%"}
+                        gap={4}
+                        key={index}
+                        ml={message.role === "user" ? "auto" : "0"}
+                      >
+                        <Flex gap={4} align={"center"}>
+                          <Avatar
+                            src={
+                              message.role === "user" ? userData.img_url : Logo
+                            }
+                            size={"xs"}
+                            radius={"xl"}
+                          />
+                          <Text fw={600} size={"xs"}>
+                            {message.role !== "assistant"
+                              ? userData.sdr_name
+                              : "Selix AI"}
+                          </Text>
+                          {message.role !== "user" &&
+                            message.message === "loading" && (
+                              <Flex align="center" gap="xs">
+                                <Loader
+                                  variant="bars"
+                                  color="grape"
+                                  size="xs"
+                                  ml={10}
+                                />
+                              </Flex>
+                            )}
+                        </Flex>
+                        <Flex
+                          className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none"
+                          px={"sm"}
+                          py={7}
+                        >
+                          <Text size={"sm"} fw={500}>
+                            {message.role === "user" ? (
+                              message.message
+                            ) : message.message === "loading" ? (
+                              <Flex align="center" gap="xs">
+                                <Loader color="black" variant="dots" />
+                              </Flex>
+                            ) : (
+                              <Text>
+                                {message.message
+                                  .split("\n")
+                                  .map((line, index) => (
+                                    <Fragment key={index}>
+                                      {line}
+                                      <br />
+                                    </Fragment>
+                                  ))}
+                              </Text>
+                            )}
+                          </Text>
+                        </Flex>
+                        <Text
+                          color="gray"
+                          size={"xs"}
+                          ml={message.role === "user" ? "auto" : "0"}
+                        >
+                          {message.created_time}
+                        </Text>
+                      </Flex>
+                    ) : (
+                      <div className=" border border-[#E25DEE] border-solid m-auto rounded-md">
+                        <div className="w-full bg-[#E25DEE] py-2 text-center text-white text-semibold">
+                          ✨ Executing: {message.action_title}
+                        </div>
+                        <div
+                          className="p-3 bg-[#E25DEE] text-black shadow-md italic"
+                          style={{ background: "white" }}
+                        >
+                          <Text size="md" fw={600} className="text-center">
+                            {message.action_description}
+                          </Text>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })}
+            </Flex>
+            <div className="absolute bottom-0 right-0 flex flex-col w-4/5 gap-1 pr-4">
+              <Paper
+                withBorder
+                p={"xs"}
+                radius={"md"}
+                className="hover:border-[#49494]"
               >
-                <ThemeIcon color="grape" size={"xl"} variant="light">
-                  <IconUserShare size={"1.4rem"} />
-                </ThemeIcon>
-                <Text color="#E25DEE" fw={500} size={"sm"}>
-                  Help me reach out to my prospect list effectively
-                </Text>
-              </Flex>
-            </Paper>
-            <Paper withBorder p={"xs"} radius={"md"}>
-              <Flex
-                align={"center"}
-                gap={"xs"}
-                onClick={() =>
-                  handleListClick(
-                    "I want to set up pre-meetings for a conference in Vegas"
-                  )
-                }
-              >
-                <ThemeIcon color="grape" size={"xl"} variant="light">
-                  <IconUserShare size={"1.4rem"} />
-                </ThemeIcon>
-                <Text color="#E25DEE" fw={500} size={"sm"}>
-                  I need assistance organizing pre-meetings for an upcoming
-                  conference
-                </Text>
-              </Flex>
-            </Paper>
-            <Paper withBorder p={"xs"} radius={"md"}>
-              <Flex
-                align={"center"}
-                gap={"xs"}
-                onClick={() =>
-                  handleListClick(
-                    "I have a campaign idea I've wanted to implement"
-                  )
-                }
-              >
-                <ThemeIcon color="grape" size={"xl"} variant="light">
-                  <IconUserShare size={"1.4rem"} />
-                </ThemeIcon>
-                <Text color="#E25DEE" fw={500} size={"sm"}>
-                  I have a campaign idea to implement
-                </Text>
-              </Flex>
-            </Paper>
-          </div>
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  onClick={() =>
+                    handleListClick(
+                      "I have a prospect list - Find the best way to reach them"
+                    )
+                  }
+                >
+                  <ThemeIcon color="grape" size={"xl"} variant="light">
+                    <IconUserShare size={"1.4rem"} />
+                  </ThemeIcon>
+                  <Text color="#E25DEE" fw={500} size={"sm"}>
+                    Help me reach out to my prospect list effectively
+                  </Text>
+                </Flex>
+              </Paper>
+              <Paper withBorder p={"xs"} radius={"md"}>
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  onClick={() =>
+                    handleListClick(
+                      "I want to set up pre-meetings for a conference in Vegas"
+                    )
+                  }
+                >
+                  <ThemeIcon color="grape" size={"xl"} variant="light">
+                    <IconUserShare size={"1.4rem"} />
+                  </ThemeIcon>
+                  <Text color="#E25DEE" fw={500} size={"sm"}>
+                    I need assistance organizing pre-meetings for an upcoming
+                    conference
+                  </Text>
+                </Flex>
+              </Paper>
+              <Paper withBorder p={"xs"} radius={"md"}>
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  onClick={() =>
+                    handleListClick(
+                      "I have a campaign idea I've wanted to implement"
+                    )
+                  }
+                >
+                  <ThemeIcon color="grape" size={"xl"} variant="light">
+                    <IconUserShare size={"1.4rem"} />
+                  </ThemeIcon>
+                  <Text color="#E25DEE" fw={500} size={"sm"}>
+                    I have a campaign idea to implement
+                  </Text>
+                </Flex>
+              </Paper>
+            </div>
+          </>
         )}
       </ScrollArea>
       <Paper
@@ -1605,8 +1709,6 @@ const PlannerComponent = ({
   //   setTasks(currentThread?.tasks);
   // }, [threads, currentSessionId, messagesLength]);
 
-  console.log("tasks are", tasks);
-
   return (
     <Paper p={"sm"} withBorder radius={"sm"}>
       <Flex w={"100%"} align={"center"} gap={"xs"}>
@@ -1675,6 +1777,22 @@ const PlannerComponent = ({
                       {index + 1}
                     </ThemeIcon>
                     {task.title}
+                    <span className="mx-2">-</span>
+                    <Popover  width={500} position="bottom" withArrow shadow="md">
+                      <Popover.Target>
+                        <Text 
+                          style={{ cursor: "pointer" }}
+                          title={task?.description || ''}
+                        >
+                          {task?.description && task?.description?.length > 60
+                            ? `${task.description.substring(0, 60)}...`
+                            : task.description}
+                        </Text>
+                      </Popover.Target>
+                      <Popover.Dropdown>
+                        <Text size="sm">{task.description}</Text>
+                      </Popover.Dropdown>
+                    </Popover>
                   </Text>
                   <Flex align={"center"} gap={"xs"}>
                     {/* <Divider orientation="vertical" /> */}

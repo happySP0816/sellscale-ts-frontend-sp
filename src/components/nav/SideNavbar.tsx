@@ -32,7 +32,7 @@ import {
   userDataState,
   userTokenState,
 } from "@atoms/userAtoms";
-import { isLoggedIn } from "@auth/core";
+import { isFreeUser, isLoggedIn } from "@auth/core";
 import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -49,6 +49,7 @@ import {
   IconHome,
   IconList,
   IconPencil,
+  IconRobot,
   IconTarget,
   IconWorld,
 } from "@tabler/icons";
@@ -157,6 +158,7 @@ export default function SideNavbar(props: {}) {
   const [currentInboxCount, setCurrentInboxCount] = useRecoilState(
     currentInboxCountState
   );
+  const freeUser = isFreeUser();
 
   const [showWebIntent, setShowWebIntent] = useState(false);
 
@@ -244,53 +246,64 @@ export default function SideNavbar(props: {}) {
         <LogoFull />
         <Divider color="dark.4" />
         <Box m="md">
-          <SideNavbarItem
-            icon={<IconHome size="1.0rem" />}
-            label="Overview"
-            tabKey={["overview", ""]}
-          />
-          <SideNavbarItem
-            icon={<IconInbox size="1.0rem" />}
-            label={
-              <Group noWrap>
-                <Text>Inbox</Text>
-                {(currentInboxCount ?? "") && (
-                  <Badge
-                    sx={{ pointerEvents: "none" }}
-                    variant="filled"
-                    size="xs"
-                    color="blue"
-                  >
-                    {currentInboxCount}
-                  </Badge>
-                )}
-              </Group>
-            }
-            tabKey={["inbox"]}
-          />
-          <SideNavbarItem
-            icon={<IconTargetArrow size="1.0rem" />}
-            label="Campaigns"
-            tabKey={["campaigns", "all/campaigns"]}
-          />
-          <SideNavbarItem
-            icon={<IconUsers size="1.0rem" />}
-            label="Contacts"
-            tabKey={["contacts/overview", "contacts", "all/contacts"]}
-          />
+          {!freeUser && (
+            <SideNavbarItem
+              icon={<IconHome size="1.0rem" />}
+              label="Overview"
+              tabKey={["overview", ""]}
+            />
+          )}
+          {!freeUser && (
+            <SideNavbarItem
+              icon={<IconInbox size="1.0rem" />}
+              label={
+                <Group noWrap>
+                  <Text>Inbox</Text>
+                  {(currentInboxCount ?? "") && (
+                    <Badge
+                      sx={{ pointerEvents: "none" }}
+                      variant="filled"
+                      size="xs"
+                      color="blue"
+                    >
+                      {currentInboxCount}
+                    </Badge>
+                  )}
+                </Group>
+              }
+              tabKey={["inbox"]}
+            />
+          )}
+          {!freeUser && (
+            <SideNavbarItem
+              icon={<IconTargetArrow size="1.0rem" />}
+              label="Campaigns"
+              tabKey={["campaigns", "all/campaigns"]}
+            />
+          )}
+          {!freeUser && (
+            <SideNavbarItem
+              icon={<IconUsers size="1.0rem" />}
+              label="Contacts"
+              tabKey={["contacts/overview", "contacts", "all/contacts"]}
+            />
+          )}
           {/* <SideNavbarItem icon={<IconTarget size='1.0rem' />} label='Triggers' tabKey={['triggers', 'create-trigger']} /> */}
-          <SideNavbarItem
-            icon={<IconBrain size="1.0rem" />}
-            label="AI Brain"
-            tabKey={["analytics"]}
-          />
-          {showWebIntent && (
+          {!freeUser && (
+            <SideNavbarItem
+              icon={<IconBrain size="1.0rem" />}
+              label="AI Brain"
+              tabKey={["analytics"]}
+            />
+          )}
+          {!freeUser && showWebIntent && (
             <SideNavbarItem
               icon={<IconWorld size="1.0rem" />}
               label="Website"
               tabKey={["website"]}
             />
           )}
+
           {/* <SideNavbarItem
             icon={<IconChartHistogram size="1.0rem" />}
             label="Analytics"
@@ -325,9 +338,9 @@ export default function SideNavbar(props: {}) {
 
           <Divider color="dark.4" mt="lg" mb="sm" />
           <SideNavbarItem
-            icon={<IconList size="1.0rem" />}
+            icon={<IconRobot size="1.0rem" />}
             label="Selix"
-            tabKey="selix"
+            tabKey={["selin_ai"]}
           />
           <SideNavbarItem
             icon={<IconSearch size="1.0rem" />}
@@ -340,11 +353,13 @@ export default function SideNavbar(props: {}) {
             tabKey={["notifications", "all/recent-activity"]}
           /> */}
           {/* <SideNavbarItem icon={<IconBooks size='1.0rem' />} label='Advanced' tabKey='advanced' /> */}
-          <SideNavbarItem
-            icon={<IconSettings size="1.0rem" />}
-            label="Settings"
-            tabKey="settings"
-          />
+          {!freeUser && (
+            <SideNavbarItem
+              icon={<IconSettings size="1.0rem" />}
+              label="Settings"
+              tabKey="settings"
+            />
+          )}
           {/*<SideNavbarItem*/}
           {/*  icon={<IconPencil />}*/}
           {/*  label="Adjust AI"*/}

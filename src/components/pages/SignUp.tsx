@@ -18,7 +18,7 @@ import { useForm } from "@mantine/form";
 import { notifications, showNotification } from "@mantine/notifications";
 import { IconAt, IconInfoCircle } from "@tabler/icons";
 import { useEffect, useState } from "react";
-import { login } from "@auth/core";
+import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { userDataState } from "@atoms/userAtoms";
 import { LogoFull } from "@nav/Logo";
@@ -30,19 +30,19 @@ import WhiteLogo from "@assets/images/whitelogo.png";
 import Background from "@assets/images/login_bg.png";
 
 async function sendSignup(fullName: string, email: string) {
-  const response = await fetch(`${API_URL}/client/send_magic_link_signup`, {
+  const response = await fetch(`${API_URL}/client/selix_user`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      client_sdr_email: email,
-      client_sdr_name: fullName,
+      full_name: fullName,
+      email: email,
     }),
   });
 
-  let result = await response.text().catch((err) => {
-    console.error("Failed to read response as plain text", err);
+  let result = await response.json().catch((err) => {
+    console.error("Failed to parse response as JSON", err);
     showNotification({
       id: "auth-error",
       title: "Error",
@@ -53,18 +53,29 @@ async function sendSignup(fullName: string, email: string) {
     return null;
   });
 
-  return { status: response.status, message: result };
+  if (response.status === 200 && result?.data?.auth_token) {
+    window.location.href = `https://app.sellscale.com/authenticate?stytch_token_type=direct&token=${result.data.auth_token}&redirect=selix_onboarding`;
+  } else {
+    showNotification({
+      id: "auth-error",
+      title: "Error",
+      message: `Error: ${result?.message || "An unexpected error occurred"}`,
+      color: "red",
+      autoClose: false,
+    });
+  }
+
+  return { status: response.status, message: result?.message };
 }
 
 export default function SignupPage() {
   setPageTitle(`SignUp`);
   const theme = useMantineTheme();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useRecoilState(userDataState);
-
-  const [checkEmail, setCheckEmail] = useState(false);
 
   const form = useForm({
     initialValues: {
@@ -72,7 +83,8 @@ export default function SignupPage() {
       email: "",
     },
     validate: {
-      fullName: (value) => (value.trim().length > 0 ? null : "Full name is required"),
+      fullName: (value) =>
+        value.trim().length > 0 ? null : "Full name is required",
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
     },
   });
@@ -89,16 +101,15 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      // Make request to backend to signup (you need to implement this function)
       const res = await sendSignup(values.fullName, values.email);
 
       if (res?.status === 200) {
         showNotification({
           color: "green",
           title: "Signup Successful",
-          message: "Please check your email to verify your account",
+          message: "Redirecting to onboarding...",
         });
-        setCheckEmail(true);
+        navigate("/selix_onboarding");
       } else {
         setError(res?.message || "Error signing up");
         showNotification({
@@ -132,7 +143,14 @@ export default function SignupPage() {
           borderBottomRightRadius: "16px",
         }}
       >
-        <Flex direction={"column"} gap={"md"} mx={100} justify={"center"} w={"100%"} h={"100%"}>
+        <Flex
+          direction={"column"}
+          gap={"md"}
+          mx={100}
+          justify={"center"}
+          w={"100%"}
+          h={"100%"}
+        >
           <img src={WhiteLogo} className="bg-[#e25dee] w-10 p-2 rounded-full" />
           <Box>
             <Text fw={700} fz={22}>
@@ -142,30 +160,39 @@ export default function SignupPage() {
               You need to create an account first to chat with Selix
             </Text>
           </Box>
-          {!checkEmail && (
-            <form onSubmit={form.onSubmit(handleSubmit)}>
-              <TextInput size="md" mt={"xl"} placeholder="John Doe" label="Enter your Full Name" {...form.getInputProps("fullName")} required />
-              <TextInput size="md" mt={"xl"} placeholder="name@xyz.com" label="Enter your Email" {...form.getInputProps("email")} required />
-              {error && (
-                <Text color="red" size="sm" mt="sm">
-                  {error}
-                </Text>
-              )}
-              <Button mt="md" size="lg" fullWidth className="bg-[#e25dee]" type="submit" loading={loading}>
-                Create Account
-              </Button>
-            </form>
-          )}
-          {checkEmail && (
-            <>
-              <Text fw={500} mt={"lg"}>
-                A verification link has been sent to your email.
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <TextInput
+              size="md"
+              mt={"xl"}
+              placeholder="John Doe"
+              label="Enter your Full Name"
+              {...form.getInputProps("fullName")}
+              required
+            />
+            <TextInput
+              size="md"
+              mt={"xl"}
+              placeholder="name@xyz.com"
+              label="Enter your Email"
+              {...form.getInputProps("email")}
+              required
+            />
+            {error && (
+              <Text color="red" size="sm" mt="sm">
+                {error}
               </Text>
-              <Text c="dimmed" mb={"lg"}>
-                Please check your email to complete the signup process.
-              </Text>
-            </>
-          )}
+            )}
+            <Button
+              mt="md"
+              size="lg"
+              fullWidth
+              className="bg-[#e25dee]"
+              type="submit"
+              loading={loading}
+            >
+              Create Account
+            </Button>
+          </form>
         </Flex>
       </Flex>
       <Flex w={"51%"} className="absolute top-0 bottom-0 right-0">

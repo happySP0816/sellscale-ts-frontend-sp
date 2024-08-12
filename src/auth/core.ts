@@ -1,16 +1,28 @@
-import { API_URL } from '@constants/data';
-import { getPersonasOverview } from '@utils/requests/getPersonas';
-import { set } from 'lodash';
-import { SetterOrUpdater } from 'recoil';
-import { ClientSDR, PersonaOverview } from 'src';
+import { API_URL } from "@constants/data";
+import { getPersonasOverview } from "@utils/requests/getPersonas";
+import { set } from "lodash";
+import { SetterOrUpdater } from "recoil";
+import { ClientSDR, PersonaOverview } from "src";
 
 export function isLoggedIn() {
-  return !!(localStorage.getItem('user-token') && localStorage.getItem('user-data'));
+  return !!(
+    localStorage.getItem("user-token") && localStorage.getItem("user-data")
+  );
+}
+
+export function isFreeUser() {
+  const userData = localStorage.getItem("user-data");
+  if (!userData) {
+    return false;
+  }
+
+  const data = JSON.parse(userData);
+  return data.role === "FREE";
 }
 
 export function login(email: string, setUserData: SetterOrUpdater<any>) {
   setUserData({ sdr_email: email });
-  localStorage.setItem('user-data', JSON.stringify({ sdr_email: email }));
+  localStorage.setItem("user-data", JSON.stringify({ sdr_email: email }));
 }
 
 export async function authorize(
@@ -19,7 +31,7 @@ export async function authorize(
   setUserData: SetterOrUpdater<any>
 ) {
   setUserToken(token);
-  localStorage.setItem('user-token', token);
+  localStorage.setItem("user-token", token);
 
   const info = await getUserInfo(token);
   if (!info) {
@@ -27,23 +39,23 @@ export async function authorize(
   }
 
   setUserData(info);
-  localStorage.setItem('user-data', JSON.stringify(info));
+  localStorage.setItem("user-data", JSON.stringify(info));
   document.cookie = `token=${token}; SameSite=None; Secure`;
 }
 
 export function logout(noCheck = false, redirect = true, clearAdmin = true) {
   const logoutProcess = () => {
-    localStorage.removeItem('user-token');
-    localStorage.removeItem('user-data');
+    localStorage.removeItem("user-token");
+    localStorage.removeItem("user-data");
     if (clearAdmin) {
-      localStorage.removeItem('admin-data');
+      localStorage.removeItem("admin-data");
     }
     document.cookie = `token=; SameSite=None; Secure`;
-    if (window.location.href.includes('login')) {
+    if (window.location.href.includes("login")) {
       return;
     }
     if (redirect) {
-      window.location.href = '/';
+      window.location.href = "/";
     }
   };
 
@@ -51,7 +63,7 @@ export function logout(noCheck = false, redirect = true, clearAdmin = true) {
     logoutProcess();
   } else {
     // Check to confirm that the token is invalid
-    getUserInfo(localStorage.getItem('user-token')).then((info) => {
+    getUserInfo(localStorage.getItem("user-token")).then((info) => {
       if (!info) {
         logoutProcess();
       }
@@ -64,7 +76,10 @@ export function logout(noCheck = false, redirect = true, clearAdmin = true) {
  * @param userToken
  * @returns
  */
-export async function syncLocalStorage(userToken: string, setUserData: SetterOrUpdater<any>) {
+export async function syncLocalStorage(
+  userToken: string,
+  setUserData: SetterOrUpdater<any>
+) {
   if (!isLoggedIn()) {
     return;
   }
@@ -73,7 +88,7 @@ export async function syncLocalStorage(userToken: string, setUserData: SetterOrU
   if (!info) {
     logout();
   }
-  localStorage.setItem('user-data', JSON.stringify(info));
+  localStorage.setItem("user-data", JSON.stringify(info));
   document.cookie = `token=${userToken}; SameSite=None; Secure`;
   setUserData(info);
 }
@@ -84,7 +99,7 @@ export async function getUserInfo(userToken: string | null) {
   }
 
   const response = await fetch(`${API_URL}/client/sdr`, {
-    method: 'GET',
+    method: "GET",
     headers: {
       Authorization: `Bearer ${userToken}`,
     },
@@ -101,28 +116,35 @@ export async function getUserInfo(userToken: string | null) {
 }
 
 export function saveCurrentPersonaId(personaId: string) {
-  localStorage.setItem('opened-persona-id', personaId);
+  localStorage.setItem("opened-persona-id", personaId);
 }
 
 export function getCurrentPersonaId() {
-  return localStorage.getItem('opened-persona-id');
+  return localStorage.getItem("opened-persona-id");
 }
 
-export async function getFreshCurrentProject(userToken: string, projectId: number) {
+export async function getFreshCurrentProject(
+  userToken: string,
+  projectId: number
+) {
   const response = await getPersonasOverview(userToken);
-  const result = response.status === 'success' ? (response.data as PersonaOverview[]) : [];
+  const result =
+    response.status === "success" ? (response.data as PersonaOverview[]) : [];
 
   const project = result.find((p) => p.id === projectId);
   return project || null;
 }
 
-export async function handleAdminUser(userToken: string, setAdminData: SetterOrUpdater<any>) {
+export async function handleAdminUser(
+  userToken: string,
+  setAdminData: SetterOrUpdater<any>
+) {
   const info = await getUserInfo(userToken);
-  if (info && info.role === 'ADMIN') {
+  if (info && info.role === "ADMIN") {
     setAdminData(info);
-    localStorage.setItem('admin-data', JSON.stringify(info));
+    localStorage.setItem("admin-data", JSON.stringify(info));
   } else {
-    localStorage.removeItem('admin-data');
+    localStorage.removeItem("admin-data");
   }
 }
 
@@ -133,7 +155,7 @@ export async function impersonateSDR(
   setUserData: SetterOrUpdater<any>,
   reload: boolean = true
 ) {
-  if (sdr.role !== 'ADMIN') {
+  if (sdr.role !== "ADMIN") {
     return;
   }
 

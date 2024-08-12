@@ -1,7 +1,7 @@
 import { navigateToPage } from "@utils/documentChange";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { isLoggedIn } from "./core";
+import { isFreeUser, isLoggedIn } from "./core";
 import { useRecoilValue } from "recoil";
 import { userDataState } from "@atoms/userAtoms";
 

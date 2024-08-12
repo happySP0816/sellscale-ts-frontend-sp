@@ -553,17 +553,16 @@ export default function CampaignTemplateEditModal({
                             <IconPoint fill="#40C057" color="#40C057" size={"3rem"} />
                           </ThemeIcon>
                           <Text size={"xs"} fw={600}>
-                            {(stagingData[sequenceType]?.filter((asset: any) => asset.step_num === index + 1).length || 0) +
-                              (sequenceType === "email" ? emailSequenceData[index]?.length || 0 : linkedinSequenceData[index]?.length || 0)}{" "}
+                            {(sequenceType === "email" ? emailSequenceData[index]?.length || 0 : linkedinSequenceData[index]?.length || 0)}{" "}
                             Templates Active
                           </Text>
                         </Flex>
-                        <Flex gap={5} ml={30} mt={6} align={"center"}>
+                        {stagingData[sequenceType] && <Flex gap={5} ml={30} mt={6} align={"center"}>
                           <IconClock color="orange" size={"1rem"} />
                           <Text size={"xs"} fw={600} color="gray">
-                            {stagingData[sequenceType]?.filter((asset: any) => asset.step_num === index + 1).length + " "} template pending save
+                            {stagingData[sequenceType]?.filter((asset: any) => asset.step_num === index + 1).length + " "} templates pending save
                           </Text>
-                        </Flex>
+                        </Flex>}
                       </Paper>
                       <Divider orientation="vertical" h={30} variant="dashed" ml={20} />
                     </>
@@ -1161,6 +1160,8 @@ export default function CampaignTemplateEditModal({
                           }))
                         : stagingData[sequenceType]
                     );
+
+                    sessionStorage.removeItem("stagingData");
 
                     if (currentProject && currentProject.id !== null) {
                       innerProps.refetchSequenceData(Number(currentProject.id));

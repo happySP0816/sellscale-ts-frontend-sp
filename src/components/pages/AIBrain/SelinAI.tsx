@@ -69,7 +69,9 @@ interface CustomCursorWrapperProps {
   children: React.ReactNode;
 }
 
-const CustomCursorWrapper: React.FC<CustomCursorWrapperProps> = ({ children }) => {
+const CustomCursorWrapper: React.FC<CustomCursorWrapperProps> = ({
+  children,
+}) => {
   const cursorStyle = {
     cursor: `url("data:image/svg+xml,${encodeURIComponent(
       "<svg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 24 24' fill='none' stroke='#ff69b4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-right' transform='rotate(225)'><path d='M9 18L15 12L9 6'></path></svg>"
@@ -160,7 +162,10 @@ export default function SelinAI() {
         role: "user",
         type: "message",
       };
-      setMessages((chatContent: MessageType[]) => [...chatContent, newChatPrompt]);
+      setMessages((chatContent: MessageType[]) => [
+        ...chatContent,
+        newChatPrompt,
+      ]);
 
       setPrompt("");
       // setLoading(true);
@@ -172,7 +177,10 @@ export default function SelinAI() {
         type: "message",
       };
 
-      setMessages((chatContent: MessageType[]) => [...chatContent, loadingMessage]);
+      setMessages((chatContent: MessageType[]) => [
+        ...chatContent,
+        loadingMessage,
+      ]);
 
       try {
         const response = await fetch(`${API_URL}/selix/create_message`, {
@@ -215,6 +223,11 @@ export default function SelinAI() {
       const data = await response.json();
       setThreads(data);
       // console.log("data is", data);
+      if (data.length > 0) {
+        setCurrentSessionId(data[0].id);
+        sessionIDRef.current = data[0].id;
+        roomIDref.current = data[0].thread_id;
+      }
     } catch (error) {
       console.error("Error fetching chat history:", error);
     }
@@ -244,10 +257,14 @@ export default function SelinAI() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      const filteredMessages = data.filter((message: MessageType) => message.message !== "Acknowledged.");
+      const filteredMessages = data.filter(
+        (message: MessageType) => message.message !== "Acknowledged."
+      );
       setMessages(filteredMessages);
 
-      const currentThread = threads.find((thread) => thread.thread_id === thread_id);
+      const currentThread = threads.find(
+        (thread) => thread.thread_id === thread_id
+      );
       const memory: MemoryType | undefined = currentThread?.memory;
       if (currentThread?.tasks) {
         setTasks(currentThread.tasks);
@@ -268,7 +285,10 @@ export default function SelinAI() {
   const handleCreateNewSession = async () => {
     setLoadingNewChat(true);
     try {
-      const room_id = Array.from({ length: 16 }, () => Math.random().toString(36)[2]).join("");
+      const room_id = Array.from(
+        { length: 16 },
+        () => Math.random().toString(36)[2]
+      ).join("");
       roomIDref.current = room_id;
       socket.emit("join-room", {
         payload: { room_id: room_id },
@@ -293,7 +313,11 @@ export default function SelinAI() {
 
   const userToken = useRecoilValue(userTokenState);
 
-  const handleNewMessage = (data: { message?: string; action?: any; thread_id: string }) => {
+  const handleNewMessage = (data: {
+    message?: string;
+    action?: any;
+    thread_id: string;
+  }) => {
     if (data.thread_id === roomIDref.current) {
       if (data.message) {
         setMessages((chatContent: MessageType[]) => [
@@ -323,7 +347,9 @@ export default function SelinAI() {
 
       //remove all messages that are message.message === 'loading'
 
-      setMessages((chatContent: MessageType[]) => chatContent.filter((message) => message.message !== "loading"));
+      setMessages((chatContent: MessageType[]) =>
+        chatContent.filter((message) => message.message !== "loading")
+      );
     }
   };
 
@@ -355,17 +381,26 @@ export default function SelinAI() {
     setThreads((prevThreads) => {
       const updatedThreads = prevThreads.map((thread) => {
         if (task.selix_session_id === sessionIDRef.current) {
-          const updatedTasks = Array.isArray(thread.tasks) ? [...thread.tasks, task] : [task];
+          const updatedTasks = Array.isArray(thread.tasks)
+            ? [...thread.tasks, task]
+            : [task];
           console.log("updated tasks are", updatedTasks);
           return { ...thread, tasks: updatedTasks };
         } else {
-          console.log("found no match for the current session. we compared", task.selix_session_id, "and", sessionIDRef.current);
+          console.log(
+            "found no match for the current session. we compared",
+            task.selix_session_id,
+            "and",
+            sessionIDRef.current
+          );
         }
         return thread;
       });
 
       // Ensure the updated threads object is correctly reflected for children components
-      const currentThread = updatedThreads.find((thread) => thread.id === sessionIDRef.current);
+      const currentThread = updatedThreads.find(
+        (thread) => thread.id === sessionIDRef.current
+      );
       setTasks(currentThread?.tasks || []);
 
       return updatedThreads;
@@ -389,7 +424,10 @@ export default function SelinAI() {
     });
   };
 
-  const handleUpdateTaskAndAction = async (data: { task: TaskType; action: MessageType }) => {
+  const handleUpdateTaskAndAction = async (data: {
+    task: TaskType;
+    action: MessageType;
+  }) => {
     showNotification({
       title: "Task updated",
       message: `Task: ${data.task.title} has been updated`,
@@ -404,7 +442,9 @@ export default function SelinAI() {
         data.task.selix_session_id === sessionIDRef.current
           ? {
               ...thread,
-              tasks: Array.isArray(thread.tasks) ? [...thread.tasks, data.task] : [data.task],
+              tasks: Array.isArray(thread.tasks)
+                ? [...thread.tasks, data.task]
+                : [data.task],
             }
           : thread
       )
@@ -420,7 +460,10 @@ export default function SelinAI() {
     );
   };
 
-  const handleUpdateSession = async (data: { session: ThreadType; thread_id: string }) => {
+  const handleUpdateSession = async (data: {
+    session: ThreadType;
+    thread_id: string;
+  }) => {
     if (roomIDref.current === data.thread_id) {
       showNotification({
         title: "Session updated",
@@ -430,7 +473,13 @@ export default function SelinAI() {
       });
 
       // just update the local state
-      setThreads((prevThreads) => prevThreads.map((thread) => (thread.id === sessionIDRef.current ? { ...thread, ...data.session } : thread)));
+      setThreads((prevThreads) =>
+        prevThreads.map((thread) =>
+          thread.id === sessionIDRef.current
+            ? { ...thread, ...data.session }
+            : thread
+        )
+      );
     }
   };
 
@@ -518,7 +567,11 @@ export default function SelinAI() {
   return (
     <CustomCursorWrapper>
       <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
-        <div style={{ position: "relative", width: "100%", zIndex: 1 }} onMouseEnter={() => setOpened(true)} onMouseLeave={() => setOpened(false)}>
+        <div
+          style={{ position: "relative", width: "100%", zIndex: 1 }}
+          onMouseEnter={() => setOpened(true)}
+          onMouseLeave={() => setOpened(false)}
+        >
           <div
             style={{
               position: "absolute",
@@ -528,22 +581,50 @@ export default function SelinAI() {
               zIndex: 2,
             }}
           ></div>
-          <Paper radius={"sm"}>
-            <Flex align={"center"} justify={"center"} className="bg-gray-100 rounded-lg p-2 shadow-lg border border-dotted border-gray-200">
-              {/* 4 chats */}
-              <Text fw={600} color="black" className="text-center">
-                {threads.length} chats
+          <Card withBorder radius={"sm"}>
+            <Flex align={"center"} justify={"flex-start"}>
+              <ThemeIcon
+                radius="xl"
+                size="xs"
+                color={
+                  threads.filter((thread) => thread.status === "ACTIVE")
+                    .length > 0
+                    ? "green"
+                    : "gray"
+                }
+                variant={
+                  threads.filter((thread) => thread.status === "ACTIVE")
+                    .length > 0
+                    ? "filled"
+                    : "light"
+                }
+                className={
+                  threads.filter((thread) => thread.status === "ACTIVE")
+                    .length > 0
+                    ? "pulsing-bubble"
+                    : ""
+                }
+              >
+                <span />
+              </ThemeIcon>
+              <Text fw={600} color="black" className="text-left" ml="xs">
+                {threads.filter((thread) => thread.status === "ACTIVE").length}{" "}
+                active chats
               </Text>
-              {openedChat ? (
-                <IconChevronDown size={"1rem"} color="black" style={{ marginLeft: "1rem" }} />
-              ) : (
-                <IconChevronUp size={"1rem"} color="black" style={{ marginLeft: "1rem" }} />
-              )}
+              <div style={{ marginLeft: "auto" }}>
+                {openedChat ? (
+                  <IconChevronDown size={"1rem"} color="black" />
+                ) : (
+                  <IconChevronUp size={"1rem"} color="black" />
+                )}
+              </div>
             </Flex>
             <Collapse in={openedChat}>
               <Flex mt={"md"} gap={"sm"}>
                 <Paper
-                  onClick={!loadingNewChat ? () => handleCreateNewSession() : undefined}
+                  onClick={
+                    !loadingNewChat ? () => handleCreateNewSession() : undefined
+                  }
                   radius={"sm"}
                   p={"sm"}
                   bg={"#fcecfe"}
@@ -563,7 +644,10 @@ export default function SelinAI() {
                     </>
                   )}
                 </Paper>
-                <div ref={containerRef} style={{ overflowX: "hidden", whiteSpace: "nowrap" }}>
+                <div
+                  ref={containerRef}
+                  style={{ overflowX: "hidden", whiteSpace: "nowrap" }}
+                >
                   {threads
                     .sort((a, b) => b.id - a.id)
                     .map((thread: ThreadType, index) => {
@@ -577,11 +661,19 @@ export default function SelinAI() {
                           style={{
                             display: "inline-block",
                             minWidth: "400px",
-                            backgroundColor: sessionIDRef.current === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
-                            borderColor: sessionIDRef.current === thread.id ? "#00796b" : "#ced4da", // Change border color if current thread
+                            backgroundColor:
+                              sessionIDRef.current === thread.id
+                                ? "#d0f0c0"
+                                : "white", // Highlight if current thread
+                            borderColor:
+                              sessionIDRef.current === thread.id
+                                ? "#00796b"
+                                : "#ced4da", // Change border color if current thread
                           }}
                           className={`transition duration-300 ease-in-out transform ${
-                            sessionIDRef.current === thread.id ? "scale-105 shadow-2xl" : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
+                            sessionIDRef.current === thread.id
+                              ? "scale-105 shadow-2xl"
+                              : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
                           }`}
                           onClick={() => {
                             getMessages(thread.thread_id, thread.id);
@@ -595,7 +687,11 @@ export default function SelinAI() {
                               </div>
                             ) : // </ThemeIcon>
                             thread.status === "COMPLETE" ? (
-                              <IconCircleCheck size={"1rem"} fill="green" color="white" />
+                              <IconCircleCheck
+                                size={"1rem"}
+                                fill="green"
+                                color="white"
+                              />
                             ) : thread.status === "PENDING_OPERATOR" ? (
                               // <ThemeIcon color="orange" radius={"xl"} size={"xs"} p={0} variant="light">
                               //   <IconPoint fill="orange" color="white" size={"4rem"} />
@@ -606,13 +702,29 @@ export default function SelinAI() {
                             ) : (
                               <></>
                             )}{" "}
-                            <Text color={thread.status === "PENDING_OPERATOR" ? "orange" : "green"} fw={600}>
-                              {thread.status === "PENDING_OPERATOR" ? "IN PROGRESS" : thread.status}
+                            <Text
+                              color={
+                                thread.status === "PENDING_OPERATOR"
+                                  ? "orange"
+                                  : "green"
+                              }
+                              fw={600}
+                            >
+                              {thread.status === "PENDING_OPERATOR"
+                                ? "IN PROGRESS"
+                                : thread.status}
                             </Text>
                           </Flex>
-                          <Text fw={600}>{thread.session_name || "Untitled Session"}</Text>
+                          <Text fw={600}>
+                            {thread.session_name || "Untitled Session"}
+                          </Text>
                           <Text color="gray">
-                            Completed on: {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}
+                            Completed on:{" "}
+                            {thread.estimated_completion_time
+                              ? moment(
+                                  thread.estimated_completion_time
+                                ).fromNow()
+                              : "N/A"}
                           </Text>
                         </Paper>
                       );
@@ -620,7 +732,7 @@ export default function SelinAI() {
                 </div>
               </Flex>
             </Collapse>
-          </Paper>
+          </Card>
         </div>
         {currentSessionId && (
           <Flex mt={"md"} gap={"xl"}>
@@ -664,7 +776,8 @@ const SegmentChat = (props: any) => {
   const setPrompt = props.setPrompt;
   const currentSessionId: Number | null = props.currentSessionId;
   const messages: MessageType[] = props.messages;
-  const setMessages: React.Dispatch<React.SetStateAction<MessageType[]>> = props.setMessages;
+  const setMessages: React.Dispatch<React.SetStateAction<MessageType[]>> =
+    props.setMessages;
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState(false);
@@ -742,7 +855,8 @@ const SegmentChat = (props: any) => {
   const [chat2, setChat2] = useState([
     {
       status: true,
-      title: "Gather information about your medical Scribe AI Product by researching on",
+      title:
+        "Gather information about your medical Scribe AI Product by researching on",
       content: `"www.junipero.com/scribe"`,
     },
     {
@@ -776,7 +890,8 @@ const SegmentChat = (props: any) => {
 
   const [shouldSubmit, setShouldSubmit] = useState(false);
 
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleListClick = async (prompt: string) => {
     setPrompt(prompt);
@@ -789,31 +904,68 @@ const SegmentChat = (props: any) => {
 
   return (
     <Paper withBorder shadow="sm" radius={"md"} w={"35%"} h={"100%"}>
-      <Flex px={"md"} py={"xs"} align={"center"} gap={5} bg={"white"} className=" rounded-t-md">
+      <Flex
+        px={"md"}
+        py={"xs"}
+        align={"center"}
+        gap={5}
+        bg={"white"}
+        className=" rounded-t-md"
+      >
         <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
         <Text fw={600}>Chat with Selix</Text>
       </Flex>
       <Divider bg="gray" />
       <ScrollArea h={"70vh"} viewportRef={viewport} scrollHideDelay={4000}>
         {messages.length > 0 ? (
-          <Flex direction={"column"} gap={"sm"} p={"md"} h={"100%"} className=" overflow-auto">
+          <Flex
+            direction={"column"}
+            gap={"sm"}
+            p={"md"}
+            h={"100%"}
+            className=" overflow-auto"
+          >
             {messages.map((message: MessageType, index: number) => {
               return (
                 <>
                   {message.type === "message" ? (
-                    <Flex direction={"column"} w={"50%"} gap={4} key={index} ml={message.role === "user" ? "auto" : "0"}>
+                    <Flex
+                      direction={"column"}
+                      w={"50%"}
+                      gap={4}
+                      key={index}
+                      ml={message.role === "user" ? "auto" : "0"}
+                    >
                       <Flex gap={4} align={"center"}>
-                        <Avatar src={message.role === "user" ? userData.img_url : Logo} size={"xs"} radius={"xl"} />
+                        <Avatar
+                          src={
+                            message.role === "user" ? userData.img_url : Logo
+                          }
+                          size={"xs"}
+                          radius={"xl"}
+                        />
                         <Text fw={600} size={"xs"}>
-                          {message.role !== "assistant" ? userData.sdr_name : "Selix AI"}
+                          {message.role !== "assistant"
+                            ? userData.sdr_name
+                            : "Selix AI"}
                         </Text>
-                        {message.role !== "user" && message.message === "loading" && (
-                          <Flex align="center" gap="xs">
-                            <Loader variant="bars" color="grape" size="xs" ml={10} />
-                          </Flex>
-                        )}
+                        {message.role !== "user" &&
+                          message.message === "loading" && (
+                            <Flex align="center" gap="xs">
+                              <Loader
+                                variant="bars"
+                                color="grape"
+                                size="xs"
+                                ml={10}
+                              />
+                            </Flex>
+                          )}
                       </Flex>
-                      <Flex className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none" px={"sm"} py={7}>
+                      <Flex
+                        className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none"
+                        px={"sm"}
+                        py={7}
+                      >
                         <Text size={"sm"} fw={500}>
                           {message.role === "user" ? (
                             message.message
@@ -823,12 +975,14 @@ const SegmentChat = (props: any) => {
                             </Flex>
                           ) : (
                             <Text>
-                              {message.message.split("\n").map((line, index) => (
-                                <Fragment key={index}>
-                                  {line}
-                                  <br />
-                                </Fragment>
-                              ))}
+                              {message.message
+                                .split("\n")
+                                .map((line, index) => (
+                                  <Fragment key={index}>
+                                    {line}
+                                    <br />
+                                  </Fragment>
+                                ))}
                             </Text>
                           )}
                         </Text>
@@ -861,14 +1015,23 @@ const SegmentChat = (props: any) => {
                           </Flex>
                         );
                       })} */}
-                      <Text color="gray" size={"xs"} ml={message.role === "user" ? "auto" : "0"}>
+                      <Text
+                        color="gray"
+                        size={"xs"}
+                        ml={message.role === "user" ? "auto" : "0"}
+                      >
                         {message.created_time}
                       </Text>
                     </Flex>
                   ) : (
                     <div className=" border border-[#E25DEE] border-solid m-auto rounded-md">
-                      <div className="w-full bg-[#E25DEE] py-2 text-center text-white text-semibold">✨ Executing: {message.action_title}</div>
-                      <div className="p-3 bg-[#E25DEE] text-black shadow-md italic" style={{ background: "white" }}>
+                      <div className="w-full bg-[#E25DEE] py-2 text-center text-white text-semibold">
+                        ✨ Executing: {message.action_title}
+                      </div>
+                      <div
+                        className="p-3 bg-[#E25DEE] text-black shadow-md italic"
+                        style={{ background: "white" }}
+                      >
                         <Text size="md" fw={600} className="text-center">
                           {message.action_description}
                         </Text>
@@ -882,8 +1045,21 @@ const SegmentChat = (props: any) => {
           </Flex>
         ) : (
           <div className="absolute bottom-0 right-0 flex flex-col w-4/5 gap-1 pr-4">
-            <Paper withBorder p={"xs"} radius={"md"} className="hover:border-[#49494]">
-              <Flex align={"center"} gap={"xs"} onClick={() => handleListClick("I have a prospect list - Find the best way to reach them")}>
+            <Paper
+              withBorder
+              p={"xs"}
+              radius={"md"}
+              className="hover:border-[#49494]"
+            >
+              <Flex
+                align={"center"}
+                gap={"xs"}
+                onClick={() =>
+                  handleListClick(
+                    "I have a prospect list - Find the best way to reach them"
+                  )
+                }
+              >
                 <ThemeIcon color="grape" size={"xl"} variant="light">
                   <IconUserShare size={"1.4rem"} />
                 </ThemeIcon>
@@ -893,17 +1069,34 @@ const SegmentChat = (props: any) => {
               </Flex>
             </Paper>
             <Paper withBorder p={"xs"} radius={"md"}>
-              <Flex align={"center"} gap={"xs"} onClick={() => handleListClick("I want to set up pre-meetings for a conference in Vegas")}>
+              <Flex
+                align={"center"}
+                gap={"xs"}
+                onClick={() =>
+                  handleListClick(
+                    "I want to set up pre-meetings for a conference in Vegas"
+                  )
+                }
+              >
                 <ThemeIcon color="grape" size={"xl"} variant="light">
                   <IconUserShare size={"1.4rem"} />
                 </ThemeIcon>
                 <Text color="#E25DEE" fw={500} size={"sm"}>
-                  I need assistance organizing pre-meetings for an upcoming conference
+                  I need assistance organizing pre-meetings for an upcoming
+                  conference
                 </Text>
               </Flex>
             </Paper>
             <Paper withBorder p={"xs"} radius={"md"}>
-              <Flex align={"center"} gap={"xs"} onClick={() => handleListClick("I have a campaign idea I've wanted to implement")}>
+              <Flex
+                align={"center"}
+                gap={"xs"}
+                onClick={() =>
+                  handleListClick(
+                    "I have a campaign idea I've wanted to implement"
+                  )
+                }
+              >
                 <ThemeIcon color="grape" size={"xl"} variant="light">
                   <IconUserShare size={"1.4rem"} />
                 </ThemeIcon>
@@ -915,14 +1108,25 @@ const SegmentChat = (props: any) => {
           </div>
         )}
       </ScrollArea>
-      <Paper p={"sm"} withBorder radius={"md"} className="bg-[#f7f8fa]" my={"lg"} mx={"md"}>
+      <Paper
+        p={"sm"}
+        withBorder
+        radius={"md"}
+        className="bg-[#f7f8fa]"
+        my={"lg"}
+        mx={"md"}
+      >
         <Textarea
           value={prompt}
           placeholder="Chat with AI..."
           onKeyDown={handleKeyDown}
           onChange={(e) => setPrompt(e.target.value)}
           variant="unstyled"
-          inputContainer={(children) => <div style={{ minHeight: "0px", cursor: "default" }}>{children}</div>}
+          inputContainer={(children) => (
+            <div style={{ minHeight: "0px", cursor: "default" }}>
+              {children}
+            </div>
+          )}
           maxRows={5}
           style={{
             minHeight: "40px",
@@ -942,7 +1146,12 @@ const SegmentChat = (props: any) => {
           </Flex>
           <Flex>
             <DeepGram onTranscriptionChanged={(text) => setPrompt(text)} />
-            <ActionIcon variant="filled" size={"md"} className="bg-[#E25DEE] hover:bg-[#E25DEE]/80" onClick={handleSubmit}>
+            <ActionIcon
+              variant="filled"
+              size={"md"}
+              className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
+              onClick={handleSubmit}
+            >
               <IconSend size={"1rem"} />
             </ActionIcon>
           </Flex>
@@ -976,12 +1185,16 @@ const SelixControlCenter = ({
   handleSubmit: () => void;
 }) => {
   const [selectedCitation, setSelectedCitation] = useState<string | null>(null);
-  const currentThreadMemory = threads.find((thread) => thread.id === currentSessionId)?.memory;
+  const currentThreadMemory = threads.find(
+    (thread) => thread.id === currentSessionId
+  )?.memory;
   const [availableCitations, setAvailableCitations] = useState<string[]>([]);
 
   useEffect(() => {
     if (currentThreadMemory?.search) {
-      const citations = currentThreadMemory.search.flatMap((searchItem) => searchItem.citations);
+      const citations = currentThreadMemory.search.flatMap(
+        (searchItem) => searchItem.citations
+      );
       if (JSON.stringify(citations) !== JSON.stringify(availableCitations)) {
         setAvailableCitations(citations);
         setSelectedCitation(citations[0]);
@@ -991,7 +1204,14 @@ const SelixControlCenter = ({
 
   return (
     <Paper withBorder shadow="sm" w={"65%"} radius={"md"}>
-      <Flex px={"md"} py={"xs"} align={"center"} gap={5} bg={"#E25DEE"} className=" rounded-t-md">
+      <Flex
+        px={"md"}
+        py={"xs"}
+        align={"center"}
+        gap={5}
+        bg={"#E25DEE"}
+        className=" rounded-t-md"
+      >
         <IconSparkles size={"1rem"} color="white" />
         <Text fw={600} color="white">
           Selix AI Workspace
@@ -1019,7 +1239,9 @@ const SelixControlCenter = ({
               value: "PLANNER",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {aiType === "PLANNER" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  {aiType === "PLANNER" && (
+                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
+                  )}
                   <span>Tasks</span>
                 </Center>
               ),
@@ -1028,7 +1250,9 @@ const SelixControlCenter = ({
               value: "STRATEGY_CREATOR",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {aiType === "STRATEGY_CREATOR" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  {aiType === "STRATEGY_CREATOR" && (
+                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
+                  )}
                   <span>Blueprint</span>
                 </Center>
               ),
@@ -1036,8 +1260,12 @@ const SelixControlCenter = ({
             {
               value: "NOT_AVAILABLE2",
               label: (
-                <Center style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}>
-                  {aiType === "segment" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                <Center
+                  style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
+                >
+                  {aiType === "segment" && (
+                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
+                  )}
                   <span>Segments</span>
                 </Center>
               ),
@@ -1045,8 +1273,12 @@ const SelixControlCenter = ({
             {
               value: "NOT_AVAILABLE3",
               label: (
-                <Center style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}>
-                  {aiType === "campaign" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                <Center
+                  style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
+                >
+                  {aiType === "campaign" && (
+                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
+                  )}
                   <span>Campaigns</span>
                 </Center>
               ),
@@ -1055,7 +1287,9 @@ const SelixControlCenter = ({
               value: "BROWSER",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {aiType === "BROWSER" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                  {aiType === "BROWSER" && (
+                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
+                  )}
                   <span>Browser</span>
                 </Center>
               ),
@@ -1063,8 +1297,12 @@ const SelixControlCenter = ({
             {
               value: "NOT_AVAILABLE",
               label: (
-                <Center style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}>
-                  {aiType === "analytics" && <Avatar src={Logo} size={"xs"} radius={"xl"} />}
+                <Center
+                  style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
+                >
+                  {aiType === "analytics" && (
+                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
+                  )}
                   <span>Analytics</span>
                 </Center>
               ),
@@ -1084,7 +1322,13 @@ const SelixControlCenter = ({
           />
         ) : aiType === "PLANNER" ? (
           // passing in messages length to trigger renders
-          <PlannerComponent counter={counter} messagesLength={messages.length} threads={threads} tasks={tasks} currentSessionId={currentSessionId} />
+          <PlannerComponent
+            counter={counter}
+            messagesLength={messages.length}
+            threads={threads}
+            tasks={tasks}
+            currentSessionId={currentSessionId}
+          />
         ) : aiType === "segment" ? (
           <Box maw="900px">
             <SegmentV3 />
@@ -1099,7 +1343,12 @@ const SelixControlCenter = ({
           </Box>
         ) : aiType === "BROWSER" ? (
           <Box maw="100%">
-            <Select value={selectedCitation} data={availableCitations} placeholder="Select a citation" onChange={(value) => setSelectedCitation(value)} />
+            <Select
+              value={selectedCitation}
+              data={availableCitations}
+              placeholder="Select a citation"
+              onChange={(value) => setSelectedCitation(value)}
+            />
 
             <iframe
               src={selectedCitation || undefined}
@@ -1115,30 +1364,47 @@ const SelixControlCenter = ({
           </Box>
         ) : aiType === "NOT_AVAILABLE" ? (
           <Center style={{ height: "100%" }}>
-            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>Not Currently Available.</Text>
+            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
+              Not Currently Available.
+            </Text>
           </Center>
         ) : aiType === "NOT_AVAILABLE2" || aiType === "NOT_AVAILABLE3" ? (
           <Center style={{ height: "100%" }}>
-            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>Not Currently Available.</Text>
+            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
+              Not Currently Available.
+            </Text>
           </Center>
         ) : (
           <Center style={{ height: "100%" }}>
-            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>No Tasks Created. Please create one via the chat.</Text>
+            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
+              No Tasks Created. Please create one via the chat.
+            </Text>
           </Center>
         )}
 
         {aiType === "STRATEGY_CREATOR" ? (
-          <Paper withBorder bg={"#fffaea"} mt={"sm"} px={"sm"} py={"xs"} style={{ borderColor: "#fdb93a" }}>
+          <Paper
+            withBorder
+            bg={"#fffaea"}
+            mt={"sm"}
+            px={"sm"}
+            py={"xs"}
+            style={{ borderColor: "#fdb93a" }}
+          >
             <Flex align={"center"} gap={"xs"}>
               <IconInfoCircle color="orange" size={"1rem"} />
               <Text size={"xs"} color="orange" fw={600}>
                 Disclaimer:{" "}
-                <span className="font-medium">Once executed, I will draft the campaign. You can review your campaign prior to any outreach.</span>
+                <span className="font-medium">
+                  Once executed, I will draft the campaign. You can review your
+                  campaign prior to any outreach.
+                </span>
               </Text>
             </Flex>
           </Paper>
         ) : aiType === "PLANNER" ? (
           <></>
+        ) : (
           // <Paper withBorder bg={"#fffaea"} mt={"sm"} px={"sm"} py={"md"} style={{ borderColor: "#fdb93a" }}>
           //   <Flex align={"center"} gap={"xs"} justify={"space-between"}>
           //     <Text size={"sm"} color="orange" fw={600}>
@@ -1154,7 +1420,6 @@ const SelixControlCenter = ({
           //     </Flex>
           //   </Flex>
           // </Paper>
-        ) : (
           <></>
         )}
       </ScrollArea>
@@ -1348,10 +1613,21 @@ const PlannerComponent = ({
         {/* <Divider label="Next in line" labelPosition="left" w={"100%"} color="gray" fw={500} />
         <ActionIcon onClick={toggle}>{opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}</ActionIcon> */}
       </Flex>
-      <Paper withBorder bg={"#fefafe"} my={"sm"} px={"sm"} py={8} style={{ borderColor: "#fadafc" }}>
+      <Paper
+        withBorder
+        bg={"#fefafe"}
+        my={"sm"}
+        px={"sm"}
+        py={8}
+        style={{ borderColor: "#fadafc" }}
+      >
         <Flex align={"center"} gap={"xs"} justify={"space-between"}>
           <Text size={"xs"} color="#E25DEE" fw={600}>
-            Selix Work Planner: <span className="font-medium text-gray-500">This is work that I will be executing on. I'll ask you if anything comes up.</span>
+            Selix Work Planner:{" "}
+            <span className="font-medium text-gray-500">
+              This is work that I will be executing on. I'll ask you if anything
+              comes up.
+            </span>
           </Text>
           <Flex gap={5} align={"center"}>
             <Divider orientation="vertical" color={"#fceafe"} />
@@ -1385,8 +1661,17 @@ const PlannerComponent = ({
             return (
               <Paper withBorder p={"sm"} key={index} mb={"xs"} radius={"md"}>
                 <Flex justify={"space-between"} align={"center"}>
-                  <Text className="flex gap-1 items-center" fw={600} size={"sm"}>
-                    <ThemeIcon color="gray" radius={"xl"} variant="light" size={18}>
+                  <Text
+                    className="flex gap-1 items-center"
+                    fw={600}
+                    size={"sm"}
+                  >
+                    <ThemeIcon
+                      color="gray"
+                      radius={"xl"}
+                      variant="light"
+                      size={18}
+                    >
                       {index + 1}
                     </ThemeIcon>
                     {task.title}
@@ -1397,10 +1682,18 @@ const PlannerComponent = ({
                       {moment(task.created_at).fromNow()}
                     </Text>
                     <Flex align={"center"} gap={"xs"}>
-                      <ThemeIcon color={statusColors[task.status]} radius={"xl"} size={10}>
+                      <ThemeIcon
+                        color={statusColors[task.status]}
+                        radius={"xl"}
+                        size={10}
+                      >
                         <span />
                       </ThemeIcon>
-                      <Text color={statusColors[task.status]} size={"sm"} fw={500}>
+                      <Text
+                        color={statusColors[task.status]}
+                        size={"sm"}
+                        fw={500}
+                      >
                         {task.status}
                       </Text>
                     </Flex>
@@ -1429,7 +1722,8 @@ const SelinStrategy = ({
   currentSessionId: Number | null;
   counter: Number;
 }) => {
-  const memory = threads.find((thread) => thread.id === currentSessionId)?.memory;
+  const memory = threads.find((thread) => thread.id === currentSessionId)
+    ?.memory;
 
   const hackedSubmit = () => {
     console.log("hacked submit");
@@ -1477,11 +1771,20 @@ const SelinStrategy = ({
     <Paper withBorder radius={"sm"}>
       <Flex bg={"#1E90FF"} p={"sm"}>
         <Text tt={"uppercase"} fw={600} color="white">
-          Blueprint: <span className="text-gray-200">{strategy?.title.replace(/['"]/g, "")}</span>
+          Blueprint:{" "}
+          <span className="text-gray-200">
+            {strategy?.title.replace(/['"]/g, "")}
+          </span>
         </Text>
       </Flex>
       <Stack p={"sm"}>
-        <Paper withBorder bg={"#F0FFF0"} px={"sm"} py={"xs"} style={{ borderColor: "#32CD32" }}>
+        <Paper
+          withBorder
+          bg={"#F0FFF0"}
+          px={"sm"}
+          py={"xs"}
+          style={{ borderColor: "#32CD32" }}
+        >
           <Flex align={"center"} gap={"xs"}>
             <IconInfoCircle color="green" size={"1rem"} />
             <Text size={"sm"} color="#228B22" fw={600}>
@@ -1544,7 +1847,8 @@ const SelinStrategy = ({
               Attached Campaigns:
             </Text>
           </div>
-          {strategy?.tagged_campaigns && strategy.tagged_campaigns.length > 0 ? (
+          {strategy?.tagged_campaigns &&
+          strategy.tagged_campaigns.length > 0 ? (
             strategy.tagged_campaigns.map((campaign: number, index: number) => (
               <Badge key={index} color="green">
                 {campaign.toString()}
@@ -1561,8 +1865,13 @@ const SelinStrategy = ({
             </Text>
           </div>
           <Text size={"xs"} color="blue" fw={600}>
-            {strategy?.start_date ? moment(strategy.start_date).format("MMMM Do, YYYY") : "N/A"} -{" "}
-            {strategy?.end_date ? moment(strategy.end_date).format("MMMM Do, YYYY") : "N/A"}
+            {strategy?.start_date
+              ? moment(strategy.start_date).format("MMMM Do, YYYY")
+              : "N/A"}{" "}
+            -{" "}
+            {strategy?.end_date
+              ? moment(strategy.end_date).format("MMMM Do, YYYY")
+              : "N/A"}
           </Text>
         </Flex>
         <Flex align={"center"} gap={"md"}>
@@ -1589,12 +1898,33 @@ const SelinStrategy = ({
                   description: strategy?.description,
                   archetypes: [],
                   status: strategy?.status,
-                  startDate: strategy?.start_date ? new Date(strategy.start_date) : null,
-                  endDate: strategy?.end_date ? new Date(strategy.end_date) : null,
-                  onSubmit: async (title: string, description: string, archetypes: number[], status: string, startDate: Date, endDate: Date) => {
-                    const response = await patchUpdateStrategy(memory?.strategy_id || -1, title, description, archetypes, status, startDate, endDate);
+                  startDate: strategy?.start_date
+                    ? new Date(strategy.start_date)
+                    : null,
+                  endDate: strategy?.end_date
+                    ? new Date(strategy.end_date)
+                    : null,
+                  onSubmit: async (
+                    title: string,
+                    description: string,
+                    archetypes: number[],
+                    status: string,
+                    startDate: Date,
+                    endDate: Date
+                  ) => {
+                    const response = await patchUpdateStrategy(
+                      memory?.strategy_id || -1,
+                      title,
+                      description,
+                      archetypes,
+                      status,
+                      startDate,
+                      endDate
+                    );
                     //yolo
-                    const updatedStrategy = await getStrategy(memory?.strategy_id || -1);
+                    const updatedStrategy = await getStrategy(
+                      memory?.strategy_id || -1
+                    );
                     setStrategy(updatedStrategy);
                     showNotification({
                       title: "Success",

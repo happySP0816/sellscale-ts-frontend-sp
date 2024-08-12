@@ -1,11 +1,13 @@
 import { Box, Button, Center, Divider, Flex, Paper, Stack, Text, Textarea, TextInput, ThemeIcon } from "@mantine/core";
 import { IconPoint, IconRefresh, IconRocket } from "@tabler/icons";
 import { useState } from "react";
+import SellScaleAssistant from "./SellScaleAssistant";
 
 export default function SelixOnboarding() {
   const [tagline, setTagLine] = useState("");
   const [description, setDescription] = useState("");
   const [preFilter, setPreFilter] = useState("");
+  const [hasNotGeneratedPreFilter, setHasNotGeneratedPrefilter] = useState(true);
 
   const [step, setStep] = useState(1);
 
@@ -51,7 +53,7 @@ export default function SelixOnboarding() {
             Review Company Information
           </Text>
           <Text size={"xs"} fw={step >= 2 ? 600 : 500} color={step >= 2 ? "" : "gray"} mr={70}>
-            Create Pre-Filters
+            Identify Core Customers
           </Text>
           <Text size={"xs"} fw={step >= 3 ? 600 : 500} color={step >= 3 ? "" : "gray"} mr={30}>
             Final Review
@@ -59,7 +61,7 @@ export default function SelixOnboarding() {
         </Flex>
         <Paper withBorder radius={"sm"} p={"md"} w={"96%"} mt={"md"} shadow="sm">
           {step === 1 && <ReviewCompanyInfo tagline={tagline} description={description} setTagLine={setTagLine} setDescription={setDescription} />}
-          {step === 2 && <CreatePreFilter preFilter={preFilter} setPreFilter={setPreFilter} />}
+          {step === 2 && <CreatePreFilter setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter} preFilter={preFilter} setPreFilter={setPreFilter} />}
           {step === 3 && <FinalReview tagline={tagline} description={description} preFilter={preFilter} />}
           <Flex gap={"sm"} justify={"end"} w={"100%"} mt={"md"}>
             <Button
@@ -72,6 +74,7 @@ export default function SelixOnboarding() {
               Go Back
             </Button>
             <Button
+              disabled={step === 2 && hasNotGeneratedPreFilter}
               leftIcon={step >= 3 && <IconRocket size={"1rem"} />}
               onClick={() => {
                 if (step < 3) setStep(step + 1);
@@ -109,13 +112,10 @@ const ReviewCompanyInfo = ({
   );
 };
 
-const CreatePreFilter = ({ preFilter, setPreFilter }: { preFilter: string; setPreFilter: any }) => {
+const CreatePreFilter = ({ preFilter, setPreFilter, setHasNotGeneratedPrefilter }: { preFilter: string; setPreFilter: any, setHasNotGeneratedPrefilter: any }) => {
   return (
     <Stack spacing={"sm"}>
-      <Text size={"sm"} fw={500}>
-        Create a high level 'pre-filter' that the AI will use to make sure its only pulling relevant contacts
-      </Text>
-      <Textarea minRows={3} value={preFilter} onChange={(e: any) => setPreFilter(e.target.value)} label="Describe your pre-filter:" />
+      <SellScaleAssistant setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter}/>
     </Stack>
   );
 };

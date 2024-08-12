@@ -1405,7 +1405,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           >
             {saved_query_id ? 'Save Filter' : 'Save Pre-filter'}
           </Button> */}
-          {!window.location.href.includes('/analytics') && !window.location.href.includes('/website') && (
+          {!window.location.href.includes('/selix_onboarding') && !window.location.href.includes('/analytics') && !window.location.href.includes('/website') && (
             <Button 
               color="green"
               disabled={saved_query_id ? false : ((currentSavedQueryId === undefined) || filterName === '')}

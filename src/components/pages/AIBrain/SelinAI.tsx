@@ -750,14 +750,25 @@ export default function SelinAI() {
                                   (prevThread) => prevThread.id !== thread.id
                                 )
                               );
+                              //if the chat we're in is the one we're deleting, we need to get the next chat
+                              if (sessionIDRef.current === thread.id) {
+                                const nextThread = threads.find(
+                                  (thread) => thread.id !== sessionIDRef.current
+                                );
+                                if (nextThread) {
+                                  getMessages(nextThread.thread_id, nextThread.id);
+                                }
+                              }
+                              
+
                               //query to delete thread
-                               fetch(`${API_URL}/selix/delete_thread`, {
-                                method: "POST",
+                               fetch(`${API_URL}/selix/delete_session`, {
+                                method: "DELETE",
                                 headers: {
                                   "Content-Type": "application/json",
                                   Authorization: `Bearer ${userToken}`,
                                 },
-                                body: JSON.stringify({ thread_id: thread.thread_id }),
+                                body: JSON.stringify({ session_id: thread.id }),
                               });
 
 

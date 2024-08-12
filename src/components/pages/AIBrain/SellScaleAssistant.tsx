@@ -25,6 +25,7 @@ import { IconSparkles } from "@tabler/icons-react";
 import moment from "moment";
 import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
+import Tour from "reactour";
 
 import Logo from "../../../assets/images/logo.png";
 import { DataGrid } from "mantine-data-grid";
@@ -32,12 +33,41 @@ import { API_URL } from "@constants/data";
 import { openContextModal } from "@mantine/modals";
 import { set } from "lodash";
 
-export default function SellScaleAssistant() {
-  const [history, setHistory] = useState([
-    { title: "Early Stage SaaS founders in NYC", time: "1 hr ago" },
-    { title: "AI companies in bay area", time: "yesterday" },
-    { title: "Fintech SaaS Companies", time: "2 days ago" },
-  ]);
+export default function SellScaleAssistant({ setHasNotGeneratedPrefilter }: { setHasNotGeneratedPrefilter?: (value: boolean) => void }) {
+  
+  useEffect(() => {
+    const tourSeen = localStorage.getItem("filterTourSeen");
+    if (!tourSeen) {
+      setIsTourOpen(true);
+    }
+  }, []);
+
+  const [isTourOpen, setIsTourOpen] = useState(false);
+  const [editTourOpen, setEditTourOpen] = useState(false);
+
+  const editTourSteps = [
+    {
+      selector: '[data-tour="edit-tutorial"]',
+      content: "Edit the customer details in this table to better define your Total Addressable Market (TAM). Click the edit button to refine your filters.",
+    },
+  ];
+  
+  const handleShowEditTour = () => {
+    const editTourSeen = localStorage.getItem("editTourSeen");
+    if (!editTourSeen) {
+      setEditTourOpen(true);
+    }
+  }
+
+  const closeTour = () => {
+    setIsTourOpen(false);
+    localStorage.setItem("filterTourSeen", "true");
+  };
+
+  const closeEditTour = () => {
+    setEditTourOpen(false);
+    localStorage.setItem("editTourSeen", "true");
+  }
 
   const [segment, setSegment] = useState([
   ]);
@@ -45,12 +75,25 @@ export default function SellScaleAssistant() {
   return (
     <Box>
       <Flex mt={"md"} gap={"xl"}>
-        <SegmentChat setSegment={setSegment} segment={segment} />
-        <SegmentAIGeneration setSegment={setSegment} segment={segment} />
+      <Tour steps={editTourSteps} isOpen={editTourOpen} onRequestClose={closeEditTour}/>
+      <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour}/>
+        <SegmentChat setSegment={setSegment} segment={segment} handleShowEditTour={handleShowEditTour}/>
+        <SegmentAIGeneration setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter} setSegment={setSegment} segment={segment} />
       </Flex>
     </Box>
   );
 }
+
+const steps = [
+  {
+    selector: '[data-tour="segment-tutorial"]',
+    content: "Let's get some details about your target audience.",
+  },
+  {
+    selector: '[data-tour="chat-tutorial"]',
+    content: "Describe your target audience to help us understand them better.",
+  },
+];
 
 const SegmentChat = (props: any) => {
   const userData = useRecoilValue(userDataState);
@@ -141,6 +184,8 @@ const SegmentChat = (props: any) => {
         }
       ]);
 
+      props.handleShowEditTour();
+
     } catch (error) {
       console.error("Error fetching prediction:", error);
       setLoading(false);
@@ -188,11 +233,11 @@ const SegmentChat = (props: any) => {
           {/* {loading && <Loader color="blue" type="dots" />} */}
         </Flex>
       </ScrollArea>
-      <Paper p={"sm"} withBorder radius={"md"} className="bg-[#f7f8fa]" my={"lg"} mx={"md"}>
+      <Paper data-tour="chat-tutorial" p={"sm"} withBorder radius={"md"} className="bg-[#f7f8fa]" my={"lg"} mx={"md"}>
         <TextInput
           multiple
           value={prompt}
-          placeholder="Type '/' for command"
+          placeholder="Type your message here..."
           onKeyDown={handleKeyDown}
           onChange={(e) => setPrompt(e.target.value)}
           variant="unstyled"
@@ -309,6 +354,9 @@ const SegmentAIGeneration = (props: any) => {
           ...query
         }));
         setPrefilters(formattedPrefilters);
+        if (formattedPrefilters.length > 0) {
+          props.setHasNotGeneratedPrefilter(false);
+        }
       } else {
         console.error("Failed to fetch saved queries:", data);
       }
@@ -384,7 +432,7 @@ const SegmentAIGeneration = (props: any) => {
               </thead>
               <tbody style={{ backgroundColor: 'white' }}>
                 {props.segment?.map((element: { total_entries: any, id: any, makers: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; industry: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; pain_point: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; }, index: number) => (
-                  <tr key={index}>
+                  <tr data-tour="edit-tutorial" key={index}>
                     <td style={{ border: '1px solid #e7ebef', padding: '8px' }}>
                       <div>
                         <Badge color="green" variant="filled" mb={4}>New</Badge>

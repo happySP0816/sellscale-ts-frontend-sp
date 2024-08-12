@@ -77,7 +77,7 @@ export default function SellScaleAssistant({ setHasNotGeneratedPrefilter }: { se
       <Flex mt={"md"} gap={"xl"}>
       <Tour steps={editTourSteps} isOpen={editTourOpen} onRequestClose={closeEditTour}/>
       <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour}/>
-        <SegmentChat setSegment={setSegment} segment={segment} handleShowEditTour={handleShowEditTour}/>
+        <SegmentChat setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter} setSegment={setSegment} segment={segment} handleShowEditTour={handleShowEditTour}/>
         <SegmentAIGeneration setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter} setSegment={setSegment} segment={segment} />
       </Flex>
     </Box>

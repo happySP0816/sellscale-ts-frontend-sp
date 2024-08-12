@@ -241,15 +241,16 @@ const SegmentChat = (props: any) => {
           onKeyDown={handleKeyDown}
           onChange={(e) => setPrompt(e.target.value)}
           variant="unstyled"
+          autoFocus
         />
         <Flex justify={"space-between"} mt={"sm"} align={"center"}>
           <Flex gap={"sm"}>
-            <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
+            {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
               <IconPlus size={"1rem"} />
-            </ActionIcon>
-            <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
+            </ActionIcon> */}
+            {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
               <IconLink size={"1rem"} />
-            </ActionIcon>
+            </ActionIcon> */}
           </Flex>
           <Button size="xs" color="grape" rightIcon={<IconSend size={"1rem"} />} onClick={handleSubmit}>
             Ask AI

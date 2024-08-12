@@ -249,18 +249,20 @@ export default function CreateSegmentModal(props: CreateSegment) {
               <Button loading={loading} color="blue" onClick={async () => {
                 setLoading(true);
                 try {
+                  const payload = {
+                    segment_title: segmentName === '' ? new Date().toISOString() : segmentName,
+                    filters: props.filters, // Add your filters here
+                    // campaign_id: 'campaign_id', // Replace with actual campaign ID
+                    saved_apollo_query_id: props.saved_apollo_query_id,
+                  };
+
                   const response = await fetch(`${API_URL}/segment/create`, {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',
                       'Authorization': `Bearer ${userToken}`,
                     },
-                    body: JSON.stringify({
-                      segment_title: segmentName === '' ? new Date().toISOString() : segmentName,
-                      filters: props.filters, // Add your filters here
-                      // campaign_id: 'campaign_id', // Replace with actual campaign ID
-                      saved_apollo_query_id: props.saved_apollo_query_id,
-                    }),
+                    body: JSON.stringify(payload),
                   });
                   if (!response.ok) {
                     throw new Error('Network response was not ok');

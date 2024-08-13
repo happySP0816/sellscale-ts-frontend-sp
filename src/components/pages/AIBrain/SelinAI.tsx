@@ -97,7 +97,13 @@ interface TaskType {
   id: number;
   title: string;
   description?: string;
-  status: "QUEUED" | "IN_PROGRESS" | "IN_PROGRESS_REVIEW_NEEDED" | "COMPLETE" | "CANCELLED" | "BLOCKED";
+  status:
+    | "QUEUED"
+    | "IN_PROGRESS"
+    | "IN_PROGRESS_REVIEW_NEEDED"
+    | "COMPLETE"
+    | "CANCELLED"
+    | "BLOCKED";
   created_at: string;
   updated_at: string;
   selix_session_id: number;
@@ -160,7 +166,9 @@ export default function SelinAI() {
   const [counter, setCounter] = useState<number>(0);
   const [messages, setMessages] = useState<MessageType[]>([]);
   const roomIDref = useRef<string>("");
-  const deviceIDRef = useRef<string>(Math.random().toString(36).substring(2, 15));
+  const deviceIDRef = useRef<string>(
+    Math.random().toString(36).substring(2, 15)
+  );
   const [currentSessionId, setCurrentSessionId] = useState<Number | null>(null);
   const sessionIDRef = useRef<Number>(-1);
   const [loadingNewChat, setLoadingNewChat] = useState(false);
@@ -240,11 +248,11 @@ export default function SelinAI() {
         },
       });
       const data = await response.json();
-      console.log('data is', data);
+      console.log("data is", data);
       setThreads(data);
       // console.log("data is", data);
       if (data.length > 0) {
-          getMessages(data[0].thread_id, data[0].id, data);
+        getMessages(data[0].thread_id, data[0].id, data);
       }
       if (data.length === 0) {
         handleCreateNewSession();
@@ -253,8 +261,11 @@ export default function SelinAI() {
       console.error("Error fetching chat history:", error);
     }
   };
-  const getMessages = async (thread_id: string, session_id: Number, threads_passed?: ThreadType[]) => {
-
+  const getMessages = async (
+    thread_id: string,
+    session_id: Number,
+    threads_passed?: ThreadType[]
+  ) => {
     setLoadingNewChat(true);
     try {
       // create new room_id
@@ -283,9 +294,9 @@ export default function SelinAI() {
         (message: MessageType) => message.message !== "Acknowledged."
       );
       setMessages(filteredMessages);
-      const currentThread = threads_passed?.find(
-        (thread) => thread.id === session_id
-      ) || threads.find((thread) => thread.id === session_id);
+      const currentThread =
+        threads_passed?.find((thread) => thread.id === session_id) ||
+        threads.find((thread) => thread.id === session_id);
 
       const memory: MemoryType | undefined = currentThread?.memory;
       if (currentThread?.tasks) {
@@ -347,11 +358,9 @@ export default function SelinAI() {
     role: "user" | "assistant" | "system";
     thread_id: string;
   }) => {
-
     // if the message is not for the current device, ignore it
-    console.log('comparing device id', data.device_id, deviceIDRef.current);
+    console.log("comparing device id", data.device_id, deviceIDRef.current);
     if (data?.device_id === deviceIDRef.current) {
-      
       return;
     }
     if (data.thread_id === roomIDref.current) {
@@ -365,12 +374,11 @@ export default function SelinAI() {
             type: "message",
           },
         ]);
-        if (data.role === "assistant"){
+        if (data.role === "assistant") {
           setMessages((chatContent: MessageType[]) =>
             chatContent.filter((message) => message.message !== "loading")
           );
         }
-      
       } else if (data.action) {
         setMessages((chatContent: MessageType[]) => [
           ...chatContent,
@@ -388,26 +396,27 @@ export default function SelinAI() {
       }
     }
 
-      //remove all messages that are message.message === 'loading'
-
-      
+    //remove all messages that are message.message === 'loading'
   };
 
-  const handleChangeTab = (data: { tab: string, thread_id: string }) => {
+  const handleChangeTab = (data: { tab: string; thread_id: string }) => {
     if (data.thread_id === roomIDref.current) {
-        showNotification({
-          title: "Tab changed",
-          message: `Tab changed to: ${data.tab}`,
-          color: "blue",
-          icon: <IconEye />,
-        });
+      showNotification({
+        title: "Tab changed",
+        message: `Tab changed to: ${data.tab}`,
+        color: "blue",
+        icon: <IconEye />,
+      });
 
-        setAIType(data.tab);
-      }
-    };
+      setAIType(data.tab);
+    }
+  };
 
-    const handleAddTaskToSession = async (data: { task: TaskType, thread_id: string }) => {
-      if (data.thread_id === roomIDref.current) {
+  const handleAddTaskToSession = async (data: {
+    task: TaskType;
+    thread_id: string;
+  }) => {
+    if (data.thread_id === roomIDref.current) {
       console.log("adding task to session", data);
 
       const task = data.task;
@@ -454,22 +463,25 @@ export default function SelinAI() {
     }
   };
 
-  const handleNewSession = async (data: { session: ThreadType, thread_id: string }) => {
+  const handleNewSession = async (data: {
+    session: ThreadType;
+    thread_id: string;
+  }) => {
     // if (data.thread_id === roomIDref.current) {
-      // just update the local state
-      setThreads((prevThreads) => [...prevThreads, data.session]);
-      getMessages(data.session.thread_id, data.session.id);
-      setCurrentSessionId(data.session.id);
-      console.log("meowww", data.session.id);
-      sessionIDRef.current = data.session.id;
-      roomIDref.current = data.session.thread_id;
+    // just update the local state
+    setThreads((prevThreads) => [...prevThreads, data.session]);
+    getMessages(data.session.thread_id, data.session.id);
+    setCurrentSessionId(data.session.id);
+    console.log("meowww", data.session.id);
+    sessionIDRef.current = data.session.id;
+    roomIDref.current = data.session.thread_id;
 
-      showNotification({
-        title: "New Session",
-        message: `New session created: ${data.session.session_name}`,
-        color: "blue",
-        icon: <IconEye />,
-      });
+    showNotification({
+      title: "New Session",
+      message: `New session created: ${data.session.session_name}`,
+      color: "blue",
+      icon: <IconEye />,
+    });
     // }
   };
 
@@ -535,11 +547,11 @@ export default function SelinAI() {
     }
   };
 
-  const handleIncrementCounter = async (data: {thread_id: string}) => {
+  const handleIncrementCounter = async (data: { thread_id: string }) => {
     if (data.thread_id === roomIDref.current) {
       console.log("heyyy counter");
       setCounter((prev) => counter + 1);
-  }
+    }
   };
 
 
@@ -689,158 +701,164 @@ export default function SelinAI() {
   }, []);
 
   return (
-    <CustomCursorWrapper>
-      <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
+    // <CustomCursorWrapper>
+    <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
+      <div
+        style={{ position: "relative", width: "100%", zIndex: 1 }}
+        onMouseEnter={() => setOpened(true)}
+        onMouseLeave={() => setOpened(false)}
+      >
         <div
-          style={{ position: "relative", width: "100%", zIndex: 1 }}
-          onMouseEnter={() => setOpened(true)}
-          onMouseLeave={() => setOpened(false)}
-        >
-          <div
-            style={{
-              position: "absolute",
-              width: "100%",
-              height: "100px",
-              top: "-50px",
-              zIndex: 2,
-            }}
-          ></div>
-          <Card withBorder radius={"sm"}>
-            <Flex align={"center"} justify={"flex-start"}>
-              <ThemeIcon
-                radius="xl"
-                size="xs"
-                color={
-                  threads.filter((thread) => thread.status === "ACTIVE")
-                    .length > 0
-                    ? "green"
-                    : "gray"
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100px",
+            top: "-50px",
+            zIndex: 2,
+          }}
+        ></div>
+        <Card withBorder radius={"sm"}>
+          <Flex align={"center"} justify={"flex-start"}>
+            <ThemeIcon
+              radius="xl"
+              size="xs"
+              color={
+                threads.filter((thread) => thread.status === "ACTIVE").length >
+                0
+                  ? "green"
+                  : "gray"
+              }
+              variant={
+                threads.filter((thread) => thread.status === "ACTIVE").length >
+                0
+                  ? "filled"
+                  : "light"
+              }
+              className={
+                threads.filter((thread) => thread.status === "ACTIVE").length >
+                0
+                  ? "pulsing-bubble"
+                  : ""
+              }
+            >
+              <span />
+            </ThemeIcon>
+            <Text fw={600} color="black" className="text-left" ml="xs">
+              {
+                threads.filter(
+                  (thread) =>
+                    thread.status !== "COMPLETE" &&
+                    thread.status !== "CANCELLED"
+                ).length
+              }{" "}
+              Conversations
+            </Text>
+            <div style={{ marginLeft: "auto" }}>
+              {openedChat ? (
+                <IconChevronDown size={"1rem"} color="black" />
+              ) : (
+                <IconChevronUp size={"1rem"} color="black" />
+              )}
+            </div>
+          </Flex>
+          <Collapse in={openedChat}>
+            <Flex mt={"md"} gap={"sm"}>
+              <Paper
+                onClick={
+                  !loadingNewChat ? () => handleCreateNewSession() : undefined
                 }
-                variant={
-                  threads.filter((thread) => thread.status === "ACTIVE")
-                    .length > 0
-                    ? "filled"
-                    : "light"
-                }
-                className={
-                  threads.filter((thread) => thread.status === "ACTIVE")
-                    .length > 0
-                    ? "pulsing-bubble"
-                    : ""
-                }
+                radius={"sm"}
+                p={"sm"}
+                bg={"#fcecfe"}
+                miw={120}
+                mr="sm"
+                className="flex flex-col items-center justify-center"
               >
-                <span />
-              </ThemeIcon>
-              <Text fw={600} color="black" className="text-left" ml="xs">
-                {threads.filter((thread) => (thread.status !== "COMPLETE" && thread.status !== "CANCELLED" )).length}{" "}
-               Conversations
-              </Text>
-              <div style={{ marginLeft: "auto" }}>
-                {openedChat ? (
-                  <IconChevronDown size={"1rem"} color="black" />
+                {loadingNewChat ? (
+                  <Loader color="#df77f5" size="sm" />
                 ) : (
-                  <IconChevronUp size={"1rem"} color="black" />
+                  <>
+                    {" "}
+                    <IconPlus color="#df77f5" />
+                    <Text size="sm" fw={600} color="#E25DEE" mt={"sm"}>
+                      New Chat
+                    </Text>
+                  </>
                 )}
-              </div>
-            </Flex>
-            <Collapse in={openedChat}>
-              <Flex mt={"md"} gap={"sm"}>
-                <Paper
-                  onClick={
-                    !loadingNewChat ? () => handleCreateNewSession() : undefined
-                  }
-                  radius={"sm"}
-                  p={"sm"}
-                  bg={"#fcecfe"}
-                  miw={120}
-                  mr="sm"
-                  className="flex flex-col items-center justify-center"
-                >
-                  {loadingNewChat ? (
-                    <Loader color="#df77f5" size="sm" />
-                  ) : (
-                    <>
-                      {" "}
-                      <IconPlus color="#df77f5" />
-                      <Text size="sm" fw={600} color="#E25DEE" mt={"sm"}>
-                        New Chat
-                      </Text>
-                    </>
-                  )}
-                </Paper>
-                <div
-                  ref={containerRef}
-                  style={{ overflowX: "hidden", whiteSpace: "nowrap" }}
-                >
-                  {threads
-                    .sort((a, b) => b.id - a.id)
-                    .map((thread: ThreadType, index) => {
-                      return (
-                        <Paper
-                          key={index}
-                          withBorder
-                          mr="sm"
-                          radius={"sm"}
-                          p={"sm"}
-                          style={{
-                            display: "inline-block",
-                            minWidth: "400px",
-                            backgroundColor:
-                              sessionIDRef.current === thread.id
-                                ? "#d0f0c0"
-                                : "white", // Highlight if current thread
-                            borderColor:
-                              sessionIDRef.current === thread.id
-                                ? "#00796b"
-                                : "#ced4da", // Change border color if current thread
-                          }}
-                          className={`transition duration-300 ease-in-out transform ${
+              </Paper>
+              <div
+                ref={containerRef}
+                style={{ overflowX: "hidden", whiteSpace: "nowrap" }}
+              >
+                {threads
+                  .sort((a, b) => b.id - a.id)
+                  .map((thread: ThreadType, index) => {
+                    return (
+                      <Paper
+                        key={index}
+                        withBorder
+                        mr="sm"
+                        radius={"sm"}
+                        p={"sm"}
+                        style={{
+                          display: "inline-block",
+                          minWidth: "400px",
+                          backgroundColor:
                             sessionIDRef.current === thread.id
-                              ? "scale-105 shadow-2xl"
-                              : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
-                          }`}
-                          onClick={() => {
-                            getMessages(thread.thread_id, thread.id);
-                            toggle();
-                          }}
-                        >
-                          <Flex align={"center"} gap={"sm"}>
-                            {thread.status === "ACTIVE" ? (
-                              <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
-                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              </div>
-                            ) : // </ThemeIcon>
-                            thread.status === "COMPLETE" ? (
-                              <IconCircleCheck
-                                size={"1rem"}
-                                fill="green"
-                                color="white"
-                              />
-                            ) : thread.status === "PENDING_OPERATOR" ? (
-                              // <ThemeIcon color="orange" radius={"xl"} size={"xs"} p={0} variant="light">
-                              //   <IconPoint fill="orange" color="white" size={"4rem"} />
-                              // </ThemeIcon>
-                              <div className="flex items-center justify-center bg-orange-100 rounded-full p-1 border-orange-300 border-[1px] border-solid">
-                                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                              </div>
-                            ) : (
-                              <></>
-                            )}{" "}
-                            <Text
-                              color={
-                                thread.status === "PENDING_OPERATOR"
-                                  ? "orange"
-                                  : "green"
-                              }
-                              fw={600}
-                            >
-                              {thread.status === "PENDING_OPERATOR"
-                                ? "IN PROGRESS"
-                                : thread.status}
-                            </Text>
-                            <ActionIcon
-                              onClick={(e) => {
-                                e.stopPropagation();
+                              ? "#d0f0c0"
+                              : "white", // Highlight if current thread
+                          borderColor:
+                            sessionIDRef.current === thread.id
+                              ? "#00796b"
+                              : "#ced4da", // Change border color if current thread
+                        }}
+                        className={`transition duration-300 ease-in-out transform ${
+                          sessionIDRef.current === thread.id
+                            ? "scale-105 shadow-2xl"
+                            : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
+                        }`}
+                        onClick={() => {
+                          getMessages(thread.thread_id, thread.id);
+                          toggle();
+                        }}
+                      >
+                        <Flex align={"center"} gap={"sm"}>
+                          {thread.status === "ACTIVE" ? (
+                            <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                          ) : // </ThemeIcon>
+                          thread.status === "COMPLETE" ? (
+                            <IconCircleCheck
+                              size={"1rem"}
+                              fill="green"
+                              color="white"
+                            />
+                          ) : thread.status === "PENDING_OPERATOR" ? (
+                            // <ThemeIcon color="orange" radius={"xl"} size={"xs"} p={0} variant="light">
+                            //   <IconPoint fill="orange" color="white" size={"4rem"} />
+                            // </ThemeIcon>
+                            <div className="flex items-center justify-center bg-orange-100 rounded-full p-1 border-orange-300 border-[1px] border-solid">
+                              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            </div>
+                          ) : (
+                            <></>
+                          )}{" "}
+                          <Text
+                            color={
+                              thread.status === "PENDING_OPERATOR"
+                                ? "orange"
+                                : "green"
+                            }
+                            fw={600}
+                          >
+                            {thread.status === "PENDING_OPERATOR"
+                              ? "IN PROGRESS"
+                              : thread.status}
+                          </Text>
+                          <ActionIcon
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setThreads((prevThreads) =>
                                 prevThreads.filter(
                                   (prevThread) => prevThread.id !== thread.id
@@ -852,19 +870,23 @@ export default function SelinAI() {
                                   (thread) => thread.id !== sessionIDRef.current
                                 );
                                 if (nextThread) {
-                                  getMessages(nextThread.thread_id, nextThread.id);
+                                  getMessages(
+                                    nextThread.thread_id,
+                                    nextThread.id
+                                  );
                                 }
                               }
-                              
 
                               //query to delete thread
-                               fetch(`${API_URL}/selix/delete_session`, {
+                              fetch(`${API_URL}/selix/delete_session`, {
                                 method: "DELETE",
                                 headers: {
                                   "Content-Type": "application/json",
                                   Authorization: `Bearer ${userToken}`,
                                 },
-                                body: JSON.stringify({ session_id: thread.id }),
+                                body: JSON.stringify({
+                                  session_id: thread.id,
+                                }),
                               });
 
 
@@ -929,7 +951,7 @@ export default function SelinAI() {
           </Flex>
         )}
       </Card>
-    </CustomCursorWrapper>
+    // </CustomCursorWrapper>
   );
 }
 
@@ -1060,8 +1082,10 @@ const SegmentChat = (props: any) => {
   ]);
 
   const [chatList, setChatList] = useState([]);
-
   const [shouldSubmit, setShouldSubmit] = useState(false);
+  const [uncollapsedCards, setUncollapsedCards] = useState<{
+    [key: number]: boolean;
+  }>({});
 
   const delay = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
@@ -1069,6 +1093,13 @@ const SegmentChat = (props: any) => {
   const handleListClick = async (prompt: string) => {
     setPrompt(prompt);
     setShouldSubmit(true);
+  };
+
+  const toggleCardCollapse = (index: number) => {
+    setUncollapsedCards((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
   };
 
   useEffect(() => {
@@ -1089,7 +1120,12 @@ const SegmentChat = (props: any) => {
         <Text fw={600}>Chat with Selix</Text>
       </Flex>
       <Divider bg="gray" />
-      <ScrollArea h={"53vh"} viewportRef={viewport} scrollHideDelay={4000} style={{ overflow: 'hidden' }}>
+      <ScrollArea
+        h={"53vh"}
+        viewportRef={viewport}
+        scrollHideDelay={4000}
+        style={{ overflow: "hidden" }}
+      >
         {messages.length > 1 ? (
           <Flex
             direction={"column"}
@@ -1109,9 +1145,10 @@ const SegmentChat = (props: any) => {
                       key={index}
                       ml={message.role === "user" ? "auto" : "0"}
                       style={{
-                        backgroundColor: message.role === "user" ? "#F5F5F5" : "#FAFAFA",
-                        boxShadow: message.role === "user" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "0 2px 4px rgba(0, 0, 0, 0.05)",
+                        backgroundColor:
+                          message.role === "user" ? "#f7ffff" : "#fafafa",
                         borderRadius: "10px",
+                        border: "1px solid #e7ebef",
                         padding: "10px",
                       }}
                     >
@@ -1172,24 +1209,55 @@ const SegmentChat = (props: any) => {
                         size={"xs"}
                         ml={message.role === "user" ? "auto" : "0"}
                       >
-                        <Text color="gray" size="xs" ml={message.role === "user" ? "auto" : "0"}>
-                          {moment(message.created_time).format("MMMM D, YYYY h:mm A")}
+                        <Text
+                          color="gray"
+                          size="xs"
+                          ml={message.role === "user" ? "auto" : "0"}
+                        >
+                          {moment(message.created_time).format(
+                            "MMMM D, YYYY h:mm A"
+                          )}
                         </Text>
                       </Text>
                     </Flex>
                   ) : (
-                    <div key={index} className=" border border-[#E25DEE] border-solid m-auto rounded-md">
-                      <div className="w-full bg-[#E25DEE] py-2 text-center text-white text-semibold">
-                        ✨ Executing: {message.action_title}
-                      </div>
-                      <div
-                        className="p-3 text-black shadow-md italic"
-                      >
-                        <Text p={'xs'} size="sm" fw={600} className="text-center">
+                    <Card
+                      key={index}
+                      className="border border-[#E25DEE] border-solid rounded-md"
+                      shadow="sm"
+                      withBorder
+                      radius="md"
+                      style={{ marginLeft: 0 }}
+                    >
+                      <Card.Section>
+                        <Flex
+                          justify="space-between"
+                          align="center"
+                          className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
+                          onClick={() => toggleCardCollapse(index)}
+                        >
+                          <Text fw={600} size="xs">
+                            ✨ Executing: {message.action_title}
+                          </Text>
+                          {!uncollapsedCards[index] ? (
+                            <IconChevronDown
+                              size={16}
+                              className="transition-transform"
+                            />
+                          ) : (
+                            <IconChevronUp
+                              size={16}
+                              className="transition-transform"
+                            />
+                          )}
+                        </Flex>
+                      </Card.Section>
+                      {uncollapsedCards[index] && (
+                        <Text size="xs" fw={400} color="gray" mt="xs">
                           {message.action_description}
                         </Text>
-                      </div>
-                    </div>
+                      )}
+                    </Card>
                   )}
                 </>
               );
@@ -1276,19 +1344,43 @@ const SegmentChat = (props: any) => {
                         </Text>
                       </Flex>
                     ) : (
-                      <div className=" border border-[#E25DEE] border-solid m-auto rounded-md">
-                        <div className="w-full bg-[#E25DEE] py-2 text-center text-white text-semibold">
-                          ✨ Executing: {message.action_title}
-                        </div>
-                        <div
-                          className="p-3 bg-[#E25DEE] text-black shadow-md italic"
-                          style={{ background: "white" }}
-                        >
-                          <Text size="md" fw={600} className="text-center">
+                      <Card
+                        key={index}
+                        className="border border-[#E25DEE] border-solid rounded-md"
+                        shadow="sm"
+                        withBorder
+                        radius="md"
+                        style={{ marginLeft: 0 }}
+                      >
+                        <Card.Section>
+                          <Flex
+                            justify="space-between"
+                            align="center"
+                            className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
+                            onClick={() => toggleCardCollapse(index)}
+                          >
+                            <Text fw={600} size="xs">
+                              ✨ Executing: {message.action_title}
+                            </Text>
+                            {uncollapsedCards[index] ? (
+                              <IconChevronDown
+                                size={16}
+                                className="transition-transform"
+                              />
+                            ) : (
+                              <IconChevronUp
+                                size={16}
+                                className="transition-transform"
+                              />
+                            )}
+                          </Flex>
+                        </Card.Section>
+                        {!uncollapsedCards[index] && (
+                          <Text size="xs" fw={400} color="gray" mt="xs">
                             {message.action_description}
                           </Text>
-                        </div>
-                      </div>
+                        )}
+                      </Card>
                     )}
                   </>
                 );
@@ -1446,17 +1538,27 @@ const SegmentChat = (props: any) => {
             </ActionIcon>
           </Flex>
           <Flex>
-            <DeepGram onTranscriptionChanged={(text) => setPrompt(prompt + text)} />
+            <DeepGram
+              onTranscriptionChanged={(text) => setPrompt(prompt + text)}
+            />
             <Button
-              size={'xs'}
+              size={"xs"}
               disabled={prompt.trim().length === 0}
               variant="filled"
               className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
               onClick={handleSubmit}
               // leftIcon={<IconSend size={"1rem"} />}
-            > {'Send'}
-              <Flex ml={'xs'} align="center" gap="1px">
-                <Kbd size={'xs'} style={{ color: 'purple' }}>⌘</Kbd>{'+'}<Kbd size={"xs"} style={{ color: 'purple' }}>↩</Kbd>
+            >
+              {" "}
+              {"Send"}
+              <Flex ml={"xs"} align="center" gap="1px">
+                <Kbd size={"xs"} style={{ color: "purple" }}>
+                  ⌘
+                </Kbd>
+                {"+"}
+                <Kbd size={"xs"} style={{ color: "purple" }}>
+                  ↩
+                </Kbd>
               </Flex>
             </Button>
           </Flex>
@@ -1934,111 +2036,120 @@ const PlannerComponent = ({
         </Flex>
       </Paper>
       <Collapse in={opened}>
-      <ScrollArea h={"55vh"} scrollHideDelay={4000} style={{ overflow: 'hidden' }}>
-        {tasks
-        // filter out duplicate tasks by title. This is a temporary fix
-          ?.filter((task: { title: any }, index: number, self: any) => 
-            task.title && self.findIndex((t: { title: any }) => t.title === task.title) === index
-          )
-          .map((task: TaskType, index: number) => {
-            const SelixSessionTaskStatus = {
-              QUEUED: "QUEUED",
-              IN_PROGRESS: "IN_PROGRESS",
-              IN_PROGRESS_REVIEW_NEEDED: "IN_PROGRESS_REVIEW_NEEDED",
-              COMPLETE: "COMPLETE",
-              CANCELLED: "CANCELLED",
-              BLOCKED: "BLOCKED",
-            };
+        <ScrollArea
+          h={"55vh"}
+          scrollHideDelay={4000}
+          style={{ overflow: "hidden" }}
+        >
+          {tasks
+            // filter out duplicate tasks by title. This is a temporary fix
+            ?.filter(
+              (task: { title: any }, index: number, self: any) =>
+                task.title &&
+                self.findIndex(
+                  (t: { title: any }) => t.title === task.title
+                ) === index
+            )
+            .map((task: TaskType, index: number) => {
+              const SelixSessionTaskStatus = {
+                QUEUED: "QUEUED",
+                IN_PROGRESS: "IN_PROGRESS",
+                IN_PROGRESS_REVIEW_NEEDED: "IN_PROGRESS_REVIEW_NEEDED",
+                COMPLETE: "COMPLETE",
+                CANCELLED: "CANCELLED",
+                BLOCKED: "BLOCKED",
+              };
 
-            const statusColors = {
-              [SelixSessionTaskStatus.QUEUED]: "blue",
-              [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
-              [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "orange",
-              [SelixSessionTaskStatus.COMPLETE]: "green",
-              [SelixSessionTaskStatus.CANCELLED]: "red",
-              [SelixSessionTaskStatus.BLOCKED]: "gray",
-            };
+              const statusColors = {
+                [SelixSessionTaskStatus.QUEUED]: "blue",
+                [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
+                [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "orange",
+                [SelixSessionTaskStatus.COMPLETE]: "green",
+                [SelixSessionTaskStatus.CANCELLED]: "red",
+                [SelixSessionTaskStatus.BLOCKED]: "gray",
+              };
 
-            const humanReadableStatus = {
-              [SelixSessionTaskStatus.QUEUED]: "Queued",
-              [SelixSessionTaskStatus.IN_PROGRESS]: "In Progress",
-              [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
-                "In Progress",
-              [SelixSessionTaskStatus.COMPLETE]: "Complete",
-              [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
-              [SelixSessionTaskStatus.BLOCKED]: "Blocked",
-            };
+              const humanReadableStatus = {
+                [SelixSessionTaskStatus.QUEUED]: "Queued",
+                [SelixSessionTaskStatus.IN_PROGRESS]: "In Progress",
+                [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
+                  "In Progress",
+                [SelixSessionTaskStatus.COMPLETE]: "Complete",
+                [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
+                [SelixSessionTaskStatus.BLOCKED]: "Blocked",
+              };
 
-            return (
-              <Paper withBorder p={"sm"} key={index} mb={"xs"} radius={"md"}>
-                <Flex justify={"space-between"} align={"center"} p={"sm"}>
-                  <Text
-                    className="flex gap-1 items-center"
-                    fw={600}
-                    size={"md"}
-                    style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)" }}
-                  >
-                    <ThemeIcon
-                      color="gray"
-                      radius={"xl"}
-                      variant="light"
-                      size={18}
+              return (
+                <Paper withBorder p={"sm"} key={index} mb={"xs"} radius={"md"}>
+                  <Flex justify={"space-between"} align={"center"} p={"sm"}>
+                    <Text
+                      className="flex gap-1 items-center"
+                      fw={600}
+                      size={"md"}
                     >
-                      {index + 1}
-                    </ThemeIcon>
-                    {task.title}
-                  </Text>
-                  <Flex align={"center"} gap={"xs"}>
-                    <Text color="gray" size={"sm"} fw={500}>
-                      {moment(task.created_at).fromNow()}
+                      <ThemeIcon
+                        color="gray"
+                        radius={"xl"}
+                        variant="light"
+                        size={18}
+                      >
+                        {index + 1}
+                      </ThemeIcon>
+                      {task.title}
                     </Text>
                     <Flex align={"center"} gap={"xs"}>
-                      <ThemeIcon
-                        color={statusColors[task.status]}
-                        radius={"xl"}
-                        size={10}
-                      >
-                        <span />
-                      </ThemeIcon>
-                      <Text
-                        color={statusColors[task.status]}
-                        size={"sm"}
-                        fw={500}
-                      >
-                        {humanReadableStatus[task.status]}
+                      <Text color="gray" size={"sm"} fw={500}>
+                        {moment(task.created_at).fromNow()}
                       </Text>
-                    </Flex>
+                      <Flex align={"center"} gap={"xs"}>
+                        <ThemeIcon
+                          color={statusColors[task.status]}
+                          radius={"xl"}
+                          size={10}
+                        >
+                          <span />
+                        </ThemeIcon>
+                        <Text
+                          color={statusColors[task.status]}
+                          size={"sm"}
+                          fw={500}
+                        >
+                          {humanReadableStatus[task.status]}
+                        </Text>
+                      </Flex>
 
-                    <ActionIcon
-                      onClick={() =>
-                        setOpenedTaskIndex(
-                          openedTaskIndex === index ? null : index
-                        )
-                      }
-                    >
-                      {openedTaskIndex === index ? (
-                        <IconChevronUp size={"1rem"} />
-                      ) : (
-                        <IconChevronDown size={"1rem"} />
-                      )}
-                    </ActionIcon>
+                      <ActionIcon
+                        onClick={() =>
+                          setOpenedTaskIndex(
+                            openedTaskIndex === index ? null : index
+                          )
+                        }
+                      >
+                        {openedTaskIndex === index ? (
+                          <IconChevronUp size={"1rem"} />
+                        ) : (
+                          <IconChevronDown size={"1rem"} />
+                        )}
+                      </ActionIcon>
+                    </Flex>
                   </Flex>
-                </Flex>
-                <Collapse in={openedTaskIndex === index}>
-                  <Text p={'sm'} mt={"sm"}>{task.description}</Text>
-                  {task.proof_of_work_img && (
-                  <img
-                    src={task.proof_of_work_img}
-                    alt="Proof of Work"
-                    width={'100%'}
-                    height={'100%'}
-                    style={{ marginTop: "10px" }}
-                  />
-                )}
-                </Collapse>
-              </Paper>
-            );
-          })}
+                  <Collapse in={openedTaskIndex === index}>
+                    <Text p={"sm"} mt={"sm"}>
+                      {task.description}
+                    </Text>
+                    {task.proof_of_work_img && (
+                      <img
+                        src={task.proof_of_work_img}
+                        alt="Proof of Work"
+                        width={"100%"}
+                        height={"100%"}
+                        style={{ marginTop: "10px" }}
+                      />
+                    )}
+                  </Collapse>
+                </Paper>
+              );
+            })}
         </ScrollArea>
       </Collapse>
     </Paper>
@@ -2131,37 +2242,35 @@ const SelinStrategy = ({
           </Flex>
         </Paper>
         <ScrollArea h={"34vh"} p={"sm"} my={"sm"}>
-        <Flex>
-          <Text color="gray" fw={500} w={160} size={"xs"}>
-            Strategy Name:
-          </Text>
-          <Text fw={500} size={"xs"}>
-            {strategy?.title.replace(/['"]/g, "")}
-          </Text>
-        </Flex>
-        <Flex>
-          <div className="w-[160px]">
+          <Flex>
             <Text color="gray" fw={500} w={160} size={"xs"}>
-              Description:
+              Strategy Name:
             </Text>
-          </div>
-          <Stack spacing={"sm"}>
-            <Box>
-              <Text fw={600} size={"xs"}>
-  
+            <Text fw={500} size={"xs"}>
+              {strategy?.title.replace(/['"]/g, "")}
+            </Text>
+          </Flex>
+          <Flex>
+            <div className="w-[160px]">
+              <Text color="gray" fw={500} w={160} size={"xs"}>
+                Description:
               </Text>
-              <Text fw={500} size={"xs"}>
-                <Text
-                  fw={500}
-                  size={"xs"}
-                  dangerouslySetInnerHTML={{
-                    __html: strategy?.description || "",
-                  }}
-                />
-              </Text>
-            </Box>
-            <Box>
-              {/* <Text fw={600} size={"xs"}>
+            </div>
+            <Stack spacing={"sm"}>
+              <Box>
+                <Text fw={600} size={"xs"}></Text>
+                <Text fw={500} size={"xs"}>
+                  <Text
+                    fw={500}
+                    size={"xs"}
+                    dangerouslySetInnerHTML={{
+                      __html: strategy?.description || "",
+                    }}
+                  />
+                </Text>
+              </Box>
+              <Box>
+                {/* <Text fw={600} size={"xs"}>
                 Angle:
               </Text>
               <Text fw={500} size={"xs"}>
@@ -2169,7 +2278,7 @@ const SelinStrategy = ({
                   "The main approach for this campaign is to leverage the MachineCon conference to establish initial contact with prospects and discuss potential collaboration opportunites. The focus will be on inviting them to our booth for a personal chat."
                 }
               </Text> */}
-              {/* <Box>
+                {/* <Box>
                 <Text fw={600} size={"xs"}>
                   Prospects:
                 </Text>
@@ -2177,42 +2286,44 @@ const SelinStrategy = ({
                   {"We will target professionals attending MachineCon, particularly those with titles such as,"}
                 </Text>
               </Box> */}
-            </Box>
-          </Stack>
-        </Flex>
-        <Flex>
-          <div className="w-[160px]">
-            <Text size={"xs"} color="gray" fw={500} w={160}>
-              Attached Campaigns:
+              </Box>
+            </Stack>
+          </Flex>
+          <Flex>
+            <div className="w-[160px]">
+              <Text size={"xs"} color="gray" fw={500} w={160}>
+                Attached Campaigns:
+              </Text>
+            </div>
+            {strategy?.tagged_campaigns &&
+            strategy.tagged_campaigns.length > 0 ? (
+              strategy.tagged_campaigns.map(
+                (campaign: number, index: number) => (
+                  <Badge key={index} color="green">
+                    {campaign.toString()}
+                  </Badge>
+                )
+              )
+            ) : (
+              <Badge color="gray">None</Badge>
+            )}
+          </Flex>
+          <Flex>
+            <div className="w-[160px]">
+              <Text color="gray" fw={500} w={160} size={"xs"}>
+                Time Frame:
+              </Text>
+            </div>
+            <Text size={"xs"} color="blue" fw={600}>
+              {strategy?.start_date
+                ? moment(strategy.start_date).format("MMMM Do, YYYY")
+                : "N/A"}{" "}
+              -{" "}
+              {strategy?.end_date
+                ? moment(strategy.end_date).format("MMMM Do, YYYY")
+                : "N/A"}
             </Text>
-          </div>
-          {strategy?.tagged_campaigns &&
-          strategy.tagged_campaigns.length > 0 ? (
-            strategy.tagged_campaigns.map((campaign: number, index: number) => (
-              <Badge key={index} color="green">
-                {campaign.toString()}
-              </Badge>
-            ))
-          ) : (
-            <Badge color="gray">None</Badge>
-          )}
-        </Flex>
-        <Flex>
-          <div className="w-[160px]">
-            <Text color="gray" fw={500} w={160} size={"xs"}>
-              Time Frame:
-            </Text>
-          </div>
-          <Text size={"xs"} color="blue" fw={600}>
-            {strategy?.start_date
-              ? moment(strategy.start_date).format("MMMM Do, YYYY")
-              : "N/A"}{" "}
-            -{" "}
-            {strategy?.end_date
-              ? moment(strategy.end_date).format("MMMM Do, YYYY")
-              : "N/A"}
-          </Text>
-        </Flex>
+          </Flex>
         </ScrollArea>
         <Flex align={"center"} gap={"md"}>
           <Button

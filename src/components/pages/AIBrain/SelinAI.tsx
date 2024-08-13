@@ -627,253 +627,250 @@ export default function SelinAI() {
   }, []);
 
   return (
-    <CustomCursorWrapper>
-      <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
+    // <CustomCursorWrapper>
+    <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
+      <div
+        style={{ position: "relative", width: "100%", zIndex: 1 }}
+        onMouseEnter={() => setOpened(true)}
+        onMouseLeave={() => setOpened(false)}
+      >
         <div
-          style={{ position: "relative", width: "100%", zIndex: 1 }}
-          onMouseEnter={() => setOpened(true)}
-          onMouseLeave={() => setOpened(false)}
-        >
-          <div
-            style={{
-              position: "absolute",
-              width: "100%",
-              height: "100px",
-              top: "-50px",
-              zIndex: 2,
-            }}
-          ></div>
-          <Card withBorder radius={"sm"}>
-            <Flex align={"center"} justify={"flex-start"}>
-              <ThemeIcon
-                radius="xl"
-                size="xs"
-                color={
-                  threads.filter((thread) => thread.status === "ACTIVE")
-                    .length > 0
-                    ? "green"
-                    : "gray"
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100px",
+            top: "-50px",
+            zIndex: 2,
+          }}
+        ></div>
+        <Card withBorder radius={"sm"}>
+          <Flex align={"center"} justify={"flex-start"}>
+            <ThemeIcon
+              radius="xl"
+              size="xs"
+              color={
+                threads.filter((thread) => thread.status === "ACTIVE").length >
+                0
+                  ? "green"
+                  : "gray"
+              }
+              variant={
+                threads.filter((thread) => thread.status === "ACTIVE").length >
+                0
+                  ? "filled"
+                  : "light"
+              }
+              className={
+                threads.filter((thread) => thread.status === "ACTIVE").length >
+                0
+                  ? "pulsing-bubble"
+                  : ""
+              }
+            >
+              <span />
+            </ThemeIcon>
+            <Text fw={600} color="black" className="text-left" ml="xs">
+              {
+                threads.filter(
+                  (thread) =>
+                    thread.status !== "COMPLETE" &&
+                    thread.status !== "CANCELLED"
+                ).length
+              }{" "}
+              Conversations
+            </Text>
+            <div style={{ marginLeft: "auto" }}>
+              {openedChat ? (
+                <IconChevronDown size={"1rem"} color="black" />
+              ) : (
+                <IconChevronUp size={"1rem"} color="black" />
+              )}
+            </div>
+          </Flex>
+          <Collapse in={openedChat}>
+            <Flex mt={"md"} gap={"sm"}>
+              <Paper
+                onClick={
+                  !loadingNewChat ? () => handleCreateNewSession() : undefined
                 }
-                variant={
-                  threads.filter((thread) => thread.status === "ACTIVE")
-                    .length > 0
-                    ? "filled"
-                    : "light"
-                }
-                className={
-                  threads.filter((thread) => thread.status === "ACTIVE")
-                    .length > 0
-                    ? "pulsing-bubble"
-                    : ""
-                }
+                radius={"sm"}
+                p={"sm"}
+                bg={"#fcecfe"}
+                miw={120}
+                mr="sm"
+                className="flex flex-col items-center justify-center"
               >
-                <span />
-              </ThemeIcon>
-              <Text fw={600} color="black" className="text-left" ml="xs">
-                {
-                  threads.filter(
-                    (thread) =>
-                      thread.status !== "COMPLETE" &&
-                      thread.status !== "CANCELLED"
-                  ).length
-                }{" "}
-                Conversations
-              </Text>
-              <div style={{ marginLeft: "auto" }}>
-                {openedChat ? (
-                  <IconChevronDown size={"1rem"} color="black" />
+                {loadingNewChat ? (
+                  <Loader color="#df77f5" size="sm" />
                 ) : (
-                  <IconChevronUp size={"1rem"} color="black" />
+                  <>
+                    {" "}
+                    <IconPlus color="#df77f5" />
+                    <Text size="sm" fw={600} color="#E25DEE" mt={"sm"}>
+                      New Chat
+                    </Text>
+                  </>
                 )}
+              </Paper>
+              <div
+                ref={containerRef}
+                style={{ overflowX: "hidden", whiteSpace: "nowrap" }}
+              >
+                {threads
+                  .sort((a, b) => b.id - a.id)
+                  .map((thread: ThreadType, index) => {
+                    return (
+                      <Paper
+                        key={index}
+                        withBorder
+                        mr="sm"
+                        radius={"sm"}
+                        p={"sm"}
+                        style={{
+                          display: "inline-block",
+                          minWidth: "400px",
+                          backgroundColor:
+                            sessionIDRef.current === thread.id
+                              ? "#d0f0c0"
+                              : "white", // Highlight if current thread
+                          borderColor:
+                            sessionIDRef.current === thread.id
+                              ? "#00796b"
+                              : "#ced4da", // Change border color if current thread
+                        }}
+                        className={`transition duration-300 ease-in-out transform ${
+                          sessionIDRef.current === thread.id
+                            ? "scale-105 shadow-2xl"
+                            : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
+                        }`}
+                        onClick={() => {
+                          getMessages(thread.thread_id, thread.id);
+                          toggle();
+                        }}
+                      >
+                        <Flex align={"center"} gap={"sm"}>
+                          {thread.status === "ACTIVE" ? (
+                            <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                          ) : // </ThemeIcon>
+                          thread.status === "COMPLETE" ? (
+                            <IconCircleCheck
+                              size={"1rem"}
+                              fill="green"
+                              color="white"
+                            />
+                          ) : thread.status === "PENDING_OPERATOR" ? (
+                            // <ThemeIcon color="orange" radius={"xl"} size={"xs"} p={0} variant="light">
+                            //   <IconPoint fill="orange" color="white" size={"4rem"} />
+                            // </ThemeIcon>
+                            <div className="flex items-center justify-center bg-orange-100 rounded-full p-1 border-orange-300 border-[1px] border-solid">
+                              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            </div>
+                          ) : (
+                            <></>
+                          )}{" "}
+                          <Text
+                            color={
+                              thread.status === "PENDING_OPERATOR"
+                                ? "orange"
+                                : "green"
+                            }
+                            fw={600}
+                          >
+                            {thread.status === "PENDING_OPERATOR"
+                              ? "IN PROGRESS"
+                              : thread.status}
+                          </Text>
+                          <ActionIcon
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setThreads((prevThreads) =>
+                                prevThreads.filter(
+                                  (prevThread) => prevThread.id !== thread.id
+                                )
+                              );
+                              //if the chat we're in is the one we're deleting, we need to get the next chat
+                              if (sessionIDRef.current === thread.id) {
+                                const nextThread = threads.find(
+                                  (thread) => thread.id !== sessionIDRef.current
+                                );
+                                if (nextThread) {
+                                  getMessages(
+                                    nextThread.thread_id,
+                                    nextThread.id
+                                  );
+                                }
+                              }
+
+                              //query to delete thread
+                              fetch(`${API_URL}/selix/delete_session`, {
+                                method: "DELETE",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `Bearer ${userToken}`,
+                                },
+                                body: JSON.stringify({
+                                  session_id: thread.id,
+                                }),
+                              });
+                            }}
+                            style={{ marginLeft: "auto" }}
+                          >
+                            <IconTrash size={"1rem"} color="red" />
+                          </ActionIcon>
+                        </Flex>
+                        <Text fw={600}>
+                          {thread.session_name || "Untitled Session"}
+                        </Text>
+                        <Text color="gray">
+                          Completed on:{" "}
+                          {thread.estimated_completion_time
+                            ? moment(thread.estimated_completion_time).fromNow()
+                            : "N/A"}
+                        </Text>
+                      </Paper>
+                    );
+                  })}
               </div>
             </Flex>
-            <Collapse in={openedChat}>
-              <Flex mt={"md"} gap={"sm"}>
-                <Paper
-                  onClick={
-                    !loadingNewChat ? () => handleCreateNewSession() : undefined
-                  }
-                  radius={"sm"}
-                  p={"sm"}
-                  bg={"#fcecfe"}
-                  miw={120}
-                  mr="sm"
-                  className="flex flex-col items-center justify-center"
-                >
-                  {loadingNewChat ? (
-                    <Loader color="#df77f5" size="sm" />
-                  ) : (
-                    <>
-                      {" "}
-                      <IconPlus color="#df77f5" />
-                      <Text size="sm" fw={600} color="#E25DEE" mt={"sm"}>
-                        New Chat
-                      </Text>
-                    </>
-                  )}
-                </Paper>
-                <div
-                  ref={containerRef}
-                  style={{ overflowX: "hidden", whiteSpace: "nowrap" }}
-                >
-                  {threads
-                    .sort((a, b) => b.id - a.id)
-                    .map((thread: ThreadType, index) => {
-                      return (
-                        <Paper
-                          key={index}
-                          withBorder
-                          mr="sm"
-                          radius={"sm"}
-                          p={"sm"}
-                          style={{
-                            display: "inline-block",
-                            minWidth: "400px",
-                            backgroundColor:
-                              sessionIDRef.current === thread.id
-                                ? "#d0f0c0"
-                                : "white", // Highlight if current thread
-                            borderColor:
-                              sessionIDRef.current === thread.id
-                                ? "#00796b"
-                                : "#ced4da", // Change border color if current thread
-                          }}
-                          className={`transition duration-300 ease-in-out transform ${
-                            sessionIDRef.current === thread.id
-                              ? "scale-105 shadow-2xl"
-                              : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
-                          }`}
-                          onClick={() => {
-                            getMessages(thread.thread_id, thread.id);
-                            toggle();
-                          }}
-                        >
-                          <Flex align={"center"} gap={"sm"}>
-                            {thread.status === "ACTIVE" ? (
-                              <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
-                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              </div>
-                            ) : // </ThemeIcon>
-                            thread.status === "COMPLETE" ? (
-                              <IconCircleCheck
-                                size={"1rem"}
-                                fill="green"
-                                color="white"
-                              />
-                            ) : thread.status === "PENDING_OPERATOR" ? (
-                              // <ThemeIcon color="orange" radius={"xl"} size={"xs"} p={0} variant="light">
-                              //   <IconPoint fill="orange" color="white" size={"4rem"} />
-                              // </ThemeIcon>
-                              <div className="flex items-center justify-center bg-orange-100 rounded-full p-1 border-orange-300 border-[1px] border-solid">
-                                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                              </div>
-                            ) : (
-                              <></>
-                            )}{" "}
-                            <Text
-                              color={
-                                thread.status === "PENDING_OPERATOR"
-                                  ? "orange"
-                                  : "green"
-                              }
-                              fw={600}
-                            >
-                              {thread.status === "PENDING_OPERATOR"
-                                ? "IN PROGRESS"
-                                : thread.status}
-                            </Text>
-                            <ActionIcon
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setThreads((prevThreads) =>
-                                  prevThreads.filter(
-                                    (prevThread) => prevThread.id !== thread.id
-                                  )
-                                );
-                                //if the chat we're in is the one we're deleting, we need to get the next chat
-                                if (sessionIDRef.current === thread.id) {
-                                  const nextThread = threads.find(
-                                    (thread) =>
-                                      thread.id !== sessionIDRef.current
-                                  );
-                                  if (nextThread) {
-                                    getMessages(
-                                      nextThread.thread_id,
-                                      nextThread.id
-                                    );
-                                  }
-                                }
-
-                                //query to delete thread
-                                fetch(`${API_URL}/selix/delete_session`, {
-                                  method: "DELETE",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                    Authorization: `Bearer ${userToken}`,
-                                  },
-                                  body: JSON.stringify({
-                                    session_id: thread.id,
-                                  }),
-                                });
-                              }}
-                              style={{ marginLeft: "auto" }}
-                            >
-                              <IconTrash size={"1rem"} color="red" />
-                            </ActionIcon>
-                          </Flex>
-                          <Text fw={600}>
-                            {thread.session_name || "Untitled Session"}
-                          </Text>
-                          <Text color="gray">
-                            Completed on:{" "}
-                            {thread.estimated_completion_time
-                              ? moment(
-                                  thread.estimated_completion_time
-                                ).fromNow()
-                              : "N/A"}
-                          </Text>
-                        </Paper>
-                      );
-                    })}
-                </div>
-              </Flex>
-            </Collapse>
-          </Card>
-        </div>
-        {currentSessionId && (
-          <Flex mt={"md"} gap={"xl"}>
-            <LoadingOverlay visible={loadingNewChat} />
-            <SegmentChat
-              handleSubmit={handleSubmit}
-              prompt={prompt}
-              setPrompt={setPrompt}
-              setSegment={setSegment}
-              messages={messages}
-              setMessages={setMessages}
-              segment={segment}
-              setAIType={setAIType}
-              aiType={aiType}
-              currentSessionId={sessionIDRef.current}
-              // generateResponse={generateResponse}
-              // chatContent={chatContent}
-              // setChatContent={setChatContent}
-            />
-            <SelixControlCenter
-              counter={counter}
-              tasks={tasks}
-              setPrompt={setPrompt}
-              handleSubmit={handleSubmit}
-              setAIType={setAIType}
-              aiType={aiType}
-              threads={threads}
-              messages={messages}
-              setMessages={setMessages}
-              currentSessionId={sessionIDRef.current}
-            />
-          </Flex>
-        )}
-      </Card>
-    </CustomCursorWrapper>
+          </Collapse>
+        </Card>
+      </div>
+      {currentSessionId && (
+        <Flex mt={"md"} gap={"xl"}>
+          <LoadingOverlay visible={loadingNewChat} />
+          <SegmentChat
+            handleSubmit={handleSubmit}
+            prompt={prompt}
+            setPrompt={setPrompt}
+            setSegment={setSegment}
+            messages={messages}
+            setMessages={setMessages}
+            segment={segment}
+            setAIType={setAIType}
+            aiType={aiType}
+            currentSessionId={sessionIDRef.current}
+            // generateResponse={generateResponse}
+            // chatContent={chatContent}
+            // setChatContent={setChatContent}
+          />
+          <SelixControlCenter
+            counter={counter}
+            tasks={tasks}
+            setPrompt={setPrompt}
+            handleSubmit={handleSubmit}
+            setAIType={setAIType}
+            aiType={aiType}
+            threads={threads}
+            messages={messages}
+            setMessages={setMessages}
+            currentSessionId={sessionIDRef.current}
+          />
+        </Flex>
+      )}
+    </Card>
+    // </CustomCursorWrapper>
   );
 }
 
@@ -1058,12 +1055,9 @@ const SegmentChat = (props: any) => {
                       ml={message.role === "user" ? "auto" : "0"}
                       style={{
                         backgroundColor:
-                          message.role === "user" ? "#F5F5F5" : "#FAFAFA",
-                        boxShadow:
-                          message.role === "user"
-                            ? "0 2px 4px rgba(0, 0, 0, 0.1)"
-                            : "0 2px 4px rgba(0, 0, 0, 0.05)",
+                          message.role === "user" ? "#f7ffff" : "#fafafa",
                         borderRadius: "10px",
+                        border: "1px solid #e7ebef",
                         padding: "10px",
                       }}
                     >
@@ -1407,7 +1401,9 @@ const SegmentChat = (props: any) => {
             </ActionIcon> */}
           </Flex>
           <Flex>
-            <DeepGram onTranscriptionChanged={(text) => setPrompt(prompt + text)} />
+            <DeepGram
+              onTranscriptionChanged={(text) => setPrompt(prompt + text)}
+            />
             <Button
               size={"xs"}
               disabled={prompt.trim().length === 0}
@@ -1953,7 +1949,6 @@ const PlannerComponent = ({
                       className="flex gap-1 items-center"
                       fw={600}
                       size={"md"}
-                      style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)" }}
                     >
                       <ThemeIcon
                         color="gray"

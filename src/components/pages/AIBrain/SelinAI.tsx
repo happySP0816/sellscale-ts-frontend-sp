@@ -79,12 +79,13 @@ import DeepGram from "@common/DeepGram";
 
 interface CustomCursorWrapperProps {
   children: React.ReactNode;
+  handleSubmit: (file: { name: string, base64: string, description: string }) => void;
 }
 
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
 import { Modal, Overlay } from '@mantine/core';
 
-const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({ children }) => {
+const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({ children, handleSubmit }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -114,6 +115,14 @@ const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({ children }) => {
     console.log('File confirmed:', file);
     setIsModalOpen(false);
     setFile(null);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result?.toString().split(',')[1] || '';
+      handleSubmit({ name: file?.name || '', base64: base64String, description: fileDescription });
+    };
+    if (file) {
+      reader.readAsDataURL(file);
+    }
   };
 
   useEffect(() => {
@@ -131,7 +140,28 @@ const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({ children }) => {
 
   return (
     <div id="drop-area">
-      {isDragging && <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1000 }} />}
+      {isDragging && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backdropFilter: 'blur(5px)',
+            color: 'white',
+            fontSize: '2rem',
+            fontWeight: 'bold',
+          }}
+        >
+          Drop files here
+        </div>
+      )}
       {children}
       <Modal
         opened={isModalOpen}
@@ -244,7 +274,29 @@ export default function SelinAI() {
 
   // console.log("current session is", currentSessionId);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (file?: {name: string, description: string, base64: string}) => {
+
+    //custom handle submit function to handle file uploads
+    if (file) {
+      await fetch(`${API_URL}/selix/upload_file`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          // device_id: deviceIDRef.current,
+          session_id: sessionIDRef.current,
+          file: file.base64,
+          file_name: file.name,
+          description: file.description,
+        }),
+      });
+
+      
+      return
+    }
+
     if (prompt.trim() !== "") {
       const newChatPrompt: MessageType = {
         created_time: moment().format("MMMM D, YYYY h:mm A"),
@@ -551,6 +603,37 @@ export default function SelinAI() {
     // }
   };
 
+  const addActionToSession = async (data: {
+    action: MessageType;
+    thread_id: string;
+  }) => {
+    console.log("adding action to session", data);
+    if (data.thread_id === roomIDref.current) {
+      setMessages((chatContent: MessageType[]) => [
+        ...chatContent,
+        {
+          created_time: moment().format("MMMM D, h:mm a"),
+          message: data.action?.action_description || "",
+          role: "assistant",
+          type: "action",
+          action_title: data.action.action_title,
+          action_description: data.action.action_description,
+          action_function: data.action.action_function,
+          action_params: data.action.action_params,
+        } as MessageType,
+      ]);
+
+      showNotification({
+        title: "Action added",
+        message: `Action: ${data.action?.action_title} has been added`,
+        color: "green",
+        icon: <IconCircleCheck />,
+      });
+
+    }
+  }
+
+
   const handleUpdateTaskAndAction = async (data: {
     task: TaskType;
     action: MessageType;
@@ -653,6 +736,7 @@ export default function SelinAI() {
     socket.on("incoming-message", handleNewMessage);
     socket.on("change-tab", handleChangeTab);
     socket.on("add-task-to-session", handleAddTaskToSession);
+    socket.on("add-action-to-session", addActionToSession);
     socket.on("new-session", handleNewSession);
     socket.on("update-action", handleUpdateTaskAndAction);
     socket.on("update-session", handleUpdateSession);
@@ -663,6 +747,7 @@ export default function SelinAI() {
       socket.off("incoming-message", handleNewMessage);
       socket.off("change-tab", handleChangeTab);
       socket.off("add-task-to-session", handleAddTaskToSession);
+      socket.off("add-action-to-session", addActionToSession);
       socket.off("new-session", handleNewSession);
       socket.off("update-action", handleUpdateTaskAndAction);
       socket.off("update-session", handleUpdateSession);
@@ -767,7 +852,7 @@ export default function SelinAI() {
   }, []);
 
   return (
-    <DropzoneWrapper>
+    <DropzoneWrapper handleSubmit={handleSubmit}>
     <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
       <div
         style={{ position: "relative", width: "100%", zIndex: 1 }}
@@ -1599,22 +1684,36 @@ const SegmentChat = (props: any) => {
             {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
               <IconPlus size={"1rem"} />
             </ActionIcon> */}
-            <ActionIcon
-              variant="outline"
-              color="gray"
-              radius={"xl"}
-              size={"sm"}
-              onClick={() =>
-                showNotification({
-                  title: "Drag and Drop",
-                  message: "Drag the file onto the window to add it to the chat.",
-                  color: "blue",
-                  icon: <IconFile />,
-                })
-              }
-            >
-              <IconLink size={"1rem"} />
-            </ActionIcon>
+            <Popover width={200} position="right" withArrow shadow="md">
+              <Popover.Target>
+                <ActionIcon
+                  variant="outline"
+                  color="gray"
+                  radius={"xl"}
+                  size={"sm"}
+                >
+                  <IconLink size={"1rem"} />
+                </ActionIcon>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Flex
+                  align="center"
+                  gap="xs"
+                  style={{
+                    height: "200px",
+                    border: "2px dashed #ccc",
+                    borderRadius: "8px",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    padding: "20px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <IconFile size={16} />
+                  <Text size="sm">Drag & Drop file here!</Text>
+                </Flex>
+              </Popover.Dropdown>
+            </Popover>
           </Flex>
           <Flex>
             <DeepGram
@@ -2068,7 +2167,7 @@ const PlannerComponent = ({
   threads: ThreadType[];
   currentSessionId: Number | null;
   messagesLength: number;
-  tasks: any;
+  tasks: TaskType[];
   counter: Number;
 }) => {
   const [opened, { toggle }] = useDisclosure(true);
@@ -2123,11 +2222,8 @@ const PlannerComponent = ({
           {tasks
             // filter out duplicate tasks by title. This is a temporary fix
             ?.filter(
-              (task: { title: any }, index: number, self: any) =>
-                task.title &&
-                self.findIndex(
-                  (t: { title: any }) => t.title === task.title
-                ) === index
+              (task: TaskType, index: number, self: any) =>
+                task.selix_session_id  === currentSessionId
             )
             .map((task: TaskType, index: number) => {
               const SelixSessionTaskStatus = {

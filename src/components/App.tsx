@@ -121,8 +121,9 @@ socket.on("connect", () => {
   console.log(`Socket connected: ${socket.id}`);
 });
 
-socket.on("disconnect", () => {
+socket.on("disconnect", (reason) => {
   console.log(`Socket disconnected: ${socket.id}`);
+  console.log('reason: ', reason);
 });
 
 export default function App() {

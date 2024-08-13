@@ -70,7 +70,7 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
       setLastText(data.channel.alternatives[0].transcript);
       if (lastText !== data.channel.alternatives[0].transcript) {
         setTranscribedText(
-          (prevText) => prevText + " " + data.channel.alternatives[0].transcript
+          () => ' ' + data.channel.alternatives[0].transcript
         );
       }
       console.log(data.channel.alternatives[0].transcript);
@@ -120,7 +120,7 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
           }
         };
 
-        mediaRecorder.start(1000); // Collect audio data in chunks of 1 second
+        mediaRecorder.start(300); // Collect audio data in chunks of 1 second
       } catch (error) {
         console.error("Error accessing media devices.", error);
         // alert("Permission denied. Please allow access to the microphone.");

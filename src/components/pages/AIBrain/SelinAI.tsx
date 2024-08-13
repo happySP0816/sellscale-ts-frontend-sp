@@ -173,8 +173,10 @@ export default function SelinAI() {
   const sessionIDRef = useRef<Number>(-1);
   const [loadingNewChat, setLoadingNewChat] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [suggestion, setSuggestion] = useState("");
+  const [suggestionHidden, setSuggestionHidden] = useState(true);
 
-  console.log("current session is", currentSessionId);
+  // console.log("current session is", currentSessionId);
 
   const handleSubmit = async () => {
     if (prompt.trim() !== "") {
@@ -190,6 +192,8 @@ export default function SelinAI() {
       ]);
 
       setPrompt("");
+      setSuggestion("");
+      slideDown();
       // setLoading(true);
 
       const loadingMessage: MessageType = {
@@ -227,7 +231,7 @@ export default function SelinAI() {
         console.error("Error creating message:", error);
       } finally {
         // setLoading(false);
-        setPrompt("");
+        // setPrompt("");
       }
     }
   };
@@ -550,6 +554,35 @@ export default function SelinAI() {
     }
   };
 
+
+  //controls the sliding up and down of the suggestion
+  const slideUp = () => {
+    setSuggestionHidden(false);
+    const div = document.getElementById('slidingDiv');
+    if (div) {
+      div.style.animation = 'slideUp 0.5s forwards';
+    }
+  }
+  const slideDown = () => {
+    const div = document.getElementById('slidingDiv');
+    if (div) {
+      div.style.animation = 'slideDown 0.5s forwards';
+    }
+  };
+
+  const handleSuggestion = async (data: { message: string, thread_id: string, device_id: string }) => {
+    //only show the suggestion if the message is for the current device
+    if (data.thread_id === roomIDref.current && data.device_id === deviceIDRef.current) {
+      setSuggestion(data.message);
+
+    slideUp();
+    setTimeout(() => {
+      slideDown();
+    }, 10000);
+
+      }
+    }
+
   useEffect(() => {
     socket.on("incoming-message", handleNewMessage);
     socket.on("change-tab", handleChangeTab);
@@ -558,6 +591,7 @@ export default function SelinAI() {
     socket.on("update-action", handleUpdateTaskAndAction);
     socket.on("update-session", handleUpdateSession);
     socket.on("increment-counter", handleIncrementCounter);
+    socket.on("suggestion", handleSuggestion);
 
     return () => {
       socket.off("incoming-message", handleNewMessage);
@@ -567,12 +601,52 @@ export default function SelinAI() {
       socket.off("update-action", handleUpdateTaskAndAction);
       socket.off("update-session", handleUpdateSession);
       socket.off("increment-counter", handleIncrementCounter);
+      socket.off("suggestion", handleSuggestion);
     };
   }, []);
 
   useEffect(() => {
     fetchChatHistory();
   }, [userToken]);
+
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const handlePromptChange = async () => {
+      try {
+        const response = await fetch(`${API_URL}/selix/generate_followup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({ prompt: prompt, messages: messages, room_id: roomIDref.current, device_id: deviceIDRef.current, previous_follow_up: suggestion }),
+        });
+
+        const data = await response.json();
+        // Log the generated follow-up question
+        console.log("Follow-up question generated:", data);
+      } catch (error) {
+        console.error("Error generating follow-up question:", error);
+      }
+    };
+
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      if (prompt.trim().length > 0) {
+        handlePromptChange();
+      }
+    }, 3000); // Adjust the debounce delay as needed
+
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [prompt]);
 
   const [segment, setSegment] = useState([]);
   const [opened, { toggle }] = useDisclosure(true);
@@ -814,62 +888,69 @@ export default function SelinAI() {
                                   session_id: thread.id,
                                 }),
                               });
-                            }}
-                            style={{ marginLeft: "auto" }}
-                          >
-                            <IconTrash size={"1rem"} color="red" />
-                          </ActionIcon>
-                        </Flex>
-                        <Text fw={600}>
-                          {thread.session_name || "Untitled Session"}
-                        </Text>
-                        <Text color="gray">
-                          Completed on:{" "}
-                          {thread.estimated_completion_time
-                            ? moment(thread.estimated_completion_time).fromNow()
-                            : "N/A"}
-                        </Text>
-                      </Paper>
-                    );
-                  })}
-              </div>
-            </Flex>
-          </Collapse>
-        </Card>
-      </div>
-      {currentSessionId && (
-        <Flex mt={"md"} gap={"xl"}>
-          <LoadingOverlay visible={loadingNewChat} />
-          <SegmentChat
-            handleSubmit={handleSubmit}
-            prompt={prompt}
-            setPrompt={setPrompt}
-            setSegment={setSegment}
-            messages={messages}
-            setMessages={setMessages}
-            segment={segment}
-            setAIType={setAIType}
-            aiType={aiType}
-            currentSessionId={sessionIDRef.current}
-            // generateResponse={generateResponse}
-            // chatContent={chatContent}
-            // setChatContent={setChatContent}
-          />
-          <SelixControlCenter
-            counter={counter}
-            tasks={tasks}
-            setPrompt={setPrompt}
-            handleSubmit={handleSubmit}
-            setAIType={setAIType}
-            aiType={aiType}
-            threads={threads}
-            messages={messages}
-            setMessages={setMessages}
-            currentSessionId={sessionIDRef.current}
-          />
-        </Flex>
-      )}
-    </Card>
+
+
+                              }}
+                              style={{ marginLeft: "auto" }}
+                            >
+                              <IconTrash size={"1rem"} color="red" />
+                            </ActionIcon>
+                          </Flex>
+                          <Text fw={600}>
+                            {thread.session_name || "Untitled Session"}
+                          </Text>
+                          <Text color="gray">
+                            Completed on:{" "}
+                            {thread.estimated_completion_time
+                              ? moment(
+                                  thread.estimated_completion_time
+                                ).fromNow()
+                              : "N/A"}
+                          </Text>
+                        </Paper>
+                      );
+                    })}
+                </div>
+              </Flex>
+            </Collapse>
+          </Card>
+        </div>
+        {currentSessionId && (
+          <Flex mt={"md"} gap={"xl"}>
+            <LoadingOverlay visible={loadingNewChat} />
+            <SegmentChat
+              setSuggestionHidden={setSuggestionHidden}
+              suggestionHidden={suggestionHidden}
+              suggestion={suggestion}
+              handleSubmit={handleSubmit}
+              prompt={prompt}
+              setPrompt={setPrompt}
+              setSegment={setSegment}
+              messages={messages}
+              setMessages={setMessages}
+              segment={segment}
+              setAIType={setAIType}
+              aiType={aiType}
+              currentSessionId={sessionIDRef.current}
+              // generateResponse={generateResponse}
+              // chatContent={chatContent}
+              // setChatContent={setChatContent}
+            />
+            <SelixControlCenter
+              counter={counter}
+              tasks={tasks}
+              setPrompt={setPrompt}
+              handleSubmit={handleSubmit}
+              setAIType={setAIType}
+              aiType={aiType}
+              threads={threads}
+              messages={messages}
+              setMessages={setMessages}
+              currentSessionId={sessionIDRef.current}
+            />
+          </Flex>
+        )}
+      </Card>
     // </CustomCursorWrapper>
   );
 }
@@ -877,6 +958,9 @@ export default function SelinAI() {
 const SegmentChat = (props: any) => {
   const handleSubmit = props.handleSubmit;
   const prompt = props.prompt;
+  const suggestion = props.suggestion;
+  const suggestionHidden = props.suggestionHidden;
+  const setSuggestionHidden = props.setSuggestionHidden;
   const setPrompt = props.setPrompt;
   const currentSessionId: Number | null = props.currentSessionId;
   const messages: MessageType[] = props.messages;
@@ -899,6 +983,13 @@ const SegmentChat = (props: any) => {
     }
   }, [{ ...messages }]);
 
+    const slideDown = () => {
+      setSuggestionHidden(true);
+      const div = document.getElementById('slidingDiv');
+      if (div) {
+        div.style.animation = 'slideDown 0.5s forwards';
+      }
+    };
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       handleSubmit();
@@ -1360,6 +1451,32 @@ const SegmentChat = (props: any) => {
           </>
         )}
       </ScrollArea>
+      <div style={{ width: '80%', position: "relative", marginBottom: "-32px", overflow: "hidden", margin: "0 auto", visibility: suggestion !== '' ? 'visible' : 'hidden' }}>
+        {<div id="slidingDiv" style={{ 
+          backgroundColor: suggestionHidden ? "transparent" : "#E25DEE", 
+          padding: "13px", 
+          borderRadius: "8px", 
+          color: "white", 
+          fontWeight: "bold", 
+          textAlign: "center", 
+          fontSize: "0.9rem", 
+          animation: suggestion !== '' ? "slideUp 0.5s forwards" : "none" 
+        }}>
+          {'💡 ' + suggestion}
+          <span 
+            style={{ 
+              position: "absolute", 
+              top: "5px", 
+              right: "10px", 
+              cursor: "pointer", 
+              fontWeight: "bold" 
+            }} 
+            onClick={() => slideDown()}
+          >
+            X
+          </span>
+        </div>}
+      </div>
       <Paper
         p={"sm"}
         withBorder
@@ -1368,6 +1485,26 @@ const SegmentChat = (props: any) => {
         my={"lg"}
         mx={"md"}
       >
+      <style>
+        {`
+          @keyframes slideUp {
+            from {
+              transform: translateY(100%);
+            }
+            to {
+              transform: translateY(0);
+            }
+          }
+          @keyframes slideDown {
+            from {
+              transform: translateY(0);
+            }
+            to {
+              transform: translateY(100%);
+            }
+          }
+        `}
+      </style>
         <Textarea
           value={prompt}
           placeholder="Chat with AI..."
@@ -1395,10 +1532,10 @@ const SegmentChat = (props: any) => {
           <Flex gap={"sm"}>
             {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
               <IconPlus size={"1rem"} />
-            </ActionIcon>
+            </ActionIcon> */}
             <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
               <IconLink size={"1rem"} />
-            </ActionIcon> */}
+            </ActionIcon>
           </Flex>
           <Flex>
             <DeepGram

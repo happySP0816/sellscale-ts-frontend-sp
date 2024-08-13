@@ -138,17 +138,15 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
       <HoverCard width={280} shadow="md" withinPortal>
         <HoverCard.Target>
           <ActionIcon
-            variant="filled"
+            variant={recording ? "filled" : "outline"}
             onClick={handleToggleRecording}
             size="md"
             mr="xs"
-            className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
+            color={recording ? "red" : "grape"}
           >
             {recording ? (
-              // <IconCircleFilled size={16} />
-              <Loader variant="bars" color="grape" size="xs" />
+              <Loader variant="bars" size="xs" color='white' />
             ) : (
-              // <IconCircleDot size={16} />
               <IconMicrophone size={"1rem"} />
             )}
           </ActionIcon>

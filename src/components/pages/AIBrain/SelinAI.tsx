@@ -24,6 +24,7 @@ import {
   Textarea,
   Popover,
   LoadingOverlay,
+  Kbd,
 } from "@mantine/core";
 import {
   IconBulb,
@@ -161,7 +162,7 @@ export default function SelinAI() {
   console.log("current session is", currentSessionId);
 
   const handleSubmit = async () => {
-    if (prompt !== "") {
+    if (prompt.trim() !== "") {
       const newChatPrompt: MessageType = {
         created_time: moment().format("MMMM D, h:mm a"),
         message: prompt,
@@ -343,6 +344,10 @@ export default function SelinAI() {
             type: "message",
           },
         ]);
+        setMessages((chatContent: MessageType[]) =>
+          chatContent.filter((message) => message.message !== "loading")
+        );
+      
       } else if (data.action) {
         setMessages((chatContent: MessageType[]) => [
           ...chatContent,
@@ -358,13 +363,11 @@ export default function SelinAI() {
           },
         ]);
       }
+    }
 
       //remove all messages that are message.message === 'loading'
 
-      setMessages((chatContent: MessageType[]) =>
-        chatContent.filter((message) => message.message !== "loading")
-      );
-    }
+      
   };
 
   const handleChangeTab = (data: { tab: string, thread_id: string }) => {
@@ -860,7 +863,7 @@ const SegmentChat = (props: any) => {
   }, [{ ...messages }]);
 
   const handleKeyDown = (event: any) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       handleSubmit();
     }
   };
@@ -1085,7 +1088,9 @@ const SegmentChat = (props: any) => {
                         size={"xs"}
                         ml={message.role === "user" ? "auto" : "0"}
                       >
-                        {message.created_time}
+                        <Text color="gray" size="xs" ml={message.role === "user" ? "auto" : "0"}>
+                          {moment(message.created_time).format("MMMM D, YYYY h:mm A")}
+                        </Text>
                       </Text>
                     </Flex>
                   ) : (
@@ -1309,14 +1314,18 @@ const SegmentChat = (props: any) => {
           </Flex>
           <Flex>
             <DeepGram onTranscriptionChanged={(text) => setPrompt(text)} />
-            <ActionIcon
+            <Button
+              size={'xs'}
+              disabled={prompt.trim().length === 0}
               variant="filled"
-              size={"md"}
               className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
               onClick={handleSubmit}
-            >
-              <IconSend size={"1rem"} />
-            </ActionIcon>
+              // leftIcon={<IconSend size={"1rem"} />}
+            > {'Send'}
+              <Flex ml={'xs'} align="center" gap="1px">
+                <Kbd size={'xs'} style={{ color: 'purple' }}>⌘</Kbd>{'+'}<Kbd size={"xs"} style={{ color: 'purple' }}>↩</Kbd>
+              </Flex>
+            </Button>
           </Flex>
         </Flex>
       </Paper>

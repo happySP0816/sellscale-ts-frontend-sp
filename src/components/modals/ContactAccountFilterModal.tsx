@@ -1,5 +1,6 @@
 import {
   Box,
+  Badge,
   Checkbox,
   Flex,
   Loader,
@@ -10,7 +11,7 @@ import {
   Text,
   HoverCard,
   Button,
-  Popover, TextInput, Divider
+  Popover, TextInput, Divider, Select, ActionIcon
 } from "@mantine/core";
 import {useEffect, useState} from "react";
 import {ICPFitReasonV2, Prospect} from "../../index";
@@ -20,6 +21,7 @@ import {API_URL} from "@constants/data";
 import {useRecoilValue} from "recoil";
 import {userTokenState} from "@atoms/userAtoms";
 import MarketMapFilters from "@pages/SegmentV3/MarketMapFilters";
+import { FaFilter } from "react-icons/fa6";
 
 interface ContactAccountFilterModalProps {
   showContactAccountFilterModal: boolean,
@@ -97,16 +99,26 @@ const ContactAccountFilterModal = function (
 
   const [viewMode, setViewMode] = useState<ViewMode>("CONTACT");
   const [prospects, setProspects] = useState<Prospect[]>([]);
-  const [prospectAccounts, setProspectAccounts] = useState<ProspectAccounts[]>([]);
+
+  // What we actually display
+  const [displayProspects, setDisplayProspects] = useState<Prospect[]>([]);
+  const [displayProspectAccounts, setDisplayProspectAccounts] = useState<ProspectAccounts[]>([]);
+
+  const [filteredColumns, setFilteredColumns] = useState<Map<string, string>>(new Map());
+
+  // We are going to use sockets to update the ICP Scoring Ruleset
+  // We are going to use sockets to update the prospects
 
   const [view20, setView20] = useState<boolean>(true);
 
+  const [loading, setLoading] = useState(false);
+
   const [contactTableHeaders, setContactTableHeaders] = useState<TableHeader[]>(
-    [{key: "full_name", title: "Full Name"},
+    [
+      {key: "icp_fit_score", title: "Score"},
+      {key: "full_name", title: "Full Name"},
       {key: "title", title: "Title"},
       {key: "company", title: "Company"},
-      {key: "icp_fit_score", title: "Score"},
-      {key: "icp_company_fit_score", title: "Company Score"},
       {key: "linkedin_url", title: "Linkedin URL"}
     ]
   );
@@ -114,18 +126,14 @@ const ContactAccountFilterModal = function (
   const notFilters = ["full_name", "title", "company", "icp_fit_score", "icp_company_fit_score", "linkedin_url"];
 
   const [companyTableHeaders, setCompanyTableHeaders] = useState<TableHeader[]>(
-    [{key: "company", title: "Account Name"},
-      {key: "icp_company_fit_score", title: "Score"}]
+    [
+      {key: "icp_company_fit_score", title: "Score"},
+      {key: "company", title: "Account Name"},
+    ]
   );
 
   const [selectedContacts, setSelectedContacts] = useState<Set<number>>(new Set());
   const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set());
-
-  // This selection is the set of columns that we want the score to be "yes" or 1.
-  // Only select the prospects or companies that have a score of 1 or "yes" for this column.
-  // We can select both individual or company columns
-  const [selectedIndividualColumns, setSelectedIndividualColumns] = useState<Set<string>>(new Set());
-  const [selectedCompanyColumns, setSelectedCompanyColumns] = useState<Set<string>>(new Set());
 
   // state for updating columns
   // whenever we change any columns, we add the columns name to the set
@@ -143,120 +151,6 @@ const ContactAccountFilterModal = function (
   // if we clear a filter we want to remove it from the header
   // if we update a column add it to the update columns state
 
-  // Whenever we select a new company, we want to select the contacts that are associated with that company
-  useEffect(() => {
-    let finalProspects: number[] = [];
-
-    selectedCompanies.forEach(company => {
-      const prospectIds = prospects.filter(prospect => prospect.company === company).map(prospect => prospect.id);
-      finalProspects = finalProspects.concat(prospectIds);
-    })
-
-    setSelectedContacts(new Set(finalProspects));
-  }, [selectedCompanies]);
-
-  // In here, we will select the reasons that says yes.
-  useEffect(() => {
-    if (selectedCompanyColumns.size === 0 && selectedIndividualColumns.size === 0) {
-      setSelectedContacts(new Set());
-      setSelectedCompanies(new Set());
-      return;
-    }
-
-    let finalProspects: Prospect[] = prospects;
-    let finalProspectAccounts: string[] = [];
-
-    selectedIndividualColumns.forEach(column => {
-      finalProspects = finalProspects.filter(prospect => {
-        const icp_fit_reason =prospect.icp_fit_reason_v2;
-
-        if (!icp_fit_reason) {
-          return false;
-        }
-
-        const section = icp_fit_reason[column];
-
-        if (section) {
-          return section.answer === "YES";
-        }
-        else {
-          return false;
-        }
-      })
-    })
-
-    selectedCompanyColumns.forEach(column => {
-      finalProspects = finalProspects.filter(prospect => {
-        const icp_company_fit_reason = prospect.icp_company_fit_reason;
-
-        if (!icp_company_fit_reason) {
-          return false;
-        }
-
-        const section = icp_company_fit_reason[column];
-
-        if (section) {
-          return section.answer === "YES";
-        }
-
-        return false;
-      })
-    })
-    finalProspectAccounts = finalProspects.map(prospect => prospect.company);
-
-    setSelectedContacts(new Set(finalProspects.map(prospect => prospect.id)));
-    setSelectedCompanies(new Set(finalProspectAccounts));
-
-  }, [selectedIndividualColumns, selectedCompanyColumns]);
-
-  // Checkbox Handlers for selecting contacts
-  const handleSelectContact = (contactId: number) => {
-    if (selectedContacts.has(contactId)) {
-      setSelectedContacts(prevState => {
-        prevState.delete(contactId);
-        return new Set(prevState);
-      })
-    }
-    else {
-      setSelectedContacts(prevState => {
-        prevState.add(contactId);
-        return new Set(prevState);
-      })
-    }
-  }
-
-  const handleSelectAllContacts = () => {
-    if (selectedContacts.size === prospects.length) {
-      setSelectedContacts(new Set());
-    }
-    else {
-      setSelectedContacts(new Set(prospects.map(prospect => prospect.id)));
-    }
-  }
-
-  // Checkbox Handlers for selecting companies
-  const handleSelectCompany = (companyName: string) => {
-    if (selectedCompanies.has(companyName)) {
-      setSelectedCompanies(prevState => {
-        prevState.delete(companyName);
-        return new Set(prevState);
-      });
-    }
-    else {
-      setSelectedCompanies(prevState => {
-        prevState.add(companyName);
-        return new Set(prevState);
-      });
-    }
-  }
-
-  const handleSelectAllCompanies = () => {
-    if (selectedCompanies.size === prospectAccounts.length) {
-      setSelectedCompanies(new Set());
-    } else {
-      setSelectedCompanies(new Set(prospectAccounts.map(prospectAccount => "" + prospectAccount.company)));
-    }
-  }
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['segmentProspects', segment?.id],
@@ -278,7 +172,6 @@ const ContactAccountFilterModal = function (
       }
     },
     enabled: !!segment,
-    refetchInterval: 10000,
   })
 
   const {data: icp_scoring_ruleset, isLoading: icp_scoring_ruleset_loading } = useQuery({
@@ -298,24 +191,36 @@ const ContactAccountFilterModal = function (
       }
     },
     enabled: !!segment,
-    refetchInterval: 10000,
   });
 
   const icp_scoring_ruleset_typed = icp_scoring_ruleset as ICPScoringRuleset;
 
-  const [loading, setLoading] = useState(false);
+  // Whenever we select a new company, we want to select the contacts that are associated with that company
+  useEffect(() => {
+    let finalProspects: number[] = [];
+
+    selectedCompanies.forEach(company => {
+      const prospectIds = prospects.filter(prospect => prospect.company === company).map(prospect => prospect.id);
+      finalProspects = finalProspects.concat(prospectIds);
+    })
+
+    setSelectedContacts(new Set(finalProspects));
+  }, [selectedCompanies]);
 
   useEffect(() => {
     if (icp_scoring_ruleset_typed) {
-      const newContactHeaders = [{key: "full_name", title: "Full Name"},
+      const newContactHeaders = [
+        {key: "icp_fit_score", title: "Score"},
+        {key: "full_name", title: "Full Name"},
         {key: "title", title: "Title"},
         {key: "company", title: "Company"},
-        {key: "icp_fit_score", title: "Score"},
         {key: "linkedin_url", title: "Linkedin URL"},
       ];
 
-      const newCompanyHeaders = [{key: "company", title: "Account Name"},
-        {key: "icp_company_fit_score", title: "Score"}];
+      const newCompanyHeaders = [
+        {key: "icp_company_fit_score", title: "Score"},
+        {key: "company", title: "Account Name"},
+      ];
 
       const company_ai_filters = icp_scoring_ruleset_typed.company_ai_filters ?? [];
       const individual_ai_filters = icp_scoring_ruleset_typed.individual_ai_filters ?? [];
@@ -447,7 +352,66 @@ const ContactAccountFilterModal = function (
           }
         )
 
-      const accountSorted = [...prospectData]
+      setProspects(prospectSorted);
+    }
+  }, [data]);
+
+  console.log(prospects);
+
+  useEffect(() => {
+    if (prospects) {
+      let currentProspects = prospects;
+
+      filteredColumns.forEach((value, key) => {
+        if (!value || value === "") {
+          return;
+        }
+        if (key === "icp_fit_score") {
+          currentProspects = currentProspects.filter(prospect => prospect.icp_fit_score === parseInt(value));
+        }
+        else if (key === "icp_company_fit_score") {
+          currentProspects = currentProspects.filter(prospect => prospect.icp_company_fit_score === parseInt(value));
+        }
+        else {
+          const keyType = key as keyof ICPFitReasonV2;
+
+          if (contactTableHeaders.find(header => header.key === key)) {
+            currentProspects = currentProspects.filter(prospect => {
+              const icp_fit_reason = prospect.icp_fit_reason_v2;
+              if (!icp_fit_reason) {
+                return false;
+              }
+
+              if (!icp_fit_reason[keyType]) {
+                return false;
+              }
+              return icp_fit_reason[keyType].answer === value;
+            })
+          }
+          else {
+            currentProspects = currentProspects.filter(prospect => {
+              const icp_company_fit_reason = prospect.icp_company_fit_reason;
+              if (!icp_company_fit_reason) {
+                return false;
+              }
+
+              if (!icp_company_fit_reason[keyType]) {
+                return false;
+              }
+              return icp_company_fit_reason[keyType].answer === value;
+            })
+          }
+        }
+      })
+
+      if (view20) {
+        currentProspects = currentProspects.slice(0, 20);
+      }
+
+      const finalCompanyData: ProspectAccounts[] = [];
+      const companySet = new Set();
+
+      const accountSorted = [...currentProspects]
         .sort((a, b) => {
             const company_fit_score = b.icp_company_fit_score - a.icp_company_fit_score;
 
@@ -467,29 +431,85 @@ const ContactAccountFilterModal = function (
           }
         )
 
-      setProspects(prospectSorted);
-
-      const companySet = new Set();
-      const finalCompanyData: ProspectAccounts[] = [];
-
       accountSorted.forEach(prospect => {
         const prospectCompanyName = prospect.company;
 
         if (!companySet.has(prospectCompanyName)) {
           companySet.add(prospectCompanyName);
-          // Add to final Company Data
-          // Have columns for them like scoring
-          // Make new column for icp_fit_reason_v2
-          // Json key value pair of header_key, and reasoning
 
           finalCompanyData.push({"company": prospectCompanyName,
             "icp_company_fit_score": prospect.icp_company_fit_score, "prospect_id": prospect.id});
         }
       })
 
-      setProspectAccounts(finalCompanyData);
+      setDisplayProspectAccounts(finalCompanyData);
+      setDisplayProspects(currentProspects);
     }
-  }, [data]);
+  }, [filteredColumns, view20, prospects]);
+
+  // Checkbox Handlers for selecting contacts
+  const handleSelectContact = (contactId: number) => {
+    if (selectedContacts.has(contactId)) {
+      setSelectedContacts(prevState => {
+        prevState.delete(contactId);
+        return new Set(prevState);
+      })
+    }
+    else {
+      setSelectedContacts(prevState => {
+        prevState.add(contactId);
+        return new Set(prevState);
+      })
+    }
+  }
+
+  const handleSelectAllContacts = () => {
+    if (selectedContacts.size === displayProspects.length) {
+      setSelectedContacts(new Set());
+    }
+    else {
+      setSelectedContacts(new Set(displayProspects.map(prospect => prospect.id)));
+    }
+  }
+
+  // Checkbox Handlers for selecting companies
+  const handleSelectCompany = (companyName: string) => {
+    if (selectedCompanies.has(companyName)) {
+      setSelectedCompanies(prevState => {
+        prevState.delete(companyName);
+        return new Set(prevState);
+      });
+    }
+    else {
+      setSelectedCompanies(prevState => {
+        prevState.add(companyName);
+        return new Set(prevState);
+      });
+    }
+  }
+
+  const handleSelectAllCompanies = () => {
+    if (selectedCompanies.size === displayProspectAccounts.length) {
+      setSelectedCompanies(new Set());
+    } else {
+      setSelectedCompanies(new Set(displayProspectAccounts.map(prospectAccount => "" + prospectAccount.company)));
+    }
+  }
+
+  const onSelectFilter = (key: string, value: string) => {
+    if (value === "") {
+      setFilteredColumns(prevState => {
+        prevState.delete(key);
+        return new Map(prevState);
+      })
+    }
+    else {
+      setFilteredColumns(prevState => {
+        prevState.set(key, value);
+        return new Map(prevState);
+      })
+    }
+  }
 
   const onClickCreateSegment = async () => {
     const response = await fetch(`${API_URL}/segment/${segment?.id}/create-segment-from-market-map`, {
@@ -522,11 +542,11 @@ const ContactAccountFilterModal = function (
       style={{maxHeight: "700px"}}
       title={
       <Flex justify={'space-between'} gap={'36px'}>
-        <Title order={3}>
+        <Title order={3} style={{maxWidth: "300px"}}>
           {segment?.is_market_map ? (
-            viewMode === "ACCOUNT" ? "Account Market Map" : "Contact Market Map"
+            segment.segment_title + " Market Map View"
           ) : (
-            viewMode === "ACCOUNT" ? "Account Segment View" : "Contact Segment View"
+            segment?.segment_title + " Segment View"
           )}
         </Title>
         <Switch size={'xl'}
@@ -600,37 +620,55 @@ const ContactAccountFilterModal = function (
               <tr>
                 <th>
                   <Checkbox
-                    checked={selectedCompanies.size === prospectAccounts.length}
+                    checked={selectedCompanies.size === displayProspectAccounts.length}
                     onChange={() => handleSelectAllCompanies()}
                   />
                 </th>
                 {icp_scoring_ruleset_typed && companyTableHeaders.map(item => {
                   return (
                     <th key={item.key}>
-                      <Flex direction={'column'}>
-                        {item.title}
+                      <Flex align={'center'} justify={'space-between'}>
+                        <Flex direction={'column'}>
+                          {item.title}
+                          {icp_scoring_ruleset_typed.company_personalizers?.includes(item.key) &&
+                              <span style={{fontStyle: 'italic', fontSize: 'x-small'}}>
 
-                        {!notFilters.includes(item.key) && (
-                          <Checkbox
-                            checked={selectedCompanyColumns.has(item.key)}
-                            onChange={() => {
-                              if (selectedCompanyColumns.has(item.key)) {
-                                setSelectedCompanyColumns(prevState => {
-                                  prevState.delete(item.key);
-                                  return new Set(prevState);
-                                })
-                              }
-                              else {
-                                setSelectedCompanyColumns(prevState => {
-                                  prevState.add(item.key);
-                                  return new Set(prevState);
-                                })
-                              }
-                            }}
-                          />
+                                  Personalizer: ✅
+                              </span>
+                          }
+                          {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && (
+                            <span style={{fontStyle: 'italic', fontSize: 'x-small'}}>Dealbreaker: ✅</span>
+                          )}
+                        </Flex>
+                        {(!notFilters.includes(item.key) || item.title === "Score") && (
+                          <Popover width={400} position="bottom" withArrow shadow="md" withinPortal>
+                            <Popover.Target>
+                              <ActionIcon>
+                                <FaFilter color={filteredColumns.has(item.key) ? "lightgreen" : "grey"}/>
+                              </ActionIcon>
+                            </Popover.Target>
+                            <Popover.Dropdown>
+                              <Select
+                                label={item.title}
+                                placeholder={'Select the Property that you would like to filter for'}
+                                data={item.title === "Score" ? [
+                                {value: "", label: "Select"},
+                                {value: "0", label: "VERY LOW"},
+                                {value: "1", label: "LOW"},
+                                {value: "2", label: "MEDIUM"},
+                                {value: "3", label: "HIGH"},
+                                {value: "4", label: "VERY HIGH"},
+                              ] : [
+                                {value: "", label: "Select"},
+                                {value: "YES", label: "YES"},
+                                {value: "NO", label: "NO"},
+                              ]}
+                                onChange={(value) => onSelectFilter(item.key, value ?? "")}
+                                value={filteredColumns.get(item.key) ? filteredColumns.get(item.key) as string : ""}
+                              />
+                            </Popover.Dropdown>
+                          </Popover>
                         )}
-                        {icp_scoring_ruleset_typed.company_personalizers?.includes(item.key) && "Personalizer: ✅"}
-                        {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && "Dealbreaker: ✅"}
                       </Flex>
                     </th>
                   )
@@ -638,7 +676,7 @@ const ContactAccountFilterModal = function (
               </tr>
               </thead>
               <tbody>
-              {prospectAccounts.map((prospectAccount, index) => {
+              {displayProspectAccounts.map((prospectAccount, index) => {
                 const keys = companyTableHeaders.map(h => h.key);
 
                 return (
@@ -669,26 +707,96 @@ const ContactAccountFilterModal = function (
 
                           const trueScore = prospect.icp_company_fit_reason && Object.keys(prospect.icp_company_fit_reason).length > 0;
 
-                          let humanReadableScore = "Not Scored";
+                          let humanReadableScore = "NOT SCORED";
 
                           if (prospectAccount[keyType] === 0) {
-                            humanReadableScore = "Very Low"
+                            humanReadableScore = "VERY LOW"
                           } else if (prospectAccount[keyType] === 1) {
-                            humanReadableScore = "Low"
+                            humanReadableScore = "LOW"
                           } else if (prospectAccount[keyType] === 2) {
-                            humanReadableScore = "Medium"
+                            humanReadableScore = "MEDIUM"
                           } else if (prospectAccount[keyType] === 3) {
-                            humanReadableScore = "High"
-                          } else {
-                            humanReadableScore = "Very High"
+                            humanReadableScore = "HIGH"
+                          } else if (prospectAccount[keyType] === 4) {
+                            humanReadableScore = "VERY HIGH"
                           }
 
                           return (
                             <td key={key + prospectAccount.company}
                                 style={{minWidth: "100px", maxWidth: "300px"}}>
-                              <Text>
-                                {trueScore ? humanReadableScore : "Not Scored"}
-                              </Text>
+                              <HoverCard>
+                                <HoverCard.Target>
+                                  <Badge
+                                    color={
+                                      humanReadableScore == "VERY HIGH"
+                                        ? "green"
+                                        : humanReadableScore == "HIGH"
+                                          ? "blue"
+                                          : humanReadableScore == "MEDIUM"
+                                            ? "yellow"
+                                            : humanReadableScore == "LOW"
+                                              ? "orange"
+                                              : humanReadableScore == "VERY LOW" && trueScore
+                                                ? "red"
+                                                : "gray"
+                                    }
+                                    fw={600}
+                                  >
+                                    {trueScore ? humanReadableScore : "NOT SCORED"}
+                                  </Badge>
+                                </HoverCard.Target>
+                                <HoverCard.Dropdown>
+                                  <Flex direction={'column'} style={{maxWidth: "400px"}}>
+                                    {
+                                      prospect.icp_company_fit_reason && (
+                                        Object.keys(prospect.icp_company_fit_reason).map(key => {
+                                          const section = prospect.icp_company_fit_reason[key];
+                                          const title = key
+                                            .replace("_individual_", "_")
+                                            .replace("_company_", "_")
+                                            .replace("aicomp_", "")
+                                            .replace("aiind_", "")
+                                            .split('_')
+                                            .join(' ')
+
+                                          if (section.answer === "NO" && icp_scoring_ruleset_typed.dealbreakers?.includes(key)) {
+                                            return (
+                                              <Flex key={key} gap={'4px'}>
+                                                <Text>
+                                                  ❌
+                                                </Text>
+                                                <Text size="sm">
+                                                  <span style={{fontWeight: "bold"}}>
+                                                    {title}
+                                                  </span>
+                                                  {section.reasoning.replace("❌", "").replace("✅", "")}
+                                                </Text>
+                                              </Flex>
+                                            )
+                                          }
+                                          else if (section.answer === "YES") {
+                                            return (
+                                              <Flex key={key} gap={'4px'}>
+                                                <Text>
+                                                  ✅
+                                                </Text>
+                                                <Text size="sm">
+                                                  <span style={{fontWeight: "bold"}}>
+                                                    {title}
+                                                  </span>
+                                                  {section.reasoning.replace("❌", "").replace("✅", "")}
+                                                </Text>
+                                              </Flex>
+                                            )
+                                          }
+
+                                          return <></>
+                                        })
+                                      )
+                                    }
+                                  </Flex>
+                                </HoverCard.Dropdown>
+                              </HoverCard>
                             </td>
                           )
                         }
@@ -723,11 +831,15 @@ const ContactAccountFilterModal = function (
                             {(pa[keyType] && !updatedCompanyColumns.has(key)) ? (
                               <HoverCard>
                                 <HoverCard.Target>
-                                  <Text color={section.answer === "YES" ? "green" : "red"}
-                                        weight={'bold'}
-                                  >
-                                    {section.answer}
-                                  </Text>
+                                  {section.answer === "LOADING" ? (
+                                    <Loader size={'xs'}/>
+                                  ) : (
+                                    <Text color={section.answer === "YES" ? "green" : "red"}
+                                          weight={'bold'}
+                                    >
+                                      {section.answer}
+                                    </Text>
+                                  )}
                                 </HoverCard.Target>
                                 <HoverCard.Dropdown maw={'300px'}>
                                   <Flex direction={'column'} gap={'4px'}>
@@ -774,29 +886,45 @@ const ContactAccountFilterModal = function (
                 {icp_scoring_ruleset_typed && contactTableHeaders.map(item => {
                   return (
                     <th key={item.title}>
-                      <Flex direction={'column'} justify={'center'}>
-                        {item.title}
-                        {!notFilters.includes(item.key) && (
-                          <Checkbox
-                            checked={selectedIndividualColumns.has(item.key)}
-                            onChange={() => {
-                              if (selectedIndividualColumns.has(item.key)) {
-                                setSelectedIndividualColumns(prevState => {
-                                  prevState.delete(item.key);
-                                  return new Set(prevState);
-                                })
-                              }
-                              else {
-                                setSelectedIndividualColumns(prevState => {
-                                  prevState.add(item.key);
-                                  return new Set(prevState);
-                                })
-                              }
-                            }}
-                          />
+                      <Flex align={'center'} justify={'space-between'}>
+                        <Flex direction={'column'} justify={'center'}>
+                          {item.title}
+                          {icp_scoring_ruleset_typed.company_personalizers?.includes(item.key) &&
+                              <span style={{fontStyle: 'italic', fontSize: "xx-small"}}>Personalizer: ✅</span>
+                          }
+                          {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && (
+                            <span style={{fontStyle: 'italic', fontSize: 'xx-small'}}>"Dealbreaker: ✅"</span>
+                          )}
+                        </Flex>
+                        {(!notFilters.includes(item.key) || item.title === "Score") && (
+                          <Popover width={400} position="bottom" withArrow shadow="md" withinPortal>
+                            <Popover.Target>
+                              <ActionIcon>
+                                <FaFilter color={filteredColumns.has(item.key) ? "lightgreen" : "grey"}/>
+                              </ActionIcon>
+                            </Popover.Target>
+                            <Popover.Dropdown>
+                              <Select
+                                label={item.title}
+                                placeholder={'Select the Property that you would like to filter for'}
+                                data={item.title === "Score" ? [
+                                  {value: "", label: "Select"},
+                                  {value: "0", label: "VERY LOW"},
+                                  {value: "1", label: "LOW"},
+                                  {value: "2", label: "MEDIUM"},
+                                  {value: "3", label: "HIGH"},
+                                  {value: "4", label: "VERY HIGH"},
+                                ] : [
+                                  {value: "", label: "Select"},
+                                  {value: "YES", label: "YES"},
+                                  {value: "NO", label: "NO"},
+                                ]}
+                                onChange={(value) => onSelectFilter(item.key, value ?? "")}
+                                value={filteredColumns.get(item.key) ? filteredColumns.get(item.key) as string : ""}
+                              />
+                            </Popover.Dropdown>
+                          </Popover>
                         )}
-                        {icp_scoring_ruleset_typed.company_personalizers?.includes(item.key) && "Personalizer: ✅"}
-                        {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && "Dealbreaker: ✅"}
                       </Flex>
                     </th>
                   )
@@ -804,7 +932,7 @@ const ContactAccountFilterModal = function (
               </tr>
               </thead>
               <tbody>
-              {prospects.slice(0, view20 ? 20 : undefined).map((prospect, index) => {
+              {displayProspects.slice(0, view20 ? 20 : undefined).map((prospect, index) => {
                 const keys: string[] = contactTableHeaders.map(h => h.key);
                 const p = {...prospect, ...prospect.icp_fit_reason_v2};
 
@@ -826,23 +954,93 @@ const ContactAccountFilterModal = function (
                           let humanReadableScore = "Not Scored";
 
                           if (p[keyType] === 0) {
-                            humanReadableScore = "Very Low"
+                            humanReadableScore = "VERY LOW"
                           } else if (p[keyType] === 1) {
-                            humanReadableScore = "Low"
+                            humanReadableScore = "LOW"
                           } else if (p[keyType] === 2) {
-                            humanReadableScore = "Medium"
+                            humanReadableScore = "MEDIUM"
                           } else if (p[keyType] === 3) {
-                            humanReadableScore = "High"
+                            humanReadableScore = "HIGH"
                           } else if (p[keyType] === 4) {
-                            humanReadableScore = "Very High"
+                            humanReadableScore = "VERY HIGH"
                           }
 
                           return (
                             <td key={key + p.id}
                                 style={{minWidth: "100px", maxWidth: "300px"}}>
-                              <Text>
-                                {trueScore ? humanReadableScore : "Not Scored"}
-                              </Text>
+                              <HoverCard>
+                                <HoverCard.Target>
+                                  <Badge
+                                    color={
+                                      humanReadableScore == "VERY HIGH"
+                                        ? "green"
+                                        : humanReadableScore == "HIGH"
+                                          ? "blue"
+                                          : humanReadableScore == "MEDIUM"
+                                            ? "yellow"
+                                            : humanReadableScore == "LOW"
+                                              ? "orange"
+                                              : humanReadableScore == "VERY LOW" && trueScore
+                                                ? "red"
+                                                : "gray"
+                                    }
+                                    fw={600}
+                                  >
+                                    {trueScore ? humanReadableScore : "NOT SCORED"}
+                                  </Badge>
+                                </HoverCard.Target>
+                                <HoverCard.Dropdown>
+                                  <Flex direction={'column'} style={{maxWidth: "400px"}}>
+                                    {
+                                      prospect.icp_fit_reason_v2 && (
+                                        Object.keys(prospect.icp_fit_reason_v2).map(key => {
+                                          const section = prospect.icp_fit_reason_v2[key];
+                                          const title = key
+                                            .replace("_individual_", "_")
+                                            .replace("_company_", "_")
+                                            .replace("aicomp_", "")
+                                            .replace("aiind_", "")
+                                            .split('_')
+                                            .join(' ')
+
+                                          if (section.answer === "NO" && icp_scoring_ruleset_typed.dealbreakers?.includes(key)) {
+                                            return (
+                                              <Flex key={key} gap={'4px'}>
+                                                <Text>
+                                                  ❌
+                                                </Text>
+                                                <Text size="sm">
+                                                  <span style={{fontWeight: "bold"}}>
+                                                    {title}
+                                                  </span>
+                                                  {section.reasoning.replace("❌", "").replace("✅", "")}
+                                                </Text>
+                                              </Flex>
+                                            )
+                                          }
+                                          else if (section.answer === "YES") {
+                                            return (
+                                              <Flex key={key} gap={'4px'}>
+                                                <Text>
+                                                  ✅
+                                                </Text>
+                                                <Text size="sm">
+                                                  <span style={{fontWeight: "bold"}}>
+                                                    {title}
+                                                  </span>
+                                                  {section.reasoning.replace("❌", "").replace("✅", "")}
+                                                </Text>
+                                              </Flex>
+                                            )
+                                          }
+
+                                          return <></>
+                                        })
+                                      )
+                                    }
+                                  </Flex>
+                                </HoverCard.Dropdown>
+                              </HoverCard>
                             </td>
                           )
                         }
@@ -863,11 +1061,15 @@ const ContactAccountFilterModal = function (
                             {(p[keyType] && !updatedIndividualColumns.has(key)) ? (
                               <HoverCard>
                                 <HoverCard.Target>
-                                  <Text color={p[keyType].answer === "YES" ? "green" : "red"}
-                                        weight={'bold'}
-                                  >
-                                    {p[keyType].answer}
-                                  </Text>
+                                  {p[keyType].answer === "LOADING" ? (
+                                    <Loader size={'xs'} />
+                                  ) : (
+                                    <Text color={p[keyType].answer === "YES" ? "green" : "red"}
+                                          weight={'bold'}
+                                    >
+                                      {p[keyType].answer}
+                                    </Text>
+                                  )}
                                 </HoverCard.Target>
                                 <HoverCard.Dropdown maw={'300px'}>
                                   <Flex direction={'column'} gap={'4px'}>

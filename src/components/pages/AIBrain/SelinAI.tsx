@@ -703,34 +703,39 @@ export default function SelinAI() {
     }
   };
 
-
   //controls the sliding up and down of the suggestion
   const slideUp = () => {
     setSuggestionHidden(false);
-    const div = document.getElementById('slidingDiv');
+    const div = document.getElementById("slidingDiv");
     if (div) {
-      div.style.animation = 'slideUp 0.5s forwards';
+      div.style.animation = "slideUp 0.5s forwards";
     }
-  }
+  };
   const slideDown = () => {
-    const div = document.getElementById('slidingDiv');
+    const div = document.getElementById("slidingDiv");
     if (div) {
-      div.style.animation = 'slideDown 0.5s forwards';
+      div.style.animation = "slideDown 0.5s forwards";
     }
   };
 
-  const handleSuggestion = async (data: { message: string, thread_id: string, device_id: string }) => {
+  const handleSuggestion = async (data: {
+    message: string;
+    thread_id: string;
+    device_id: string;
+  }) => {
     //only show the suggestion if the message is for the current device
-    if (data.thread_id === roomIDref.current && data.device_id === deviceIDRef.current) {
+    if (
+      data.thread_id === roomIDref.current &&
+      data.device_id === deviceIDRef.current
+    ) {
       setSuggestion(data.message);
 
-    slideUp();
-    setTimeout(() => {
-      slideDown();
-    }, 10000);
-
-      }
+      slideUp();
+      setTimeout(() => {
+        slideDown();
+      }, 10000);
     }
+  };
 
   useEffect(() => {
     socket.on("incoming-message", handleNewMessage);
@@ -771,7 +776,13 @@ export default function SelinAI() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${userToken}`,
           },
-          body: JSON.stringify({ prompt: prompt, messages: messages, room_id: roomIDref.current, device_id: deviceIDRef.current, previous_follow_up: suggestion }),
+          body: JSON.stringify({
+            prompt: prompt,
+            messages: messages,
+            room_id: roomIDref.current,
+            device_id: deviceIDRef.current,
+            previous_follow_up: suggestion,
+          }),
         });
 
         const data = await response.json();
@@ -1134,13 +1145,13 @@ const SegmentChat = (props: any) => {
     }
   }, [{ ...messages }]);
 
-    const slideDown = () => {
-      setSuggestionHidden(true);
-      const div = document.getElementById('slidingDiv');
-      if (div) {
-        div.style.animation = 'slideDown 0.5s forwards';
-      }
-    };
+  const slideDown = () => {
+    setSuggestionHidden(true);
+    const div = document.getElementById("slidingDiv");
+    if (div) {
+      div.style.animation = "slideDown 0.5s forwards";
+    }
+  };
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       handleSubmit();
@@ -1405,7 +1416,15 @@ const SegmentChat = (props: any) => {
                       </Card.Section>
                       {uncollapsedCards[index] && (
                         <Text size="xs" fw={400} color="gray" mt="xs">
-                          {message.action_description}
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                message.action_description?.replaceAll(
+                                  "\n",
+                                  "<br/><br/>"
+                                ) || "",
+                            }}
+                          />
                         </Text>
                       )}
                     </Card>
@@ -1528,7 +1547,15 @@ const SegmentChat = (props: any) => {
                         </Card.Section>
                         {!uncollapsedCards[index] && (
                           <Text size="xs" fw={400} color="gray" mt="xs">
-                            {message.action_description}
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html:
+                                  message.action_description?.replaceAll(
+                                    "\n",
+                                    "<br/><br/>"
+                                  ) || "",
+                              }}
+                            />
                           </Text>
                         )}
                       </Card>
@@ -1602,31 +1629,45 @@ const SegmentChat = (props: any) => {
           </>
         )}
       </ScrollArea>
-      <div style={{ width: '80%', position: "relative", marginBottom: "-32px", overflow: "hidden", margin: "0 auto", visibility: suggestion !== '' ? 'visible' : 'hidden' }}>
-        {<div id="slidingDiv" style={{ 
-          backgroundColor: suggestionHidden ? "transparent" : "#E25DEE", 
-          padding: "13px", 
-          borderRadius: "8px", 
-          color: "white", 
-          fontWeight: "bold", 
-          textAlign: "center", 
-          fontSize: "0.9rem", 
-          animation: suggestion !== '' ? "slideUp 0.5s forwards" : "none" 
-        }}>
-          {'💡 ' + suggestion}
-          <span 
-            style={{ 
-              position: "absolute", 
-              top: "5px", 
-              right: "10px", 
-              cursor: "pointer", 
-              fontWeight: "bold" 
-            }} 
-            onClick={() => slideDown()}
+      <div
+        style={{
+          width: "80%",
+          position: "relative",
+          marginBottom: "-32px",
+          overflow: "hidden",
+          margin: "0 auto",
+          visibility: suggestion !== "" ? "visible" : "hidden",
+        }}
+      >
+        {
+          <div
+            id="slidingDiv"
+            style={{
+              backgroundColor: suggestionHidden ? "transparent" : "#E25DEE",
+              padding: "13px",
+              borderRadius: "8px",
+              color: "white",
+              fontWeight: "bold",
+              textAlign: "center",
+              fontSize: "0.9rem",
+              animation: suggestion !== "" ? "slideUp 0.5s forwards" : "none",
+            }}
           >
-            X
-          </span>
-        </div>}
+            {"💡 " + suggestion}
+            <span
+              style={{
+                position: "absolute",
+                top: "5px",
+                right: "10px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+              onClick={() => slideDown()}
+            >
+              X
+            </span>
+          </div>
+        }
       </div>
       <Paper
         p={"sm"}
@@ -1636,8 +1677,8 @@ const SegmentChat = (props: any) => {
         my={"lg"}
         mx={"md"}
       >
-      <style>
-        {`
+        <style>
+          {`
           @keyframes slideUp {
             from {
               transform: translateY(100%);
@@ -1655,7 +1696,7 @@ const SegmentChat = (props: any) => {
             }
           }
         `}
-      </style>
+        </style>
         <Textarea
           value={prompt}
           placeholder="Chat with AI..."
@@ -1838,28 +1879,28 @@ const SelixControlCenter = ({
                 </Center>
               ),
             },
-            {
-              value: "NOT_AVAILABLE2",
-              label: (
-                <Center
-                  style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
-                >
-                  <IconPuzzle size={"1rem"} />
-                  <span>Segments</span>
-                </Center>
-              ),
-            },
-            {
-              value: "NOT_AVAILABLE3",
-              label: (
-                <Center
-                  style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
-                >
-                  <IconParachute size={"1rem"} />
-                  <span>Campaigns</span>
-                </Center>
-              ),
-            },
+            // {
+            //   value: "NOT_AVAILABLE2",
+            //   label: (
+            //     <Center
+            //       style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
+            //     >
+            //       <IconPuzzle size={"1rem"} />
+            //       <span>Segments</span>
+            //     </Center>
+            //   ),
+            // },
+            // {
+            //   value: "NOT_AVAILABLE3",
+            //   label: (
+            //     <Center
+            //       style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
+            //     >
+            //       <IconParachute size={"1rem"} />
+            //       <span>Campaigns</span>
+            //     </Center>
+            //   ),
+            // },
             {
               value: "BROWSER",
               label: (
@@ -1869,17 +1910,17 @@ const SelixControlCenter = ({
                 </Center>
               ),
             },
-            {
-              value: "NOT_AVAILABLE",
-              label: (
-                <Center
-                  style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
-                >
-                  <IconFlask size={"1rem"} />
-                  <span>Analytics</span>
-                </Center>
-              ),
-            },
+            // {
+            //   value: "NOT_AVAILABLE",
+            //   label: (
+            //     <Center
+            //       style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
+            //     >
+            //       <IconFlask size={"1rem"} />
+            //       <span>Analytics</span>
+            //     </Center>
+            //   ),
+            // },
           ]}
         />
       </Paper>
@@ -2310,7 +2351,12 @@ const PlannerComponent = ({
                   </Flex>
                   <Collapse in={openedTaskIndex === index}>
                     <Text p={"sm"} mt={"sm"}>
-                      {task.description}
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            task.description?.replaceAll("\n", "<br />") || "",
+                        }}
+                      />
                     </Text>
                     {task.proof_of_work_img && (
                       <img
@@ -2412,7 +2458,8 @@ const SelinStrategy = ({
           <Flex align={"center"} gap={"xs"}>
             <IconInfoCircle color="green" size={"1rem"} />
             <Text size={"sm"} color="#228B22" fw={600}>
-              This blueprint summarizes the angle for your campaign.
+              This blueprint summarizes the angle for your campaign. Review then
+              press 'Save Draft'
             </Text>
           </Flex>
         </Paper>
@@ -2576,7 +2623,7 @@ const SelinStrategy = ({
               hackedSubmit();
             }}
           >
-            Create Campaign
+            Save Draft
           </Button>
         </Flex>
       </Stack>

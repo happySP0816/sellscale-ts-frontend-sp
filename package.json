@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "build": "tsc && vite build",
+    "build": "node --max_old_space_size=8192 ./node_modules/.bin/tsc && node --max_old_space_size=8192 ./node_modules/.bin/vite build",
     "test": "jest",
     "tsc": "tsc && vite",
     "preview": "vite preview",

@@ -1313,7 +1313,7 @@ const SegmentChat = (props: any) => {
             </ActionIcon> */}
           </Flex>
           <Flex>
-            <DeepGram onTranscriptionChanged={(text) => setPrompt(text)} />
+            <DeepGram onTranscriptionChanged={(text) => setPrompt(prompt + text)} />
             <Button
               size={'xs'}
               disabled={prompt.trim().length === 0}

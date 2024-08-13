@@ -170,7 +170,7 @@ export default function SelinAI() {
   const handleSubmit = async () => {
     if (prompt.trim() !== "") {
       const newChatPrompt: MessageType = {
-        created_time: moment().format("MMMM D, h:mm a"),
+        created_time: moment().format("MMMM D, YYYY h:mm A"),
         message: prompt,
         role: "user",
         type: "message",
@@ -989,7 +989,7 @@ const SegmentChat = (props: any) => {
         <Text fw={600}>Chat with Selix</Text>
       </Flex>
       <Divider bg="gray" />
-      <ScrollArea h={"65vh"} viewportRef={viewport} scrollHideDelay={4000}>
+      <ScrollArea h={"53vh"} viewportRef={viewport} scrollHideDelay={4000} style={{ overflow: 'hidden' }}>
         {messages.length > 1 ? (
           <Flex
             direction={"column"}
@@ -1788,6 +1788,7 @@ const PlannerComponent = ({
         </Flex>
       </Paper>
       <Collapse in={opened}>
+      <ScrollArea h={"55vh"} scrollHideDelay={4000} style={{ overflow: 'hidden' }}>
         {tasks
         // filter out duplicate tasks by title. This is a temporary fix
           ?.filter((task: { title: any }, index: number, self: any) => 
@@ -1892,6 +1893,7 @@ const PlannerComponent = ({
               </Paper>
             );
           })}
+        </ScrollArea>
       </Collapse>
     </Paper>
   );
@@ -1982,6 +1984,7 @@ const SelinStrategy = ({
             </Text>
           </Flex>
         </Paper>
+        <ScrollArea h={"34vh"} p={"sm"} my={"sm"}>
         <Flex>
           <Text color="gray" fw={500} w={160} size={"xs"}>
             Strategy Name:
@@ -1999,7 +2002,7 @@ const SelinStrategy = ({
           <Stack spacing={"sm"}>
             <Box>
               <Text fw={600} size={"xs"}>
-                Description:
+  
               </Text>
               <Text fw={500} size={"xs"}>
                 <Text
@@ -2064,6 +2067,7 @@ const SelinStrategy = ({
               : "N/A"}
           </Text>
         </Flex>
+        </ScrollArea>
         <Flex align={"center"} gap={"md"}>
           <Button
             variant="outline"

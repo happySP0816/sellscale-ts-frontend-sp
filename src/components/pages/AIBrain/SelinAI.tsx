@@ -118,7 +118,7 @@ export interface MemoryType {
 export interface ThreadType {
   id: number;
   session_name: string;
-  status: "ACTIVE" | "PENDING_OPERATOR" | "COMPLETE";
+  status: "ACTIVE" | "COMPLETE" | "CANCELLED" | "PENDING_OPERATOR" | "BLOCKED";
   assistant_id: string;
   client_sdr_id: number;
   created_at: string;
@@ -636,8 +636,8 @@ export default function SelinAI() {
                 <span />
               </ThemeIcon>
               <Text fw={600} color="black" className="text-left" ml="xs">
-                {threads.filter((thread) => thread.status === "ACTIVE").length}{" "}
-                active chats
+                {threads.filter((thread) => (thread.status !== "COMPLETE" && thread.status !== "CANCELLED" )).length}{" "}
+               Conversations
               </Text>
               <div style={{ marginLeft: "auto" }}>
                 {openedChat ? (
@@ -2085,6 +2085,9 @@ const SelinStrategy = ({
             color="gray"
             fullWidth
             onClick={() => {
+              if (!memory?.strategy_id) {
+                return;
+              }
               openContextModal({
                 modal: "editStrategy",
                 title: (
@@ -2146,6 +2149,9 @@ const SelinStrategy = ({
           <Button
             fullWidth
             onClick={() => {
+              if (!memory?.strategy_id) {
+                return;
+              }
               hackedSubmit();
             }}
           >

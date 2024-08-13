@@ -24,8 +24,10 @@ import {
   Textarea,
   Popover,
   LoadingOverlay,
+  Kbd,
 } from "@mantine/core";
 import {
+  IconBrowser,
   IconBulb,
   IconChevronDown,
   IconChevronLeft,
@@ -35,10 +37,15 @@ import {
   IconClock,
   IconEye,
   IconEyeOff,
+  IconFlask,
+  IconHammer,
   IconInfoCircle,
   IconLink,
+  IconList,
+  IconParachute,
   IconPlus,
   IconPoint,
+  IconPuzzle,
   IconSend,
   IconTrash,
   IconTriangleInverted,
@@ -118,7 +125,7 @@ export interface MemoryType {
 export interface ThreadType {
   id: number;
   session_name: string;
-  status: "ACTIVE" | "PENDING_OPERATOR" | "COMPLETE";
+  status: "ACTIVE" | "COMPLETE" | "CANCELLED" | "PENDING_OPERATOR" | "BLOCKED";
   assistant_id: string;
   client_sdr_id: number;
   created_at: string;
@@ -162,9 +169,9 @@ export default function SelinAI() {
   console.log("current session is", currentSessionId);
 
   const handleSubmit = async () => {
-    if (prompt !== "") {
+    if (prompt.trim() !== "") {
       const newChatPrompt: MessageType = {
-        created_time: moment().format("MMMM D, h:mm a"),
+        created_time: moment().format("MMMM D, YYYY h:mm A"),
         message: prompt,
         role: "user",
         type: "message",
@@ -375,13 +382,11 @@ export default function SelinAI() {
           },
         ]);
       }
+    }
 
       //remove all messages that are message.message === 'loading'
 
-      setMessages((chatContent: MessageType[]) =>
-        chatContent.filter((message) => message.message !== "loading")
-      );
-    }
+      
   };
 
   const handleChangeTab = (data: { tab: string, thread_id: string }) => {
@@ -653,8 +658,8 @@ export default function SelinAI() {
                 <span />
               </ThemeIcon>
               <Text fw={600} color="black" className="text-left" ml="xs">
-                {threads.filter((thread) => thread.status === "ACTIVE").length}{" "}
-                active chats
+                {threads.filter((thread) => (thread.status !== "COMPLETE" && thread.status !== "CANCELLED" )).length}{" "}
+               Conversations
               </Text>
               <div style={{ marginLeft: "auto" }}>
                 {openedChat ? (
@@ -877,7 +882,7 @@ const SegmentChat = (props: any) => {
   }, [{ ...messages }]);
 
   const handleKeyDown = (event: any) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       handleSubmit();
     }
   };
@@ -997,7 +1002,7 @@ const SegmentChat = (props: any) => {
         <Text fw={600}>Chat with Selix</Text>
       </Flex>
       <Divider bg="gray" />
-      <ScrollArea h={"65vh"} viewportRef={viewport} scrollHideDelay={4000}>
+      <ScrollArea h={"53vh"} viewportRef={viewport} scrollHideDelay={4000} style={{ overflow: 'hidden' }}>
         {messages.length > 1 ? (
           <Flex
             direction={"column"}
@@ -1016,6 +1021,12 @@ const SegmentChat = (props: any) => {
                       gap={4}
                       key={index}
                       ml={message.role === "user" ? "auto" : "0"}
+                      style={{
+                        backgroundColor: message.role === "user" ? "#F5F5F5" : "#FAFAFA",
+                        boxShadow: message.role === "user" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "0 2px 4px rgba(0, 0, 0, 0.05)",
+                        borderRadius: "10px",
+                        padding: "10px",
+                      }}
                     >
                       <Flex gap={4} align={"center"}>
                         <Avatar
@@ -1044,7 +1055,7 @@ const SegmentChat = (props: any) => {
                           )}
                       </Flex>
                       <Flex
-                        className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none"
+                        className=" rounded-lg rounded-br-none"
                         px={"sm"}
                         py={7}
                       >
@@ -1069,40 +1080,14 @@ const SegmentChat = (props: any) => {
                           )}
                         </Text>
                       </Flex>
-                      {/* {messages.map((subMessage: MessageType, subIndex: number) => {
-                        return (
-                          <Flex
-                            className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none"
-                            px={"sm"}
-                            py={7}
-                            key={subIndex}
-                            bg={subMessage.role === "user" ? "#F5F9FE" : ""}
-                          >
-                            <Text size={"sm"} fw={500}>
-                              {subMessage.role === "user" ? (
-                                subMessage.message
-                              ) : subMessage.message === "loading" ? (
-                                <Flex align="center" gap="xs">
-                                  <Loader color="black" variant="dots" />
-                                  <Text size={"sm"} fw={500} color="gray">
-                                    Generating segment...
-                                  </Text>
-                                </Flex>
-                              ) : (
-                                <>
-                                  <div dangerouslySetInnerHTML={{ __html: message.message }} />
-                                </>
-                              )}
-                            </Text>
-                          </Flex>
-                        );
-                      })} */}
                       <Text
                         color="gray"
                         size={"xs"}
                         ml={message.role === "user" ? "auto" : "0"}
                       >
-                        {message.created_time}
+                        <Text color="gray" size="xs" ml={message.role === "user" ? "auto" : "0"}>
+                          {moment(message.created_time).format("MMMM D, YYYY h:mm A")}
+                        </Text>
                       </Text>
                     </Flex>
                   ) : (
@@ -1111,10 +1096,9 @@ const SegmentChat = (props: any) => {
                         ✨ Executing: {message.action_title}
                       </div>
                       <div
-                        className="p-3 bg-[#E25DEE] text-black shadow-md italic"
-                        style={{ background: "white" }}
+                        className="p-3 text-black shadow-md italic"
                       >
-                        <Text size="md" fw={600} className="text-center">
+                        <Text p={'xs'} size="sm" fw={600} className="text-center">
                           {message.action_description}
                         </Text>
                       </div>
@@ -1307,12 +1291,16 @@ const SegmentChat = (props: any) => {
               {children}
             </div>
           )}
-          maxRows={5}
+          maxRows={10}
           style={{
-            minHeight: "40px",
+            minHeight: "80px",
             resize: "none",
             overflow: "hidden",
             cursor: "default",
+            fontSize: "1rem",
+            padding: "10px",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
           }}
         />
         <Flex justify={"space-between"} mt={"sm"} align={"center"}>
@@ -1326,14 +1314,18 @@ const SegmentChat = (props: any) => {
           </Flex>
           <Flex>
             <DeepGram onTranscriptionChanged={(text) => setPrompt(text)} />
-            <ActionIcon
+            <Button
+              size={'xs'}
+              disabled={prompt.trim().length === 0}
               variant="filled"
-              size={"md"}
               className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
               onClick={handleSubmit}
-            >
-              <IconSend size={"1rem"} />
-            </ActionIcon>
+              // leftIcon={<IconSend size={"1rem"} />}
+            > {'Send'}
+              <Flex ml={'xs'} align="center" gap="1px">
+                <Kbd size={'xs'} style={{ color: 'purple' }}>⌘</Kbd>{'+'}<Kbd size={"xs"} style={{ color: 'purple' }}>↩</Kbd>
+              </Flex>
+            </Button>
           </Flex>
         </Flex>
       </Paper>
@@ -1419,9 +1411,7 @@ const SelixControlCenter = ({
               value: "PLANNER",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {aiType === "PLANNER" && (
-                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
-                  )}
+                  <IconList size={"1rem"} />
                   <span>Tasks</span>
                 </Center>
               ),
@@ -1430,9 +1420,7 @@ const SelixControlCenter = ({
               value: "STRATEGY_CREATOR",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {aiType === "STRATEGY_CREATOR" && (
-                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
-                  )}
+                  <IconHammer size={"1rem"} />
                   <span>Blueprint</span>
                 </Center>
               ),
@@ -1443,9 +1431,7 @@ const SelixControlCenter = ({
                 <Center
                   style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
                 >
-                  {aiType === "segment" && (
-                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
-                  )}
+                  <IconPuzzle size={"1rem"} />
                   <span>Segments</span>
                 </Center>
               ),
@@ -1456,9 +1442,7 @@ const SelixControlCenter = ({
                 <Center
                   style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
                 >
-                  {aiType === "campaign" && (
-                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
-                  )}
+                  <IconParachute size={"1rem"} />
                   <span>Campaigns</span>
                 </Center>
               ),
@@ -1467,9 +1451,7 @@ const SelixControlCenter = ({
               value: "BROWSER",
               label: (
                 <Center style={{ gap: 10 }}>
-                  {aiType === "BROWSER" && (
-                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
-                  )}
+                  <IconBrowser size={"1rem"} />
                   <span>Browser</span>
                 </Center>
               ),
@@ -1480,9 +1462,7 @@ const SelixControlCenter = ({
                 <Center
                   style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
                 >
-                  {aiType === "analytics" && (
-                    <Avatar src={Logo} size={"xs"} radius={"xl"} />
-                  )}
+                  <IconFlask size={"1rem"} />
                   <span>Analytics</span>
                 </Center>
               ),
@@ -1821,6 +1801,7 @@ const PlannerComponent = ({
         </Flex>
       </Paper>
       <Collapse in={opened}>
+      <ScrollArea h={"55vh"} scrollHideDelay={4000} style={{ overflow: 'hidden' }}>
         {tasks
         // filter out duplicate tasks by title. This is a temporary fix
           ?.filter((task: { title: any }, index: number, self: any) => 
@@ -1857,11 +1838,12 @@ const PlannerComponent = ({
 
             return (
               <Paper withBorder p={"sm"} key={index} mb={"xs"} radius={"md"}>
-                <Flex justify={"space-between"} align={"center"}>
+                <Flex justify={"space-between"} align={"center"} p={"sm"}>
                   <Text
                     className="flex gap-1 items-center"
                     fw={600}
-                    size={"sm"}
+                    size={"md"}
+                    style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.2)" }}
                   >
                     <ThemeIcon
                       color="gray"
@@ -1910,7 +1892,7 @@ const PlannerComponent = ({
                   </Flex>
                 </Flex>
                 <Collapse in={openedTaskIndex === index}>
-                  <Text mt={"sm"}>{task.description}</Text>
+                  <Text p={'sm'} mt={"sm"}>{task.description}</Text>
                   {task.proof_of_work_img && (
                   <img
                     src={task.proof_of_work_img}
@@ -1924,6 +1906,7 @@ const PlannerComponent = ({
               </Paper>
             );
           })}
+        </ScrollArea>
       </Collapse>
     </Paper>
   );
@@ -2014,6 +1997,7 @@ const SelinStrategy = ({
             </Text>
           </Flex>
         </Paper>
+        <ScrollArea h={"34vh"} p={"sm"} my={"sm"}>
         <Flex>
           <Text color="gray" fw={500} w={160} size={"xs"}>
             Strategy Name:
@@ -2031,7 +2015,7 @@ const SelinStrategy = ({
           <Stack spacing={"sm"}>
             <Box>
               <Text fw={600} size={"xs"}>
-                Description:
+  
               </Text>
               <Text fw={500} size={"xs"}>
                 <Text
@@ -2096,12 +2080,16 @@ const SelinStrategy = ({
               : "N/A"}
           </Text>
         </Flex>
+        </ScrollArea>
         <Flex align={"center"} gap={"md"}>
           <Button
             variant="outline"
             color="gray"
             fullWidth
             onClick={() => {
+              if (!memory?.strategy_id) {
+                return;
+              }
               openContextModal({
                 modal: "editStrategy",
                 title: (
@@ -2163,6 +2151,9 @@ const SelinStrategy = ({
           <Button
             fullWidth
             onClick={() => {
+              if (!memory?.strategy_id) {
+                return;
+              }
               hackedSubmit();
             }}
           >

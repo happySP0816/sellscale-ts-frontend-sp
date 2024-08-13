@@ -239,7 +239,7 @@ export interface Prospect {
   icp_company_fit_reason: ICPFitReasonV2;
 }
 
-interface ICPFitReasonV2 {
+export interface ICPFitReasonV2 {
   [key: string]: {
     answer: string,
     reasoning: string,

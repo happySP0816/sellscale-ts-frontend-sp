@@ -153,6 +153,7 @@ export default function SelinAI() {
   const [counter, setCounter] = useState<number>(0);
   const [messages, setMessages] = useState<MessageType[]>([]);
   const roomIDref = useRef<string>("");
+  const deviceIDRef = useRef<string>(Math.random().toString(36).substring(2, 15));
   const [currentSessionId, setCurrentSessionId] = useState<Number | null>(null);
   const sessionIDRef = useRef<Number>(-1);
   const [loadingNewChat, setLoadingNewChat] = useState(false);
@@ -196,6 +197,7 @@ export default function SelinAI() {
             Authorization: `Bearer ${userToken}`,
           },
           body: JSON.stringify({
+            device_id: deviceIDRef.current,
             session_id: currentSessionId,
             message: prompt,
           }),
@@ -330,8 +332,17 @@ export default function SelinAI() {
   const handleNewMessage = (data: {
     message?: string;
     action?: any;
+    device_id?: string;
+    role: "user" | "assistant" | "system";
     thread_id: string;
   }) => {
+
+    // if the message is not for the current device, ignore it
+    console.log('comparing device id', data.device_id, deviceIDRef.current);
+    if (data?.device_id === deviceIDRef.current) {
+      
+      return;
+    }
     if (data.thread_id === roomIDref.current) {
       if (data.message) {
         setMessages((chatContent: MessageType[]) => [
@@ -339,10 +350,16 @@ export default function SelinAI() {
           {
             created_time: moment().format("MMMM D, h:mm a"),
             message: data?.message || "",
-            role: "assistant",
+            role: data?.role || "assistant",
             type: "message",
           },
         ]);
+        if (data.role === "assistant"){
+          setMessages((chatContent: MessageType[]) =>
+            chatContent.filter((message) => message.message !== "loading")
+          );
+        }
+      
       } else if (data.action) {
         setMessages((chatContent: MessageType[]) => [
           ...chatContent,

@@ -25,6 +25,7 @@ import {
   Popover,
   LoadingOverlay,
   Kbd,
+  Group,
 } from "@mantine/core";
 import {
   IconBrowser,
@@ -37,6 +38,7 @@ import {
   IconClock,
   IconEye,
   IconEyeOff,
+  IconFile,
   IconFlask,
   IconHammer,
   IconInfoCircle,
@@ -79,19 +81,83 @@ interface CustomCursorWrapperProps {
   children: React.ReactNode;
 }
 
-const CustomCursorWrapper: React.FC<CustomCursorWrapperProps> = ({
-  children,
-}) => {
-  const cursorStyle = {
-    cursor: `url("data:image/svg+xml,${encodeURIComponent(
-      "<svg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 24 24' fill='none' stroke='#ff69b4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-right' transform='rotate(225)'><path d='M9 18L15 12L9 6'></path></svg>"
-    )}") 16 0, auto`,
+import { Dropzone, DropzoneProps } from '@mantine/dropzone';
+import { Modal, Overlay } from '@mantine/core';
+
+const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({ children }) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [fileDescription, setFileDescription] = useState('');
+
+  const handleDrop = (event: DragEvent) => {
+    event.preventDefault();
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      setFile(files[0]);
+      setIsModalOpen(true);
+    }
+    setIsDragging(false);
   };
 
-  return <div style={cursorStyle}>{children}</div>;
+  const handleDragOver = (event: DragEvent) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleConfirm = () => {
+    // Placeholder function to run when the user confirms
+    console.log('File confirmed:', file);
+    setIsModalOpen(false);
+    setFile(null);
+  };
+
+  useEffect(() => {
+    const dropArea = document.getElementById('drop-area');
+    dropArea?.addEventListener('dragover', handleDragOver);
+    dropArea?.addEventListener('dragleave', handleDragLeave);
+    dropArea?.addEventListener('drop', handleDrop);
+
+    return () => {
+      dropArea?.removeEventListener('dragover', handleDragOver);
+      dropArea?.removeEventListener('dragleave', handleDragLeave);
+      dropArea?.removeEventListener('drop', handleDrop);
+    };
+  }, []);
+
+  return (
+    <div id="drop-area">
+      {isDragging && <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1000 }} />}
+      {children}
+      <Modal
+        opened={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Add File to Chat"
+      >
+        <Flex align="center" mt="md">
+          <IconFile size={20} />
+          <Text ml="xs">{file?.name}</Text>
+        </Flex>
+        <Textarea
+          placeholder="Enter file description..."
+          value={fileDescription}
+          onChange={(e) => setFileDescription(e.target.value)}
+          minRows={3}
+          mt="md"
+        />
+        <Group position="right" mt="md">  
+          <Button onClick={handleConfirm}>Confirm</Button>
+        </Group>
+      </Modal>
+    </div>
+  );
 };
 
-interface TaskType {
+ interface TaskType {
   order_number: number;
   proof_of_work_img: string | null;
   id: number;
@@ -1395,10 +1461,23 @@ const SegmentChat = (props: any) => {
           <Flex gap={"sm"}>
             {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
               <IconPlus size={"1rem"} />
-            </ActionIcon>
-            <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
-              <IconLink size={"1rem"} />
             </ActionIcon> */}
+            <ActionIcon
+              variant="outline"
+              color="gray"
+              radius={"xl"}
+              size={"sm"}
+              onClick={() =>
+                showNotification({
+                  title: "Drag and Drop",
+                  message: "Drag the file onto the window to add it to the chat.",
+                  color: "blue",
+                  icon: <IconFile />,
+                })
+              }
+            >
+              <IconLink size={"1rem"} />
+            </ActionIcon>
           </Flex>
           <Flex>
             <DeepGram

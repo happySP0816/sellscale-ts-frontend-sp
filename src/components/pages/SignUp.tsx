@@ -112,6 +112,7 @@ export default function SignupPage() {
       {
         id: "cheeky-1",
         color: "blue",
+        position: "top-left",
         title: "Almost there...",
         message: "Just a few more moments!",
         icon: <IconInfoCircle />,
@@ -120,6 +121,7 @@ export default function SignupPage() {
       {
         id: "cheeky-2",
         color: "teal",
+        position: "top-left",
         title: "Good things take time",
         message: "We're making magic happen!",
         icon: <IconAt />,
@@ -128,6 +130,7 @@ export default function SignupPage() {
       {
         id: "cheeky-3",
         color: "violet",
+        position: "top-left",
         title: "Patience is a virtue",
         message: "Greatness is loading...",
         icon: <IconInfoCircle />,
@@ -136,6 +139,7 @@ export default function SignupPage() {
       {
         id: "cheeky-4",
         color: "orange",
+        position: "top-left",
         title: "Hang tight!",
         message: "We're almost done!",
         icon: <IconInfoCircle />,
@@ -144,6 +148,7 @@ export default function SignupPage() {
       {
         id: "cheeky-5",
         color: "red",
+        position: "top-left",
         title: "Just a bit more...",
         message: "Thank you for your patience!",
         icon: <IconAt />,
@@ -152,6 +157,7 @@ export default function SignupPage() {
       {
         id: "cheeky-6",
         color: "cyan",
+        position: "top-left",
         title: "Just a tad longer...",
         message: "We're putting on the finishing touches!",
         icon: <IconInfoCircle />,
@@ -160,6 +166,7 @@ export default function SignupPage() {
       {
         id: "cheeky-8",
         color: "yellow",
+        position: "top-left",
         title: "Finalizing...",
         message: "We're almost ready for you!",
         icon: <IconInfoCircle />,

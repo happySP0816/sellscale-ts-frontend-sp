@@ -135,6 +135,21 @@ export const useStrategiesApi = (userToken: string) => {
     return data;
   };
 
+  const deleteStrategy = async (strategyId: number) => {
+    setIsLoading(true);
+    const response = await fetch(`${API_URL}/strategies/${strategyId}/remove`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+
+    const data = await response.text();
+    setIsLoading(false);
+    return data;
+  }
+
   const getAllStrategies = async () => {
     setIsLoading(true);
     const response = await fetch(`${API_URL}/strategies/get_all`, {
@@ -158,5 +173,6 @@ export const useStrategiesApi = (userToken: string) => {
     postAddArchetypeMapping,
     deleteRemoveArchetypeMapping,
     getAllStrategies,
+    deleteStrategy,
   };
 };

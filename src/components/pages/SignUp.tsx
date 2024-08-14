@@ -108,6 +108,74 @@ export default function SignupPage() {
       message: "Hang tight, this may take a little while but it's worth the wait!",
     });
 
+    const cheekyNotifications = [
+      {
+        id: "cheeky-1",
+        color: "blue",
+        title: "Almost there...",
+        message: "Just a few more moments!",
+        icon: <IconInfoCircle />,
+        autoClose: 5000,
+      },
+      {
+        id: "cheeky-2",
+        color: "teal",
+        title: "Good things take time",
+        message: "We're making magic happen!",
+        icon: <IconAt />,
+        autoClose: 10000,
+      },
+      {
+        id: "cheeky-3",
+        color: "violet",
+        title: "Patience is a virtue",
+        message: "Greatness is loading...",
+        icon: <IconInfoCircle />,
+        autoClose: 15000,
+      },
+      {
+        id: "cheeky-4",
+        color: "orange",
+        title: "Hang tight!",
+        message: "We're almost done!",
+        icon: <IconInfoCircle />,
+        autoClose: 20000,
+      },
+      {
+        id: "cheeky-5",
+        color: "red",
+        title: "Just a bit more...",
+        message: "Thank you for your patience!",
+        icon: <IconAt />,
+        autoClose: 25000,
+      },
+      {
+        id: "cheeky-6",
+        color: "cyan",
+        title: "Just a tad longer...",
+        message: "We're putting on the finishing touches!",
+        icon: <IconInfoCircle />,
+        autoClose: 30000,
+      },
+      {
+        id: "cheeky-8",
+        color: "yellow",
+        title: "Finalizing...",
+        message: "We're almost ready for you!",
+        icon: <IconInfoCircle />,
+        autoClose: 40000,
+      },
+    ];
+
+    let cheekyTimeouts: NodeJS.Timeout[] = [];
+
+    cheekyNotifications.forEach((notification, index) => {
+      const timeout = setTimeout(() => {
+        showNotification(notification);
+      }, (index + 1) * 5000);
+      cheekyTimeouts.push(timeout);
+    });
+
     setLoading(true);
 
     try {
@@ -145,6 +213,7 @@ export default function SignupPage() {
         message: "An unexpected error occurred",
       });
     } finally {
+      cheekyTimeouts.forEach(clearTimeout); // Clear all cheeky notifications if an error occurs
       setLoading(false);
     }
   };

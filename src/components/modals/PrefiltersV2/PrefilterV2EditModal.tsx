@@ -58,6 +58,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
   const saved_query_id = innerProps.id;
   const isIcpFilter = innerProps.isIcpFilter || false;
   const hideSaveFeature = innerProps.hide_save_feature || false;
+  const [somethingWasAltered, setSomethingWasAltered] = useState(false);
 
   const theme = useMantineTheme();
 
@@ -151,7 +152,13 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
     fetchSavedQueries();
   }, [userToken]);
 
+
   useEffect(() => {
+      setSomethingWasAltered(true);
+  }, [jobTitles, name, seniority, excludedJobTitles, industry, revenue, companyName, companyKeywords, selectedCompanies, locations, experience, fundraise, companyDomain, aiPrompt, selectedNumEmployees, technology, eventTypes, days, recentNews, departmentMinCount, departmentMaxCount]);
+
+  useEffect(() => {
+    setTimeout(() => setSomethingWasAltered(false), 0);
     const fetchSavedQuery = async () => {
       if (saved_query_id !== undefined) {
         try {
@@ -268,6 +275,8 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           }
         } catch (error) {
           console.error("Error fetching saved query:", error);
+        } finally {
+          setTimeout(() => setSomethingWasAltered(false), 0);
         }
       }
     };
@@ -417,6 +426,8 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
       }
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setSomethingWasAltered(false);
     }
     setLoadingProsepcts(false);
   }
@@ -1391,11 +1402,29 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             color="blue" 
             fullWidth 
             leftIcon={<IconSearch size={16} />} 
-            style={{ padding: '10px 20px', fontSize: '16px', borderRadius: '5px' }}
+            style={{ 
+              padding: '10px 20px', 
+              fontSize: '16px', 
+              borderRadius: '5px',
+              boxShadow: !hideSaveFeature && somethingWasAltered ? '0 0 10px 2px rgba(255, 0, 0, 1)' : 'none', // Glowing halo when it needs to be saved
+              animation: !hideSaveFeature && somethingWasAltered ? 'glow 0.90s infinite alternate' : 'none' // Animation for the glowing effect
+            }}
             onClick={searchProspects}
           >
             {hideSaveFeature ? "Search" : "Search & Save"}
           </Button>
+          <style>
+            {`
+              @keyframes glow {
+                from {
+                  box-shadow: 0 0 15px rgba(0, 255, 0, 1); /* Green color */
+                }
+                to {
+                  box-shadow: 0 0 30px rgba(255, 192, 203, 1); /* Pink color */
+                }
+              }
+            `}
+          </style>
           {/* <Button 
             disabled={(currentSavedQueryId === undefined || filterName === '')} 
             onClick={() => saved_query_id ? saveFilter(saved_query_id) : saveFilter()} 

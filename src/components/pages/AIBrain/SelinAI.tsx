@@ -1111,7 +1111,15 @@ export default function SelinAI() {
               counter={counter}
               tasks={tasks}
               setPrompt={setPrompt}
-              handleSubmit={handleSubmit}
+              handleSubmit={() => {
+                showNotification({
+                  title: "Send message",
+                  message: "Press cmd + enter to send the message",
+                  color: "blue",
+                  icon: <IconCircleCheck />,
+                });
+                handleSubmit();
+              }}
               setAIType={setAIType}
               aiType={aiType}
               threads={threads}

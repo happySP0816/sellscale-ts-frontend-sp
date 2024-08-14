@@ -55,18 +55,20 @@ export default function StrategyEditModal({
   return (
     <Box>
       <TextInput label="Strategy Name" defaultValue={innerProps.title} onChange={(event) => setTitle(event.currentTarget.value)} />
-      <MultiSelect
-        withinPortal
-        label="Attach Campaigns"
-        placeholder="Search campaigns"
-        searchable
-        data={allArchetypes}
-        onChange={(value: any) => {
-          setArchetypes(value);
-        }}
-        value={archetypes}
-        mt={10}
-      />
+      {window.location.href.includes('selin_ai') ? null : (
+        <MultiSelect
+          withinPortal
+          label="Attach Campaigns"
+          placeholder="Search campaigns"
+          searchable
+          data={allArchetypes}
+          onChange={(value: any) => {
+            setArchetypes(value);
+          }}
+          value={archetypes}
+          mt={10}
+        />
+      )}
         <Flex gap={"md"} align="center" justify="center">
           <Box>
             <Text size={"sm"} fw={500}>

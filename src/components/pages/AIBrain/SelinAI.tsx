@@ -88,6 +88,7 @@ interface CustomCursorWrapperProps {
 
 import { Dropzone, DropzoneProps } from "@mantine/dropzone";
 import { Modal, Overlay } from "@mantine/core";
+import { Message } from "postcss";
 
 const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({
   children,
@@ -311,7 +312,7 @@ export default function SelinAI() {
 
     if (messagToSend.trim() !== "") {
       const newChatPrompt: MessageType = {
-        created_time: moment().format("MMMM D, h:mm A"),
+        created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
         message: messagToSend,
         role: "user",
         type: "message",
@@ -327,7 +328,7 @@ export default function SelinAI() {
       // setLoading(true);
 
       const loadingMessage: MessageType = {
-        created_time: moment().format("MMMM D, YYYY h:mm a"),
+        created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
         message: "loading",
         role: "assistant",
         type: "message",
@@ -352,7 +353,7 @@ export default function SelinAI() {
           }),
         });
 
-        const data = await response.json();
+        await response
         // if (data.status === "OK") {
         //   // Fetch the updated messages
         //   await getMessages(currentThreadID.current);
@@ -470,7 +471,7 @@ export default function SelinAI() {
         },
         body: JSON.stringify({ additional_context: "", room_id: room_id }), // Placeholder for the body
       });
-      const data = await response.json();
+      const data = await response;
       console.log("data is", data);
     } catch (error) {
       console.error("Error creating new session:", error);
@@ -488,8 +489,9 @@ export default function SelinAI() {
     role: "user" | "assistant" | "system";
     thread_id: string;
   }) => {
+    console.log("new message is", data);
     // if the message is not for the current device, ignore it
-    console.log("comparing device id", data.device_id, deviceIDRef.current);
+    // console.log("comparing device id", data.device_id, deviceIDRef.current);
     if (data?.device_id === deviceIDRef.current) {
       return;
     }
@@ -531,12 +533,12 @@ export default function SelinAI() {
 
   const handleChangeTab = (data: { tab: string; thread_id: string }) => {
     if (data.thread_id === roomIDref.current) {
-      showNotification({
-        title: "Tab changed",
-        message: `Tab changed to: ${data.tab}`,
-        color: "blue",
-        icon: <IconEye />,
-      });
+      // showNotification({
+      //   title: "Tab changed",
+      //   message: `Tab changed to: ${data.tab}`,
+      //   color: "blue",
+      //   icon: <IconEye />,
+      // });
 
       setAIType(data.tab);
     }
@@ -566,7 +568,6 @@ export default function SelinAI() {
             const updatedTasks = Array.isArray(thread.tasks)
               ? [...thread.tasks, task]
               : [task];
-            console.log("updated tasks are", updatedTasks);
             return { ...thread, tasks: updatedTasks };
           } else {
             console.log(
@@ -644,42 +645,47 @@ export default function SelinAI() {
     }
   };
 
-  const handleUpdateTaskAndAction = async (data: {
+  const handleUpdateTaskAndAction = (data: {
     task: TaskType;
-    action: MessageType;
+    action?: MessageType;
     thread_id: string;
-  }) => {
+  }, setMessages:any) => {
     if (data.thread_id === roomIDref.current) {
-      showNotification({
-        title: "Task updated",
-        message: `Task: ${data.task.title} has been updated`,
-        color: "green",
-        icon: <IconCircleCheck />,
-      });
 
-      // just update the local state
-      console.log("updating task and action", data);
-      setThreads((prevThreads) =>
-        prevThreads.map((thread) =>
-          data.task.selix_session_id === sessionIDRef.current
-            ? {
-                ...thread,
-                tasks: Array.isArray(thread.tasks)
-                  ? [...thread.tasks, data.task]
-                  : [data.task],
-              }
-            : thread
-        )
-      );
-      setMessages((chatContent: MessageType[]) =>
-        chatContent.map((message: MessageType) =>
-          message.id === data.action.id
-            ? {
-                ...data.action,
-              }
-            : message
-        )
-      );
+      // Update the task
+      if (data.task) {
+        setThreads((prevThreads) =>
+          prevThreads.map((thread) =>
+            data.task.selix_session_id === sessionIDRef.current
+              ? {
+                  ...thread,
+                  tasks: Array.isArray(thread.tasks)
+                    ? thread.tasks.map((task) =>
+                        task.id === data.task.id ? data.task : task
+                      )
+                    : [data.task],
+                }
+              : thread
+          )
+        );
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === data.task.id ? data.task : task
+          )
+        );
+      }
+
+      // Update the action
+      if (data.action) {
+        setMessages((prevMessages : MessageType[]) =>
+          prevMessages.map((message) =>
+            message?.id === data.action?.id ? data.action as MessageType : message
+          )
+        );
+      }
+
+      // Force update the tasks
+      setCounter((prev) => prev + 1);
     }
   };
 
@@ -753,10 +759,11 @@ export default function SelinAI() {
     socket.on("add-task-to-session", handleAddTaskToSession);
     socket.on("add-action-to-session", addActionToSession);
     socket.on("new-session", handleNewSession);
-    socket.on("update-action", handleUpdateTaskAndAction);
+    socket.on("update-action", (data) => {handleUpdateTaskAndAction(data, setMessages)});
     socket.on("update-session", handleUpdateSession);
     socket.on("increment-counter", handleIncrementCounter);
     socket.on("suggestion", handleSuggestion);
+    socket.on("update-task", (data) => {handleUpdateTaskAndAction(data, setMessages)});
 
     return () => {
       socket.off("incoming-message", handleNewMessage);
@@ -764,7 +771,8 @@ export default function SelinAI() {
       socket.off("add-task-to-session", handleAddTaskToSession);
       socket.off("add-action-to-session", addActionToSession);
       socket.off("new-session", handleNewSession);
-      socket.off("update-action", handleUpdateTaskAndAction);
+      socket.off("update-action", (data) => {handleUpdateTaskAndAction(data, setMessages)});
+      socket.off("update-task", (data) => {handleUpdateTaskAndAction(data, setMessages)});
       socket.off("update-session", handleUpdateSession);
       socket.off("increment-counter", handleIncrementCounter);
       socket.off("suggestion", handleSuggestion);
@@ -1133,15 +1141,9 @@ const SegmentChat = (props: any) => {
   const suggestionHidden = props.suggestionHidden;
   const setSuggestionHidden = props.setSuggestionHidden;
   const setPrompt = props.setPrompt;
-  const currentSessionId: Number | null = props.currentSessionId;
   const messages: MessageType[] = props.messages;
-  const setMessages: React.Dispatch<React.SetStateAction<MessageType[]>> =
-    props.setMessages;
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
-  const [loading, setLoading] = useState(false);
-
-  const { chatContent, setChatContent } = props;
 
   const viewport = useRef<any>(null);
 
@@ -1356,14 +1358,14 @@ const SegmentChat = (props: any) => {
                       >
                         <Text size={"xs"} fw={500}>
                           {message.role === "user" ? (
-                            message.message
+                            message.message.split(" ").map(x => x.substring(0, 40) + (x.length > 40 ? "..." : "")).join(" ")
                           ) : message.message === "loading" ? (
                             <Flex align="center" gap="xs">
                               <Loader color="black" variant="dots" />
                             </Flex>
                           ) : (
                             <Text>
-                              {message.message
+                              {message.message.split(" ").map(x => x.substring(0, 40) + (x.length > 40 ? "..." : "")).join(" ")
                                 .split("\n")
                                 .map((line, index) => (
                                   <Fragment key={index}>
@@ -1407,6 +1409,8 @@ const SegmentChat = (props: any) => {
                           className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
                           onClick={() => toggleCardCollapse(index)}
                         >
+                          {(!messages[index + 1]) && <Loader size="sm" color="white"/>}
+
                           <Text fw={600} size="xs">
                             ✨ Executing: {message.action_title}
                           </Text>
@@ -2264,22 +2268,22 @@ const PlannerComponent = ({
               This is work that I'll execute. I'll ask you if anything comes up.
             </span>
           </Text>
-          <Flex gap={5} align={"center"}>
+          {threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time && <Flex gap={5} align={"center"}>
             <Divider orientation="vertical" color={"#fceafe"} />
             <Text size={"xs"} className="text-gray-500">
               Estimated completion:
             </Text>
             <ThemeIcon bg="#fceafe" variant="light" className="text-[#E25DEE]">
-              --
+              {threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time ? moment(threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time).format("HH") : "--"}
             </ThemeIcon>
             <Text color="#E25DEE">:</Text>
             <ThemeIcon bg="#fceafe" variant="light" className="text-[#E25DEE]">
-              --
+              {threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time ? moment(threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time).format("mm") : "--"}
             </ThemeIcon>
             <Text size={"xs"} className="text-gray-500">
               min
             </Text>
-          </Flex>
+          </Flex>}
         </Flex>
       </Paper>
       <Collapse in={opened}>
@@ -2459,7 +2463,7 @@ const SelinStrategy = ({
           console.log(err);
         });
     }
-  }, [messages.length]);
+  }, [...threads]);
 
   return (
     <Paper withBorder radius={"sm"}>

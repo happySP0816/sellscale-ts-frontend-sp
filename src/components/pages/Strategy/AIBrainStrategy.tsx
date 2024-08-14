@@ -7,6 +7,7 @@ import {
   HoverCard,
   Loader,
   Paper,
+  Popover,
   Select,
   Text,
   Title,
@@ -24,6 +25,7 @@ import {
   IconPlus,
   IconTargetArrow,
   IconToggleLeft,
+  IconTrash,
 } from "@tabler/icons";
 import {IconLighter} from "@tabler/icons-react";
 import {DataGrid} from "mantine-data-grid";
@@ -72,6 +74,7 @@ export default function AIBrainStrategy() {
     postAddArchetypeMapping,
     deleteRemoveArchetypeMapping,
     getAllStrategies,
+    deleteStrategy,
   } = useStrategiesApi(userToken);
 
   const [strategies, setStrategies] = useState([]);
@@ -498,6 +501,36 @@ export default function AIBrainStrategy() {
                       }}
                     >
                       <IconPencil color="orange" size={"0.9rem"} />
+                    </ActionIcon>
+                    <ActionIcon
+                      size={"sm"}
+                      radius={"xl"}
+                      variant="light"
+                      color="orange"
+                      onClick={() => {
+                        openContextModal({
+                          modal: "deleteStrategy",
+                          title: (
+                            <Flex align={"center"} gap={"sm"}>
+                              <IconBulb color="#228be6" size={"1.6rem"} />
+                              <Title order={2}>Delete Strategy</Title>
+                            </Flex>
+                          ),
+                          styles: {
+                            content: {
+                              minWidth: "70%",
+                            },
+                          },
+                          innerProps: {
+                            onSubmit: async () => {
+                              const response = await deleteStrategy(cell.row.original.id);
+                              handleGetAllStrategies();
+                            },
+                          },
+                        });
+                      }}
+                    >
+                      <IconTrash color="red" size={"0.9rem"} />
                     </ActionIcon>
                   </Flex>
                 );

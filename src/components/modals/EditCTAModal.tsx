@@ -158,15 +158,6 @@ export default function EditCTAModal({
         </Group>
 
         <Flex mb='md'>
-          <Switch
-            mt='md'
-            label='If accepted, mark prospect as "scheduling"'
-            defaultChecked={markAsScheduling}
-            mb='md'
-            onChange={() => { 
-              setMarkAsScheduling(!markAsScheduling); 
-          }}/>
-
           <Select
             ml='md'
             label="Select CTA Type"

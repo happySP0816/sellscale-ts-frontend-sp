@@ -386,7 +386,6 @@ export default function LinkedInSequenceSection(props: {
           noWrap
         >
           <Box sx={{ flexBasis: "35%", position: "relative" }}>
-            <LoadingOverlay visible={loading} />
             <Stack>
               <FrameworkCard
                 title="Connection Request"
@@ -1286,147 +1285,150 @@ export function IntroMessageSection(props: {
           character limit.
         </Text>
       </Box>
-      <Stack pt={20} spacing={5} sx={{ position: "relative" }}>
-        <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
-        {noProspectsFound ? (
-          <Box
-            sx={{
-              border: "1px dashed #339af0",
-              borderRadius: "0.5rem",
-            }}
-            p="sm"
-            mih={100}
-          >
-            <Center h={100}>
-              <Stack>
-                <Text ta="center" c="dimmed" fs="italic" fz="sm">
-                  No prospects found to show example message.
-                </Text>
-                <Center>
-                  <Box>
-                    <Button
-                      variant="filled"
-                      color="teal"
-                      radius="md"
-                      ml="auto"
-                      mr="0"
-                      size="xs"
-                      rightIcon={<IconUpload size={14} />}
-                      onClick={() => setUploadDrawerOpened(true)}
-                    >
-                      Upload New Prospects
-                    </Button>
-                  </Box>
-                </Center>
-              </Stack>
-            </Center>
-          </Box>
-        ) : (
-          <Box>
-            <Group position="apart" pb="0.3125rem">
-              <Text fz="sm" fw={500} c="dimmed">
-                EXAMPLE INVITE MESSAGE:
-              </Text>
-              <Group>
-                <Button
-                  size="xs"
-                  variant="subtle"
-                  compact
-                  leftIcon={<IconReload size="0.75rem" />}
-                  onClick={onRegenerate}
-                >
-                  Regenerate
-                </Button>
-                <ProspectSelect
-                  personaId={currentProject?.id || -1}
-                  onChange={(prospect) => {
-                    if (prospect) {
-                      setProspectId(prospect.id);
-                    }
-                  }}
-                  onFinishLoading={(prospects) => {
-                    setProspectsLoading(false);
-                    if (prospects.length === 0) setNoProspectsFound(true);
-                  }}
-                  selectedProspect={prospectId}
-                  autoSelect
-                  includeDrawer
-                />
-              </Group>
-            </Group>
+      <Flex direction={'column'} gap={'16px'}>
+        <Stack pt={20} spacing={5} sx={{ position: "relative" }}>
+          {noProspectsFound ? (
             <Box
               sx={{
                 border: "1px dashed #339af0",
                 borderRadius: "0.5rem",
               }}
               p="sm"
-              h={250}
+              mih={100}
             >
-              {message && (
-                <LiExampleInvitation
-                  message={message}
-                  startHovered={
-                    activeTab === "personalization" || hoveredPersonSettingsBtn
-                      ? true
-                      : undefined
-                  }
-                  endHovered={
-                    activeTab === "ctas" || hoveredYourCTAsBtn
-                      ? true
-                      : undefined
-                  }
-                  onClickStart={openPersonalizationSettings}
-                  onClickEnd={openCTASettings}
-                  onHoveredEnd={(hovered) => setHoveredCTA(hovered)}
-                />
+              <Center h={100}>
+                <Stack>
+                  <Text ta="center" c="dimmed" fs="italic" fz="sm">
+                    No prospects found to show example message.
+                  </Text>
+                  <Center>
+                    <Box>
+                      <Button
+                        variant="filled"
+                        color="teal"
+                        radius="md"
+                        ml="auto"
+                        mr="0"
+                        size="xs"
+                        rightIcon={<IconUpload size={14} />}
+                        onClick={() => setUploadDrawerOpened(true)}
+                      >
+                        Upload New Prospects
+                      </Button>
+                    </Box>
+                  </Center>
+                </Stack>
+              </Center>
+            </Box>
+          ) : (
+            <Box>
+              <Group position="apart" pb="0.3125rem">
+                <Text fz="sm" fw={500} c="dimmed">
+                  EXAMPLE INVITE MESSAGE:
+                </Text>
+                <Group>
+                  <Button
+                    size="xs"
+                    variant="subtle"
+                    compact
+                    leftIcon={<IconReload size="0.75rem" />}
+                    onClick={onRegenerate}
+                  >
+                    Regenerate
+                  </Button>
+                  <ProspectSelect
+                    personaId={currentProject?.id || -1}
+                    onChange={(prospect) => {
+                      if (prospect) {
+                        setProspectId(prospect.id);
+                      }
+                    }}
+                    onFinishLoading={(prospects) => {
+                      setProspectsLoading(false);
+                      if (prospects.length === 0) setNoProspectsFound(true);
+                    }}
+                    selectedProspect={prospectId}
+                    autoSelect
+                    includeDrawer
+                  />
+                </Group>
+              </Group>
+              <Box
+                sx={{
+                  border: "1px dashed #339af0",
+                  borderRadius: "0.5rem",
+                }}
+                p="sm"
+                h={250}
+              >
+                <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
+                {message && (
+                  <LiExampleInvitation
+                    message={message}
+                    startHovered={
+                      activeTab === "personalization" || hoveredPersonSettingsBtn
+                        ? true
+                        : undefined
+                    }
+                    endHovered={
+                      activeTab === "ctas" || hoveredYourCTAsBtn
+                        ? true
+                        : undefined
+                    }
+                    onClickStart={openPersonalizationSettings}
+                    onClickEnd={openCTASettings}
+                    onHoveredEnd={(hovered) => setHoveredCTA(hovered)}
+                  />
+                )}
+              </Box>
+              {messageMetaData && !currentProject?.template_mode && (
+                <Group py="xs" noWrap>
+                  <HoverCard width={280} shadow="md">
+                    <HoverCard.Target>
+                      <Badge
+                        color="green"
+                        styles={{ root: { textTransform: "initial" } }}
+                      >
+                        Personalizations:{" "}
+                        <Text fw={500} span>
+                          {messageMetaData?.notes?.length}
+                        </Text>
+                      </Badge>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown>
+                      <List>
+                        {messageMetaData?.notes?.map(
+                          (note: any, index: number) => (
+                            <List.Item key={index}>
+                              <Text fz="sm">{note}</Text>
+                            </List.Item>
+                          )
+                        )}
+                      </List>
+                    </HoverCard.Dropdown>
+                  </HoverCard>
+                  <HoverCard width={280} shadow="md">
+                    <HoverCard.Target>
+                      <Badge
+                        color="blue"
+                        styles={{ root: { textTransform: "initial" } }}
+                      >
+                        CTA Used:{" "}
+                        <Text fw={500} span>
+                          {_.truncate(messageMetaData.cta, { length: 45 })}
+                        </Text>
+                      </Badge>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown>
+                      <Text size="sm">{messageMetaData.cta}</Text>
+                    </HoverCard.Dropdown>
+                  </HoverCard>
+                </Group>
               )}
             </Box>
-            {messageMetaData && !currentProject?.template_mode && (
-              <Group py="xs" noWrap>
-                <HoverCard width={280} shadow="md">
-                  <HoverCard.Target>
-                    <Badge
-                      color="green"
-                      styles={{ root: { textTransform: "initial" } }}
-                    >
-                      Personalizations:{" "}
-                      <Text fw={500} span>
-                        {messageMetaData?.notes?.length}
-                      </Text>
-                    </Badge>
-                  </HoverCard.Target>
-                  <HoverCard.Dropdown>
-                    <List>
-                      {messageMetaData?.notes?.map(
-                        (note: any, index: number) => (
-                          <List.Item key={index}>
-                            <Text fz="sm">{note}</Text>
-                          </List.Item>
-                        )
-                      )}
-                    </List>
-                  </HoverCard.Dropdown>
-                </HoverCard>
-                <HoverCard width={280} shadow="md">
-                  <HoverCard.Target>
-                    <Badge
-                      color="blue"
-                      styles={{ root: { textTransform: "initial" } }}
-                    >
-                      CTA Used:{" "}
-                      <Text fw={500} span>
-                        {_.truncate(messageMetaData.cta, { length: 45 })}
-                      </Text>
-                    </Badge>
-                  </HoverCard.Target>
-                  <HoverCard.Dropdown>
-                    <Text size="sm">{messageMetaData.cta}</Text>
-                  </HoverCard.Dropdown>
-                </HoverCard>
-              </Group>
-            )}
-          </Box>
-        )}
+          )}
+
+        </Stack>
 
         {currentProject?.template_mode ? (
           <>
@@ -1603,7 +1605,8 @@ export function IntroMessageSection(props: {
             </Tabs.Panel>
           </Tabs>
         )}
-      </Stack>
+      </Flex>
+
     </Stack>
   );
 }
@@ -2306,6 +2309,7 @@ function FrameworkSection(props: {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [prospectsLoading, setProspectsLoading] = useState(true);
+  const [generateMessageLoading, setGenerateMessageLoading] = useState(true);
   const [changed, setChanged] = useState(false);
 
   const [noProspectsFound, setNoProspectsFound] = useState(false);
@@ -2451,7 +2455,7 @@ function FrameworkSection(props: {
 
   const getFollowUpMessage = async (prospectId: number, useCache: boolean) => {
     if (!currentProject) return null;
-    setLoading(true);
+    setGenerateMessageLoading(true);
     setMessage("");
 
     setShowUserFeedback(false);
@@ -2464,7 +2468,7 @@ function FrameworkSection(props: {
       useCache
     );
 
-    setLoading(false);
+    setGenerateMessageLoading(false);
     return result.status === "success" ? result.data.message : null;
   };
 
@@ -2637,10 +2641,6 @@ function FrameworkSection(props: {
             </Card>
             <Stack pt={20} spacing={15}>
               <Box styles={{ position: "relative" }}>
-                <LoadingOverlay
-                  visible={loading || prospectsLoading}
-                  zIndex={10}
-                />
                 {noProspectsFound ? (
                   <Box
                     sx={{
@@ -2717,6 +2717,9 @@ function FrameworkSection(props: {
                       p="sm"
                       mih={150}
                     >
+                      {generateMessageLoading && (
+                        <Loader />
+                      )}
                       {message && (
                         <LiExampleMessage
                           message={message}

@@ -285,11 +285,10 @@ export default function SelinAI() {
 
   // console.log("current session is", currentSessionId);
 
-  const handleSubmit = async (file?: {
-    name: string;
-    description: string;
-    base64: string;
-  }) => {
+  const handleSubmit = async (file?: {name: string, description: string, base64: string}, forcePrompt?: string) => {
+
+    let messagToSend = forcePrompt || prompt;
+
     //custom handle submit function to handle file uploads
     if (file) {
       await fetch(`${API_URL}/selix/upload_file`, {
@@ -310,10 +309,10 @@ export default function SelinAI() {
       return;
     }
 
-    if (prompt.trim() !== "") {
+    if (messagToSend.trim() !== "") {
       const newChatPrompt: MessageType = {
-        created_time: moment().format("MMMM D, YYYY h:mm A"),
-        message: prompt,
+        created_time: moment().format("MMMM D, h:mm A"),
+        message: messagToSend,
         role: "user",
         type: "message",
       };
@@ -349,7 +348,7 @@ export default function SelinAI() {
           body: JSON.stringify({
             device_id: deviceIDRef.current,
             session_id: currentSessionId,
-            message: prompt,
+            message: messagToSend,
           }),
         });
 
@@ -1387,7 +1386,7 @@ const SegmentChat = (props: any) => {
                           ml={message.role === "user" ? "auto" : "0"}
                         >
                           {moment(message.created_time).format(
-                            "MMMM D, YYYY h:mm A"
+                            "MMMM D, h:mm A"
                           )}
                         </Text>
                       </Text>
@@ -2416,7 +2415,7 @@ const SelinStrategy = ({
 }: {
   messages: any[];
   setPrompt: React.Dispatch<React.SetStateAction<string>>;
-  handleSubmit: () => void;
+  handleSubmit: (file: any, message: string) => void;
   threads: ThreadType[];
   currentSessionId: Number | null;
   counter: Number;
@@ -2425,11 +2424,7 @@ const SelinStrategy = ({
     ?.memory;
 
   const hackedSubmit = () => {
-    console.log("hacked submit");
-    setPrompt("Let's do it - create the task list and start executing.");
-    setTimeout(() => {
-      handleSubmit();
-    }, 500);
+    handleSubmit(undefined, "Let's do it - create the task list and start executing.");
   };
 
   // console.log('memory is', memory);

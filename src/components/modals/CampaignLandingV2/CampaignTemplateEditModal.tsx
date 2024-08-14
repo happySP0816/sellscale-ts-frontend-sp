@@ -119,7 +119,7 @@ export default function CampaignTemplateEditModal({
   const [opened, setOpened] = useState(false);
   const [selectStep, setSelectStep] = useState<number | null>(null);
   //////handlers for the saved variants
-  const [opened2, setOpened2] = useState(false);
+  const [opened2, setOpened2] = useState(true);
   //handler for the suggestions
   const [selectStep3, setSelectStep3] = useState<number | null>(null);
   const [selectStep2, setSelectStep2] = useState<number | null>(null);

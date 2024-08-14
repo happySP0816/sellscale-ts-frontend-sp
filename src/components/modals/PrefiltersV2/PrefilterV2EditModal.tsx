@@ -1459,7 +1459,6 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                     align={"start"} 
                     gap={"xs"} 
                     key={index} 
-                    onClick={() => item.linkedin && window.open(item.linkedin_url, '_blank')}
                     style={{ cursor: item.linkedin ? 'pointer' : 'default' }}
                   >
                     <Avatar src={item.avatar} color={valueToColor(theme, item.name)} radius="lg" size={30}>
@@ -1471,7 +1470,15 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
                           <Text size={"sm"} fw={500}>
                             {item.name}
                           </Text>
-                          <IconBrandLinkedin size={"1.4rem"} fill="#228be6" color="white" />
+                          <IconBrandLinkedin
+                            size={"1.4rem"}
+                            onClick={() => {
+                              if (item.linkedin_url) {
+                                window.open(item.linkedin_url, '_blank');
+                              }
+                            }}
+                            fill="#228be6"
+                            color="white" />
                         </Flex>
 
                       </Flex>

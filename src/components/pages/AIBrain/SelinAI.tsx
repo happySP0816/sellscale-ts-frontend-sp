@@ -1802,7 +1802,7 @@ const SegmentChat = (props: any) => {
               disabled={prompt.trim().length === 0}
               variant="filled"
               className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
-              onClick={handleSubmit}
+              onClick={() =>{handleSubmit()}}
               // leftIcon={<IconSend size={"1rem"} />}
             >
               {" "}

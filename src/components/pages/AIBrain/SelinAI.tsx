@@ -79,17 +79,24 @@ import DeepGram from "@common/DeepGram";
 
 interface CustomCursorWrapperProps {
   children: React.ReactNode;
-  handleSubmit: (file: { name: string, base64: string, description: string }) => void;
+  handleSubmit: (file: {
+    name: string;
+    base64: string;
+    description: string;
+  }) => void;
 }
 
-import { Dropzone, DropzoneProps } from '@mantine/dropzone';
-import { Modal, Overlay } from '@mantine/core';
+import { Dropzone, DropzoneProps } from "@mantine/dropzone";
+import { Modal, Overlay } from "@mantine/core";
 
-const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({ children, handleSubmit }) => {
+const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({
+  children,
+  handleSubmit,
+}) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [fileDescription, setFileDescription] = useState('');
+  const [fileDescription, setFileDescription] = useState("");
 
   const handleDrop = (event: DragEvent) => {
     event.preventDefault();
@@ -112,13 +119,17 @@ const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({ children, handleS
 
   const handleConfirm = () => {
     // Placeholder function to run when the user confirms
-    console.log('File confirmed:', file);
+    console.log("File confirmed:", file);
     setIsModalOpen(false);
     setFile(null);
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64String = reader.result?.toString().split(',')[1] || '';
-      handleSubmit({ name: file?.name || '', base64: base64String, description: fileDescription });
+      const base64String = reader.result?.toString().split(",")[1] || "";
+      handleSubmit({
+        name: file?.name || "",
+        base64: base64String,
+        description: fileDescription,
+      });
     };
     if (file) {
       reader.readAsDataURL(file);
@@ -126,15 +137,15 @@ const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({ children, handleS
   };
 
   useEffect(() => {
-    const dropArea = document.getElementById('drop-area');
-    dropArea?.addEventListener('dragover', handleDragOver);
-    dropArea?.addEventListener('dragleave', handleDragLeave);
-    dropArea?.addEventListener('drop', handleDrop);
+    const dropArea = document.getElementById("drop-area");
+    dropArea?.addEventListener("dragover", handleDragOver);
+    dropArea?.addEventListener("dragleave", handleDragLeave);
+    dropArea?.addEventListener("drop", handleDrop);
 
     return () => {
-      dropArea?.removeEventListener('dragover', handleDragOver);
-      dropArea?.removeEventListener('dragleave', handleDragLeave);
-      dropArea?.removeEventListener('drop', handleDrop);
+      dropArea?.removeEventListener("dragover", handleDragOver);
+      dropArea?.removeEventListener("dragleave", handleDragLeave);
+      dropArea?.removeEventListener("drop", handleDrop);
     };
   }, []);
 
@@ -143,20 +154,20 @@ const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({ children, handleS
       {isDragging && (
         <div
           style={{
-            position: 'fixed',
+            position: "fixed",
             top: 0,
             left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
             zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(5px)',
-            color: 'white',
-            fontSize: '2rem',
-            fontWeight: 'bold',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(5px)",
+            color: "white",
+            fontSize: "2rem",
+            fontWeight: "bold",
           }}
         >
           Drop files here
@@ -179,7 +190,7 @@ const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({ children, handleS
           minRows={3}
           mt="md"
         />
-        <Group position="right" mt="md">  
+        <Group position="right" mt="md">
           <Button onClick={handleConfirm}>Confirm</Button>
         </Group>
       </Modal>
@@ -187,7 +198,7 @@ const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({ children, handleS
   );
 };
 
- interface TaskType {
+interface TaskType {
   order_number: number;
   proof_of_work_img: string | null;
   id: number;
@@ -274,8 +285,11 @@ export default function SelinAI() {
 
   // console.log("current session is", currentSessionId);
 
-  const handleSubmit = async (file?: {name: string, description: string, base64: string}) => {
-
+  const handleSubmit = async (file?: {
+    name: string;
+    description: string;
+    base64: string;
+  }) => {
     //custom handle submit function to handle file uploads
     if (file) {
       await fetch(`${API_URL}/selix/upload_file`, {
@@ -293,8 +307,7 @@ export default function SelinAI() {
         }),
       });
 
-      
-      return
+      return;
     }
 
     if (prompt.trim() !== "") {
@@ -315,7 +328,7 @@ export default function SelinAI() {
       // setLoading(true);
 
       const loadingMessage: MessageType = {
-        created_time: moment().format("MMMM D, h:mm a"),
+        created_time: moment().format("MMMM D, YYYY h:mm a"),
         message: "loading",
         role: "assistant",
         type: "message",
@@ -629,10 +642,8 @@ export default function SelinAI() {
         color: "green",
         icon: <IconCircleCheck />,
       });
-
     }
-  }
-
+  };
 
   const handleUpdateTaskAndAction = async (data: {
     task: TaskType;
@@ -864,194 +875,193 @@ export default function SelinAI() {
 
   return (
     <DropzoneWrapper handleSubmit={handleSubmit}>
-    <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
-      <div
-        style={{ position: "relative", width: "100%", zIndex: 1 }}
-        onMouseEnter={() => setOpened(true)}
-        onMouseLeave={() => setOpened(false)}
-      >
+      <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
         <div
-          style={{
-            position: "absolute",
-            width: "100%",
-            height: "100px",
-            top: "-50px",
-            zIndex: 2,
-          }}
-        ></div>
-        <Card withBorder radius={"sm"}>
-          <Flex align={"center"} justify={"flex-start"}>
-            <ThemeIcon
-              radius="xl"
-              size="xs"
-              color={
-                threads.filter((thread) => thread.status === "ACTIVE").length >
-                0
-                  ? "green"
-                  : "gray"
-              }
-              variant={
-                threads.filter((thread) => thread.status === "ACTIVE").length >
-                0
-                  ? "filled"
-                  : "light"
-              }
-              className={
-                threads.filter((thread) => thread.status === "ACTIVE").length >
-                0
-                  ? "pulsing-bubble"
-                  : ""
-              }
-            >
-              <span />
-            </ThemeIcon>
-            <Text fw={600} color="black" className="text-left" ml="xs">
-              {
-                threads.filter(
-                  (thread) =>
-                    thread.status !== "COMPLETE" &&
-                    thread.status !== "CANCELLED"
-                ).length
-              }{" "}
-              Conversations
-            </Text>
-            <div style={{ marginLeft: "auto" }}>
-              {openedChat ? (
-                <IconChevronDown size={"1rem"} color="black" />
-              ) : (
-                <IconChevronUp size={"1rem"} color="black" />
-              )}
-            </div>
-          </Flex>
-          <Collapse in={openedChat}>
-            <Flex mt={"md"} gap={"sm"}>
-              <Paper
-                onClick={
-                  !loadingNewChat ? () => handleCreateNewSession() : undefined
+          style={{ position: "relative", width: "100%", zIndex: 1 }}
+          onMouseEnter={() => setOpened(true)}
+          onMouseLeave={() => setOpened(false)}
+        >
+          <div
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100px",
+              top: "-50px",
+              zIndex: 2,
+            }}
+          ></div>
+          <Card withBorder radius={"sm"}>
+            <Flex align={"center"} justify={"flex-start"}>
+              <ThemeIcon
+                radius="xl"
+                size="xs"
+                color={
+                  threads.filter((thread) => thread.status === "ACTIVE")
+                    .length > 0
+                    ? "green"
+                    : "gray"
                 }
-                radius={"sm"}
-                p={"sm"}
-                bg={"#fcecfe"}
-                miw={120}
-                mr="sm"
-                className="flex flex-col items-center justify-center"
+                variant={
+                  threads.filter((thread) => thread.status === "ACTIVE")
+                    .length > 0
+                    ? "filled"
+                    : "light"
+                }
+                className={
+                  threads.filter((thread) => thread.status === "ACTIVE")
+                    .length > 0
+                    ? "pulsing-bubble"
+                    : ""
+                }
               >
-                {loadingNewChat ? (
-                  <Loader color="#df77f5" size="sm" />
+                <span />
+              </ThemeIcon>
+              <Text fw={600} color="black" className="text-left" ml="xs">
+                {
+                  threads.filter(
+                    (thread) =>
+                      thread.status !== "COMPLETE" &&
+                      thread.status !== "CANCELLED"
+                  ).length
+                }{" "}
+                Conversations
+              </Text>
+              <div style={{ marginLeft: "auto" }}>
+                {openedChat ? (
+                  <IconChevronDown size={"1rem"} color="black" />
                 ) : (
-                  <>
-                    {" "}
-                    <IconPlus color="#df77f5" />
-                    <Text size="sm" fw={600} color="#E25DEE" mt={"sm"}>
-                      New Chat
-                    </Text>
-                  </>
+                  <IconChevronUp size={"1rem"} color="black" />
                 )}
-              </Paper>
-              <div
-                ref={containerRef}
-                style={{ overflowX: "hidden", whiteSpace: "nowrap" }}
-              >
-                {threads
-                  .sort((a, b) => b.id - a.id)
-                  .map((thread: ThreadType, index) => {
-                    return (
-                      <Paper
-                        key={index}
-                        withBorder
-                        mr="sm"
-                        radius={"sm"}
-                        p={"sm"}
-                        style={{
-                          display: "inline-block",
-                          minWidth: "400px",
-                          backgroundColor:
+              </div>
+            </Flex>
+            <Collapse in={openedChat}>
+              <Flex mt={"md"} gap={"sm"}>
+                <Paper
+                  onClick={
+                    !loadingNewChat ? () => handleCreateNewSession() : undefined
+                  }
+                  radius={"sm"}
+                  p={"sm"}
+                  bg={"#fcecfe"}
+                  miw={120}
+                  mr="sm"
+                  className="flex flex-col items-center justify-center"
+                >
+                  {loadingNewChat ? (
+                    <Loader color="#df77f5" size="sm" />
+                  ) : (
+                    <>
+                      {" "}
+                      <IconPlus color="#df77f5" />
+                      <Text size="sm" fw={600} color="#E25DEE" mt={"sm"}>
+                        New Chat
+                      </Text>
+                    </>
+                  )}
+                </Paper>
+                <div
+                  ref={containerRef}
+                  style={{ overflowX: "hidden", whiteSpace: "nowrap" }}
+                >
+                  {threads
+                    .sort((a, b) => b.id - a.id)
+                    .map((thread: ThreadType, index) => {
+                      return (
+                        <Paper
+                          key={index}
+                          withBorder
+                          mr="sm"
+                          radius={"sm"}
+                          p={"sm"}
+                          style={{
+                            display: "inline-block",
+                            minWidth: "400px",
+                            backgroundColor:
+                              sessionIDRef.current === thread.id
+                                ? "#d0f0c0"
+                                : "white", // Highlight if current thread
+                            borderColor:
+                              sessionIDRef.current === thread.id
+                                ? "#00796b"
+                                : "#ced4da", // Change border color if current thread
+                          }}
+                          className={`transition duration-300 ease-in-out transform ${
                             sessionIDRef.current === thread.id
-                              ? "#d0f0c0"
-                              : "white", // Highlight if current thread
-                          borderColor:
-                            sessionIDRef.current === thread.id
-                              ? "#00796b"
-                              : "#ced4da", // Change border color if current thread
-                        }}
-                        className={`transition duration-300 ease-in-out transform ${
-                          sessionIDRef.current === thread.id
-                            ? "scale-105 shadow-2xl"
-                            : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
-                        }`}
-                        onClick={() => {
-                          getMessages(thread.thread_id, thread.id);
-                          toggle();
-                        }}
-                      >
-                        <Flex align={"center"} gap={"sm"}>
-                          {thread.status === "ACTIVE" ? (
-                            <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            </div>
-                          ) : // </ThemeIcon>
-                          thread.status === "COMPLETE" ? (
-                            <IconCircleCheck
-                              size={"1rem"}
-                              fill="green"
-                              color="white"
-                            />
-                          ) : thread.status === "PENDING_OPERATOR" ? (
-                            // <ThemeIcon color="orange" radius={"xl"} size={"xs"} p={0} variant="light">
-                            //   <IconPoint fill="orange" color="white" size={"4rem"} />
-                            // </ThemeIcon>
-                            <div className="flex items-center justify-center bg-orange-100 rounded-full p-1 border-orange-300 border-[1px] border-solid">
-                              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                            </div>
-                          ) : (
-                            <></>
-                          )}{" "}
-                          <Text
-                            color={
-                              thread.status === "PENDING_OPERATOR"
-                                ? "orange"
-                                : "green"
-                            }
-                            fw={600}
-                          >
-                            {thread.status === "PENDING_OPERATOR"
-                              ? "IN PROGRESS"
-                              : thread.status}
-                          </Text>
-                          <ActionIcon
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setThreads((prevThreads) =>
-                                prevThreads.filter(
-                                  (prevThread) => prevThread.id !== thread.id
-                                )
-                              );
-                              //if the chat we're in is the one we're deleting, we need to get the next chat
-                              if (sessionIDRef.current === thread.id) {
-                                const nextThread = threads.find(
-                                  (thread) => thread.id !== sessionIDRef.current
-                                );
-                                if (nextThread) {
-                                  getMessages(
-                                    nextThread.thread_id,
-                                    nextThread.id
-                                  );
-                                }
+                              ? "scale-105 shadow-2xl"
+                              : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
+                          }`}
+                          onClick={() => {
+                            getMessages(thread.thread_id, thread.id);
+                            toggle();
+                          }}
+                        >
+                          <Flex align={"center"} gap={"sm"}>
+                            {thread.status === "ACTIVE" ? (
+                              <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              </div>
+                            ) : // </ThemeIcon>
+                            thread.status === "COMPLETE" ? (
+                              <IconCircleCheck
+                                size={"1rem"}
+                                fill="green"
+                                color="white"
+                              />
+                            ) : thread.status === "PENDING_OPERATOR" ? (
+                              // <ThemeIcon color="orange" radius={"xl"} size={"xs"} p={0} variant="light">
+                              //   <IconPoint fill="orange" color="white" size={"4rem"} />
+                              // </ThemeIcon>
+                              <div className="flex items-center justify-center bg-orange-100 rounded-full p-1 border-orange-300 border-[1px] border-solid">
+                                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                              </div>
+                            ) : (
+                              <></>
+                            )}{" "}
+                            <Text
+                              color={
+                                thread.status === "PENDING_OPERATOR"
+                                  ? "orange"
+                                  : "green"
                               }
+                              fw={600}
+                            >
+                              {thread.status === "PENDING_OPERATOR"
+                                ? "IN PROGRESS"
+                                : thread.status}
+                            </Text>
+                            <ActionIcon
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setThreads((prevThreads) =>
+                                  prevThreads.filter(
+                                    (prevThread) => prevThread.id !== thread.id
+                                  )
+                                );
+                                //if the chat we're in is the one we're deleting, we need to get the next chat
+                                if (sessionIDRef.current === thread.id) {
+                                  const nextThread = threads.find(
+                                    (thread) =>
+                                      thread.id !== sessionIDRef.current
+                                  );
+                                  if (nextThread) {
+                                    getMessages(
+                                      nextThread.thread_id,
+                                      nextThread.id
+                                    );
+                                  }
+                                }
 
-                              //query to delete thread
-                              fetch(`${API_URL}/selix/delete_session`, {
-                                method: "DELETE",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `Bearer ${userToken}`,
-                                },
-                                body: JSON.stringify({
-                                  session_id: thread.id,
-                                }),
-                              });
-
-
+                                //query to delete thread
+                                fetch(`${API_URL}/selix/delete_session`, {
+                                  method: "DELETE",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${userToken}`,
+                                  },
+                                  body: JSON.stringify({
+                                    session_id: thread.id,
+                                  }),
+                                });
                               }}
                               style={{ marginLeft: "auto" }}
                             >
@@ -2283,7 +2293,7 @@ const PlannerComponent = ({
             // filter out duplicate tasks by title. This is a temporary fix
             ?.filter(
               (task: TaskType, index: number, self: any) =>
-                task.selix_session_id  === currentSessionId
+                task.selix_session_id === currentSessionId
             )
             .map((task: TaskType, index: number) => {
               const SelixSessionTaskStatus = {

@@ -1,4 +1,4 @@
-import { Box, Button, Center, Divider, Flex, Loader, Paper, Stack, Text, Textarea, TextInput, ThemeIcon } from "@mantine/core";
+import { Avatar, Box, Button, Center, Divider, Flex, Loader, Paper, Stack, Text, Textarea, TextInput, ThemeIcon } from "@mantine/core";
 import { IconPoint, IconRefresh, IconRocket } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import SellScaleAssistant from "./SellScaleAssistant";
@@ -16,6 +16,7 @@ export default function SelixOnboarding() {
   const [hasNotGeneratedPreFilter, setHasNotGeneratedPrefilter] = useState(true);
   const navigate = useNavigate();
 
+  const clientDomain = userData.client.domain.split('/')[2].split(':')[0];
   const [step, setStep] = useState(1);
 
   return (
@@ -24,9 +25,10 @@ export default function SelixOnboarding() {
         <Text fw={600} size={"xl"}>
           Onboarding
         </Text>
-        <Button leftIcon={<IconRefresh size={"1rem"} />} size="sm">
+        <Avatar radius='xl' size='lg' src={'https://logo.clearbit.com/' + clientDomain} alt="Client Avatar" />
+        {/* <Button leftIcon={<IconRefresh size={"1rem"} />} size="sm">
           Reset
-        </Button>
+        </Button> */}
       </Flex>
       <Flex w={"80%"} direction={"column"} align={"center"} justify={"center"} mt={"md"}>
         <Flex gap={"xs"} align={"center"} w={"70%"}>

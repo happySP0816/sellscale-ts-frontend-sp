@@ -88,7 +88,6 @@ interface CustomCursorWrapperProps {
 
 import { Dropzone, DropzoneProps } from "@mantine/dropzone";
 import { Modal, Overlay } from "@mantine/core";
-import { Message } from "postcss";
 
 const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({
   children,
@@ -616,7 +615,7 @@ export default function SelinAI() {
     // }
   };
 
-  const addActionToSession = async (data: {
+  const addActionToSession = (data: {
     action: MessageType;
     thread_id: string;
   }) => {
@@ -625,14 +624,7 @@ export default function SelinAI() {
       setMessages((chatContent: MessageType[]) => [
         ...chatContent,
         {
-          created_time: moment().format("MMMM D, h:mm a"),
-          message: data.action?.action_description || "",
-          role: "assistant",
-          type: "action",
-          action_title: data.action.action_title,
-          action_description: data.action.action_description,
-          action_function: data.action.action_function,
-          action_params: data.action.action_params,
+          ...data.action
         } as MessageType,
       ]);
 
@@ -1859,7 +1851,7 @@ const SelixControlCenter = ({
         setSelectedCitation(citations[0]);
       }
     }
-  }, [messages.length]);
+  }, [{...threads}]);
 
   return (
     <Paper withBorder shadow="sm" w={"65%"} radius={"md"}>

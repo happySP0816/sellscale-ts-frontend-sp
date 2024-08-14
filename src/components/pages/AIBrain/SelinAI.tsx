@@ -1147,7 +1147,7 @@ const SegmentChat = (props: any) => {
                   {message.type === "message" ? (
                     <Flex
                       direction={"column"}
-                      w={"70%"}
+                      maw={"85%"}
                       gap={4}
                       key={index}
                       ml={message.role === "user" ? "auto" : "0"}
@@ -1190,7 +1190,7 @@ const SegmentChat = (props: any) => {
                         px={"sm"}
                         py={7}
                       >
-                        <Text size={"sm"} fw={500}>
+                        <Text size={"xs"} fw={500}>
                           {message.role === "user" ? (
                             message.message
                           ) : message.message === "loading" ? (
@@ -1561,10 +1561,30 @@ const SegmentChat = (props: any) => {
             cursor: "default",
             fontSize: "1rem",
             padding: "10px",
-            border: "1px solid #ccc",
+            border:
+              prompt.trim().length === 0
+                ? "2px solid #D8BFD8"
+                : "1px solid #ccc",
             borderRadius: "8px",
+            boxShadow: prompt.trim().length === 0 ? "0 0 10px #D8BFD8" : "none",
+            animation:
+              prompt.trim().length === 0
+                ? "glow 1.5s infinite alternate"
+                : "none",
           }}
         />
+        <style>
+          {`
+            @keyframes glow {
+              from {
+                box-shadow: 0 0 5px #D8BFD8;
+              }
+              to {
+                box-shadow: 0 0 15px #D8BFD8;
+              }
+            }
+          `}
+        </style>
         <Flex justify={"space-between"} mt={"sm"} align={"center"}>
           <Flex gap={"sm"}>
             {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
@@ -2053,16 +2073,15 @@ const PlannerComponent = ({
       >
         <Flex align={"center"} gap={"xs"} justify={"space-between"}>
           <Text size={"xs"} color="#E25DEE" fw={600}>
-            Selix Work Planner:{" "}
+            Selix Tasks:{" "}
             <span className="font-medium text-gray-500">
-              This is work that I will be executing on. I'll ask you if anything
-              comes up.
+              This is work that I'll execute. I'll ask you if anything comes up.
             </span>
           </Text>
           <Flex gap={5} align={"center"}>
             <Divider orientation="vertical" color={"#fceafe"} />
             <Text size={"xs"} className="text-gray-500">
-              Estimated time left:
+              Estimated completion:
             </Text>
             <ThemeIcon bg="#fceafe" variant="light" className="text-[#E25DEE]">
               --
@@ -2123,11 +2142,11 @@ const PlannerComponent = ({
 
               return (
                 <Paper withBorder p={"sm"} key={index} mb={"xs"} radius={"md"}>
-                  <Flex justify={"space-between"} align={"center"} p={"sm"}>
+                  <Flex justify={"space-between"} align={"center"} p={"4px"}>
                     <Text
                       className="flex gap-1 items-center"
                       fw={600}
-                      size={"md"}
+                      size={"sm"}
                     >
                       <ThemeIcon
                         color="gray"
@@ -2176,7 +2195,7 @@ const PlannerComponent = ({
                     </Flex>
                   </Flex>
                   <Collapse in={openedTaskIndex === index}>
-                    <Text p={"sm"} mt={"sm"}>
+                    <Text p={"xs"} mt={"sm"} size="xs">
                       <div
                         dangerouslySetInnerHTML={{
                           __html:
@@ -2223,7 +2242,7 @@ const SelinStrategy = ({
 
   const hackedSubmit = () => {
     console.log("hacked submit");
-    setPrompt("Let's do it.");
+    setPrompt("Let's do it - create the task list and start executing.");
     setTimeout(() => {
       handleSubmit();
     }, 500);

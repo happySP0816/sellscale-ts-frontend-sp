@@ -386,6 +386,7 @@ export default function SelinAI() {
       }
       if (data.length === 0) {
         handleCreateNewSession();
+        setAIType("PLANNER");
       }
     } catch (error) {
       console.error("Error fetching chat history:", error);
@@ -1047,6 +1048,9 @@ export default function SelinAI() {
                                       nextThread.thread_id,
                                       nextThread.id
                                     );
+                                  } else {
+                                    handleCreateNewSession();
+                                    setAIType("PLANNER");
                                   }
                                 }
 

@@ -439,7 +439,7 @@ export default function SelinAI() {
       if (memory) {
         setAIType(memory.tab || "PLANNER");
       } else {
-        setAIType("");
+        setAIType("PLANNER");
       }
 
       console.log("Messages data:", messages);

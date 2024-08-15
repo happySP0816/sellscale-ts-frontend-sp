@@ -1,10 +1,12 @@
-import { Avatar, Box, Button, Center, Divider, Flex, Loader, Paper, Stack, Text, Textarea, TextInput, ThemeIcon } from "@mantine/core";
-import { IconPoint, IconRefresh, IconRocket } from "@tabler/icons";
+import { Avatar, Box, Button, Center, Divider, Flex, Loader, Modal, Paper, Stack, Text, Textarea, TextInput, ThemeIcon, Image } from "@mantine/core";
+import { IconCalendarEvent, IconPoint, IconRefresh, IconRocket } from "@tabler/icons";
 import { useEffect, useRef, useState } from "react";
 import SellScaleAssistant from "./SellScaleAssistant";
 import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { useNavigate } from "react-router-dom";
+import posthog from "posthog-js";
+import Logo2 from "@assets/images/icon.svg";
 import { API_URL } from "@constants/data";
 
 export default function SelixOnboarding() {
@@ -20,6 +22,9 @@ export default function SelixOnboarding() {
   const [step, setStep] = useState(1);
 
   const userToken = useRecoilValue(userTokenState);
+
+  const [showCalendly, setShowCalendly] = useState(false);
+  const [showCalendlyModal, setShowCalendlyModal] = useState(false);
 
   const fetchSavedQueries = async () => {
     try {
@@ -69,8 +74,58 @@ export default function SelixOnboarding() {
   }
 
   useEffect(() => {
+    posthog.onFeatureFlags(function () {
+      if (posthog.isFeatureEnabled("show-calendly-for-signup")) {
+        setShowCalendly(true);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     fetchSavedQueries();
   }, [userToken]);
+
+  if (showCalendly) {
+  return (
+    <Center style={{ height: "100%", backgroundColor: "#f0f4f8" }}>
+      <Paper withBorder shadow="lg" p="xl" radius="lg" style={{ maxWidth: 500, backgroundColor: "#ffffff", position: "relative" }}>
+        <Flex direction="column" align="center" gap="md">
+          <Image src={Logo2} alt="Selix Logo" width={100} mb="md" />
+          <Text align="center" size="xl" weight={700} color="teal" mb="md">
+            Welcome to Selix!
+          </Text>
+          <Text align="center" size="md" color="gray" mb="md">
+            To get started, please find a time that works for you:
+          </Text>
+          <Button
+            fullWidth
+            mt="md"
+            size="lg"
+            radius="md"
+            style={{ backgroundColor: "#1e90ff", color: "white" }}
+            leftIcon={<IconCalendarEvent size={18} />}
+            onClick={() => setShowCalendlyModal(true)}
+          >
+            Schedule a Time
+          </Button>
+        </Flex>
+      </Paper>
+
+      {/* <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet"> */}
+      <Modal
+        opened={showCalendlyModal}
+        onClose={() => setShowCalendlyModal(false)}
+        size="xl"
+      >
+        <iframe
+          src="https://calendly.com/ishan-sellscaleai/sellscale-demo"
+          style={{ minWidth: "100%", height: "1000px", border: "none" }}
+        ></iframe>
+      </Modal>
+      <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+    </Center>
+  );
+}
 
   return (
     <Center p={"lg"} className="flex-col">

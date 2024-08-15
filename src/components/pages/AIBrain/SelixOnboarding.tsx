@@ -275,7 +275,7 @@ const FinalReview = ({ preFilter, tagline, description }: { preFilter: string; t
                 Customer description:
               </Text>
             </Box>
-            <Text size={"sm"} fw={600}>
+            <Text size={"sm"} fw={600} style={{ whiteSpace: "pre-line" }}>
               {preFilter}
             </Text>
           </Flex>

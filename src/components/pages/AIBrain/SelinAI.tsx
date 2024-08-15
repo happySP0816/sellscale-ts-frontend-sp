@@ -285,8 +285,10 @@ export default function SelinAI() {
 
   // console.log("current session is", currentSessionId);
 
-  const handleSubmit = async (file?: {name: string, description: string, base64: string}, forcePrompt?: string) => {
-
+  const handleSubmit = async (
+    file?: { name: string; description: string; base64: string },
+    forcePrompt?: string
+  ) => {
     let messagToSend = forcePrompt || prompt;
 
     //custom handle submit function to handle file uploads
@@ -352,7 +354,7 @@ export default function SelinAI() {
           }),
         });
 
-        await response
+        await response;
         // if (data.status === "OK") {
         //   // Fetch the updated messages
         //   await getMessages(currentThreadID.current);
@@ -625,7 +627,7 @@ export default function SelinAI() {
       setMessages((chatContent: MessageType[]) => [
         ...chatContent,
         {
-          ...data.action
+          ...data.action,
         } as MessageType,
       ]);
 
@@ -638,13 +640,15 @@ export default function SelinAI() {
     }
   };
 
-  const handleUpdateTaskAndAction = (data: {
-    task: TaskType;
-    action?: MessageType;
-    thread_id: string;
-  }, setMessages:any) => {
+  const handleUpdateTaskAndAction = (
+    data: {
+      task: TaskType;
+      action?: MessageType;
+      thread_id: string;
+    },
+    setMessages: any
+  ) => {
     if (data.thread_id === roomIDref.current) {
-
       // Update the task
       if (data.task) {
         setThreads((prevThreads) =>
@@ -662,17 +666,17 @@ export default function SelinAI() {
           )
         );
         setTasks((prevTasks) =>
-          prevTasks.map((task) =>
-            task.id === data.task.id ? data.task : task
-          )
+          prevTasks.map((task) => (task.id === data.task.id ? data.task : task))
         );
       }
 
       // Update the action
       if (data.action) {
-        setMessages((prevMessages : MessageType[]) =>
+        setMessages((prevMessages: MessageType[]) =>
           prevMessages.map((message) =>
-            message?.id === data.action?.id ? data.action as MessageType : message
+            message?.id === data.action?.id
+              ? (data.action as MessageType)
+              : message
           )
         );
       }
@@ -752,11 +756,15 @@ export default function SelinAI() {
     socket.on("add-task-to-session", handleAddTaskToSession);
     socket.on("add-action-to-session", addActionToSession);
     socket.on("new-session", handleNewSession);
-    socket.on("update-action", (data) => {handleUpdateTaskAndAction(data, setMessages)});
+    socket.on("update-action", (data) => {
+      handleUpdateTaskAndAction(data, setMessages);
+    });
     socket.on("update-session", handleUpdateSession);
     socket.on("increment-counter", handleIncrementCounter);
     socket.on("suggestion", handleSuggestion);
-    socket.on("update-task", (data) => {handleUpdateTaskAndAction(data, setMessages)});
+    socket.on("update-task", (data) => {
+      handleUpdateTaskAndAction(data, setMessages);
+    });
 
     return () => {
       socket.off("incoming-message", handleNewMessage);
@@ -764,8 +772,12 @@ export default function SelinAI() {
       socket.off("add-task-to-session", handleAddTaskToSession);
       socket.off("add-action-to-session", addActionToSession);
       socket.off("new-session", handleNewSession);
-      socket.off("update-action", (data) => {handleUpdateTaskAndAction(data, setMessages)});
-      socket.off("update-task", (data) => {handleUpdateTaskAndAction(data, setMessages)});
+      socket.off("update-action", (data) => {
+        handleUpdateTaskAndAction(data, setMessages);
+      });
+      socket.off("update-task", (data) => {
+        handleUpdateTaskAndAction(data, setMessages);
+      });
       socket.off("update-session", handleUpdateSession);
       socket.off("increment-counter", handleIncrementCounter);
       socket.off("suggestion", handleSuggestion);
@@ -1354,14 +1366,28 @@ const SegmentChat = (props: any) => {
                       >
                         <Text size={"xs"} fw={500}>
                           {message.role === "user" ? (
-                            message.message.split(" ").map(x => x.substring(0, 40) + (x.length > 40 ? "..." : "")).join(" ")
+                            message.message
+                              .split(" ")
+                              .map(
+                                (x) =>
+                                  x.substring(0, 40) +
+                                  (x.length > 40 ? "..." : "")
+                              )
+                              .join(" ")
                           ) : message.message === "loading" ? (
                             <Flex align="center" gap="xs">
                               <Loader color="black" variant="dots" />
                             </Flex>
                           ) : (
                             <Text>
-                              {message.message.split(" ").map(x => x.substring(0, 40) + (x.length > 40 ? "..." : "")).join(" ")
+                              {message.message
+                                .split(" ")
+                                .map(
+                                  (x) =>
+                                    x.substring(0, 40) +
+                                    (x.length > 40 ? "..." : "")
+                                )
+                                .join(" ")
                                 .split("\n")
                                 .map((line, index) => (
                                   <Fragment key={index}>
@@ -1405,7 +1431,9 @@ const SegmentChat = (props: any) => {
                           className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
                           onClick={() => toggleCardCollapse(index)}
                         >
-                          {(!messages[index + 1]) && <Loader size="sm" color="white"/>}
+                          {!messages[index + 1] && (
+                            <Loader size="sm" color="white" />
+                          )}
 
                           <Text fw={600} size="xs">
                             ✨ Executing: {message.action_title}
@@ -1734,7 +1762,8 @@ const SegmentChat = (props: any) => {
                   ? "2px solid #D8BFD8"
                   : "1px solid #ccc",
               borderRadius: "8px",
-              boxShadow: prompt.trim().length === 0 ? "0 0 10px #D8BFD8" : "none",
+              boxShadow:
+                prompt.trim().length === 0 ? "0 0 10px #D8BFD8" : "none",
               animation:
                 prompt.trim().length === 0
                   ? "glow 1.5s infinite alternate"
@@ -1798,7 +1827,9 @@ const SegmentChat = (props: any) => {
                 disabled={prompt.trim().length === 0}
                 variant="filled"
                 className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
-                onClick={() =>{handleSubmit()}}
+                onClick={() => {
+                  handleSubmit();
+                }}
                 // leftIcon={<IconSend size={"1rem"} />}
               >
                 {" "}
@@ -1860,7 +1891,7 @@ const SelixControlCenter = ({
         setSelectedCitation(citations[0]);
       }
     }
-  }, [{...threads}]);
+  }, [{ ...threads }]);
 
   return (
     <Paper withBorder shadow="sm" w={"65%"} radius={"md"}>
@@ -2269,22 +2300,54 @@ const PlannerComponent = ({
               This is work that I'll execute. I'll ask you if anything comes up.
             </span>
           </Text>
-          {threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time && <Flex gap={5} align={"center"}>
-            <Divider orientation="vertical" color={"#fceafe"} />
-            <Text size={"xs"} className="text-gray-500">
-              Estimated completion:
-            </Text>
-            <ThemeIcon bg="#fceafe" variant="light" className="text-[#E25DEE]">
-              {threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time ? moment(threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time).format("HH") : "--"}
-            </ThemeIcon>
-            <Text color="#E25DEE">:</Text>
-            <ThemeIcon bg="#fceafe" variant="light" className="text-[#E25DEE]">
-              {threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time ? moment(threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time).format("mm") : "--"}
-            </ThemeIcon>
-            <Text size={"xs"} className="text-gray-500">
-              min
-            </Text>
-          </Flex>}
+          {threads.find((thread) => thread.id === currentSessionId)
+            ?.estimated_completion_time && (
+            <Flex gap={5} align={"center"}>
+              <Divider orientation="vertical" color={"#fceafe"} />
+              {threads.find((thread) => thread.id === currentSessionId)
+                ?.estimated_completion_time ? (
+                (() => {
+                  const now = moment();
+                  const estimatedCompletion = moment(
+                    threads.find((thread) => thread.id === currentSessionId)
+                      ?.estimated_completion_time
+                  );
+                  const duration = moment.duration(
+                    estimatedCompletion.diff(now)
+                  );
+                  const hours = Math.floor(duration.asHours());
+                  const minutes = duration.minutes();
+                  return (
+                    <>
+                      <Text size={"xs"} className="text-gray-500">
+                        Estimated completion time:
+                      </Text>
+                      <ThemeIcon
+                        bg="#fceafe"
+                        variant="light"
+                        className="text-[#E25DEE]"
+                      >
+                        {hours}
+                      </ThemeIcon>
+                      <Text color="#E25DEE"> hours, </Text>
+                      <ThemeIcon
+                        bg="#fceafe"
+                        variant="light"
+                        className="text-[#E25DEE]"
+                      >
+                        {minutes}
+                      </ThemeIcon>
+                      <Text color="#E25DEE"> minutes</Text>
+                    </>
+                  );
+                })()
+              ) : (
+                <Text size={"xs"} className="text-gray-500">
+                  Estimated completion time: --
+                </Text>
+              )}
+            </Flex>
+          )}
         </Flex>
       </Paper>
       <Collapse in={opened}>
@@ -2429,7 +2492,10 @@ const SelinStrategy = ({
     ?.memory;
 
   const hackedSubmit = () => {
-    handleSubmit(undefined, "Let's do it - create the task list and start executing.");
+    handleSubmit(
+      undefined,
+      "Let's do it - create the task list and start executing."
+    );
   };
 
   // console.log('memory is', memory);

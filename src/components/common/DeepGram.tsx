@@ -151,7 +151,7 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
             )}
           </ActionIcon>
         </HoverCard.Target>
-        <HoverCard.Dropdown>
+        {/* <HoverCard.Dropdown>
           <Paper>
             <Text>Transcribed Text: {transcribedText}</Text>
             <Card withBorder mt="sm">
@@ -165,7 +165,7 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
               </Text>
             </Card>
           </Paper>
-        </HoverCard.Dropdown>
+        </HoverCard.Dropdown> */}
       </HoverCard>
     </div>
   );

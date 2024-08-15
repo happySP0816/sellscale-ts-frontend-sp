@@ -12,13 +12,13 @@ import { API_URL } from "@constants/data";
 export default function SelixOnboarding() {
   const userData = useRecoilValue(userDataState);
 
-  const [tagline, setTagLine] = useState(userData.client.tagline || '');
-  const [description, setDescription] = useState(userData.client.description || '');
+  const [tagline, setTagLine] = useState(userData.client?.tagline || '');
+  const [description, setDescription] = useState(userData.client?.description || '');
   const navigate = useNavigate();
   const [prefilter, setPreFilter] = useState<{ segment_description: string }>({segment_description: ''});
   const prefilterIDref = useRef<number>(-1);
 
-  const clientDomain = userData.client.domain.split('/')[2].split(':')[0];
+  const clientDomain = userData.client?.domain.split('/')[2].split(':')[0];
   const [step, setStep] = useState(1);
 
   const userToken = useRecoilValue(userTokenState);

@@ -207,7 +207,12 @@ export default function SpotlightWrapper({
       searchInputProps={{ autoComplete: "off" }}
       shortcut={["mod + K"]}
       limit={30}
-      disabled={notLoggedIn}
+      disabled={
+        notLoggedIn ||
+        ["selin_ai", "selix_onboarding", "signup", "login"].some((path) =>
+          window.location.href.includes(path)
+        )
+      }
       filter={(query: string, actions: SpotlightAction[]) => {
         actions.sort((a, b) => {
           if (a.group === b.group) {

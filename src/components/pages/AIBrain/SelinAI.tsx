@@ -1634,180 +1634,185 @@ const SegmentChat = (props: any) => {
           </>
         )}
       </ScrollArea>
-      <div
-        style={{
-          width: "80%",
-          position: "relative",
-          marginBottom: "-32px",
-          overflow: "hidden",
-          margin: "0 auto",
-          visibility: suggestion !== "" ? "visible" : "hidden",
-        }}
-      >
-        {
-          <div
-            id="slidingDiv"
-            style={{
-              backgroundColor: suggestionHidden ? "transparent" : "#E25DEE",
-              padding: "13px",
-              borderRadius: "8px",
-              color: "white",
-              fontWeight: "bold",
-              textAlign: "center",
-              fontSize: "0.9rem",
-              animation: suggestion !== "" ? "slideUp 0.5s forwards" : "none",
-            }}
-          >
-            {"💡 " + suggestion}
-            <span
-              style={{
-                position: "absolute",
-                top: "5px",
-                right: "10px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => slideDown()}
-            >
-              X
-            </span>
-          </div>
-        }
-      </div>
-      <Paper
-        p={"sm"}
-        withBorder
-        radius={"md"}
-        className="bg-[#f7f8fa]"
-        my={"lg"}
-        mx={"md"}
-      >
-        <style>
-          {`
-          @keyframes slideUp {
-            from {
-              transform: translateY(100%);
-            }
-            to {
-              transform: translateY(0);
-            }
-          }
-          @keyframes slideDown {
-            from {
-              transform: translateY(0);
-            }
-            to {
-              transform: translateY(100%);
-            }
-          }
-        `}
-        </style>
-        <Textarea
-          value={prompt}
-          placeholder="Chat with AI..."
-          onKeyDown={handleKeyDown}
-          onChange={(e) => setPrompt(e.target.value)}
-          variant="unstyled"
-          inputContainer={(children) => (
-            <div style={{ minHeight: "0px", cursor: "default" }}>
-              {children}
-            </div>
-          )}
-          maxRows={10}
+      <div style={{ position: "relative" }}>
+        <div
           style={{
-            minHeight: "80px",
-            resize: "none",
+            width: "80%",
+            position: "absolute",
+            top: suggestion !== "" ? "-75px" : "0",
+            left: "50%",
+            transform: "translateX(-50%)",
             overflow: "hidden",
-            cursor: "default",
-            fontSize: "1rem",
-            padding: "10px",
-            border:
-              prompt.trim().length === 0
-                ? "2px solid #D8BFD8"
-                : "1px solid #ccc",
-            borderRadius: "8px",
-            boxShadow: prompt.trim().length === 0 ? "0 0 10px #D8BFD8" : "none",
-            animation:
-              prompt.trim().length === 0
-                ? "glow 1.5s infinite alternate"
-                : "none",
+            height: suggestion !== "" ? "auto" : "0",
+            visibility: suggestion !== "" ? "visible" : "hidden",
+            zIndex: 1,
           }}
-        />
-        <style>
-          {`
-            @keyframes glow {
+        >
+          {
+            <div
+              id="slidingDiv"
+              style={{
+                backgroundColor: suggestionHidden ? "transparent" : "#E25DEE",
+                padding: "13px",
+                borderRadius: "8px",
+                color: "white",
+                fontWeight: "bold",
+                textAlign: "center",
+                fontSize: "0.9rem",
+                animation: suggestion !== "" ? "slideUp 0.5s forwards" : "none",
+              }}
+            >
+              {"💡 " + suggestion}
+              <span
+                style={{
+                  position: "absolute",
+                  top: "5px",
+                  right: "10px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                }}
+                onClick={() => slideDown()}
+              >
+                X
+              </span>
+            </div>
+          }
+        </div>
+        <Paper
+          p={"sm"}
+          withBorder
+          radius={"md"}
+          className="bg-[#f7f8fa]"
+          my={"lg"}
+          mx={"md"}
+        >
+          <style>
+            {`
+            @keyframes slideUp {
               from {
-                box-shadow: 0 0 5px #D8BFD8;
+                transform: translateY(100%);
               }
               to {
-                box-shadow: 0 0 15px #D8BFD8;
+                transform: translateY(0);
+              }
+            }
+            @keyframes slideDown {
+              from {
+                transform: translateY(0);
+              }
+              to {
+                transform: translateY(100%);
               }
             }
           `}
-        </style>
-        <Flex justify={"space-between"} mt={"sm"} align={"center"}>
-          <Flex gap={"sm"}>
-            {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
-              <IconPlus size={"1rem"} />
-            </ActionIcon> */}
-            <Popover width={200} position="right" withArrow shadow="md">
-              <Popover.Target>
-                <ActionIcon
-                  variant="outline"
-                  color="gray"
-                  radius={"xl"}
-                  size={"sm"}
-                >
-                  <IconLink size={"1rem"} />
-                </ActionIcon>
-              </Popover.Target>
-              <Popover.Dropdown>
-                <Flex
-                  align="center"
-                  gap="xs"
-                  style={{
-                    height: "200px",
-                    border: "2px dashed #ccc",
-                    borderRadius: "8px",
-                    justifyContent: "center",
-                    textAlign: "center",
-                    padding: "20px",
-                    cursor: "pointer",
-                  }}
-                >
-                  <IconFile size={16} />
-                  <Text size="sm">Drag & Drop file here!</Text>
+          </style>
+          <Textarea
+            value={prompt}
+            placeholder="Chat with AI..."
+            onKeyDown={handleKeyDown}
+            onChange={(e) => setPrompt(e.target.value)}
+            variant="unstyled"
+            inputContainer={(children) => (
+              <div style={{ minHeight: "0px", cursor: "default" }}>
+                {children}
+              </div>
+            )}
+            maxRows={10}
+            style={{
+              minHeight: "80px",
+              resize: "none",
+              overflow: "hidden",
+              cursor: "default",
+              fontSize: "1rem",
+              padding: "10px",
+              border:
+                prompt.trim().length === 0
+                  ? "2px solid #D8BFD8"
+                  : "1px solid #ccc",
+              borderRadius: "8px",
+              boxShadow: prompt.trim().length === 0 ? "0 0 10px #D8BFD8" : "none",
+              animation:
+                prompt.trim().length === 0
+                  ? "glow 1.5s infinite alternate"
+                  : "none",
+            }}
+          />
+          <style>
+            {`
+              @keyframes glow {
+                from {
+                  box-shadow: 0 0 5px #D8BFD8;
+                }
+                to {
+                  box-shadow: 0 0 15px #D8BFD8;
+                }
+              }
+            `}
+          </style>
+          <Flex justify={"space-between"} mt={"sm"} align={"center"}>
+            <Flex gap={"sm"}>
+              {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
+                <IconPlus size={"1rem"} />
+              </ActionIcon> */}
+              <Popover width={200} position="right" withArrow shadow="md">
+                <Popover.Target>
+                  <ActionIcon
+                    variant="outline"
+                    color="gray"
+                    radius={"xl"}
+                    size={"sm"}
+                  >
+                    <IconLink size={"1rem"} />
+                  </ActionIcon>
+                </Popover.Target>
+                <Popover.Dropdown>
+                  <Flex
+                    align="center"
+                    gap="xs"
+                    style={{
+                      height: "200px",
+                      border: "2px dashed #ccc",
+                      borderRadius: "8px",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      padding: "20px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <IconFile size={16} />
+                    <Text size="sm">Drag & Drop file here!</Text>
+                  </Flex>
+                </Popover.Dropdown>
+              </Popover>
+            </Flex>
+            <Flex>
+              <DeepGram
+                onTranscriptionChanged={(text) => setPrompt(prompt + text)}
+              />
+              <Button
+                size={"xs"}
+                disabled={prompt.trim().length === 0}
+                variant="filled"
+                className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
+                onClick={() =>{handleSubmit()}}
+                // leftIcon={<IconSend size={"1rem"} />}
+              >
+                {" "}
+                {"Send"}
+                <Flex ml={"xs"} align="center" gap="1px">
+                  <Kbd size={"xs"} style={{ color: "purple" }}>
+                    ⌘
+                  </Kbd>
+                  {"+"}
+                  <Kbd size={"xs"} style={{ color: "purple" }}>
+                    ↩
+                  </Kbd>
                 </Flex>
-              </Popover.Dropdown>
-            </Popover>
+              </Button>
+            </Flex>
           </Flex>
-          <Flex>
-            <DeepGram
-              onTranscriptionChanged={(text) => setPrompt(prompt + text)}
-            />
-            <Button
-              size={"xs"}
-              disabled={prompt.trim().length === 0}
-              variant="filled"
-              className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
-              onClick={() =>{handleSubmit()}}
-              // leftIcon={<IconSend size={"1rem"} />}
-            >
-              {" "}
-              {"Send"}
-              <Flex ml={"xs"} align="center" gap="1px">
-                <Kbd size={"xs"} style={{ color: "purple" }}>
-                  ⌘
-                </Kbd>
-                {"+"}
-                <Kbd size={"xs"} style={{ color: "purple" }}>
-                  ↩
-                </Kbd>
-              </Flex>
-            </Button>
-          </Flex>
-        </Flex>
-      </Paper>
+        </Paper>
+      </div>
     </Paper>
   );
 };

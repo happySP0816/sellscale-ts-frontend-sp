@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Center, Divider, Flex, Loader, Modal, Paper, Stack, Text, Textarea, TextInput, ThemeIcon, Image } from "@mantine/core";
+import { Avatar, Box, Button, Center, Divider, Flex, Loader, Modal, Paper, Stack, Text, Textarea, TextInput, ThemeIcon, Image, Card } from "@mantine/core";
 import { IconCalendarEvent, IconPoint, IconRefresh, IconRocket } from "@tabler/icons";
 import { useEffect, useRef, useState } from "react";
 import SellScaleAssistant from "./SellScaleAssistant";
@@ -16,6 +16,7 @@ export default function SelixOnboarding() {
   const [description, setDescription] = useState(userData.client?.description || '');
   const navigate = useNavigate();
   const [prefilter, setPreFilter] = useState<{ segment_description: string }>({segment_description: ''});
+  const [showInfoModal, setShowInfoModal] = useState(true);
   const prefilterIDref = useRef<number>(-1);
 
   const clientDomain = userData.client?.domain.split('/')[2].split(':')[0];
@@ -129,11 +130,93 @@ export default function SelixOnboarding() {
 
   return (
     <Center p={"lg"} className="flex-col">
+
+    <Modal
+      opened={showInfoModal}
+      onClose={() => setShowInfoModal(false)}
+      size="lg"
+      // title="Welcome to Selix AI"
+    >
+      <Card withBorder shadow="md" p="lg" radius="md" style={{ backgroundColor: "#ffffff" }}>
+        <Text size="lg" weight={700} mb="md" color="teal">
+          Welcome! 🚀
+        </Text>
+        <Text size="md" color="gray" mb="md">
+          {'Selix AI is your automated assistant for creating AI outreach campaigns, specifically designed for B2B applications.'}
+          </Text>
+          <Text size="md" color="gray" mb="md">
+          {"Provide your details to let Selix AI enhance your outreach. Here's how Selix AI can assist you:"}
+          </Text>
+    
+       
+        <ul style={{ paddingLeft: "20px", color: "gray" }}>
+          <li style={{ marginBottom: "10px" }}>
+            <Text size="md" weight={500}>
+              Automate LinkedIn and Email Campaigns
+            </Text>
+            <Text size="sm">
+              Effortlessly draft and manage your outreach campaigns on LinkedIn and via email.
+            </Text>
+          </li>
+          <li style={{ marginBottom: "10px" }}>
+            <Text size="md" weight={500}>
+              Create Effective Strategies
+            </Text>
+            <Text size="sm">
+              Leverage AI to develop strategies that maximize your campaign's impact.
+            </Text>
+          </li>
+          <li style={{ marginBottom: "10px" }}>
+            <Text size="md" weight={500}>
+              Guided Campaign Creation
+            </Text>
+            <Text size="sm">
+              Follow step-by-step guidance to create a successful SellScale campaign.
+            </Text>
+          </li>
+          <li style={{ marginBottom: "10px" }}>
+            <Text size="md" weight={500}>
+              Target Customer Insights
+            </Text>
+            <Text size="sm">
+              Describe your target customer and let Selix AI optimize your outreach.
+            </Text>
+          </li>
+          <li style={{ marginBottom: "10px" }}>
+            <Text size="md" weight={500}>
+              Reach Out to an Accounts List
+            </Text>
+            <Text size="sm">
+              Upload your accounts list, and Selix AI will seamlessly direct your outreach campaigns to the right contacts.
+            </Text>
+          </li>
+        </ul>
+        <Button
+          fullWidth
+          mt="md"
+          size="lg"
+          radius="md"
+          style={{ backgroundColor: "#1e90ff", color: "white" }}
+          onClick={() => setShowInfoModal(false)}
+        >
+          Get Started
+        </Button>
+      </Card>
+    </Modal>
       <Flex align={"center"} px={"md"} w={"100%"} justify={"space-between"}>
         <Text fw={600} size={"xl"}>
           Onboarding
         </Text>
-        <Avatar radius='xl' size='lg' src={'https://logo.clearbit.com/' + clientDomain} alt="Client Avatar" />
+        
+        <Flex direction="column" align="center" ml="md">
+          <Avatar radius='xl' size='lg' src={'https://logo.clearbit.com/' + clientDomain} alt="Client Avatar" />
+          <Text fw={600} size="md">{userData?.client_name}</Text>
+          <Text size="sm" color="blue">
+            <a href={`https://${clientDomain}`} target="_blank" rel="noopener noreferrer">
+              {clientDomain}
+            </a>
+          </Text>
+        </Flex>
         {/* <Button leftIcon={<IconRefresh size={"1rem"} />} size="sm">
           Reset
         </Button> */}
@@ -181,9 +264,9 @@ export default function SelixOnboarding() {
           {step === 2 && (
             <Flex direction="column" align="center" w="100%" p="lg">
               <Text size="lg" fw={600} align="center" mb="md">
-                Customer Description
+                Does this accurately represent your ideal customer profile?
               </Text>
-              <Textarea defaultValue={prefilter.segment_description} onChange={(e) => setPreFilter({ ...prefilter, segment_description: e.target.value })} minRows={20} w="80%" />
+              <Textarea defaultValue={prefilter?.segment_description} onChange={(e) => setPreFilter({ ...prefilter, segment_description: e.target.value })} minRows={20} w="80%" />
             </Flex>
           )}
           {step === 3 && <FinalReview tagline={tagline} description={description} preFilter={prefilter.segment_description} />}
@@ -232,7 +315,7 @@ const ReviewCompanyInfo = ({
   return (
     <Stack spacing={"sm"}>
       <Text size={"sm"} fw={500}>
-        Confirm your company's information below and make any needed updates.
+        Please confirm or edit this information for our AI brain.
       </Text>
       <TextInput label="Tagline:" value={tagline} onChange={(e: any) => setTagLine(e.target.value)} />
       <Textarea minRows={13} label="Description:" value={description} onChange={(e: any) => setDescription(e.target.value)} />

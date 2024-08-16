@@ -2521,12 +2521,13 @@ const PlannerComponent = ({
           style={{ overflow: "hidden" }}
         >
           {tasks
-            // filter out duplicate tasks by title. This is a temporary fix
             ?.filter(
               (task: TaskType, index: number, self: any) =>
                 task.selix_session_id === currentSessionId
             )
-            .map((task: TaskType, index: number) => {
+            .reverse()
+            .map((task: TaskType, index: number, array) => {
+              index = array.length - 1 - index;
               const SelixSessionTaskStatus = {
                 QUEUED: "QUEUED",
                 IN_PROGRESS: "IN_PROGRESS",

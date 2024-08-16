@@ -220,6 +220,7 @@ export default function Sequences(props: any) {
                   props.setSequences(linkedinSequenceData);
                 }
               }}
+              defaultValue={emailSequenceData && emailSequenceData.length > 0 ? "email" : "linkedin"}
               data={[
                 {
                   value: "email",

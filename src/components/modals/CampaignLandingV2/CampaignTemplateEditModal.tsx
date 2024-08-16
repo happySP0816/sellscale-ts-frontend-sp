@@ -1256,7 +1256,7 @@ export const OneshotModal = (props: any) => {
           </Box>
           <Box>
             <Text size={"sm"} fw={500}>
-              Include Strategies
+              Include Template Copies
             </Text>
             <SimpleGrid cols={2} mt={"xs"}>
               <Checkbox size={"xs"} label="Confernece outreach" />

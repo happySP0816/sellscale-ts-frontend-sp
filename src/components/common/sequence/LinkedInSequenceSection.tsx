@@ -1184,6 +1184,9 @@ export function IntroMessageSection(props: {
     setMessage("");
 
     let convoResponse = await getLiConvoSim(userToken, undefined, prospectId);
+
+    console.log("convoResponse: ", convoResponse);
+
     if (convoResponse.status !== "success" || forceRegenerate) {
       // If convo doesn't exist, create it
       const createResponse = await createLiConvoSim(
@@ -1211,6 +1214,8 @@ export function IntroMessageSection(props: {
         return null;
       }
       convoResponse = await getLiConvoSim(userToken, createResponse.data);
+
+      console.log("convoResponse: ", convoResponse);
     } else if (convoResponse.data.messages.length === 0) {
       // If convo exists but no messages, generate initial message
       const initMsgResponse = await generateInitialMessageForLiConvoSim(
@@ -1228,6 +1233,8 @@ export function IntroMessageSection(props: {
         userToken,
         convoResponse.data.simulation.id
       );
+
+      console.log("ConvoResponse: ", convoResponse);
     }
 
     setLoading(false);
@@ -1259,6 +1266,8 @@ export function IntroMessageSection(props: {
       }
     });
   }, [prospectId, selectedTemplateId]);
+
+  console.log("Message Meta Data: ", messageMetaData);
 
   // if (!currentProject) return <></>;
   return (

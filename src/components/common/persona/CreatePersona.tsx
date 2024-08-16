@@ -47,7 +47,12 @@ type PropsType = {
       emailGeneralAngle?: string;
       liSequenceKeywords?: string[];
       liAssetIngestor?: string;
+      emailAssetIngestor?: string;
       liCtaGenerator?: boolean;
+      selectedVoice?: number;
+      numSteps: number,
+      withData: string,
+      numVariance: number,
       liPainPoint?: string;
       liSequenceState?: {
         howItWorks: boolean;

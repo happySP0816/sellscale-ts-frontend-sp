@@ -59,8 +59,6 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
   const [createdPersona, setCreatedPersona] = useState("");
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
 
-  const [newCTAText, setNewCTAText] = useState("");
-  const addCTAInputRef = useRef<HTMLTextAreaElement | null>(null);
   const [ctas, setCTAs] = useState<{ id: number; cta: string }[]>([]);
 
   const [fitReason, setFitReason] = useState("");
@@ -71,13 +69,24 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
   const [purpose, setPurpose] = useState("");
 
   const [personaContractSize, setPersonaContractSize] = useState(userData.client.contract_size);
-  const [templateMode, setTemplateMode] = useState<string>("cta");
-
-  const [opened, setOpened] = useState(false);
+  const [templateMode, setTemplateMode] = useState<string>("template");
 
   const [tab, setTab] = useState("scratch");
 
   const [defaultVoicesOptions, setDefaultVoicesOptions] = useState<DefaultVoices[]>([]);
+
+  // New System for one shot campaign generator
+  const [selectedVoice, setSelectedVoice] = useState<string | null>(null);
+  const [numSteps, setNumSteps] = useState(1);
+  const [numVariance, setNumVariance] = useState(1);
+  const [liAssetIngestor, setLiAssetIngestor] = useState("");
+
+  const [emailAssetIngestor, setEmailAssetIngestor] = useState("");
+
+  // CTA system
+  const [company, setCompany] = useState(userData.client.company);
+  const [withData, setWithData] = useState("");
+
 
   const [findSampleProspects, setFindSampleProspects] = useState(false);
   const [writeEmailSequenceDraft, setWriteEmailSequenceDraft] = useState(false);
@@ -89,7 +98,6 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
   const [liGeneralAngle, setLiGeneralAngle] = useState("");
   const [emailGeneralAngle, setEmailGeneralAngle] = useState("");
   const [liSequenceKeywords, setLiSequenceKeywords] = useState<string[]>([]);
-  const [liAssetIngestor, setLiAssetIngestor] = useState("");
   const [liCtaGenerator, setLiCtaGenerator] = useState(false);
   const [liPainPoint, setLiPainPoint] = useState("");
   const setLiSequenceToggle = () => setLiSequenceOpened(!liSequenceOpened);
@@ -127,8 +135,6 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
 
     getVoices();
   }, [])
-
-  console.log("Default voices options: ", defaultVoicesOptions);
 
   const [loadingPersonaBuyReasonGeneration, setLoadingPersonaBuyReasonGeneration] = useState(false);
   const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
@@ -385,6 +391,24 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                   {writeEmailSequenceDraft && (
                     <Paper mt={4} w="100%">
                       <Stack spacing="sm">
+                        <NumberInput
+                          defaultValue={1}
+                          placeholder="# Steps"
+                          label="# Steps"
+                          withAsterisk
+                          onChange={(e) => setNumSteps(+e)}
+                          value={numSteps}
+                          width={'30%'}
+                        />
+                        <NumberInput
+                          defaultValue={1}
+                          placeholder="# Variance Per Step"
+                          label="# Variance Per Step"
+                          withAsterisk
+                          onChange={(e) => setNumVariance(+e)}
+                          value={numVariance}
+                          width={'30%'}
+                        />
                         <TextInput
                           label="General Angle"
                           placeholder="We are targeting marketing professionals to highlight the benefits of our new analytics tool."
@@ -400,6 +424,12 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                           data={emailSequenceKeywords}
                           setData={setEmailSequenceKeywords}
                         />
+                        <Textarea
+                          label="Asset Ingestor"
+                          placeholder="Give any additional context for the campaign generation"
+                          value={emailAssetIngestor}
+                          onChange={(e) => setEmailAssetIngestor(e.currentTarget.value)}
+                          minRows={4} />
                         <Divider
                           label={
                             <Button
@@ -447,37 +477,6 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                               />
                             </SimpleGrid>
                           </Box>
-                          <Box>
-                            <Text size="sm" fw={500}>
-                              Include Strategies
-                            </Text>
-                            <SimpleGrid cols={2} mt="xs">
-                              <Checkbox 
-                                size="xs" 
-                                label="Conference outreach" 
-                                checked={emailSequenceState.conferenceOutreach}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceState, conferenceOutreach: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="City chat" 
-                                checked={emailSequenceState.cityChat}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceState, cityChat: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="Former work alum" 
-                                checked={emailSequenceState.formerWorkAlum}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceState, formerWorkAlum: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="Feedback based" 
-                                checked={emailSequenceState.feedbackBased}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceState, feedbackBased: e.currentTarget.checked })}
-                              />
-                            </SimpleGrid>
-                          </Box>
                         </Collapse>
                       </Stack>
                     </Paper>
@@ -512,11 +511,35 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                   {writeLISequenceDraft && (
                     <Accordion mt={4} w="100%">
                       <Stack spacing="sm">
+                        <NumberInput
+                          defaultValue={1}
+                          placeholder="# Steps"
+                          label="# Steps"
+                          withAsterisk
+                          onChange={(e) => setNumSteps(+e)}
+                          value={numSteps}
+                          width={'30%'}
+                        />
+                        <NumberInput
+                          defaultValue={1}
+                          placeholder="# Variance Per Step"
+                          label="# Variance Per Step"
+                          withAsterisk
+                          onChange={(e) => setNumVariance(+e)}
+                          value={numVariance}
+                          width={'30%'}
+                        />
                         <TextInput
                           label="General Angle"
                           placeholder="We are targeting marketing professionals to highlight the benefits of our new analytics tool."
                           value={liGeneralAngle}
                           onChange={(e) => setLiGeneralAngle(e.currentTarget.value)}
+                        />
+                        <TextInput
+                          label={"Pain Points"}
+                          placeholder={"Is this a pain? (e.g., Are you facing challenges with XYZ?)"}
+                          value={liPainPoint}
+                          onChange={(e) => setLiPainPoint(e.currentTarget.value)}
                         />
                         <CustomSelect
                           maxWidth="100%"
@@ -527,16 +550,66 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                           data={liSequenceKeywords}
                           setData={setLiSequenceKeywords}
                         />
-                        <Checkbox 
+                        <Checkbox
                           label={<Text>Generate CTA (Call to Action)</Text>}
                           checked={liCtaGenerator}
-                          onChange={(e) => setLiCtaGenerator(e.currentTarget.checked)}
+                          onChange={(e) => {
+                            setLiCtaGenerator(e.currentTarget.checked)
+                            if (e.currentTarget.checked) {
+                              setTemplateMode("cta");
+                            } else {
+                              setTemplateMode("template");
+                            }
+                          }}
                         />
-                        {liCtaGenerator && <TextInput 
-                          placeholder={"Is this a pain? (e.g., Are you facing challenges with XYZ?)"} 
-                          value={liPainPoint}
-                          onChange={(e) => setLiPainPoint(e.currentTarget.value)}
-                        />}
+                        {liCtaGenerator && (
+                          <>
+                            <Flex align={'center'} gap={'4px'}>
+                              <TextInput
+                                value={company}
+                                disabled
+                                size="xs"
+                                radius="xl"
+                              />
+                              <Text>
+                                {" Help "}
+                              </Text>
+                              <TextInput
+                                value={createdPersona}
+                                disabled
+                                size="xs"
+                                radius="xl"
+                              />
+                              <Text>
+                                {" with "}
+                              </Text>
+                              <TextInput
+                                value={withData}
+                                size="xs"
+                                radius="xl"
+                                onChange={(e) => setWithData(e.currentTarget.value)}
+                                placeholder={"Filling their top of funnel leads."}
+                              />
+                            </Flex>
+                            <Select
+                              data={defaultVoicesOptions.map(item =>{
+                                return {
+                                  value: "" + item.id,
+                                  label: item.title,
+                                }})}
+                              onChange={(value) => setSelectedVoice(value)}
+                              value={selectedVoice}
+                              label={"Select Voices"}
+                              placeholder={'Select the voice to generate the campaign'}
+                            />
+                          </>
+                        )}
+                        <Textarea
+                          label="Asset Ingestor"
+                          placeholder="Give any additional context for the campaign generation"
+                          value={liAssetIngestor}
+                          onChange={(e) => setLiAssetIngestor(e.currentTarget.value)}
+                          minRows={4} />
                         <Divider
                           label={
                             <Button
@@ -581,37 +654,6 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                                 label="Unique offer" 
                                 checked={liSequenceState.uniqueOffer}
                                 onChange={(e) => setLiSequenceState({ ...liSequenceState, uniqueOffer: e.currentTarget.checked })}
-                              />
-                            </SimpleGrid>
-                          </Box>
-                          <Box>
-                            <Text size="sm" fw={500}>
-                              Include Strategies
-                            </Text>
-                            <SimpleGrid cols={2} mt="xs">
-                              <Checkbox 
-                                size="xs" 
-                                label="Conference outreach" 
-                                checked={liSequenceState.conferenceOutreach}
-                                onChange={(e) => setLiSequenceState({ ...liSequenceState, conferenceOutreach: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="City chat" 
-                                checked={liSequenceState.cityChat}
-                                onChange={(e) => setLiSequenceState({ ...liSequenceState, cityChat: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="Former work alum" 
-                                checked={liSequenceState.formerWorkAlum}
-                                onChange={(e) => setLiSequenceState({ ...liSequenceState, formerWorkAlum: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="Feedback based" 
-                                checked={liSequenceState.feedbackBased}
-                                onChange={(e) => setLiSequenceState({ ...liSequenceState, feedbackBased: e.currentTarget.checked })}
                               />
                             </SimpleGrid>
                           </Box>
@@ -716,6 +758,11 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
               liSequenceKeywords,
               liAssetIngestor,
               liCtaGenerator,
+              emailAssetIngestor,
+              withData,
+              selectedVoice: selectedVoice ? +selectedVoice : undefined,
+              numSteps,
+              numVariance,
               liPainPoint,
               liSequenceState,
               emailSequenceState,

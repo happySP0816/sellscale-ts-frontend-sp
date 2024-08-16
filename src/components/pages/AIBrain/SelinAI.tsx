@@ -55,7 +55,7 @@ import {
 import { IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
 import { Fragment, Key, useEffect, useRef, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { proxyURL } from "@utils/general";
 
 import Logo from "../../../assets/images/logo.png";
@@ -88,6 +88,8 @@ interface CustomCursorWrapperProps {
 
 import { Dropzone, DropzoneProps } from "@mantine/dropzone";
 import { Modal, Overlay } from "@mantine/core";
+import { currentProjectState } from "@atoms/personaAtoms";
+import { getFreshCurrentProject } from "@auth/core";
 
 const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({
   children,
@@ -221,6 +223,7 @@ export interface MemoryType {
   counter: number;
   session_name: string;
   strategy_id: number;
+  campaign_id: number;
   tab: "STRATEGY_CREATOR" | "PLANNER" | "BROWSER";
   search?: {
     query: string;
@@ -2278,6 +2281,22 @@ const PlannerComponent = ({
 }) => {
   const [opened, { toggle }] = useDisclosure(true);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
+  const userToken = useRecoilValue(userTokenState);
+
+  const campaignId = threads.find((thread) => thread.id === currentSessionId)
+    ?.memory?.campaign_id;
+
+  useEffect(() => {
+    (async () => {
+      if (campaignId) {
+        const project = await getFreshCurrentProject(userToken, campaignId);
+        setCurrentProject(project);
+      }
+    })();
+  }, [campaignId]);
 
   return (
     <Paper p={"sm"} withBorder radius={"sm"}>
@@ -2454,7 +2473,7 @@ const PlannerComponent = ({
                         }}
                       />
                     </Text>
-                    {task.proof_of_work_img && (
+                    {index !== tasks.length - 1 && task.proof_of_work_img && (
                       <img
                         src={task.proof_of_work_img}
                         alt="Proof of Work"
@@ -2463,6 +2482,15 @@ const PlannerComponent = ({
                         style={{ marginTop: "10px" }}
                       />
                     )}
+                    {currentProject &&
+                      index === tasks.length - 1 &&
+                      campaignId && (
+                        <CampaignLandingV2
+                          showOnlyHeader
+                          showLaunchButton
+                          forcedCampaignId={currentProject.id}
+                        />
+                      )}
                   </Collapse>
                 </Paper>
               );

@@ -9,6 +9,7 @@ import {
   Flex,
   Loader,
   ActionIcon,
+  Popover,
 } from "@mantine/core";
 import {
   IconCircleDot,
@@ -42,7 +43,7 @@ export default function DeepGram({ recording, setRecording, onTranscriptionChang
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowAnimation(false);
-    }, 4000);
+    }, 6000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -54,7 +55,7 @@ export default function DeepGram({ recording, setRecording, onTranscriptionChang
         opacity: 1;
       }
       50% {
-        transform: scale(1.5);
+        transform: scale(1.4);
         opacity: 0.7;
         filter: brightness(1.2);
       }
@@ -179,20 +180,44 @@ export default function DeepGram({ recording, setRecording, onTranscriptionChang
     <div>
       <HoverCard width={280} shadow="md" withinPortal>
         <HoverCard.Target>
-          <ActionIcon
-            className={showAnimation ? "animate-scale" : ""} 
-            variant={recording ? "filled" : "outline"}
-            onClick={handleToggleRecording}
-            size="md"
-            mr="xs"
-            color={recording ? "red" : "grape"}
-          >
-            {recording ? (
-              <Loader variant="bars" size="xs" color='white' />
-            ) : (
-              <IconMicrophone size={"1rem"} />
-            )}
-          </ActionIcon>
+          {showAnimation ? (
+            <Popover opened={showAnimation} position="top" withArrow shadow="md">
+              <Popover.Target>
+                <ActionIcon
+                  className="animate-scale"
+                  variant={recording ? "filled" : "outline"}
+                  onClick={handleToggleRecording}
+                  size="md"
+                  mr="xs"
+                  color={recording ? "red" : "grape"}
+                >
+                  {recording ? (
+                    <Loader variant="bars" size="xs" color='white' />
+                  ) : (
+                    <IconMicrophone size={"1rem"} />
+                  )}
+                </ActionIcon>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Text size="xs">Try speaking into the microphone for </Text> <Text size="xs">more accurate 
+                and engaging responses!</Text>
+              </Popover.Dropdown>
+            </Popover>
+          ) : (
+            <ActionIcon
+              variant={recording ? "filled" : "outline"}
+              onClick={handleToggleRecording}
+              size="md"
+              mr="xs"
+              color={recording ? "red" : "grape"}
+            >
+              {recording ? (
+                <Loader variant="bars" size="xs" color='white' />
+              ) : (
+                <IconMicrophone size={"1rem"} />
+              )}
+            </ActionIcon>
+          )}
         </HoverCard.Target>
         {/* <HoverCard.Dropdown>
           <Paper>

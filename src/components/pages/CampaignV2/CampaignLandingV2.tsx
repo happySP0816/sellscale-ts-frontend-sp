@@ -1047,7 +1047,7 @@ export default function CampaignLandingV2(props: PropsType) {
                           },
                           body: JSON.stringify({
                             message: `⚠️⚠️⚠️\nUser ${statsData?.sdr_name} launched '${statsData?.archetype_name}' campaign.\n⚠️⚠️⚠️`,
-                            webhook_key: "eng-sandbox",
+                            webhook_key: "selix-sessions",
                           }),
                         });
                       }}

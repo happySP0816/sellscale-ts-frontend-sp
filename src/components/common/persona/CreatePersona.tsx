@@ -49,6 +49,7 @@ type PropsType = {
       liAssetIngestor?: string;
       emailAssetIngestor?: string;
       liCtaGenerator?: boolean;
+      ctaTarget?: string;
       selectedVoice?: number;
       numSteps: number,
       withData: string,

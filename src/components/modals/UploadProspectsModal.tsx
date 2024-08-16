@@ -82,6 +82,7 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
   const [liAssetIngestor, setLiAssetIngestor] = useState("");
 
   const [emailAssetIngestor, setEmailAssetIngestor] = useState("");
+  const [ctaTarget, setCTATarget] = useState("");
 
   // CTA system
   const [company, setCompany] = useState(userData.client.company);
@@ -317,7 +318,10 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                   placeholder="eg. C-Suite Sales Leaders in tech companies"
                   label={<Text mb="xs" size="lg">Campaign Name</Text>}
                   value={createdPersona}
-                  onChange={(e) => setCreatedPersona(e.currentTarget.value)}
+                  onChange={(e) =>
+                  {
+                    setCreatedPersona(e.currentTarget.value)
+                  }}
                 />
                 <Stack spacing={"xs"} mt={4}>
                   <Text size={"md"} fw={500} mb={-8}>
@@ -535,12 +539,6 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                           value={liGeneralAngle}
                           onChange={(e) => setLiGeneralAngle(e.currentTarget.value)}
                         />
-                        <TextInput
-                          label={"Pain Points"}
-                          placeholder={"Is this a pain? (e.g., Are you facing challenges with XYZ?)"}
-                          value={liPainPoint}
-                          onChange={(e) => setLiPainPoint(e.currentTarget.value)}
-                        />
                         <CustomSelect
                           maxWidth="100%"
                           value={liSequenceKeywords}
@@ -575,20 +573,25 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                                 {" Help "}
                               </Text>
                               <TextInput
-                                value={createdPersona}
-                                disabled
+                                value={ctaTarget}
+                                onChange={(e) => setCTATarget(e.currentTarget.value)}
                                 size="xs"
                                 radius="xl"
+                                placeholder={createdPersona}
+                                withAsterisk
                               />
                               <Text>
                                 {" with "}
                               </Text>
-                              <TextInput
+                              <Textarea
                                 value={withData}
                                 size="xs"
-                                radius="xl"
+                                style={{width: "fit-content"}}
+                                radius="sm"
                                 onChange={(e) => setWithData(e.currentTarget.value)}
                                 placeholder={"Filling their top of funnel leads."}
+                                required
+                                withAsterisk
                               />
                             </Flex>
                             <Select
@@ -758,6 +761,7 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
               liSequenceKeywords,
               liAssetIngestor,
               liCtaGenerator,
+              ctaTarget: ctaTarget ? ctaTarget : createdPersona,
               emailAssetIngestor,
               withData,
               selectedVoice: selectedVoice ? +selectedVoice : undefined,

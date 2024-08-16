@@ -31,6 +31,7 @@ import {
   SimpleGrid,
   Stack,
   ThemeIcon,
+  Loader,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { ContextModalProps, openContextModal, closeAllModals } from "@mantine/modals";
@@ -57,7 +58,7 @@ import { deterministicMantineColor } from "@utils/requests/utils";
 import { useEffect, useState, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { getEmailSubjectLineTemplates } from "@utils/requests/emailSubjectLines";
-import { SubjectLineTemplate } from "src";
+import {DefaultVoices, SubjectLineTemplate} from "src";
 import { SubjectLineItem } from "@pages/EmailSequencing/DetailEmailSequencing";
 import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
 import { set } from "lodash";
@@ -1177,15 +1178,129 @@ export default function CampaignTemplateEditModal({
           </Paper>
         </Flex>
       )}
-      <OneshotModal oneshotOpened={oneshotOpened} close={close} />
+      props.
+      props.
+      props.
+      <OneshotModal oneshotOpened={oneshotOpened} close={close} refetch={() => innerProps.refetchSequenceData(Number(currentProject ? currentProject.id : -1)) } />
     </div>
   );
 }
 
 export const OneshotModal = (props: any) => {
-  const { oneshotOpened, close } = props;
-  const [opened, { toggle }] = useDisclosure(false);
-  const [keywords, setKeywords] = useState(["B2B Research", "Bi-directional ETL"]);
+  const { oneshotOpened, close, refetch } = props;
+  const userData = useRecoilValue(userDataState);
+  const currentProject = useRecoilValue(currentProjectState);
+  const userToken = useRecoilValue(userTokenState);
+
+  // Email
+  const [emailGeneralAngle, setEmailGeneralAngle] = useState("");
+  const [writeEmailSequenceDraft, setWriteEmailSequenceDraft] = useState(false);
+  const [emailAssetIngestor, setEmailAssetIngestor] = useState("");
+  const [emailSequenceKeywords, setEmailSequenceKeywords] = useState<string[]>([]);
+  const [emailSequenceOpened, setEmailSequenceOpened] = useState(false);
+  const setEmailSequenceToggle = () => setEmailSequenceOpened(!emailSequenceOpened);
+  const [ctaTarget, setCTATarget] = useState("");
+
+  const [defaultVoicesOptions, setDefaultVoicesOptions] = useState<DefaultVoices[]>([]);
+
+  const [loading, setLoading] = useState(false);
+
+  const [templateMode, setTemplateMode] = useState<string>("template");
+
+  useEffect(() => {
+    const getVoices = async () => {
+      const res = await fetch(`${API_URL}/internal_voices`)
+
+      if (res.status === 200) {
+        const data = await res.json()
+        setDefaultVoicesOptions(data)
+      }
+    }
+
+    getVoices();
+  }, [])
+
+  const onClickGenerate = async function () {
+    setLoading(true);
+    const response = await fetch(`${API_URL}/client/archetype/${currentProject?.id}/generate_ai_sequence`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        auto_generation_payload: {
+          writeEmailSequenceDraft,
+          writeLISequenceDraft,
+          emailSequenceOpened,
+          emailSequenceKeywords,
+          liSequenceOpened,
+          liGeneralAngle,
+          emailGeneralAngle,
+          liSequenceKeywords,
+          liAssetIngestor,
+          liCtaGenerator,
+          ctaTarget: ctaTarget ? ctaTarget : currentProject?.name,
+          emailAssetIngestor,
+          withData,
+          selectedVoice: selectedVoice ? +selectedVoice : undefined,
+          numSteps,
+          numVariance,
+          liSequenceState,
+          emailSequenceState,
+        }
+      }),
+    });
+
+
+    if (response.status === 200) {
+      const data = await response.json();
+      refetch();
+      close();
+    }
+
+    setLoading(false);
+  }
+
+  const [emailSequenceState, setEmailSequenceState] = useState({
+    howItWorks: false,
+    varyIntroMessages: false,
+    breakupMessage: false,
+    uniqueOffer: false,
+    conferenceOutreach: false,
+    cityChat: false,
+    formerWorkAlum: false,
+    feedbackBased: false,
+  });
+
+  // LinkedIn
+  const [writeLISequenceDraft, setWriteLISequenceDraft] = useState(false);
+  const [liSequenceOpened, setLiSequenceOpened] = useState(false);
+  const [liGeneralAngle, setLiGeneralAngle] = useState("");
+  const [liSequenceKeywords, setLiSequenceKeywords] = useState<string[]>([]);
+  const [liAssetIngestor, setLiAssetIngestor] = useState("");
+  const setLiSequenceToggle = () => setLiSequenceOpened(!liSequenceOpened);
+  const [liSequenceState, setLiSequenceState] = useState({
+    howItWorks: false,
+    varyIntroMessages: false,
+    breakupMessage: false,
+    uniqueOffer: false,
+    conferenceOutreach: false,
+    cityChat: false,
+    formerWorkAlum: false,
+    feedbackBased: false,
+  });
+
+  // New System for one shot campaign generator
+  const [selectedVoice, setSelectedVoice] = useState<string | null>(null);
+  const [numSteps, setNumSteps] = useState(1);
+  const [numVariance, setNumVariance] = useState(1);
+  const [liCtaGenerator, setLiCtaGenerator] = useState(false);
+
+  // CTA system
+  const [company, setCompany] = useState(userData.client.company);
+  const [withData, setWithData] = useState("");
+
 
   return (
     <Modal
@@ -1209,69 +1324,267 @@ export const OneshotModal = (props: any) => {
           One Shot Generator
         </Text>
         <Flex align={"center"} gap={"sm"}>
-          <Select data={["Linkedin"]} label="Sequence Type" w={200} />
-          <NumberInput label="No. of Steps" w={100} />
+          <Select
+            data={[{
+            label: "Email",
+            value: "email",
+          }, {
+            label: "LinkedIn",
+            value: "linkedin",
+          }]}
+            label="Sequence Type" w={200}
+            onChange={(value) => {
+              if (value === "linkedin") {
+                setLiSequenceOpened(true);
+                setWriteLISequenceDraft(true);
+
+                setEmailSequenceOpened(false);
+                setWriteEmailSequenceDraft(false);
+              } else {
+                setEmailSequenceOpened(true);
+                setWriteEmailSequenceDraft(true);
+
+                setLiSequenceOpened(false);
+                setWriteLISequenceDraft(false);
+              }
+            }}
+          />
+          <NumberInput
+            label="# Steps"
+            placeholder="# Steps"
+            withAsterisk
+            onChange={(e) => setNumSteps(+e)}
+            value={numSteps}
+            w={100} />
+          <NumberInput
+            label="# Variants"
+            placeholder="# Variants"
+            withAsterisk
+            onChange={(e) => setNumVariance(+e)}
+            value={numVariance}
+            w={100} />
         </Flex>
       </Flex>
       <Stack spacing={"sm"}>
-        <TextInput label="General Campaign Angle" placeholder="I want to write a sequence that targets marketers and does XYZ" />
-        <CustomSelect
-          maxWidth="30vw"
-          value={keywords}
-          label="Keywords-put in keywords that should for sure be mentioned"
-          placeholder="Select options"
-          setValue={setKeywords}
-          data={keywords}
-          setData={setKeywords}
-        />
-        <Textarea label="Asset Investor (for reference only)" placeholder="Paste here" minRows={4} />
-        <Checkbox label="CTA Generator" />
-        <TextInput defaultValue={"Is this a pain?"} />
+        {writeEmailSequenceDraft ? (
+          <TextInput
+            label="General Angle"
+            placeholder="I want to write a sequence that targets marketers and does XYZ"
+            value={emailGeneralAngle}
+            onChange={(e) => setEmailGeneralAngle(e.currentTarget.value)}
+          />
+        ) : (
+          <TextInput
+            label="General Angle"
+            placeholder="I want to write a sequence that targets marketers and does XYZ"
+            onChange={(e) => setLiGeneralAngle(e.currentTarget.value)}
+            value={liGeneralAngle}
+          />
+        )}
+        {writeEmailSequenceDraft ? (
+          <CustomSelect
+            maxWidth="30vw"
+            value={emailSequenceKeywords}
+            label="Keywords-put mandatory keywords that should for sure be mentioned"
+            placeholder="Select options"
+            setValue={setEmailSequenceKeywords}
+            data={emailSequenceKeywords}
+            setData={setEmailSequenceKeywords}
+          />
+        ) : (
+          <CustomSelect
+            maxWidth="30vw"
+            value={liSequenceKeywords}
+            label="Keywords-put mandatory keywords that should for sure be mentioned"
+            placeholder="Select options"
+            setValue={setLiSequenceKeywords}
+            data={liSequenceKeywords}
+            setData={setLiSequenceKeywords}
+          />
+        )}
+        {writeLISequenceDraft && (
+          <Checkbox
+            label={<Text>Generate CTA (Call to Action)</Text>}
+            checked={liCtaGenerator}
+            onChange={(e) => {
+              setLiCtaGenerator(e.currentTarget.checked)
+              if (e.currentTarget.checked) {
+                setTemplateMode("cta");
+              } else {
+                setTemplateMode("template");
+              }
+            }}
+          />
+          )}
+        {writeLISequenceDraft && liCtaGenerator && (
+          <>
+            <Flex align={'center'} gap={'4px'}>
+              <TextInput
+                value={company}
+                disabled
+                size="xs"
+                radius="xl"
+              />
+              <Text>
+                {" Help "}
+              </Text>
+              <TextInput
+                value={ctaTarget}
+                onChange={(e) => setCTATarget(e.currentTarget.value)}
+                size="xs"
+                radius="xl"
+                placeholder={"Enter the target for your CTA"}
+                withAsterisk
+              />
+              <Text>
+                {" with "}
+              </Text>
+              <Textarea
+                value={withData}
+                size="xs"
+                style={{width: "fit-content"}}
+                radius="sm"
+                onChange={(e) => setWithData(e.currentTarget.value)}
+                placeholder={"Filling their top of funnel leads."}
+                required
+                withAsterisk
+              />
+            </Flex>
+            <Select
+              data={defaultVoicesOptions.map(item =>{
+                return {
+                  value: "" + item.id,
+                  label: item.title,
+                }})}
+              onChange={(value) => setSelectedVoice(value)}
+              value={selectedVoice}
+              label={"Select Voices"}
+              placeholder={'Select the voice to generate the campaign'}
+            />
+          </>
+        )}
+        {writeEmailSequenceDraft ? (
+          <Textarea
+            value={emailAssetIngestor}
+            onChange={(e) => setEmailAssetIngestor(e.currentTarget.value)}
+            label="Asset Ingestor"
+            placeholder="Give any additional context for the campaign generation"
+            minRows={4} />
+        ) : (
+          <Textarea
+            label="Asset Ingestor"
+            placeholder="Give any additional context for the campaign generation"
+            value={liAssetIngestor}
+            onChange={(e) => setLiAssetIngestor(e.currentTarget.value)}
+            minRows={4} />
+        )}
         <Divider
           label={
-            <Button
-              onClick={toggle}
-              variant="outline"
-              color="gray"
-              radius={"xl"}
-              rightIcon={opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}
-            >
-              Advanced
-            </Button>
+            liSequenceOpened ? (
+                <Button
+                  onClick={setLiSequenceToggle}
+                  variant="outline"
+                  color="gray"
+                  radius="xl"
+                  rightIcon={liSequenceOpened ? <IconChevronUp size="1rem" /> : <IconChevronDown size="1rem" />}
+                >
+                  Advanced
+                </Button>
+              ) : (
+                <Button
+                  onClick={setEmailSequenceToggle}
+                  variant="outline"
+                  color="gray"
+                  radius="xl"
+                  rightIcon={emailSequenceOpened ? <IconChevronUp size="1rem" /> : <IconChevronDown size="1rem" />}
+                >
+                  Advanced
+                </Button>
+              )
           }
           variant="dashed"
           labelPosition="center"
         />
-        <Collapse in={opened}>
-          <Box>
-            <Text size={"sm"} fw={500}>
-              Include Templates
-            </Text>
-            <SimpleGrid cols={2} mt={"xs"}>
-              <Checkbox size={"xs"} label="How it works" />
-              <Checkbox size={"xs"} label="Vary intro messages" />
-              <Checkbox size={"xs"} label="Breakup message" />
-              <Checkbox size={"xs"} label="Unique offer" />
-            </SimpleGrid>
-          </Box>
-          <Box>
-            <Text size={"sm"} fw={500}>
-              Include Template Copies
-            </Text>
-            <SimpleGrid cols={2} mt={"xs"}>
-              <Checkbox size={"xs"} label="Confernece outreach" />
-              <Checkbox size={"xs"} label="City chat" />
-              <Checkbox size={"xs"} label="Former work alum" />
-              <Checkbox size={"xs"} label="Feedback based" />
-            </SimpleGrid>
-          </Box>
-        </Collapse>
-
+        {emailSequenceOpened ? (
+          <Collapse in={emailSequenceOpened}>
+            <Box>
+              <Text size="sm" fw={500}>
+                Include Templates
+              </Text>
+              <SimpleGrid mb="sm" cols={2} mt="xs">
+                <Checkbox
+                  size="xs"
+                  label="How it works"
+                  checked={emailSequenceState.howItWorks}
+                  onChange={(e) => setEmailSequenceState({ ...emailSequenceState, howItWorks: e.currentTarget.checked })}
+                />
+                <Checkbox
+                  size="xs"
+                  label="Vary intro messages"
+                  checked={emailSequenceState.varyIntroMessages}
+                  onChange={(e) => setEmailSequenceState({ ...emailSequenceState, varyIntroMessages: e.currentTarget.checked })}
+                />
+                <Checkbox
+                  size="xs"
+                  label="Breakup message"
+                  checked={emailSequenceState.breakupMessage}
+                  onChange={(e) => setEmailSequenceState({ ...emailSequenceState, breakupMessage: e.currentTarget.checked })}
+                />
+                <Checkbox
+                  size="xs"
+                  label="Unique offer"
+                  checked={emailSequenceState.uniqueOffer}
+                  onChange={(e) => setEmailSequenceState({ ...emailSequenceState, uniqueOffer: e.currentTarget.checked })}
+                />
+              </SimpleGrid>
+            </Box>
+          </Collapse>
+        ) : (
+          <Collapse in={liSequenceOpened}>
+            <Box>
+              <Text size="sm" fw={500}>
+                Include Templates
+              </Text>
+              <SimpleGrid mb="sm" cols={2} mt="xs">
+                <Checkbox
+                  size="xs"
+                  label="How it works"
+                  checked={liSequenceState.howItWorks}
+                  onChange={(e) => setLiSequenceState({ ...liSequenceState, howItWorks: e.currentTarget.checked })}
+                />
+                <Checkbox
+                  size="xs"
+                  label="Vary intro messages"
+                  checked={liSequenceState.varyIntroMessages}
+                  onChange={(e) => setLiSequenceState({ ...liSequenceState, varyIntroMessages: e.currentTarget.checked })}
+                />
+                <Checkbox
+                  size="xs"
+                  label="Breakup message"
+                  checked={liSequenceState.breakupMessage}
+                  onChange={(e) => setLiSequenceState({ ...liSequenceState, breakupMessage: e.currentTarget.checked })}
+                />
+                <Checkbox
+                  size="xs"
+                  label="Unique offer"
+                  checked={liSequenceState.uniqueOffer}
+                  onChange={(e) => setLiSequenceState({ ...liSequenceState, uniqueOffer: e.currentTarget.checked })}
+                />
+              </SimpleGrid>
+            </Box>
+          </Collapse>
+        )}
         <Flex gap={"lg"}>
           <Button variant="outline" color="gray" fullWidth onClick={close}>
             Cancel
           </Button>
-          <Button fullWidth>Generate</Button>
+          <Button
+            fullWidth
+            onClick={() => onClickGenerate()}
+            disabled={!currentProject}
+          >
+            {loading ? <Loader /> : "Generate"}
+          </Button>
         </Flex>
       </Stack>
     </Modal>

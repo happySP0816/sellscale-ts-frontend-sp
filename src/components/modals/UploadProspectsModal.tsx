@@ -269,8 +269,6 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
     }
   }, [defaultPersonas.current]);
 
-  console.log("CTAs: ", ctas);
-
   return (
     <Paper
       p={0}
@@ -406,8 +404,8 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                         />
                         <NumberInput
                           defaultValue={1}
-                          placeholder="# Variance Per Step"
-                          label="# Variance Per Step"
+                          placeholder="# Variants Per Step"
+                          label="# Variants Per Step"
                           withAsterisk
                           onChange={(e) => setNumVariance(+e)}
                           value={numVariance}

@@ -1040,6 +1040,16 @@ export default function CampaignLandingV2(props: PropsType) {
                           color: "blue",
                           autoClose: 5000,
                         });
+                        fetch(`${API_URL}/echo/send-slack-message`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            message: `⚠️⚠️⚠️\nUser ${statsData?.sdr_name} launched '${statsData?.archetype_name}' campaign.\n⚠️⚠️⚠️`,
+                            webhook_key: "eng-sandbox",
+                          }),
+                        });
                       }}
                     >
                       Launch Campaign

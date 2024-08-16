@@ -86,7 +86,7 @@ export default function SignupPage() {
       //   color: "red",
       //   autoClose: false,
       // });
-      return { status: response.status, message: result?.data.message };
+      return { status: response.status, message: result?.data?.message, error: result?.error };
     }
   
     return { status: response.status, message: result?.message };
@@ -186,8 +186,19 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const { status, message } = await sendSignup(values.fullName, values.email);
+      const { status, message, error } = await sendSignup(values.fullName, values.email);
       const res = { status, message };
+
+      if (error === 'Email must be a work email and not from a common email provider') {
+        showNotification({
+          color: "red",
+          title: "Error Signing Up",
+          message: "The email provided must be a work email and not from a common email provider.",
+          icon: <IconInfoCircle />,
+          autoClose: 5000,
+        });
+        return;
+      }
 
       if (res?.status === 200) {
         console.log(status, message);
@@ -295,8 +306,8 @@ export default function SignupPage() {
             <TextInput
               size="md"
               mt={"xl"}
-              placeholder="name@xyz.com"
-              label="Email"
+              placeholder="name@company.com"
+              label="Organization Email"
               {...form.getInputProps("email")}
               required
             />

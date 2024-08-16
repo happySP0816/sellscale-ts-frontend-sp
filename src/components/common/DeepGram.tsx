@@ -23,10 +23,12 @@ import { showNotification } from "@mantine/notifications";
 
 type DeepGramProps = {
   onTranscriptionChanged: (text: string) => void;
+  setRecording: (recording: boolean) => void;
+  recording: boolean;
 };
 
-export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
-  const [recording, setRecording] = useState(false);
+export default function DeepGram({ recording, setRecording, onTranscriptionChanged }: DeepGramProps) {
+  
   const [speaking, setSpeaking] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [transcribedText, setTranscribedText] = useState("");
@@ -34,6 +36,46 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
   const deepgram = createClient("e9d9d07aa3dcd0d87ea82dbe5f91c9759f2b2319");
   const liveRef = useRef<any>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
+  const [showAnimation, setShowAnimation] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowAnimation(false);
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const animateScale = `
+    @keyframes scale {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.5);
+        opacity: 0.7;
+        filter: brightness(1.2);
+      }
+    }
+
+    .animate-scale {
+      animation: scale 1s infinite;
+      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, filter 0.3s ease-in-out;
+    }
+  `;
+
+  useEffect(() => {
+    const styleSheet = document.createElement("style");
+    styleSheet.type = "text/css";
+    styleSheet.innerText = animateScale;
+    document.head.appendChild(styleSheet);
+
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []);
 
   useEffect(() => {
     const requestMicrophoneAccess = async () => {
@@ -138,6 +180,7 @@ export default function DeepGram({ onTranscriptionChanged }: DeepGramProps) {
       <HoverCard width={280} shadow="md" withinPortal>
         <HoverCard.Target>
           <ActionIcon
+            className={showAnimation ? "animate-scale" : ""} 
             variant={recording ? "filled" : "outline"}
             onClick={handleToggleRecording}
             size="md"

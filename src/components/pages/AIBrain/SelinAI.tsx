@@ -30,6 +30,7 @@ import {
 import {
   IconBrowser,
   IconBulb,
+  IconCheck,
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
@@ -1155,8 +1156,20 @@ const SegmentChat = (props: any) => {
   const messages: MessageType[] = props.messages;
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
+  const [showLoader, setShowLoader] = useState(false);
+  const [recording, setRecording] = useState(false);
 
   const viewport = useRef<any>(null);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      setShowLoader(true);
+      const timer = setTimeout(() => {
+        setShowLoader(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length]);
 
   useEffect(() => {
     if (viewport.current) {
@@ -1176,6 +1189,7 @@ const SegmentChat = (props: any) => {
   };
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      setRecording(false);
       handleSubmit();
     }
   };
@@ -1288,6 +1302,7 @@ const SegmentChat = (props: any) => {
 
   useEffect(() => {
     handleSubmit();
+    setRecording(false);
   }, [shouldSubmit]);
 
   return (
@@ -1353,12 +1368,14 @@ const SegmentChat = (props: any) => {
                           message.message !== "loading" &&
                           index === messages.length - 1 && (
                             <Flex align="center" gap="xs">
-                              <Loader
-                                variant="bars"
-                                color="grape"
-                                size="xs"
-                                ml={10}
-                              />
+                              {showLoader && (
+                                <Loader
+                                  variant="bars"
+                                  color="grape"
+                                  size="xs"
+                                  ml={10}
+                                />
+                              )}
                             </Flex>
                           )}
                       </Flex>
@@ -1823,6 +1840,8 @@ const SegmentChat = (props: any) => {
             </Flex>
             <Flex>
               <DeepGram
+                recording={recording}
+                setRecording={setRecording}
                 onTranscriptionChanged={(text) => setPrompt(prompt + text)}
               />
               <Button
@@ -1832,6 +1851,7 @@ const SegmentChat = (props: any) => {
                 className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
                 onClick={() => {
                   handleSubmit();
+                  setRecording(false);
                 }}
                 // leftIcon={<IconSend size={"1rem"} />}
               >
@@ -1882,7 +1902,16 @@ const SelixControlCenter = ({
   const currentThreadMemory = threads.find(
     (thread) => thread.id === currentSessionId
   )?.memory;
+  const [popoverOpenedArray, setPopoverOpenedArray] = useState<boolean[]>([1,1,1]?.map(() => false));
+
   const [availableCitations, setAvailableCitations] = useState<string[]>([]);
+  const handlePopoverOpen = (index: number) => {
+    setPopoverOpenedArray(popoverOpenedArray.map((opened, i) => i === index));
+  };
+
+  const handlePopoverClose = () => {
+    setPopoverOpenedArray(popoverOpenedArray.map(() => false));
+  };
 
   useEffect(() => {
     if (currentThreadMemory?.search) {
@@ -1915,7 +1944,12 @@ const SelixControlCenter = ({
       <Paper withBorder radius={0} p={"sm"}>
         <SegmentedControl
           value={aiType}
-          onChange={(value) => setAIType(value)}
+          onChange={(value) => {
+            if (value === "BROWSER" && availableCitations.length === 0) {
+              return;
+            }
+            setAIType(value);
+          }}
           w={"100%"}
           styles={{
             root: {
@@ -1932,19 +1966,77 @@ const SelixControlCenter = ({
             {
               value: "PLANNER",
               label: (
-                <Center style={{ gap: 10 }}>
-                  <IconList size={"1rem"} />
-                  <span>Tasks</span>
-                </Center>
+                <Popover
+                  position="bottom"
+                  withinPortal
+                  withArrow
+                  shadow="md"
+                  width={200}
+                  offset={10}
+                  onClose={handlePopoverClose}
+                  keepMounted
+                  transitionProps={{ duration: 150, transition: 'fade' }}
+                  middlewares={{ shift: true, flip: true }}
+                  arrowSize={10}
+                  arrowOffset={5}
+                  arrowRadius={2}
+                  arrowPosition="center"
+                  zIndex={1000}
+                  radius="md"
+                  opened={popoverOpenedArray[1]}
+                >
+                  <Popover.Target>
+                    <div onMouseEnter={() => handlePopoverOpen(1)} onMouseLeave={handlePopoverClose}>
+                      <Center style={{ gap: 10 }}>
+                        <IconList size={"1rem"} />
+                        <span>Tasks</span>
+                      </Center>
+                    </div>
+                  </Popover.Target>
+                  <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
+                    <Text size="sm">
+                      This section allows you to view your tasks.
+                    </Text>
+                  </Popover.Dropdown>
+                </Popover>
               ),
             },
             {
               value: "STRATEGY_CREATOR",
               label: (
-                <Center style={{ gap: 10 }}>
-                  <IconHammer size={"1rem"} />
-                  <span>Blueprint</span>
-                </Center>
+                <Popover
+                  position="bottom"
+                  withinPortal
+                  withArrow
+                  shadow="md"
+                  width={200}
+                  offset={10}
+                  onClose={handlePopoverClose}
+                  keepMounted
+                  transitionProps={{ duration: 150, transition: 'fade' }}
+                  middlewares={{ shift: true, flip: true }}
+                  arrowSize={10}
+                  arrowOffset={5}
+                  arrowRadius={2}
+                  arrowPosition="center"
+                  zIndex={1000}
+                  radius="md"
+                  opened={popoverOpenedArray[0]}
+                >
+                  <Popover.Target>
+                    <div onMouseEnter={() => handlePopoverOpen(0)} onMouseLeave={handlePopoverClose}>
+                      <Center style={{ gap: 10 }}>
+                        <IconHammer size={"1rem"} />
+                        <span>Blueprint</span>
+                      </Center>
+                    </div>
+                  </Popover.Target>
+                  <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
+                    <Text size="sm">
+                      This section allows you to manage your project's blueprint.
+                    </Text>
+                  </Popover.Dropdown>
+                </Popover>
               ),
             },
             // {
@@ -1972,10 +2064,42 @@ const SelixControlCenter = ({
             {
               value: "BROWSER",
               label: (
-                <Center style={{ gap: 10 }}>
-                  <IconBrowser size={"1rem"} />
-                  <span>Browser</span>
-                </Center>
+                <Popover 
+                  position="bottom" 
+                  withinPortal 
+                  withArrow 
+                  shadow="md" 
+                  opened={popoverOpenedArray[2]} // Assuming this is the second popover
+                  offset={10}
+                  onPositionChange={(position) => console.log('Popover position:', position)}
+                  // positionDependencies={[selectedSubject]}
+                  onClose={handlePopoverClose}
+                  onOpen={() => handlePopoverOpen(2)}
+                  keepMounted
+                  transitionProps={{ duration: 150, transition: 'fade' }}
+                  width="auto" 
+                  middlewares={{ shift: true, flip: true }}
+                  arrowSize={10}
+                  arrowOffset={5}
+                  arrowRadius={2}
+                  arrowPosition="center"
+                  zIndex={1000}
+                  radius="md"
+                >
+                  <Popover.Target>
+                    <div onMouseEnter={() => handlePopoverOpen(2)} onMouseLeave={handlePopoverClose}>
+                      <Center style={{ gap: 10 }}>
+                        <IconBrowser size={"1rem"} />
+                        <span>Browser</span>
+                      </Center>
+                    </div>
+                  </Popover.Target>
+                  <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
+                    <Text size="sm">
+                      Controlled by chat, view for Selix AI research.
+                    </Text>
+                  </Popover.Dropdown>
+                </Popover>
               ),
             },
             // {
@@ -2740,6 +2864,13 @@ const SelinStrategy = ({
           <Button
             fullWidth
             onClick={() => {
+              showNotification({
+                title: "Task Creation",
+                message: "Drafting Campaign: " + strategy?.title,
+                color: "green",
+                icon: <IconCheck />,
+              }); 
+
               if (!memory?.strategy_id) {
                 return;
               }

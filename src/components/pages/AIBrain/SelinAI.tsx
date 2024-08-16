@@ -297,7 +297,7 @@ export default function SelinAI() {
 
     //custom handle submit function to handle file uploads
     if (file) {
-      await fetch(`${API_URL}/selix/upload_file`, {
+      const response = await fetch(`${API_URL}/selix/upload_file`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -311,6 +311,27 @@ export default function SelinAI() {
           description: file.description,
         }),
       });
+
+      if (response.status === 400) {
+
+        showNotification({
+          title: "File upload failed",
+          message: "Please try uploading a smaller file!",
+          color: "red",
+          icon: <IconCircleCheck />,
+        });
+
+      }
+
+      if (response.status === 429) {
+        showNotification({
+          title: "File upload failed",
+          message: "You have reached the maximum file upload count! Please reach out to csm@sellscale.com",
+          color: "red",
+          icon: <IconCircleCheck />,
+        });
+
+      }
 
       return;
     }

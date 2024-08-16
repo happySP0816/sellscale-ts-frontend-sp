@@ -316,7 +316,7 @@ export default function SelinAI() {
 
         showNotification({
           title: "File upload failed",
-          message: "Please try uploading a smaller file!",
+          message: "Please try uploading a file less than 5mb in size!",
           color: "red",
           icon: <IconCircleCheck />,
         });

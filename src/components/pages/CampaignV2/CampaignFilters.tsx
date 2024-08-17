@@ -26,12 +26,12 @@ import {API_URL} from "@constants/data";
 import {useQueryClient} from "@tanstack/react-query";
 import {showNotification} from "@mantine/notifications";
 
-interface MarketMapFiltersProps {
+interface CampaignFiltersProps {
   prospects: Prospect[],
   viewMode: ViewMode,
   icp_scoring_ruleset: ICPScoringRuleset,
   selectedContacts: Set<number>,
-  segment_id?: number;
+  archetype_id?: number;
   setUpdatedIndividualColumns: React.Dispatch<React.SetStateAction<Set<string>>>;
   setUpdatedCompanyColumns: React.Dispatch<React.SetStateAction<Set<string>>>;
   setContactTableHeaders: React.Dispatch<React.SetStateAction<TableHeader[]>>;
@@ -41,13 +41,13 @@ interface MarketMapFiltersProps {
   setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
 }
 
-const MarketMapFilters = function (
+const CampaignFilters = function (
   {
     icp_scoring_ruleset,
     prospects,
     viewMode,
     selectedContacts,
-    segment_id,
+    archetype_id,
     setUpdatedCompanyColumns,
     setContactTableHeaders,
     setCompanyTableHeaders,
@@ -55,7 +55,7 @@ const MarketMapFilters = function (
     headerSet,
     setHeaderSet,
     setViewMode,
-  }: MarketMapFiltersProps
+  }: CampaignFiltersProps
 ) {
   const userToken = useRecoilValue(userTokenState);
 
@@ -169,7 +169,7 @@ const MarketMapFilters = function (
   ] = useState<string[]>(icp_scoring_ruleset.individual_personalizers ?? []);
 
   const [
-   dealbreakers,
+    dealbreakers,
     setDealBreakers,
   ] = useState<string[]>(icp_scoring_ruleset.dealbreakers ?? []);
 
@@ -196,88 +196,88 @@ const MarketMapFilters = function (
   const [company_ai_use_linkedin, setCompanyAIUseLinkedin] = useState<boolean>(false);
 
   useEffect(() => {
-        if (included_individual_title_keywords.length === 0) {
-          setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_title_keywords"))
-        }
-        if (excluded_individual_title_keywords.length === 0) {
+      if (included_individual_title_keywords.length === 0) {
+        setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_title_keywords"))
+      }
+      if (excluded_individual_title_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_title_keywords"))}
-        if (included_individual_industry_keywords.length === 0) {
+      if (included_individual_industry_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_industry_keywords"))}
-        if (excluded_individual_industry_keywords.length === 0) {
+      if (excluded_individual_industry_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_industry_keywords"))}
-        if ((!individual_years_of_experience_start && individual_years_of_experience_start !== 0) && (!individual_years_of_experience_end && individual_years_of_experience_end !== 0)) {
+      if ((!individual_years_of_experience_start && individual_years_of_experience_start !== 0) && (!individual_years_of_experience_end && individual_years_of_experience_end !== 0)) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "individual_years_of_experience"))}
-        if (included_individual_skills_keywords.length === 0) {
+      if (included_individual_skills_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_skills_keywords"))}
-        if (excluded_individual_skills_keywords.length === 0) {
+      if (excluded_individual_skills_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_skills_keywords"))}
-        if (included_individual_locations_keywords.length === 0) {
+      if (included_individual_locations_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_locations_keywords"))}
-        if (excluded_individual_locations_keywords.length === 0) {
+      if (excluded_individual_locations_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_locations_keywords"))}
-        if (included_individual_generalized_keywords.length === 0) {
+      if (included_individual_generalized_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_generalized_keywords"))}
-        if (excluded_individual_generalized_keywords.length === 0) {
+      if (excluded_individual_generalized_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_generalized_keywords"))}
-        if (included_individual_education_keywords.length === 0) {
+      if (included_individual_education_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_education_keywords"))}
-        if (excluded_individual_education_keywords.length === 0) {
+      if (excluded_individual_education_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_education_keywords"))}
-        if (included_individual_seniority_keywords.length === 0) {
+      if (included_individual_seniority_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "included_individual_seniority_keywords"))}
-        if (excluded_individual_seniority_keywords.length === 0) {
+      if (excluded_individual_seniority_keywords.length === 0) {
         setContactTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_individual_seniority_keywords"))}
-        if (included_company_name_keywords.length === 0) {
+      if (included_company_name_keywords.length === 0) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_name_keywords"))}
-        if (excluded_company_name_keywords.length === 0) {
+      if (excluded_company_name_keywords.length === 0) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_name_keywords"))}
-        if (included_company_locations_keywords.length === 0) {
+      if (included_company_locations_keywords.length === 0) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_locations_keywords"))}
-        if (excluded_company_locations_keywords.length === 0) {
+      if (excluded_company_locations_keywords.length === 0) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_locations_keywords"))}
-        if ((!company_size_start && company_size_start !== 0)  && (!company_size_end && company_size_end !== 0)) {
+      if ((!company_size_start && company_size_start !== 0)  && (!company_size_end && company_size_end !== 0)) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "company_size"))}
-        if (included_company_industries_keywords.length === 0) {
+      if (included_company_industries_keywords.length === 0) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_industries_keywords"))}
-        if (excluded_company_industries_keywords.length === 0) {
+      if (excluded_company_industries_keywords.length === 0) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_industries_keywords"))}
-        if (included_company_generalized_keywords.length === 0) {
+      if (included_company_generalized_keywords.length === 0) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "included_company_generalized_keywords"))}
-        if (excluded_company_generalized_keywords.length === 0) {
+      if (excluded_company_generalized_keywords.length === 0) {
         setCompanyTableHeaders(prevState => prevState.filter(item => item.key !== "excluded_company_generalized_keywords"))}
-  },
-[
-    included_individual_title_keywords,
-    excluded_individual_title_keywords,
-    included_individual_industry_keywords,
-    excluded_individual_industry_keywords,
-    individual_years_of_experience_start,
-    individual_years_of_experience_end,
-    included_individual_skills_keywords,
-    excluded_individual_skills_keywords,
-    included_individual_locations_keywords,
-    excluded_individual_locations_keywords,
-    included_individual_generalized_keywords,
-    excluded_individual_generalized_keywords,
-    included_individual_education_keywords,
-    excluded_individual_education_keywords,
-    included_individual_seniority_keywords,
-    excluded_individual_seniority_keywords,
-    included_company_name_keywords,
-    excluded_company_name_keywords,
-    included_company_locations_keywords,
-    excluded_company_locations_keywords,
-    company_size_start,
-    company_size_end,
-    included_company_industries_keywords,
-    excluded_company_industries_keywords,
-    included_company_generalized_keywords,
-    excluded_company_generalized_keywords,
-    individual_personalizers,
-    company_personalizers,
-    dealbreakers,
-    individual_ai_filters,
-    company_ai_filters,
+    },
+    [
+      included_individual_title_keywords,
+      excluded_individual_title_keywords,
+      included_individual_industry_keywords,
+      excluded_individual_industry_keywords,
+      individual_years_of_experience_start,
+      individual_years_of_experience_end,
+      included_individual_skills_keywords,
+      excluded_individual_skills_keywords,
+      included_individual_locations_keywords,
+      excluded_individual_locations_keywords,
+      included_individual_generalized_keywords,
+      excluded_individual_generalized_keywords,
+      included_individual_education_keywords,
+      excluded_individual_education_keywords,
+      included_individual_seniority_keywords,
+      excluded_individual_seniority_keywords,
+      included_company_name_keywords,
+      excluded_company_name_keywords,
+      included_company_locations_keywords,
+      excluded_company_locations_keywords,
+      company_size_start,
+      company_size_end,
+      included_company_industries_keywords,
+      excluded_company_industries_keywords,
+      included_company_generalized_keywords,
+      excluded_company_generalized_keywords,
+      individual_personalizers,
+      company_personalizers,
+      dealbreakers,
+      individual_ai_filters,
+      company_ai_filters,
     ]);
 
   const [scoreLoading, setScoreLoading] = useState(false);
@@ -330,9 +330,9 @@ const MarketMapFilters = function (
     ...new Set(prospects.map((x) => x.company)),
   ].filter((x) => x);
 
-  const scoreMarketMap = async () => {
+  const scoreCampaignFilters = async () => {
     setScoreLoading(true);
-    const response = await fetch(`${API_URL}/segment/${segment_id}/score`, {
+    const response = await fetch(`${API_URL}/client/archetype/${archetype_id}/score`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -377,19 +377,19 @@ const MarketMapFilters = function (
     if (response.status === 200) {
       const data = await response.json();
 
-      await queryClient.invalidateQueries(['segmentProspects', segment_id]);
-      await queryClient.invalidateQueries(['icpScoringRuleset', segment_id]);
+      await queryClient.invalidateQueries(['archetypeProspects', archetype_id]);
+      await queryClient.invalidateQueries(['icpScoringRuleset', archetype_id]);
       setScoreLoading(false);
       showNotification({
         title: "Success",
-        message: "Successfully scored the market map with the ICP ruleset. AI Filters will take a while to show up.",
+        message: "Successfully scored the Campaign Prospects with the ICP ruleset. AI Filters will take a while to show up.",
         color: "blue",
       })
     } else {
       setScoreLoading(false);
       showNotification({
         title: "Error",
-        message: "Failed to score the market map with the ICP ruleset",
+        message: "Failed to score the Campaign Prospects with the ICP ruleset",
         color: "red",
       });
     }
@@ -426,9 +426,10 @@ const MarketMapFilters = function (
             marginRight: '10px',
           }}
         >
+
           <Button color={'red'}
                   size={'md'}
-                  onClick={() => scoreMarketMap()}
+                  onClick={() => scoreCampaignFilters()}
                   disabled={scoreLoading}
           >
             {scoreLoading ? <Loader /> : "Score"}
@@ -1343,7 +1344,7 @@ const MarketMapFilters = function (
           </Accordion>
 
         </Box>
-      ) :(
+      ) : (
         <Box
           style={{ display: "flex",
             gap: "1rem",
@@ -1355,7 +1356,7 @@ const MarketMapFilters = function (
         >
           <Button color={'red'}
                   size={'md'}
-                  onClick={() => scoreMarketMap()}
+                  onClick={() => scoreCampaignFilters()}
                   disabled={scoreLoading}
           >
             {scoreLoading ? <Loader /> : "Score"}
@@ -1970,8 +1971,8 @@ const MarketMapFilters = function (
           </Accordion>
         </Box>
       )}
-    </Flex>
+  </Flex>
   )
 };
 
-export default MarketMapFilters;
+export default CampaignFilters;

@@ -1,100 +1,49 @@
 import {
-  Box,
+  ActionIcon,
   Badge,
+  Box,
   Checkbox,
+  Divider,
   Flex,
+  HoverCard,
   Loader,
   Modal,
+  Popover,
+  ScrollArea,
+  Select,
   Switch,
   Table,
-  Title,
-  Text,
-  HoverCard,
-  Button,
-  Popover, TextInput, Divider, Select, ActionIcon, ScrollArea
+  Text, TextInput,
+  Title
 } from "@mantine/core";
 import {useEffect, useState} from "react";
-import {ICPFitReasonV2, Prospect} from "../../index";
 import {useQuery} from "@tanstack/react-query";
-import {TransformedSegment} from "@pages/SegmentV3/SegmentV3";
 import {API_URL} from "@constants/data";
 import {useRecoilValue} from "recoil";
 import {userTokenState} from "@atoms/userAtoms";
-import MarketMapFilters from "@pages/SegmentV3/MarketMapFilters";
-import { FaFilter } from "react-icons/fa6";
-import {socket} from "../App";
+import {FaFilter} from "react-icons/fa6";
+import {ICPFitReasonV2, Prospect} from "src";
+import {
+  ICPScoringRuleset,
+  ICPScoringRulesetKeys,
+  ProspectAccounts,
+  TableHeader,
+  ViewMode
+} from "@modals/ContactAccountFilterModal";
+import {currentProjectState} from "@atoms/personaAtoms";
+import {getICPRuleSet} from "@utils/requests/icpScoring";
+import CampaignFilters from "@pages/CampaignV2/CampaignFilters";
+import { socket } from "../../App";
 
 interface ContactAccountFilterModalProps {
   showContactAccountFilterModal: boolean,
   setShowContactAccountFilterModal: (showModal: boolean) => void,
-  segment?: TransformedSegment,
 }
 
-export type ViewMode = "ACCOUNT" | "CONTACT";
-
-export interface TableHeader {
-  key: string,
-  title: string,
-}
-
-export interface ProspectAccounts {
-  [key: string]: string | number;
-}
-
-export interface AIFilters {
-  key: string,
-  title: string,
-  prompt: string,
-  use_linkedin: boolean,
-}
-
-export interface ICPScoringRuleset extends ICPScoringRulesetKeys {
-  client_archetype_id: number;
-  dealbreakers: string[] | null;
-  company_ai_filters: AIFilters[] | null;
-  company_personalizers: string[] | null;
-  hash: string | null;
-  id: number;
-  individual_ai_filters: AIFilters[];
-  individual_personalizers: string[];
-  segment_id: number;
-}
-
-export interface ICPScoringRulesetKeys {
-  company_size_end: number | null;
-  company_size_start: number | null;
-  excluded_company_generalized_keywords: string[] | null;
-  excluded_company_industries_keywords: string[] | null;
-  excluded_company_locations_keywords: string[] | null;
-  excluded_company_name_keywords: string[] | null;
-  excluded_individual_education_keywords: string[] | null;
-  excluded_individual_generalized_keywords: string[] | null;
-  excluded_individual_industry_keywords: string[] | null;
-  excluded_individual_locations_keywords: string[] | null;
-  excluded_individual_seniority_keywords: string[] | null;
-  excluded_individual_skills_keywords: string[] | null;
-  excluded_individual_title_keywords: string[] | null;
-  included_company_generalized_keywords: string[] | null;
-  included_company_industries_keywords: string[] | null;
-  included_company_locations_keywords: string[] | null;
-  included_company_name_keywords: string[] | null;
-  included_individual_education_keywords: string[] | null;
-  included_individual_generalized_keywords: string[] | null;
-  included_individual_industry_keywords: string[] | null;
-  included_individual_locations_keywords: string[] | null;
-  included_individual_seniority_keywords:  string[] | null;
-  included_individual_skills_keywords: string[] | null;
-  included_individual_title_keywords: string[] | null;
-
-  individual_years_of_experience_end: number;
-  individual_years_of_experience_start: number;
-}
-
-const ContactAccountFilterModal = function (
+const ArchetypeFilterModal = function (
   {
     showContactAccountFilterModal,
     setShowContactAccountFilterModal,
-    segment,
   }: ContactAccountFilterModalProps) {
   const userToken = useRecoilValue(userTokenState);
 
@@ -113,7 +62,7 @@ const ContactAccountFilterModal = function (
 
   const [view20, setView20] = useState<boolean>(true);
 
-  const [loading, setLoading] = useState(false);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const [contactTableHeaders, setContactTableHeaders] = useState<TableHeader[]>(
     [
@@ -144,8 +93,6 @@ const ContactAccountFilterModal = function (
   const [updatedIndividualColumns, setUpdatedIndividualColumns] = useState<Set<string>>(new Set());
   const [updatedCompanyColumns, setUpdatedCompanyColumns] = useState<Set<string>>(new Set());
 
-  const [segmentName, setSegmentName] = useState<string>("");
-
   const [headerSet, setHeaderSet] = useState<Set<string>>(new Set());
 
   // We want to pass in the set column header to the filter component
@@ -165,10 +112,11 @@ const ContactAccountFilterModal = function (
   }, []);
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['segmentProspects', segment?.id],
+    queryKey: ['archetypeProspects', currentProject?.id],
     queryFn: async () => {
-      if (segment) {
-        const response = await fetch(`${API_URL}/segment/${segment.id}/prospects`, {
+      if (currentProject) {
+        // Fetch Prospects from the campaign Id
+        const response = await fetch(`${API_URL}/client/archetype/${currentProject.id}/prospects`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${userToken}`,
@@ -183,26 +131,19 @@ const ContactAccountFilterModal = function (
         return null;
       }
     },
-    enabled: !!segment,
+    enabled: !!currentProject,
   })
 
-  const {data: icp_scoring_ruleset, isLoading: icp_scoring_ruleset_loading , refetch: refetchICP} = useQuery({
-    queryKey: ['icpScoringRuleset', segment?.id],
+  const {data: icp_scoring_ruleset, isLoading: icp_scoring_ruleset_loading , refetch : refetchICP} = useQuery({
+    queryKey: ['icpScoringRuleset', currentProject?.id],
     queryFn: async () => {
-      if (segment) {
-        const response = await fetch(`${API_URL}/segment/${segment.id}/icp_ruleset`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          }
-        })
+      if (currentProject) {
+        const response = await getICPRuleSet(userToken, currentProject?.id);
 
-        const jsonResponse = await response.json();
-
-        return jsonResponse.icp_ruleset;
+        return response.data;
       }
     },
-    enabled: !!segment,
+    enabled: !!currentProject,
   });
 
   const icp_scoring_ruleset_typed = icp_scoring_ruleset as ICPScoringRuleset;
@@ -541,29 +482,6 @@ const ContactAccountFilterModal = function (
     }
   }
 
-  const onClickCreateSegment = async () => {
-    const response = await fetch(`${API_URL}/segment/${segment?.id}/create-segment-from-market-map`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        segment_title: segmentName,
-        prospects: Array.from(selectedContacts),
-      })
-    });
-
-    const jsonResponse = await response.json();
-
-    if (jsonResponse.status === 200) {
-      setLoading(false);
-      setSegmentName("");
-      setSelectedContacts(new Set());
-      return setShowContactAccountFilterModal(false);
-    }
-  }
-
   return (
     <Modal
       onClose={() => setShowContactAccountFilterModal(false)}
@@ -571,60 +489,32 @@ const ContactAccountFilterModal = function (
       size={'1100px'}
       style={{maxHeight: "700px", maxWidth: '1100px'}}
       title={
-      <Flex justify={'space-between'} gap={'36px'}>
-        <Title order={3} style={{maxWidth: "300px"}}>
-          {segment?.is_market_map ? (
-            segment.segment_title + " Market Map View"
-          ) : (
-            segment?.segment_title + " Segment View"
-          )}
-        </Title>
-        <Switch size={'xl'}
-                onLabel={"View All"}
-                offLabel={"View 20"}
-                checked={!view20}
-                onChange={(event) => {
-                  setView20(!event.currentTarget.checked);
-                }}
-        />
-        <Popover width={400} position="bottom" withArrow shadow="md" withinPortal>
-          <Popover.Target>
-            <Button>Create Segment From Selected Prospects</Button>
-          </Popover.Target>
-          <Popover.Dropdown>
-            <Flex direction={'column'} gap={'24px'}>
-              <TextInput
-                value={segmentName}
-                label={'Segment Name'}
-                onChange={(event) => setSegmentName(event.currentTarget.value)}
-              >
+        <Flex justify={'space-between'} gap={'36px'}>
+          <Title order={3} style={{width: "600px"}}>
+            {currentProject ? currentProject.name + " Filters view" : "Filters View"}
+          </Title>
 
-              </TextInput>
-              <Button
-                onClick={() => {
-                setLoading(true);
-                onClickCreateSegment()
-                }}
-                disabled={loading}
-              >
-                {loading ? <Loader /> : "Create Segment"}
-              </Button>
-            </Flex>
-          </Popover.Dropdown>
-        </Popover>
-      </Flex>
+          <Switch size={'xl'}
+                  onLabel={"View All"}
+                  offLabel={"View 20"}
+                  checked={!view20}
+                  onChange={(event) => {
+                    setView20(!event.currentTarget.checked);
+                  }}
+          />
+        </Flex>
       }
     >
       <Flex gap={'8px'}>
         {isLoading && <Loader />}
         {!isLoading && icp_scoring_ruleset &&
           (
-            <MarketMapFilters
+            <CampaignFilters
               prospects={prospects}
               viewMode={viewMode}
               icp_scoring_ruleset={icp_scoring_ruleset}
               selectedContacts={selectedContacts}
-              segment_id={segment?.id}
+              archetype_id={currentProject?.id}
               setCompanyTableHeaders={setCompanyTableHeaders}
               setContactTableHeaders={setContactTableHeaders}
               setUpdatedCompanyColumns={setUpdatedCompanyColumns}
@@ -1141,4 +1031,4 @@ const ContactAccountFilterModal = function (
   );
 };
 
-export default ContactAccountFilterModal;
+export default ArchetypeFilterModal;

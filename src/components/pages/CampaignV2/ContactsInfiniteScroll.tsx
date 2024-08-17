@@ -9,6 +9,7 @@ import CampaignChannelPage from "@pages/CampaignChannelPage";
 import FindContactsPage from "@pages/FindContactsPage";
 import { debounce } from "lodash";
 import { currentProjectState } from "@atoms/personaAtoms";
+import ArchetypeFilterModal from "./ArchetypeFilterModal";
 
 export interface Contact {
   first_name: string;
@@ -187,23 +188,25 @@ export function ContactsInfiniteScroll({
           <FindContactsPage />
         </Box>
       </Modal>
-      <Modal
-        opened={showCampaignTemplateModal}
-        onClose={() => {
-          setShowCampaignTemplateModal(false);
-        }}
-        size="1150px"
-      >
-        <CampaignChannelPage
-          campaignId={currentProject?.id || -1}
-          hideIcpFilters={false}
-          hideAssets={true}
-          cType={"filter_contact"}
-          hideHeader={true}
-          hideEmail={true}
-          hideLinkedIn={true}
-        />
-      </Modal>
+      {/*<Modal*/}
+      {/*  opened={showCampaignTemplateModal}*/}
+      {/*  onClose={() => {*/}
+      {/*    setShowCampaignTemplateModal(false);*/}
+      {/*  }}*/}
+      {/*  size="1150px"*/}
+      {/*>*/}
+      {/*  <CampaignChannelPage*/}
+      {/*    campaignId={currentProject?.id || -1}*/}
+      {/*    hideIcpFilters={false}*/}
+      {/*    hideAssets={true}*/}
+      {/*    cType={"filter_contact"}*/}
+      {/*    hideHeader={true}*/}
+      {/*    hideEmail={true}*/}
+      {/*    hideLinkedIn={true}*/}
+      {/*  />*/}
+      {/*</Modal>*/}
+      <ArchetypeFilterModal setShowContactAccountFilterModal={setShowCampaignTemplateModal}
+                            showContactAccountFilterModal={showCampaignTemplateModal}/>
       <Flex gap={"sm"} align={"center"}>
         <Flex direction="column" w={"100%"} gap="sm">
           <Flex justify="space-between" align="center" w={"100%"} style={{ borderBottom: "1px solid #ECEEF1" }} p={"md"}>

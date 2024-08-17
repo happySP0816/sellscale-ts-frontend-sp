@@ -918,7 +918,7 @@ const ContactAccountFilterModal = function (
                           <Flex align={'center'} justify={'space-between'}>
                             <Flex direction={'column'} justify={'center'}>
                               {item.title}
-                              {icp_scoring_ruleset_typed.company_personalizers?.includes(item.key) &&
+                              {icp_scoring_ruleset_typed.individual_personalizers?.includes(item.key) &&
                                   <span style={{fontStyle: 'italic', fontSize: "xx-small"}}>Personalizer: ✅</span>
                               }
                               {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && (

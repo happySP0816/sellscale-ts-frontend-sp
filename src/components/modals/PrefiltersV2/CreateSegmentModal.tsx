@@ -175,6 +175,7 @@ export default function CreateSegmentModal(props: CreateSegment) {
             <Flex justify="center" mt="xl">
               <Button loading={loading} color="blue" onClick={async () => {
                 setLoading(true);
+                console.log(props.saved_apollo_query_id);
                 try {
                   const response = await fetch(`${API_URL}/prospect/add_from_apollo_query_id`, {
                     method: 'POST',
@@ -249,6 +250,8 @@ export default function CreateSegmentModal(props: CreateSegment) {
               <Button loading={loading} color="blue" onClick={async () => {
                 setLoading(true);
                 try {
+                  console.log(props.saved_apollo_query_id);
+
                   const payload = {
                     segment_title: segmentName === '' ? new Date().toISOString() : segmentName,
                     filters: props.filters, // Add your filters here
@@ -295,7 +298,7 @@ export default function CreateSegmentModal(props: CreateSegment) {
                   if (!addContactsResponse.ok) {
                     throw new Error('Network response was not ok');
                   }
-                  const addContactsData = await addContactsResponse;
+                  const addContactsData = await addContactsResponse.json();
                   console.log('Success:', addContactsData);
 
                   closeAllModals();

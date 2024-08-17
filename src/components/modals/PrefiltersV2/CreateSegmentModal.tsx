@@ -298,8 +298,6 @@ export default function CreateSegmentModal(props: CreateSegment) {
                   if (!addContactsResponse.ok) {
                     throw new Error('Network response was not ok');
                   }
-                  const addContactsData = await addContactsResponse.json();
-                  console.log('Success:', addContactsData);
 
                   closeAllModals();
                   showNotification({

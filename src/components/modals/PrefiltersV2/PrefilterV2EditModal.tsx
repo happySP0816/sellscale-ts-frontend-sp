@@ -118,9 +118,9 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
 
   const handleApply = async () => {
     if (!selectedFilter) return;
-    innerProps.id = selectedFilter;
-    setCurrentSavedQueryId(+selectedFilter);
+    innerProps.id = Number(selectedFilter);
     setShowApplyButton(false);
+    setCurrentSavedQueryId(prefilters.find((prefilter) => prefilter.id === Number(selectedFilter))?.id);
   };
 
   const fetchSavedQueries = async () => {
@@ -590,7 +590,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
       <CreateSegmentModal
         numContactsLimit={totalFound}
         filters={generateQueryPayload()}
-        saved_apollo_query_id={currentSavedQueryId ? currentSavedQueryId : -1}
+        saved_apollo_query_id={currentSavedQueryId || saved_query_id}
         modalOpened={createSegmentOpened}
         openModal={()=>{}}
         closeModal={()=>{setCreateSegmentOpened(false)}}

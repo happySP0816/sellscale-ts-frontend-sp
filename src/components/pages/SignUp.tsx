@@ -39,6 +39,14 @@ export default function SignupPage() {
   const [userData, setUserData] = useRecoilState(userDataState);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  const non_work_domains = [
+    "@gmail.com", "@hotmail.com", "@yahoo.com", "@outlook.com", 
+    "@aol.com", "@icloud.com", "@protonmail.com", "@zoho.com", 
+    "@yandex.com", "@mail.com", "@inbox.com", "@gmx.com",
+    "@me.com", "@msn.com", "@live.com", "@qq.com", "@naver.com",
+    "@163.com", "@126.com", "@sina.com", "@yeah.net", "@foxmail.com",
+  ];
+  
   const form = useForm({
     initialValues: {
       fullName: "",
@@ -47,7 +55,16 @@ export default function SignupPage() {
     validate: {
       fullName: (value) =>
         value.trim().length > 0 ? null : "Full name is required",
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+      email: (value) => {
+        if (!/^\S+@\S+$/.test(value)) {
+          return "Invalid email.";
+        }
+        const domain = value.substring(value.lastIndexOf("@"));
+        if (non_work_domains.includes(domain)) {
+          return "Please use a work email address.";
+        }
+        return null;
+      },
     },
   });
 

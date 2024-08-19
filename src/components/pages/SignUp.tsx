@@ -275,6 +275,11 @@ export default function SignupPage() {
               {...form.getInputProps("email")}
               required
             />
+            {form.values.email.length > 0 && (
+              <Text color="blue" size="sm" mt="sm">
+                Use a work email linked to your company website.
+              </Text>
+            )}
             {error && (
               <Text color="red" size="sm" mt="sm">
                 {error}

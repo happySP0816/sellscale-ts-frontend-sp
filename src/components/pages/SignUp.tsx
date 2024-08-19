@@ -133,7 +133,7 @@ export default function SignupPage() {
         title: "Almost there...",
         message: "Just a few more moments! We're researching your company and gathering all the necessary details.",
         icon: <IconInfoCircle />,
-        autoClose: 5000,
+        autoClose: 9000,
       },
   
     ];

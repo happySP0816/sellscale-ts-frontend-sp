@@ -269,7 +269,7 @@ export default function SelixOnboarding() {
               <Textarea defaultValue={prefilter?.segment_description} onChange={(e) => setPreFilter({ ...prefilter, segment_description: e.target.value })} minRows={20} w="80%" />
             </Flex>
           )}
-          {step === 3 && <FinalReview tagline={tagline} description={description} preFilter={prefilter.segment_description} />}
+          {step === 3 && <FinalReview tagline={tagline} description={description} preFilter={prefilter?.segment_description} />}
           <Flex gap={"sm"} justify={"end"} w={"100%"} mt={"md"}>
             <Button
               variant="outline"
@@ -285,7 +285,7 @@ export default function SelixOnboarding() {
               leftIcon={step >= 3 && <IconRocket size={"1rem"} />}
               onClick={() => {
                 if (step === 3) {
-                  update_prefilter_description(prefilterIDref.current, prefilter.segment_description);
+                  update_prefilter_description(prefilterIDref.current, prefilter?.segment_description);
                   navigate("/selin_ai");
                 }
                 if (step < 3) setStep(step + 1);

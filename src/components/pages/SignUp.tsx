@@ -122,7 +122,7 @@ export default function SignupPage() {
     showNotification({
       color: "gray",
       title: "Creating Account...",
-      message: "Hang tight, this may take a little while but it's worth the wait!",
+      message: "Hang tight, this should only take about 15 seconds. Thank you for your patience!",
     });
 
     const cheekyNotifications = [
@@ -131,64 +131,11 @@ export default function SignupPage() {
         color: "blue",
         position: "top-left",
         title: "Almost there...",
-        message: "Just a few more moments!",
+        message: "Just a few more moments! We're researching your company and gathering all the necessary details.",
         icon: <IconInfoCircle />,
-        autoClose: 5000,
+        autoClose: 9000,
       },
-      {
-        id: "cheeky-2",
-        color: "teal",
-        position: "top-left",
-        title: "Good things take time",
-        message: "We're making magic happen!",
-        icon: <IconAt />,
-        autoClose: 10000,
-      },
-      {
-        id: "cheeky-3",
-        color: "violet",
-        position: "top-left",
-        title: "Patience is a virtue",
-        message: "Greatness is loading...",
-        icon: <IconInfoCircle />,
-        autoClose: 15000,
-      },
-      {
-        id: "cheeky-4",
-        color: "orange",
-        position: "top-left",
-        title: "Hang tight!",
-        message: "We're almost done!",
-        icon: <IconInfoCircle />,
-        autoClose: 20000,
-      },
-      {
-        id: "cheeky-5",
-        color: "red",
-        position: "top-left",
-        title: "Just a bit more...",
-        message: "Thank you for your patience!",
-        icon: <IconAt />,
-        autoClose: 25000,
-      },
-      {
-        id: "cheeky-6",
-        color: "cyan",
-        position: "top-left",
-        title: "Just a tad longer...",
-        message: "We're putting on the finishing touches!",
-        icon: <IconInfoCircle />,
-        autoClose: 30000,
-      },
-      {
-        id: "cheeky-8",
-        color: "yellow",
-        position: "top-left",
-        title: "Finalizing...",
-        message: "We're almost ready for you!",
-        icon: <IconInfoCircle />,
-        autoClose: 40000,
-      },
+  
     ];
 
     let cheekyTimeouts: NodeJS.Timeout[] = [];

@@ -71,7 +71,7 @@ import AIBrainStrategy from "@pages/Strategy/AIBrainStrategy";
 // import SelinStrategy from "@pages/Strategy/Selinstrategy";
 import { title } from "process";
 import { socket } from "../../App";
-import { set } from "lodash";
+import { get, set } from "lodash";
 import { cu } from "@fullcalendar/core/internal-common";
 import { showNotification } from "@mantine/notifications";
 import { useStrategiesApi } from "@pages/Strategy/StrategyApi";
@@ -91,6 +91,7 @@ import { Dropzone, DropzoneProps } from "@mantine/dropzone";
 import { Modal, Overlay } from "@mantine/core";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { getFreshCurrentProject } from "@auth/core";
+import Tour from "reactour";
 
 const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({
   children,
@@ -286,6 +287,7 @@ export default function SelinAI() {
   const [prompt, setPrompt] = useState("");
   const [suggestion, setSuggestion] = useState("");
   const [suggestionHidden, setSuggestionHidden] = useState(true);
+  const [suggestedFirstMessage, setSuggestedFirstMessage] = useState<string[]>([]);
 
   // console.log("current session is", currentSessionId);
 
@@ -393,6 +395,29 @@ export default function SelinAI() {
     }
   };
 
+
+  const get_one_suggested_first_message = async () => {
+    try {
+      const response = await fetch(`${API_URL}/selix/get_one_suggested_first_message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          device_id: deviceIDRef.current,
+          room_id: roomIDref.current,
+        }),
+      });
+      const data = await response.json();
+      console.log("data is", data);
+      setSuggestedFirstMessage(data.messages);
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+    }
+  }
+
+
   // console.log('current session thread is', threads.find((thread) => thread.id === currentSessionId));
 
   const fetchChatHistory = async () => {
@@ -431,6 +456,8 @@ export default function SelinAI() {
       setCurrentSessionId(session_id);
       sessionIDRef.current = session_id;
       roomIDref.current = thread_id;
+
+      get_one_suggested_first_message();
 
       socket.emit("join-room", {
         payload: { room_id: thread_id },
@@ -790,7 +817,10 @@ export default function SelinAI() {
     socket.on("update-task", (data) => {
       handleUpdateTaskAndAction(data, setMessages);
     });
-
+    socket.on("first-message-suggestion", (data) => {
+      console.log('data is', data);
+      setSuggestedFirstMessage(data.messages);
+    });
     return () => {
       socket.off("incoming-message", handleNewMessage);
       socket.off("change-tab", handleChangeTab);
@@ -806,6 +836,9 @@ export default function SelinAI() {
       socket.off("update-session", handleUpdateSession);
       socket.off("increment-counter", handleIncrementCounter);
       socket.off("suggestion", handleSuggestion);
+      socket.off("first-message-suggestion", (data) => {
+        setSuggestedFirstMessage(data.messages);
+      });
     };
   }, []);
 
@@ -1131,6 +1164,7 @@ export default function SelinAI() {
           <Flex mt={"md"} gap={"xl"}>
             <LoadingOverlay visible={loadingNewChat} />
             <SegmentChat
+              suggestedFirstMessage={suggestedFirstMessage}
               setSuggestionHidden={setSuggestionHidden}
               suggestionHidden={suggestionHidden}
               suggestion={suggestion}
@@ -1168,6 +1202,7 @@ export default function SelinAI() {
 }
 
 const SegmentChat = (props: any) => {
+  const suggestedFirstMessage: string[] = props.suggestedFirstMessage;
   const handleSubmit = props.handleSubmit;
   const prompt = props.prompt;
   const suggestion = props.suggestion;
@@ -1215,102 +1250,13 @@ const SegmentChat = (props: any) => {
     }
   };
 
-  // const handleResponse = async () => {
-  //   setLoading(true);
-
-  //   // Add a placeholder loading message
-  //   const loadingMessage = {
-  //     sender: "chatbot",
-  //     query: "loading",
-  //     id: Date.now(),
-  //     created_at: moment().format("MMMM D, h:mm a"),
-  //   };
-
-  //   try {
-  //     const response = await fetch(`${API_URL}/contacts/chat-icp`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${userToken}`,
-  //       },
-  //       body: JSON.stringify({ prompt, chatContent }),
-  //     });
-
-  //     const data = await response.json();
-  //     const res = data?.response;
-  //     const chatbotMessage = {
-  //       sender: "chatbot",
-  //       query: res,
-  //       id: loadingMessage.id, // Use the same id to replace the loading message
-  //       created_at: moment().format("MMMM D, h:mm a"),
-  //     };
-  //     // Replace the loading message with the actual response
-  //     viewport.current?.scrollTo({ top: viewport.current.scrollHeight });
-  //     setLoading(false);
-
-  //     console.log("data is", data.data);
-
-  //     props.setSegment((prevSegments: any) => [
-  //       ...prevSegments,
-  //       {
-  //         makers: data["makers"],
-  //         industry: data["industry"],
-  //         pain_point: data["pain_point"],
-  //         id: data?.data?.saved_query_id,
-  //         total_entries: data?.data?.pagination?.total_entries,
-  //       },
-  //     ]);
-  //   } catch (error) {
-  //     console.error("Error fetching prediction:", error);
-  //     setLoading(false);
-  //   }
-  // };
-
-  const [chat2, setChat2] = useState([
-    {
-      status: true,
-      title:
-        "Gather information about your medical Scribe AI Product by researching on",
-      content: `"www.junipero.com/scribe"`,
-    },
-    {
-      status: true,
-      title: `Add prospects to a new segment called "COO/CFO - Top 50 EHRs". Find prospects via this query: "COOs and CFOs who work at top 50 EHR companies"`,
-      content: null,
-    },
-    {
-      status: true,
-      title: `Create a new campaign called "COO/CFO - Top 50 EHRs - Partnership"`,
-      content: null,
-    },
-    {
-      status: true,
-      title: `Add am Email sequence to "COO/CFO - Top 50 EHRs - Partnership" campaign with the angle of "We want to parner with you to integrate our Medical Scribe AI into your EHR platform. This will drive more revenue & customers to your business."`,
-      content: null,
-    },
-    {
-      status: false,
-      title: `Add am Linkedin sequence to "COO/CFO - Top 50 EHRs - Partnership" campaign with the angle of "We want to parner with you to integrate our Medical Scribe AI into your EHR platform. This will drive more revenue & customers to your business."`,
-      content: null,
-    },
-    {
-      status: false,
-      title: `Notify you that the campaign is ready to review & lanuch. I will let you know once the campaign is ready to lanuch!`,
-      content: null,
-    },
-  ]);
-
-  const [chatList, setChatList] = useState([]);
   const [shouldSubmit, setShouldSubmit] = useState(false);
   const [uncollapsedCards, setUncollapsedCards] = useState<{
     [key: number]: boolean;
   }>({});
 
-  const delay = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
-
   const handleListClick = async (prompt: string) => {
-    setPrompt(prompt);
+    handleSubmit(undefined, prompt);
     setShouldSubmit(true);
   };
 
@@ -1530,9 +1476,33 @@ const SegmentChat = (props: any) => {
                         w={"50%"}
                         gap={4}
                         key={index}
-                        ml={message.role === "user" ? "auto" : "0"}
+                        align="center"
+                        justify="center"
+                        mx="auto"
                       >
-                        <Flex gap={4} align={"center"}>
+
+                        <Flex
+                          data-tour="selix-tour"
+                          direction="column"
+                          align="center"
+                          justify="center"
+                          bg="#f0f4ff"
+                          w="200%"
+                          p="md"
+                          mb="md"
+                          style={{ border: "1px solid #d0d7ff", borderRadius: "8px" }}
+                        >
+                          <Text fw={600} size="md" color="#1e3a8a">
+                            Welcome to Selix AI! 🎉
+                          </Text>
+                          <Flex align="center" gap="xs" mt="xs">
+                            <IconInfoCircle size="3rem" color="#1e3a8a" />
+                            <Text size="sm" color="#1e3a8a">
+                              Hit the microphone icon below and start speaking for an even more engaging experience. Your voice makes it better!
+                            </Text>
+                          </Flex>
+                        </Flex>
+                        {/* <Flex gap={4} align={"center"}>
                           <Avatar
                             src={
                               message.role === "user" ? userData.img_url : Logo
@@ -1556,8 +1526,8 @@ const SegmentChat = (props: any) => {
                                 />
                               </Flex>
                             )}
-                        </Flex>
-                        <Flex
+                        </Flex> */}
+                        {/* <Flex
                           className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none"
                           px={"sm"}
                           py={7}
@@ -1582,14 +1552,16 @@ const SegmentChat = (props: any) => {
                               </Text>
                             )}
                           </Text>
-                        </Flex>
-                        <Text
+                        </Flex> */}
+                        {/* <Text
                           color="gray"
                           size={"xs"}
                           ml={message.role === "user" ? "auto" : "0"}
                         >
-                          {message.created_time}
-                        </Text>
+                          {moment(message.created_time).format(
+                            "MMMM D, h:mm A"
+                          )}
+                        </Text> */}
                       </Flex>
                     ) : (
                       <Card
@@ -1643,30 +1615,29 @@ const SegmentChat = (props: any) => {
               })}
             </Flex>
             <div className="absolute bottom-0 right-0 flex flex-col w-4/5 gap-1 pr-4">
-              <Paper
-                withBorder
-                p={"xs"}
-                radius={"md"}
-                className="hover:border-[#49494]"
-              >
-                <Flex
-                  align={"center"}
-                  gap={"xs"}
-                  onClick={() =>
-                    handleListClick(
-                      "I have a prospect list - Find the best way to reach them"
-                    )
-                  }
+              {suggestedFirstMessage.map((message, index) => (
+                <Paper
+                  key={index}
+                  withBorder
+                  p={"xs"}
+                  radius={"md"}
+                  className="hover:border-[#49494] cursor-pointer"
                 >
-                  <ThemeIcon color="grape" size={"xl"} variant="light">
-                    <IconUserShare size={"1.4rem"} />
-                  </ThemeIcon>
-                  <Text color="#E25DEE" fw={500} size={"sm"}>
-                    Help me reach out to my prospect list effectively
-                  </Text>
-                </Flex>
-              </Paper>
-              <Paper withBorder p={"xs"} radius={"md"}>
+                  <Flex
+                    align={"center"}
+                    gap={"xs"}
+                    onClick={() => handleListClick(message)}
+                  >
+                    <ThemeIcon color="grape" size={"xl"} variant="light">
+                      <IconUserShare size={"1.4rem"} />
+                    </ThemeIcon>
+                    <Text color="#E25DEE" fw={500} size={"sm"}>
+                      {message}
+                    </Text>
+                  </Flex>
+                </Paper>
+              ))}
+              {/* <Paper className="hover:border-[#49494] cursor-pointer" withBorder p={"xs"} radius={"md"} >
                 <Flex
                   align={"center"}
                   gap={"xs"}
@@ -1685,7 +1656,7 @@ const SegmentChat = (props: any) => {
                   </Text>
                 </Flex>
               </Paper>
-              <Paper withBorder p={"xs"} radius={"md"}>
+              <Paper className="hover:border-[#49494] cursor-pointer" withBorder p={"xs"} radius={"md"}>
                 <Flex
                   align={"center"}
                   gap={"xs"}
@@ -1702,7 +1673,7 @@ const SegmentChat = (props: any) => {
                     I have a campaign idea to implement
                   </Text>
                 </Flex>
-              </Paper>
+              </Paper> */}
             </div>
           </>
         )}

@@ -397,6 +397,9 @@ export default function SelinAI() {
 
 
   const get_one_suggested_first_message = async () => {
+    if (suggestedFirstMessage.length > 0){
+      return;
+    }
     try {
       const response = await fetch(`${API_URL}/selix/get_one_suggested_first_message`, {
         method: "POST",

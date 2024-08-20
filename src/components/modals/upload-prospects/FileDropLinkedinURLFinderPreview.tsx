@@ -223,7 +223,11 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
   }
 
   const getDupProspects = async () => {
-    if (checkCanUpload().length === 0) {
+    if (checkCanUpload().length === 0 && (["full_name", "company"].every((column) => {
+        return Array.from(columnMappings.values()).includes(column)
+      }) || ["first_name", "last_name", "company"].every((column) => {
+        return Array.from(columnMappings.values()).includes(column)
+      }))) {
       setLoading(true);
       const uploadJSON = (fileJSON as any[])
         .map((row) => {
@@ -754,7 +758,6 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
                   color={checkCanUpload().length > 0 ? "red" : "teal"}
                   onClick={() => {
                     if (checkCanUpload().length === 0) {
-                      getDupProspects();
                       // openModal();
                       open();
                     }

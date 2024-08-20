@@ -293,6 +293,7 @@ export default function SelinAI() {
   const [suggestedFirstMessage, setSuggestedFirstMessage] = useState<string[]>([]);
   const [recording, setRecording] = useState(false);
   const prevPromptLengthRef = useRef<number>(0);
+  const prevSlideUpTime = useRef<number>(0);
 
   // console.log("current session is", currentSessionId);
 
@@ -807,7 +808,6 @@ export default function SelinAI() {
       div.style.animation = "slideDown 0.5s forwards";
     }
   };
-
   const handleSuggestion = async (data: {
     message: string;
     thread_id: string;
@@ -818,12 +818,24 @@ export default function SelinAI() {
       data.thread_id === roomIDref.current &&
       data.device_id === deviceIDRef.current
     ) {
+      const currentTime = Date.now();
       setSuggestion(data.message);
 
-      slideUp();
+      // queue the next slide up if the last slide up was less than 6 seconds ago
+      if (currentTime - prevSlideUpTime.current < 6000) {
+        setTimeout(() => {
+          slideUp();
+          prevSlideUpTime.current = Date.now(); // Update the time start ref after sliding up
+        }, 6000 - (currentTime - prevSlideUpTime.current));
+      } else {
+        slideUp();
+        prevSlideUpTime.current = currentTime; // Set the time start ref of this suggestion
+      }
+
+      // slide down after 6 seconds no matter what
       setTimeout(() => {
         slideDown();
-      }, 10000);
+      }, 6000);
     }
   };
 

@@ -246,70 +246,80 @@ export default function AccountModal({
           )}
         </Flex>
       </Flex>
-      <Paper
-        mt={"md"}
-        withBorder
-        px={"sm"}
-        py={"xs"}
-        className="flex items-center justify-between"
-      >
-        <Flex gap={5} align={"center"}>
-          <IconBrandLinkedin fill="#228be6" color="white" size={"2rem"} />
-          <Text fw={500}>Linkedin Connected</Text>
-        </Flex>
-        <Flex align={"center"} gap={"sm"}>
-          {userData?.li_voyager_connected && (
-            <Text
-              underline
-              color="red"
-              fw={600}
-              size={"sm"}
-              onClick={() => (window.location.href = `/settings/linkedin`)}
-              className="hover:cursor-pointer"
-            >
-              Disconnect
-            </Text>
-          )}
-
-          <Button
-            color={userData?.li_voyager_connected ? "green" : "red"}
-            variant="outline"
-            leftIcon={
-              userData?.li_voyager_connected && (
-                <IconCircleCheck size={"1.4rem"} fill="#40c057" color="white" />
-              )
-            }
-            onClick={() => {
-              window.location.href = `/settings/linkedin`;
-            }}
+      {!window.location.pathname.includes("selix") && (
+        <>
+          <Paper
+            mt={"md"}
+            withBorder
+            px={"sm"}
+            py={"xs"}
+            className="flex items-center justify-between"
           >
-            {userData?.li_voyager_connected ? "Connected" : "Disconnected"}
-          </Button>
-        </Flex>
-      </Paper>
-      <Paper mt={"md"} withBorder px={"sm"} py={"xs"} className="flex">
-        <Flex gap={5} align={"center"}>
-          <IconMail fill="orange" color="white" size={"2rem"} />
-          <Text fw={500}>{Math.max(0, domains.length - 1)} inboxes active</Text>
-        </Flex>
-        <Button
-          ml="auto"
-          variant="outline"
-          rightIcon={<IconMail size={"1.2rem"} />}
-          onClick={() => (window.location.href = `/settings/inboxes`)}
-        >
-          Inboxes
-        </Button>
-        <Button
-          ml="xs"
-          variant="outline"
-          color="gray"
-          rightIcon={<IconSettings size={"1.2rem"} />}
-          onClick={() => (window.location.href = `/settings/email`)}
-        >
-          Settings
-        </Button>
-      </Paper>
+            <Flex gap={5} align={"center"}>
+              <IconBrandLinkedin fill="#228be6" color="white" size={"2rem"} />
+              <Text fw={500}>Linkedin Connected</Text>
+            </Flex>
+            <Flex align={"center"} gap={"sm"}>
+              {userData?.li_voyager_connected && (
+                <Text
+                  underline
+                  color="red"
+                  fw={600}
+                  size={"sm"}
+                  onClick={() => (window.location.href = `/settings/linkedin`)}
+                  className="hover:cursor-pointer"
+                >
+                  Disconnect
+                </Text>
+              )}
+
+              <Button
+                color={userData?.li_voyager_connected ? "green" : "red"}
+                variant="outline"
+                leftIcon={
+                  userData?.li_voyager_connected && (
+                    <IconCircleCheck
+                      size={"1.4rem"}
+                      fill="#40c057"
+                      color="white"
+                    />
+                  )
+                }
+                onClick={() => {
+                  window.location.href = `/settings/linkedin`;
+                }}
+              >
+                {userData?.li_voyager_connected ? "Connected" : "Disconnected"}
+              </Button>
+            </Flex>
+          </Paper>
+          <Paper mt={"md"} withBorder px={"sm"} py={"xs"} className="flex">
+            <Flex gap={5} align={"center"}>
+              <IconMail fill="orange" color="white" size={"2rem"} />
+              <Text fw={500}>
+                {Math.max(0, domains.length - 1)} inboxes active
+              </Text>
+            </Flex>
+            <Button
+              ml="auto"
+              variant="outline"
+              rightIcon={<IconMail size={"1.2rem"} />}
+              onClick={() => (window.location.href = `/settings/inboxes`)}
+            >
+              Inboxes
+            </Button>
+            <Button
+              ml="xs"
+              variant="outline"
+              color="gray"
+              rightIcon={<IconSettings size={"1.2rem"} />}
+              onClick={() => (window.location.href = `/settings/email`)}
+            >
+              Settings
+            </Button>
+          </Paper>
+        </>
+      )}
       <Flex mt={"lg"} gap={"md"}>
         <Button
           size="md"

@@ -93,7 +93,7 @@ interface CustomCursorWrapperProps {
 import { Dropzone, DropzoneProps } from "@mantine/dropzone";
 import { Modal, Overlay } from "@mantine/core";
 import { currentProjectState } from "@atoms/personaAtoms";
-import { getFreshCurrentProject } from "@auth/core";
+import { getFreshCurrentProject, isFreeUser } from "@auth/core";
 import Tour from "reactour";
 import { useNavigate } from "react-router-dom";
 
@@ -300,13 +300,15 @@ export default function SelinAI() {
   const prevPromptLengthRef = useRef<number>(0);
   const prevSlideUpTime = useRef<number>(0);
 
+  const freeUser = isFreeUser();
+
   const navigate = useNavigate();
 
   // console.log("current session is", currentSessionId);
 
   useEffect(() => {
     posthog.onFeatureFlags(function () {
-      if (posthog.isFeatureEnabled("show-calendly-for-signup")) {
+      if (posthog.isFeatureEnabled("show-calendly-for-signup") && freeUser) {
         navigate("/selix_onboarding");
       }
     });

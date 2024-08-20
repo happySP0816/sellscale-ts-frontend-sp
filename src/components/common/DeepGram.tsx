@@ -28,8 +28,11 @@ type DeepGramProps = {
   recording: boolean;
 };
 
-export default function DeepGram({ recording, setRecording, onTranscriptionChanged }: DeepGramProps) {
-  
+export default function DeepGram({
+  recording,
+  setRecording,
+  onTranscriptionChanged,
+}: DeepGramProps) {
   const [speaking, setSpeaking] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [transcribedText, setTranscribedText] = useState("");
@@ -43,7 +46,7 @@ export default function DeepGram({ recording, setRecording, onTranscriptionChang
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowAnimation(false);
-    }, 6000);
+    }, 20000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -112,9 +115,7 @@ export default function DeepGram({ recording, setRecording, onTranscriptionChang
     live.on(LiveTranscriptionEvents.Transcript, (data) => {
       setLastText(data.channel.alternatives[0].transcript);
       if (lastText !== data.channel.alternatives[0].transcript) {
-        setTranscribedText(
-          () => ' ' + data.channel.alternatives[0].transcript
-        );
+        setTranscribedText(() => " " + data.channel.alternatives[0].transcript);
       }
       console.log(data.channel.alternatives[0].transcript);
     });
@@ -129,11 +130,13 @@ export default function DeepGram({ recording, setRecording, onTranscriptionChang
   };
 
   const handleToggleRecording = async () => {
+    setShowAnimation(false);
     if (recording) {
       // alert("Recording stopped");
       setRecording(false);
       setSpeaking(false);
       setTranscribing(false);
+
       if (mediaRecorderRef.current) {
         mediaRecorderRef.current.stop();
       }
@@ -181,7 +184,12 @@ export default function DeepGram({ recording, setRecording, onTranscriptionChang
       <HoverCard width={280} shadow="md" withinPortal>
         <HoverCard.Target>
           {showAnimation ? (
-            <Popover opened={showAnimation} position="top" withArrow shadow="md">
+            <Popover
+              opened={showAnimation}
+              position="top"
+              withArrow
+              shadow="md"
+            >
               <Popover.Target>
                 <ActionIcon
                   className="animate-scale"
@@ -192,15 +200,15 @@ export default function DeepGram({ recording, setRecording, onTranscriptionChang
                   color={recording ? "red" : "grape"}
                 >
                   {recording ? (
-                    <Loader variant="bars" size="xs" color='white' />
+                    <Loader variant="bars" size="xs" color="white" />
                   ) : (
                     <IconMicrophone size={"1rem"} />
                   )}
                 </ActionIcon>
               </Popover.Target>
               <Popover.Dropdown>
-                <Text size="xs">Try speaking into the microphone for </Text> <Text size="xs">more accurate 
-                and engaging responses!</Text>
+                <Text size="xs">Speak into the microphone for </Text>{" "}
+                <Text size="xs">more accurate and engaging responses!</Text>
               </Popover.Dropdown>
             </Popover>
           ) : (
@@ -212,7 +220,7 @@ export default function DeepGram({ recording, setRecording, onTranscriptionChang
               color={recording ? "red" : "grape"}
             >
               {recording ? (
-                <Loader variant="bars" size="xs" color='white' />
+                <Loader variant="bars" size="xs" color="white" />
               ) : (
                 <IconMicrophone size={"1rem"} />
               )}

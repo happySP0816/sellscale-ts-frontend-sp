@@ -37,6 +37,7 @@ import {
   IconChevronUp,
   IconCircleCheck,
   IconClock,
+  IconEar,
   IconEye,
   IconEyeOff,
   IconFile,
@@ -285,9 +286,13 @@ export default function SelinAI() {
   const sessionIDRef = useRef<Number>(-1);
   const [loadingNewChat, setLoadingNewChat] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const promptRef = useRef<string>("");
+  const promptLengthRef = useRef<number>(0);
   const [suggestion, setSuggestion] = useState("");
   const [suggestionHidden, setSuggestionHidden] = useState(true);
   const [suggestedFirstMessage, setSuggestedFirstMessage] = useState<string[]>([]);
+  const [recording, setRecording] = useState(false);
+  const prevPromptLengthRef = useRef<number>(0);
 
   // console.log("current session is", currentSessionId);
 
@@ -352,6 +357,7 @@ export default function SelinAI() {
 
       setPrompt("");
       setSuggestion("");
+      prevPromptLengthRef.current = 0; //this is used while recording 
       slideDown();
       // setLoading(true);
 
@@ -394,6 +400,22 @@ export default function SelinAI() {
       }
     }
   };
+
+  const handleEditStrategy = async (prompt: string) => {
+    const response = await fetch(`${API_URL}/selix/edit_strategy`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        session_id: currentSessionId,
+        message: prompt,
+      }),
+    });
+
+    const data = await response;
+  }
 
 
   const get_one_suggested_first_message = async () => {
@@ -846,12 +868,40 @@ export default function SelinAI() {
   }, []);
 
   useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (recording) {
+      intervalId = setInterval(() => {
+
+        const memory = threads.find((thread) => thread.id === currentSessionId)
+    ?.memory;
+        if (memory?.strategy_id && promptLengthRef.current > prevPromptLengthRef.current + 80) {
+          handleEditStrategy(promptRef.current);
+          prevPromptLengthRef.current = promptLengthRef.current;
+        }
+      }, 3000);
+    } else if (intervalId) {
+      clearInterval(intervalId);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [recording]);
+
+  useEffect(() => {
     fetchChatHistory();
   }, [userToken]);
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    promptLengthRef.current = prompt.length;
+    if (prompt.trim().length === 0) {
+      prevPromptLengthRef.current = 0;
+    }
     const handlePromptChange = async () => {
       try {
         const response = await fetch(`${API_URL}/selix/generate_followup`, {
@@ -1173,12 +1223,15 @@ export default function SelinAI() {
               suggestion={suggestion}
               handleSubmit={handleSubmit}
               prompt={prompt}
+              promptRef={promptRef}
               setPrompt={setPrompt}
               setSegment={setSegment}
               messages={messages}
               setMessages={setMessages}
               segment={segment}
               setAIType={setAIType}
+              recording={recording}
+              setRecording={setRecording}
               aiType={aiType}
               currentSessionId={sessionIDRef.current}
               // generateResponse={generateResponse}
@@ -1187,6 +1240,7 @@ export default function SelinAI() {
             />
             <SelixControlCenter
               counter={counter}
+              recording={recording}
               tasks={tasks}
               setPrompt={setPrompt}
               handleSubmit={handleSubmit}
@@ -1208,15 +1262,18 @@ const SegmentChat = (props: any) => {
   const suggestedFirstMessage: string[] = props.suggestedFirstMessage;
   const handleSubmit = props.handleSubmit;
   const prompt = props.prompt;
+  const promptRef = props.promptRef;
   const suggestion = props.suggestion;
   const suggestionHidden = props.suggestionHidden;
   const setSuggestionHidden = props.setSuggestionHidden;
+  const recording = props.recording;
+  const setRecording = props.setRecording;
   const setPrompt = props.setPrompt;
   const messages: MessageType[] = props.messages;
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [showLoader, setShowLoader] = useState(false);
-  const [recording, setRecording] = useState(false);
+  // const [recording, setRecording] = useState(false);
 
   const viewport = useRef<any>(null);
 
@@ -1837,7 +1894,7 @@ const SegmentChat = (props: any) => {
               <DeepGram
                 recording={recording}
                 setRecording={setRecording}
-                onTranscriptionChanged={(text) => setPrompt(prompt + text)}
+                onTranscriptionChanged={(text) => {setPrompt(prompt + text);promptRef.current = prompt + text}}
               />
               <Button
                 size={"xs"}
@@ -1874,6 +1931,7 @@ const SelixControlCenter = ({
   setAIType,
   aiType,
   tasks,
+  recording,
   counter,
   messages,
   setMessages,
@@ -1885,6 +1943,7 @@ const SelixControlCenter = ({
   setAIType: React.Dispatch<React.SetStateAction<string>>;
   aiType: string;
   tasks: any;
+  recording: boolean;
   threads: ThreadType[];
   counter: Number;
   messages: MessageType[];
@@ -1934,6 +1993,15 @@ const SelixControlCenter = ({
         <Text fw={600} color="white">
           Selix AI Workspace
         </Text>
+        {recording && aiType === 'STRATEGY_CREATOR' && (
+          <IconEar
+            size={"1rem"}
+            color="white"
+            style={{
+              animation: "scale 1s infinite",
+            }}
+          />
+        )}
       </Flex>
       <Divider bg="gray" />
       <Paper withBorder radius={0} p={"sm"}>

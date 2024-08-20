@@ -290,7 +290,9 @@ export default function SelinAI() {
   const promptLengthRef = useRef<number>(0);
   const [suggestion, setSuggestion] = useState("");
   const [suggestionHidden, setSuggestionHidden] = useState(true);
-  const [suggestedFirstMessage, setSuggestedFirstMessage] = useState<string[]>([]);
+  const [suggestedFirstMessage, setSuggestedFirstMessage] = useState<string[]>(
+    []
+  );
   const [recording, setRecording] = useState(false);
   const prevPromptLengthRef = useRef<number>(0);
 
@@ -320,24 +322,22 @@ export default function SelinAI() {
       });
 
       if (response.status === 400) {
-
         showNotification({
           title: "File upload failed",
           message: "Please try uploading a file less than 5mb in size!",
           color: "red",
           icon: <IconCircleCheck />,
         });
-
       }
 
       if (response.status === 429) {
         showNotification({
           title: "File upload failed",
-          message: "You have reached the maximum file upload count! Please reach out to csm@sellscale.com",
+          message:
+            "You have reached the maximum file upload count! Please reach out to csm@sellscale.com",
           color: "red",
           icon: <IconCircleCheck />,
         });
-
       }
 
       return;
@@ -357,7 +357,7 @@ export default function SelinAI() {
 
       setPrompt("");
       setSuggestion("");
-      prevPromptLengthRef.current = 0; //this is used while recording 
+      prevPromptLengthRef.current = 0; //this is used while recording
       slideDown();
       // setLoading(true);
 
@@ -415,33 +415,34 @@ export default function SelinAI() {
     });
 
     const data = await response;
-  }
-
+  };
 
   const get_one_suggested_first_message = async () => {
-    if (suggestedFirstMessage.length > 0){
+    if (suggestedFirstMessage.length > 0) {
       return;
     }
     try {
-      const response = await fetch(`${API_URL}/selix/get_one_suggested_first_message`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          device_id: deviceIDRef.current,
-          room_id: roomIDref.current,
-        }),
-      });
+      const response = await fetch(
+        `${API_URL}/selix/get_one_suggested_first_message`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            device_id: deviceIDRef.current,
+            room_id: roomIDref.current,
+          }),
+        }
+      );
       const data = await response.json();
       console.log("data is", data);
       setSuggestedFirstMessage(data.messages);
     } catch (error) {
       console.error("Error fetching chat history:", error);
     }
-  }
-
+  };
 
   // console.log('current session thread is', threads.find((thread) => thread.id === currentSessionId));
 
@@ -843,7 +844,7 @@ export default function SelinAI() {
       handleUpdateTaskAndAction(data, setMessages);
     });
     socket.on("first-message-suggestion", (data) => {
-      console.log('data is', data);
+      console.log("data is", data);
       setSuggestedFirstMessage(data.messages);
     });
     return () => {
@@ -872,10 +873,12 @@ export default function SelinAI() {
 
     if (recording) {
       intervalId = setInterval(() => {
-
         const memory = threads.find((thread) => thread.id === currentSessionId)
-    ?.memory;
-        if (memory?.strategy_id && promptLengthRef.current > prevPromptLengthRef.current + 80) {
+          ?.memory;
+        if (
+          memory?.strategy_id &&
+          promptLengthRef.current > prevPromptLengthRef.current + 80
+        ) {
           handleEditStrategy(promptRef.current);
           prevPromptLengthRef.current = promptLengthRef.current;
         }
@@ -1540,7 +1543,6 @@ const SegmentChat = (props: any) => {
                         justify="center"
                         mx="auto"
                       >
-
                         <Flex
                           data-tour="selix-tour"
                           direction="column"
@@ -1550,17 +1552,17 @@ const SegmentChat = (props: any) => {
                           w="200%"
                           p="md"
                           mb="md"
-                          style={{ border: "1px solid #d0d7ff", borderRadius: "8px" }}
+                          style={{
+                            border: "1px solid #d0d7ff",
+                            borderRadius: "8px",
+                          }}
                         >
                           <Text fw={600} size="md" color="#1e3a8a">
-                            Welcome to Selix AI! 🎉
+                            Speak into the microphone 🎙
                           </Text>
-                          <Flex align="center" gap="xs" mt="xs">
-                            <IconInfoCircle size="3rem" color="#1e3a8a" />
-                            <Text size="sm" color="#1e3a8a">
-                              Hit the microphone icon below and start speaking for an even more engaging experience. Your voice makes it better!
-                            </Text>
-                          </Flex>
+                          <Text fw={600} size="md" color="gray">
+                            Typing is less effective.
+                          </Text>
                         </Flex>
                         {/* <Flex gap={4} align={"center"}>
                           <Avatar
@@ -1894,7 +1896,10 @@ const SegmentChat = (props: any) => {
               <DeepGram
                 recording={recording}
                 setRecording={setRecording}
-                onTranscriptionChanged={(text) => {setPrompt(prompt + text);promptRef.current = prompt + text}}
+                onTranscriptionChanged={(text) => {
+                  setPrompt(prompt + text);
+                  promptRef.current = prompt + text;
+                }}
               />
               <Button
                 size={"xs"}
@@ -1956,7 +1961,9 @@ const SelixControlCenter = ({
   const currentThreadMemory = threads.find(
     (thread) => thread.id === currentSessionId
   )?.memory;
-  const [popoverOpenedArray, setPopoverOpenedArray] = useState<boolean[]>([1,1,1]?.map(() => false));
+  const [popoverOpenedArray, setPopoverOpenedArray] = useState<boolean[]>(
+    [1, 1, 1]?.map(() => false)
+  );
 
   const [availableCitations, setAvailableCitations] = useState<string[]>([]);
   const handlePopoverOpen = (index: number) => {
@@ -1993,7 +2000,7 @@ const SelixControlCenter = ({
         <Text fw={600} color="white">
           Selix AI Workspace
         </Text>
-        {recording && aiType === 'STRATEGY_CREATOR' && (
+        {recording && aiType === "STRATEGY_CREATOR" && (
           <IconEar
             size={"1rem"}
             color="white"
@@ -2038,7 +2045,7 @@ const SelixControlCenter = ({
                   offset={10}
                   onClose={handlePopoverClose}
                   keepMounted
-                  transitionProps={{ duration: 150, transition: 'fade' }}
+                  transitionProps={{ duration: 150, transition: "fade" }}
                   middlewares={{ shift: true, flip: true }}
                   arrowSize={10}
                   arrowOffset={5}
@@ -2049,14 +2056,17 @@ const SelixControlCenter = ({
                   opened={popoverOpenedArray[1]}
                 >
                   <Popover.Target>
-                    <div onMouseEnter={() => handlePopoverOpen(1)} onMouseLeave={handlePopoverClose}>
+                    <div
+                      onMouseEnter={() => handlePopoverOpen(1)}
+                      onMouseLeave={handlePopoverClose}
+                    >
                       <Center style={{ gap: 10 }}>
                         <IconList size={"1rem"} />
                         <span>Tasks</span>
                       </Center>
                     </div>
                   </Popover.Target>
-                  <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
+                  <Popover.Dropdown sx={{ pointerEvents: "none" }}>
                     <Text size="sm">
                       This section allows you to view your tasks.
                     </Text>
@@ -2076,7 +2086,7 @@ const SelixControlCenter = ({
                   offset={10}
                   onClose={handlePopoverClose}
                   keepMounted
-                  transitionProps={{ duration: 150, transition: 'fade' }}
+                  transitionProps={{ duration: 150, transition: "fade" }}
                   middlewares={{ shift: true, flip: true }}
                   arrowSize={10}
                   arrowOffset={5}
@@ -2087,16 +2097,20 @@ const SelixControlCenter = ({
                   opened={popoverOpenedArray[0]}
                 >
                   <Popover.Target>
-                    <div onMouseEnter={() => handlePopoverOpen(0)} onMouseLeave={handlePopoverClose}>
+                    <div
+                      onMouseEnter={() => handlePopoverOpen(0)}
+                      onMouseLeave={handlePopoverClose}
+                    >
                       <Center style={{ gap: 10 }}>
                         <IconHammer size={"1rem"} />
                         <span>Blueprint</span>
                       </Center>
                     </div>
                   </Popover.Target>
-                  <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
+                  <Popover.Dropdown sx={{ pointerEvents: "none" }}>
                     <Text size="sm">
-                      This section allows you to manage your project's blueprint.
+                      This section allows you to manage your project's
+                      blueprint.
                     </Text>
                   </Popover.Dropdown>
                 </Popover>
@@ -2127,20 +2141,22 @@ const SelixControlCenter = ({
             {
               value: "BROWSER",
               label: (
-                <Popover 
-                  position="bottom" 
-                  withinPortal 
-                  withArrow 
-                  shadow="md" 
+                <Popover
+                  position="bottom"
+                  withinPortal
+                  withArrow
+                  shadow="md"
                   opened={popoverOpenedArray[2]} // Assuming this is the second popover
                   offset={10}
-                  onPositionChange={(position) => console.log('Popover position:', position)}
+                  onPositionChange={(position) =>
+                    console.log("Popover position:", position)
+                  }
                   // positionDependencies={[selectedSubject]}
                   onClose={handlePopoverClose}
                   onOpen={() => handlePopoverOpen(2)}
                   keepMounted
-                  transitionProps={{ duration: 150, transition: 'fade' }}
-                  width="auto" 
+                  transitionProps={{ duration: 150, transition: "fade" }}
+                  width="auto"
                   middlewares={{ shift: true, flip: true }}
                   arrowSize={10}
                   arrowOffset={5}
@@ -2150,14 +2166,17 @@ const SelixControlCenter = ({
                   radius="md"
                 >
                   <Popover.Target>
-                    <div onMouseEnter={() => handlePopoverOpen(2)} onMouseLeave={handlePopoverClose}>
+                    <div
+                      onMouseEnter={() => handlePopoverOpen(2)}
+                      onMouseLeave={handlePopoverClose}
+                    >
                       <Center style={{ gap: 10 }}>
                         <IconBrowser size={"1rem"} />
                         <span>Browser</span>
                       </Center>
                     </div>
                   </Popover.Target>
-                  <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
+                  <Popover.Dropdown sx={{ pointerEvents: "none" }}>
                     <Text size="sm">
                       Controlled by chat, view for Selix AI research.
                     </Text>
@@ -2933,7 +2952,7 @@ const SelinStrategy = ({
                 message: "Drafting Campaign: " + strategy?.title,
                 color: "green",
                 icon: <IconCheck />,
-              }); 
+              });
 
               if (!memory?.strategy_id) {
                 return;

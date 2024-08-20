@@ -1,4 +1,6 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
+import posthog from "posthog-js";
+
 import {
   ActionIcon,
   Avatar,
@@ -93,6 +95,7 @@ import { Modal, Overlay } from "@mantine/core";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { getFreshCurrentProject } from "@auth/core";
 import Tour from "reactour";
+import { useNavigate } from "react-router-dom";
 
 const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({
   children,
@@ -297,7 +300,17 @@ export default function SelinAI() {
   const prevPromptLengthRef = useRef<number>(0);
   const prevSlideUpTime = useRef<number>(0);
 
+  const navigate = useNavigate();
+
   // console.log("current session is", currentSessionId);
+
+  useEffect(() => {
+    posthog.onFeatureFlags(function () {
+      if (posthog.isFeatureEnabled("show-calendly-for-signup")) {
+        navigate("/selix_onboarding");
+      }
+    });
+  }, []);
 
   const handleSubmit = async (
     file?: { name: string; description: string; base64: string },

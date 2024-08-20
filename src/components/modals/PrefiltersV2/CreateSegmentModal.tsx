@@ -306,6 +306,10 @@ export default function CreateSegmentModal(props: CreateSegment) {
                     message: 'Segment created and contacts added successfully',
                     color: 'green',
                   });
+                  //close current modal
+                  
+                  props.closeModal();
+
                 } catch (error) {
                   showNotification({
                     id: 'error',

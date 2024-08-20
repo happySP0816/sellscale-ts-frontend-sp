@@ -82,6 +82,9 @@ export default function AuthPage() {
             const to = redirect.split('?')[0];
             const params = new URLSearchParams(redirect.split('?')[1]);
             navigateToPage(navigate, to, params);
+          } else if (redirect.includes('selin_ai')) {
+            const params = new URLSearchParams(window.location.search);
+            navigateToPage(navigate, redirect, params);
           } else {
             navigateToPage(navigate, redirect);
           }

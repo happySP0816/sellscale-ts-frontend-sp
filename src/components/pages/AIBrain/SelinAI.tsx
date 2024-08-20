@@ -474,6 +474,18 @@ export default function SelinAI() {
       const data = await response.json();
       console.log("data is", data);
       setThreads(data);
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionIdFromUrl = urlParams.get('session_id');
+      const threadIdFromUrl = urlParams.get('thread_id');
+
+        // Clear the URL parameters from the input bar
+      if (sessionIdFromUrl || threadIdFromUrl) {
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+        return;
+      }
+
       // console.log("data is", data);
       if (data.length > 0) {
         getMessages(data[0].thread_id, data[0].id, data);
@@ -923,6 +935,13 @@ export default function SelinAI() {
 
   useEffect(() => {
     fetchChatHistory();
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionIdFromUrl = urlParams.get('session_id');
+    const threadIdFromUrl = urlParams.get('thread_id');
+
+    if (sessionIdFromUrl) {
+      getMessages(threadIdFromUrl || '', parseInt(sessionIdFromUrl));
+    }
   }, [userToken]);
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);

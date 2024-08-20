@@ -1843,7 +1843,11 @@ const SegmentChat = (props: any) => {
             value={prompt}
             placeholder="Chat with AI..."
             onKeyDown={handleKeyDown}
-            onChange={(e) => setPrompt(e.target.value)}
+            onChange={(e) => {
+              setPrompt(e.target.value);
+              const textarea = e.target;
+              textarea.scrollTop = textarea.scrollHeight;
+            }}
             variant="unstyled"
             inputContainer={(children) => (
               <div style={{ minHeight: "0px", cursor: "default" }}>
@@ -1924,8 +1928,17 @@ const SegmentChat = (props: any) => {
                 recording={recording}
                 setRecording={setRecording}
                 onTranscriptionChanged={(text) => {
-                  setPrompt(prompt + text);
-                  promptRef.current = prompt + text;
+                  setPrompt((prevPrompt: string) => {
+                    const newPrompt = prevPrompt + text;
+                    promptRef.current = newPrompt;
+                    setTimeout(() => {
+                      const textarea = document.querySelector("textarea");
+                      if (textarea) {
+                        textarea.scrollTop = textarea.scrollHeight;
+                      }
+                    }, 0);
+                    return newPrompt;
+                  });
                 }}
               />
               <Button

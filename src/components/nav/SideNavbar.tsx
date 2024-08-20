@@ -337,16 +337,20 @@ export default function SideNavbar(props: {}) {
           )} */}
 
           <Divider color="dark.4" mt="lg" mb="sm" />
-          <SideNavbarItem
-            icon={<IconRobot size="1.0rem" />}
-            label="Selix"
-            tabKey={["selin_ai"]}
-          />
-          <SideNavbarItem
-            icon={<IconSearch size="1.0rem" />}
-            label="Search"
-            onClick={openSpotlight}
-          />
+          {location.pathname !== "/selix_onboarding" && (
+            <SideNavbarItem
+              icon={<IconRobot size="1.0rem" />}
+              label="Selix"
+              tabKey={["selin_ai"]}
+            />
+          )}
+          {location.pathname !== "/selix_onboarding" && (
+            <SideNavbarItem
+              icon={<IconSearch size="1.0rem" />}
+              label="Search"
+              onClick={openSpotlight}
+            />
+          )}
           {/* <SideNavbarItem
             icon={<IconBell size="1.0rem" />}
             label="Notifications"

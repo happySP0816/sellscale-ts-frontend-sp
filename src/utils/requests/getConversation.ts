@@ -24,3 +24,19 @@ export async function getConversation(
   );
   return await processResponse(response);
 }
+
+export async function getScheduledMessages(
+  userToken: string,
+  prospectId: number
+): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/voyager/scheduled_messages?prospect_id=${prospectId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  return await processResponse(response);
+}

@@ -200,9 +200,9 @@ export default function FindContactsPage() {
               {tabHover && "Segments"}
             </Tabs.Tab>
           </Tooltip>
-          <Tabs.Tab value="by-csv" icon={<IconUpload size="0.9rem" />} onClick={() => setTab("by-csv")}>
-            {tabHover && "Upload CSV"}
-          </Tabs.Tab>
+          {/* <Tabs.Tab value="by-csv" icon={<IconUpload size="0.9rem" />} onClick={() => setTab("by-csv")}> */}
+          {/*   {tabHover && "Upload CSV"} */}
+          {/* </Tabs.Tab> */}
 
           <Tabs.Tab value="linkedin-url" icon={<IconBrandLinkedin size="0.9rem" />} onClick={() => setTab("linkedin-url")}>
             {tabHover && "LinkedIn URL"}
@@ -214,7 +214,7 @@ export default function FindContactsPage() {
             {tabHover && "OpenCV"}
           </Tabs.Tab>
           <Tabs.Tab value="linkedin-url-finder" icon={<IconBrandLinkedin size="0.9rem" />} onClick={() => setTab("linkedin-url-finder")}>
-            {tabHover && "URL Finder"}
+            {tabHover && "Upload CSV"}
           </Tabs.Tab>
           {/* <Tabs.Tab
             value="individuals"
@@ -265,81 +265,81 @@ export default function FindContactsPage() {
             />
           </Card>
         </Tabs.Panel>
-        <Tabs.Panel value="by-csv" pt="xs" style={{ position: "relative" }}>
-          <Card maw="600px" ml="auto" mr="auto">
-            <Title order={3}>Upload CSV</Title>
-            <Text mb="md" color="gray">
-              Upload a CSV file with the following columns
-              <ul>
-                <li>linkedin_url (required; if no email)</li>
-                <li>first_name (optional; required if no linkedin_url)</li>
-                <li>last_name (optional; required if no linkedin_url)</li>
-                <li>email (optional; required if no linkedin_url)</li>
-                <li>company (optional; required if no linkedin_url)</li>
-                <li>custom_data (optional)</li>
-              </ul>
-            </Text>
-
-            {/* Segment Selector */}
-            <Flex align="flex-end">
-              <Flex w="90%">
-                <Select
-                  mb="md"
-                  mt="md"
-                  w="100%"
-                  placeholder="Select Segment"
-                  label="(optional) Select Segment"
-                  description="Select a segment to add these prospects to"
-                  value={selectedSegmentId}
-                  onChange={(value: any) => {
-                    setSelectedSegmentId(value);
-                  }}
-                  data={
-                    segments?.map((segment: Segment) => ({
-                      value: segment.id,
-                      label: segment.segment_title,
-                    })) ?? []
-                  }
-                />
-              </Flex>
-              <Flex w="10%" align="center" justify={"center"}>
-                <Tooltip label="Create a new Segment" withArrow withinPortal>
-                  <ActionIcon
-                    onClick={() => {
-                      openCreateSegment();
-                    }}
-                    mb="lg"
-                    variant="filled"
-                  >
-                    <IconPlus size="1.5rem" />
-                  </ActionIcon>
-                </Tooltip>
-                <Modal opened={createSegmentOpened} onClose={closeCreateSegment} title="Create a New Segment">
-                  <TextInput label="Segment Title" value={createSegmentName} onChange={(e) => setCreateSegmentName(e.currentTarget.value)} />
-                  <Text size="xs" mt="md">
-                    You can add filters from the Segments page
-                  </Text>
-                  <Flex mt="xl" justify="flex-end">
-                    <Button loading={createSegmentLoading} disabled={createSegmentName.length === 0} onClick={createSegment}>
-                      Create New Segment
-                    </Button>
-                  </Flex>
-                </Modal>
-              </Flex>
-            </Flex>
-
-            <FileDropAndPreview
-              segmentId={selectedSegmentId}
-              personaId={activePersona + ""}
-              onUploadSuccess={() => {
-                showNotification({
-                  title: "Success",
-                  message: "File uploaded successfully",
-                  color: "teal",
-                });
-              }}
-            />
-          </Card>
+        {/* <Tabs.Panel value="by-csv" pt="xs" style={{ position: "relative" }}> */}
+        {/*   <Card maw="600px" ml="auto" mr="auto"> */}
+        {/*     <Title order={3}>Upload CSV</Title> */}
+        {/*     <Text mb="md" color="gray"> */}
+        {/*       Upload a CSV file with the following columns */}
+        {/*       <ul> */}
+        {/*         <li>linkedin_url (required; if no email)</li> */}
+        {/*         <li>first_name (optional; required if no linkedin_url)</li> */}
+        {/*         <li>last_name (optional; required if no linkedin_url)</li> */}
+        {/*         <li>email (optional; required if no linkedin_url)</li> */}
+        {/*         <li>company (optional; required if no linkedin_url)</li> */}
+        {/*         <li>custom_data (optional)</li> */}
+        {/*       </ul> */}
+        {/*     </Text> */}
+        {/**/}
+        {/*     {/* Segment Selector */} 
+        {/*     <Flex align="flex-end"> */}
+        {/*       <Flex w="90%"> */}
+        {/*         <Select */}
+        {/*           mb="md" */}
+        {/*           mt="md" */}
+        {/*           w="100%" */}
+        {/*           placeholder="Select Segment" */}
+        {/*           label="(optional) Select Segment" */}
+        {/*           description="Select a segment to add these prospects to" */}
+        {/*           value={selectedSegmentId} */}
+        {/*           onChange={(value: any) => { */}
+        {/*             setSelectedSegmentId(value); */}
+        {/*           }} */}
+        {/*           data={ */}
+        {/*             segments?.map((segment: Segment) => ({ */}
+        {/*               value: segment.id, */}
+        {/*               label: segment.segment_title, */}
+        {/*             })) ?? [] */}
+        {/*           } */}
+        {/*         /> */}
+        {/*       </Flex> */}
+        {/*       <Flex w="10%" align="center" justify={"center"}> */}
+        {/*         <Tooltip label="Create a new Segment" withArrow withinPortal> */}
+        {/*           <ActionIcon */}
+        {/*             onClick={() => { */}
+        {/*               openCreateSegment(); */}
+        {/*             }} */}
+        {/*             mb="lg" */}
+        {/*             variant="filled" */}
+        {/*           > */}
+        {/*             <IconPlus size="1.5rem" /> */}
+        {/*           </ActionIcon> */}
+        {/*         </Tooltip> */}
+        {/*         <Modal opened={createSegmentOpened} onClose={closeCreateSegment} title="Create a New Segment"> */}
+        {/*           <TextInput label="Segment Title" value={createSegmentName} onChange={(e) => setCreateSegmentName(e.currentTarget.value)} /> */}
+        {/*           <Text size="xs" mt="md"> */}
+        {/*             You can add filters from the Segments page */}
+        {/*           </Text> */}
+        {/*           <Flex mt="xl" justify="flex-end"> */}
+        {/*             <Button loading={createSegmentLoading} disabled={createSegmentName.length === 0} onClick={createSegment}> */}
+        {/*               Create New Segment */}
+        {/*             </Button> */}
+        {/*           </Flex> */}
+        {/*         </Modal> */}
+        {/*       </Flex> */}
+        {/*     </Flex> */}
+        {/**/}
+        {/*     <FileDropAndPreview */}
+        {/*       segmentId={selectedSegmentId} */}
+        {/*       personaId={activePersona + ""} */}
+        {/*       onUploadSuccess={() => { */}
+        {/*         showNotification({ */}
+        {/*           title: "Success", */}
+        {/*           message: "File uploaded successfully", */}
+        {/*           color: "teal", */}
+        {/*         }); */}
+        {/*       }} */}
+        {/*     /> */}
+        {/*   </Card> */}
 
           {/* {uploads && uploads.length > 0 && (
             <Select
@@ -363,7 +363,7 @@ export default function FindContactsPage() {
               }}
             />
           )} */}
-        </Tabs.Panel>
+        {/* </Tabs.Panel> */}
 
         <Tabs.Panel value="sellscale-db" pt="xs" style={{ position: "relative" }}>
           {userToken && (
@@ -387,11 +387,11 @@ export default function FindContactsPage() {
 
         <Tabs.Panel value="linkedin-url-finder" pt="xs" style={{ position: "relative" }}>
           <Card maw="600px" ml="auto" mr="auto">
-            <Title order={3}>LinkedIn URL Finder</Title>
+            <Title order={3}>Upload CSV</Title>
             <Text mb="md" color="gray">
               <ul>
-                <li>Upload CSV or Excel file with format: name, company name, title</li>
-                <li>LinkedIn URLs will be automatically parsed</li>
+                <li>Upload CSV or Excel file with format: name, company name, title. linkedin_url or emails are optional.</li>
+                <li>If you do not provide a LinkedIn URL, we will do our best to automatically parsed</li>
                 <li>Can add to segments automatically</li>
                 <li>Can extract emails as needed</li>
               </ul>

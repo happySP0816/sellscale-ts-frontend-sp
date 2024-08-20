@@ -20,8 +20,8 @@ const scaleY = {
 };
 
 const ItemCollapse: FC<
-  PropsWithChildren<{ title: string; numberOfItem?: number }>
-> = ({ children, title, numberOfItem = 0 }) => {
+  PropsWithChildren<{ title: string; numberOfItem?: number, showNumber?: boolean, color?: string }>
+> = ({ children, title, numberOfItem = 0, showNumber = true, color = null}) => {
   const [opened, { toggle, open }] = useDisclosure(false);
 
   useEffect(() => {
@@ -57,6 +57,7 @@ const ItemCollapse: FC<
               paddingRight: 0,
             },
           }}
+          style={{color: color ? color : "black"}}
           rightIcon={
             <IconChevronDown
               size={"0.8rem"}
@@ -71,13 +72,15 @@ const ItemCollapse: FC<
         >
           <Flex align={"center"} gap={"xs"}>
             <Text>{title}</Text>
-            <Badge color="gray">{numberOfItem}</Badge>
+            { showNumber &&
+              <Badge color="gray">{numberOfItem}</Badge>
+            }
           </Flex>
         </Button>
       </Flex>
 
       {opened && (
-        <Flex direction={"column"} gap={"sm"}>
+        <Flex direction={"column"} gap={"sm"} style={{backgroundColor: "white"}} w={"100%"} p="4px">
           {children}
         </Flex>
       )}

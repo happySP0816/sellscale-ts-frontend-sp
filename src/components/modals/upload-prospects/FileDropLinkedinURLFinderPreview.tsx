@@ -1,44 +1,28 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { logout } from "@auth/core";
 import FlexSeparate from "@common/library/FlexSeparate";
 import {
-  Anchor,
   Button,
   Group,
   Text,
-  Paper,
   useMantineTheme,
-  Avatar,
   Stack,
   Select,
-  Collapse,
-  Divider,
-  Container,
   Center,
   ActionIcon,
-  TextInput,
   Flex,
-  Textarea,
-  FocusTrap,
   HoverCard,
   List,
   LoadingOverlay,
-  Title, Table, Checkbox, Space, Modal, Accordion,
+  Table, Checkbox, Space, Modal, Accordion,
 } from "@mantine/core";
-import { Dropzone, DropzoneProps, MIME_TYPES } from "@mantine/dropzone";
-import {useDisclosure, useForceUpdate } from "@mantine/hooks";
-import { closeAllModals, openConfirmModal } from "@mantine/modals";
+import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
+import {useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import {
   IconUpload,
   IconX,
   IconTrashX,
-  IconFileDescription,
-  IconChevronDown,
-  IconChevronUp,
-  IconPencil,
-  IconPlus,
-} from "@tabler/icons";
+  } from "@tabler/icons";
 import { convertFileToJSON } from "@utils/fileProcessing";
 import createPersona from "@utils/requests/createPersona";
 import uploadProspects, {getDuplicateProspects} from "@utils/requests/uploadProspects";
@@ -49,7 +33,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { QueryCache } from "@tanstack/react-query";
 import { MaxHeap } from "@datastructures-js/heap";
-import {CHECKBOX} from "html2canvas/dist/types/dom/replaced-elements/input-element-container";
 
 const MAX_FILE_SIZE_MB = 2;
 const PREVIEW_FIRST_N_ROWS = 5;

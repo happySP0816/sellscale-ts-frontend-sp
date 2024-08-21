@@ -126,7 +126,7 @@ const MovePersonaAction = ({
 
   return (
     <Flex mx={mx}>
-      <Button size="xs" color="orange" onClick={openMovePersona}>
+      <Button size="sm" color="orange" onClick={openMovePersona}>
         Move Persona
       </Button>
       <Modal

@@ -471,7 +471,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       if (scheduledMessageRef.current) {
         (scheduledMessageRef.current as any).refreshScheduledMessages();
       }
-    }, 100);
+    }, 200);
 
     setMsgLoading(false);
     setAiGenerated(false);

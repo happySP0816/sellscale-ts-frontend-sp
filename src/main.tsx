@@ -609,7 +609,7 @@ const router = sentryCreateBrowserRouter([
         element: <WebsitePage />,
       },
       {
-        path: "/selin_ai",
+        path: "/selix",
         element: <SelinAI />,
       },
       {

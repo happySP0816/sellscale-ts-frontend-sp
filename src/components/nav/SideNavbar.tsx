@@ -341,7 +341,7 @@ export default function SideNavbar(props: {}) {
             <SideNavbarItem
               icon={<IconRobot size="1.0rem" />}
               label="Selix"
-              tabKey={["selin_ai"]}
+              tabKey={["selix"]}
             />
           )}
           {location.pathname !== "/selix_onboarding" && (

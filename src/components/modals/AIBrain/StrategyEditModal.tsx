@@ -55,7 +55,7 @@ export default function StrategyEditModal({
   return (
     <Box>
       <TextInput label="Strategy Name" defaultValue={innerProps.title} onChange={(event) => setTitle(event.currentTarget.value)} />
-      {window.location.href.includes('selin_ai') ? null : (
+      {window.location.href.includes('selix') ? null : (
         <MultiSelect
           withinPortal
           label="Attach Campaigns"

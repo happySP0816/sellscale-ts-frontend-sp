@@ -209,7 +209,7 @@ export default function SpotlightWrapper({
       limit={30}
       disabled={
         notLoggedIn ||
-        ["selin_ai", "selix_onboarding", "signup", "login"].some((path) =>
+        ["selix", "selix_onboarding", "signup", "login"].some((path) =>
           window.location.href.includes(path)
         )
       }

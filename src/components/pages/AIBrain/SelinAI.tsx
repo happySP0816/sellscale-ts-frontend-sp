@@ -59,6 +59,7 @@ import {
 import { IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
 import { Fragment, Key, useEffect, useRef, useState } from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { proxyURL } from "@utils/general";
 
@@ -72,10 +73,7 @@ import CampaignLandingV2 from "@pages/CampaignV2/CampaignLandingV2";
 import WhatHappenedLastWeek from "./WhatHappenedLastWeek";
 import AIBrainStrategy from "@pages/Strategy/AIBrainStrategy";
 // import SelinStrategy from "@pages/Strategy/Selinstrategy";
-import { title } from "process";
 import { socket } from "../../App";
-import { get, set } from "lodash";
-import { cu } from "@fullcalendar/core/internal-common";
 import { showNotification } from "@mantine/notifications";
 import { useStrategiesApi } from "@pages/Strategy/StrategyApi";
 import { openContextModal } from "@mantine/modals";
@@ -97,114 +95,121 @@ import { getFreshCurrentProject, isFreeUser } from "@auth/core";
 import Tour from "reactour";
 import { useNavigate } from "react-router-dom";
 
-const DropzoneWrapper: React.FC<CustomCursorWrapperProps> = ({
-  children,
-  handleSubmit,
-}) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [fileDescription, setFileDescription] = useState("");
+const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
+  ({ children, handleSubmit }, ref) => {
+    const [isDragging, setIsDragging] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
+    const [fileDescription, setFileDescription] = useState("");
 
-  const handleDrop = (event: DragEvent) => {
-    event.preventDefault();
-    const files = event.dataTransfer?.files;
-    if (files && files.length > 0) {
-      setFile(files[0]);
-      setIsModalOpen(true);
-    }
-    setIsDragging(false);
-  };
-
-  const handleDragOver = (event: DragEvent) => {
-    event.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleConfirm = () => {
-    // Placeholder function to run when the user confirms
-    console.log("File confirmed:", file);
-    setIsModalOpen(false);
-    setFile(null);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result?.toString().split(",")[1] || "";
-      handleSubmit({
-        name: file?.name || "",
-        base64: base64String,
-        description: fileDescription,
-      });
+    const handleDrop = (event: DragEvent) => {
+      event.preventDefault();
+      const files = event.dataTransfer?.files;
+      if (files && files.length > 0) {
+        setFile(files[0]);
+        setIsModalOpen(true);
+      }
+      setIsDragging(false);
     };
-    if (file) {
-      reader.readAsDataURL(file);
-    }
-  };
 
-  useEffect(() => {
-    const dropArea = document.getElementById("drop-area");
-    dropArea?.addEventListener("dragover", handleDragOver);
-    dropArea?.addEventListener("dragleave", handleDragLeave);
-    dropArea?.addEventListener("drop", handleDrop);
-
-    return () => {
-      dropArea?.removeEventListener("dragover", handleDragOver);
-      dropArea?.removeEventListener("dragleave", handleDragLeave);
-      dropArea?.removeEventListener("drop", handleDrop);
+    const handleDragOver = (event: DragEvent) => {
+      event.preventDefault();
+      setIsDragging(true);
     };
-  }, []);
 
-  return (
-    <div id="drop-area">
-      {isDragging && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backdropFilter: "blur(5px)",
-            color: "white",
-            fontSize: "2rem",
-            fontWeight: "bold",
-          }}
+    const handleDragLeave = () => {
+      setIsDragging(false);
+    };
+
+    const handleConfirm = () => {
+      console.log("File confirmed:", file);
+      setIsModalOpen(false);
+      setFile(null);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result?.toString().split(",")[1] || "";
+        handleSubmit({
+          name: file?.name || "",
+          base64: base64String,
+          description: fileDescription,
+        });
+      };
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+    };
+
+    useImperativeHandle(ref, () => ({
+      handleDrop: (file: File) => {
+        setFile(file);
+        setIsModalOpen(true);
+      },
+    }));
+
+    useEffect(() => {
+      const dropArea = document.getElementById("drop-area");
+      dropArea?.addEventListener("dragover", handleDragOver);
+      dropArea?.addEventListener("dragleave", handleDragLeave);
+      dropArea?.addEventListener("drop", handleDrop);
+
+      return () => {
+        dropArea?.removeEventListener("dragover", handleDragOver);
+        dropArea?.removeEventListener("dragleave", handleDragLeave);
+        dropArea?.removeEventListener("drop", handleDrop);
+      };
+    }, []);
+
+    return (
+      <div id="drop-area">
+        {isDragging && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              zIndex: 1000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(5px)",
+              color: "white",
+              fontSize: "2rem",
+              fontWeight: "bold",
+            }}
+          >
+            Drop files here
+          </div>
+        )}
+        {children}
+        <Modal
+          opened={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Add File to Chat"
         >
-          Drop files here
-        </div>
-      )}
-      {children}
-      <Modal
-        opened={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Add File to Chat"
-      >
-        <Flex align="center" mt="md">
-          <IconFile size={20} />
-          <Text ml="xs">{file?.name}</Text>
-        </Flex>
-        <Textarea
-          placeholder="Enter file description..."
-          value={fileDescription}
-          onChange={(e) => setFileDescription(e.target.value)}
-          minRows={3}
-          mt="md"
-        />
-        <Group position="right" mt="md">
-          <Button onClick={handleConfirm}>Confirm</Button>
-        </Group>
-      </Modal>
-    </div>
-  );
-};
+          <Flex align="center" mt="md">
+            <IconFile size={20} />
+            <Text ml="xs">{file?.name}</Text>
+          </Flex>
+          <Textarea
+            placeholder="Enter file description..."
+            value={fileDescription}
+            onChange={(e) => setFileDescription(e.target.value)}
+            minRows={3}
+            mt="md"
+          />
+          <Group position="right" mt="md">
+            <Button onClick={handleConfirm}>Confirm</Button>
+          </Group>
+        </Modal>
+      </div>
+    );
+  }
+);
+
+DropzoneWrapper.displayName = "DropzoneWrapper";
 
 interface TaskType {
   order_number: number;
@@ -305,6 +310,7 @@ export default function SelinAI() {
   const [recording, setRecording] = useState(false);
   const prevPromptLengthRef = useRef<number>(0);
   const prevSlideUpTime = useRef<number>(0);
+  const dropzoneRef = useRef<{ handleDrop: (file: File) => void } | null>(null);
 
   const freeUser = isFreeUser();
 
@@ -487,9 +493,7 @@ export default function SelinAI() {
 
       // Clear the URL parameters from the input bar
       if (sessionIdFromUrl || threadIdFromUrl) {
-        const newUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
-        return;
+        return data || [];
       }
 
       // console.log("data is", data);
@@ -500,6 +504,7 @@ export default function SelinAI() {
         handleCreateNewSession();
         setAIType("PLANNER");
       }
+      return data || [];
     } catch (error) {
       console.error("Error fetching chat history:", error);
     }
@@ -942,17 +947,17 @@ export default function SelinAI() {
 
   useEffect(() => {
     const fetchAndLoadMessages = async () => {
-      await fetchChatHistory();
+      const threads_loaded = await fetchChatHistory();
       const urlParams = new URLSearchParams(window.location.search);
-      const sessionIdFromUrl = urlParams.get("session_id");
-      const threadIdFromUrl = urlParams.get("thread_id");
-      console.log("session id from url is", sessionIdFromUrl);
-      console.log("got here");
+      const sessionIdFromUrl = urlParams.get('session_id');
+      const threadIdFromUrl = urlParams.get('thread_id');
+      console.log('session id from url is', sessionIdFromUrl);
+      console.log('got here');
       if (sessionIdFromUrl) {
         // Clear the URL parameters from the input bar
         const newUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
-        getMessages(threadIdFromUrl || "", parseInt(sessionIdFromUrl), threads);
+        getMessages(threadIdFromUrl || '', parseInt(sessionIdFromUrl), threads_loaded);
       }
     };
 
@@ -1065,7 +1070,7 @@ export default function SelinAI() {
   const [newButtonHover, setNewButtonHover] = useState(false);
 
   return (
-    <DropzoneWrapper handleSubmit={handleSubmit}>
+    <DropzoneWrapper ref={dropzoneRef} handleSubmit={handleSubmit}>
       <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
         <div>
           <div
@@ -1390,6 +1395,7 @@ export default function SelinAI() {
           <Flex mt={"md"} gap={"xl"}>
             <LoadingOverlay visible={loadingNewChat} />
             <SegmentChat
+              dropzoneRef={dropzoneRef}
               suggestedFirstMessage={suggestedFirstMessage}
               setSuggestionHidden={setSuggestionHidden}
               suggestionHidden={suggestionHidden}
@@ -1434,6 +1440,7 @@ export default function SelinAI() {
 const SegmentChat = (props: any) => {
   const suggestedFirstMessage: string[] = props.suggestedFirstMessage;
   const handleSubmit = props.handleSubmit;
+  const dropzoneRef = props.dropzoneRef;
   const prompt = props.prompt;
   const promptRef = props.promptRef;
   const suggestion = props.suggestion;
@@ -2035,36 +2042,30 @@ const SegmentChat = (props: any) => {
               {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
                 <IconPlus size={"1rem"} />
               </ActionIcon> */}
-              <Popover width={200} position="right" withArrow shadow="md">
-                <Popover.Target>
-                  <ActionIcon
-                    variant="outline"
-                    color="gray"
-                    radius={"xl"}
-                    size={"sm"}
-                  >
-                    <IconLink size={"1rem"} />
-                  </ActionIcon>
-                </Popover.Target>
-                <Popover.Dropdown>
-                  <Flex
-                    align="center"
-                    gap="xs"
-                    style={{
-                      height: "200px",
-                      border: "2px dashed #ccc",
-                      borderRadius: "8px",
-                      justifyContent: "center",
-                      textAlign: "center",
-                      padding: "20px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <IconFile size={16} />
-                    <Text size="sm">Drag & Drop file here!</Text>
-                  </Flex>
-                </Popover.Dropdown>
-              </Popover>
+              <ActionIcon
+                ml={'xl'}
+                variant="outline"
+                color="gray"
+                radius={"xl"}
+                size={"sm"}
+                onClick={() => {
+                  const fileInput = document.createElement("input");
+                  fileInput.type = "file";
+                  fileInput.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (file) {
+                      console.log("File selected:", file.name);
+                      dropzoneRef.current?.handleDrop(file);
+                    }
+                  };
+                  fileInput.click();
+                }}
+              >
+                <Button ml="xl"color="grape" size="xs">
+                  {'Add File'}
+                  <IconPlus size={"1rem"} />
+                </Button>
+              </ActionIcon>
             </Flex>
             <Flex>
               <DeepGram

@@ -2,6 +2,7 @@ import {
   ActionIcon,
   Badge,
   Box,
+  Button,
   Center,
   Checkbox,
   Divider,
@@ -11,7 +12,6 @@ import {
   Modal,
   Popover,
   ScrollArea,
-  SegmentedControl,
   Select,
   Switch,
   Table,
@@ -19,6 +19,7 @@ import {
   Text,
   TextInput,
   Title,
+  Tooltip,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -30,22 +31,28 @@ import { ICPFitReasonV2, Prospect } from "src";
 import {
   ICPScoringRuleset,
   ICPScoringRulesetKeys,
-  ProspectAccounts,
   TableHeader,
-  ViewMode,
 } from "@modals/ContactAccountFilterModal";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { getICPRuleSet } from "@utils/requests/icpScoring";
 import CampaignFilters from "@pages/CampaignV2/CampaignFilters";
 import { socket } from "../../App";
-import { display } from "html2canvas/dist/types/css/property-descriptors/display";
+import { showNotification } from "@mantine/notifications";
+import { moveToUnassigned } from "@utils/requests/moveToUnassigned";
+import { ProspectICP } from "@common/persona/Pulse";
+import BulkActions from "@common/persona/BulkActions_new";
+import { IconFileDownload, IconMagnet, IconTrash } from "@tabler/icons-react";
+import { openConfirmModal } from "@mantine/modals";
+import { CSVLink } from "react-csv";
+import CustomResearchPointCard from "@common/persona/CustomResearchPointCard";
+import { useDisclosure } from "@mantine/hooks";
 
 interface ContactAccountFilterModalProps {
   showContactAccountFilterModal: boolean;
   setShowContactAccountFilterModal: (showModal: boolean) => void;
 }
 
-const ArchetypeFilterModal = function({
+const ArchetypeFilterModal = function ({
   showContactAccountFilterModal,
   setShowContactAccountFilterModal,
 }: ContactAccountFilterModalProps) {
@@ -91,6 +98,10 @@ const ArchetypeFilterModal = function({
   const [selectedContacts, setSelectedContacts] = useState<Set<number>>(
     new Set()
   );
+
+  const [removeProspectsLoading, setRemoveProspectsLoading] = useState(false);
+
+  const [openedCustomPoint, customPointHandlers] = useDisclosure(false);
 
   // state for updating columns
   // whenever we change any columns, we add the columns name to the set
@@ -256,11 +267,11 @@ const ArchetypeFilterModal = function({
           a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
             ? -1
             : !a.icp_fit_reason_v2 && b.icp_fit_reason_v2
-              ? 1
-              : !a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
-                ? 0
-                : Object.keys(b.icp_fit_reason_v2).length -
-                Object.keys(a.icp_fit_reason_v2).length;
+            ? 1
+            : !a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
+            ? 0
+            : Object.keys(b.icp_fit_reason_v2).length -
+              Object.keys(a.icp_fit_reason_v2).length;
 
         if (individual_fit_reason !== 0) {
           return individual_fit_reason;
@@ -371,6 +382,187 @@ const ArchetypeFilterModal = function({
     }
   }, [filteredColumns, view10, prospects, filteredWords, displayScore]);
 
+  const triggerMoveToUnassigned = async () => {
+    setRemoveProspectsLoading(true);
+    if (currentProject === null) {
+      return;
+    }
+
+    const prospectIDs = Array.from(selectedContacts);
+    try {
+      showNotification({
+        id: "prospect-removed",
+        title: "Removing Prospected and Sent Outreach prospects only...",
+        message: `SellScale can only remove prospects that are in the Prospected or Sent Outreach status. SellScale will remove the rest.`,
+        color: "blue",
+        autoClose: 3000,
+      });
+
+      const response = await moveToUnassigned(
+        userToken,
+        currentProject.id,
+        prospectIDs
+      );
+
+      if (response.status === "success") {
+        showNotification({
+          id: "prospect-removed",
+          title: "Prospects removed",
+          message: `${prospectIDs.length} prospects has been removed from your list`,
+          color: "green",
+          autoClose: 3000,
+        });
+      } else {
+        showNotification({
+          id: "prospect-removed",
+          title: "Prospects removal failed",
+          message:
+            "These prospects could not be removed. Please try again, or contact support.",
+          color: "red",
+          autoClose: false,
+        });
+      }
+
+      refetch();
+      setSelectedContacts(new Set());
+    } catch (error) {
+      showNotification({
+        id: "prospect-removed",
+        title: "Prospects removal failed",
+        message:
+          "These prospects could not be removed. Please try again, or contact support.",
+        color: "red",
+        autoClose: false,
+      });
+    } finally {
+      setRemoveProspectsLoading(false);
+    }
+  };
+
+  const csvData = prospects
+    .filter((prospect) => {
+      return selectedContacts.has(prospect.id);
+    })
+    .map((prospect) => {
+      let readable_score = "";
+      let color = "";
+      let number = "";
+      switch (prospect.icp_fit_score) {
+        case -1:
+          readable_score = "Not Scored";
+          color = "🟪";
+          number = "0";
+          break;
+        case 0:
+          readable_score = "Very Low";
+          color = "🟥";
+          number = "1";
+          break;
+        case 1:
+          readable_score = "Low";
+          color = "🟧";
+          number = "2";
+          break;
+        case 2:
+          readable_score = "Medium";
+          color = "🟨";
+          number = "3";
+          break;
+        case 3:
+          readable_score = "High";
+          color = "🟦";
+          number = "4";
+          break;
+        case 4:
+          readable_score = "Very High";
+          color = "green";
+          color = "🟩";
+          number = "5";
+          break;
+        default:
+          readable_score = "Unknown";
+          color = "";
+          break;
+      }
+
+      let icp_fit_reason = "";
+      let ai_filters = {};
+
+      if (prospect.icp_fit_reason_v2) {
+        const reason_keys = Object.keys(prospect.icp_fit_reason_v2);
+
+        reason_keys.forEach((key) => {
+          const answer =
+            prospect.icp_fit_reason_v2[key].answer +
+            " - " +
+            prospect.icp_fit_reason_v2[key].reasoning;
+
+          if (key.includes("aiind") || key.includes("aicomp")) {
+            ai_filters = {
+              ...ai_filters,
+              [key]: answer.replace("❌", "").replace("✅", ""),
+            };
+          }
+          icp_fit_reason +=
+            key + ": " + prospect.icp_fit_reason_v2[key].reasoning + ". ";
+        });
+      }
+
+      if (prospect.icp_company_fit_reason) {
+        const reason_keys = Object.keys(prospect.icp_company_fit_reason);
+
+        reason_keys.forEach((key) => {
+          const answer =
+            prospect.icp_company_fit_reason[key].answer +
+            " - " +
+            prospect.icp_company_fit_reason[key].reasoning;
+
+          if (key.includes("aiind") || key.includes("aicomp")) {
+            ai_filters = {
+              ...ai_filters,
+              [key]: answer.replace("❌", "").replace("✅", ""),
+            };
+          }
+          icp_fit_reason +=
+            key + ": " + prospect.icp_company_fit_reason[key].reasoning + ". ";
+        });
+      }
+
+      return {
+        id: prospect.id,
+        label: `${number} ${color} ${readable_score}`.toUpperCase(),
+        full_name: prospect.full_name,
+        title: prospect.title,
+        company: prospect.company,
+        icp_fit_reason: icp_fit_reason,
+        linkedin_url: prospect.linkedin_url,
+        email: prospect.email,
+        ...ai_filters,
+      };
+    });
+
+  const csvHeaders = [
+    { label: "ID", key: "id" },
+    { label: "Label", key: "label" },
+    { label: "Full name", key: "full_name" },
+    { label: "Title", key: "title" },
+    { label: "Company", key: "company" },
+    { label: "Icp fit reason", key: "icp_fit_reason" },
+    { label: "LinkedinURL", key: "linkedin_url" },
+    { label: "Email", key: "email" },
+    ...contactTableHeaders
+      .filter(
+        (header) =>
+          header.key.includes("aiind") || header.key.includes("aicomp")
+      )
+      .map((header) => {
+        return { key: header.key, label: header.title };
+      }),
+  ];
+
+  console.log("csvData", csvData);
+  console.log("headers", csvHeaders);
+
   // Checkbox Handlers for selecting contacts
   const handleSelectContact = (contactId: number) => {
     if (selectedContacts.has(contactId)) {
@@ -441,15 +633,105 @@ const ArchetypeFilterModal = function({
         )}
         <Divider orientation={"vertical"} />
         <Flex direction={"column"} gap={"8px"}>
+          {selectedContacts && selectedContacts.size > 0 && (
+            <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>
+              <Text>Bulk Actions - {selectedContacts.size} Selected</Text>
+              <Tooltip
+                withinPortal
+                label="Remove 'Prospected' or 'Sent Outreach' prospects from this campaign."
+              >
+                <Button
+                  color="red"
+                  leftIcon={<IconTrash size={14} />}
+                  size="sm"
+                  loading={removeProspectsLoading}
+                  onClick={() => {
+                    openConfirmModal({
+                      title: "Remove these prospects?",
+                      children: (
+                        <>
+                          <Text>
+                            Are you sure you want to remove these{" "}
+                            {selectedContacts.size} prospects? This will move
+                            them into your Unassigned Contacts list.
+                          </Text>
+                          <Text mt="xs">
+                            <b>Note: </b>Only "Prospected" and "Sent Outreach"
+                            prospects will be removed.
+                          </Text>
+                        </>
+                      ),
+                      labels: {
+                        confirm: "Remove",
+                        cancel: "Cancel",
+                      },
+                      confirmProps: { color: "red" },
+                      onCancel: () => {},
+                      onConfirm: () => {
+                        triggerMoveToUnassigned();
+                      },
+                    });
+                  }}
+                >
+                  Remove
+                </Button>
+              </Tooltip>
+              <BulkActions
+                selectedProspects={prospects.filter((prospect) =>
+                  selectedContacts.has(prospect.id)
+                )}
+                backFunc={() => {
+                  setSelectedContacts(new Set());
+                  refetch();
+                  showNotification({
+                    title: "Success",
+                    message: `${selectedContacts.size} prospects has been moved from Unassigned Contacts to the new persona.`,
+                    color: "green",
+                    autoClose: 5000,
+                  });
+                }}
+              />
+              <CSVLink data={csvData} headers={csvHeaders} filename="export">
+                <Button
+                  color="green"
+                  leftIcon={<IconFileDownload size={14} />}
+                  size="sm"
+                >
+                  Download CSV
+                </Button>
+              </CSVLink>
+             
+            </Flex>
+          )}
           <Flex gap={"4px"} align={"end"} justify={"space-between"}>
             <TextInput
               label={"Global Search"}
               placeholder={"Search for a specific name / company / title"}
               value={filteredWords}
-              style={{ minWidth: "85%" }}
+              style={{ minWidth: "75%" }}
               onChange={(event) => setFilteredWords(event.currentTarget.value)}
             />
-
+            <Tooltip label="Upload custom data points to your prospects.">
+              <Button
+                size="sm"
+                onClick={customPointHandlers.open}
+                color="gray"
+                variant="outline"
+              >
+                <IconMagnet size={16} />
+              </Button>
+            </Tooltip>
+             <Modal
+                opened={openedCustomPoint}
+                onClose={customPointHandlers.close}
+                size="xl"
+                title="Custom Data Point Importer"
+              >
+                <Text size="xs" color="gray">
+                  Upload custom data points to your prospects.
+                </Text>
+                <CustomResearchPointCard />
+              </Modal>
             <Switch
               size={"xl"}
               onLabel={"View All"}
@@ -537,69 +819,69 @@ const ArchetypeFilterModal = function({
                                 {icp_scoring_ruleset_typed.individual_personalizers?.includes(
                                   item.key
                                 ) && (
-                                    <span
-                                      style={{
-                                        fontStyle: "italic",
-                                        fontSize: "xx-small",
-                                      }}
-                                    >
-                                      Personalizer: ✅
-                                    </span>
-                                  )}
+                                  <span
+                                    style={{
+                                      fontStyle: "italic",
+                                      fontSize: "xx-small",
+                                    }}
+                                  >
+                                    Personalizer: ✅
+                                  </span>
+                                )}
                                 {icp_scoring_ruleset_typed.company_personalizers?.includes(
                                   item.key
                                 ) && (
-                                    <span
-                                      style={{
-                                        fontStyle: "italic",
-                                        fontSize: "xx-small",
-                                      }}
-                                    >
-                                      Personalizer: ✅
-                                    </span>
-                                  )}
+                                  <span
+                                    style={{
+                                      fontStyle: "italic",
+                                      fontSize: "xx-small",
+                                    }}
+                                  >
+                                    Personalizer: ✅
+                                  </span>
+                                )}
                                 {icp_scoring_ruleset_typed.dealbreakers?.includes(
                                   item.key
                                 ) && (
-                                    <span
-                                      style={{
-                                        fontStyle: "italic",
-                                        fontSize: "xx-small",
-                                      }}
-                                    >
-                                      "Dealbreaker: ✅"
-                                    </span>
-                                  )}
+                                  <span
+                                    style={{
+                                      fontStyle: "italic",
+                                      fontSize: "xx-small",
+                                    }}
+                                  >
+                                    "Dealbreaker: ✅"
+                                  </span>
+                                )}
                               </Flex>
                               {(!notFilters.includes(item.key) ||
                                 item.title === "Score") && (
-                                  <Popover
-                                    width={400}
-                                    position="bottom"
-                                    withArrow
-                                    shadow="md"
-                                    withinPortal
-                                  >
-                                    <Popover.Target>
-                                      <ActionIcon>
-                                        <FaFilter
-                                          color={
-                                            filteredColumns.has(item.key)
-                                              ? "lightgreen"
-                                              : "grey"
-                                          }
-                                        />
-                                      </ActionIcon>
-                                    </Popover.Target>
-                                    <Popover.Dropdown>
-                                      <Select
-                                        label={item.title}
-                                        placeholder={
-                                          "Select the Property that you would like to filter for"
+                                <Popover
+                                  width={400}
+                                  position="bottom"
+                                  withArrow
+                                  shadow="md"
+                                  withinPortal
+                                >
+                                  <Popover.Target>
+                                    <ActionIcon>
+                                      <FaFilter
+                                        color={
+                                          filteredColumns.has(item.key)
+                                            ? "lightgreen"
+                                            : "grey"
                                         }
-                                        data={
-                                          item.title === "Score"
-                                            ? [
+                                      />
+                                    </ActionIcon>
+                                  </Popover.Target>
+                                  <Popover.Dropdown>
+                                    <Select
+                                      label={item.title}
+                                      placeholder={
+                                        "Select the Property that you would like to filter for"
+                                      }
+                                      data={
+                                        item.title === "Score"
+                                          ? [
                                               { value: "", label: "Select" },
                                               {
                                                 value: "0",
@@ -613,26 +895,26 @@ const ArchetypeFilterModal = function({
                                                 label: "VERY HIGH",
                                               },
                                             ]
-                                            : [
+                                          : [
                                               { value: "", label: "Select" },
                                               { value: "YES", label: "YES" },
                                               { value: "NO", label: "NO" },
                                             ]
-                                        }
-                                        onChange={(value) =>
-                                          onSelectFilter(item.key, value ?? "")
-                                        }
-                                        value={
-                                          filteredColumns.get(item.key)
-                                            ? (filteredColumns.get(
+                                      }
+                                      onChange={(value) =>
+                                        onSelectFilter(item.key, value ?? "")
+                                      }
+                                      value={
+                                        filteredColumns.get(item.key)
+                                          ? (filteredColumns.get(
                                               item.key
                                             ) as string)
-                                            : ""
-                                        }
-                                      />
-                                    </Popover.Dropdown>
-                                  </Popover>
-                                )}
+                                          : ""
+                                      }
+                                    />
+                                  </Popover.Dropdown>
+                                </Popover>
+                              )}
                             </Flex>
                           </th>
                         );
@@ -705,15 +987,15 @@ const ArchetypeFilterModal = function({
                                             humanReadableScore == "VERY HIGH"
                                               ? "green"
                                               : humanReadableScore == "HIGH"
-                                                ? "blue"
-                                                : humanReadableScore == "MEDIUM"
-                                                  ? "yellow"
-                                                  : humanReadableScore == "LOW"
-                                                    ? "orange"
-                                                    : humanReadableScore ==
-                                                      "VERY LOW" && trueScore
-                                                      ? "red"
-                                                      : "gray"
+                                              ? "blue"
+                                              : humanReadableScore == "MEDIUM"
+                                              ? "yellow"
+                                              : humanReadableScore == "LOW"
+                                              ? "orange"
+                                              : humanReadableScore ==
+                                                  "VERY LOW" && trueScore
+                                              ? "red"
+                                              : "gray"
                                           }
                                           fw={600}
                                         >
@@ -795,7 +1077,7 @@ const ArchetypeFilterModal = function({
                                             ).map((key) => {
                                               const section =
                                                 prospect.icp_company_fit_reason[
-                                                key
+                                                  key
                                                 ];
                                               const title = key
                                                 .replace("_individual_", "_")
@@ -881,7 +1163,7 @@ const ArchetypeFilterModal = function({
                                   }}
                                 >
                                   {p[keyType] &&
-                                    !updatedIndividualColumns.has(key) ? (
+                                  !updatedIndividualColumns.has(key) ? (
                                     <HoverCard>
                                       <HoverCard.Target>
                                         {p[keyType].answer === "LOADING" ? (

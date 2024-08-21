@@ -350,7 +350,7 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<SelixAIRetool />} />,
       },
       {
-        path: "selix",
+        path: "selix_old",
         element: <RestrictedRoute page={<SelixTaskPuppet />} />,
       },
       {

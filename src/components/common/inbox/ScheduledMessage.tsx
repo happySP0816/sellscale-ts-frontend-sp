@@ -137,7 +137,7 @@ export default function ScheduledMessage({ openedProspectId }: { openedProspectI
                     </Text>
                     <Flex>
                       <Text size={'sm'} mr={'sm'} fw={600} color='gray'>
-                        {moment(message.execution_date).format('MMM DD, YYYY')}
+                        {moment(message.execution_date).subtract(1, 'days').format('MMM DD, YYYY')}
                       </Text>
                       <IconCalendar color='gray' size={'1.1rem'} onClick={open} style={{ cursor: 'pointer' }} />
                     </Flex>

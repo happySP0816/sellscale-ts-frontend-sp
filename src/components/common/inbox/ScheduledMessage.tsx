@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 import { Button, Collapse, Divider, Flex, Indicator, Modal, Popover, Text, TextInput } from '@mantine/core';
 import { Calendar } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
@@ -8,9 +8,9 @@ import { DatePicker, DatePickerProps } from '@mantine/dates';
 import moment from 'moment';
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
-import { set } from 'lodash';
 import { API_URL } from '@constants/data';
-export default function ScheduledMessage({ openedProspectId }: { openedProspectId: number }) {
+
+export const ScheduledMessage = forwardRef(({ openedProspectId }: { openedProspectId: number }, ref) => {
   const [opened, { toggle }] = useDisclosure(false);
   const [modalOpend, { open, close }] = useDisclosure(false);
   const [scheduledMessages, setScheduledMessages] = useState<{
@@ -55,15 +55,21 @@ export default function ScheduledMessage({ openedProspectId }: { openedProspectI
     return null;
   };
 
-  useEffect(() => {
+  const fetchScheduledMessages = () => {
     getScheduledMessages(userToken, openedProspectId).then((res) => {
       console.log('setting to ', res.data.data);
       setScheduledMessages(res.data.data);
     });
-  }
-  , []);
+  };
 
-  
+  useEffect(() => {
+    fetchScheduledMessages();
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    refreshScheduledMessages: fetchScheduledMessages
+  }));
+
   const [value, setValue] = useState<Date | null>(null);
   return (
     <>
@@ -182,3 +188,4 @@ export default function ScheduledMessage({ openedProspectId }: { openedProspectI
     </>
   );
 }
+);

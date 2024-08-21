@@ -108,7 +108,7 @@ import postSmartleadReply from "@utils/requests/postSmartleadReply";
 import { convertToTitleCase } from "@utils/stringFormatting";
 import { postGenerateEmailReplyUsingFramework } from "@utils/requests/emailReplies";
 import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
-import ScheduledMessage from "./ScheduledMessage";
+import {ScheduledMessage} from "./ScheduledMessage";
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -206,6 +206,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
     moment(new Date()).add(4, "days").toDate()
   );
   const openedProspectId = useRecoilValue(openedProspectIdState);
+  const scheduledMessageRef = useRef(null);
   const openedOutboundChannel = useRecoilValue(currentConvoChannelState);
   const [fetchingProspectId, setFetchingProspectId] = useRecoilState(
     fetchingProspectIdState
@@ -466,6 +467,12 @@ export default forwardRef(function InboxProspectConvoSendBox(
       }
     }
 
+    setTimeout(() => {
+      if (scheduledMessageRef.current) {
+        (scheduledMessageRef.current as any).refreshScheduledMessages();
+      }
+    }, 100);
+
     setMsgLoading(false);
     setAiGenerated(false);
     setTimeout(() => props.scrollToBottom && props.scrollToBottom(), 100);
@@ -698,7 +705,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
     >
       <LoadingOverlay visible={msgLoading} />
       <div key={openedProspectId} className='mb-4 bg-transparent mx-6'>
-        <ScheduledMessage openedProspectId={openedProspectId}/>
+        <ScheduledMessage ref={scheduledMessageRef} openedProspectId={openedProspectId}/>
       </div>
       <div
         style={{

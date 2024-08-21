@@ -932,7 +932,7 @@ export default function SelinAI() {
       console.log('session id from url is', sessionIdFromUrl);
       console.log('got here')
       if (sessionIdFromUrl) {
-        // Clear the URL parameters from the input bar
+      // Clear the URL parameters from the input bar
       const newUrl = window.location.origin + window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
       getMessages(threadIdFromUrl || '', parseInt(sessionIdFromUrl), threads);

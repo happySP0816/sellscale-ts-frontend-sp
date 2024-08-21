@@ -435,7 +435,7 @@ export default function SelixOnboarding() {
                     prefilterIDref.current,
                     prefilter?.segment_description
                   );
-                  navigate("/selin_ai");
+                  navigate("/selix");
                 }
                 if (step < 3) setStep(step + 1);
               }}

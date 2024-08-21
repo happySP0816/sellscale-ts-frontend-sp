@@ -3843,7 +3843,7 @@ export const PersonalizationSection = (props: {
   const { data: researchPointTypes } = useQuery({
     queryKey: [`query-get-research-point-types`],
     queryFn: async () => {
-      const response = await getResearchPointTypes(userToken);
+      const response = await getResearchPointTypes(userToken, currentProject ? currentProject.id : undefined);
       return response.status === "success"
         ? (response.data as ResearchPointType[])
         : [];
@@ -3855,15 +3855,15 @@ export const PersonalizationSection = (props: {
     if (!researchPointTypes) return;
     const convertedType = researchPointTypes.map((rp) => {
       return {
-        title: _.startCase(rp.name.toLowerCase().replaceAll("_", " ")),
+        title: _.startCase(rp.name.toLowerCase().replaceAll("_", " ").replace("aicomp", "").replace("aiind", "")),
         id: rp.name,
         checked: !props.blocklist.includes(rp.name),
         disabled: !!currentProject?.transformer_blocklist?.includes(rp.name),
       };
     });
 
-    setProspectItems(convertedType.filter((rp) => !rp.id.includes("JOB")));
-    setCompanyItems(convertedType.filter((rp) => rp.id.includes("JOB")));
+    setProspectItems(convertedType.filter((rp) => (!rp.id.includes("JOB") && !rp.id.includes("AICOMP")) || rp.id.includes("AIIND")));
+    setCompanyItems(convertedType.filter((rp) => (rp.id.includes("JOB") && !rp.id.includes("AIIND")) || rp.id.includes("AICOMP")));
   }, [researchPointTypes]);
 
   const [prospectItems, setProspectItems] = useState<

@@ -72,7 +72,6 @@ export default function Sequences(props: any) {
   const [loadingSequences, setLoadingSequences] = useState(true);
   const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] = useState<any>(0);
   const [sequences, setSequences] = useState<any[]>([]);
-  const [type, setType] = useState("email");
   const [linkedinSequenceViewingArray, setLinkedinSequenceViewingArray] = useState<any[]>([]);
   const [emailSequenceViewingArray, setEmailSequenceViewingArray] = useState<any[]>([]);
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
@@ -85,6 +84,8 @@ export default function Sequences(props: any) {
 
   const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(linkedinSequenceState);
   const [emailSequenceData, setEmailSequenceData] = useRecoilState(emailSequenceState);
+  const [type, setType] = useState<"linkedin" | "email" | undefined>('email');
+
 
   const [selectStep, setSelectStep] = useState<number | null>(null);
   const [opened, setOpened] = useState(false);
@@ -128,7 +129,7 @@ export default function Sequences(props: any) {
           setSequences(orderedGroupedSequences);
           props.setSequences(orderedGroupedSequences);
           console.log("orderedGroupedSequences", orderedGroupedSequences);
-          setType(type);
+          // setType(type);
           if (type === "linkedin") {
             setLinkedinSequenceViewingArray(orderedGroupedSequences.map((group) => group[0].title));
             setLinkedinSequenceData(orderedGroupedSequences);
@@ -151,7 +152,7 @@ export default function Sequences(props: any) {
         } else {
           setSequences([]);
           props.setSequences([]);
-          setType("email");
+          // setType("email");
           setEmailSequenceData([]);
           setLinkedinSequenceData([]);
           setEmailSequenceViewingArray([]);
@@ -174,6 +175,10 @@ export default function Sequences(props: any) {
     }
     setSelectStep(key);
   };
+
+  useEffect(() => {
+    setType(emailSequenceData && emailSequenceData.length > 0 ? "email" : (linkedinSequenceData && linkedinSequenceData.length > 0) || (linkedinInitialMessages && linkedinInitialMessages.length > 0) ? "linkedin" : "email");
+  }, [linkedinSequenceData, emailSequenceData, linkedinInitialMessages]);
 
   useEffect(() => {
     refetchSequenceData(clientArchetypeId);
@@ -220,7 +225,6 @@ export default function Sequences(props: any) {
                   props.setSequences(linkedinSequenceData);
                 }
               }}
-              defaultValue={emailSequenceData && emailSequenceData.length > 0 ? "email" : "linkedin"}
               data={[
                 {
                   value: "email",

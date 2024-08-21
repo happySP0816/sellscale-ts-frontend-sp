@@ -475,17 +475,6 @@ export default function SelinAI() {
       console.log("data is", data);
       setThreads(data);
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const sessionIdFromUrl = urlParams.get('session_id');
-      const threadIdFromUrl = urlParams.get('thread_id');
-
-        // Clear the URL parameters from the input bar
-      if (sessionIdFromUrl || threadIdFromUrl) {
-        const newUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
-        return;
-      }
-
       // console.log("data is", data);
       if (data.length > 0) {
         getMessages(data[0].thread_id, data[0].id, data);
@@ -538,6 +527,7 @@ export default function SelinAI() {
         threads.find((thread) => thread.id === session_id);
 
       const memory: MemoryType | undefined = currentThread?.memory;
+      console.log('current thread is', currentThread);
       if (currentThread?.tasks) {
         const orderedTasks = currentThread.tasks.sort(
           (a, b) => a.order_number - b.order_number
@@ -934,14 +924,22 @@ export default function SelinAI() {
   }, [recording]);
 
   useEffect(() => {
-    fetchChatHistory();
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionIdFromUrl = urlParams.get('session_id');
-    const threadIdFromUrl = urlParams.get('thread_id');
+    const fetchAndLoadMessages = async () => {
+      await fetchChatHistory();
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionIdFromUrl = urlParams.get('session_id');
+      const threadIdFromUrl = urlParams.get('thread_id');
+      console.log('session id from url is', sessionIdFromUrl);
+      console.log('got here')
+      if (sessionIdFromUrl) {
+      // Clear the URL parameters from the input bar
+      const newUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+      getMessages(threadIdFromUrl || '', parseInt(sessionIdFromUrl), threads);
+      }
+    };
 
-    if (sessionIdFromUrl) {
-      getMessages(threadIdFromUrl || '', parseInt(sessionIdFromUrl));
-    }
+    fetchAndLoadMessages();
   }, [userToken]);
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);

@@ -544,6 +544,7 @@ export default function SelinAI() {
         threads.find((thread) => thread.id === session_id);
 
       const memory: MemoryType | undefined = currentThread?.memory;
+      console.log("current thread is", currentThread);
       if (currentThread?.tasks) {
         const orderedTasks = currentThread.tasks.sort(
           (a, b) => a.order_number - b.order_number
@@ -940,14 +941,22 @@ export default function SelinAI() {
   }, [recording]);
 
   useEffect(() => {
-    fetchChatHistory();
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionIdFromUrl = urlParams.get("session_id");
-    const threadIdFromUrl = urlParams.get("thread_id");
+    const fetchAndLoadMessages = async () => {
+      await fetchChatHistory();
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionIdFromUrl = urlParams.get("session_id");
+      const threadIdFromUrl = urlParams.get("thread_id");
+      console.log("session id from url is", sessionIdFromUrl);
+      console.log("got here");
+      if (sessionIdFromUrl) {
+        // Clear the URL parameters from the input bar
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+        getMessages(threadIdFromUrl || "", parseInt(sessionIdFromUrl), threads);
+      }
+    };
 
-    if (sessionIdFromUrl) {
-      getMessages(threadIdFromUrl || "", parseInt(sessionIdFromUrl));
-    }
+    fetchAndLoadMessages();
   }, [userToken]);
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -1119,18 +1128,20 @@ export default function SelinAI() {
                         label: (
                           <Center>
                             <Box>Active</Box>
-                            {type === "active" && (
-                              <Badge ml={5}>
-                                {
-                                  threads.filter(
-                                    (thread) =>
-                                      thread.status === "ACTIVE" ||
-                                      thread.status === "PENDING_OPERATOR" ||
-                                      thread.status === "BLOCKED"
-                                  ).length
-                                }
-                              </Badge>
-                            )}
+
+                            <Badge
+                              ml={5}
+                              color={type === "active" ? "blue" : "gray"}
+                            >
+                              {
+                                threads.filter(
+                                  (thread) =>
+                                    thread.status === "ACTIVE" ||
+                                    thread.status === "PENDING_OPERATOR" ||
+                                    thread.status === "BLOCKED"
+                                ).length
+                              }
+                            </Badge>
                           </Center>
                         ),
                       },
@@ -1139,17 +1150,19 @@ export default function SelinAI() {
                         label: (
                           <Center>
                             <Box>Past Sessions</Box>
-                            {type === "past" && (
-                              <Badge ml={5}>
-                                {
-                                  threads.filter(
-                                    (thread) =>
-                                      thread.status === "COMPLETE" ||
-                                      thread.status === "CANCELLED"
-                                  ).length
-                                }
-                              </Badge>
-                            )}
+
+                            <Badge
+                              ml={5}
+                              color={type === "past" ? "blue" : "gray"}
+                            >
+                              {
+                                threads.filter(
+                                  (thread) =>
+                                    thread.status === "COMPLETE" ||
+                                    thread.status === "CANCELLED"
+                                ).length
+                              }
+                            </Badge>
                           </Center>
                         ),
                       },

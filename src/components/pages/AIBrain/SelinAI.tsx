@@ -1120,7 +1120,14 @@ export default function SelinAI() {
                         thread.status !== "CANCELLED"
                     ).length - 1
                   )}{" "}
-                  other active task
+                  {Math.max(
+                    0,
+                    threads.filter(
+                      (thread) =>
+                        thread.status !== "COMPLETE" &&
+                        thread.status !== "CANCELLED"
+                    ).length - 1
+                  ) > 1 ? "other active sessions" : "other active session"}
                 </Text>
               </Flex>
               <Flex align={"center"} gap={"sm"}>

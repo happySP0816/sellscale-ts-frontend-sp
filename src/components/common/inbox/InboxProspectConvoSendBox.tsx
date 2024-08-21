@@ -694,7 +694,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       style={{ border: '0px' }}
       pb={8}
       mah={500}
-      bg={'transparent'}
+      // bg={'transparent'}
     >
       <LoadingOverlay visible={msgLoading} />
       <div key={openedProspectId} className='mb-4 bg-transparent mx-6'>

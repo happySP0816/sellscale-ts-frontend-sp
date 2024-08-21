@@ -247,7 +247,13 @@ export interface MemoryType {
 export interface ThreadType {
   id: number;
   session_name: string;
-  status: "ACTIVE" | "COMPLETE" | "CANCELLED" | "PENDING_OPERATOR" | "BLOCKED";
+  status:
+    | "ACTIVE"
+    | "COMPLETE"
+    | "CANCELLED"
+    | "PENDING_OPERATOR"
+    | "BLOCKED"
+    | "IN_PROGRESS";
   assistant_id: string;
   client_sdr_id: number;
   created_at: string;
@@ -475,6 +481,17 @@ export default function SelinAI() {
       console.log("data is", data);
       setThreads(data);
 
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionIdFromUrl = urlParams.get("session_id");
+      const threadIdFromUrl = urlParams.get("thread_id");
+
+      // Clear the URL parameters from the input bar
+      if (sessionIdFromUrl || threadIdFromUrl) {
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+        return;
+      }
+
       // console.log("data is", data);
       if (data.length > 0) {
         getMessages(data[0].thread_id, data[0].id, data);
@@ -527,7 +544,7 @@ export default function SelinAI() {
         threads.find((thread) => thread.id === session_id);
 
       const memory: MemoryType | undefined = currentThread?.memory;
-      console.log('current thread is', currentThread);
+      console.log("current thread is", currentThread);
       if (currentThread?.tasks) {
         const orderedTasks = currentThread.tasks.sort(
           (a, b) => a.order_number - b.order_number
@@ -927,15 +944,15 @@ export default function SelinAI() {
     const fetchAndLoadMessages = async () => {
       await fetchChatHistory();
       const urlParams = new URLSearchParams(window.location.search);
-      const sessionIdFromUrl = urlParams.get('session_id');
-      const threadIdFromUrl = urlParams.get('thread_id');
-      console.log('session id from url is', sessionIdFromUrl);
-      console.log('got here')
+      const sessionIdFromUrl = urlParams.get("session_id");
+      const threadIdFromUrl = urlParams.get("thread_id");
+      console.log("session id from url is", sessionIdFromUrl);
+      console.log("got here");
       if (sessionIdFromUrl) {
-      // Clear the URL parameters from the input bar
-      const newUrl = window.location.origin + window.location.pathname;
-      window.history.replaceState({}, document.title, newUrl);
-      getMessages(threadIdFromUrl || '', parseInt(sessionIdFromUrl), threads);
+        // Clear the URL parameters from the input bar
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+        getMessages(threadIdFromUrl || "", parseInt(sessionIdFromUrl), threads);
       }
     };
 
@@ -1043,14 +1060,14 @@ export default function SelinAI() {
     };
   }, []);
 
+  const [type, setType] = useState("active");
+  const [hoverChat, setHoverChat] = useState<number>();
+  const [newButtonHover, setNewButtonHover] = useState(false);
+
   return (
     <DropzoneWrapper handleSubmit={handleSubmit}>
       <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
-        <div
-          style={{ position: "relative", width: "100%", zIndex: 1 }}
-          onMouseEnter={() => setOpened(true)}
-          onMouseLeave={() => setOpened(false)}
-        >
+        <div>
           <div
             style={{
               position: "absolute",
@@ -1060,81 +1077,145 @@ export default function SelinAI() {
               zIndex: 2,
             }}
           ></div>
+
           <Card withBorder radius={"sm"}>
-            <Flex align={"center"} justify={"flex-start"}>
-              <ThemeIcon
+            <Flex align={"center"} justify={"space-between"}>
+              <Flex
+                align={"center"}
+                w={"100%"}
+                justify={"flex-start"}
+                className="hover:cursor-pointer"
+                onClick={() => setOpened(!openedChat)}
+              >
+                {/* <ThemeIcon
                 radius="xl"
                 size="xs"
-                color={
-                  threads.filter((thread) => thread.status === "ACTIVE")
-                    .length > 0
-                    ? "green"
-                    : "gray"
-                }
-                variant={
-                  threads.filter((thread) => thread.status === "ACTIVE")
-                    .length > 0
-                    ? "filled"
-                    : "light"
-                }
-                className={
-                  threads.filter((thread) => thread.status === "ACTIVE")
-                    .length > 0
-                    ? "pulsing-bubble"
-                    : ""
-                }
+                color={threads.filter((thread) => thread.status === "ACTIVE").length > 0 ? "green" : "gray"}
+                variant={threads.filter((thread) => thread.status === "ACTIVE").length > 0 ? "filled" : "light"}
+                className={threads.filter((thread) => thread.status === "ACTIVE").length > 0 ? "pulsing-bubble" : ""}
               >
                 <span />
-              </ThemeIcon>
-              <Text fw={600} color="black" className="text-left" ml="xs">
-                {
-                  threads.filter(
-                    (thread) =>
-                      thread.status !== "COMPLETE" &&
-                      thread.status !== "CANCELLED"
-                  ).length
-                }{" "}
-                Conversations
-              </Text>
-              <div style={{ marginLeft: "auto" }}>
-                {openedChat ? (
-                  <IconChevronDown size={"1rem"} color="black" />
-                ) : (
-                  <IconChevronUp size={"1rem"} color="black" />
+              </ThemeIcon> */}
+                <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                </div>
+                <Text fw={600} color="black" className="text-left" ml="xs">
+                  {
+                    threads.filter(
+                      (item: ThreadType) => item.id === sessionIDRef.current
+                    )[0]?.session_name
+                  }
+                </Text>
+                <Text color="gray" fw={500} ml={"sm"}>
+                  {Math.max(
+                    0,
+                    threads.filter(
+                      (thread) =>
+                        thread.status !== "COMPLETE" &&
+                        thread.status !== "CANCELLED"
+                    ).length - 1
+                  )}{" "}
+                  other active task
+                </Text>
+              </Flex>
+              <Flex align={"center"} gap={"sm"}>
+                {openedChat && (
+                  <SegmentedControl
+                    onChange={setType}
+                    data={[
+                      {
+                        value: "active",
+                        label: (
+                          <Center>
+                            <Box>Active</Box>
+
+                            <Badge
+                              ml={5}
+                              color={type === "active" ? "blue" : "gray"}
+                            >
+                              {
+                                threads.filter(
+                                  (thread) =>
+                                    thread.status === "ACTIVE" ||
+                                    thread.status === "PENDING_OPERATOR" ||
+                                    thread.status === "BLOCKED"
+                                ).length
+                              }
+                            </Badge>
+                          </Center>
+                        ),
+                      },
+                      {
+                        value: "past",
+                        label: (
+                          <Center>
+                            <Box>Past Sessions</Box>
+
+                            <Badge
+                              ml={5}
+                              color={type === "past" ? "blue" : "gray"}
+                            >
+                              {
+                                threads.filter(
+                                  (thread) =>
+                                    thread.status === "COMPLETE" ||
+                                    thread.status === "CANCELLED"
+                                ).length
+                              }
+                            </Badge>
+                          </Center>
+                        ),
+                      },
+                    ]}
+                  />
                 )}
-              </div>
+                <ActionIcon
+                  variant="transparent"
+                  onClick={() => setOpened(!openedChat)}
+                >
+                  {openedChat ? (
+                    <IconChevronDown size={"1rem"} color="black" />
+                  ) : (
+                    <IconChevronUp size={"1rem"} color="black" />
+                  )}
+                </ActionIcon>
+              </Flex>
             </Flex>
             <Collapse in={openedChat}>
               <Flex mt={"md"} gap={"sm"}>
-                <Paper
+                <Button
+                  leftIcon={
+                    <IconPlus
+                      color={newButtonHover ? "white" : "#D444F1"}
+                      size={"1.3rem"}
+                    />
+                  }
+                  className="bg-[#D444F1]/10 hover:bg-[#D444F1]/80 text-[#D444F1] hover:text-white"
                   onClick={
                     !loadingNewChat ? () => handleCreateNewSession() : undefined
                   }
-                  radius={"sm"}
-                  p={"sm"}
-                  bg={"#fcecfe"}
-                  miw={120}
-                  mr="sm"
-                  className="flex flex-col items-center justify-center"
+                  loading={loadingNewChat}
+                  px={30}
+                  h={72}
+                  onMouseEnter={() => setNewButtonHover(true)}
+                  onMouseLeave={() => setNewButtonHover(false)}
                 >
-                  {loadingNewChat ? (
-                    <Loader color="#df77f5" size="sm" />
-                  ) : (
-                    <>
-                      {" "}
-                      <IconPlus color="#df77f5" />
-                      <Text size="sm" fw={600} color="#E25DEE" mt={"sm"}>
-                        New Chat
-                      </Text>
-                    </>
-                  )}
-                </Paper>
+                  New Chat
+                </Button>
                 <div
                   ref={containerRef}
                   style={{ overflowX: "hidden", whiteSpace: "nowrap" }}
                 >
                   {threads
                     .sort((a, b) => b.id - a.id)
+                    .filter((thread) =>
+                      type === "active"
+                        ? thread.status === "ACTIVE" ||
+                          thread.status === "PENDING_OPERATOR" ||
+                          thread.status === "BLOCKED"
+                        : thread.status === "COMPLETE" ||
+                          thread.status === "CANCELLED"
+                    )
                     .map((thread: ThreadType, index) => {
                       return (
                         <Paper
@@ -1145,7 +1226,7 @@ export default function SelinAI() {
                           p={"sm"}
                           style={{
                             display: "inline-block",
-                            minWidth: "400px",
+                            minWidth: "350px",
                             backgroundColor:
                               sessionIDRef.current === thread.id
                                 ? "#d0f0c0"
@@ -1158,25 +1239,23 @@ export default function SelinAI() {
                           className={`transition duration-300 ease-in-out transform ${
                             sessionIDRef.current === thread.id
                               ? "scale-105 shadow-2xl"
-                              : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl"
+                              : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
                           }`}
                           onClick={() => {
                             getMessages(thread.thread_id, thread.id);
                             toggle();
                           }}
+                          onMouseEnter={() => setHoverChat(thread.id)}
+                          onMouseLeave={() => setHoverChat(undefined)}
                         >
-                          <Flex align={"center"} gap={"sm"}>
+                          {/* <Flex align={"center"} gap={"sm"}>
                             {thread.status === "ACTIVE" ? (
                               <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
                                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                               </div>
                             ) : // </ThemeIcon>
                             thread.status === "COMPLETE" ? (
-                              <IconCircleCheck
-                                size={"1rem"}
-                                fill="green"
-                                color="white"
-                              />
+                              <IconCircleCheck size={"1rem"} fill="green" color="white" />
                             ) : thread.status === "PENDING_OPERATOR" ? (
                               // <ThemeIcon color="orange" radius={"xl"} size={"xs"} p={0} variant="light">
                               //   <IconPoint fill="orange" color="white" size={"4rem"} />
@@ -1187,37 +1266,18 @@ export default function SelinAI() {
                             ) : (
                               <></>
                             )}{" "}
-                            <Text
-                              color={
-                                thread.status === "PENDING_OPERATOR"
-                                  ? "orange"
-                                  : "green"
-                              }
-                              fw={600}
-                            >
-                              {thread.status === "PENDING_OPERATOR"
-                                ? "IN PROGRESS"
-                                : thread.status}
+                            <Text color={thread.status === "PENDING_OPERATOR" ? "orange" : "green"} fw={600}>
+                              {thread.status === "PENDING_OPERATOR" ? "IN PROGRESS" : thread.status}
                             </Text>
                             <ActionIcon
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setThreads((prevThreads) =>
-                                  prevThreads.filter(
-                                    (prevThread) => prevThread.id !== thread.id
-                                  )
-                                );
+                                setThreads((prevThreads) => prevThreads.filter((prevThread) => prevThread.id !== thread.id));
                                 //if the chat we're in is the one we're deleting, we need to get the next chat
                                 if (sessionIDRef.current === thread.id) {
-                                  const nextThread = threads.find(
-                                    (thread) =>
-                                      thread.id !== sessionIDRef.current
-                                  );
+                                  const nextThread = threads.find((thread) => thread.id !== sessionIDRef.current);
                                   if (nextThread) {
-                                    getMessages(
-                                      nextThread.thread_id,
-                                      nextThread.id
-                                    );
+                                    getMessages(nextThread.thread_id, nextThread.id);
                                   } else {
                                     handleCreateNewSession();
                                     setAIType("PLANNER");
@@ -1240,18 +1300,84 @@ export default function SelinAI() {
                             >
                               <IconTrash size={"1rem"} color="red" />
                             </ActionIcon>
+                          </Flex> */}
+                          <Flex align={"center"} justify={"space-between"}>
+                            <Text fw={600}>
+                              {thread.session_name || "Untitled Session"}
+                            </Text>
+                            {hoverChat && hoverChat === thread.id && (
+                              <ActionIcon
+                                variant="transparent"
+                                color="red"
+                                size={"sm"}
+                              >
+                                <IconTrash size={"1rem"} />
+                              </ActionIcon>
+                            )}
                           </Flex>
-                          <Text fw={600}>
-                            {thread.session_name || "Untitled Session"}
-                          </Text>
-                          <Text color="gray">
-                            Completed on:{" "}
-                            {thread.estimated_completion_time
-                              ? moment(
-                                  thread.estimated_completion_time
-                                ).fromNow()
-                              : "N/A"}
-                          </Text>
+                          <Flex align={"center"} gap={"xs"}>
+                            {thread.status === "ACTIVE" && (
+                              <Flex align={"center"} gap={4}>
+                                <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
+                                  <div className="w-[6px] h-[6px] bg-green-500 rounded-full"></div>
+                                </div>
+                                <Text color="green" fw={500} size={"sm"}>
+                                  Live
+                                </Text>
+                              </Flex>
+                            )}
+                            {thread.status === "PENDING_OPERATOR" && (
+                              <Flex align={"center"} gap={4}>
+                                <div className="flex items-center justify-center bg-yellow-100 rounded-full p-1 border-yellow-300 border-[1px] border-solid">
+                                  <div className="w-[6px] h-[6px] bg-yellow-500 rounded-full"></div>
+                                </div>
+                                <Text color="yellow" fw={500} size={"sm"}>
+                                  In Progress
+                                </Text>
+                              </Flex>
+                            )}
+                            {thread.status === "BLOCKED" && (
+                              <Flex align={"center"} gap={4}>
+                                <div className="flex items-center justify-center bg-red-100 rounded-full p-1 border-red-300 border-[1px] border-solid">
+                                  <div className="w-[6px] h-[6px] bg-red-500 rounded-full"></div>
+                                </div>
+                                <Text color="red" fw={500} size={"sm"}>
+                                  Blocked
+                                </Text>
+                              </Flex>
+                            )}
+                            {thread.status === "COMPLETE" && (
+                              <Flex align={"center"} gap={4}>
+                                <div className="flex items-center justify-center bg-blue-100 rounded-full p-1 border-blue-300 border-[1px] border-solid">
+                                  <div className="w-[6px] h-[6px] bg-blue-500 rounded-full"></div>
+                                </div>
+                                <Text color="blue" fw={500} size={"sm"}>
+                                  Done
+                                </Text>
+                              </Flex>
+                            )}
+                            {thread.status === "CANCELLED" && (
+                              <Flex align={"center"} gap={4}>
+                                <div className="flex items-center justify-center bg-gray-100 rounded-full p-1 border-gray-300 border-[1px] border-solid">
+                                  <div className="w-[6px] h-[6px] bg-gray-500 rounded-full"></div>
+                                </div>
+                                <Text color="gray" fw={500} size={"sm"}>
+                                  Cancelled
+                                </Text>
+                              </Flex>
+                            )}
+
+                            <Text color="gray" size={"sm"}>
+                              {thread.estimated_completion_time
+                                ? moment(
+                                    thread.estimated_completion_time
+                                  ).fromNow()
+                                : "N/A"}{" "}
+                              {(thread.status === "ACTIVE" ||
+                                thread.status === "IN_PROGRESS") &&
+                                "remaining"}
+                            </Text>
+                          </Flex>
                         </Paper>
                       );
                     })}

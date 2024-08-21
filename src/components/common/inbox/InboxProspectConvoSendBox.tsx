@@ -108,6 +108,7 @@ import postSmartleadReply from "@utils/requests/postSmartleadReply";
 import { convertToTitleCase } from "@utils/stringFormatting";
 import { postGenerateEmailReplyUsingFramework } from "@utils/requests/emailReplies";
 import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
+import ScheduledMessage from "./ScheduledMessage";
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -309,9 +310,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         scheduleDay
       ).then(() => {
         queryClient.refetchQueries({
-          queryKey: [
-            `query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`,
-          ],
+          queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
         });
       });
       if (true) {
@@ -329,9 +328,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           ]);
         } else {
           queryClient.refetchQueries({
-            queryKey: [
-              `query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`,
-            ],
+            queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
           });
           queryClient.refetchQueries({
             queryKey: ["query-prospects-list"],
@@ -452,9 +449,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           ]);
         } else {
           queryClient.refetchQueries({
-            queryKey: [
-              `query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`,
-            ],
+            queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
           });
         }
         messageDraftEmail.current = "";
@@ -696,10 +691,15 @@ export default forwardRef(function InboxProspectConvoSendBox(
         flexWrap: "nowrap",
         position: "relative",
       }}
+      style={{ border: '0px' }}
       pb={8}
       mah={500}
+      bg={'transparent'}
     >
       <LoadingOverlay visible={msgLoading} />
+      <div key={openedProspectId} className='mb-4 bg-transparent mx-6'>
+        <ScheduledMessage openedProspectId={openedProspectId}/>
+      </div>
       <div
         style={{
           flexBasis: "15%",
@@ -1195,11 +1195,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     return;
                   }
 
-                  const result = await postGenerateEmailReplyUsingFramework(
-                    userToken,
-                    selectedEmailReplyFramework?.id,
-                    props.prospectId
-                  );
+                  const result = await postGenerateEmailReplyUsingFramework(userToken, selectedEmailReplyFramework?.id, props.prospectId);
 
                   // Clean the result
                   const email_body = result.data.message;

@@ -53,7 +53,7 @@ import {
   proxyURL,
   valueToColor,
 } from "@utils/general";
-import { getConversation, getScheduledMessages } from "@utils/requests/getConversation";
+import { getConversation } from "@utils/requests/getConversation";
 import {
   getProspectByID,
   getProspectShallowByID,
@@ -474,10 +474,6 @@ export default function InboxProspectConvo(props: Props) {
 
       // For LinkedIn //
       const result = await getConversation(userToken, openedProspectId, false);
-      const scheduledMessagesResponse = await getScheduledMessages(
-        userToken,
-        openedProspectId
-      )
       const finalMessages =
         result.status === "success"
           ? (result.data.data.reverse() as LinkedInMessage[])

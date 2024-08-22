@@ -165,7 +165,9 @@ import { CTAGeneratorSuggestedModal } from "@modals/CTAGeneratorSuggestedModal";
 import { createBumpFramework } from "@utils/requests/createBumpFramework";
 import useRefresh from "@common/library/use-refresh";
 import AIBrainPill from "@common/persona/ICPFilter/AiBrainPill";
-import getResearchPointTypes from "@utils/requests/getResearchPointTypes";
+import getResearchPointTypes, {
+  getResearchPoint,
+} from "@utils/requests/getResearchPointTypes";
 import BumpFrameworkAssets from "@modals/BumpFrameworkAssets";
 import LiInitialMessageAssets from "@modals/LiInitialMessageAssets";
 
@@ -305,8 +307,8 @@ export default function LinkedInSequenceSection(props: {
       ? "green"
       : !bf?.etl_num_times_used ||
         (bf?.etl_num_times_used && bf?.etl_num_times_used < 10)
-      ? "gray"
-      : "red";
+        ? "gray"
+        : "red";
   };
 
   const getReplyPillText = (
@@ -464,8 +466,8 @@ export default function LinkedInSequenceSection(props: {
                         isNaN(replyRate)
                           ? "grey"
                           : replyRate > 0.5
-                          ? "green"
-                          : "red"
+                            ? "green"
+                            : "red"
                       }
                     >
                       Replied:{" "}
@@ -489,11 +491,11 @@ export default function LinkedInSequenceSection(props: {
                       : (bf0 &&
                         bf0.etl_num_times_used &&
                         bf0.etl_num_times_used < 20
-                          ? "Not enough data, "
-                          : "") +
-                        (bf0?.etl_num_times_converted || 0) +
-                        " / " +
-                        (bf0?.etl_num_times_used || 0)
+                        ? "Not enough data, "
+                        : "") +
+                      (bf0?.etl_num_times_converted || 0) +
+                      " / " +
+                      (bf0?.etl_num_times_used || 0)
                   }
                   bodyTitle={bf0?.title ?? ""}
                   // bodyText={bf0?.description ?? ""}
@@ -570,11 +572,11 @@ export default function LinkedInSequenceSection(props: {
                       : (bf1 &&
                         bf1.etl_num_times_used &&
                         bf1.etl_num_times_used < 20
-                          ? "Not enough data, "
-                          : "") +
-                        (bf1?.etl_num_times_converted || 0) +
-                        " / " +
-                        (bf1?.etl_num_times_used || 0)
+                        ? "Not enough data, "
+                        : "") +
+                      (bf1?.etl_num_times_converted || 0) +
+                      " / " +
+                      (bf1?.etl_num_times_used || 0)
                   }
                   badgeColor={bumpConversionColor(bf1, bf1Conversion)}
                   bodyTitle={bf1?.title ?? ""}
@@ -656,11 +658,11 @@ export default function LinkedInSequenceSection(props: {
                       : (bf2 &&
                         bf2.etl_num_times_used &&
                         bf2.etl_num_times_used < 20
-                          ? "Not enough data, "
-                          : "") +
-                        (bf2?.etl_num_times_converted || 0) +
-                        " / " +
-                        (bf2?.etl_num_times_used || 0)
+                        ? "Not enough data, "
+                        : "") +
+                      (bf2?.etl_num_times_converted || 0) +
+                      " / " +
+                      (bf2?.etl_num_times_used || 0)
                   }
                   bodyTitle={bf2?.title ?? ""}
                   // bodyText={bf2?.description ?? ""}
@@ -741,11 +743,11 @@ export default function LinkedInSequenceSection(props: {
                       : (bf3 &&
                         bf3.etl_num_times_used &&
                         bf3.etl_num_times_used < 20
-                          ? "Not enough data, "
-                          : "") +
-                        (bf3?.etl_num_times_converted || 0) +
-                        " / " +
-                        (bf3?.etl_num_times_used || 0)
+                        ? "Not enough data, "
+                        : "") +
+                      (bf3?.etl_num_times_converted || 0) +
+                      " / " +
+                      (bf3?.etl_num_times_used || 0)
                   }
                   bodyTitle={bf3?.title ?? ""}
                   // bodyText={bf3?.description ?? ""}
@@ -880,7 +882,7 @@ export default function LinkedInSequenceSection(props: {
         </Group>
         <PersonaUploadDrawer
           personaOverviews={currentProject ? [currentProject] : []}
-          afterUpload={() => {}}
+          afterUpload={() => { }}
         />
       </Card>
     </>
@@ -1068,14 +1070,14 @@ function BumpFrameworkSelect(props: {
             title: "Make your own framework",
             innerProps: {
               modalOpened: true,
-              openModal: () => {},
+              openModal: () => { },
               closeModal: () => {
                 queryClient.refetchQueries({
                   queryKey: [`query-get-bump-frameworks`],
                 });
                 modals.closeAll();
               },
-              backFunction: () => {},
+              backFunction: () => { },
               dataChannels: dataChannels,
               status: props.overallStatus,
               archetypeID: currentProject?.id,
@@ -1097,6 +1099,12 @@ function BumpFrameworkSelect(props: {
       </Button>
     </>
   );
+}
+
+interface ResearchPoint {
+  id: number;
+  research_point_type: string;
+  value: string;
 }
 
 export function IntroMessageSection(props: {
@@ -1171,6 +1179,33 @@ export function IntroMessageSection(props: {
     },
     refetchOnWindowFocus: false,
     enabled: !!currentProject && !!currentProject.template_mode,
+  });
+
+  // get research points for selected prospect
+  const { data: researchPoints, refetch } = useQuery({
+    queryKey: [`query-get-research-points`, prospectId],
+    queryFn: async () => {
+      const response = await getResearchPoint(userToken, prospectId);
+
+      return response.status === "success"
+        ? (response.data as ResearchPoint[])
+        : [];
+    },
+    enabled: !!prospectId,
+  });
+
+  const { data: researchPointTypes } = useQuery({
+    queryKey: [`query-get-research-point-types`],
+    queryFn: async () => {
+      const response = await getResearchPointTypes(
+        userToken,
+        currentProject ? currentProject.id : undefined
+      );
+      return response.status === "success"
+        ? (response.data as ResearchPointType[])
+        : [];
+    },
+    refetchOnWindowFocus: false,
   });
 
   const getIntroMessage = async (
@@ -1267,7 +1302,7 @@ export function IntroMessageSection(props: {
     });
   }, [prospectId, selectedTemplateId]);
 
-  console.log("Message Meta Data: ", messageMetaData);
+  console.log("meta_data", messageMetaData);
 
   // if (!currentProject) return <></>;
   return (
@@ -1282,8 +1317,8 @@ export function IntroMessageSection(props: {
         {!currentProject?.template_mode && (
           <VoiceSelect
             personaId={currentProject?.id || -1}
-            onChange={(voice) => {}}
-            onFinishLoading={(voices) => {}}
+            onChange={(voice) => { }}
+            onFinishLoading={(voices) => { }}
             autoSelect
           />
         )}
@@ -1294,7 +1329,7 @@ export function IntroMessageSection(props: {
           character limit.
         </Text>
       </Box>
-      <Flex direction={'column'} gap={'16px'}>
+      <Flex direction={"column"} gap={"16px"}>
         <Stack pt={20} spacing={5} sx={{ position: "relative" }}>
           {noProspectsFound ? (
             <Box
@@ -1370,12 +1405,16 @@ export function IntroMessageSection(props: {
                 p="sm"
                 h={250}
               >
-                <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
+                <LoadingOverlay
+                  visible={loading || prospectsLoading}
+                  zIndex={10}
+                />
                 {message && (
                   <LiExampleInvitation
                     message={message}
                     startHovered={
-                      activeTab === "personalization" || hoveredPersonSettingsBtn
+                      activeTab === "personalization" ||
+                        hoveredPersonSettingsBtn
                         ? true
                         : undefined
                     }
@@ -1405,15 +1444,66 @@ export function IntroMessageSection(props: {
                       </Badge>
                     </HoverCard.Target>
                     <HoverCard.Dropdown>
-                      <List>
-                        {messageMetaData?.notes?.map(
-                          (note: any, index: number) => (
-                            <List.Item key={index}>
-                              <Text fz="sm">{note}</Text>
-                            </List.Item>
-                          )
-                        )}
-                      </List>
+                      {messageMetaData?.combined ? (
+                        <List>
+                          {messageMetaData?.combined.map(
+                            (combined_data: any, index: number) => {
+                              return (
+                                <List.Item key={index}>
+                                  <Flex direction={"column"}>
+                                    <Text fz="sm" fw={"bold"}>
+                                      {_.startCase(
+                                        combined_data.research_point_type
+                                          .toLowerCase()
+                                          .replaceAll("_", " ")
+                                          .replace("aicomp", "")
+                                          .replace("aiind", "")
+                                      )}
+                                    </Text>
+                                    <Text fz="sm">{combined_data.value}</Text>
+                                  </Flex>
+                                </List.Item>
+                              );
+                            }
+                          )}
+                        </List>
+                      ) : (
+                        <List>
+                          {messageMetaData?.notes?.map(
+                            (note: any, index: number) => {
+                              const researchPointId =
+                                messageMetaData?.research_points[index];
+
+                              const researchPointType =
+                                researchPointTypes?.find(
+                                  (item) => item.id === researchPointId
+                                );
+
+                              return (
+                                <List.Item key={index}>
+                                  <Flex direction="column">
+                                    {researchPointType && (
+                                      <Text fz="sm" fw={"bold"}>
+                                        {_.startCase(
+                                          researchPointType.name
+                                            .toLowerCase()
+                                            .replaceAll("_", " ")
+                                            .replace("aicomp", "")
+                                            .replace("aiind", "")
+                                        )}
+                                      </Text>
+                                    )}
+                                    <Text fz="sm">
+                                      {messageMetaData?.notes}
+                                    </Text>
+                                    <Text fz="sm">{note}</Text>
+                                  </Flex>
+                                </List.Item>
+                              );
+                            }
+                          )}
+                        </List>
+                      )}
                     </HoverCard.Dropdown>
                   </HoverCard>
                   <HoverCard width={280} shadow="md">
@@ -1436,7 +1526,6 @@ export function IntroMessageSection(props: {
               )}
             </Box>
           )}
-
         </Stack>
 
         {currentProject?.template_mode ? (
@@ -1570,6 +1659,7 @@ export function IntroMessageSection(props: {
 
             <Tabs.Panel value="personalization">
               <PersonalizationSection
+                researchPoints={researchPoints}
                 blocklist={currentProject?.transformer_blocklist_initial ?? []}
                 onItemsChange={async (items) => {
                   setPersonalizationItemsCount(
@@ -1584,7 +1674,10 @@ export function IntroMessageSection(props: {
                   );
 
                   setCurrentProject(
-                    await getFreshCurrentProject(userToken, currentProject?.id || -1)
+                    await getFreshCurrentProject(
+                      userToken,
+                      currentProject?.id || -1
+                    )
                   );
                 }}
               />
@@ -1615,7 +1708,6 @@ export function IntroMessageSection(props: {
           </Tabs>
         )}
       </Flex>
-
     </Stack>
   );
 }
@@ -1679,10 +1771,10 @@ function LiExampleInvitation(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
-          .length - 1
-      ].fileIdentifyingUrlPathSegment
+    liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
+      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
+        .length - 1
+    ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile?.firstName + " " + liSDR.miniProfile?.lastName
@@ -1963,10 +2055,10 @@ function LiExampleMessage(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
-          .length - 1
-      ].fileIdentifyingUrlPathSegment
+    liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
+      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
+        .length - 1
+    ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile?.firstName + " " + liSDR.miniProfile?.lastName
@@ -2090,17 +2182,17 @@ function FrameworkCard(props: {
         cursor: "pointer",
         backgroundColor: props.active
           ? theme.fn.lighten(
-              theme.fn.variant({ variant: "filled", color: "blue" })
-                .background!,
-              0.95
-            )
+            theme.fn.variant({ variant: "filled", color: "blue" })
+              .background!,
+            0.95
+          )
           : hovered
-          ? theme.fn.lighten(
+            ? theme.fn.lighten(
               theme.fn.variant({ variant: "filled", color: "blue" })
                 .background!,
               0.99
             )
-          : undefined,
+            : undefined,
         borderColor:
           props.active || hovered
             ? theme.colors.blue[5] + "!important"
@@ -2129,10 +2221,10 @@ function FrameworkCard(props: {
                 props.conversion > 9.0
                   ? "Your open rates are above industry standards (9%). Congrats!"
                   : props.conversion <= 9.0 && props.conversion > 0.0
-                  ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
+                    ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
                     Math.round(props.conversion * 10) / 10 +
                     "%."
-                  : (props.timesUsed && props.timesUsed < 20
+                    : (props.timesUsed && props.timesUsed < 20
                       ? "Not enough data, "
                       : "") +
                     props.timesConverted +
@@ -2149,8 +2241,8 @@ function FrameworkCard(props: {
                   isNaN(props.conversion)
                     ? "grey"
                     : props.conversion > 9.0
-                    ? "green"
-                    : "red"
+                      ? "green"
+                      : "red"
                 }
               >
                 Opened:{" "}
@@ -2726,9 +2818,7 @@ function FrameworkSection(props: {
                       p="sm"
                       mih={150}
                     >
-                      {generateMessageLoading && (
-                        <Loader />
-                      )}
+                      {generateMessageLoading && <Loader />}
                       {message && (
                         <LiExampleMessage
                           message={message}
@@ -2945,7 +3035,7 @@ function FrameworkSection(props: {
                               Math.round(
                                 (bf.etl_num_times_converted /
                                   (bf.etl_num_times_used + 0.0001)) *
-                                  100
+                                100
                               )}
                             % reply
                           </Text>
@@ -2996,7 +3086,7 @@ function FrameworkSection(props: {
                                 color="lime"
                                 variant={
                                   bf.active_transformers &&
-                                  bf.active_transformers.length > 0
+                                    bf.active_transformers.length > 0
                                     ? "filled"
                                     : "outline"
                                 }
@@ -3007,9 +3097,9 @@ function FrameworkSection(props: {
                                 }}
                               >
                                 {bf.active_transformers &&
-                                bf.active_transformers.length > 0
+                                  bf.active_transformers.length > 0
                                   ? bf.active_transformers.length +
-                                    " Research Points"
+                                  " Research Points"
                                   : "0 Research Points"}
                               </Badge>
                             </HoverCard.Target>
@@ -3029,11 +3119,11 @@ function FrameworkSection(props: {
                                 <TextWithNewline style={{ fontSize: "12px" }}>
                                   {bf.active_transformers.length > 0
                                     ? "<b>Active Research Points:</b>\n- " +
-                                      bf.active_transformers
-                                        .map((rp: any) =>
-                                          rp.replaceAll("_", " ").toLowerCase()
-                                        )
-                                        .join("\n- ")
+                                    bf.active_transformers
+                                      .map((rp: any) =>
+                                        rp.replaceAll("_", " ").toLowerCase()
+                                      )
+                                      .join("\n- ")
                                     : "Click to activate more research points"}
                                 </TextWithNewline>
                               </Paper>
@@ -3113,8 +3203,8 @@ function FrameworkSection(props: {
                                     .replaceAll(
                                       "[[",
                                       "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                        theme.colors["blue"][5] +
-                                        "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                                      theme.colors["blue"][5] +
+                                      "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
                                     )
                                     .replaceAll("]]", "</span>")
                                     .replaceAll(
@@ -3519,7 +3609,7 @@ function TemplateSection(props: {
                       {Math.round(
                         (template.times_accepted /
                           (template.times_used + 0.0001)) *
-                          100
+                        100
                       )}
                       % reply
                     </Text>
@@ -3664,8 +3754,8 @@ function TemplateSection(props: {
                                 .replaceAll(
                                   "[[",
                                   "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                    theme.colors["blue"][5] +
-                                    "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                                  theme.colors["blue"][5] +
+                                  "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
                                 )
                                 .replaceAll("]]", "</span>") as string
                             ),
@@ -3836,6 +3926,7 @@ export const PersonalizationSection = (props: {
   onChanged?: () => void;
   title?: string;
   hideAnalytics?: boolean;
+  researchPoints?: ResearchPoint[];
 }) => {
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
@@ -3843,7 +3934,10 @@ export const PersonalizationSection = (props: {
   const { data: researchPointTypes } = useQuery({
     queryKey: [`query-get-research-point-types`],
     queryFn: async () => {
-      const response = await getResearchPointTypes(userToken, currentProject ? currentProject.id : undefined);
+      const response = await getResearchPointTypes(
+        userToken,
+        currentProject ? currentProject.id : undefined
+      );
       return response.status === "success"
         ? (response.data as ResearchPointType[])
         : [];
@@ -3855,15 +3949,33 @@ export const PersonalizationSection = (props: {
     if (!researchPointTypes) return;
     const convertedType = researchPointTypes.map((rp) => {
       return {
-        title: _.startCase(rp.name.toLowerCase().replaceAll("_", " ").replace("aicomp", "").replace("aiind", "")),
+        title: _.startCase(
+          rp.name
+            .toLowerCase()
+            .replaceAll("_", " ")
+            .replace("aicomp", "")
+            .replace("aiind", "")
+        ),
         id: rp.name,
         checked: !props.blocklist.includes(rp.name),
         disabled: !!currentProject?.transformer_blocklist?.includes(rp.name),
       };
     });
 
-    setProspectItems(convertedType.filter((rp) => (!rp.id.includes("JOB") && !rp.id.includes("AICOMP")) || rp.id.includes("AIIND")));
-    setCompanyItems(convertedType.filter((rp) => (rp.id.includes("JOB") && !rp.id.includes("AIIND")) || rp.id.includes("AICOMP")));
+    setProspectItems(
+      convertedType.filter(
+        (rp) =>
+          (!rp.id.includes("JOB") && !rp.id.includes("AICOMP")) ||
+          rp.id.includes("AIIND")
+      )
+    );
+    setCompanyItems(
+      convertedType.filter(
+        (rp) =>
+          (rp.id.includes("JOB") && !rp.id.includes("AIIND")) ||
+          rp.id.includes("AICOMP")
+      )
+    );
   }, [researchPointTypes]);
 
   const [prospectItems, setProspectItems] = useState<
@@ -3985,6 +4097,8 @@ export const PersonalizationSection = (props: {
     });
   }
 
+  console.log("all Items: ", allItems);
+
   return (
     <Flex direction="column">
       <Card radius={"md"} mb={"1rem"}>
@@ -4032,6 +4146,9 @@ export const PersonalizationSection = (props: {
               }
               color={item.type === "PROSPECT" ? "teal" : "grape"}
               hideAnalytics={props.hideAnalytics}
+              researchPoint={props.researchPoints?.find(
+                (researchPoint) => researchPoint.research_point_type === item.id
+              )}
             />
           ))}
         </Flex>
@@ -4049,6 +4166,7 @@ const ProcessBar: React.FC<{
   color?: string;
   onPressItem: (itemId: string, checked: boolean) => void;
   hideAnalytics?: boolean;
+  researchPoint?: ResearchPoint;
 }> = ({
   id,
   title,
@@ -4058,46 +4176,51 @@ const ProcessBar: React.FC<{
   checked,
   onPressItem,
   hideAnalytics = false,
+  researchPoint,
 }) => {
-  return (
-    <Flex align={"center"} gap={"0.5rem"}>
-      <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
-        <Checkbox
-          size={"sm"}
-          label={<Text fw={300}>{title}</Text>}
-          checked={checked}
-          disabled={disabled}
-          variant="outline"
-          onChange={(event) => onPressItem(id, event.currentTarget.checked)}
-          color={color}
-        />
-        <Flex sx={{ flex: 1 }}>
-          <Divider w={"100%"} color={"#E9ECEF"} />
+    return (
+      <Flex align={"center"} gap={"0.5rem"}>
+        <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
+          <Tooltip 
+          label={researchPoint ? researchPoint.value : "No value"}
+          style={{maxWidth: "300px", textWrap: "wrap"}}>
+            <Checkbox
+              size={"sm"}
+              label={<Text fw={300}>{title}</Text>}
+              checked={checked}
+              disabled={disabled}
+              variant="outline"
+              onChange={(event) => onPressItem(id, event.currentTarget.checked)}
+              color={color}
+            />
+          </Tooltip>
+          <Flex sx={{ flex: 1 }}>
+            <Divider w={"100%"} color={"#E9ECEF"} />
+          </Flex>
+          <Tooltip label="Historical Acceptance Rate" withArrow>
+            <Button
+              variant={"light"}
+              fw={700}
+              size="xs"
+              color={color}
+              radius="xl"
+              h="auto"
+              fz={"0.625rem"}
+              py={"0.125rem"}
+              px={"0.25rem"}
+            >
+              {hideAnalytics ? "Not Available" : percent + "%"}
+            </Button>
+          </Tooltip>
         </Flex>
-        <Tooltip label="Historical Acceptance Rate" withArrow>
-          <Button
-            variant={"light"}
-            fw={700}
-            size="xs"
-            color={color}
-            radius="xl"
-            h="auto"
-            fz={"0.625rem"}
-            py={"0.125rem"}
-            px={"0.25rem"}
-          >
-            {hideAnalytics ? "Not Available" : percent + "%"}
-          </Button>
-        </Tooltip>
+        {!hideAnalytics && (
+          <Flex direction={"column"} sx={{ flex: 6 }}>
+            <Progress value={percent} color={color} size={"lg"} radius="xl" />
+          </Flex>
+        )}
       </Flex>
-      {!hideAnalytics && (
-        <Flex direction={"column"} sx={{ flex: 6 }}>
-          <Progress value={percent} color={color} size={"lg"} radius="xl" />
-        </Flex>
-      )}
-    </Flex>
-  );
-};
+    );
+  };
 
 export const PersonalizationCard: React.FC<{
   title: string;

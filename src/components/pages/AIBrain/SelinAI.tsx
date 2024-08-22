@@ -28,6 +28,7 @@ import {
   LoadingOverlay,
   Kbd,
   Group,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconBrowser,
@@ -45,6 +46,7 @@ import {
   IconFile,
   IconFlask,
   IconHammer,
+  IconHistory,
   IconInfoCircle,
   IconLink,
   IconList,
@@ -227,6 +229,7 @@ interface TaskType {
   created_at: string;
   updated_at: string;
   selix_session_id: number;
+  rewind_img: string | null;
 }
 
 export interface MemoryType {
@@ -950,16 +953,21 @@ export default function SelinAI() {
     const fetchAndLoadMessages = async () => {
       const threads_loaded = await fetchChatHistory();
       const urlParams = new URLSearchParams(window.location.search);
-      const sessionIdFromUrl = urlParams.get('session_id');
-      const threadIdFromUrl = urlParams.get('thread_id');
-      console.log('session id from url is', sessionIdFromUrl);
-      console.log('got here');
+      const sessionIdFromUrl = urlParams.get("session_id");
+      const threadIdFromUrl = urlParams.get("thread_id");
+      console.log("session id from url is", sessionIdFromUrl);
+      console.log("got here");
       if (sessionIdFromUrl) {
         // Clear the URL parameters from the input bar
         const newUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
-        getMessages(threadIdFromUrl || '', parseInt(sessionIdFromUrl), threads_loaded, 'PLANNER');
-        setAIType('PLANNER');
+        getMessages(
+          threadIdFromUrl || "",
+          parseInt(sessionIdFromUrl),
+          threads_loaded,
+          "PLANNER"
+        );
+        setAIType("PLANNER");
       }
     };
 
@@ -1129,7 +1137,9 @@ export default function SelinAI() {
                         thread.status !== "COMPLETE" &&
                         thread.status !== "CANCELLED"
                     ).length - 1
-                  ) > 1 ? "other active sessions" : "other active session"}
+                  ) > 1
+                    ? "other active sessions"
+                    : "other active session"}
                 </Text>
               </Flex>
               <Flex align={"center"} gap={"sm"}>
@@ -2052,7 +2062,7 @@ const SegmentChat = (props: any) => {
                 <IconPlus size={"1rem"} />
               </ActionIcon> */}
               <ActionIcon
-                ml={'xl'}
+                ml={"xl"}
                 variant="outline"
                 color="gray"
                 radius={"xl"}
@@ -2070,8 +2080,8 @@ const SegmentChat = (props: any) => {
                   fileInput.click();
                 }}
               >
-                <Button ml="xl"color="grape" size="xs">
-                  {'Add File'}
+                <Button ml="xl" color="grape" size="xs">
+                  {"Add File"}
                   <IconPlus size={"1rem"} />
                 </Button>
               </ActionIcon>
@@ -2684,6 +2694,8 @@ const PlannerComponent = ({
     currentProjectState
   );
   const userToken = useRecoilValue(userTokenState);
+  const [showRewindImage, setShowRewindImage] = useState(false);
+  const [selectedRewindImage, setSelectedRewindImage] = useState<string>("");
 
   const campaignId = threads.find((thread) => thread.id === currentSessionId)
     ?.memory?.campaign_id;
@@ -2768,6 +2780,19 @@ const PlannerComponent = ({
           )}
         </Flex>
       </Paper>
+      <Modal
+        opened={showRewindImage}
+        onClose={() => setShowRewindImage(false)}
+        title="Rewind Image"
+      >
+        <img
+          src={selectedRewindImage}
+          alt="Rewind"
+          width={"100%"}
+          height={"100%"}
+          style={{ marginTop: "10px" }}
+        />
+      </Modal>
       <Collapse in={opened}>
         <ScrollArea
           h={"55vh"}
@@ -2829,6 +2854,28 @@ const PlannerComponent = ({
                       {task.title}
                     </Text>
                     <Flex align={"center"} gap={"xs"}>
+                      <Tooltip
+                        label={
+                          !task.rewind_img
+                            ? "No rewind available"
+                            : "View rewind"
+                        }
+                      >
+                        <Button
+                          size={"xs"}
+                          variant="outline"
+                          color={task.rewind_img ? "blue" : "gray"}
+                          leftIcon={<IconHistory size={14} />}
+                          onClick={() => {
+                            if (task.rewind_img) {
+                              setShowRewindImage(true);
+                              setSelectedRewindImage(task.rewind_img);
+                            }
+                          }}
+                        >
+                          Show Rewind
+                        </Button>
+                      </Tooltip>
                       <Text color="gray" size={"sm"} fw={500}>
                         {moment(task.created_at).fromNow()}
                       </Text>
@@ -2873,7 +2920,7 @@ const PlannerComponent = ({
                         }}
                       />
                     </Text>
-                    {index !== tasks.length - 1 && task.proof_of_work_img && (
+                    {task.proof_of_work_img && (
                       <img
                         src={task.proof_of_work_img}
                         alt="Proof of Work"

@@ -21,7 +21,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
-import { Icon123, IconChevronLeft, IconChevronRight, IconCircleCheck, IconLetterT, IconUsers, IconX } from "@tabler/icons";
+import { Icon123, IconChevronLeft, IconChevronRight, IconCircleCheck, IconLetterT, IconPlus, IconUsers, IconX } from "@tabler/icons";
 import { DataGrid, numberFilterFn, stringFilterFn } from "mantine-data-grid";
 import { useState } from "react";
 
@@ -196,6 +196,9 @@ export default function AccountContactFiltersModal({ context, id, innerProps }: 
                       <Textarea mt={"sm"} label="AI Filter" withAsterisk minRows={3} placeholder="Enter AI Prompt here: A question to score your..." />
                       <Checkbox mt={"sm"} label="Dealbreaker" />
                       <Checkbox mt={"sm"} label="Save to prospect" />
+                      <Button leftIcon={<IconPlus size={"1rem"} />} fullWidth mt={"40%"}>
+                        Add Filter
+                      </Button>
                     </Accordion.Panel>
                   </Accordion.Item>
                 </Accordion>

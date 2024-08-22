@@ -115,6 +115,7 @@ import CreateCampaignWithVoiceModal from "@modals/CreateCampaignWithVoiceModal";
 import CreateVisitorBucketModal from "@modals/website/CreateVisitorBucketModal";
 import ConnectSegmentModal from "@modals/SegmentV3/ConnectSegmentModal";
 import StrategyDeleteModal from "@modals/AIBrain/StrategyDeleteModal";
+import CampaignFilterModal from "@modals/CampaignFilterModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -124,7 +125,7 @@ socket.on("connect", () => {
 
 socket.on("disconnect", (reason) => {
   console.log(`Socket disconnected: ${socket.id}`);
-  console.log('reason: ', reason);
+  console.log("reason: ", reason);
 });
 
 export default function App() {
@@ -831,6 +832,7 @@ export default function App() {
               createICProutingModal: ICPRoutingCreateModal,
               createvisitorbucketmodal: CreateVisitorBucketModal,
               connectSegment: ConnectSegmentModal,
+              campaignFilter: CampaignFilterModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

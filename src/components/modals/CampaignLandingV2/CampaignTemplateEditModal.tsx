@@ -707,7 +707,7 @@ export default function CampaignTemplateEditModal({
                       <SequenceVariant
                         asset={template}
                         assetType={"linkedin"}
-                        refetch={async () => await innerProps.refetchSequenceData(innerProps.campaignId)}
+                        refetch={() => innerProps.refetchSequenceData(innerProps.campaignId)}
                         sequenceType={sequenceType}
                         angle={template.message}
                         text={template.message}
@@ -721,7 +721,6 @@ export default function CampaignTemplateEditModal({
                         handleToggle={handleToggle}
                         stagingData={stagingData}
                         setStagingData={setStagingData}
-                        currentStepNum={0}
                       />
                     ))}
                   </Flex>

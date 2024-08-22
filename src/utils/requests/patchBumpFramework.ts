@@ -32,7 +32,8 @@ export async function patchBumpFramework(
   additionalContext: string | null = null,
   bumpFrameworkTemplateName: string | null = null,
   bumpFrameworkHumanReadablePrompt: string | null = null,
-  humanFeedback: string | null = null
+  humanFeedback: string | null = null,
+  stepNumber?: number,
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/bump_framework/bump`, {
     method: 'PATCH',
@@ -55,6 +56,7 @@ export async function patchBumpFramework(
       bump_framework_template_name: bumpFrameworkTemplateName,
       bump_framework_human_readable_prompt: bumpFrameworkHumanReadablePrompt,
       human_feedback: humanFeedback,
+      step_number: stepNumber,
     }),
   });
   return await processResponse(response);

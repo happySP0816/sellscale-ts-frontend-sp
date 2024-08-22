@@ -560,8 +560,6 @@ const ArchetypeFilterModal = function({
       }),
   ];
 
-  console.log("csvData", csvData);
-  console.log("headers", csvHeaders);
 
   // Checkbox Handlers for selecting contacts
   const handleSelectContact = (contactId: number) => {

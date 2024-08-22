@@ -782,7 +782,7 @@ const ContactAccountFilterModal = function({
           </Flex>
           <ScrollArea w={800} h={700}>
             <Box>
-              {!isLoading && viewMode === "ACCOUNT" ? (
+              {!isLoading && icp_scoring_ruleset_typed && viewMode === "ACCOUNT" ? (
                 <Table style={{ overflow: "scroll" }} verticalSpacing={"sm"}>
                   <thead>
                     <tr>

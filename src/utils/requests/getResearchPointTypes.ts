@@ -11,3 +11,14 @@ export default async function getResearchPointTypes(userToken: string, archetype
   });
   return await processResponse(response, 'data');
 }
+
+export async function getResearchPoint(userToken: string, prospect_id: number): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/research/research_points/${prospect_id}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
+  return await processResponse(response, 'data');
+}
+

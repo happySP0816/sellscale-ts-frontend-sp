@@ -52,7 +52,7 @@ interface ContactAccountFilterModalProps {
   setShowContactAccountFilterModal: (showModal: boolean) => void;
 }
 
-const ArchetypeFilterModal = function ({
+const ArchetypeFilterModal = function({
   showContactAccountFilterModal,
   setShowContactAccountFilterModal,
 }: ContactAccountFilterModalProps) {
@@ -267,11 +267,11 @@ const ArchetypeFilterModal = function ({
           a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
             ? -1
             : !a.icp_fit_reason_v2 && b.icp_fit_reason_v2
-            ? 1
-            : !a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
-            ? 0
-            : Object.keys(b.icp_fit_reason_v2).length -
-              Object.keys(a.icp_fit_reason_v2).length;
+              ? 1
+              : !a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
+                ? 0
+                : Object.keys(b.icp_fit_reason_v2).length -
+                Object.keys(a.icp_fit_reason_v2).length;
 
         if (individual_fit_reason !== 0) {
           return individual_fit_reason;
@@ -666,7 +666,7 @@ const ArchetypeFilterModal = function ({
                         cancel: "Cancel",
                       },
                       confirmProps: { color: "red" },
-                      onCancel: () => {},
+                      onCancel: () => { },
                       onConfirm: () => {
                         triggerMoveToUnassigned();
                       },
@@ -700,7 +700,6 @@ const ArchetypeFilterModal = function ({
                   Download CSV
                 </Button>
               </CSVLink>
-             
             </Flex>
           )}
           <Flex gap={"4px"} align={"end"} justify={"space-between"}>
@@ -721,17 +720,17 @@ const ArchetypeFilterModal = function ({
                 <IconMagnet size={16} />
               </Button>
             </Tooltip>
-             <Modal
-                opened={openedCustomPoint}
-                onClose={customPointHandlers.close}
-                size="xl"
-                title="Custom Data Point Importer"
-              >
-                <Text size="xs" color="gray">
-                  Upload custom data points to your prospects.
-                </Text>
-                <CustomResearchPointCard />
-              </Modal>
+            <Modal
+              opened={openedCustomPoint}
+              onClose={customPointHandlers.close}
+              size="xl"
+              title="Custom Data Point Importer"
+            >
+              <Text size="xs" color="gray">
+                Upload custom data points to your prospects.
+              </Text>
+              <CustomResearchPointCard />
+            </Modal>
             <Switch
               size={"xl"}
               onLabel={"View All"}
@@ -800,178 +799,351 @@ const ArchetypeFilterModal = function ({
           </Tabs>
           <ScrollArea w={800} h={700}>
             <Box>
-              <Table style={{ overflow: "scroll" }} verticalSpacing={"sm"}>
-                <thead>
-                  <tr>
-                    <th>
-                      <Checkbox
-                        checked={selectedContacts.size === prospects.length}
-                        onChange={() => handleSelectAllContacts()}
-                      />
-                    </th>
-                    {icp_scoring_ruleset_typed &&
-                      contactTableHeaders.map((item) => {
-                        return (
-                          <th key={item.title}>
-                            <Flex align={"center"} justify={"space-between"}>
-                              <Flex direction={"column"} justify={"center"}>
-                                {item.title}
-                                {icp_scoring_ruleset_typed.individual_personalizers?.includes(
-                                  item.key
-                                ) && (
-                                  <span
-                                    style={{
-                                      fontStyle: "italic",
-                                      fontSize: "xx-small",
-                                    }}
-                                  >
-                                    Personalizer: ✅
-                                  </span>
-                                )}
-                                {icp_scoring_ruleset_typed.company_personalizers?.includes(
-                                  item.key
-                                ) && (
-                                  <span
-                                    style={{
-                                      fontStyle: "italic",
-                                      fontSize: "xx-small",
-                                    }}
-                                  >
-                                    Personalizer: ✅
-                                  </span>
-                                )}
-                                {icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                  item.key
-                                ) && (
-                                  <span
-                                    style={{
-                                      fontStyle: "italic",
-                                      fontSize: "xx-small",
-                                    }}
-                                  >
-                                    "Dealbreaker: ✅"
-                                  </span>
-                                )}
+              {icp_scoring_ruleset_typed && (
+                <Table style={{ overflow: "scroll" }} verticalSpacing={"sm"}>
+                  <thead>
+                    <tr>
+                      <th>
+                        <Checkbox
+                          checked={selectedContacts.size === prospects.length}
+                          onChange={() => handleSelectAllContacts()}
+                        />
+                      </th>
+                      {icp_scoring_ruleset_typed &&
+                        contactTableHeaders.map((item) => {
+                          return (
+                            <th key={item.title}>
+                              <Flex align={"center"} justify={"space-between"}>
+                                <Flex direction={"column"} justify={"center"}>
+                                  {item.title}
+                                  {icp_scoring_ruleset_typed.individual_personalizers?.includes(
+                                    item.key
+                                  ) && (
+                                      <span
+                                        style={{
+                                          fontStyle: "italic",
+                                          fontSize: "xx-small",
+                                        }}
+                                      >
+                                        Personalizer: ✅
+                                      </span>
+                                    )}
+                                  {icp_scoring_ruleset_typed.company_personalizers?.includes(
+                                    item.key
+                                  ) && (
+                                      <span
+                                        style={{
+                                          fontStyle: "italic",
+                                          fontSize: "xx-small",
+                                        }}
+                                      >
+                                        Personalizer: ✅
+                                      </span>
+                                    )}
+                                  {icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                    item.key
+                                  ) && (
+                                      <span
+                                        style={{
+                                          fontStyle: "italic",
+                                          fontSize: "xx-small",
+                                        }}
+                                      >
+                                        "Dealbreaker: ✅"
+                                      </span>
+                                    )}
+                                </Flex>
+                                {(!notFilters.includes(item.key) ||
+                                  item.title === "Score") && (
+                                    <Popover
+                                      width={400}
+                                      position="bottom"
+                                      withArrow
+                                      shadow="md"
+                                      withinPortal
+                                    >
+                                      <Popover.Target>
+                                        <ActionIcon>
+                                          <FaFilter
+                                            color={
+                                              filteredColumns.has(item.key)
+                                                ? "lightgreen"
+                                                : "grey"
+                                            }
+                                          />
+                                        </ActionIcon>
+                                      </Popover.Target>
+                                      <Popover.Dropdown>
+                                        <Select
+                                          label={item.title}
+                                          placeholder={
+                                            "Select the Property that you would like to filter for"
+                                          }
+                                          data={
+                                            item.title === "Score"
+                                              ? [
+                                                { value: "", label: "Select" },
+                                                {
+                                                  value: "0",
+                                                  label: "VERY LOW",
+                                                },
+                                                { value: "1", label: "LOW" },
+                                                { value: "2", label: "MEDIUM" },
+                                                { value: "3", label: "HIGH" },
+                                                {
+                                                  value: "4",
+                                                  label: "VERY HIGH",
+                                                },
+                                              ]
+                                              : [
+                                                { value: "", label: "Select" },
+                                                { value: "YES", label: "YES" },
+                                                { value: "NO", label: "NO" },
+                                              ]
+                                          }
+                                          onChange={(value) =>
+                                            onSelectFilter(item.key, value ?? "")
+                                          }
+                                          value={
+                                            filteredColumns.get(item.key)
+                                              ? (filteredColumns.get(
+                                                item.key
+                                              ) as string)
+                                              : ""
+                                          }
+                                        />
+                                      </Popover.Dropdown>
+                                    </Popover>
+                                  )}
                               </Flex>
-                              {(!notFilters.includes(item.key) ||
-                                item.title === "Score") && (
-                                <Popover
-                                  width={400}
-                                  position="bottom"
-                                  withArrow
-                                  shadow="md"
-                                  withinPortal
-                                >
-                                  <Popover.Target>
-                                    <ActionIcon>
-                                      <FaFilter
-                                        color={
-                                          filteredColumns.has(item.key)
-                                            ? "lightgreen"
-                                            : "grey"
-                                        }
-                                      />
-                                    </ActionIcon>
-                                  </Popover.Target>
-                                  <Popover.Dropdown>
-                                    <Select
-                                      label={item.title}
-                                      placeholder={
-                                        "Select the Property that you would like to filter for"
-                                      }
-                                      data={
-                                        item.title === "Score"
-                                          ? [
-                                              { value: "", label: "Select" },
-                                              {
-                                                value: "0",
-                                                label: "VERY LOW",
-                                              },
-                                              { value: "1", label: "LOW" },
-                                              { value: "2", label: "MEDIUM" },
-                                              { value: "3", label: "HIGH" },
-                                              {
-                                                value: "4",
-                                                label: "VERY HIGH",
-                                              },
-                                            ]
-                                          : [
-                                              { value: "", label: "Select" },
-                                              { value: "YES", label: "YES" },
-                                              { value: "NO", label: "NO" },
-                                            ]
-                                      }
-                                      onChange={(value) =>
-                                        onSelectFilter(item.key, value ?? "")
-                                      }
-                                      value={
-                                        filteredColumns.get(item.key)
-                                          ? (filteredColumns.get(
-                                              item.key
-                                            ) as string)
-                                          : ""
-                                      }
-                                    />
-                                  </Popover.Dropdown>
-                                </Popover>
-                              )}
-                            </Flex>
-                          </th>
+                            </th>
+                          );
+                        })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayProspects
+                      .slice(0, view10 ? 20 : undefined)
+                      .map((prospect, index) => {
+                        const keys: string[] = contactTableHeaders.map(
+                          (h) => h.key
                         );
-                      })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayProspects
-                    .slice(0, view10 ? 20 : undefined)
-                    .map((prospect, index) => {
-                      const keys: string[] = contactTableHeaders.map(
-                        (h) => h.key
-                      );
-                      const p = {
-                        ...prospect,
-                        ...prospect.icp_fit_reason_v2,
-                        ...prospect.icp_company_fit_reason,
-                      };
+                        const p = {
+                          ...prospect,
+                          ...prospect.icp_fit_reason_v2,
+                          ...prospect.icp_company_fit_reason,
+                        };
 
-                      return (
-                        <tr
-                          key={p.id}
-                          style={{
-                            backgroundColor: selectedContacts.has(p.id)
-                              ? "lightcyan"
-                              : "white",
-                          }}
-                        >
-                          <td>
-                            <Checkbox
-                              checked={selectedContacts.has(p.id)}
-                              onChange={() => handleSelectContact(p.id)}
-                            />
-                          </td>
-                          {keys.map((key) => {
-                            if (notFilters.includes(key)) {
-                              const keyType = key as keyof typeof p;
-                              if (key === "icp_fit_score") {
-                                const trueScore =
-                                  prospect.icp_fit_reason_v2 &&
-                                  Object.keys(prospect.icp_fit_reason_v2)
-                                    .length > 0;
+                        return (
+                          <tr
+                            key={p.id}
+                            style={{
+                              backgroundColor: selectedContacts.has(p.id)
+                                ? "lightcyan"
+                                : "white",
+                            }}
+                          >
+                            <td>
+                              <Checkbox
+                                checked={selectedContacts.has(p.id)}
+                                onChange={() => handleSelectContact(p.id)}
+                              />
+                            </td>
+                            {keys.map((key) => {
+                              if (notFilters.includes(key)) {
+                                const keyType = key as keyof typeof p;
+                                if (key === "icp_fit_score") {
+                                  const trueScore =
+                                    prospect.icp_fit_reason_v2 &&
+                                    Object.keys(prospect.icp_fit_reason_v2)
+                                      .length > 0;
 
-                                let humanReadableScore = "Not Scored";
+                                  let humanReadableScore = "Not Scored";
 
-                                if (p[keyType] === 0) {
-                                  humanReadableScore = "VERY LOW";
-                                } else if (p[keyType] === 1) {
-                                  humanReadableScore = "LOW";
-                                } else if (p[keyType] === 2) {
-                                  humanReadableScore = "MEDIUM";
-                                } else if (p[keyType] === 3) {
-                                  humanReadableScore = "HIGH";
-                                } else if (p[keyType] === 4) {
-                                  humanReadableScore = "VERY HIGH";
+                                  if (p[keyType] === 0) {
+                                    humanReadableScore = "VERY LOW";
+                                  } else if (p[keyType] === 1) {
+                                    humanReadableScore = "LOW";
+                                  } else if (p[keyType] === 2) {
+                                    humanReadableScore = "MEDIUM";
+                                  } else if (p[keyType] === 3) {
+                                    humanReadableScore = "HIGH";
+                                  } else if (p[keyType] === 4) {
+                                    humanReadableScore = "VERY HIGH";
+                                  }
+
+                                  return (
+                                    <td
+                                      key={key + p.id}
+                                      style={{
+                                        minWidth: "100px",
+                                        maxWidth: "300px",
+                                      }}
+                                    >
+                                      <HoverCard>
+                                        <HoverCard.Target>
+                                          <Badge
+                                            color={
+                                              humanReadableScore == "VERY HIGH"
+                                                ? "green"
+                                                : humanReadableScore == "HIGH"
+                                                  ? "blue"
+                                                  : humanReadableScore == "MEDIUM"
+                                                    ? "yellow"
+                                                    : humanReadableScore == "LOW"
+                                                      ? "orange"
+                                                      : humanReadableScore ==
+                                                        "VERY LOW" && trueScore
+                                                        ? "red"
+                                                        : "gray"
+                                            }
+                                            fw={600}
+                                          >
+                                            {trueScore
+                                              ? humanReadableScore
+                                              : "NOT SCORED"}
+                                          </Badge>
+                                        </HoverCard.Target>
+                                        <HoverCard.Dropdown>
+                                          <Flex
+                                            direction={"column"}
+                                            style={{ maxWidth: "400px" }}
+                                          >
+                                            {prospect.icp_fit_reason_v2 &&
+                                              Object.keys(
+                                                prospect.icp_fit_reason_v2
+                                              ).map((key) => {
+                                                const section =
+                                                  prospect.icp_fit_reason_v2[
+                                                  key
+                                                  ];
+                                                const title = key
+                                                  .replace("_individual_", "_")
+                                                  .replace("_company_", "_")
+                                                  .replace("aicomp_", "")
+                                                  .replace("aiind_", "")
+                                                  .replace("keywords", "")
+                                                  .split("_")
+                                                  .join(" ");
+
+                                                if (
+                                                  section.answer === "NO" &&
+                                                  icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                                    key
+                                                  )
+                                                ) {
+                                                  return (
+                                                    <Flex key={key} gap={"4px"}>
+                                                      <Text>❌</Text>
+                                                      <Text size="sm">
+                                                        <span
+                                                          style={{
+                                                            fontWeight: "bold",
+                                                          }}
+                                                        >
+                                                          {title}:
+                                                        </span>
+                                                        {section.reasoning
+                                                          .replace("❌", "")
+                                                          .replace("✅", "")}
+                                                      </Text>
+                                                    </Flex>
+                                                  );
+                                                } else if (
+                                                  section.answer === "YES"
+                                                ) {
+                                                  return (
+                                                    <Flex key={key} gap={"4px"}>
+                                                      <Text>✅</Text>
+                                                      <Text size="sm">
+                                                        <span
+                                                          style={{
+                                                            fontWeight: "bold",
+                                                          }}
+                                                        >
+                                                          {title}:
+                                                        </span>
+                                                        {section.reasoning
+                                                          .replace("❌", "")
+                                                          .replace("✅", "")}
+                                                      </Text>
+                                                    </Flex>
+                                                  );
+                                                }
+
+                                                return <></>;
+                                              })}
+                                            {prospect.icp_company_fit_reason &&
+                                              Object.keys(
+                                                prospect.icp_company_fit_reason
+                                              ).map((key) => {
+                                                const section =
+                                                  prospect
+                                                    .icp_company_fit_reason[
+                                                  key
+                                                  ];
+                                                const title = key
+                                                  .replace("_individual_", "_")
+                                                  .replace("_company_", "_")
+                                                  .replace("aicomp_", "")
+                                                  .replace("aiind_", "")
+                                                  .replace("keywords", "")
+                                                  .split("_")
+                                                  .join(" ");
+
+                                                if (
+                                                  section.answer === "NO" &&
+                                                  icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                                    key
+                                                  )
+                                                ) {
+                                                  return (
+                                                    <Flex key={key} gap={"4px"}>
+                                                      <Text>❌</Text>
+                                                      <Text size="sm">
+                                                        <span
+                                                          style={{
+                                                            fontWeight: "bold",
+                                                          }}
+                                                        >
+                                                          {title}:
+                                                        </span>
+                                                        {section.reasoning
+                                                          .replace("❌", "")
+                                                          .replace("✅", "")}
+                                                      </Text>
+                                                    </Flex>
+                                                  );
+                                                } else if (
+                                                  section.answer === "YES"
+                                                ) {
+                                                  return (
+                                                    <Flex key={key} gap={"4px"}>
+                                                      <Text>✅</Text>
+                                                      <Text size="sm">
+                                                        <span
+                                                          style={{
+                                                            fontWeight: "bold",
+                                                          }}
+                                                        >
+                                                          {title}:
+                                                        </span>
+                                                        {section.reasoning
+                                                          .replace("❌", "")
+                                                          .replace("✅", "")}
+                                                      </Text>
+                                                    </Flex>
+                                                  );
+                                                }
+
+                                                return <></>;
+                                              })}
+                                          </Flex>
+                                        </HoverCard.Dropdown>
+                                      </HoverCard>
+                                    </td>
+                                  );
                                 }
-
                                 return (
                                   <td
                                     key={key + p.id}
@@ -980,243 +1152,78 @@ const ArchetypeFilterModal = function ({
                                       maxWidth: "300px",
                                     }}
                                   >
-                                    <HoverCard>
-                                      <HoverCard.Target>
-                                        <Badge
-                                          color={
-                                            humanReadableScore == "VERY HIGH"
-                                              ? "green"
-                                              : humanReadableScore == "HIGH"
-                                              ? "blue"
-                                              : humanReadableScore == "MEDIUM"
-                                              ? "yellow"
-                                              : humanReadableScore == "LOW"
-                                              ? "orange"
-                                              : humanReadableScore ==
-                                                  "VERY LOW" && trueScore
-                                              ? "red"
-                                              : "gray"
-                                          }
-                                          fw={600}
-                                        >
-                                          {trueScore
-                                            ? humanReadableScore
-                                            : "NOT SCORED"}
-                                        </Badge>
-                                      </HoverCard.Target>
-                                      <HoverCard.Dropdown>
-                                        <Flex
-                                          direction={"column"}
-                                          style={{ maxWidth: "400px" }}
-                                        >
-                                          {prospect.icp_fit_reason_v2 &&
-                                            Object.keys(
-                                              prospect.icp_fit_reason_v2
-                                            ).map((key) => {
-                                              const section =
-                                                prospect.icp_fit_reason_v2[key];
-                                              const title = key
-                                                .replace("_individual_", "_")
-                                                .replace("_company_", "_")
-                                                .replace("aicomp_", "")
-                                                .replace("aiind_", "")
-                                                .replace("keywords", "")
-                                                .split("_")
-                                                .join(" ");
-
-                                              if (
-                                                section.answer === "NO" &&
-                                                icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                                  key
-                                                )
-                                              ) {
-                                                return (
-                                                  <Flex key={key} gap={"4px"}>
-                                                    <Text>❌</Text>
-                                                    <Text size="sm">
-                                                      <span
-                                                        style={{
-                                                          fontWeight: "bold",
-                                                        }}
-                                                      >
-                                                        {title}:
-                                                      </span>
-                                                      {section.reasoning
-                                                        .replace("❌", "")
-                                                        .replace("✅", "")}
-                                                    </Text>
-                                                  </Flex>
-                                                );
-                                              } else if (
-                                                section.answer === "YES"
-                                              ) {
-                                                return (
-                                                  <Flex key={key} gap={"4px"}>
-                                                    <Text>✅</Text>
-                                                    <Text size="sm">
-                                                      <span
-                                                        style={{
-                                                          fontWeight: "bold",
-                                                        }}
-                                                      >
-                                                        {title}:
-                                                      </span>
-                                                      {section.reasoning
-                                                        .replace("❌", "")
-                                                        .replace("✅", "")}
-                                                    </Text>
-                                                  </Flex>
-                                                );
+                                    <Text>{p[keyType]}</Text>
+                                  </td>
+                                );
+                              } else {
+                                const keyType = key as keyof typeof p;
+                                return (
+                                  <td
+                                    key={key + p.id}
+                                    style={{
+                                      minWidth: "100px",
+                                      maxWidth: "300px",
+                                    }}
+                                  >
+                                    {p[keyType] &&
+                                      !updatedIndividualColumns.has(key) ? (
+                                      <HoverCard>
+                                        <HoverCard.Target>
+                                          {p[keyType].answer === "LOADING" ? (
+                                            <Loader size={"xs"} />
+                                          ) : (
+                                            <Text
+                                              color={
+                                                p[keyType].answer === "YES"
+                                                  ? "green"
+                                                  : "red"
                                               }
-
-                                              return <></>;
-                                            })}
-                                          {prospect.icp_company_fit_reason &&
-                                            Object.keys(
-                                              prospect.icp_company_fit_reason
-                                            ).map((key) => {
-                                              const section =
-                                                prospect.icp_company_fit_reason[
-                                                  key
-                                                ];
-                                              const title = key
-                                                .replace("_individual_", "_")
-                                                .replace("_company_", "_")
-                                                .replace("aicomp_", "")
-                                                .replace("aiind_", "")
-                                                .replace("keywords", "")
-                                                .split("_")
-                                                .join(" ");
-
-                                              if (
-                                                section.answer === "NO" &&
-                                                icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                                  key
-                                                )
-                                              ) {
-                                                return (
-                                                  <Flex key={key} gap={"4px"}>
-                                                    <Text>❌</Text>
-                                                    <Text size="sm">
-                                                      <span
-                                                        style={{
-                                                          fontWeight: "bold",
-                                                        }}
-                                                      >
-                                                        {title}:
-                                                      </span>
-                                                      {section.reasoning
-                                                        .replace("❌", "")
-                                                        .replace("✅", "")}
-                                                    </Text>
-                                                  </Flex>
-                                                );
-                                              } else if (
-                                                section.answer === "YES"
-                                              ) {
-                                                return (
-                                                  <Flex key={key} gap={"4px"}>
-                                                    <Text>✅</Text>
-                                                    <Text size="sm">
-                                                      <span
-                                                        style={{
-                                                          fontWeight: "bold",
-                                                        }}
-                                                      >
-                                                        {title}:
-                                                      </span>
-                                                      {section.reasoning
-                                                        .replace("❌", "")
-                                                        .replace("✅", "")}
-                                                    </Text>
-                                                  </Flex>
-                                                );
-                                              }
-
-                                              return <></>;
-                                            })}
-                                        </Flex>
-                                      </HoverCard.Dropdown>
-                                    </HoverCard>
+                                              weight={"bold"}
+                                            >
+                                              {p[keyType].answer}
+                                            </Text>
+                                          )}
+                                        </HoverCard.Target>
+                                        <HoverCard.Dropdown maw={"300px"}>
+                                          <Flex
+                                            direction={"column"}
+                                            gap={"4px"}
+                                          >
+                                            <Text size="sm">
+                                              <span
+                                                style={{ fontWeight: "bold" }}
+                                              >
+                                                {`Reason: `}
+                                              </span>
+                                              {p[keyType].reasoning}
+                                            </Text>
+                                            <Divider />
+                                            <Text>
+                                              <span
+                                                style={{ fontWeight: "bold" }}
+                                              >
+                                                {`Source:  `}
+                                              </span>
+                                              {p[keyType].source}
+                                            </Text>
+                                          </Flex>
+                                        </HoverCard.Dropdown>
+                                      </HoverCard>
+                                    ) : (
+                                      <Text color={"orange"} weight={"bold"}>
+                                        TBD
+                                      </Text>
+                                    )}
                                   </td>
                                 );
                               }
-                              return (
-                                <td
-                                  key={key + p.id}
-                                  style={{
-                                    minWidth: "100px",
-                                    maxWidth: "300px",
-                                  }}
-                                >
-                                  <Text>{p[keyType]}</Text>
-                                </td>
-                              );
-                            } else {
-                              const keyType = key as keyof typeof p;
-                              return (
-                                <td
-                                  key={key + p.id}
-                                  style={{
-                                    minWidth: "100px",
-                                    maxWidth: "300px",
-                                  }}
-                                >
-                                  {p[keyType] &&
-                                  !updatedIndividualColumns.has(key) ? (
-                                    <HoverCard>
-                                      <HoverCard.Target>
-                                        {p[keyType].answer === "LOADING" ? (
-                                          <Loader size={"xs"} />
-                                        ) : (
-                                          <Text
-                                            color={
-                                              p[keyType].answer === "YES"
-                                                ? "green"
-                                                : "red"
-                                            }
-                                            weight={"bold"}
-                                          >
-                                            {p[keyType].answer}
-                                          </Text>
-                                        )}
-                                      </HoverCard.Target>
-                                      <HoverCard.Dropdown maw={"300px"}>
-                                        <Flex direction={"column"} gap={"4px"}>
-                                          <Text size="sm">
-                                            <span
-                                              style={{ fontWeight: "bold" }}
-                                            >
-                                              {`Reason: `}
-                                            </span>
-                                            {p[keyType].reasoning}
-                                          </Text>
-                                          <Divider />
-                                          <Text>
-                                            <span
-                                              style={{ fontWeight: "bold" }}
-                                            >
-                                              {`Source:  `}
-                                            </span>
-                                            {p[keyType].source}
-                                          </Text>
-                                        </Flex>
-                                      </HoverCard.Dropdown>
-                                    </HoverCard>
-                                  ) : (
-                                    <Text color={"orange"} weight={"bold"}>
-                                      TBD
-                                    </Text>
-                                  )}
-                                </td>
-                              );
-                            }
-                          })}
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </Table>
+                            })}
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </Table>
+              )}
             </Box>
           </ScrollArea>
         </Flex>

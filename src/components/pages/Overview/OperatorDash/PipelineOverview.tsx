@@ -191,7 +191,7 @@ export default function PipelineOverview(props: PropsType) {
         Pipeline
       </Text>
       <Text color="gray" size="sm" fw={400}>
-        A snapshot of your pipeline and activity for the quarter.
+        A snapshot of your pipeline and activity.
       </Text>
       <HomePageV2/>
     </Card>

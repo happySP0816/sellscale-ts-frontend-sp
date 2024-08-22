@@ -150,7 +150,7 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
             Variant #{index + 1}:
           </Text>
           <Text fw={600} size={"xs"} ml={"-5px"}>
-            {angle}
+            {textState}
           </Text>
         </Flex>
         <Flex gap={1} align={"center"}>
@@ -328,11 +328,10 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
                   <Button
                     size="xs"
                     color="teal"
-                    onClick={() => {
-                      {console.log('asset is', asset)}
-                      patchBumpFramework(
+                    onClick={async () => {
+                      await patchBumpFramework(
                         userToken, // User token for authentication
-                        asset.bump_framework_id, // Bump framework ID
+                        asset.bump_framework_id || asset.id, // Bump framework ID
                         asset.overall_status, // Overall status
                         asset.title, // Title
                         bodyRef.current || asset.description, // Description
@@ -344,11 +343,13 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
                         undefined, // Blocklist (optional)
                         null, // Additional context (optional)
                         null, // Bump framework template name (optional)
-                        null // Bump framework human readable prompt (optional)
+                        null, // Bump framework human readable prompt (optional)
+                        null,
+                        (currentStepNum || currentStepNum === 0) ? currentStepNum : undefined,
                       );
                       setShowEditor(false);
                       setTextState(bodyRef.current || '');
-                      console.log("Save button clicked");
+                      refetch();
                     }}
                   >
                     Save

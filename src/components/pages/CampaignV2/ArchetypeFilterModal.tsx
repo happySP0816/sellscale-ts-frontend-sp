@@ -20,6 +20,7 @@ import {
   TextInput,
   Title,
   Tooltip,
+  useMantineTheme,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -84,6 +85,7 @@ export const ArchetypeFilters = function ({
 }: {
   hideFeature?: boolean; // for selix
 }) {
+  const theme = useMantineTheme();
 
   const userToken = useRecoilValue(userTokenState);
 
@@ -296,11 +298,11 @@ export const ArchetypeFilters = function ({
           a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
             ? -1
             : !a.icp_fit_reason_v2 && b.icp_fit_reason_v2
-              ? 1
-              : !a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
-                ? 0
-                : Object.keys(b.icp_fit_reason_v2).length -
-                Object.keys(a.icp_fit_reason_v2).length;
+            ? 1
+            : !a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
+            ? 0
+            : Object.keys(b.icp_fit_reason_v2).length -
+              Object.keys(a.icp_fit_reason_v2).length;
 
         if (individual_fit_reason !== 0) {
           return individual_fit_reason;
@@ -589,7 +591,6 @@ export const ArchetypeFilters = function ({
       }),
   ];
 
-
   // Checkbox Handlers for selecting contacts
   const handleSelectContact = (contactId: number) => {
     if (selectedContacts.has(contactId)) {
@@ -629,207 +630,282 @@ export const ArchetypeFilters = function ({
     }
   };
 
-  return <Flex gap={"8px"}>
-    {isLoading && <Loader />}
-    {!isLoading && icp_scoring_ruleset && !hideFeature && (
-      <CampaignFilters
-        prospects={prospects}
-        icp_scoring_ruleset={icp_scoring_ruleset}
-        selectedContacts={selectedContacts}
-        archetype_id={currentProject?.id}
-        setContactTableHeaders={setContactTableHeaders}
-        setHeaderSet={setHeaderSet}
-        setUpdatedIndividualColumns={setUpdatedIndividualColumns}
-      />
-    )}
-    <Divider orientation={"vertical"} />
-    <Flex direction={"column"} gap={"8px"}>
-      {selectedContacts && selectedContacts.size > 0 && (
-        <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>
-          <Text>Bulk Actions - {selectedContacts.size} Selected</Text>
-          <Tooltip
-            withinPortal
-            label="Remove 'Prospected' or 'Sent Outreach' prospects from this campaign."
-          >
-            <Button
-              color="red"
-              leftIcon={<IconTrash size={14} />}
-              size="sm"
-              loading={removeProspectsLoading}
-              onClick={() => {
-                openConfirmModal({
-                  title: "Remove these prospects?",
-                  children: (
-                    <>
-                      <Text>
-                        Are you sure you want to remove these{" "}
-                        {selectedContacts.size} prospects? This will move
-                        them into your Unassigned Contacts list.
-                      </Text>
-                      <Text mt="xs">
-                        <b>Note: </b>Only "Prospected" and "Sent Outreach"
-                        prospects will be removed.
-                      </Text>
-                    </>
-                  ),
-                  labels: {
-                    confirm: "Remove",
-                    cancel: "Cancel",
-                  },
-                  confirmProps: { color: "red" },
-                  onCancel: () => { },
-                  onConfirm: () => {
-                    triggerMoveToUnassigned();
-                  },
+  return (
+    <Flex gap={"8px"}>
+      {isLoading && <Loader />}
+      {!isLoading && icp_scoring_ruleset && !hideFeature && (
+        <CampaignFilters
+          prospects={prospects}
+          icp_scoring_ruleset={icp_scoring_ruleset}
+          selectedContacts={selectedContacts}
+          archetype_id={currentProject?.id}
+          setContactTableHeaders={setContactTableHeaders}
+          setHeaderSet={setHeaderSet}
+          setUpdatedIndividualColumns={setUpdatedIndividualColumns}
+        />
+      )}
+      <Divider orientation={"vertical"} />
+      <Flex direction={"column"} gap={"8px"}>
+        {selectedContacts && selectedContacts.size > 0 && (
+          <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>
+            <Text>Bulk Actions - {selectedContacts.size} Selected</Text>
+            <Tooltip
+              withinPortal
+              label="Remove 'Prospected' or 'Sent Outreach' prospects from this campaign."
+            >
+              <Button
+                color="red"
+                leftIcon={<IconTrash size={14} />}
+                size="sm"
+                loading={removeProspectsLoading}
+                onClick={() => {
+                  openConfirmModal({
+                    title: "Remove these prospects?",
+                    children: (
+                      <>
+                        <Text>
+                          Are you sure you want to remove these{" "}
+                          {selectedContacts.size} prospects? This will move them
+                          into your Unassigned Contacts list.
+                        </Text>
+                        <Text mt="xs">
+                          <b>Note: </b>Only "Prospected" and "Sent Outreach"
+                          prospects will be removed.
+                        </Text>
+                      </>
+                    ),
+                    labels: {
+                      confirm: "Remove",
+                      cancel: "Cancel",
+                    },
+                    confirmProps: { color: "red" },
+                    onCancel: () => {},
+                    onConfirm: () => {
+                      triggerMoveToUnassigned();
+                    },
+                  });
+                }}
+              >
+                Remove
+              </Button>
+            </Tooltip>
+            <BulkActions
+              selectedProspects={prospects.filter((prospect) =>
+                selectedContacts.has(prospect.id)
+              )}
+              backFunc={() => {
+                setSelectedContacts(new Set());
+                refetch();
+                showNotification({
+                  title: "Success",
+                  message: `${selectedContacts.size} prospects has been moved from Unassigned Contacts to the new persona.`,
+                  color: "green",
+                  autoClose: 5000,
                 });
               }}
+            />
+            <CSVLink data={csvData} headers={csvHeaders} filename="export">
+              <Button
+                color="green"
+                leftIcon={<IconFileDownload size={14} />}
+                size="sm"
+              >
+                Download CSV
+              </Button>
+            </CSVLink>
+          </Flex>
+        )}
+        <Flex gap={"4px"} align={"end"} justify={"space-between"}>
+          <TextInput
+            label={"Global Search"}
+            placeholder={"Search for a specific name / company / title"}
+            value={filteredWords}
+            style={{ minWidth: "75%" }}
+            onChange={(event) => setFilteredWords(event.currentTarget.value)}
+          />
+          <Tooltip label="Upload custom data points to your prospects.">
+            <Button
+              size="sm"
+              onClick={customPointHandlers.open}
+              color="gray"
+              variant="outline"
             >
-              Remove
+              <IconMagnet size={16} />
             </Button>
           </Tooltip>
-          <BulkActions
-            selectedProspects={prospects.filter((prospect) =>
-              selectedContacts.has(prospect.id)
-            )}
-            backFunc={() => {
-              setSelectedContacts(new Set());
-              refetch();
-              showNotification({
-                title: "Success",
-                message: `${selectedContacts.size} prospects has been moved from Unassigned Contacts to the new persona.`,
-                color: "green",
-                autoClose: 5000,
-              });
+          <Modal
+            opened={openedCustomPoint}
+            onClose={customPointHandlers.close}
+            size="xl"
+            title="Custom Data Point Importer"
+          >
+            <Text size="xs" color="gray">
+              Upload custom data points to your prospects.
+            </Text>
+            <CustomResearchPointCard />
+          </Modal>
+          <Switch
+            size={"xl"}
+            onLabel={"View All"}
+            offLabel={"View 10"}
+            checked={!view10}
+            onChange={(event) => {
+              setView10(!event.currentTarget.checked);
             }}
           />
-          <CSVLink data={csvData} headers={csvHeaders} filename="export">
-            <Button
-              color="green"
-              leftIcon={<IconFileDownload size={14} />}
-              size="sm"
-            >
-              Download CSV
-            </Button>
-          </CSVLink>
         </Flex>
-      )}
-      <Flex gap={"4px"} align={"end"} justify={"space-between"}>
-        <TextInput
-          label={"Global Search"}
-          placeholder={"Search for a specific name / company / title"}
-          value={filteredWords}
-          style={{ minWidth: "75%" }}
-          onChange={(event) => setFilteredWords(event.currentTarget.value)}
-        />
-        <Tooltip label="Upload custom data points to your prospects.">
-          <Button
-            size="sm"
-            onClick={customPointHandlers.open}
-            color="gray"
-            variant="outline"
-          >
-            <IconMagnet size={16} />
-          </Button>
-        </Tooltip>
-        <Modal
-          opened={openedCustomPoint}
-          onClose={customPointHandlers.close}
-          size="xl"
-          title="Custom Data Point Importer"
+        <Tabs
+          defaultValue="5"
+          value={displayScore}
+          onTabChange={setDisplayScore}
         >
-          <Text size="xs" color="gray">
-            Upload custom data points to your prospects.
-          </Text>
-          <CustomResearchPointCard />
-        </Modal>
-        <Switch
-          size={"xl"}
-          onLabel={"View All"}
-          offLabel={"View 10"}
-          checked={!view10}
-          onChange={(event) => {
-            setView10(!event.currentTarget.checked);
-          }}
-        />
-      </Flex>
-      <Tabs
-        defaultValue="5"
-        value={displayScore}
-        onTabChange={setDisplayScore}
-      >
-        <Tabs.List>
-          {["5", "4", "3", "2", "1", "0"].map((item) => {
-            let label = "All";
+          <Tabs.List>
+            {["5", "4", "3", "2", "1", "0"].map((item) => {
+              let label = "All";
 
-            const typedItem = +item;
-            let color = "black";
+              const typedItem = +item;
+              let color = "black";
 
-            if (typedItem === 0) {
-              color = "red";
-              label = "Very Low";
-            } else if (typedItem === 1) {
-              color = "orange";
-              label = "Low";
-            } else if (typedItem === 2) {
-              color = "gold";
-              label = "Medium";
-            } else if (typedItem === 3) {
-              color = "blue";
-              label = "High";
-            } else if (typedItem === 4) {
-              color = "lightgreen";
-              label = "Very High";
-            } else {
-              label = "All";
-            }
+              if (typedItem === 0) {
+                color = "red";
+                label = "Very Low";
+              } else if (typedItem === 1) {
+                color = "orange";
+                label = "Low";
+              } else if (typedItem === 2) {
+                color = "gold";
+                label = "Medium";
+              } else if (typedItem === 3) {
+                color = "blue";
+                label = "High";
+              } else if (typedItem === 4) {
+                color = "lightgreen";
+                label = "Very High";
+              } else {
+                label = "All";
+              }
 
-            return (
-              <Tabs.Tab value={item}>
-                <Center>
-                  <Text style={{ color: color, fontWeight: "bold" }}>
-                    {label}
-                  </Text>
-                  <Text ml={10} style={{ color: color }}>
-                    (
-                    {
-                      prospects.filter((prospect) => {
-                        if (typedItem === 5) {
-                          return true;
-                        } else {
-                          return typedItem === prospect.icp_fit_score;
-                        }
-                      }).length
-                    }
-                    )
-                  </Text>
-                </Center>
-              </Tabs.Tab>
-            );
-          })}
-        </Tabs.List>
-      </Tabs>
-      <ScrollArea w={'100%'} h={700}>
-        <Box>
-          {icp_scoring_ruleset_typed && (
-            <Table style={{ overflow: "scroll" }} verticalSpacing={"sm"}>
-              <thead>
-                <tr>
-                  <th>
-                    <Checkbox
-                      checked={selectedContacts.size === prospects.length}
-                      onChange={() => handleSelectAllContacts()}
-                    />
-                  </th>
-                  {icp_scoring_ruleset_typed &&
-                    contactTableHeaders.map((item) => {
-                      return (
-                        <th key={item.title}>
-                          <Flex align={"center"} justify={"space-between"}>
-                            <Flex direction={"column"} justify={"center"}>
-                              {item.title}
-                              {icp_scoring_ruleset_typed.individual_personalizers?.includes(
-                                item.key
-                              ) && (
+              return (
+                <Tabs.Tab value={item}>
+                  <Center>
+                    <Text style={{ color: color, fontWeight: "bold" }}>
+                      {label}
+                    </Text>
+                    <Text ml={10} style={{ color: color }}>
+                      (
+                      {
+                        prospects.filter((prospect) => {
+                          if (typedItem === 5) {
+                            return true;
+                          } else {
+                            return typedItem === prospect.icp_fit_score;
+                          }
+                        }).length
+                      }
+                      )
+                    </Text>
+                  </Center>
+                </Tabs.Tab>
+              );
+            })}
+          </Tabs.List>
+        </Tabs>
+
+        <div
+          className="border flex items-center overflow-hidden border-[#ced4da] rounded-md border-solid"
+          style={{ overflowX: "hidden", whiteSpace: "nowrap" }}
+        >
+          <Button
+            variant={filterOption === "all" ? "filled" : "white"}
+            fullWidth
+            color="dark"
+            onClick={() => setFilterOption("all")}
+            rightIcon={<Badge color="dark">123</Badge>}
+          >
+            All
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            fullWidth
+            variant={filterOption === "very_high" ? "filled" : "white"}
+            onClick={() => setFilterOption("very_high")}
+            rightIcon={<Badge>123</Badge>}
+          >
+            Very High
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            color="green"
+            variant={filterOption === "high" ? "filled" : "white"}
+            fullWidth
+            onClick={() => setFilterOption("high")}
+            rightIcon={<Badge color="green">123</Badge>}
+          >
+            High
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            color="yellow"
+            fullWidth
+            variant={filterOption === "medium" ? "filled" : "white"}
+            onClick={() => setFilterOption("medium")}
+            rightIcon={<Badge color="yellow">123</Badge>}
+          >
+            Medium
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            color="orange"
+            fullWidth
+            variant={filterOption === "low" ? "filled" : "white"}
+            onClick={() => setFilterOption("low")}
+            rightIcon={<Badge color="orange">123</Badge>}
+          >
+            Low
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            color="red"
+            fullWidth
+            variant={filterOption === "very_low" ? "filled" : "white"}
+            onClick={() => setFilterOption("very_low")}
+            rightIcon={<Badge color="red">123</Badge>}
+          >
+            Very Low
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            color="gray"
+            fullWidth
+            variant={filterOption === "un" ? "filled" : "white"}
+            onClick={() => setFilterOption("un")}
+            rightIcon={<Badge color="gray">123</Badge>}
+          >
+            Unsevadf
+          </Button>
+        </div>
+        <ScrollArea w={"100%"} h={700}>
+          <Box>
+            {icp_scoring_ruleset_typed && (
+              <Table style={{ overflow: "scroll" }} verticalSpacing={"sm"}>
+                <thead>
+                  <tr>
+                    <th>
+                      <Checkbox
+                        checked={selectedContacts.size === prospects.length}
+                        onChange={() => handleSelectAllContacts()}
+                      />
+                    </th>
+                    {icp_scoring_ruleset_typed &&
+                      contactTableHeaders.map((item) => {
+                        return (
+                          <th key={item.title}>
+                            <Flex align={"center"} justify={"space-between"}>
+                              <Flex direction={"column"} justify={"center"}>
+                                {item.title}
+                                {icp_scoring_ruleset_typed.individual_personalizers?.includes(
+                                  item.key
+                                ) && (
                                   <span
                                     style={{
                                       fontStyle: "italic",
@@ -839,9 +915,9 @@ export const ArchetypeFilters = function ({
                                     Personalizer: ✅
                                   </span>
                                 )}
-                              {icp_scoring_ruleset_typed.company_personalizers?.includes(
-                                item.key
-                              ) && (
+                                {icp_scoring_ruleset_typed.company_personalizers?.includes(
+                                  item.key
+                                ) && (
                                   <span
                                     style={{
                                       fontStyle: "italic",
@@ -851,9 +927,9 @@ export const ArchetypeFilters = function ({
                                     Personalizer: ✅
                                   </span>
                                 )}
-                              {icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                item.key
-                              ) && (
+                                {icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                  item.key
+                                ) && (
                                   <span
                                     style={{
                                       fontStyle: "italic",
@@ -863,9 +939,9 @@ export const ArchetypeFilters = function ({
                                     "Dealbreaker: ✅"
                                   </span>
                                 )}
-                            </Flex>
-                            {(!notFilters.includes(item.key) ||
-                              item.title === "Score") && (
+                              </Flex>
+                              {(!notFilters.includes(item.key) ||
+                                item.title === "Score") && (
                                 <Popover
                                   width={400}
                                   position="bottom"
@@ -893,24 +969,24 @@ export const ArchetypeFilters = function ({
                                       data={
                                         item.title === "Score"
                                           ? [
-                                            { value: "", label: "Select" },
-                                            {
-                                              value: "0",
-                                              label: "VERY LOW",
-                                            },
-                                            { value: "1", label: "LOW" },
-                                            { value: "2", label: "MEDIUM" },
-                                            { value: "3", label: "HIGH" },
-                                            {
-                                              value: "4",
-                                              label: "VERY HIGH",
-                                            },
-                                          ]
+                                              { value: "", label: "Select" },
+                                              {
+                                                value: "0",
+                                                label: "VERY LOW",
+                                              },
+                                              { value: "1", label: "LOW" },
+                                              { value: "2", label: "MEDIUM" },
+                                              { value: "3", label: "HIGH" },
+                                              {
+                                                value: "4",
+                                                label: "VERY HIGH",
+                                              },
+                                            ]
                                           : [
-                                            { value: "", label: "Select" },
-                                            { value: "YES", label: "YES" },
-                                            { value: "NO", label: "NO" },
-                                          ]
+                                              { value: "", label: "Select" },
+                                              { value: "YES", label: "YES" },
+                                              { value: "NO", label: "NO" },
+                                            ]
                                       }
                                       onChange={(value) =>
                                         onSelectFilter(item.key, value ?? "")
@@ -918,71 +994,240 @@ export const ArchetypeFilters = function ({
                                       value={
                                         filteredColumns.get(item.key)
                                           ? (filteredColumns.get(
-                                            item.key
-                                          ) as string)
+                                              item.key
+                                            ) as string)
                                           : ""
                                       }
                                     />
                                   </Popover.Dropdown>
                                 </Popover>
                               )}
-                          </Flex>
-                        </th>
+                            </Flex>
+                          </th>
+                        );
+                      })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayProspects
+                    .slice(0, view10 ? 20 : undefined)
+                    .map((prospect, index) => {
+                      const keys: string[] = contactTableHeaders.map(
+                        (h) => h.key
                       );
-                    })}
-                </tr>
-              </thead>
-              <tbody>
-                {displayProspects
-                  .slice(0, view10 ? 20 : undefined)
-                  .map((prospect, index) => {
-                    const keys: string[] = contactTableHeaders.map(
-                      (h) => h.key
-                    );
-                    const p = {
-                      ...prospect,
-                      ...prospect.icp_fit_reason_v2,
-                      ...prospect.icp_company_fit_reason,
-                    };
+                      const p = {
+                        ...prospect,
+                        ...prospect.icp_fit_reason_v2,
+                        ...prospect.icp_company_fit_reason,
+                      };
 
-                    return (
-                      <tr
-                        key={p.id}
-                        style={{
-                          backgroundColor: selectedContacts.has(p.id)
-                            ? "lightcyan"
-                            : "white",
-                        }}
-                      >
-                        <td>
-                          <Checkbox
-                            checked={selectedContacts.has(p.id)}
-                            onChange={() => handleSelectContact(p.id)}
-                          />
-                        </td>
-                        {keys.map((key) => {
-                          if (notFilters.includes(key)) {
-                            const keyType = key as keyof typeof p;
-                            if (key === "icp_fit_score") {
-                              const trueScore =
-                                prospect.icp_fit_reason_v2 &&
-                                Object.keys(prospect.icp_fit_reason_v2)
-                                  .length > 0;
+                      return (
+                        <tr
+                          key={p.id}
+                          style={{
+                            backgroundColor: selectedContacts.has(p.id)
+                              ? "lightcyan"
+                              : "white",
+                          }}
+                        >
+                          <td>
+                            <Checkbox
+                              checked={selectedContacts.has(p.id)}
+                              onChange={() => handleSelectContact(p.id)}
+                            />
+                          </td>
+                          {keys.map((key) => {
+                            if (notFilters.includes(key)) {
+                              const keyType = key as keyof typeof p;
+                              if (key === "icp_fit_score") {
+                                const trueScore =
+                                  prospect.icp_fit_reason_v2 &&
+                                  Object.keys(prospect.icp_fit_reason_v2)
+                                    .length > 0;
 
-                              let humanReadableScore = "Not Scored";
+                                let humanReadableScore = "Not Scored";
 
-                              if (p[keyType] === 0) {
-                                humanReadableScore = "VERY LOW";
-                              } else if (p[keyType] === 1) {
-                                humanReadableScore = "LOW";
-                              } else if (p[keyType] === 2) {
-                                humanReadableScore = "MEDIUM";
-                              } else if (p[keyType] === 3) {
-                                humanReadableScore = "HIGH";
-                              } else if (p[keyType] === 4) {
-                                humanReadableScore = "VERY HIGH";
+                                if (p[keyType] === 0) {
+                                  humanReadableScore = "VERY LOW";
+                                } else if (p[keyType] === 1) {
+                                  humanReadableScore = "LOW";
+                                } else if (p[keyType] === 2) {
+                                  humanReadableScore = "MEDIUM";
+                                } else if (p[keyType] === 3) {
+                                  humanReadableScore = "HIGH";
+                                } else if (p[keyType] === 4) {
+                                  humanReadableScore = "VERY HIGH";
+                                }
+
+                                return (
+                                  <td
+                                    key={key + p.id}
+                                    style={{
+                                      minWidth: "100px",
+                                      maxWidth: "300px",
+                                    }}
+                                  >
+                                    <HoverCard>
+                                      <HoverCard.Target>
+                                        <Badge
+                                          color={
+                                            humanReadableScore == "VERY HIGH"
+                                              ? "green"
+                                              : humanReadableScore == "HIGH"
+                                              ? "blue"
+                                              : humanReadableScore == "MEDIUM"
+                                              ? "yellow"
+                                              : humanReadableScore == "LOW"
+                                              ? "orange"
+                                              : humanReadableScore ==
+                                                  "VERY LOW" && trueScore
+                                              ? "red"
+                                              : "gray"
+                                          }
+                                          fw={600}
+                                        >
+                                          {trueScore
+                                            ? humanReadableScore
+                                            : "NOT SCORED"}
+                                        </Badge>
+                                      </HoverCard.Target>
+                                      <HoverCard.Dropdown>
+                                        <Flex
+                                          direction={"column"}
+                                          style={{ maxWidth: "400px" }}
+                                        >
+                                          {prospect.icp_fit_reason_v2 &&
+                                            Object.keys(
+                                              prospect.icp_fit_reason_v2
+                                            ).map((key) => {
+                                              const section =
+                                                prospect.icp_fit_reason_v2[key];
+                                              const title = key
+                                                .replace("_individual_", "_")
+                                                .replace("_company_", "_")
+                                                .replace("aicomp_", "")
+                                                .replace("aiind_", "")
+                                                .replace("keywords", "")
+                                                .split("_")
+                                                .join(" ");
+
+                                              if (
+                                                section.answer === "NO" &&
+                                                icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                                  key
+                                                )
+                                              ) {
+                                                return (
+                                                  <Flex key={key} gap={"4px"}>
+                                                    <Text>❌</Text>
+                                                    <Text size="sm">
+                                                      <span
+                                                        style={{
+                                                          fontWeight: "bold",
+                                                        }}
+                                                      >
+                                                        {title}:
+                                                      </span>
+                                                      {section.reasoning
+                                                        .replace("❌", "")
+                                                        .replace("✅", "")}
+                                                    </Text>
+                                                  </Flex>
+                                                );
+                                              } else if (
+                                                section.answer === "YES"
+                                              ) {
+                                                return (
+                                                  <Flex key={key} gap={"4px"}>
+                                                    <Text>✅</Text>
+                                                    <Text size="sm">
+                                                      <span
+                                                        style={{
+                                                          fontWeight: "bold",
+                                                        }}
+                                                      >
+                                                        {title}:
+                                                      </span>
+                                                      {section.reasoning
+                                                        .replace("❌", "")
+                                                        .replace("✅", "")}
+                                                    </Text>
+                                                  </Flex>
+                                                );
+                                              }
+
+                                              return <></>;
+                                            })}
+                                          {prospect.icp_company_fit_reason &&
+                                            Object.keys(
+                                              prospect.icp_company_fit_reason
+                                            ).map((key) => {
+                                              const section =
+                                                prospect.icp_company_fit_reason[
+                                                  key
+                                                ];
+                                              const title = key
+                                                .replace("_individual_", "_")
+                                                .replace("_company_", "_")
+                                                .replace("aicomp_", "")
+                                                .replace("aiind_", "")
+                                                .replace("keywords", "")
+                                                .split("_")
+                                                .join(" ");
+
+                                              if (
+                                                section.answer === "NO" &&
+                                                icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                                  key
+                                                )
+                                              ) {
+                                                return (
+                                                  <Flex key={key} gap={"4px"}>
+                                                    <Text>❌</Text>
+                                                    <Text size="sm">
+                                                      <span
+                                                        style={{
+                                                          fontWeight: "bold",
+                                                        }}
+                                                      >
+                                                        {title}:
+                                                      </span>
+                                                      {section.reasoning
+                                                        .replace("❌", "")
+                                                        .replace("✅", "")}
+                                                    </Text>
+                                                  </Flex>
+                                                );
+                                              } else if (
+                                                section.answer === "YES"
+                                              ) {
+                                                return (
+                                                  <Flex key={key} gap={"4px"}>
+                                                    <Text>✅</Text>
+                                                    <Text size="sm">
+                                                      <span
+                                                        style={{
+                                                          fontWeight: "bold",
+                                                        }}
+                                                      >
+                                                        {title}:
+                                                      </span>
+                                                      {section.reasoning
+                                                        .replace("❌", "")
+                                                        .replace("✅", "")}
+                                                    </Text>
+                                                  </Flex>
+                                                );
+                                              }
+
+                                              return <></>;
+                                            })}
+                                        </Flex>
+                                      </HoverCard.Dropdown>
+                                    </HoverCard>
+                                  </td>
+                                );
                               }
-
                               return (
                                 <td
                                   key={key + p.id}
@@ -991,254 +1236,80 @@ export const ArchetypeFilters = function ({
                                     maxWidth: "300px",
                                   }}
                                 >
-                                  <HoverCard>
-                                    <HoverCard.Target>
-                                      <Badge
-                                        color={
-                                          humanReadableScore == "VERY HIGH"
-                                            ? "green"
-                                            : humanReadableScore == "HIGH"
-                                              ? "blue"
-                                              : humanReadableScore == "MEDIUM"
-                                                ? "yellow"
-                                                : humanReadableScore == "LOW"
-                                                  ? "orange"
-                                                  : humanReadableScore ==
-                                                    "VERY LOW" && trueScore
-                                                    ? "red"
-                                                    : "gray"
-                                        }
-                                        fw={600}
-                                      >
-                                        {trueScore
-                                          ? humanReadableScore
-                                          : "NOT SCORED"}
-                                      </Badge>
-                                    </HoverCard.Target>
-                                    <HoverCard.Dropdown>
-                                      <Flex
-                                        direction={"column"}
-                                        style={{ maxWidth: "400px" }}
-                                      >
-                                        {prospect.icp_fit_reason_v2 &&
-                                          Object.keys(
-                                            prospect.icp_fit_reason_v2
-                                          ).map((key) => {
-                                            const section =
-                                              prospect.icp_fit_reason_v2[
-                                              key
-                                              ];
-                                            const title = key
-                                              .replace("_individual_", "_")
-                                              .replace("_company_", "_")
-                                              .replace("aicomp_", "")
-                                              .replace("aiind_", "")
-                                              .replace("keywords", "")
-                                              .split("_")
-                                              .join(" ");
-
-                                            if (
-                                              section.answer === "NO" &&
-                                              icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                                key
-                                              )
-                                            ) {
-                                              return (
-                                                <Flex key={key} gap={"4px"}>
-                                                  <Text>❌</Text>
-                                                  <Text size="sm">
-                                                    <span
-                                                      style={{
-                                                        fontWeight: "bold",
-                                                      }}
-                                                    >
-                                                      {title}:
-                                                    </span>
-                                                    {section.reasoning
-                                                      .replace("❌", "")
-                                                      .replace("✅", "")}
-                                                  </Text>
-                                                </Flex>
-                                              );
-                                            } else if (
-                                              section.answer === "YES"
-                                            ) {
-                                              return (
-                                                <Flex key={key} gap={"4px"}>
-                                                  <Text>✅</Text>
-                                                  <Text size="sm">
-                                                    <span
-                                                      style={{
-                                                        fontWeight: "bold",
-                                                      }}
-                                                    >
-                                                      {title}:
-                                                    </span>
-                                                    {section.reasoning
-                                                      .replace("❌", "")
-                                                      .replace("✅", "")}
-                                                  </Text>
-                                                </Flex>
-                                              );
+                                  <Text>{p[keyType]}</Text>
+                                </td>
+                              );
+                            } else {
+                              const keyType = key as keyof typeof p;
+                              return (
+                                <td
+                                  key={key + p.id}
+                                  style={{
+                                    minWidth: "100px",
+                                    maxWidth: "300px",
+                                  }}
+                                >
+                                  {p[keyType] &&
+                                  !updatedIndividualColumns.has(key) ? (
+                                    <HoverCard>
+                                      <HoverCard.Target>
+                                        {p[keyType].answer === "LOADING" ? (
+                                          <Loader size={"xs"} />
+                                        ) : (
+                                          <Text
+                                            color={
+                                              p[keyType].answer === "YES"
+                                                ? "green"
+                                                : "red"
                                             }
-
-                                            return <></>;
-                                          })}
-                                        {prospect.icp_company_fit_reason &&
-                                          Object.keys(
-                                            prospect.icp_company_fit_reason
-                                          ).map((key) => {
-                                            const section =
-                                              prospect
-                                                .icp_company_fit_reason[
-                                              key
-                                              ];
-                                            const title = key
-                                              .replace("_individual_", "_")
-                                              .replace("_company_", "_")
-                                              .replace("aicomp_", "")
-                                              .replace("aiind_", "")
-                                              .replace("keywords", "")
-                                              .split("_")
-                                              .join(" ");
-
-                                            if (
-                                              section.answer === "NO" &&
-                                              icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                                key
-                                              )
-                                            ) {
-                                              return (
-                                                <Flex key={key} gap={"4px"}>
-                                                  <Text>❌</Text>
-                                                  <Text size="sm">
-                                                    <span
-                                                      style={{
-                                                        fontWeight: "bold",
-                                                      }}
-                                                    >
-                                                      {title}:
-                                                    </span>
-                                                    {section.reasoning
-                                                      .replace("❌", "")
-                                                      .replace("✅", "")}
-                                                  </Text>
-                                                </Flex>
-                                              );
-                                            } else if (
-                                              section.answer === "YES"
-                                            ) {
-                                              return (
-                                                <Flex key={key} gap={"4px"}>
-                                                  <Text>✅</Text>
-                                                  <Text size="sm">
-                                                    <span
-                                                      style={{
-                                                        fontWeight: "bold",
-                                                      }}
-                                                    >
-                                                      {title}:
-                                                    </span>
-                                                    {section.reasoning
-                                                      .replace("❌", "")
-                                                      .replace("✅", "")}
-                                                  </Text>
-                                                </Flex>
-                                              );
-                                            }
-
-                                            return <></>;
-                                          })}
-                                      </Flex>
-                                    </HoverCard.Dropdown>
-                                  </HoverCard>
+                                            weight={"bold"}
+                                          >
+                                            {p[keyType].answer}
+                                          </Text>
+                                        )}
+                                      </HoverCard.Target>
+                                      <HoverCard.Dropdown maw={"300px"}>
+                                        <Flex direction={"column"} gap={"4px"}>
+                                          <Text size="sm">
+                                            <span
+                                              style={{ fontWeight: "bold" }}
+                                            >
+                                              {`Reason: `}
+                                            </span>
+                                            {p[keyType].reasoning}
+                                          </Text>
+                                          <Divider />
+                                          <Text>
+                                            <span
+                                              style={{ fontWeight: "bold" }}
+                                            >
+                                              {`Source:  `}
+                                            </span>
+                                            {p[keyType].source}
+                                          </Text>
+                                        </Flex>
+                                      </HoverCard.Dropdown>
+                                    </HoverCard>
+                                  ) : (
+                                    <Text color={"orange"} weight={"bold"}>
+                                      TBD
+                                    </Text>
+                                  )}
                                 </td>
                               );
                             }
-                            return (
-                              <td
-                                key={key + p.id}
-                                style={{
-                                  minWidth: "100px",
-                                  maxWidth: "300px",
-                                }}
-                              >
-                                <Text>{p[keyType]}</Text>
-                              </td>
-                            );
-                          } else {
-                            const keyType = key as keyof typeof p;
-                            return (
-                              <td
-                                key={key + p.id}
-                                style={{
-                                  minWidth: "100px",
-                                  maxWidth: "300px",
-                                }}
-                              >
-                                {p[keyType] &&
-                                  !updatedIndividualColumns.has(key) ? (
-                                  <HoverCard>
-                                    <HoverCard.Target>
-                                      {p[keyType].answer === "LOADING" ? (
-                                        <Loader size={"xs"} />
-                                      ) : (
-                                        <Text
-                                          color={
-                                            p[keyType].answer === "YES"
-                                              ? "green"
-                                              : "red"
-                                          }
-                                          weight={"bold"}
-                                        >
-                                          {p[keyType].answer}
-                                        </Text>
-                                      )}
-                                    </HoverCard.Target>
-                                    <HoverCard.Dropdown maw={"300px"}>
-                                      <Flex
-                                        direction={"column"}
-                                        gap={"4px"}
-                                      >
-                                        <Text size="sm">
-                                          <span
-                                            style={{ fontWeight: "bold" }}
-                                          >
-                                            {`Reason: `}
-                                          </span>
-                                          {p[keyType].reasoning}
-                                        </Text>
-                                        <Divider />
-                                        <Text>
-                                          <span
-                                            style={{ fontWeight: "bold" }}
-                                          >
-                                            {`Source:  `}
-                                          </span>
-                                          {p[keyType].source}
-                                        </Text>
-                                      </Flex>
-                                    </HoverCard.Dropdown>
-                                  </HoverCard>
-                                ) : (
-                                  <Text color={"orange"} weight={"bold"}>
-                                    TBD
-                                  </Text>
-                                )}
-                              </td>
-                            );
-                          }
-                        })}
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </Table>
-          )}
-        </Box>
-      </ScrollArea>
+                          })}
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </Table>
+            )}
+          </Box>
+        </ScrollArea>
+      </Flex>
     </Flex>
-  </Flex>;
-}
+  );
+};
 
 export default ArchetypeFilterModal;

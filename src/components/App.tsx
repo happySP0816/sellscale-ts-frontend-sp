@@ -115,6 +115,7 @@ import CreateCampaignWithVoiceModal from "@modals/CreateCampaignWithVoiceModal";
 import CreateVisitorBucketModal from "@modals/website/CreateVisitorBucketModal";
 import ConnectSegmentModal from "@modals/SegmentV3/ConnectSegmentModal";
 import StrategyDeleteModal from "@modals/AIBrain/StrategyDeleteModal";
+import CampaignFilterModal from "@modals/CampaignFilterModal";
 import AccountContactFiltersModal from "@modals/AccountContactFiltersModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
@@ -832,6 +833,7 @@ export default function App() {
               createICProutingModal: ICPRoutingCreateModal,
               createvisitorbucketmodal: CreateVisitorBucketModal,
               connectSegment: ConnectSegmentModal,
+              campaignFilter: CampaignFilterModal,
               accountcontactFilterModal: AccountContactFiltersModal,
             }}
             modalProps={{

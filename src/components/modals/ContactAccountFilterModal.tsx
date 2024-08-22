@@ -781,565 +781,214 @@ const ContactAccountFilterModal = function({
             />
           </Flex>
           <ScrollArea w={800} h={700}>
-            <Box>
-              {!isLoading && icp_scoring_ruleset_typed && viewMode === "ACCOUNT" ? (
-                <Table style={{ overflow: "scroll" }} verticalSpacing={"sm"}>
-                  <thead>
-                    <tr>
-                      <th>
-                        <Checkbox
-                          checked={
-                            selectedCompanies.size ===
-                            displayProspectAccounts.length
-                          }
-                          onChange={() => handleSelectAllCompanies()}
-                        />
-                      </th>
-                      {icp_scoring_ruleset_typed &&
-                        companyTableHeaders.map((item) => {
-                          return (
-                            <th key={item.key}>
-                              <Flex align={"center"} justify={"space-between"}>
-                                <Flex direction={"column"}>
-                                  {item.title}
-                                  {icp_scoring_ruleset_typed.company_personalizers?.includes(
-                                    item.key
-                                  ) && (
-                                      <span
-                                        style={{
-                                          fontStyle: "italic",
-                                          fontSize: "x-small",
-                                        }}
-                                      >
-                                        Personalizer: ✅
-                                      </span>
-                                    )}
-                                  {icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                    item.key
-                                  ) && (
-                                      <span
-                                        style={{
-                                          fontStyle: "italic",
-                                          fontSize: "x-small",
-                                        }}
-                                      >
-                                        Dealbreaker: ✅
-                                      </span>
-                                    )}
-                                </Flex>
-                                {(!notFilters.includes(item.key) ||
-                                  item.title === "Score") && (
-                                    <Popover
-                                      width={400}
-                                      position="bottom"
-                                      withArrow
-                                      shadow="md"
-                                      withinPortal
-                                    >
-                                      <Popover.Target>
-                                        <ActionIcon>
-                                          <FaFilter
-                                            color={
-                                              filteredColumns.has(item.key)
-                                                ? "lightgreen"
-                                                : "grey"
-                                            }
-                                          />
-                                        </ActionIcon>
-                                      </Popover.Target>
-                                      <Popover.Dropdown>
-                                        <Select
-                                          label={item.title}
-                                          placeholder={
-                                            "Select the Property that you would like to filter for"
-                                          }
-                                          data={
-                                            item.title === "Score"
-                                              ? [
-                                                { value: "", label: "Select" },
-                                                {
-                                                  value: "0",
-                                                  label: "VERY LOW",
-                                                },
-                                                { value: "1", label: "LOW" },
-                                                { value: "2", label: "MEDIUM" },
-                                                { value: "3", label: "HIGH" },
-                                                {
-                                                  value: "4",
-                                                  label: "VERY HIGH",
-                                                },
-                                              ]
-                                              : [
-                                                { value: "", label: "Select" },
-                                                { value: "YES", label: "YES" },
-                                                { value: "NO", label: "NO" },
-                                              ]
-                                          }
-                                          onChange={(value) =>
-                                            onSelectFilter(item.key, value ?? "")
-                                          }
-                                          value={
-                                            filteredColumns.get(item.key)
-                                              ? (filteredColumns.get(
-                                                item.key
-                                              ) as string)
-                                              : ""
-                                          }
-                                        />
-                                      </Popover.Dropdown>
-                                    </Popover>
-                                  )}
-                              </Flex>
-                            </th>
-                          );
-                        })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {displayProspectAccounts.map((prospectAccount, index) => {
-                      const keys = companyTableHeaders.map((h) => h.key);
-
-                      return (
-                        <tr
-                          key={prospectAccount.company}
-                          style={{
-                            backgroundColor: selectedCompanies.has(
-                              "" + prospectAccount.company
-                            )
-                              ? "lightcyan"
-                              : "white",
-                          }}
-                        >
-                          <td>
-                            <Checkbox
-                              checked={selectedCompanies.has(
-                                "" + prospectAccount.company
-                              )}
-                              onChange={() =>
-                                handleSelectCompany(
-                                  "" + prospectAccount.company
-                                )
-                              }
-                            />
-                          </td>
-                          {keys.map((key) => {
-                            if (notFilters.includes(key)) {
-                              const keyType = key as keyof ProspectAccounts;
-
-                              if (key === "icp_company_fit_score") {
-                                const prospect = prospects.find(
-                                  (item) =>
-                                    item.id === prospectAccount.prospect_id
-                                );
-
-                                if (!prospect) {
-                                  return (
-                                    <td
-                                      key={key + prospectAccount.company}
-                                      style={{
-                                        minWidth: "100px",
-                                        maxWidth: "300px",
-                                      }}
-                                    >
-                                      <Text color={"orange"} weight={"bold"}>
-                                        Not Scored
-                                      </Text>
-                                    </td>
-                                  );
-                                }
-
-                                const trueScore =
-                                  prospect.icp_company_fit_reason &&
-                                  Object.keys(prospect.icp_company_fit_reason)
-                                    .length > 0;
-
-                                let humanReadableScore = "NOT SCORED";
-
-                                if (prospectAccount[keyType] === 0) {
-                                  humanReadableScore = "VERY LOW";
-                                } else if (prospectAccount[keyType] === 1) {
-                                  humanReadableScore = "LOW";
-                                } else if (prospectAccount[keyType] === 2) {
-                                  humanReadableScore = "MEDIUM";
-                                } else if (prospectAccount[keyType] === 3) {
-                                  humanReadableScore = "HIGH";
-                                } else if (prospectAccount[keyType] === 4) {
-                                  humanReadableScore = "VERY HIGH";
-                                }
-
-                                return (
-                                  <td
-                                    key={key + prospectAccount.company}
-                                    style={{
-                                      minWidth: "100px",
-                                      maxWidth: "300px",
-                                    }}
-                                  >
-                                    <HoverCard>
-                                      <HoverCard.Target>
-                                        <Badge
-                                          color={
-                                            humanReadableScore == "VERY HIGH"
-                                              ? "green"
-                                              : humanReadableScore == "HIGH"
-                                                ? "blue"
-                                                : humanReadableScore == "MEDIUM"
-                                                  ? "yellow"
-                                                  : humanReadableScore == "LOW"
-                                                    ? "orange"
-                                                    : humanReadableScore ==
-                                                      "VERY LOW" && trueScore
-                                                      ? "red"
-                                                      : "gray"
-                                          }
-                                          fw={600}
-                                        >
-                                          {trueScore
-                                            ? humanReadableScore
-                                            : "NOT SCORED"}
-                                        </Badge>
-                                      </HoverCard.Target>
-                                      <HoverCard.Dropdown>
-                                        <Flex
-                                          direction={"column"}
-                                          style={{ maxWidth: "400px" }}
-                                        >
-                                          {prospect.icp_company_fit_reason &&
-                                            Object.keys(
-                                              prospect.icp_company_fit_reason
-                                            ).map((key) => {
-                                              const section =
-                                                prospect.icp_company_fit_reason[
-                                                key
-                                                ];
-                                              const title = key
-                                                .replace("_individual_", "_")
-                                                .replace("_company_", "_")
-                                                .replace("aicomp_", "")
-                                                .replace("aiind_", "")
-                                                .split("_")
-                                                .join(" ");
-
-                                              if (
-                                                section.answer === "NO" &&
-                                                icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                                  key
-                                                )
-                                              ) {
-                                                return (
-                                                  <Flex key={key} gap={"4px"}>
-                                                    <Text>❌</Text>
-                                                    <Text size="sm">
-                                                      <span
-                                                        style={{
-                                                          fontWeight: "bold",
-                                                        }}
-                                                      >
-                                                        {title}
-                                                      </span>
-                                                      {section.reasoning
-                                                        .replace("❌", "")
-                                                        .replace("✅", "")}
-                                                    </Text>
-                                                  </Flex>
-                                                );
-                                              } else if (
-                                                section.answer === "YES"
-                                              ) {
-                                                return (
-                                                  <Flex key={key} gap={"4px"}>
-                                                    <Text>✅</Text>
-                                                    <Text size="sm">
-                                                      <span
-                                                        style={{
-                                                          fontWeight: "bold",
-                                                        }}
-                                                      >
-                                                        {title}
-                                                      </span>
-                                                      {section.reasoning
-                                                        .replace("❌", "")
-                                                        .replace("✅", "")}
-                                                    </Text>
-                                                  </Flex>
-                                                );
-                                              }
-
-                                              return <></>;
-                                            })}
-                                        </Flex>
-                                      </HoverCard.Dropdown>
-                                    </HoverCard>
-                                  </td>
-                                );
-                              }
-
-                              return (
-                                <td
-                                  key={key + prospectAccount.company}
-                                  style={{
-                                    minWidth: "100px",
-                                    maxWidth: "300px",
-                                  }}
-                                >
-                                  {prospectAccount[keyType]}
-                                </td>
-                              );
-                            } else {
-                              const icp_company_fit_reason = prospects.find(
-                                (item) =>
-                                  item.id === prospectAccount.prospect_id
-                              )?.icp_company_fit_reason as ICPFitReasonV2;
-
-                              if (!icp_company_fit_reason) {
-                                return (
-                                  <td
-                                    key={key + prospectAccount.company}
-                                    style={{
-                                      minWidth: "100px",
-                                      maxWidth: "300px",
-                                    }}
-                                  >
-                                    <Text color={"orange"} weight={"bold"}>
-                                      TBD
-                                    </Text>
-                                  </td>
-                                );
-                              }
-                              const pa = {
-                                ...prospectAccount,
-                                ...icp_company_fit_reason,
-                              };
-                              const keyType = key as keyof typeof pa;
-
-                              const section = icp_company_fit_reason[keyType];
-
-                              return (
-                                <td
-                                  key={key + prospectAccount.company}
-                                  style={{
-                                    minWidth: "100px",
-                                    maxWidth: "300px",
-                                  }}
-                                >
-                                  {pa[keyType] &&
-                                    !updatedCompanyColumns.has(key) ? (
-                                    <HoverCard>
-                                      <HoverCard.Target>
-                                        {section.answer === "LOADING" ? (
-                                          <Loader size={"xs"} />
-                                        ) : (
-                                          <Text
-                                            color={
-                                              section.answer === "YES"
-                                                ? "green"
-                                                : "red"
-                                            }
-                                            weight={"bold"}
-                                          >
-                                            {section.answer}
-                                          </Text>
-                                        )}
-                                      </HoverCard.Target>
-                                      <HoverCard.Dropdown maw={"300px"}>
-                                        <Flex direction={"column"} gap={"4px"}>
-                                          <Text size="sm">
-                                            <span
-                                              style={{ fontWeight: "bold" }}
-                                            >
-                                              {`Reason: `}
-                                            </span>
-                                            {section.reasoning}
-                                          </Text>
-                                          <Divider />
-                                          <Text>
-                                            <span
-                                              style={{ fontWeight: "bold" }}
-                                            >
-                                              {`Source:  `}
-                                            </span>
-                                            {section.source}
-                                          </Text>
-                                        </Flex>
-                                      </HoverCard.Dropdown>
-                                    </HoverCard>
-                                  ) : (
-                                    <Text color={"orange"} weight={"bold"}>
-                                      TBD
-                                    </Text>
-                                  )}
-                                </td>
-                              );
+            {icp_scoring_ruleset_typed && (
+              <Box>
+                {!isLoading && viewMode === "ACCOUNT" ? (
+                  <Table style={{ overflow: "scroll" }} verticalSpacing={"sm"}>
+                    <thead>
+                      <tr>
+                        <th>
+                          <Checkbox
+                            checked={
+                              selectedCompanies.size ===
+                              displayProspectAccounts.length
                             }
-                          })}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </Table>
-              ) : (
-                <Table style={{ overflow: "scroll" }} verticalSpacing={"sm"}>
-                  <thead>
-                    <tr>
-                      <th>
-                        <Checkbox
-                          checked={selectedContacts.size === prospects.length}
-                          onChange={() => handleSelectAllContacts()}
-                        />
-                      </th>
-                      {icp_scoring_ruleset_typed &&
-                        contactTableHeaders.map((item) => {
-                          return (
-                            <th key={item.title}>
-                              <Flex align={"center"} justify={"space-between"}>
-                                <Flex direction={"column"} justify={"center"}>
-                                  {item.title}
-                                  {icp_scoring_ruleset_typed.individual_personalizers?.includes(
-                                    item.key
-                                  ) && (
-                                      <span
-                                        style={{
-                                          fontStyle: "italic",
-                                          fontSize: "xx-small",
-                                        }}
+                            onChange={() => handleSelectAllCompanies()}
+                          />
+                        </th>
+                        {icp_scoring_ruleset_typed &&
+                          companyTableHeaders.map((item) => {
+                            return (
+                              <th key={item.key}>
+                                <Flex
+                                  align={"center"}
+                                  justify={"space-between"}
+                                >
+                                  <Flex direction={"column"}>
+                                    {item.title}
+                                    {icp_scoring_ruleset_typed.company_personalizers?.includes(
+                                      item.key
+                                    ) && (
+                                        <span
+                                          style={{
+                                            fontStyle: "italic",
+                                            fontSize: "x-small",
+                                          }}
+                                        >
+                                          Personalizer: ✅
+                                        </span>
+                                      )}
+                                    {icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                      item.key
+                                    ) && (
+                                        <span
+                                          style={{
+                                            fontStyle: "italic",
+                                            fontSize: "x-small",
+                                          }}
+                                        >
+                                          Dealbreaker: ✅
+                                        </span>
+                                      )}
+                                  </Flex>
+                                  {(!notFilters.includes(item.key) ||
+                                    item.title === "Score") && (
+                                      <Popover
+                                        width={400}
+                                        position="bottom"
+                                        withArrow
+                                        shadow="md"
+                                        withinPortal
                                       >
-                                        Personalizer: ✅
-                                      </span>
-                                    )}
-                                  {icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                    item.key
-                                  ) && (
-                                      <span
-                                        style={{
-                                          fontStyle: "italic",
-                                          fontSize: "xx-small",
-                                        }}
-                                      >
-                                        "Dealbreaker: ✅"
-                                      </span>
-                                    )}
-                                </Flex>
-                                {(!notFilters.includes(item.key) ||
-                                  item.title === "Score") && (
-                                    <Popover
-                                      width={400}
-                                      position="bottom"
-                                      withArrow
-                                      shadow="md"
-                                      withinPortal
-                                    >
-                                      <Popover.Target>
-                                        <ActionIcon>
-                                          <FaFilter
-                                            color={
-                                              filteredColumns.has(item.key)
-                                                ? "lightgreen"
-                                                : "grey"
+                                        <Popover.Target>
+                                          <ActionIcon>
+                                            <FaFilter
+                                              color={
+                                                filteredColumns.has(item.key)
+                                                  ? "lightgreen"
+                                                  : "grey"
+                                              }
+                                            />
+                                          </ActionIcon>
+                                        </Popover.Target>
+                                        <Popover.Dropdown>
+                                          <Select
+                                            label={item.title}
+                                            placeholder={
+                                              "Select the Property that you would like to filter for"
+                                            }
+                                            data={
+                                              item.title === "Score"
+                                                ? [
+                                                  {
+                                                    value: "",
+                                                    label: "Select",
+                                                  },
+                                                  {
+                                                    value: "0",
+                                                    label: "VERY LOW",
+                                                  },
+                                                  { value: "1", label: "LOW" },
+                                                  {
+                                                    value: "2",
+                                                    label: "MEDIUM",
+                                                  },
+                                                  { value: "3", label: "HIGH" },
+                                                  {
+                                                    value: "4",
+                                                    label: "VERY HIGH",
+                                                  },
+                                                ]
+                                                : [
+                                                  {
+                                                    value: "",
+                                                    label: "Select",
+                                                  },
+                                                  {
+                                                    value: "YES",
+                                                    label: "YES",
+                                                  },
+                                                  { value: "NO", label: "NO" },
+                                                ]
+                                            }
+                                            onChange={(value) =>
+                                              onSelectFilter(
+                                                item.key,
+                                                value ?? ""
+                                              )
+                                            }
+                                            value={
+                                              filteredColumns.get(item.key)
+                                                ? (filteredColumns.get(
+                                                  item.key
+                                                ) as string)
+                                                : ""
                                             }
                                           />
-                                        </ActionIcon>
-                                      </Popover.Target>
-                                      <Popover.Dropdown>
-                                        <Select
-                                          label={item.title}
-                                          placeholder={
-                                            "Select the Property that you would like to filter for"
-                                          }
-                                          data={
-                                            item.title === "Score"
-                                              ? [
-                                                { value: "", label: "Select" },
-                                                {
-                                                  value: "0",
-                                                  label: "VERY LOW",
-                                                },
-                                                { value: "1", label: "LOW" },
-                                                { value: "2", label: "MEDIUM" },
-                                                { value: "3", label: "HIGH" },
-                                                {
-                                                  value: "4",
-                                                  label: "VERY HIGH",
-                                                },
-                                              ]
-                                              : [
-                                                { value: "", label: "Select" },
-                                                { value: "YES", label: "YES" },
-                                                { value: "NO", label: "NO" },
-                                              ]
-                                          }
-                                          onChange={(value) =>
-                                            onSelectFilter(item.key, value ?? "")
-                                          }
-                                          value={
-                                            filteredColumns.get(item.key)
-                                              ? (filteredColumns.get(
-                                                item.key
-                                              ) as string)
-                                              : ""
-                                          }
-                                        />
-                                      </Popover.Dropdown>
-                                    </Popover>
-                                  )}
-                              </Flex>
-                            </th>
-                          );
-                        })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {displayProspects
-                      .slice(0, view20 ? 20 : undefined)
-                      .map((prospect, index) => {
-                        const keys: string[] = contactTableHeaders.map(
-                          (h) => h.key
-                        );
-                        const p = {
-                          ...prospect,
-                          ...prospect.icp_fit_reason_v2,
-                        };
+                                        </Popover.Dropdown>
+                                      </Popover>
+                                    )}
+                                </Flex>
+                              </th>
+                            );
+                          })}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {displayProspectAccounts.map((prospectAccount, index) => {
+                        const keys = companyTableHeaders.map((h) => h.key);
 
                         return (
                           <tr
-                            key={p.id}
+                            key={prospectAccount.company}
                             style={{
-                              backgroundColor: selectedContacts.has(p.id)
+                              backgroundColor: selectedCompanies.has(
+                                "" + prospectAccount.company
+                              )
                                 ? "lightcyan"
                                 : "white",
                             }}
                           >
                             <td>
                               <Checkbox
-                                checked={selectedContacts.has(p.id)}
-                                onChange={() => handleSelectContact(p.id)}
+                                checked={selectedCompanies.has(
+                                  "" + prospectAccount.company
+                                )}
+                                onChange={() =>
+                                  handleSelectCompany(
+                                    "" + prospectAccount.company
+                                  )
+                                }
                               />
                             </td>
                             {keys.map((key) => {
                               if (notFilters.includes(key)) {
-                                const keyType = key as keyof typeof p;
-                                if (key === "icp_prospect_fit_score") {
+                                const keyType = key as keyof ProspectAccounts;
+
+                                if (key === "icp_company_fit_score") {
+                                  const prospect = prospects.find(
+                                    (item) =>
+                                      item.id === prospectAccount.prospect_id
+                                  );
+
+                                  if (!prospect) {
+                                    return (
+                                      <td
+                                        key={key + prospectAccount.company}
+                                        style={{
+                                          minWidth: "100px",
+                                          maxWidth: "300px",
+                                        }}
+                                      >
+                                        <Text color={"orange"} weight={"bold"}>
+                                          Not Scored
+                                        </Text>
+                                      </td>
+                                    );
+                                  }
+
                                   const trueScore =
-                                    prospect.icp_fit_reason_v2 &&
-                                    Object.keys(prospect.icp_fit_reason_v2)
+                                    prospect.icp_company_fit_reason &&
+                                    Object.keys(prospect.icp_company_fit_reason)
                                       .length > 0;
 
-                                  let humanReadableScore = "Not Scored";
+                                  let humanReadableScore = "NOT SCORED";
 
-                                  if (p[keyType] === 0) {
+                                  if (prospectAccount[keyType] === 0) {
                                     humanReadableScore = "VERY LOW";
-                                  } else if (p[keyType] === 1) {
+                                  } else if (prospectAccount[keyType] === 1) {
                                     humanReadableScore = "LOW";
-                                  } else if (p[keyType] === 2) {
+                                  } else if (prospectAccount[keyType] === 2) {
                                     humanReadableScore = "MEDIUM";
-                                  } else if (p[keyType] === 3) {
+                                  } else if (prospectAccount[keyType] === 3) {
                                     humanReadableScore = "HIGH";
-                                  } else if (p[keyType] === 4) {
+                                  } else if (prospectAccount[keyType] === 4) {
                                     humanReadableScore = "VERY HIGH";
                                   }
 
                                   return (
                                     <td
-                                      key={key + p.id}
+                                      key={key + prospectAccount.company}
                                       style={{
                                         minWidth: "100px",
                                         maxWidth: "300px",
@@ -1374,12 +1023,13 @@ const ContactAccountFilterModal = function({
                                             direction={"column"}
                                             style={{ maxWidth: "400px" }}
                                           >
-                                            {prospect.icp_fit_reason_v2 &&
+                                            {prospect.icp_company_fit_reason &&
                                               Object.keys(
-                                                prospect.icp_fit_reason_v2
+                                                prospect.icp_company_fit_reason
                                               ).map((key) => {
                                                 const section =
-                                                  prospect.icp_fit_reason_v2[
+                                                  prospect
+                                                    .icp_company_fit_reason[
                                                   key
                                                   ];
                                                 const title = key
@@ -1443,43 +1093,71 @@ const ContactAccountFilterModal = function({
                                     </td>
                                   );
                                 }
+
                                 return (
                                   <td
-                                    key={key + p.id}
+                                    key={key + prospectAccount.company}
                                     style={{
                                       minWidth: "100px",
                                       maxWidth: "300px",
                                     }}
                                   >
-                                    <Text>{p[keyType]}</Text>
+                                    {prospectAccount[keyType]}
                                   </td>
                                 );
                               } else {
-                                const keyType = key as keyof typeof p;
+                                const icp_company_fit_reason = prospects.find(
+                                  (item) =>
+                                    item.id === prospectAccount.prospect_id
+                                )?.icp_company_fit_reason as ICPFitReasonV2;
+
+                                if (!icp_company_fit_reason) {
+                                  return (
+                                    <td
+                                      key={key + prospectAccount.company}
+                                      style={{
+                                        minWidth: "100px",
+                                        maxWidth: "300px",
+                                      }}
+                                    >
+                                      <Text color={"orange"} weight={"bold"}>
+                                        TBD
+                                      </Text>
+                                    </td>
+                                  );
+                                }
+                                const pa = {
+                                  ...prospectAccount,
+                                  ...icp_company_fit_reason,
+                                };
+                                const keyType = key as keyof typeof pa;
+
+                                const section = icp_company_fit_reason[keyType];
+
                                 return (
                                   <td
-                                    key={key + p.id}
+                                    key={key + prospectAccount.company}
                                     style={{
                                       minWidth: "100px",
                                       maxWidth: "300px",
                                     }}
                                   >
-                                    {p[keyType] &&
-                                      !updatedIndividualColumns.has(key) ? (
+                                    {pa[keyType] &&
+                                      !updatedCompanyColumns.has(key) ? (
                                       <HoverCard>
                                         <HoverCard.Target>
-                                          {p[keyType].answer === "LOADING" ? (
+                                          {section.answer === "LOADING" ? (
                                             <Loader size={"xs"} />
                                           ) : (
                                             <Text
                                               color={
-                                                p[keyType].answer === "YES"
+                                                section.answer === "YES"
                                                   ? "green"
                                                   : "red"
                                               }
                                               weight={"bold"}
                                             >
-                                              {p[keyType].answer}
+                                              {section.answer}
                                             </Text>
                                           )}
                                         </HoverCard.Target>
@@ -1494,7 +1172,7 @@ const ContactAccountFilterModal = function({
                                               >
                                                 {`Reason: `}
                                               </span>
-                                              {p[keyType].reasoning}
+                                              {section.reasoning}
                                             </Text>
                                             <Divider />
                                             <Text>
@@ -1503,7 +1181,7 @@ const ContactAccountFilterModal = function({
                                               >
                                                 {`Source:  `}
                                               </span>
-                                              {p[keyType].source}
+                                              {section.source}
                                             </Text>
                                           </Flex>
                                         </HoverCard.Dropdown>
@@ -1520,10 +1198,387 @@ const ContactAccountFilterModal = function({
                           </tr>
                         );
                       })}
-                  </tbody>
-                </Table>
-              )}
-            </Box>
+                    </tbody>
+                  </Table>
+                ) : (
+                  <Table style={{ overflow: "scroll" }} verticalSpacing={"sm"}>
+                    <thead>
+                      <tr>
+                        <th>
+                          <Checkbox
+                            checked={selectedContacts.size === prospects.length}
+                            onChange={() => handleSelectAllContacts()}
+                          />
+                        </th>
+                        {icp_scoring_ruleset_typed &&
+                          contactTableHeaders.map((item) => {
+                            return (
+                              <th key={item.title}>
+                                <Flex
+                                  align={"center"}
+                                  justify={"space-between"}
+                                >
+                                  <Flex direction={"column"} justify={"center"}>
+                                    {item.title}
+                                    {icp_scoring_ruleset_typed.individual_personalizers?.includes(
+                                      item.key
+                                    ) && (
+                                        <span
+                                          style={{
+                                            fontStyle: "italic",
+                                            fontSize: "xx-small",
+                                          }}
+                                        >
+                                          Personalizer: ✅
+                                        </span>
+                                      )}
+                                    {icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                      item.key
+                                    ) && (
+                                        <span
+                                          style={{
+                                            fontStyle: "italic",
+                                            fontSize: "xx-small",
+                                          }}
+                                        >
+                                          "Dealbreaker: ✅"
+                                        </span>
+                                      )}
+                                  </Flex>
+                                  {(!notFilters.includes(item.key) ||
+                                    item.title === "Score") && (
+                                      <Popover
+                                        width={400}
+                                        position="bottom"
+                                        withArrow
+                                        shadow="md"
+                                        withinPortal
+                                      >
+                                        <Popover.Target>
+                                          <ActionIcon>
+                                            <FaFilter
+                                              color={
+                                                filteredColumns.has(item.key)
+                                                  ? "lightgreen"
+                                                  : "grey"
+                                              }
+                                            />
+                                          </ActionIcon>
+                                        </Popover.Target>
+                                        <Popover.Dropdown>
+                                          <Select
+                                            label={item.title}
+                                            placeholder={
+                                              "Select the Property that you would like to filter for"
+                                            }
+                                            data={
+                                              item.title === "Score"
+                                                ? [
+                                                  {
+                                                    value: "",
+                                                    label: "Select",
+                                                  },
+                                                  {
+                                                    value: "0",
+                                                    label: "VERY LOW",
+                                                  },
+                                                  { value: "1", label: "LOW" },
+                                                  {
+                                                    value: "2",
+                                                    label: "MEDIUM",
+                                                  },
+                                                  { value: "3", label: "HIGH" },
+                                                  {
+                                                    value: "4",
+                                                    label: "VERY HIGH",
+                                                  },
+                                                ]
+                                                : [
+                                                  {
+                                                    value: "",
+                                                    label: "Select",
+                                                  },
+                                                  {
+                                                    value: "YES",
+                                                    label: "YES",
+                                                  },
+                                                  { value: "NO", label: "NO" },
+                                                ]
+                                            }
+                                            onChange={(value) =>
+                                              onSelectFilter(
+                                                item.key,
+                                                value ?? ""
+                                              )
+                                            }
+                                            value={
+                                              filteredColumns.get(item.key)
+                                                ? (filteredColumns.get(
+                                                  item.key
+                                                ) as string)
+                                                : ""
+                                            }
+                                          />
+                                        </Popover.Dropdown>
+                                      </Popover>
+                                    )}
+                                </Flex>
+                              </th>
+                            );
+                          })}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {displayProspects
+                        .slice(0, view20 ? 20 : undefined)
+                        .map((prospect, index) => {
+                          const keys: string[] = contactTableHeaders.map(
+                            (h) => h.key
+                          );
+                          const p = {
+                            ...prospect,
+                            ...prospect.icp_fit_reason_v2,
+                          };
+
+                          return (
+                            <tr
+                              key={p.id}
+                              style={{
+                                backgroundColor: selectedContacts.has(p.id)
+                                  ? "lightcyan"
+                                  : "white",
+                              }}
+                            >
+                              <td>
+                                <Checkbox
+                                  checked={selectedContacts.has(p.id)}
+                                  onChange={() => handleSelectContact(p.id)}
+                                />
+                              </td>
+                              {keys.map((key) => {
+                                if (notFilters.includes(key)) {
+                                  const keyType = key as keyof typeof p;
+                                  if (key === "icp_prospect_fit_score") {
+                                    const trueScore =
+                                      prospect.icp_fit_reason_v2 &&
+                                      Object.keys(prospect.icp_fit_reason_v2)
+                                        .length > 0;
+
+                                    let humanReadableScore = "Not Scored";
+
+                                    if (p[keyType] === 0) {
+                                      humanReadableScore = "VERY LOW";
+                                    } else if (p[keyType] === 1) {
+                                      humanReadableScore = "LOW";
+                                    } else if (p[keyType] === 2) {
+                                      humanReadableScore = "MEDIUM";
+                                    } else if (p[keyType] === 3) {
+                                      humanReadableScore = "HIGH";
+                                    } else if (p[keyType] === 4) {
+                                      humanReadableScore = "VERY HIGH";
+                                    }
+
+                                    return (
+                                      <td
+                                        key={key + p.id}
+                                        style={{
+                                          minWidth: "100px",
+                                          maxWidth: "300px",
+                                        }}
+                                      >
+                                        <HoverCard>
+                                          <HoverCard.Target>
+                                            <Badge
+                                              color={
+                                                humanReadableScore ==
+                                                  "VERY HIGH"
+                                                  ? "green"
+                                                  : humanReadableScore == "HIGH"
+                                                    ? "blue"
+                                                    : humanReadableScore ==
+                                                      "MEDIUM"
+                                                      ? "yellow"
+                                                      : humanReadableScore == "LOW"
+                                                        ? "orange"
+                                                        : humanReadableScore ==
+                                                          "VERY LOW" && trueScore
+                                                          ? "red"
+                                                          : "gray"
+                                              }
+                                              fw={600}
+                                            >
+                                              {trueScore
+                                                ? humanReadableScore
+                                                : "NOT SCORED"}
+                                            </Badge>
+                                          </HoverCard.Target>
+                                          <HoverCard.Dropdown>
+                                            <Flex
+                                              direction={"column"}
+                                              style={{ maxWidth: "400px" }}
+                                            >
+                                              {prospect.icp_fit_reason_v2 &&
+                                                Object.keys(
+                                                  prospect.icp_fit_reason_v2
+                                                ).map((key) => {
+                                                  const section =
+                                                    prospect.icp_fit_reason_v2[
+                                                    key
+                                                    ];
+                                                  const title = key
+                                                    .replace(
+                                                      "_individual_",
+                                                      "_"
+                                                    )
+                                                    .replace("_company_", "_")
+                                                    .replace("aicomp_", "")
+                                                    .replace("aiind_", "")
+                                                    .split("_")
+                                                    .join(" ");
+
+                                                  if (
+                                                    section.answer === "NO" &&
+                                                    icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                                      key
+                                                    )
+                                                  ) {
+                                                    return (
+                                                      <Flex
+                                                        key={key}
+                                                        gap={"4px"}
+                                                      >
+                                                        <Text>❌</Text>
+                                                        <Text size="sm">
+                                                          <span
+                                                            style={{
+                                                              fontWeight:
+                                                                "bold",
+                                                            }}
+                                                          >
+                                                            {title}
+                                                          </span>
+                                                          {section.reasoning
+                                                            .replace("❌", "")
+                                                            .replace("✅", "")}
+                                                        </Text>
+                                                      </Flex>
+                                                    );
+                                                  } else if (
+                                                    section.answer === "YES"
+                                                  ) {
+                                                    return (
+                                                      <Flex
+                                                        key={key}
+                                                        gap={"4px"}
+                                                      >
+                                                        <Text>✅</Text>
+                                                        <Text size="sm">
+                                                          <span
+                                                            style={{
+                                                              fontWeight:
+                                                                "bold",
+                                                            }}
+                                                          >
+                                                            {title}
+                                                          </span>
+                                                          {section.reasoning
+                                                            .replace("❌", "")
+                                                            .replace("✅", "")}
+                                                        </Text>
+                                                      </Flex>
+                                                    );
+                                                  }
+
+                                                  return <></>;
+                                                })}
+                                            </Flex>
+                                          </HoverCard.Dropdown>
+                                        </HoverCard>
+                                      </td>
+                                    );
+                                  }
+                                  return (
+                                    <td
+                                      key={key + p.id}
+                                      style={{
+                                        minWidth: "100px",
+                                        maxWidth: "300px",
+                                      }}
+                                    >
+                                      <Text>{p[keyType]}</Text>
+                                    </td>
+                                  );
+                                } else {
+                                  const keyType = key as keyof typeof p;
+                                  return (
+                                    <td
+                                      key={key + p.id}
+                                      style={{
+                                        minWidth: "100px",
+                                        maxWidth: "300px",
+                                      }}
+                                    >
+                                      {p[keyType] &&
+                                        !updatedIndividualColumns.has(key) ? (
+                                        <HoverCard>
+                                          <HoverCard.Target>
+                                            {p[keyType].answer === "LOADING" ? (
+                                              <Loader size={"xs"} />
+                                            ) : (
+                                              <Text
+                                                color={
+                                                  p[keyType].answer === "YES"
+                                                    ? "green"
+                                                    : "red"
+                                                }
+                                                weight={"bold"}
+                                              >
+                                                {p[keyType].answer}
+                                              </Text>
+                                            )}
+                                          </HoverCard.Target>
+                                          <HoverCard.Dropdown maw={"300px"}>
+                                            <Flex
+                                              direction={"column"}
+                                              gap={"4px"}
+                                            >
+                                              <Text size="sm">
+                                                <span
+                                                  style={{ fontWeight: "bold" }}
+                                                >
+                                                  {`Reason: `}
+                                                </span>
+                                                {p[keyType].reasoning}
+                                              </Text>
+                                              <Divider />
+                                              <Text>
+                                                <span
+                                                  style={{ fontWeight: "bold" }}
+                                                >
+                                                  {`Source:  `}
+                                                </span>
+                                                {p[keyType].source}
+                                              </Text>
+                                            </Flex>
+                                          </HoverCard.Dropdown>
+                                        </HoverCard>
+                                      ) : (
+                                        <Text color={"orange"} weight={"bold"}>
+                                          TBD
+                                        </Text>
+                                      )}
+                                    </td>
+                                  );
+                                }
+                              })}
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </Table>
+                )}
+              </Box>
+            )}
           </ScrollArea>
         </Flex>
       </Flex>

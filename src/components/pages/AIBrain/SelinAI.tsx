@@ -1,4 +1,8 @@
-import { userDataState, userTokenState } from "@atoms/userAtoms";
+import {
+  emailSubjectLinesState,
+  userDataState,
+  userTokenState,
+} from "@atoms/userAtoms";
 import posthog from "posthog-js";
 
 import {
@@ -60,7 +64,15 @@ import {
 } from "@tabler/icons";
 import { IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
-import { Fragment, Key, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  Fragment,
+  Key,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import React, { forwardRef, useImperativeHandle } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { proxyURL } from "@utils/general";
@@ -96,6 +108,9 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { getFreshCurrentProject, isFreeUser } from "@auth/core";
 import Tour from "reactour";
 import { useNavigate } from "react-router-dom";
+import Sequences from "@pages/CampaignV2/Sequences";
+import { SubjectLineTemplate } from "src";
+import { ArchetypeFilters } from "@pages/CampaignV2/ArchetypeFilterModal";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit }, ref) => {
@@ -230,6 +245,7 @@ interface TaskType {
   updated_at: string;
   selix_session_id: number;
   rewind_img: string | null;
+  widget_type?: string;
 }
 
 export interface MemoryType {
@@ -2920,24 +2936,21 @@ const PlannerComponent = ({
                         }}
                       />
                     </Text>
-                    {task.proof_of_work_img && (
-                      <img
-                        src={task.proof_of_work_img}
-                        alt="Proof of Work"
-                        width={"100%"}
-                        height={"100%"}
-                        style={{ marginTop: "10px" }}
+                    {currentProject && index === tasks.length - 1 ? (
+                      <CampaignLandingV2
+                        showOnlyHeader
+                        showLaunchButton
+                        forcedCampaignId={currentProject?.id}
+                      />
+                    ) : (
+                      <TaskRenderer
+                        task={task}
+                        counter={counter}
+                        // messages={messages}
+                        threads={threads}
+                        currentSessionId={currentSessionId}
                       />
                     )}
-                    {currentProject &&
-                      index === tasks.length - 1 &&
-                      campaignId && (
-                        <CampaignLandingV2
-                          showOnlyHeader
-                          showLaunchButton
-                          forcedCampaignId={currentProject.id}
-                        />
-                      )}
                   </Collapse>
                 </Paper>
               );
@@ -2948,6 +2961,76 @@ const PlannerComponent = ({
   );
 };
 
+const TaskRenderer = ({
+  task,
+  counter,
+  // messages,
+  threads,
+  currentSessionId,
+}: {
+  task: TaskType;
+  counter: Number;
+  // messages: MessageType[],
+  threads: ThreadType[];
+  currentSessionId: Number | null;
+}) => {
+  const currentProject = useRecoilValue(currentProjectState);
+  const [sequences, setSequences] = useState<any[]>([]);
+  const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>(
+    []
+  );
+
+  const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<
+    SubjectLineTemplate[]
+  >(emailSubjectLinesState);
+
+  switch (task.widget_type) {
+    case "LAUNCH_CAMPAIGN":
+      return (
+        <CampaignLandingV2
+          showOnlyHeader
+          showLaunchButton
+          forcedCampaignId={currentProject?.id}
+        />
+      );
+    case "VIEW_STRATEGY":
+      return (
+        <SelinStrategy
+          counter={counter}
+          // messages={messages}
+          threads={threads}
+          currentSessionId={currentSessionId}
+        />
+      );
+    case "REVIEW_PROSPECTS":
+      return <ArchetypeFilters hideFeature={true} />;
+    case "VIEW_SEQUENCE":
+      return (
+        <Sequences
+          setSequences={setSequences}
+          setEmailSubjectLines={setEmailSubjectLines}
+          emailSubjectLines={emailSubjectLines}
+          setLinkedinInitialMessages={setLinkedinInitialMessages}
+          linkedinInitialMessages={linkedinInitialMessages}
+        />
+      );
+    default:
+      return (
+        <>
+          {task.proof_of_work_img && (
+            <img
+              src={task.proof_of_work_img}
+              alt="Proof of Work"
+              width={"100%"}
+              height={"100%"}
+              style={{ marginTop: "10px" }}
+            />
+          )}
+        </>
+      );
+  }
+};
+
 const SelinStrategy = ({
   messages,
   counter,
@@ -2956,9 +3039,9 @@ const SelinStrategy = ({
   threads,
   currentSessionId,
 }: {
-  messages: any[];
-  setPrompt: React.Dispatch<React.SetStateAction<string>>;
-  handleSubmit: (file: any, message: string) => void;
+  messages?: any[];
+  setPrompt?: React.Dispatch<React.SetStateAction<string>>;
+  handleSubmit?: (file: any, message: string) => void;
   threads: ThreadType[];
   currentSessionId: Number | null;
   counter: Number;
@@ -2967,10 +3050,11 @@ const SelinStrategy = ({
     ?.memory;
 
   const hackedSubmit = () => {
-    handleSubmit(
-      undefined,
-      "Let's do it - create the task list and start executing."
-    );
+    handleSubmit &&
+      handleSubmit(
+        undefined,
+        "Let's do it - create the task list and start executing."
+      );
   };
 
   // console.log('memory is', memory);
@@ -3018,21 +3102,23 @@ const SelinStrategy = ({
         </Text>
       </Flex>
       <Stack p={"sm"}>
-        <Paper
-          withBorder
-          bg={"#F0FFF0"}
-          px={"sm"}
-          py={"xs"}
-          style={{ borderColor: "#32CD32" }}
-        >
-          <Flex align={"center"} gap={"xs"}>
-            <IconInfoCircle color="green" size={"1rem"} />
-            <Text size={"sm"} color="#228B22" fw={600}>
-              This blueprint summarizes the angle for your campaign. Review then
-              press 'Save Draft'
-            </Text>
-          </Flex>
-        </Paper>
+        {handleSubmit && (
+          <Paper
+            withBorder
+            bg={"#F0FFF0"}
+            px={"sm"}
+            py={"xs"}
+            style={{ borderColor: "#32CD32" }}
+          >
+            <Flex align={"center"} gap={"xs"}>
+              <IconInfoCircle color="green" size={"1rem"} />
+              <Text size={"sm"} color="#228B22" fw={600}>
+                This blueprint summarizes the angle for your campaign. Review
+                then press 'Save Draft'
+              </Text>
+            </Flex>
+          </Paper>
+        )}
         <ScrollArea h={"34vh"} p={"sm"} my={"sm"}>
           <Flex>
             <Text color="gray" fw={500} w={160} size={"xs"}>
@@ -3117,92 +3203,94 @@ const SelinStrategy = ({
             </Text>
           </Flex>
         </ScrollArea>
-        <Flex align={"center"} gap={"md"}>
-          <Button
-            variant="outline"
-            color="gray"
-            fullWidth
-            onClick={() => {
-              if (!memory?.strategy_id) {
-                return;
-              }
-              openContextModal({
-                modal: "editStrategy",
-                title: (
-                  <Flex align={"center"} gap={"sm"}>
-                    <IconBulb color="#228be6" size={"1.6rem"} />
-                    <Title order={2}>Edit Strategy</Title>
-                  </Flex>
-                ),
-                styles: {
-                  content: {
-                    minWidth: "70%",
+        {handleSubmit && (
+          <Flex align={"center"} gap={"md"}>
+            <Button
+              variant="outline"
+              color="gray"
+              fullWidth
+              onClick={() => {
+                if (!memory?.strategy_id) {
+                  return;
+                }
+                openContextModal({
+                  modal: "editStrategy",
+                  title: (
+                    <Flex align={"center"} gap={"sm"}>
+                      <IconBulb color="#228be6" size={"1.6rem"} />
+                      <Title order={2}>Edit Strategy</Title>
+                    </Flex>
+                  ),
+                  styles: {
+                    content: {
+                      minWidth: "70%",
+                    },
                   },
-                },
-                innerProps: {
-                  title: strategy?.title,
-                  description: strategy?.description,
-                  archetypes: [],
-                  status: strategy?.status,
-                  startDate: strategy?.start_date
-                    ? new Date(strategy.start_date)
-                    : null,
-                  endDate: strategy?.end_date
-                    ? new Date(strategy.end_date)
-                    : null,
-                  onSubmit: async (
-                    title: string,
-                    description: string,
-                    archetypes: number[],
-                    status: string,
-                    startDate: Date,
-                    endDate: Date
-                  ) => {
-                    const response = await patchUpdateStrategy(
-                      memory?.strategy_id || -1,
-                      title,
-                      description,
-                      archetypes,
-                      status,
-                      startDate,
-                      endDate
-                    );
-                    //yolo
-                    const updatedStrategy = await getStrategy(
-                      memory?.strategy_id || -1
-                    );
-                    setStrategy(updatedStrategy);
-                    showNotification({
-                      title: "Success",
-                      message: "Strategy updated successfully",
-                      color: "green",
-                    });
+                  innerProps: {
+                    title: strategy?.title,
+                    description: strategy?.description,
+                    archetypes: [],
+                    status: strategy?.status,
+                    startDate: strategy?.start_date
+                      ? new Date(strategy.start_date)
+                      : null,
+                    endDate: strategy?.end_date
+                      ? new Date(strategy.end_date)
+                      : null,
+                    onSubmit: async (
+                      title: string,
+                      description: string,
+                      archetypes: number[],
+                      status: string,
+                      startDate: Date,
+                      endDate: Date
+                    ) => {
+                      const response = await patchUpdateStrategy(
+                        memory?.strategy_id || -1,
+                        title,
+                        description,
+                        archetypes,
+                        status,
+                        startDate,
+                        endDate
+                      );
+                      //yolo
+                      const updatedStrategy = await getStrategy(
+                        memory?.strategy_id || -1
+                      );
+                      setStrategy(updatedStrategy);
+                      showNotification({
+                        title: "Success",
+                        message: "Strategy updated successfully",
+                        color: "green",
+                      });
+                    },
                   },
-                },
-              });
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            fullWidth
-            onClick={() => {
-              showNotification({
-                title: "Task Creation",
-                message: "Drafting Campaign: " + strategy?.title,
-                color: "green",
-                icon: <IconCheck />,
-              });
+                });
+              }}
+            >
+              Edit
+            </Button>
+            <Button
+              fullWidth
+              onClick={() => {
+                showNotification({
+                  title: "Task Creation",
+                  message: "Drafting Campaign: " + strategy?.title,
+                  color: "green",
+                  icon: <IconCheck />,
+                });
 
-              if (!memory?.strategy_id) {
-                return;
-              }
-              hackedSubmit();
-            }}
-          >
-            Save Draft
-          </Button>
-        </Flex>
+                if (!memory?.strategy_id) {
+                  return;
+                }
+                hackedSubmit();
+              }}
+            >
+              Save Draft
+            </Button>
+          </Flex>
+        )}
       </Stack>
     </Paper>
   );

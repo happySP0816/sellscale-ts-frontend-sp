@@ -207,7 +207,7 @@ const CampaignFilters = function({
   >(icp_scoring_ruleset.individual_personalizers ?? []);
 
   const [company_personalizers, setCompanyPersonalizers] = useState<string[]>(
-    icp_scoring_ruleset.individual_personalizers ?? []
+    icp_scoring_ruleset.company_personalizers ?? []
   );
 
   const [dealbreakers, setDealBreakers] = useState<string[]>(

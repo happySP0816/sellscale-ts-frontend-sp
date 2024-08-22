@@ -501,7 +501,7 @@ export default function CampaignTemplateEditModal({
                     bg={currentStepNum === "subjectLines" ? "#f9fbfe" : ""}
                     style={{
                       border: currentStepNum === "subjectLines" ? "1px solid #228be6 " : "",
-                      boxShadow: emailSubjectLines.length === 1 ? "0 0 0 2px rgba(255, 0, 0, 0.5)" : "",
+                      boxShadow: emailSubjectLines.length === 0 ? "0 0 0 2px rgba(255, 0, 0, 0.5)" : "",
                     }}
                   >
                     <Flex align={"center"} justify={"space-between"}>
@@ -510,7 +510,7 @@ export default function CampaignTemplateEditModal({
                         <ThemeIcon size={"sm"}>
                           <IconMail fill="white" color="#228be6" style={{ width: "90%", height: "90%" }} />
                         </ThemeIcon>
-                        Subject Lines
+                        {emailSubjectLines.length} {emailSubjectLines.length === 1 ? "Subject Line" : "Subject Lines"}
                       </Text>
                     </Flex>
                   </Paper>

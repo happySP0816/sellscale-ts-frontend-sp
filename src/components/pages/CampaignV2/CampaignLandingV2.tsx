@@ -20,6 +20,7 @@ import {
   Textarea,
   ActionIcon,
   TextInput,
+  Anchor,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -33,7 +34,9 @@ import {
   IconArrowsLeftRight,
   IconBrandLinkedin,
   IconCalendar,
+  IconCheck,
   IconChecks,
+  IconCircleCheck,
   IconEdit,
   IconMailOpened,
   IconSend,
@@ -271,6 +274,7 @@ export default function CampaignLandingV2(props: PropsType) {
   const [voiceParam4, setVoiceParam4] = useState({ x: 140, y: 140 });
   const [loadingVoiceSimulation, setLoadingVoiceSimulation] = useState(false);
   const [testingVolume, setTestingVolume] = useState(0);
+  const [successPopup, setSuccessPopup] = useState(false);
 
   const [value, setValue] = useState("");
 
@@ -333,7 +337,10 @@ export default function CampaignLandingV2(props: PropsType) {
     }
   }, [currentProject]);
 
-  const checkCanToggleLinkedin = () => {
+  const checkCanToggleLinkedin = (checkPage?: boolean) => {
+    if (checkPage && window.location.href.includes('selix')) {
+      return false;
+    }
     if (totalContacts === 0) {
       showNotification({
         color: "red",
@@ -363,7 +370,17 @@ export default function CampaignLandingV2(props: PropsType) {
     return true;
   };
 
-  const checkCanToggleEmail = () => {
+  const showSuccessPopup = () => {
+    setSuccessPopup(true);
+    setTimeout(() => {
+      setSuccessPopup(false);
+    }, 60000);
+  };
+
+  const checkCanToggleEmail = (checkPage?: boolean) => {
+    if (checkPage && window.location.href.includes('selix')) {
+      return false;
+    }
     if (totalContacts === 0) {
       showNotification({
         color: "red",
@@ -569,31 +586,31 @@ export default function CampaignLandingV2(props: PropsType) {
     if (channel === "email") {
       //check if there are email sequences and subject lines.
       //if not, show a notification that the channel cannot be activated.
-      if (emailSequenceData.length === 0 || emailSubjectLines.length === 0) {
-        showNotification({
-          color: "red",
-          title: "Email Channel",
-          message:
-            "Email channel cannot be activated without email sequences and subject lines.",
-        });
-        return;
-      }
+      // if (emailSequenceData.length === 0 || emailSubjectLines.length === 0) {
+      //   showNotification({
+      //     color: "red",
+      //     title: "Email Channel",
+      //     message:
+      //       "Email channel cannot be activated without email sequences and subject lines.",
+      //   });
+      //   return;
+      // }
     }
 
     //show a warning that for email channel, if they activate, the number of sequence steps will always stay the same.
     //check localStorage if they have set the warning to not show again.
     //if not, show the warning.
-    if (!localStorage.getItem("emailChannelWarning") && active === true) {
-      localStorage.setItem("emailChannelWarning", "true");
-    }
-    if (
-      channel === "email" &&
-      localStorage.getItem("emailChannelWarning") === "true" &&
-      active === true
-    ) {
-      setShowActivateWarningModal(true);
-      return;
-    }
+    // if (!localStorage.getItem("emailChannelWarning") && active === true) {
+    //   localStorage.setItem("emailChannelWarning", "true");
+    // }
+    // if (
+    //   channel === "email" &&
+    //   localStorage.getItem("emailChannelWarning") === "true" &&
+    //   active === true
+    // ) {
+    //   setShowActivateWarningModal(true);
+    //   return;
+    // }
 
     setLoadingStats(true);
     const result = postTogglePersonaActive(
@@ -890,7 +907,7 @@ export default function CampaignLandingV2(props: PropsType) {
           }}
         >
           <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour} />
-          <Flex direction={"column"} w={"100%"}>
+          {!successPopup ? (<Flex direction={"column"} w={"100%"}>
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
             <Flex
               justify={"space-between"}
@@ -1031,6 +1048,7 @@ export default function CampaignLandingV2(props: PropsType) {
                   )}
                   {props.showLaunchButton && (
                     <Button
+                      // disabled={statsData?.linkedin_active || statsData?.email_active}
                       size="sm"
                       color="green"
                       onClick={() => {
@@ -1050,6 +1068,18 @@ export default function CampaignLandingV2(props: PropsType) {
                             webhook_key: "selix-sessions",
                           }),
                         });
+
+                        showSuccessPopup();
+                        
+                        // if (checkCanToggleEmail(false)){
+                        //   togglePersonaChannel(id, "email", userToken, true);
+                        //   showSuccessPopup();
+                        // }
+                        // if (checkCanToggleLinkedin(false)){
+                        //   togglePersonaChannel(id, "linkedin", userToken, true);
+                        //   showSuccessPopup();
+                        // }
+
                       }}
                     >
                       Launch Campaign
@@ -1093,7 +1123,7 @@ export default function CampaignLandingV2(props: PropsType) {
                     <Group noWrap spacing={"sm"} w={"100%"}>
                       <Switch
                         onChange={() => {
-                          if (!checkCanToggleEmail()) {
+                          if (!checkCanToggleEmail(true)) {
                             return;
                           }
                           togglePersonaChannel(
@@ -1185,7 +1215,7 @@ export default function CampaignLandingV2(props: PropsType) {
                       </>
                       <Switch
                         onChange={() => {
-                          if (!checkCanToggleLinkedin()) {
+                          if (!checkCanToggleLinkedin(true)) {
                             return;
                           }
                           togglePersonaChannel(
@@ -1251,7 +1281,7 @@ export default function CampaignLandingV2(props: PropsType) {
                 </Flex>
               </Flex>
             </Flex>
-            <Flex gap={"sm"} w={"100%"} justify={"center"} p={"lg"}>
+            {!window.location.href.includes('selix') && <Flex gap={"sm"} w={"100%"} justify={"center"} p={"lg"}>
               <Paper w={"100%"} withBorder>
                 {loadingStats || !statsData ? (
                   <Flex direction="row" align="center" w="100%" my="md">
@@ -1526,7 +1556,7 @@ export default function CampaignLandingV2(props: PropsType) {
                   setLoadingStats={setLoadingStats}
                 />
               </Flex>
-            </Flex>
+            </Flex>}
             {!loadingContacts && activeStep !== 3 && (
               <Box
                 data-tour="campaign-progress"
@@ -1534,14 +1564,25 @@ export default function CampaignLandingV2(props: PropsType) {
                 py={"md"}
                 bg={"#FAFAFA"}
               >
-                <Stepper active={activeStep} size="xs" iconSize={28}>
+                {!window.location.href.includes('selix') && <Stepper active={activeStep} size="xs" iconSize={28}>
                   <Stepper.Step label="Add Contacts" />
                   <Stepper.Step label="Setup Templates" />
                   <Stepper.Step label="Add Personalizers" />
-                </Stepper>
+                </Stepper>}
               </Box>
             )}
-          </Flex>
+          </Flex>) : (
+              <Flex direction="column" align="center" justify="center" gap="sm" style={{ textAlign: 'center', width: '100%', paddingTop: '16px', paddingBottom: '16px' }} id="success-popup">
+                <Box style={{ margin: '0 auto' }}>
+                  <IconCircleCheck size={48} color="green" />
+                </Box>
+                <Text size="lg" weight={500}>Amazing!</Text>
+                <Text size="md">Campaign created Successfully</Text>
+                <Text size="sm">
+                  Campaign: <Anchor href="#" target="_blank">{currentProject?.name}</Anchor>
+                </Text>
+              </Flex>
+          )}
         </Flex>
       )}
       {!showOnlyHeader && (

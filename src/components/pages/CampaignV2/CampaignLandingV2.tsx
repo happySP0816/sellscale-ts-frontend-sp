@@ -374,7 +374,7 @@ export default function CampaignLandingV2(props: PropsType) {
     setSuccessPopup(true);
     setTimeout(() => {
       setSuccessPopup(false);
-    }, 60000);
+    }, 300000);
   };
 
   const checkCanToggleEmail = (checkPage?: boolean) => {

@@ -1,4 +1,8 @@
-import { emailSubjectLinesState, userDataState, userTokenState } from "@atoms/userAtoms";
+import {
+  emailSubjectLinesState,
+  userDataState,
+  userTokenState,
+} from "@atoms/userAtoms";
 import posthog from "posthog-js";
 
 import {
@@ -28,6 +32,7 @@ import {
   LoadingOverlay,
   Kbd,
   Group,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconBrowser,
@@ -45,6 +50,7 @@ import {
   IconFile,
   IconFlask,
   IconHammer,
+  IconHistory,
   IconInfoCircle,
   IconLink,
   IconList,
@@ -58,7 +64,15 @@ import {
 } from "@tabler/icons";
 import { IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
-import { Dispatch, Fragment, Key, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  Fragment,
+  Key,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import React, { forwardRef, useImperativeHandle } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { proxyURL } from "@utils/general";
@@ -230,6 +244,7 @@ interface TaskType {
   created_at: string;
   updated_at: string;
   selix_session_id: number;
+  rewind_img: string | null;
   widget_type?: string;
 }
 
@@ -954,16 +969,21 @@ export default function SelinAI() {
     const fetchAndLoadMessages = async () => {
       const threads_loaded = await fetchChatHistory();
       const urlParams = new URLSearchParams(window.location.search);
-      const sessionIdFromUrl = urlParams.get('session_id');
-      const threadIdFromUrl = urlParams.get('thread_id');
-      console.log('session id from url is', sessionIdFromUrl);
-      console.log('got here');
+      const sessionIdFromUrl = urlParams.get("session_id");
+      const threadIdFromUrl = urlParams.get("thread_id");
+      console.log("session id from url is", sessionIdFromUrl);
+      console.log("got here");
       if (sessionIdFromUrl) {
         // Clear the URL parameters from the input bar
         const newUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
-        getMessages(threadIdFromUrl || '', parseInt(sessionIdFromUrl), threads_loaded, 'PLANNER');
-        setAIType('PLANNER');
+        getMessages(
+          threadIdFromUrl || "",
+          parseInt(sessionIdFromUrl),
+          threads_loaded,
+          "PLANNER"
+        );
+        setAIType("PLANNER");
       }
     };
 
@@ -1133,7 +1153,9 @@ export default function SelinAI() {
                         thread.status !== "COMPLETE" &&
                         thread.status !== "CANCELLED"
                     ).length - 1
-                  ) > 1 ? "other active sessions" : "other active session"}
+                  ) > 1
+                    ? "other active sessions"
+                    : "other active session"}
                 </Text>
               </Flex>
               <Flex align={"center"} gap={"sm"}>
@@ -2056,7 +2078,7 @@ const SegmentChat = (props: any) => {
                 <IconPlus size={"1rem"} />
               </ActionIcon> */}
               <ActionIcon
-                ml={'xl'}
+                ml={"xl"}
                 variant="outline"
                 color="gray"
                 radius={"xl"}
@@ -2074,8 +2096,8 @@ const SegmentChat = (props: any) => {
                   fileInput.click();
                 }}
               >
-                <Button ml="xl"color="grape" size="xs">
-                  {'Add File'}
+                <Button ml="xl" color="grape" size="xs">
+                  {"Add File"}
                   <IconPlus size={"1rem"} />
                 </Button>
               </ActionIcon>
@@ -2688,6 +2710,8 @@ const PlannerComponent = ({
     currentProjectState
   );
   const userToken = useRecoilValue(userTokenState);
+  const [showRewindImage, setShowRewindImage] = useState(false);
+  const [selectedRewindImage, setSelectedRewindImage] = useState<string>("");
 
   const campaignId = threads.find((thread) => thread.id === currentSessionId)
     ?.memory?.campaign_id;
@@ -2772,6 +2796,19 @@ const PlannerComponent = ({
           )}
         </Flex>
       </Paper>
+      <Modal
+        opened={showRewindImage}
+        onClose={() => setShowRewindImage(false)}
+        title="Rewind Image"
+      >
+        <img
+          src={selectedRewindImage}
+          alt="Rewind"
+          width={"100%"}
+          height={"100%"}
+          style={{ marginTop: "10px" }}
+        />
+      </Modal>
       <Collapse in={opened}>
         <ScrollArea
           h={"55vh"}
@@ -2833,6 +2870,28 @@ const PlannerComponent = ({
                       {task.title}
                     </Text>
                     <Flex align={"center"} gap={"xs"}>
+                      <Tooltip
+                        label={
+                          !task.rewind_img
+                            ? "No rewind available"
+                            : "View rewind"
+                        }
+                      >
+                        <Button
+                          size={"xs"}
+                          variant="outline"
+                          color={task.rewind_img ? "blue" : "gray"}
+                          leftIcon={<IconHistory size={14} />}
+                          onClick={() => {
+                            if (task.rewind_img) {
+                              setShowRewindImage(true);
+                              setSelectedRewindImage(task.rewind_img);
+                            }
+                          }}
+                        >
+                          Show Rewind
+                        </Button>
+                      </Tooltip>
                       <Text color="gray" size={"sm"} fw={500}>
                         {moment(task.created_at).fromNow()}
                       </Text>
@@ -2869,16 +2928,29 @@ const PlannerComponent = ({
                     </Flex>
                   </Flex>
                   <Collapse in={openedTaskIndex === index}>
-                  {/* eventually we will make this just LAUNCH_CAMPAIGN */}
-                      {currentProject && index === tasks.length - 1 ? (
-                        <CampaignLandingV2 showOnlyHeader showLaunchButton forcedCampaignId={currentProject?.id}/>
-                      ) : <TaskRenderer 
-                            task={task} 
-                            counter={counter} 
-                            // messages={messages} 
-                            threads={threads} 
-                            currentSessionId={currentSessionId} 
-                          />}    
+                    <Text p={"xs"} mt={"sm"} size="xs">
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            task.description?.replaceAll("\n", "<br />") || "",
+                        }}
+                      />
+                    </Text>
+                    {currentProject && index === tasks.length - 1 ? (
+                      <CampaignLandingV2
+                        showOnlyHeader
+                        showLaunchButton
+                        forcedCampaignId={currentProject?.id}
+                      />
+                    ) : (
+                      <TaskRenderer
+                        task={task}
+                        counter={counter}
+                        // messages={messages}
+                        threads={threads}
+                        currentSessionId={currentSessionId}
+                      />
+                    )}
                   </Collapse>
                 </Paper>
               );
@@ -2896,11 +2968,11 @@ const TaskRenderer = ({
   threads,
   currentSessionId,
 }: {
-  task: TaskType,
-  counter: Number,
+  task: TaskType;
+  counter: Number;
   // messages: MessageType[],
-  threads: ThreadType[],
-  currentSessionId: Number | null,
+  threads: ThreadType[];
+  currentSessionId: Number | null;
 }) => {
   const currentProject = useRecoilValue(currentProjectState);
   const [sequences, setSequences] = useState<any[]>([]);
@@ -2913,7 +2985,7 @@ const TaskRenderer = ({
   >(emailSubjectLinesState);
 
   switch (task.widget_type) {
-    case 'LAUNCH_CAMPAIGN':
+    case "LAUNCH_CAMPAIGN":
       return (
         <CampaignLandingV2
           showOnlyHeader
@@ -2921,20 +2993,18 @@ const TaskRenderer = ({
           forcedCampaignId={currentProject?.id}
         />
       );
-    case 'VIEW_STRATEGY':
+    case "VIEW_STRATEGY":
       return (
         <SelinStrategy
-            counter={counter}
-            // messages={messages}
-            threads={threads}
-            currentSessionId={currentSessionId}
-          />
+          counter={counter}
+          // messages={messages}
+          threads={threads}
+          currentSessionId={currentSessionId}
+        />
       );
-    case 'REVIEW_PROSPECTS':
-      return (
-        <ArchetypeFilters hideFeature={true}/>
-      );
-    case 'VIEW_SEQUENCE':
+    case "REVIEW_PROSPECTS":
+      return <ArchetypeFilters hideFeature={true} />;
+    case "VIEW_SEQUENCE":
       return (
         <Sequences
           setSequences={setSequences}
@@ -2942,18 +3012,11 @@ const TaskRenderer = ({
           emailSubjectLines={emailSubjectLines}
           setLinkedinInitialMessages={setLinkedinInitialMessages}
           linkedinInitialMessages={linkedinInitialMessages}
-          />
+        />
       );
     default:
       return (
         <>
-          <Text p={"xs"} mt={"sm"} size="xs">
-            <div
-              dangerouslySetInnerHTML={{
-                __html: task.description?.replaceAll("\n", "<br />") || "",
-              }}
-            />
-          </Text>
           {task.proof_of_work_img && (
             <img
               src={task.proof_of_work_img}
@@ -2987,10 +3050,11 @@ const SelinStrategy = ({
     ?.memory;
 
   const hackedSubmit = () => {
-    handleSubmit && handleSubmit(
-      undefined,
-      "Let's do it - create the task list and start executing."
-    );
+    handleSubmit &&
+      handleSubmit(
+        undefined,
+        "Let's do it - create the task list and start executing."
+      );
   };
 
   // console.log('memory is', memory);
@@ -3038,21 +3102,23 @@ const SelinStrategy = ({
         </Text>
       </Flex>
       <Stack p={"sm"}>
-        {handleSubmit && <Paper
-          withBorder
-          bg={"#F0FFF0"}
-          px={"sm"}
-          py={"xs"}
-          style={{ borderColor: "#32CD32" }}
-        >
-          <Flex align={"center"} gap={"xs"}>
-            <IconInfoCircle color="green" size={"1rem"} />
-            <Text size={"sm"} color="#228B22" fw={600}>
-              This blueprint summarizes the angle for your campaign. Review then
-              press 'Save Draft'
-            </Text>
-          </Flex>
-        </Paper>}
+        {handleSubmit && (
+          <Paper
+            withBorder
+            bg={"#F0FFF0"}
+            px={"sm"}
+            py={"xs"}
+            style={{ borderColor: "#32CD32" }}
+          >
+            <Flex align={"center"} gap={"xs"}>
+              <IconInfoCircle color="green" size={"1rem"} />
+              <Text size={"sm"} color="#228B22" fw={600}>
+                This blueprint summarizes the angle for your campaign. Review
+                then press 'Save Draft'
+              </Text>
+            </Flex>
+          </Paper>
+        )}
         <ScrollArea h={"34vh"} p={"sm"} my={"sm"}>
           <Flex>
             <Text color="gray" fw={500} w={160} size={"xs"}>
@@ -3137,92 +3203,94 @@ const SelinStrategy = ({
             </Text>
           </Flex>
         </ScrollArea>
-        {handleSubmit && <Flex align={"center"} gap={"md"}>
-          <Button
-            variant="outline"
-            color="gray"
-            fullWidth
-            onClick={() => {
-              if (!memory?.strategy_id) {
-                return;
-              }
-              openContextModal({
-                modal: "editStrategy",
-                title: (
-                  <Flex align={"center"} gap={"sm"}>
-                    <IconBulb color="#228be6" size={"1.6rem"} />
-                    <Title order={2}>Edit Strategy</Title>
-                  </Flex>
-                ),
-                styles: {
-                  content: {
-                    minWidth: "70%",
+        {handleSubmit && (
+          <Flex align={"center"} gap={"md"}>
+            <Button
+              variant="outline"
+              color="gray"
+              fullWidth
+              onClick={() => {
+                if (!memory?.strategy_id) {
+                  return;
+                }
+                openContextModal({
+                  modal: "editStrategy",
+                  title: (
+                    <Flex align={"center"} gap={"sm"}>
+                      <IconBulb color="#228be6" size={"1.6rem"} />
+                      <Title order={2}>Edit Strategy</Title>
+                    </Flex>
+                  ),
+                  styles: {
+                    content: {
+                      minWidth: "70%",
+                    },
                   },
-                },
-                innerProps: {
-                  title: strategy?.title,
-                  description: strategy?.description,
-                  archetypes: [],
-                  status: strategy?.status,
-                  startDate: strategy?.start_date
-                    ? new Date(strategy.start_date)
-                    : null,
-                  endDate: strategy?.end_date
-                    ? new Date(strategy.end_date)
-                    : null,
-                  onSubmit: async (
-                    title: string,
-                    description: string,
-                    archetypes: number[],
-                    status: string,
-                    startDate: Date,
-                    endDate: Date
-                  ) => {
-                    const response = await patchUpdateStrategy(
-                      memory?.strategy_id || -1,
-                      title,
-                      description,
-                      archetypes,
-                      status,
-                      startDate,
-                      endDate
-                    );
-                    //yolo
-                    const updatedStrategy = await getStrategy(
-                      memory?.strategy_id || -1
-                    );
-                    setStrategy(updatedStrategy);
-                    showNotification({
-                      title: "Success",
-                      message: "Strategy updated successfully",
-                      color: "green",
-                    });
+                  innerProps: {
+                    title: strategy?.title,
+                    description: strategy?.description,
+                    archetypes: [],
+                    status: strategy?.status,
+                    startDate: strategy?.start_date
+                      ? new Date(strategy.start_date)
+                      : null,
+                    endDate: strategy?.end_date
+                      ? new Date(strategy.end_date)
+                      : null,
+                    onSubmit: async (
+                      title: string,
+                      description: string,
+                      archetypes: number[],
+                      status: string,
+                      startDate: Date,
+                      endDate: Date
+                    ) => {
+                      const response = await patchUpdateStrategy(
+                        memory?.strategy_id || -1,
+                        title,
+                        description,
+                        archetypes,
+                        status,
+                        startDate,
+                        endDate
+                      );
+                      //yolo
+                      const updatedStrategy = await getStrategy(
+                        memory?.strategy_id || -1
+                      );
+                      setStrategy(updatedStrategy);
+                      showNotification({
+                        title: "Success",
+                        message: "Strategy updated successfully",
+                        color: "green",
+                      });
+                    },
                   },
-                },
-              });
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            fullWidth
-            onClick={() => {
-              showNotification({
-                title: "Task Creation",
-                message: "Drafting Campaign: " + strategy?.title,
-                color: "green",
-                icon: <IconCheck />,
-              });
+                });
+              }}
+            >
+              Edit
+            </Button>
+            <Button
+              fullWidth
+              onClick={() => {
+                showNotification({
+                  title: "Task Creation",
+                  message: "Drafting Campaign: " + strategy?.title,
+                  color: "green",
+                  icon: <IconCheck />,
+                });
 
-              if (!memory?.strategy_id) {
-                return;
-              }
-              hackedSubmit();
-            }}
-          >
-            Save Draft
-          </Button>
-        </Flex>}
+                if (!memory?.strategy_id) {
+                  return;
+                }
+                hackedSubmit();
+              }}
+            >
+              Save Draft
+            </Button>
+          </Flex>
+        )}
       </Stack>
     </Paper>
   );

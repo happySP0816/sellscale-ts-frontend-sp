@@ -512,7 +512,8 @@ export default function SelinAI() {
   const getMessages = async (
     thread_id: string,
     session_id: Number,
-    threads_passed?: ThreadType[]
+    threads_passed?: ThreadType[],
+    tab_override?: string
   ) => {
     setLoadingNewChat(true);
     try {
@@ -557,7 +558,7 @@ export default function SelinAI() {
         setTasks(orderedTasks || []);
       }
       if (memory) {
-        setAIType(memory.tab || "PLANNER");
+        setAIType(tab_override || memory.tab || "PLANNER");
       } else {
         setAIType("PLANNER");
       }
@@ -957,7 +958,8 @@ export default function SelinAI() {
         // Clear the URL parameters from the input bar
         const newUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
-        getMessages(threadIdFromUrl || '', parseInt(sessionIdFromUrl), threads_loaded);
+        getMessages(threadIdFromUrl || '', parseInt(sessionIdFromUrl), threads_loaded, 'PLANNER');
+        setAIType('PLANNER');
       }
     };
 

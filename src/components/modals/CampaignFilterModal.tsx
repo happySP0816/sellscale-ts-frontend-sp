@@ -542,7 +542,7 @@ export default function CampaignFilterModal({ context, id, innerProps }: Context
                           </Text>
                         </Flex>
                       );
-                    },
+                   },
                   },
                   {
                     accessorKey: "title",

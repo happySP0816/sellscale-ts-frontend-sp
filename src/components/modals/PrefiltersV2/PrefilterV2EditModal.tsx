@@ -622,9 +622,16 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           value={selectedFilter}
           onChange={(value) => {
             setSelectedFilter(value);
-            setShowApplyButton(true);
+            const handleApply = async (value: any) => {
+              if (!value) return;
+              innerProps.id = Number(value);
+              setShowApplyButton(false);
+              setCurrentSavedQueryId(prefilters.find((prefilter) => prefilter.id === Number(value))?.id);
+            };
+            handleApply(value);
+            // setShowApplyButton(true);
           }}
-          rightSection={showApplyButton && (
+          rightSection={false && (
             <Button onClick={handleApply} size="xs" style={{ marginLeft: '-60px' }}>
               Apply
             </Button>

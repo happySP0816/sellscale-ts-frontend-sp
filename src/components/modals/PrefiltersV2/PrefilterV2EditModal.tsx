@@ -154,6 +154,132 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
   }, [userToken]);
 
 
+const mergeSavedQueries = async (saved_query_id: number) => {
+  if (saved_query_id !== undefined) {
+    try {
+      const response = await fetch(`${API_URL}/apollo/get_saved_query/${saved_query_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      if (data.status === "success") {
+        const queryDetails = data.data;
+
+        setFilterName((prev) => queryDetails.data.custom_name || prev);
+        setName((prev) => queryDetails.data.q_person_name || prev);
+        setJobTitles((prev) => Array.from(new Set([...prev, ...(queryDetails.data.person_titles || [])])));
+        setSeniority((prev) => Array.from(new Set([...prev, ...(queryDetails.data.person_seniorities || [])])));
+        setExcludedJobTitles((prev) => Array.from(new Set([...prev, ...(queryDetails.data.person_not_titles || [])])));
+
+        const industryBreadcrumbs = queryDetails.results.breadcrumbs.filter((breadcrumb: any) => breadcrumb.label === "Industry");
+        if (industryBreadcrumbs.length > 0) {
+          const industryNames = industryBreadcrumbs.map((breadcrumb: any) => breadcrumb.display_name);
+          const industryIds = industryBreadcrumbs.reduce((acc: any, breadcrumb: any) => {
+            acc[breadcrumb.display_name] = breadcrumb.value;
+            return acc;
+          }, {});
+
+          setIndustry((prev) => Array.from(new Set([...prev, ...industryNames])));
+          setIndustryOptions((prevOptions: string[]) => Array.from(new Set([...prevOptions, ...industryNames])));
+          setIndustryOptionsWithIds((prevOptions: any) => ({
+            ...prevOptions,
+            ...industryIds,
+          }));
+        } else {
+          setIndustry((prev) => Array.from(new Set([...prev, ...(queryDetails.data.organization_industry_tag_ids || [])])));
+        }
+
+        setRevenue((prev) => ({
+          min: queryDetails.data.revenue_range?.min ? String(queryDetails.data.revenue_range.min) : prev.min,
+          max: queryDetails.data.revenue_range?.max ? String(queryDetails.data.revenue_range.max) : prev.max,
+        }));
+
+        setcompanyName((prev) => queryDetails.data.q_person_title || prev);
+        setCompanyKeywords((prev) => queryDetails.data.q_organization_keyword_tags || prev);
+
+        const companyBreadcrumbs = queryDetails.results.breadcrumbs.filter((breadcrumb: any) => breadcrumb.label === "Companies");
+        if (companyBreadcrumbs.length > 0) {
+          const companyNames = companyBreadcrumbs.map((breadcrumb: any) => breadcrumb.value);
+          const companyOptions = companyBreadcrumbs.map((breadcrumb: any) => ({
+            label: breadcrumb.display_name,
+            value: breadcrumb.value,
+            logo_url: breadcrumb.logo_url || ""
+          }));
+
+          setselectedCompanies((prev) => Array.from(new Set([...prev, ...companyNames])));
+          setCompanyOptions((prevOptions: any[]) => Array.from(new Set([...prevOptions, ...companyOptions])));
+        } else {
+          setselectedCompanies((prev) => Array.from(new Set([...prev, ...(queryDetails.data.organization_ids || [])])));
+        }
+
+        setLocations((prev) => Array.from(new Set([...(prev || []), ...(queryDetails.data.person_locations || [])])) as any);
+        setExperience((prev) => queryDetails.data.person_seniorities || prev);
+        setFundraise((prev) => Array.from(new Set([...prev, ...(queryDetails.data.organization_latest_funding_stage_cd || [])])));
+        setCompanyDomain((prev) => queryDetails.data.q_organization_search_list_id || prev);
+        setAiPrompt((prev) => prev); // Assuming no change needed
+        setSelectedNumEmployees((prev) => Array.from(new Set([...prev, ...(queryDetails.data.organization_num_employees_ranges || [])])));
+        
+        const technologyBreadcrumbs = queryDetails.results.breadcrumbs.filter((breadcrumb: any) => breadcrumb.label === "Use at least one of");
+        if (technologyBreadcrumbs.length > 0) {
+          const technologyNames = technologyBreadcrumbs.map((breadcrumb: any) => breadcrumb.display_name);
+          const technologyUids = technologyBreadcrumbs.reduce((acc: any, breadcrumb: any) => {
+            acc[breadcrumb.display_name] = breadcrumb.value;
+            return acc;
+          }, {});
+
+          setTechnology((prev) => Array.from(new Set([...prev, ...technologyNames])));
+          setTechnologyOptions((prevOptions: string[]) => Array.from(new Set([...prevOptions, ...technologyNames])));
+          setTechnologyOptionsWithUids((prevOptions: any) => ({
+            ...prevOptions,
+            ...technologyUids,
+          }));
+        } else {
+          setTechnology((prev) => Array.from(new Set([...prev, ...(queryDetails.data.currently_using_any_of_technology_uids || [])])));
+        }
+
+        setEventTypes((prev) => Array.from(new Set([...prev, ...(queryDetails.data.event_categories || [])])));
+        setDays((prev) => queryDetails.data.published_at_date_range ? parseInt(queryDetails.data.published_at_date_range.min.replace("_days_ago", ""), 10) : prev);
+        setRecentNews((prev) => queryDetails.data.q_organization_keyword_tags || prev);
+        setDepartmentMinCount((prev) => queryDetails.data.organization_department_or_subdepartment_counts?.min || prev);
+        setDepartmentMaxCount((prev) => queryDetails.data.organization_department_or_subdepartment_counts?.max || prev);
+
+        const newProspects = queryDetails.results.people.map((person: any) => ({
+          avatar: person.photo_url,
+          name: `${person.first_name} ${person.last_name}`,
+          linkedin: !!person.linkedin_url,
+          linkedin_url: person.linkedin_url,
+          email: !!person.email,
+          prospects: "",
+          job: person.headline,
+          filter: {
+            ...(name && { name: person?.name }),
+            ...(selectedNumEmployees.length && { company_headcount: person.organization.organization_num_employees_ranges }),
+            ...(experience.length && { position: person.seniority }),
+            ...(locations.length && { location: person.city }),
+            ...(selectedCompanies.length && { company: person.organization?.name }),
+            ...(typeof revenue === 'object' && (revenue.min || revenue.max) && { revenue: person.organization.revenue }),
+            ...(fundraise.length && { funding_stage: person.organization.latest_funding_stage }),
+            ...(technology.length && { technology: person.organization.technology }),
+            ...(days && { published_at: person.organization.published_at }),
+            ...(eventTypes.length && { event_category: person.organization.event_category }),
+          },
+        }));
+
+        // setTotalFound((prev) => prev + (queryDetails.results.pagination.total_entries > 100 ? queryDetails.results.pagination.total_entries : queryDetails.results.people.length) || 0);
+        setProspects([]);
+      } else {
+        console.error("Failed to fetch saved query:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching saved query:", error);
+    }
+  }
+};
+
+
   useEffect(() => {
       setSomethingWasAltered(true);
   }, [jobTitles, name, seniority, excludedJobTitles, industry, revenue, companyName, companyKeywords, selectedCompanies, locations, experience, fundraise, companyDomain, aiPrompt, selectedNumEmployees, technology, eventTypes, days, recentNews, departmentMinCount, departmentMaxCount]);
@@ -623,10 +749,11 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           onChange={(value) => {
             setSelectedFilter(value);
             const handleApply = async (value: any) => {
-              if (!value) return;
-              innerProps.id = Number(value);
-              setShowApplyButton(false);
-              setCurrentSavedQueryId(prefilters.find((prefilter) => prefilter.id === Number(value))?.id);
+              mergeSavedQueries(Number(value));
+              // if (!value) return;
+              // innerProps.id = Number(value);
+              // setShowApplyButton(false);
+              // setCurrentSavedQueryId(prefilters.find((prefilter) => prefilter.id === Number(value))?.id);
             };
             handleApply(value);
             // setShowApplyButton(true);

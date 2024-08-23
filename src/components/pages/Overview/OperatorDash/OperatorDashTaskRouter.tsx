@@ -222,7 +222,9 @@ const OperatorDashTaskRouter: React.FC = () => {
         console.log('Task marked complete successfully');
       }
       setFetchingComplete(false);
-      navigate('/overview');
+      if (task?.task_type !== 'LINKEDIN_DISCONNECTED') {
+        navigate('/overview');
+      }
     } catch (error) {
       setFetchingComplete(false);
       console.error('Error marking task complete', error);

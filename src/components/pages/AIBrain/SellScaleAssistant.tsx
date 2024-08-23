@@ -78,7 +78,7 @@ export default function SellScaleAssistant({ setHasNotGeneratedPrefilter, showCh
       <Tour steps={editTourSteps} isOpen={editTourOpen} onRequestClose={closeEditTour}/>
       <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour}/>
         {showChat && <SegmentChat setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter} setSegment={setSegment} segment={segment} handleShowEditTour={handleShowEditTour}/>}
-        <SegmentAIGeneration setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter} setSegment={setSegment} segment={segment} />
+        <SegmentAIGeneration setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter} setSegment={setSegment} segment={segment} showChat={showChat} />
       </Flex>
     </Box>
   );
@@ -265,6 +265,7 @@ const SegmentChat = (props: any) => {
 
 const SegmentAIGeneration = (props: any) => {
   const [active, setActive] = useState(1);
+  const showChat = props.showChat;
   const [assets, setAssets] = useState(["Important-sales-asset.pdf", "extra-asset-1.pdf"]);
   const [generatingFilters, setGeneratingFilters] = useState(false);
   const [loadingIndex, setLoadingIndex] = useState<number>(0);
@@ -377,13 +378,13 @@ const SegmentAIGeneration = (props: any) => {
 
 
   return (
-    <Paper withBorder shadow="sm" w={"100%"} radius={"md"}>
-      <Flex p={"md"} align={"center"} gap={5} bg={"grape"} className=" rounded-t-md">
+    <Paper withBorder w={"100%"} radius={"md"}>
+      {showChat && <Flex p={"md"} align={"center"} gap={5} bg={"grape"} className=" rounded-t-md">
         <IconSparkles size={"1rem"} color="white" />
         <Text fw={600} color="white">
           AI Generation
         </Text>
-      </Flex>
+      </Flex>}
       <Divider bg="gray" />
       <ScrollArea h={500} scrollHideDelay={4000} px={"md"}>
         <Timeline
@@ -422,7 +423,7 @@ const SegmentAIGeneration = (props: any) => {
           <Timeline.Item
             lineActive={active === 2 ? true : false}
             bullet={active === 2 ? <IconCheck size={"1rem"} /> : <IconLoader size={"1rem"} color="orange" />}
-            title="Generated Segments"
+            title={!showChat ? "" : "Generated Segments"}
           >
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
               <thead style={{ backgroundColor: '#f7f8fa', textAlign: 'left' }}>

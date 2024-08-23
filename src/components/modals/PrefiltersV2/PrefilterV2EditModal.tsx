@@ -615,7 +615,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
         onChange={(event) => setFilterName(event.currentTarget.value)}
       />}
       <Flex align="end" mb={'sm'}>
-        <Select
+        {!window.location.href.includes("selix") && !window.location.href.includes("pre-filters-v2") && <Select
           label="Saved filters"
           placeholder="Pick one"
           data={prefilters.map((prefilter) => ({ value: prefilter.id, label: prefilter.title }))}
@@ -630,7 +630,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
             </Button>
           )}
           style={{ width: '50%' }}
-        />
+        />}
       </Flex>
       <Flex mt={"sm"} gap={"md"}>
         <Paper withBorder radius={"sm"} w={"100%"}>

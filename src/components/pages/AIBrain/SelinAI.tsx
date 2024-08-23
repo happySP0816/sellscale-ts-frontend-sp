@@ -111,6 +111,7 @@ import { useNavigate } from "react-router-dom";
 import Sequences from "@pages/CampaignV2/Sequences";
 import { SubjectLineTemplate } from "src";
 import { ArchetypeFilters } from "@pages/CampaignV2/ArchetypeFilterModal";
+import SellScaleAssistant from "./SellScaleAssistant";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit }, ref) => {
@@ -254,7 +255,7 @@ export interface MemoryType {
   session_name: string;
   strategy_id: number;
   campaign_id: number;
-  tab: "STRATEGY_CREATOR" | "PLANNER" | "BROWSER";
+  tab: "STRATEGY_CREATOR" | "PLANNER" | "BROWSER" | "ICP";
   search?: {
     query: string;
     response: string;
@@ -2335,28 +2336,6 @@ const SelixControlCenter = ({
                 </Popover>
               ),
             },
-            // {
-            //   value: "NOT_AVAILABLE2",
-            //   label: (
-            //     <Center
-            //       style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
-            //     >
-            //       <IconPuzzle size={"1rem"} />
-            //       <span>Segments</span>
-            //     </Center>
-            //   ),
-            // },
-            // {
-            //   value: "NOT_AVAILABLE3",
-            //   label: (
-            //     <Center
-            //       style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
-            //     >
-            //       <IconParachute size={"1rem"} />
-            //       <span>Campaigns</span>
-            //     </Center>
-            //   ),
-            // },
             {
               value: "BROWSER",
               label: (
@@ -2403,17 +2382,51 @@ const SelixControlCenter = ({
                 </Popover>
               ),
             },
-            // {
-            //   value: "NOT_AVAILABLE",
-            //   label: (
-            //     <Center
-            //       style={{ gap: 10, pointerEvents: "none", opacity: 0.5 }}
-            //     >
-            //       <IconFlask size={"1rem"} />
-            //       <span>Analytics</span>
-            //     </Center>
-            //   ),
-            // },
+            {
+              value: "ICP",
+              label: (
+                <Popover
+                  position="bottom"
+                  withinPortal
+                  withArrow
+                  shadow="md"
+                  opened={popoverOpenedArray[3]} // Assuming this is the third popover
+                  offset={10}
+                  onPositionChange={(position) =>
+                    console.log("Popover position:", position)
+                  }
+                  onClose={handlePopoverClose}
+                  onOpen={() => handlePopoverOpen(3)}
+                  keepMounted
+                  transitionProps={{ duration: 150, transition: "fade" }}
+                  width="auto"
+                  middlewares={{ shift: true, flip: true }}
+                  arrowSize={10}
+                  arrowOffset={5}
+                  arrowRadius={2}
+                  arrowPosition="center"
+                  zIndex={1000}
+                  radius="md"
+                >
+                  <Popover.Target>
+                    <div
+                      onMouseEnter={() => handlePopoverOpen(3)}
+                      onMouseLeave={handlePopoverClose}
+                    >
+                      <Center style={{ gap: 10 }}>
+                        <IconFlask size={"1rem"} />
+                        <span>ICP</span>
+                      </Center>
+                    </div>
+                  </Popover.Target>
+                  <Popover.Dropdown sx={{ pointerEvents: "none" }}>
+                    <Text size="sm">
+                      This section allows you to manage your Ideal Customer Profile.
+                    </Text>
+                  </Popover.Dropdown>
+                </Popover>
+              ),
+            },
           ]}
         />
       </Paper>
@@ -2481,7 +2494,10 @@ const SelixControlCenter = ({
               Not Currently Available.
             </Text>
           </Center>
-        ) : (
+        ) : aiType === "ICP" ? (
+          <SellScaleAssistant showChat={false}/>
+        ) :
+        (
           <Center style={{ height: "100%" }}>
             <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
               No Tasks Created. Please create one via the chat.

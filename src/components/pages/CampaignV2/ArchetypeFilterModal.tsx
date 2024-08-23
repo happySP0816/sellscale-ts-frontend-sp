@@ -1,6 +1,5 @@
 import {
   ActionIcon,
-  Anchor,
   Badge,
   Box,
   Button,
@@ -21,8 +20,9 @@ import {
   TextInput,
   Title,
   Tooltip,
+  useMantineTheme,
 } from "@mantine/core";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "@constants/data";
 import { useRecoilValue } from "recoil";
@@ -47,16 +47,10 @@ import { openConfirmModal } from "@mantine/modals";
 import { CSVLink } from "react-csv";
 import CustomResearchPointCard from "@common/persona/CustomResearchPointCard";
 import { useDisclosure } from "@mantine/hooks";
-import generate from "@babel/generator";
-import { MantineReactTable } from "mantine-react-table";
 
 interface ContactAccountFilterModalProps {
   showContactAccountFilterModal: boolean;
   setShowContactAccountFilterModal: (showModal: boolean) => void;
-}
-
-interface DataRow {
-  [key: string]: any;
 }
 
 const ArchetypeFilterModal = function ({
@@ -91,6 +85,8 @@ export const ArchetypeFilters = function ({
 }: {
   hideFeature?: boolean; // for selix
 }) {
+  const theme = useMantineTheme();
+
   const userToken = useRecoilValue(userTokenState);
 
   const [prospects, setProspects] = useState<Prospect[]>([]);
@@ -634,300 +630,6 @@ export const ArchetypeFilters = function ({
     }
   };
 
-  const generatedData = useMemo(() => {
-    return displayProspects.map((prospect) => {
-      const p = {
-        ...prospect,
-        ...prospect.icp_fit_reason_v2,
-        ...prospect.icp_company_fit_reason,
-      };
-
-      const row: DataRow = {};
-
-      row["id"] = p.id;
-
-      contactTableHeaders.forEach((item) => {
-        const key = item.key;
-        const keyType = key as keyof typeof p;
-
-        row[key] = p[keyType];
-      });
-
-      return row;
-    });
-  }, [displayProspects, contactTableHeaders]);
-
-  const generatedColumns = useMemo(() => {
-    if (!icp_scoring_ruleset_typed) {
-      return [];
-    }
-
-    return contactTableHeaders.map((item) => {
-      return {
-        header: item.title,
-        accessorKey: item.key,
-        Header: () => {
-          return (
-            <Flex align={"center"} gap={"3px"}>
-              <Text>{item.title}</Text>
-              {icp_scoring_ruleset_typed.individual_personalizers?.includes(
-                item.key
-              ) ||
-                (icp_scoring_ruleset_typed.company_personalizers?.includes(
-                  item.key
-                ) && (
-                  <Badge size={"xs"} color={"red"}>
-                    Dealbreaker
-                  </Badge>
-                ))}
-              {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && (
-                <Badge size={"xs"} color={"green"}>
-                  Dealbreaker
-                </Badge>
-              )}
-            </Flex>
-          );
-        },
-        Cell: ({ cell }: { cell: any }) => {
-          const value = cell.getValue();
-
-          const prospect = prospects.find(
-            (prospect) => prospect.id === cell.row.original["id"]
-          );
-
-          if (!prospect) {
-            return "";
-          }
-
-          if (notFilters.includes(item.key)) {
-            const p = {
-              ...prospect,
-              ...prospect.icp_fit_reason_v2,
-              ...prospect.icp_company_fit_reason,
-            };
-
-            const keyType = item.key as keyof typeof p;
-            if (item.key === "icp_fit_score") {
-              const trueScore =
-                prospect.icp_fit_reason_v2 &&
-                Object.keys(prospect.icp_fit_reason_v2).length > 0;
-
-              let humanReadableScore = "Not Scored";
-
-              if (value === 0) {
-                humanReadableScore = "VERY LOW";
-              } else if (value === 1) {
-                humanReadableScore = "LOW";
-              } else if (value === 2) {
-                humanReadableScore = "MEDIUM";
-              } else if (value === 3) {
-                humanReadableScore = "HIGH";
-              } else if (value === 4) {
-                humanReadableScore = "VERY HIGH";
-              }
-
-              return (
-                <HoverCard>
-                  <HoverCard.Target>
-                    <Badge
-                      color={
-                        humanReadableScore == "VERY HIGH"
-                          ? "green"
-                          : humanReadableScore == "HIGH"
-                          ? "blue"
-                          : humanReadableScore == "MEDIUM"
-                          ? "yellow"
-                          : humanReadableScore == "LOW"
-                          ? "orange"
-                          : humanReadableScore == "VERY LOW" && trueScore
-                          ? "red"
-                          : "gray"
-                      }
-                      fw={600}
-                    >
-                      {trueScore ? humanReadableScore : "NOT SCORED"}
-                    </Badge>
-                  </HoverCard.Target>
-                  <HoverCard.Dropdown>
-                    <Flex direction={"column"} style={{ maxWidth: "400px" }}>
-                      {prospect.icp_fit_reason_v2 &&
-                        Object.keys(prospect.icp_fit_reason_v2).map((key) => {
-                          const section = prospect.icp_fit_reason_v2[key];
-                          const title = key
-                            .replace("_individual_", "_")
-                            .replace("_company_", "_")
-                            .replace("aicomp_", "")
-                            .replace("aiind_", "")
-                            .replace("keywords", "")
-                            .split("_")
-                            .join(" ");
-
-                          if (
-                            section.answer === "NO" &&
-                            icp_scoring_ruleset_typed.dealbreakers?.includes(
-                              key
-                            )
-                          ) {
-                            return (
-                              <Flex key={key} gap={"4px"}>
-                                <Text>❌</Text>
-                                <Text size="sm">
-                                  <span
-                                    style={{
-                                      fontWeight: "bold",
-                                    }}
-                                  >
-                                    {title}:
-                                  </span>
-                                  {section.reasoning
-                                    .replace("❌", "")
-                                    .replace("✅", "")}
-                                </Text>
-                              </Flex>
-                            );
-                          } else if (section.answer === "YES") {
-                            return (
-                              <Flex key={key} gap={"4px"}>
-                                <Text>✅</Text>
-                                <Text size="sm">
-                                  <span
-                                    style={{
-                                      fontWeight: "bold",
-                                    }}
-                                  >
-                                    {title}:
-                                  </span>
-                                  {section.reasoning
-                                    .replace("❌", "")
-                                    .replace("✅", "")}
-                                </Text>
-                              </Flex>
-                            );
-                          }
-
-                          return <></>;
-                        })}
-                      {prospect.icp_company_fit_reason &&
-                        Object.keys(prospect.icp_company_fit_reason).map(
-                          (key) => {
-                            const section =
-                              prospect.icp_company_fit_reason[key];
-                            const title = key
-                              .replace("_individual_", "_")
-                              .replace("_company_", "_")
-                              .replace("aicomp_", "")
-                              .replace("aiind_", "")
-                              .replace("keywords", "")
-                              .split("_")
-                              .join(" ");
-
-                            if (
-                              section.answer === "NO" &&
-                              icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                key
-                              )
-                            ) {
-                              return (
-                                <Flex key={key} gap={"4px"}>
-                                  <Text>❌</Text>
-                                  <Text size="sm">
-                                    <span
-                                      style={{
-                                        fontWeight: "bold",
-                                      }}
-                                    >
-                                      {title}:
-                                    </span>
-                                    {section.reasoning
-                                      .replace("❌", "")
-                                      .replace("✅", "")}
-                                  </Text>
-                                </Flex>
-                              );
-                            } else if (section.answer === "YES") {
-                              return (
-                                <Flex key={key} gap={"4px"}>
-                                  <Text>✅</Text>
-                                  <Text size="sm">
-                                    <span
-                                      style={{
-                                        fontWeight: "bold",
-                                      }}
-                                    >
-                                      {title}:
-                                    </span>
-                                    {section.reasoning
-                                      .replace("❌", "")
-                                      .replace("✅", "")}
-                                  </Text>
-                                </Flex>
-                              );
-                            }
-
-                            return <></>;
-                          }
-                        )}
-                    </Flex>
-                  </HoverCard.Dropdown>
-                </HoverCard>
-              );
-            } else if (item.key === "linkedin_url") {
-              return (
-                <Anchor href="value" target="_blank">
-                  {value}
-                </Anchor>
-              );
-            }
-            return <Text>{p[keyType]}</Text>;
-          } else {
-            if (value) {
-              return !updatedIndividualColumns.has(item.key) ? (
-                <HoverCard>
-                  <HoverCard.Target>
-                    {value.answer === "LOADING" ? (
-                      <Loader size={"xs"} />
-                    ) : (
-                      <Text
-                        color={value.answer === "YES" ? "green" : "red"}
-                        weight={"bold"}
-                      >
-                        {value.answer}
-                      </Text>
-                    )}
-                  </HoverCard.Target>
-                  <HoverCard.Dropdown maw={"300px"}>
-                    <Flex direction={"column"} gap={"4px"}>
-                      <Text size="sm">
-                        <span style={{ fontWeight: "bold" }}>{`Reason: `}</span>
-                        {value.reasoning}
-                      </Text>
-                      <Divider />
-                      <Text>
-                        <span style={{ fontWeight: "bold" }}>
-                          {`Source:  `}
-                        </span>
-                        {value.source}
-                      </Text>
-                    </Flex>
-                  </HoverCard.Dropdown>
-                </HoverCard>
-              ) : (
-                <Text color={"orange"} weight={"bold"}>
-                  TBD
-                </Text>
-              );
-            } else {
-              return "";
-            }
-          }
-        },
-      };
-    });
-  }, [prospects, updatedIndividualColumns, icp_scoring_ruleset_typed]);
-
-  console.log("generated Data: ", generatedData);
-  console.log("generated Columns: ", generatedColumns);
-
   return (
     <Flex gap={"8px"}>
       {isLoading && <Loader />}
@@ -943,11 +645,7 @@ export const ArchetypeFilters = function ({
         />
       )}
       <Divider orientation={"vertical"} />
-      <Flex
-        direction={"column"}
-        gap={"8px"}
-        style={{ minWidth: "800px", maxWidth: "800px" }}
-      >
+      <Flex direction={"column"} gap={"8px"}>
         {selectedContacts && selectedContacts.size > 0 && (
           <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>
             <Text>Bulk Actions - {selectedContacts.size} Selected</Text>
@@ -1056,44 +754,45 @@ export const ArchetypeFilters = function ({
             }}
           />
         </Flex>
-        <Flex
-          className="border border-[#ced4da] rounded-md border-solid"
-          style={{ minWidth: "800px", maxWidth: "800px" }}
+        <Tabs
+          defaultValue="5"
+          value={displayScore}
+          onTabChange={setDisplayScore}
         >
-          {["5", "4", "3", "2", "1", "0"].map((item) => {
-            let label = "All";
+          <Tabs.List>
+            {["5", "4", "3", "2", "1", "0"].map((item) => {
+              let label = "All";
 
-            const typedItem = +item;
-            let color = "black";
+              const typedItem = +item;
+              let color = "black";
 
-            if (typedItem === 0) {
-              color = "red";
-              label = "Very Low";
-            } else if (typedItem === 1) {
-              color = "orange";
-              label = "Low";
-            } else if (typedItem === 2) {
-              color = "yellow";
-              label = "Medium";
-            } else if (typedItem === 3) {
-              color = "blue";
-              label = "High";
-            } else if (typedItem === 4) {
-              color = "green";
-              label = "Very High";
-            } else {
-              label = "All";
-            }
+              if (typedItem === 0) {
+                color = "red";
+                label = "Very Low";
+              } else if (typedItem === 1) {
+                color = "orange";
+                label = "Low";
+              } else if (typedItem === 2) {
+                color = "gold";
+                label = "Medium";
+              } else if (typedItem === 3) {
+                color = "blue";
+                label = "High";
+              } else if (typedItem === 4) {
+                color = "lightgreen";
+                label = "Very High";
+              } else {
+                label = "All";
+              }
 
-            return (
-              <>
-                <Button
-                  color={color}
-                  fullWidth
-                  onClick={() => setDisplayScore(item)}
-                  variant={displayScore === item ? "filled" : "white"}
-                  rightIcon={
-                    <Badge color={color}>
+              return (
+                <Tabs.Tab value={item}>
+                  <Center>
+                    <Text style={{ color: color, fontWeight: "bold" }}>
+                      {label}
+                    </Text>
+                    <Text ml={10} style={{ color: color }}>
+                      (
                       {
                         prospects.filter((prospect) => {
                           if (typedItem === 5) {
@@ -1103,457 +802,508 @@ export const ArchetypeFilters = function ({
                           }
                         }).length
                       }
-                    </Badge>
-                  }
-                >
-                  {label}
-                </Button>
-                <Divider orientation="vertical" h={24} my="auto" />
-              </>
-            );
-          })}
-        </Flex>
-        <ScrollArea w={"100%"} h={600}>
+                      )
+                    </Text>
+                  </Center>
+                </Tabs.Tab>
+              );
+            })}
+          </Tabs.List>
+        </Tabs>
+
+        <div
+          className="border flex items-center overflow-hidden border-[#ced4da] rounded-md border-solid"
+          style={{ overflowX: "hidden", whiteSpace: "nowrap" }}
+        >
+          <Button
+            variant={filterOption === "all" ? "filled" : "white"}
+            fullWidth
+            color="dark"
+            onClick={() => setFilterOption("all")}
+            rightIcon={<Badge color="dark">123</Badge>}
+          >
+            All
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            fullWidth
+            variant={filterOption === "very_high" ? "filled" : "white"}
+            onClick={() => setFilterOption("very_high")}
+            rightIcon={<Badge>123</Badge>}
+          >
+            Very High
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            color="green"
+            variant={filterOption === "high" ? "filled" : "white"}
+            fullWidth
+            onClick={() => setFilterOption("high")}
+            rightIcon={<Badge color="green">123</Badge>}
+          >
+            High
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            color="yellow"
+            fullWidth
+            variant={filterOption === "medium" ? "filled" : "white"}
+            onClick={() => setFilterOption("medium")}
+            rightIcon={<Badge color="yellow">123</Badge>}
+          >
+            Medium
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            color="orange"
+            fullWidth
+            variant={filterOption === "low" ? "filled" : "white"}
+            onClick={() => setFilterOption("low")}
+            rightIcon={<Badge color="orange">123</Badge>}
+          >
+            Low
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            color="red"
+            fullWidth
+            variant={filterOption === "very_low" ? "filled" : "white"}
+            onClick={() => setFilterOption("very_low")}
+            rightIcon={<Badge color="red">123</Badge>}
+          >
+            Very Low
+          </Button>
+          <Divider orientation="vertical" h={24} my={"auto"} />
+          <Button
+            color="gray"
+            fullWidth
+            variant={filterOption === "un" ? "filled" : "white"}
+            onClick={() => setFilterOption("un")}
+            rightIcon={<Badge color="gray">123</Badge>}
+          >
+            Unsevadf
+          </Button>
+        </div>
+        <ScrollArea w={"100%"} h={700}>
           <Box>
             {icp_scoring_ruleset_typed && (
-              <MantineReactTable
-                data={generatedData}
-                columns={generatedColumns}
-                enableMultiRowSelection
-                mantineTableHeadProps={{
-                  style: {
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1, // Ensure header stays on top
-                    backgroundColor: "white", // Set background to avoid overlap issues
-                  },
-                }}
-                mantineTableFooterProps={{
-                  style: {
-                    position: "sticky",
-                    bottom: 0,
-                    zIndex: 1, // Ensure footer stays on top
-                    backgroundColor: "white", // Set background to avoid overlap issues
-                  },
-                }}
-              />
-              // <Table style={{ overflow: "scroll" }} verticalSpacing={"sm"}>
-              //   <thead>
-              //     <tr>
-              //       <th>
-              //         <Checkbox
-              //           checked={selectedContacts.size === prospects.length}
-              //           onChange={() => handleSelectAllContacts()}
-              //         />
-              //       </th>
-              //       {icp_scoring_ruleset_typed &&
-              //         contactTableHeaders.map((item) => {
-              //           return (
-              //             <th key={item.title}>
-              //               <Flex align={"center"} justify={"space-between"}>
-              //                 <Flex direction={"column"} justify={"center"}>
-              //                   {item.title}
-              //                   {icp_scoring_ruleset_typed.individual_personalizers?.includes(
-              //                     item.key
-              //                   ) && (
-              //                     <span
-              //                       style={{
-              //                         fontStyle: "italic",
-              //                         fontSize: "xx-small",
-              //                       }}
-              //                     >
-              //                       Personalizer: ✅
-              //                     </span>
-              //                   )}
-              //                   {icp_scoring_ruleset_typed.company_personalizers?.includes(
-              //                     item.key
-              //                   ) && (
-              //                     <span
-              //                       style={{
-              //                         fontStyle: "italic",
-              //                         fontSize: "xx-small",
-              //                       }}
-              //                     >
-              //                       Personalizer: ✅
-              //                     </span>
-              //                   )}
-              //                   {icp_scoring_ruleset_typed.dealbreakers?.includes(
-              //                     item.key
-              //                   ) && (
-              //                     <span
-              //                       style={{
-              //                         fontStyle: "italic",
-              //                         fontSize: "xx-small",
-              //                       }}
-              //                     >
-              //                       "Dealbreaker: ✅"
-              //                     </span>
-              //                   )}
-              //                 </Flex>
-              //                 {(!notFilters.includes(item.key) ||
-              //                   item.title === "Score") && (
-              //                   <Popover
-              //                     width={400}
-              //                     position="bottom"
-              //                     withArrow
-              //                     shadow="md"
-              //                     withinPortal
-              //                   >
-              //                     <Popover.Target>
-              //                       <ActionIcon>
-              //                         <FaFilter
-              //                           color={
-              //                             filteredColumns.has(item.key)
-              //                               ? "lightgreen"
-              //                               : "grey"
-              //                           }
-              //                         />
-              //                       </ActionIcon>
-              //                     </Popover.Target>
-              //                     <Popover.Dropdown>
-              //                       <Select
-              //                         label={item.title}
-              //                         placeholder={
-              //                           "Select the Property that you would like to filter for"
-              //                         }
-              //                         data={
-              //                           item.title === "Score"
-              //                             ? [
-              //                                 { value: "", label: "Select" },
-              //                                 {
-              //                                   value: "0",
-              //                                   label: "VERY LOW",
-              //                                 },
-              //                                 { value: "1", label: "LOW" },
-              //                                 { value: "2", label: "MEDIUM" },
-              //                                 { value: "3", label: "HIGH" },
-              //                                 {
-              //                                   value: "4",
-              //                                   label: "VERY HIGH",
-              //                                 },
-              //                               ]
-              //                             : [
-              //                                 { value: "", label: "Select" },
-              //                                 { value: "YES", label: "YES" },
-              //                                 { value: "NO", label: "NO" },
-              //                               ]
-              //                         }
-              //                         onChange={(value) =>
-              //                           onSelectFilter(item.key, value ?? "")
-              //                         }
-              //                         value={
-              //                           filteredColumns.get(item.key)
-              //                             ? (filteredColumns.get(
-              //                                 item.key
-              //                               ) as string)
-              //                             : ""
-              //                         }
-              //                       />
-              //                     </Popover.Dropdown>
-              //                   </Popover>
-              //                 )}
-              //               </Flex>
-              //             </th>
-              //           );
-              //         })}
-              //     </tr>
-              //   </thead>
-              //   <tbody>
-              //     {displayProspects
-              //       .slice(0, view10 ? 10 : undefined)
-              //       .map((prospect, index) => {
-              //         const keys: string[] = contactTableHeaders.map(
-              //           (h) => h.key
-              //         );
-              //         const p = {
-              //           ...prospect,
-              //           ...prospect.icp_fit_reason_v2,
-              //           ...prospect.icp_company_fit_reason,
-              //         };
-              //
-              //         return (
-              //           <tr
-              //             key={p.id}
-              //             style={{
-              //               backgroundColor: selectedContacts.has(p.id)
-              //                 ? "lightcyan"
-              //                 : "white",
-              //             }}
-              //           >
-              //             <td>
-              //               <Checkbox
-              //                 checked={selectedContacts.has(p.id)}
-              //                 onChange={() => handleSelectContact(p.id)}
-              //               />
-              //             </td>
-              //             {keys.map((key) => {
-              //               if (notFilters.includes(key)) {
-              //                 const keyType = key as keyof typeof p;
-              //                 if (key === "icp_fit_score") {
-              //                   const trueScore =
-              //                     prospect.icp_fit_reason_v2 &&
-              //                     Object.keys(prospect.icp_fit_reason_v2)
-              //                       .length > 0;
-              //
-              //                   let humanReadableScore = "Not Scored";
-              //
-              //                   if (p[keyType] === 0) {
-              //                     humanReadableScore = "VERY LOW";
-              //                   } else if (p[keyType] === 1) {
-              //                     humanReadableScore = "LOW";
-              //                   } else if (p[keyType] === 2) {
-              //                     humanReadableScore = "MEDIUM";
-              //                   } else if (p[keyType] === 3) {
-              //                     humanReadableScore = "HIGH";
-              //                   } else if (p[keyType] === 4) {
-              //                     humanReadableScore = "VERY HIGH";
-              //                   }
-              //
-              //                   return (
-              //                     <td
-              //                       key={key + p.id}
-              //                       style={{
-              //                         minWidth: "100px",
-              //                         maxWidth: "300px",
-              //                       }}
-              //                     >
-              //                       <HoverCard>
-              //                         <HoverCard.Target>
-              //                           <Badge
-              //                             color={
-              //                               humanReadableScore == "VERY HIGH"
-              //                                 ? "green"
-              //                                 : humanReadableScore == "HIGH"
-              //                                 ? "blue"
-              //                                 : humanReadableScore == "MEDIUM"
-              //                                 ? "yellow"
-              //                                 : humanReadableScore == "LOW"
-              //                                 ? "orange"
-              //                                 : humanReadableScore ==
-              //                                     "VERY LOW" && trueScore
-              //                                 ? "red"
-              //                                 : "gray"
-              //                             }
-              //                             fw={600}
-              //                           >
-              //                             {trueScore
-              //                               ? humanReadableScore
-              //                               : "NOT SCORED"}
-              //                           </Badge>
-              //                         </HoverCard.Target>
-              //                         <HoverCard.Dropdown>
-              //                           <Flex
-              //                             direction={"column"}
-              //                             style={{ maxWidth: "400px" }}
-              //                           >
-              //                             {prospect.icp_fit_reason_v2 &&
-              //                               Object.keys(
-              //                                 prospect.icp_fit_reason_v2
-              //                               ).map((key) => {
-              //                                 const section =
-              //                                   prospect.icp_fit_reason_v2[key];
-              //                                 const title = key
-              //                                   .replace("_individual_", "_")
-              //                                   .replace("_company_", "_")
-              //                                   .replace("aicomp_", "")
-              //                                   .replace("aiind_", "")
-              //                                   .replace("keywords", "")
-              //                                   .split("_")
-              //                                   .join(" ");
-              //
-              //                                 if (
-              //                                   section.answer === "NO" &&
-              //                                   icp_scoring_ruleset_typed.dealbreakers?.includes(
-              //                                     key
-              //                                   )
-              //                                 ) {
-              //                                   return (
-              //                                     <Flex key={key} gap={"4px"}>
-              //                                       <Text>❌</Text>
-              //                                       <Text size="sm">
-              //                                         <span
-              //                                           style={{
-              //                                             fontWeight: "bold",
-              //                                           }}
-              //                                         >
-              //                                           {title}:
-              //                                         </span>
-              //                                         {section.reasoning
-              //                                           .replace("❌", "")
-              //                                           .replace("✅", "")}
-              //                                       </Text>
-              //                                     </Flex>
-              //                                   );
-              //                                 } else if (
-              //                                   section.answer === "YES"
-              //                                 ) {
-              //                                   return (
-              //                                     <Flex key={key} gap={"4px"}>
-              //                                       <Text>✅</Text>
-              //                                       <Text size="sm">
-              //                                         <span
-              //                                           style={{
-              //                                             fontWeight: "bold",
-              //                                           }}
-              //                                         >
-              //                                           {title}:
-              //                                         </span>
-              //                                         {section.reasoning
-              //                                           .replace("❌", "")
-              //                                           .replace("✅", "")}
-              //                                       </Text>
-              //                                     </Flex>
-              //                                   );
-              //                                 }
-              //
-              //                                 return <></>;
-              //                               })}
-              //                             {prospect.icp_company_fit_reason &&
-              //                               Object.keys(
-              //                                 prospect.icp_company_fit_reason
-              //                               ).map((key) => {
-              //                                 const section =
-              //                                   prospect.icp_company_fit_reason[
-              //                                     key
-              //                                   ];
-              //                                 const title = key
-              //                                   .replace("_individual_", "_")
-              //                                   .replace("_company_", "_")
-              //                                   .replace("aicomp_", "")
-              //                                   .replace("aiind_", "")
-              //                                   .replace("keywords", "")
-              //                                   .split("_")
-              //                                   .join(" ");
-              //
-              //                                 if (
-              //                                   section.answer === "NO" &&
-              //                                   icp_scoring_ruleset_typed.dealbreakers?.includes(
-              //                                     key
-              //                                   )
-              //                                 ) {
-              //                                   return (
-              //                                     <Flex key={key} gap={"4px"}>
-              //                                       <Text>❌</Text>
-              //                                       <Text size="sm">
-              //                                         <span
-              //                                           style={{
-              //                                             fontWeight: "bold",
-              //                                           }}
-              //                                         >
-              //                                           {title}:
-              //                                         </span>
-              //                                         {section.reasoning
-              //                                           .replace("❌", "")
-              //                                           .replace("✅", "")}
-              //                                       </Text>
-              //                                     </Flex>
-              //                                   );
-              //                                 } else if (
-              //                                   section.answer === "YES"
-              //                                 ) {
-              //                                   return (
-              //                                     <Flex key={key} gap={"4px"}>
-              //                                       <Text>✅</Text>
-              //                                       <Text size="sm">
-              //                                         <span
-              //                                           style={{
-              //                                             fontWeight: "bold",
-              //                                           }}
-              //                                         >
-              //                                           {title}:
-              //                                         </span>
-              //                                         {section.reasoning
-              //                                           .replace("❌", "")
-              //                                           .replace("✅", "")}
-              //                                       </Text>
-              //                                     </Flex>
-              //                                   );
-              //                                 }
-              //
-              //                                 return <></>;
-              //                               })}
-              //                           </Flex>
-              //                         </HoverCard.Dropdown>
-              //                       </HoverCard>
-              //                     </td>
-              //                   );
-              //                 }
-              //                 return (
-              //                   <td
-              //                     key={key + p.id}
-              //                     style={{
-              //                       minWidth: "100px",
-              //                       maxWidth: "300px",
-              //                     }}
-              //                   >
-              //                     <Text>{p[keyType]}</Text>
-              //                   </td>
-              //                 );
-              //               } else {
-              //                 const keyType = key as keyof typeof p;
-              //                 return (
-              //                   <td
-              //                     key={key + p.id}
-              //                     style={{
-              //                       minWidth: "100px",
-              //                       maxWidth: "300px",
-              //                     }}
-              //                   >
-              //                     {p[keyType] &&
-              //                     !updatedIndividualColumns.has(key) ? (
-              //                       <HoverCard>
-              //                         <HoverCard.Target>
-              //                           {p[keyType].answer === "LOADING" ? (
-              //                             <Loader size={"xs"} />
-              //                           ) : (
-              //                             <Text
-              //                               color={
-              //                                 p[keyType].answer === "YES"
-              //                                   ? "green"
-              //                                   : "red"
-              //                               }
-              //                               weight={"bold"}
-              //                             >
-              //                               {p[keyType].answer}
-              //                             </Text>
-              //                           )}
-              //                         </HoverCard.Target>
-              //                         <HoverCard.Dropdown maw={"300px"}>
-              //                           <Flex direction={"column"} gap={"4px"}>
-              //                             <Text size="sm">
-              //                               <span
-              //                                 style={{ fontWeight: "bold" }}
-              //                               >
-              //                                 {`Reason: `}
-              //                               </span>
-              //                               {p[keyType].reasoning}
-              //                             </Text>
-              //                             <Divider />
-              //                             <Text>
-              //                               <span
-              //                                 style={{ fontWeight: "bold" }}
-              //                               >
-              //                                 {`Source:  `}
-              //                               </span>
-              //                               {p[keyType].source}
-              //                             </Text>
-              //                           </Flex>
-              //                         </HoverCard.Dropdown>
-              //                       </HoverCard>
-              //                     ) : (
-              //                       <Text color={"orange"} weight={"bold"}>
-              //                         TBD
-              //                       </Text>
-              //                     )}
-              //                   </td>
-              //                 );
-              //               }
-              //             })}
-              //           </tr>
-              //         );
-              //       })}
-              //   </tbody>
-              // </Table>
+              <Table style={{ overflow: "scroll" }} verticalSpacing={"sm"}>
+                <thead>
+                  <tr>
+                    <th>
+                      <Checkbox
+                        checked={selectedContacts.size === prospects.length}
+                        onChange={() => handleSelectAllContacts()}
+                      />
+                    </th>
+                    {icp_scoring_ruleset_typed &&
+                      contactTableHeaders.map((item) => {
+                        return (
+                          <th key={item.title}>
+                            <Flex align={"center"} justify={"space-between"}>
+                              <Flex direction={"column"} justify={"center"}>
+                                {item.title}
+                                {icp_scoring_ruleset_typed.individual_personalizers?.includes(
+                                  item.key
+                                ) && (
+                                  <span
+                                    style={{
+                                      fontStyle: "italic",
+                                      fontSize: "xx-small",
+                                    }}
+                                  >
+                                    Personalizer: ✅
+                                  </span>
+                                )}
+                                {icp_scoring_ruleset_typed.company_personalizers?.includes(
+                                  item.key
+                                ) && (
+                                  <span
+                                    style={{
+                                      fontStyle: "italic",
+                                      fontSize: "xx-small",
+                                    }}
+                                  >
+                                    Personalizer: ✅
+                                  </span>
+                                )}
+                                {icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                  item.key
+                                ) && (
+                                  <span
+                                    style={{
+                                      fontStyle: "italic",
+                                      fontSize: "xx-small",
+                                    }}
+                                  >
+                                    "Dealbreaker: ✅"
+                                  </span>
+                                )}
+                              </Flex>
+                              {(!notFilters.includes(item.key) ||
+                                item.title === "Score") && (
+                                <Popover
+                                  width={400}
+                                  position="bottom"
+                                  withArrow
+                                  shadow="md"
+                                  withinPortal
+                                >
+                                  <Popover.Target>
+                                    <ActionIcon>
+                                      <FaFilter
+                                        color={
+                                          filteredColumns.has(item.key)
+                                            ? "lightgreen"
+                                            : "grey"
+                                        }
+                                      />
+                                    </ActionIcon>
+                                  </Popover.Target>
+                                  <Popover.Dropdown>
+                                    <Select
+                                      label={item.title}
+                                      placeholder={
+                                        "Select the Property that you would like to filter for"
+                                      }
+                                      data={
+                                        item.title === "Score"
+                                          ? [
+                                              { value: "", label: "Select" },
+                                              {
+                                                value: "0",
+                                                label: "VERY LOW",
+                                              },
+                                              { value: "1", label: "LOW" },
+                                              { value: "2", label: "MEDIUM" },
+                                              { value: "3", label: "HIGH" },
+                                              {
+                                                value: "4",
+                                                label: "VERY HIGH",
+                                              },
+                                            ]
+                                          : [
+                                              { value: "", label: "Select" },
+                                              { value: "YES", label: "YES" },
+                                              { value: "NO", label: "NO" },
+                                            ]
+                                      }
+                                      onChange={(value) =>
+                                        onSelectFilter(item.key, value ?? "")
+                                      }
+                                      value={
+                                        filteredColumns.get(item.key)
+                                          ? (filteredColumns.get(
+                                              item.key
+                                            ) as string)
+                                          : ""
+                                      }
+                                    />
+                                  </Popover.Dropdown>
+                                </Popover>
+                              )}
+                            </Flex>
+                          </th>
+                        );
+                      })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayProspects
+                    .slice(0, view10 ? 20 : undefined)
+                    .map((prospect, index) => {
+                      const keys: string[] = contactTableHeaders.map(
+                        (h) => h.key
+                      );
+                      const p = {
+                        ...prospect,
+                        ...prospect.icp_fit_reason_v2,
+                        ...prospect.icp_company_fit_reason,
+                      };
+
+                      return (
+                        <tr
+                          key={p.id}
+                          style={{
+                            backgroundColor: selectedContacts.has(p.id)
+                              ? "lightcyan"
+                              : "white",
+                          }}
+                        >
+                          <td>
+                            <Checkbox
+                              checked={selectedContacts.has(p.id)}
+                              onChange={() => handleSelectContact(p.id)}
+                            />
+                          </td>
+                          {keys.map((key) => {
+                            if (notFilters.includes(key)) {
+                              const keyType = key as keyof typeof p;
+                              if (key === "icp_fit_score") {
+                                const trueScore =
+                                  prospect.icp_fit_reason_v2 &&
+                                  Object.keys(prospect.icp_fit_reason_v2)
+                                    .length > 0;
+
+                                let humanReadableScore = "Not Scored";
+
+                                if (p[keyType] === 0) {
+                                  humanReadableScore = "VERY LOW";
+                                } else if (p[keyType] === 1) {
+                                  humanReadableScore = "LOW";
+                                } else if (p[keyType] === 2) {
+                                  humanReadableScore = "MEDIUM";
+                                } else if (p[keyType] === 3) {
+                                  humanReadableScore = "HIGH";
+                                } else if (p[keyType] === 4) {
+                                  humanReadableScore = "VERY HIGH";
+                                }
+
+                                return (
+                                  <td
+                                    key={key + p.id}
+                                    style={{
+                                      minWidth: "100px",
+                                      maxWidth: "300px",
+                                    }}
+                                  >
+                                    <HoverCard>
+                                      <HoverCard.Target>
+                                        <Badge
+                                          color={
+                                            humanReadableScore == "VERY HIGH"
+                                              ? "green"
+                                              : humanReadableScore == "HIGH"
+                                              ? "blue"
+                                              : humanReadableScore == "MEDIUM"
+                                              ? "yellow"
+                                              : humanReadableScore == "LOW"
+                                              ? "orange"
+                                              : humanReadableScore ==
+                                                  "VERY LOW" && trueScore
+                                              ? "red"
+                                              : "gray"
+                                          }
+                                          fw={600}
+                                        >
+                                          {trueScore
+                                            ? humanReadableScore
+                                            : "NOT SCORED"}
+                                        </Badge>
+                                      </HoverCard.Target>
+                                      <HoverCard.Dropdown>
+                                        <Flex
+                                          direction={"column"}
+                                          style={{ maxWidth: "400px" }}
+                                        >
+                                          {prospect.icp_fit_reason_v2 &&
+                                            Object.keys(
+                                              prospect.icp_fit_reason_v2
+                                            ).map((key) => {
+                                              const section =
+                                                prospect.icp_fit_reason_v2[key];
+                                              const title = key
+                                                .replace("_individual_", "_")
+                                                .replace("_company_", "_")
+                                                .replace("aicomp_", "")
+                                                .replace("aiind_", "")
+                                                .replace("keywords", "")
+                                                .split("_")
+                                                .join(" ");
+
+                                              if (
+                                                section.answer === "NO" &&
+                                                icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                                  key
+                                                )
+                                              ) {
+                                                return (
+                                                  <Flex key={key} gap={"4px"}>
+                                                    <Text>❌</Text>
+                                                    <Text size="sm">
+                                                      <span
+                                                        style={{
+                                                          fontWeight: "bold",
+                                                        }}
+                                                      >
+                                                        {title}:
+                                                      </span>
+                                                      {section.reasoning
+                                                        .replace("❌", "")
+                                                        .replace("✅", "")}
+                                                    </Text>
+                                                  </Flex>
+                                                );
+                                              } else if (
+                                                section.answer === "YES"
+                                              ) {
+                                                return (
+                                                  <Flex key={key} gap={"4px"}>
+                                                    <Text>✅</Text>
+                                                    <Text size="sm">
+                                                      <span
+                                                        style={{
+                                                          fontWeight: "bold",
+                                                        }}
+                                                      >
+                                                        {title}:
+                                                      </span>
+                                                      {section.reasoning
+                                                        .replace("❌", "")
+                                                        .replace("✅", "")}
+                                                    </Text>
+                                                  </Flex>
+                                                );
+                                              }
+
+                                              return <></>;
+                                            })}
+                                          {prospect.icp_company_fit_reason &&
+                                            Object.keys(
+                                              prospect.icp_company_fit_reason
+                                            ).map((key) => {
+                                              const section =
+                                                prospect.icp_company_fit_reason[
+                                                  key
+                                                ];
+                                              const title = key
+                                                .replace("_individual_", "_")
+                                                .replace("_company_", "_")
+                                                .replace("aicomp_", "")
+                                                .replace("aiind_", "")
+                                                .replace("keywords", "")
+                                                .split("_")
+                                                .join(" ");
+
+                                              if (
+                                                section.answer === "NO" &&
+                                                icp_scoring_ruleset_typed.dealbreakers?.includes(
+                                                  key
+                                                )
+                                              ) {
+                                                return (
+                                                  <Flex key={key} gap={"4px"}>
+                                                    <Text>❌</Text>
+                                                    <Text size="sm">
+                                                      <span
+                                                        style={{
+                                                          fontWeight: "bold",
+                                                        }}
+                                                      >
+                                                        {title}:
+                                                      </span>
+                                                      {section.reasoning
+                                                        .replace("❌", "")
+                                                        .replace("✅", "")}
+                                                    </Text>
+                                                  </Flex>
+                                                );
+                                              } else if (
+                                                section.answer === "YES"
+                                              ) {
+                                                return (
+                                                  <Flex key={key} gap={"4px"}>
+                                                    <Text>✅</Text>
+                                                    <Text size="sm">
+                                                      <span
+                                                        style={{
+                                                          fontWeight: "bold",
+                                                        }}
+                                                      >
+                                                        {title}:
+                                                      </span>
+                                                      {section.reasoning
+                                                        .replace("❌", "")
+                                                        .replace("✅", "")}
+                                                    </Text>
+                                                  </Flex>
+                                                );
+                                              }
+
+                                              return <></>;
+                                            })}
+                                        </Flex>
+                                      </HoverCard.Dropdown>
+                                    </HoverCard>
+                                  </td>
+                                );
+                              }
+                              return (
+                                <td
+                                  key={key + p.id}
+                                  style={{
+                                    minWidth: "100px",
+                                    maxWidth: "300px",
+                                  }}
+                                >
+                                  <Text>{p[keyType]}</Text>
+                                </td>
+                              );
+                            } else {
+                              const keyType = key as keyof typeof p;
+                              return (
+                                <td
+                                  key={key + p.id}
+                                  style={{
+                                    minWidth: "100px",
+                                    maxWidth: "300px",
+                                  }}
+                                >
+                                  {p[keyType] &&
+                                  !updatedIndividualColumns.has(key) ? (
+                                    <HoverCard>
+                                      <HoverCard.Target>
+                                        {p[keyType].answer === "LOADING" ? (
+                                          <Loader size={"xs"} />
+                                        ) : (
+                                          <Text
+                                            color={
+                                              p[keyType].answer === "YES"
+                                                ? "green"
+                                                : "red"
+                                            }
+                                            weight={"bold"}
+                                          >
+                                            {p[keyType].answer}
+                                          </Text>
+                                        )}
+                                      </HoverCard.Target>
+                                      <HoverCard.Dropdown maw={"300px"}>
+                                        <Flex direction={"column"} gap={"4px"}>
+                                          <Text size="sm">
+                                            <span
+                                              style={{ fontWeight: "bold" }}
+                                            >
+                                              {`Reason: `}
+                                            </span>
+                                            {p[keyType].reasoning}
+                                          </Text>
+                                          <Divider />
+                                          <Text>
+                                            <span
+                                              style={{ fontWeight: "bold" }}
+                                            >
+                                              {`Source:  `}
+                                            </span>
+                                            {p[keyType].source}
+                                          </Text>
+                                        </Flex>
+                                      </HoverCard.Dropdown>
+                                    </HoverCard>
+                                  ) : (
+                                    <Text color={"orange"} weight={"bold"}>
+                                      TBD
+                                    </Text>
+                                  )}
+                                </td>
+                              );
+                            }
+                          })}
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </Table>
             )}
           </Box>
         </ScrollArea>

@@ -721,6 +721,7 @@ export default function CampaignTemplateEditModal({
                         handleToggle={handleToggle}
                         stagingData={stagingData}
                         setStagingData={setStagingData}
+                        currentStepNum={currentStepNum}
                       />
                     ))}
                   </Flex>

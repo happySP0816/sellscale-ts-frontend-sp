@@ -133,6 +133,8 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
     }
   }, [text]);
 
+  console.log("current step num: ", currentStepNum);
+
   return (
     <Box
       mb={"sm"}

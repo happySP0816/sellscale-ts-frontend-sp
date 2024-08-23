@@ -33,7 +33,7 @@ import { API_URL } from "@constants/data";
 import { openContextModal } from "@mantine/modals";
 import { set } from "lodash";
 
-export default function SellScaleAssistant({ setHasNotGeneratedPrefilter }: { setHasNotGeneratedPrefilter?: (value: boolean) => void }) {
+export default function SellScaleAssistant({ setHasNotGeneratedPrefilter, showChat = true }: { setHasNotGeneratedPrefilter?: (value: boolean) => void, showChat?: boolean }) {
   
   useEffect(() => {
     const tourSeen = localStorage.getItem("filterTourSeen");
@@ -77,7 +77,7 @@ export default function SellScaleAssistant({ setHasNotGeneratedPrefilter }: { se
       <Flex mt={"md"} gap={"xl"}>
       <Tour steps={editTourSteps} isOpen={editTourOpen} onRequestClose={closeEditTour}/>
       <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour}/>
-        <SegmentChat setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter} setSegment={setSegment} segment={segment} handleShowEditTour={handleShowEditTour}/>
+        {showChat && <SegmentChat setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter} setSegment={setSegment} segment={segment} handleShowEditTour={handleShowEditTour}/>}
         <SegmentAIGeneration setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter} setSegment={setSegment} segment={segment} />
       </Flex>
     </Box>
@@ -377,7 +377,7 @@ const SegmentAIGeneration = (props: any) => {
 
 
   return (
-    <Paper withBorder shadow="sm" w={"65%"} radius={"md"}>
+    <Paper withBorder shadow="sm" w={"100%"} radius={"md"}>
       <Flex p={"md"} align={"center"} gap={5} bg={"grape"} className=" rounded-t-md">
         <IconSparkles size={"1rem"} color="white" />
         <Text fw={600} color="white">
@@ -430,7 +430,7 @@ const SegmentAIGeneration = (props: any) => {
                   <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Segment Name</th>
                   <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Segment Description</th>
                   <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Value Proposition</th>
-                  {(props.segment?.length || prefilters?.length) && <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Filter</th>}
+                  {(props.segment?.length > 0 || prefilters?.length > 0) && <th style={{ border: '1px solid #e7ebef', padding: '8px' }}>Filter</th>}
                 </tr>
               </thead>
               <tbody style={{ backgroundColor: 'white' }}>

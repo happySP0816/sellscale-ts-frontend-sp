@@ -674,14 +674,13 @@ export default function SelinAI() {
 
   const handleChangeTab = (data: { tab: string; thread_id: string }) => {
     if (data.thread_id === roomIDref.current) {
-      // showNotification({
-      //   title: "Tab changed",
-      //   message: `Tab changed to: ${data.tab}`,
-      //   color: "blue",
-      //   icon: <IconEye />,
-      // });
-
-      setAIType(data.tab);
+      //re-render hack
+      if (data.tab === 'ICP') {
+        setAIType('');
+        setTimeout(() => setAIType('ICP'), 0);
+      } else {
+        setAIType(data.tab);
+      }
     }
   };
 

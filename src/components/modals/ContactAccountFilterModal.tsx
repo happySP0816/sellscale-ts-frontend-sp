@@ -41,6 +41,8 @@ interface ContactAccountFilterModalProps {
 
 export type ViewMode = "ACCOUNT" | "CONTACT";
 
+export type FilterVariant = "select" | "text" | "checkbox" | "date" | "autocomplete" | "date-range" | "multi-select" | "range" | "range-slider" | undefined;
+
 export interface TableHeader {
   key: string;
   title: string;
@@ -772,7 +774,7 @@ const ContactAccountFilterModal = function({
         enableColumnFilter:
           item.key === "icp_prospect_fit_score" ||
           !notFilters.includes(item.key),
-        filterVariant: "select",
+        filterVariant: "select" as FilterVariant,
         filterFn: (row: any, id: any, filterValue: string) => {
           let value = row.getValue(id);
           if (item.key === "icp_prospect_fit_score") {
@@ -1045,7 +1047,7 @@ const ContactAccountFilterModal = function({
         enableColumnFilter:
           item.key === "icp_company_fit_score" ||
           !notFilters.includes(item.key),
-        filterVariant: "select",
+        filterVariant: "select" as FilterVariant,
         filterFn: (row: any, id: any, filterValue: string) => {
           let value = row.getValue(id);
           if (item.key === "icp_company_fit_score") {

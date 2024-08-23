@@ -30,6 +30,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { FaFilter } from "react-icons/fa6";
 import { ICPFitReasonV2, Prospect } from "src";
 import {
+  FilterVariant,
   ICPScoringRuleset,
   ICPScoringRulesetKeys,
   TableHeader,
@@ -635,7 +636,7 @@ export const ArchetypeFilters = function({
           item.key === "icp_fit_score" || item.key === "full_name" ? 150 : 250,
         enableColumnFilter:
           item.key === "icp_fit_score" || !notFilters.includes(item.key),
-        filterVariant: "select",
+        filterVariant: "select" as FilterVariant,
         filterFn: (row: any, id: any, filterValue: string) => {
           let value = row.getValue(id);
           if (item.key === "icp_fit_score") {

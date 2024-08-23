@@ -1438,7 +1438,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
           {!window.location.href.includes('/selix_onboarding') && !window.location.href.includes('/analytics') && !window.location.href.includes('/website') && (
             <Button 
               color="green"
-              disabled={saved_query_id ? false : ((currentSavedQueryId === undefined) || filterName === '')}
+              disabled={saved_query_id || currentSavedQueryId ? false : ((currentSavedQueryId === undefined) || filterName === '')}
               leftIcon={<IconLink size={"1rem"} />}
               onClick={() => setCreateSegmentOpened(true)}
             >

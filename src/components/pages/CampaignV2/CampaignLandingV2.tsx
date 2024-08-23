@@ -915,7 +915,7 @@ export default function CampaignLandingV2(props: PropsType) {
             borderRadius: "6px",
           }}
         >
-          <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour} />
+         { !window.location.href.includes('selix') && <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour} />}
           {!successPopup ? (<Flex direction={"column"} w={"100%"}>
             {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
             <Flex

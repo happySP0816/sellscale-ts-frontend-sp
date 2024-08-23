@@ -66,6 +66,7 @@ import { PersonaOverview, SubjectLineTemplate } from "src";
 import OutreachSlider from "../../CampaignShell/OutreachSlider";
 import Personalizers from "./Personalizers";
 import Sequences from "./Sequences";
+import { set } from "lodash";
 // import ToneAdjuster from "./ToneAdjuster";
 
 interface StatsData {
@@ -374,7 +375,7 @@ export default function CampaignLandingV2(props: PropsType) {
     setSuccessPopup(true);
     setTimeout(() => {
       setSuccessPopup(false);
-    }, 300000);
+    }, 6000);
   };
 
   const checkCanToggleEmail = (checkPage?: boolean) => {
@@ -581,7 +582,8 @@ export default function CampaignLandingV2(props: PropsType) {
     campaignId: number,
     channel: "email" | "linkedin",
     userToken: string,
-    active: boolean
+    active: boolean,
+    dontrefresh: boolean = false
   ) => {
     if (channel === "email") {
       //check if there are email sequences and subject lines.
@@ -612,15 +614,22 @@ export default function CampaignLandingV2(props: PropsType) {
     //   return;
     // }
 
-    setLoadingStats(true);
+    !dontrefresh && setLoadingStats(true);
     const result = postTogglePersonaActive(
       userToken,
       campaignId,
       channel,
       active
     ).then((res) => {
-      refetchCampaignStatsData();
+      !dontrefresh && refetchCampaignStatsData();
+    }).catch((error) => {
+      console.error("Error toggling persona active", error);
+      throw new Error("Error toggling persona active");
+    }
+    ).finally(() => {
+      !dontrefresh && setLoadingStats(false);
     });
+    return result;
   };
 
   const handleModal = (
@@ -1047,44 +1056,69 @@ export default function CampaignLandingV2(props: PropsType) {
                     </Button>
                   )}
                   {props.showLaunchButton && (
-                    <Button
-                      // disabled={statsData?.linkedin_active || statsData?.email_active}
-                      size="sm"
-                      color="green"
-                      onClick={() => {
-                        showNotification({
-                          title: "Campaign Launching 🚀",
-                          message: "This campaign will be enabled momentarily",
-                          color: "blue",
-                          autoClose: 5000,
-                        });
-                        fetch(`${API_URL}/echo/send-slack-message`, {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify({
-                            message: `⚠️⚠️⚠️\nUser ${statsData?.sdr_name} launched '${statsData?.archetype_name}' campaign.\n⚠️⚠️⚠️`,
-                            webhook_key: "selix-sessions",
-                          }),
-                        });
+                    statsData?.linkedin_active || statsData?.email_active ? (
+                      <Flex
+                        align="center"
+                        color="green"
+                        style={{ fontWeight: 'bold', fontSize: '1rem', color: 'green' }}
+                      >
+                        <IconCheck size="1rem" style={{ marginRight: '0.5rem', color: 'green' }} />
+                        Campaign Launched
+                      </Flex>
+                    ) : (
+                      <Button
+                        size="sm"
+                        color="green"
+                        onClick={() => {
+                          showNotification({
+                            title: "Campaign Launching 🚀",
+                            message: "This campaign will be enabled momentarily",
+                            color: "blue",
+                            autoClose: 5000,
+                          });
+                          fetch(`${API_URL}/echo/send-slack-message`, {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              message: `⚠️⚠️⚠️\nUser ${statsData?.sdr_name} launched '${statsData?.archetype_name}' campaign.\n⚠️⚠️⚠️`,
+                              webhook_key: "selix-sessions",
+                            }),
+                          });
+                          (async () => {
+                            setLoadingStats(true);
+                            let emailSuccess = false;
+                            let linkedinSuccess = false;
 
-                        showSuccessPopup();
-                        
-                        // if (checkCanToggleEmail(false)){
-                        //   togglePersonaChannel(id, "email", userToken, true);
-                        //   showSuccessPopup();
-                        // }
-                        // if (checkCanToggleLinkedin(false)){
-                        //   togglePersonaChannel(id, "linkedin", userToken, true);
-                        //   showSuccessPopup();
-                        // }
+                            try {
+                              const emailResult = await togglePersonaChannel(id, "email", userToken, true, true);
+                              emailSuccess = true;
+                            } catch (e) {
+                              console.error("Error enabling email channel", e);
+                            }
 
-                      }}
-                    >
-                      Launch Campaign
-                    </Button>
+                            try {
+                              const linkedinResult = await togglePersonaChannel(id, "linkedin", userToken, true, true);
+                              linkedinSuccess = true;
+                            } catch (e) {
+                              console.error("Error enabling linkedin channel", e);
+                            }
+
+                            if (emailSuccess || linkedinSuccess) {
+                              showSuccessPopup();
+                            }
+                            refetchCampaignStatsData();
+                            setLoadingStats(false);
+                          })();
+
+                        }}
+                      >
+                        Launch Campaign
+                      </Button>
+                    )
                   )}
+
                 </Flex>
               </Flex>
               <Flex align={"center"} w={"100%"} gap={"xs"}>
@@ -1577,7 +1611,7 @@ export default function CampaignLandingV2(props: PropsType) {
                   <IconCircleCheck size={48} color="green" />
                 </Box>
                 <Text size="lg" weight={500}>Amazing!</Text>
-                <Text size="md">Campaign created Successfully</Text>
+                <Text size="md">Campaign launched Successfully</Text>
                 <Text size="sm">
                   Campaign: <Anchor href="#" target="_blank">{currentProject?.name}</Anchor>
                 </Text>

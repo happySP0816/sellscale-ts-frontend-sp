@@ -26,12 +26,14 @@ type DeepGramProps = {
   onTranscriptionChanged: (text: string) => void;
   setRecording: (recording: boolean) => void;
   recording: boolean;
+  showPopup?: boolean;
 };
 
 export default function DeepGram({
   recording,
   setRecording,
   onTranscriptionChanged,
+  showPopup,
 }: DeepGramProps) {
   const [speaking, setSpeaking] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
@@ -187,6 +189,7 @@ export default function DeepGram({
             <Popover
               opened={showAnimation}
               position="top"
+              disabled={!showPopup}
               withArrow
               shadow="md"
             >

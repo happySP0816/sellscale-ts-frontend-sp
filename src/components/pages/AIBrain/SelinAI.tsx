@@ -675,9 +675,9 @@ export default function SelinAI() {
   const handleChangeTab = (data: { tab: string; thread_id: string }) => {
     if (data.thread_id === roomIDref.current) {
       //re-render hack
-      if (data.tab === 'ICP') {
-        setAIType('');
-        setTimeout(() => setAIType('ICP'), 0);
+      if (data.tab === "ICP") {
+        setAIType("");
+        setTimeout(() => setAIType("ICP"), 0);
       } else {
         setAIType(data.tab);
       }
@@ -2184,6 +2184,9 @@ const SelixControlCenter = ({
     [1, 1, 1]?.map(() => false)
   );
 
+  const [showICPModal, setShowICPModal] = useState(false);
+  const [refreshIcp, setRefreshIcp] = useState(false);
+
   const [availableCitations, setAvailableCitations] = useState<string[]>([]);
   const handlePopoverOpen = (index: number) => {
     setPopoverOpenedArray(popoverOpenedArray.map((opened, i) => i === index));
@@ -2207,6 +2210,21 @@ const SelixControlCenter = ({
 
   return (
     <Paper withBorder shadow="sm" w={"65%"} radius={"md"}>
+      <Modal
+        opened={showICPModal}
+        onClose={() => {
+          setShowICPModal(false);
+          setRefreshIcp(!refreshIcp);
+        }}
+        fullScreen
+        pt={0}
+        zIndex={10000}
+        sx={{
+          float: "left",
+        }}
+      >
+        <SellScaleAssistant />
+      </Modal>
       <Flex
         px={"md"}
         py={"xs"}
@@ -2384,46 +2402,16 @@ const SelixControlCenter = ({
             {
               value: "ICP",
               label: (
-                <Popover
-                  position="bottom"
-                  withinPortal
-                  withArrow
-                  shadow="md"
-                  opened={popoverOpenedArray[3]} // Assuming this is the third popover
-                  offset={10}
-                  onPositionChange={(position) =>
-                    console.log("Popover position:", position)
-                  }
-                  onClose={handlePopoverClose}
-                  onOpen={() => handlePopoverOpen(3)}
-                  keepMounted
-                  transitionProps={{ duration: 150, transition: "fade" }}
-                  width="auto"
-                  middlewares={{ shift: true, flip: true }}
-                  arrowSize={10}
-                  arrowOffset={5}
-                  arrowRadius={2}
-                  arrowPosition="center"
-                  zIndex={1000}
-                  radius="md"
+                <div
+                  onMouseEnter={() => handlePopoverOpen(3)}
+                  onMouseLeave={handlePopoverClose}
+                  onClick={() => setShowICPModal(true)}
                 >
-                  <Popover.Target>
-                    <div
-                      onMouseEnter={() => handlePopoverOpen(3)}
-                      onMouseLeave={handlePopoverClose}
-                    >
-                      <Center style={{ gap: 10 }}>
-                        <IconFlask size={"1rem"} />
-                        <span>ICP</span>
-                      </Center>
-                    </div>
-                  </Popover.Target>
-                  <Popover.Dropdown sx={{ pointerEvents: "none" }}>
-                    <Text size="sm">
-                      This section allows you to manage your Ideal Customer Profile.
-                    </Text>
-                  </Popover.Dropdown>
-                </Popover>
+                  <Center style={{ gap: 10 }}>
+                    <IconFlask size={"1rem"} />
+                    <span>ICP</span>
+                  </Center>
+                </div>
               ),
             },
           ]}
@@ -2494,9 +2482,8 @@ const SelixControlCenter = ({
             </Text>
           </Center>
         ) : aiType === "ICP" ? (
-          <SellScaleAssistant showChat={false}/>
-        ) :
-        (
+          <SellScaleAssistant showChat={false} refresh={refreshIcp} />
+        ) : (
           <Center style={{ height: "100%" }}>
             <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
               No Tasks Created. Please create one via the chat.

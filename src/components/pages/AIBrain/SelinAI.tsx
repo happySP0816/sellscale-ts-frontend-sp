@@ -2765,6 +2765,15 @@ const PlannerComponent = ({
                   );
                   const hours = Math.floor(duration.asHours());
                   const minutes = duration.minutes();
+
+                  if (hours < 0 || minutes < 0) {
+                    return (
+                      <Text size={"xs"} className="text-gray-500">
+                        --
+                      </Text>
+                    );
+                  }
+
                   return (
                     <>
                       <Text size={"xs"} className="text-gray-500">
@@ -2884,6 +2893,9 @@ const PlannerComponent = ({
                           variant="outline"
                           color={task.rewind_img ? "blue" : "gray"}
                           leftIcon={<IconHistory size={14} />}
+                          sx={{
+                            opacity: task.rewind_img ? 1 : 0.3,
+                          }}
                           onClick={() => {
                             if (task.rewind_img) {
                               setShowRewindImage(true);
@@ -2895,9 +2907,9 @@ const PlannerComponent = ({
                         </Button>
                       </Tooltip>
                       <Text color="gray" size={"sm"} fw={500}>
-                        {moment(task.created_at).fromNow()}
+                        {/* {moment(task.created_at).format("MM/DD/YY, h:mm a")} */}
                       </Text>
-                      <Flex align={"center"} gap={"xs"}>
+                      <Flex align={"center"} gap={"xs"} w={90}>
                         <ThemeIcon
                           color={statusColors[task.status]}
                           radius={"xl"}

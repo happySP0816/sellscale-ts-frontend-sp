@@ -23,6 +23,7 @@ import {
   IconPlus,
   IconQuestionMark,
 } from "@tabler/icons";
+import { IconSparkles } from "@tabler/icons-react";
 import { fetchCampaignPersonalizers } from "@utils/requests/campaignOverview";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -202,8 +203,9 @@ export default function Personalizers(props: any) {
             }}
           />
           <Button
+            color="grape"
             disabled={!currentProject?.is_ai_research_personalization_enabled}
-            leftIcon={<IconPlus size={"0.9rem"} />}
+            leftIcon={<IconSparkles size={"0.9rem"} />}
             onClick={() =>
               openContextModal({
                 modal: "campaignPersonalizersModal",
@@ -226,7 +228,7 @@ export default function Personalizers(props: any) {
               })
             }
           >
-            Add
+            Edit & Simulate
           </Button>
         </Flex>
       </Flex>

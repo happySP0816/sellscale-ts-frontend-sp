@@ -1766,7 +1766,7 @@ export default function CampaignLandingV2(props: PropsType) {
               <Paper></Paper>
             </Flex>
             <Flex direction={"column"} gap={"md"} w={"80%"}>
-              <SequencesV2 />
+              {/* <SequencesV2 /> */}
               <Sequences
                 setSequences={setSequences}
                 // emailSequenceData={emailSequenceData}

@@ -119,6 +119,7 @@ export const ArchetypeFilters = function({
       { key: "title", title: "Title" },
       { key: "company", title: "Company" },
       { key: "linkedin_url", title: "Linkedin URL" },
+      { key: "overall_status", title: "Status" },
     ]
   );
 
@@ -128,6 +129,7 @@ export const ArchetypeFilters = function({
     "company",
     "icp_fit_score",
     "linkedin_url",
+    "overall_status",
   ];
 
   const [selectedContacts, setSelectedContacts] = useState<Set<number>>(
@@ -215,6 +217,7 @@ export const ArchetypeFilters = function({
         { key: "title", title: "Title" },
         { key: "company", title: "Company" },
         { key: "linkedin_url", title: "Linkedin URL" },
+        { key: "overall_status", title: "Status" },
       ];
 
       const company_ai_filters =
@@ -767,7 +770,10 @@ export const ArchetypeFilters = function({
                   label={
                     <Flex
                       direction={"column"}
-                      style={{ maxWidth: "400px", textWrap: "wrap" }}
+                      style={{
+                        maxWidth: "400px",
+                        textWrap: "wrap",
+                      }}
                     >
                       <Flex gap={"4px"}>
                         <Text size={"md"} fw={"bold"}>
@@ -991,15 +997,48 @@ export const ArchetypeFilters = function({
     mantineTableProps: {
       withColumnBorders: true,
     },
+    mantinePaginationProps: {
+      rowsPerPageOptions: ['5', '10', '25', '50', '100', "" + displayProspects.length].sort((a, b) => +a - +b)
+    },
+    mantineTableBodyCellProps: ({ row }) => {
+      return {
+        style: {
+          backgroundColor: selectedContacts.has(+row.id) ? "cyan" : undefined,
+        },
+      };
+    },
+    mantineSelectAllCheckboxProps: {
+      indeterminate:
+        selectedContacts.size > 0 &&
+        selectedContacts.size < displayProspects.length,
+      checked: selectedContacts.size === displayProspects.length,
+      onChange: (e) => {
+        if (!e.currentTarget.checked) {
+          setSelectedContacts(new Set());
+        } else {
+          setSelectedContacts(new Set(displayProspects.map((p) => p.id)));
+        }
+      },
+    },
+    mantineSelectCheckboxProps: ({ row }) => {
+      return {
+        checked: selectedContacts.has(+row.id),
+        onChange: (e) => {
+          if (!e.currentTarget.checked) {
+            setSelectedContacts((prevState) => {
+              return new Set([...prevState].filter((p) => p !== +row.id));
+            });
+          } else {
+            setSelectedContacts((prevState) => {
+              return new Set([...prevState, +row.id]);
+            });
+          }
+        },
+      };
+    },
   });
 
-  useEffect(() => {
-    //fetch data based on row selection state or something
-    //
-    const array = Object.keys(table.getState().rowSelection).map((key) => +key);
-
-    setSelectedContacts(new Set(array));
-  }, [table.getState().rowSelection]);
+  console.log("selectedContacts: ", selectedContacts);
 
   return (
     <Flex gap={"8px"} style={{ overflowY: "hidden", height: "100%" }}>

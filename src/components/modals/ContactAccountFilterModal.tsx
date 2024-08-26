@@ -989,7 +989,7 @@ const ContactAccountFilterModal = function({
               );
             } else if (item.key === "linkedin_url") {
               return (
-                <Anchor href={value} target="_blank">
+                <Anchor href={"https://" + value} target="_blank">
                   {value}
                 </Anchor>
               );

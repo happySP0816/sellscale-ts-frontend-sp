@@ -19,6 +19,7 @@ import {
   ScrollArea,
   Tooltip,
   Anchor,
+  Avatar,
 } from "@mantine/core";
 import { useEffect, useMemo, useState } from "react";
 import { ICPFitReasonV2, Prospect } from "../../index";
@@ -756,6 +757,7 @@ const ContactAccountFilterModal = function({
         const keyType = key as keyof typeof p;
 
         row[key] = p[keyType];
+        row["company_url"] = prospectAccount.company_url;
       });
 
       return row;
@@ -1351,8 +1353,28 @@ const ContactAccountFilterModal = function({
   });
 
   const companyTable = useMantineReactTable({
-    columns: generatedProspectAccountColumns,
-    data: generatedProspectAccountData,
+    columns: generatedProspectAccountColumns.map((column) => {
+      if (column.accessorKey === "company") {
+        return {
+          ...column,
+          Cell: ({ cell }) => {
+            const value = cell.getValue();
+            const prospect = prospects.find(
+              (prospect) => prospect.id === cell.row.original["id"]
+            );
+            const companyUrl = prospect?.company_url || "";
+            return (
+              <Flex align="center" gap="sm">
+                <Avatar src={"https://logo.clearbit.com/" + companyUrl} />
+                <Text>{String(value)}</Text>
+              </Flex>
+            );
+          },
+        };
+      }
+      return column;
+    }),
+    data: generatedProspectAccountData as any,
     enableRowSelection: true,
     getRowId: (row) => row.company,
     mantineTableContainerProps: {

@@ -29,7 +29,7 @@ import { useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 export default function Personalizers(props: any) {
-  const { statsData } = props;
+  const { ai_researcher_id } = props;
 
   const userToken = useRecoilValue(userTokenState);
   const [currentProject, setCurrentProject] = useRecoilState(
@@ -202,15 +202,15 @@ export default function Personalizers(props: any) {
             }}
           />
           <Button
-            disabled={!Array.isArray(props.sequences)}
+            disabled={!currentProject?.is_ai_research_personalization_enabled}
             leftIcon={<IconPlus size={"0.9rem"} />}
             onClick={() =>
               openContextModal({
                 modal: "campaignPersonalizersModal",
                 title: <Title order={3}>Personalizers</Title>,
                 innerProps: {
-                  sequences: props.sequences,
-                  ai_researcher_id: statsData?.ai_researcher_id,
+                  sequences: props.sequences || [],
+                  ai_researcher_id: ai_researcher_id,
                   id,
                   setPersonalizers: props.setPersonalizers,
                 },
@@ -394,8 +394,8 @@ export default function Personalizers(props: any) {
                 modal: "campaignPersonalizersModal",
                 title: <Title order={3}>Personalizers</Title>,
                 innerProps: {
-                  sequences: props.sequences,
-                  ai_researcher_id: statsData?.ai_researcher_id,
+                  sequences: props.sequences || [],
+                  ai_researcher_id: ai_researcher_id,
                   id,
                   setPersonalizers: props.setPersonalizers,
                 },

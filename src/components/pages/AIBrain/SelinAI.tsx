@@ -1,4 +1,5 @@
 import {
+  emailSequenceState,
   emailSubjectLinesState,
   userDataState,
   userTokenState,
@@ -112,6 +113,7 @@ import Sequences from "@pages/CampaignV2/Sequences";
 import { SubjectLineTemplate } from "src";
 import { ArchetypeFilters } from "@pages/CampaignV2/ArchetypeFilterModal";
 import SellScaleAssistant from "./SellScaleAssistant";
+import Personalizers from "@pages/CampaignV2/Personalizers";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit }, ref) => {
@@ -3000,6 +3002,9 @@ const TaskRenderer = ({
     SubjectLineTemplate[]
   >(emailSubjectLinesState);
 
+  const [personalizers, setPersonalizers] = useState([]);
+  const emailSequenceData = useRecoilValue(emailSequenceState);
+
   switch (task.widget_type) {
     case "LAUNCH_CAMPAIGN":
       return (
@@ -3009,6 +3014,15 @@ const TaskRenderer = ({
           forcedCampaignId={currentProject?.id}
         />
       );
+    case "VIEW_PERSONALIZERS":
+    return (
+      <Personalizers
+        ai_researcher_id={currentProject?.ai_researcher_id}
+        sequences={emailSequenceData}
+        setPersonalizers={setPersonalizers}
+        personalizers={personalizers}
+      />
+    );
     case "VIEW_STRATEGY":
       return (
         <SelinStrategy

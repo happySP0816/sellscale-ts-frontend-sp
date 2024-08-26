@@ -37,6 +37,7 @@ interface ContactAccountFilterModalProps {
   showContactAccountFilterModal: boolean;
   setShowContactAccountFilterModal: (showModal: boolean) => void;
   segment?: TransformedSegment;
+  isModal?: boolean;
 }
 
 export type ViewMode = "ACCOUNT" | "CONTACT";
@@ -115,8 +116,11 @@ const ContactAccountFilterModal = function({
   showContactAccountFilterModal,
   setShowContactAccountFilterModal,
   segment,
+  isModal = true,
 }: ContactAccountFilterModalProps) {
   const userToken = useRecoilValue(userTokenState);
+
+  console.log('segment is', segment);
 
   const [viewMode, setViewMode] = useState<ViewMode>("CONTACT");
   const [prospects, setProspects] = useState<Prospect[]>([]);
@@ -1353,7 +1357,7 @@ const ContactAccountFilterModal = function({
     getRowId: (row) => row.company,
     mantineTableContainerProps: {
       sx: {
-        maxHeight: "540px",
+        height: "100%",
       },
     },
     enableBottomToolbar: true,
@@ -1386,7 +1390,7 @@ const ContactAccountFilterModal = function({
     setSelectedCompanies(new Set(array));
   }, [companyTable.getState().rowSelection]);
 
-  return (
+  return isModal ? (
     <Modal
       onClose={() => setShowContactAccountFilterModal(false)}
       opened={showContactAccountFilterModal}
@@ -1479,7 +1483,45 @@ const ContactAccountFilterModal = function({
         </Flex>
       </Flex>
     </Modal>
-  );
-};
+  ) : (
+    <Box style={{ maxHeight: "700px", maxWidth: "1100px" }}>
+      <Flex justify={"space-between"} gap={"36px"}>
+        <Title order={3} style={{ maxWidth: "300px" }}>
+          {segment?.is_market_map
+            ? segment.segment_title + " Market Map View"
+            : segment?.segment_title + " Segment View"}
+        </Title>
 
-export default ContactAccountFilterModal;
+      </Flex>
+      <Flex gap={"8px"} style={{ overflowY: "hidden", height: "100%" }}>
+        {isLoading && <Loader />}
+        <Divider orientation={"vertical"} />
+        <Flex
+          direction={"column"}
+          gap={"8px"}
+          style={{ minWidth: "100%", maxWidth: "100%" }}
+        >
+          <Flex gap={"4px"} align={"end"} justify="space-between">
+            <TextInput
+              label={"Global Search"}
+              placeholder={"Search for a specific name / company / title"}
+              value={filteredWords}
+              onChange={(event) =>
+                setFilteredWords(event.currentTarget.value)
+              }
+              style={{ minWidth: "100%" }}
+            />
+          </Flex>
+          {icp_scoring_ruleset_typed && (
+            <Box>
+              <MantineReactTable table={companyTable} />
+            </Box>
+          )}
+        </Flex>
+      </Flex>
+    </Box>
+  );
+
+}
+
+  export default ContactAccountFilterModal;

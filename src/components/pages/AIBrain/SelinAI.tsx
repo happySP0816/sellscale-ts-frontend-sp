@@ -2723,6 +2723,8 @@ const PlannerComponent = ({
       if (campaignId) {
         const project = await getFreshCurrentProject(userToken, campaignId);
         setCurrentProject(project);
+        //show the 'launch campaign' task if a campaign is attached
+        setOpenedTaskIndex(tasks.length - 1);
       }
     })();
   }, [campaignId]);

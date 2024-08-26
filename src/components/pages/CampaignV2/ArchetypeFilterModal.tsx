@@ -637,7 +637,7 @@ export const ArchetypeFilters = function({
           },
         },
         size:
-          item.key === "icp_fit_score" || item.key === "full_name" ? 150 : 250,
+          item.key === "icp_fit_score" || item.key === "full_name" || item.key === "company" ? 125 : 250,
         enableColumnFilter:
           item.key === "icp_fit_score" || !notFilters.includes(item.key),
         filterVariant: "select" as FilterVariant,
@@ -928,6 +928,7 @@ export const ArchetypeFilters = function({
                 <Tooltip label={value}>
                   <Anchor href={'https://' + value} target="_blank">
                     <IconBrandLinkedin size={16} />
+                    {value}
                   </Anchor>
                 </Tooltip>
               );
@@ -1058,7 +1059,7 @@ export const ArchetypeFilters = function({
       <Flex
         direction={"column"}
         gap={"8px"}
-        style={{ minWidth: "100%", maxWidth: "750px" }}
+        style={{ minWidth: "750px", maxWidth: "750px" }}
       >
         {selectedContacts && selectedContacts.size > 0 && (
           <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>

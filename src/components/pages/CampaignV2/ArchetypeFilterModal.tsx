@@ -1065,6 +1065,7 @@ export const ArchetypeFilters = function({
               </Button>
             </Tooltip>
             <BulkActions
+              hideFeature={hideFeature}
               selectedProspects={prospects.filter((prospect) =>
                 selectedContacts.has(prospect.id)
               )}

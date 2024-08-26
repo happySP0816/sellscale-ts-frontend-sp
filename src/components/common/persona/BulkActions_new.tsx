@@ -26,11 +26,13 @@ import { showNotification } from "@mantine/notifications";
 type PropsType = {
   selectedProspects: any[];
   backFunc: () => void;
+  hideFeature?: boolean;
 };
 
 export default function BulkActions(props: PropsType) {
   return (
     <MovePersonaAction
+      hideFeature={props.hideFeature}
       selectedProspects={props.selectedProspects}
       backFunc={props.backFunc}
     />
@@ -41,11 +43,13 @@ type MovePersonaActionPropsType = {
   selectedProspects: any[];
   backFunc?: () => void;
   mx?: string;
+  hideFeature?: boolean;
 };
 
 const MovePersonaAction = ({
   selectedProspects,
   backFunc,
+  hideFeature,
   mx,
 }: MovePersonaActionPropsType) => {
   const theme = useMantineTheme();
@@ -126,9 +130,9 @@ const MovePersonaAction = ({
 
   return (
     <Flex mx={mx}>
-      <Button size="sm" color="orange" onClick={openMovePersona}>
+      {!hideFeature && <Button size="sm" color="orange" onClick={openMovePersona}>
         Move Persona
-      </Button>
+      </Button>}
       <Modal
         opened={movePersonaOpened}
         onClose={closeMovePersona}

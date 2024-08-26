@@ -41,7 +41,7 @@ import { fetchCampaignSequences } from "@utils/requests/campaignOverview";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
-import{ IntroMessageSection } from "@common/sequence/LinkedInSequenceSection";
+import { IntroMessageSection } from "@common/sequence/LinkedInSequenceSection";
 
 interface linkedinSequence {
   active: boolean;
@@ -94,7 +94,7 @@ export default function Sequences(props: any) {
   const userData = useRecoilValue(userDataState);
 
   const campaignContacts = useRecoilValue(campaignContactsState);
-  const [selectedCampaignContactId, setSelectedCampaignContactId] = useState<any>(campaignContacts?.[0]?.id); 
+  const [selectedCampaignContactId, setSelectedCampaignContactId] = useState<any>(campaignContacts?.[0]?.id);
 
   const refetchSequenceData = async (clientArchetypeId: number) => {
     setLoadingSequences(true);
@@ -362,137 +362,137 @@ export default function Sequences(props: any) {
               </Text>
             </Flex>
           </Flex>
-        ) : 
-        
-        (type === "linkedin" && currentProject?.template_mode === false && currentProject?.id) ? (
-           <IntroMessageSection prospectId={selectedCampaignContactId} setProspectId={setSelectedCampaignContactId} />
         ) :
-        (sequences && sequences.length > 0) || (linkedinInitialMessages?.length > 0 && type === "linkedin") ? (
-          <Flex direction={"column"} h={"fit-content"} w={"100%"}>
-            <Flex w={"100%"} gap={"md"} direction={"column"} p={"lg"}>
-              {type === "linkedin" && linkedinInitialMessages && linkedinInitialMessages.length > 0 && (
-                <Box
-                  style={{
-                    border: "1px solid #ced4da",
-                    borderRadius: "8px",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <Flex align={"center"} justify={"space-between"} px={"sm"} py={"xs"}>
-                    <Flex mx="lg" align={"center"} gap={"xs"}>
-                      <IconMessages color="#228be6" size={"0.9rem"} />
-                      <Text color="gray" fw={500} size={"xs"}>
-                        Initial Message:
-                      </Text>
-                      <Select
-                        defaultValue={linkedinInitialMessages[0].title}
-                        onChange={(value) => setLinkedinInitialMessageViewing(value)}
-                        data={linkedinInitialMessages.map((option: any) => ({
-                          value: option.title,
-                          label: option.title,
-                        }))}
-                        size="xs"
-                        styles={{
-                          root: { marginLeft: "-5px" },
-                          input: { fontWeight: 600 },
-                        }}
+
+          (type === "linkedin" && currentProject?.template_mode === false && currentProject?.id) ? (
+            <IntroMessageSection prospectId={selectedCampaignContactId} setProspectId={setSelectedCampaignContactId} />
+          ) :
+            (sequences && sequences.length > 0) || (linkedinInitialMessages?.length > 0 && type === "linkedin") ? (
+              <Flex direction={"column"} h={"fit-content"} w={"100%"}>
+                <Flex w={"100%"} gap={"md"} direction={"column"} p={"lg"}>
+                  {type === "linkedin" && linkedinInitialMessages && linkedinInitialMessages.length > 0 && (
+                    <Box
+                      style={{
+                        border: "1px solid #ced4da",
+                        borderRadius: "8px",
+                        marginBottom: "1rem",
+                      }}
+                    >
+                      <Flex align={"center"} justify={"space-between"} px={"sm"} py={"xs"}>
+                        <Flex mx="lg" align={"center"} gap={"xs"}>
+                          <IconMessages color="#228be6" size={"0.9rem"} />
+                          <Text color="gray" fw={500} size={"xs"}>
+                            Initial Message:
+                          </Text>
+                          <Select
+                            defaultValue={linkedinInitialMessages[0].title}
+                            onChange={(value) => setLinkedinInitialMessageViewing(value)}
+                            data={linkedinInitialMessages.map((option: any) => ({
+                              value: option.title,
+                              label: option.title,
+                            }))}
+                            size="xs"
+                            styles={{
+                              root: { marginLeft: "-5px" },
+                              input: { fontWeight: 600 },
+                            }}
+                          />
+                        </Flex>
+                      </Flex>
+                      <Collapse in={true}>
+                        <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
+                          <Avatar size={"md"} radius={"xl"} src={userData.img_url} />
+                          <Box>
+                            <Text fw={600} size={"sm"}>
+                              {linkedinInitialMessages[0]?.name}
+                            </Text>
+                            <Text fw={500} size={"xs"}>
+                              <BracketGradientWrapper>
+                                {linkedinInitialMessages.find((msg: any) => msg.title === linkedinInitialMessageViewing)?.message.replace(/\n/g, "<br/>")}
+                              </BracketGradientWrapper>
+                            </Text>
+                          </Box>
+                        </Flex>
+                      </Collapse>
+                    </Box>
+                  )}
+                  {Array.isArray(sequences) && sequences.map((item: any, index: number) => {
+                    return (
+                      <VariantSelect
+                        item={item}
+                        index={index}
+                        selectStep={selectStep}
+                        handleToggle={handleToggle}
+                        opened={opened}
+                        type={type}
+                        userData={userData}
+                        emailSubjectLines={emailSubjectLines}
+                        emailSequenceViewingArray={emailSequenceViewingArray}
+                        linkedinSequenceViewingArray={linkedinSequenceViewingArray}
+                        setLinkedinSequenceViewingArray={setLinkedinSequenceViewingArray}
+                        setEmailSequenceViewingArray={setEmailSequenceViewingArray}
                       />
-                    </Flex>
-                  </Flex>
-                  <Collapse in={true}>
-                    <Flex gap={"sm"} p={"sm"} style={{ borderTop: "1px solid #ced4da" }}>
-                      <Avatar size={"md"} radius={"xl"} src={userData.img_url} />
-                      <Box>
-                        <Text fw={600} size={"sm"}>
-                          {linkedinInitialMessages[0]?.name}
-                        </Text>
-                        <Text fw={500} size={"xs"}>
-                          <BracketGradientWrapper>
-                            {linkedinInitialMessages.find((msg: any) => msg.title === linkedinInitialMessageViewing)?.message.replace(/\n/g, "<br/>")}
-                          </BracketGradientWrapper>
-                        </Text>
-                      </Box>
-                    </Flex>
-                  </Collapse>
-                </Box>
-              )}
-              {Array.isArray(sequences) && sequences.map((item: any, index: number) => {
-                return (
-                  <VariantSelect
-                    item={item}
-                    index={index}
-                    selectStep={selectStep}
-                    handleToggle={handleToggle}
-                    opened={opened}
-                    type={type}
-                    userData={userData}
-                    emailSubjectLines={emailSubjectLines}
-                    emailSequenceViewingArray={emailSequenceViewingArray}
-                    linkedinSequenceViewingArray={linkedinSequenceViewingArray}
-                    setLinkedinSequenceViewingArray={setLinkedinSequenceViewingArray}
-                    setEmailSequenceViewingArray={setEmailSequenceViewingArray}
-                  />
-                );
-              })}
-            </Flex>
-          </Flex>
-        ) : (
-          <Flex
-            mb="xl"
-            direction="column"
-            align="center"
-            justify="center"
-            m="auto"
-            sx={(theme) => ({
-              border: "2px dotted gray",
-              borderRadius: "15px",
-              padding: "10px", // Reduced padding to make the area less height
-              cursor: "pointer",
-              transition: "transform 0.2s, background-color 0.2s",
-              "&:hover": {
-                transform: "scale(1.05)",
-                backgroundColor: theme.colors.gray[0],
-              },
-            })}
-            onClick={() => {
-              openContextModal({
-                modal: "campaignTemplateEditModal",
-                title: <Title order={3}>Sequence Builder</Title>,
-                innerProps: {
-                  sequenceType: type,
-                  linkedinInitialMessages,
-                  emailSubjectLines,
-                  setEmailSubjectLines,
-                  // linkedinSequenceData,
-                  // emailSequenceData,
-                  campaignId: id,
-                  createTemplateBuilder,
-                  setCreateTemplateBuilder,
-                  setSequences,
-                },
-                centered: true,
-                styles: {
-                  content: {
-                    minWidth: "1100px",
+                    );
+                  })}
+                </Flex>
+              </Flex>
+            ) : (
+              <Flex
+                mb="xl"
+                direction="column"
+                align="center"
+                justify="center"
+                m="auto"
+                sx={(theme) => ({
+                  border: "2px dotted gray",
+                  borderRadius: "15px",
+                  padding: "10px", // Reduced padding to make the area less height
+                  cursor: "pointer",
+                  transition: "transform 0.2s, background-color 0.2s",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                    backgroundColor: theme.colors.gray[0],
                   },
-                },
-                onClose: () => {
-                  const clientArchetypeId = Number(id);
-                  refetchSequenceData(clientArchetypeId);
-                },
-              });
-            }}
-          >
-            <Flex align="center" gap="xs">
-              <Text color="gray" fw={400} size={"sm"}>
-                There are no sequences here. Add one to get started.
-              </Text>
-              <ActionIcon>
-                <IconPlus size={"1.2rem"} />
-              </ActionIcon>
-            </Flex>
-          </Flex>
-        )}
+                })}
+                onClick={() => {
+                  openContextModal({
+                    modal: "campaignTemplateEditModal",
+                    title: <Title order={3}>Sequence Builder</Title>,
+                    innerProps: {
+                      sequenceType: type,
+                      linkedinInitialMessages,
+                      emailSubjectLines,
+                      setEmailSubjectLines,
+                      // linkedinSequenceData,
+                      // emailSequenceData,
+                      campaignId: id,
+                      createTemplateBuilder,
+                      setCreateTemplateBuilder,
+                      setSequences,
+                    },
+                    centered: true,
+                    styles: {
+                      content: {
+                        minWidth: "1100px",
+                      },
+                    },
+                    onClose: () => {
+                      const clientArchetypeId = Number(id);
+                      refetchSequenceData(clientArchetypeId);
+                    },
+                  });
+                }}
+              >
+                <Flex align="center" gap="xs">
+                  <Text color="gray" fw={400} size={"sm"}>
+                    There are no sequences here. Add one to get started.
+                  </Text>
+                  <ActionIcon>
+                    <IconPlus size={"1.2rem"} />
+                  </ActionIcon>
+                </Flex>
+              </Flex>
+            )}
       </Flex>
     </Paper>
   );

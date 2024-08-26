@@ -1508,7 +1508,7 @@ const ContactAccountFilterModal = function({
   ) : (
     <Box style={{ maxHeight: "700px", maxWidth: "1100px" }}>
       <Flex justify={"space-between"} gap={"36px"}>
-        <Title order={3} style={{ maxWidth: "300px" }}>
+        <Title order={3} style={{ maxWidth: "100%" }}>
           {segment?.is_market_map
             ? segment.segment_title + " Market Map View"
             : segment?.segment_title + " Segment View"}

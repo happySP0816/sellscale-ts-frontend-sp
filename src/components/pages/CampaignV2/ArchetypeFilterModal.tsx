@@ -43,13 +43,14 @@ import { showNotification } from "@mantine/notifications";
 import { moveToUnassigned } from "@utils/requests/moveToUnassigned";
 import { ProspectICP } from "@common/persona/Pulse";
 import BulkActions from "@common/persona/BulkActions_new";
-import { IconFileDownload, IconMagnet, IconTrash } from "@tabler/icons-react";
+import { IconExternalLink, IconFileDownload, IconMagnet, IconTrash } from "@tabler/icons-react";
 import { openConfirmModal } from "@mantine/modals";
 import { CSVLink } from "react-csv";
 import CustomResearchPointCard from "@common/persona/CustomResearchPointCard";
 import { useDisclosure } from "@mantine/hooks";
 import generate from "@babel/generator";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
+import { IconBrandLinkedin } from "@tabler/icons";
 
 interface ContactAccountFilterModalProps {
   showContactAccountFilterModal: boolean;
@@ -70,8 +71,8 @@ const ArchetypeFilterModal = function({
     <Modal
       onClose={() => setShowContactAccountFilterModal(false)}
       opened={showContactAccountFilterModal}
-      size={"1100px"}
-      style={{ maxHeight: "700px", maxWidth: "1100px" }}
+      size={"90%"}
+      style={{ maxHeight: "700px", minWidth: "2000px" }}
       title={
         <Flex justify={"space-between"} gap={"36px"}>
           <Title order={3} style={{ width: "600px" }}>
@@ -918,9 +919,11 @@ export const ArchetypeFilters = function({
               );
             } else if (item.key === "linkedin_url") {
               return (
-                <Anchor href="value" target="_blank">
-                  {value}
-                </Anchor>
+                <Tooltip label={value}>
+                  <Anchor href={'https://' + value} target="_blank">
+                    <IconBrandLinkedin size={16} />
+                  </Anchor>
+                </Tooltip>
               );
             }
             return <Text style={{ maxHeight: "2em" }}>{p[keyType]}</Text>;
@@ -1016,7 +1019,7 @@ export const ArchetypeFilters = function({
       <Flex
         direction={"column"}
         gap={"8px"}
-        style={{ minWidth: "750px", maxWidth: "750px" }}
+        style={{ minWidth: "100%", maxWidth: "750px" }}
       >
         {selectedContacts && selectedContacts.size > 0 && (
           <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>
@@ -1092,10 +1095,10 @@ export const ArchetypeFilters = function({
             label={"Global Search"}
             placeholder={"Search for a specific name / company / title"}
             value={filteredWords}
-            style={{ minWidth: "90%" }}
+            style={{ minWidth: "93%" }}
             onChange={(event) => setFilteredWords(event.currentTarget.value)}
           />
-          <Tooltip label="Upload custom data points to your prospects.">
+          {!hideFeature && <Tooltip label="Upload custom data points to your prospects.">
             <Button
               size="sm"
               onClick={customPointHandlers.open}
@@ -1104,7 +1107,7 @@ export const ArchetypeFilters = function({
             >
               <IconMagnet size={16} />
             </Button>
-          </Tooltip>
+          </Tooltip>}
           <Modal
             opened={openedCustomPoint}
             onClose={customPointHandlers.close}

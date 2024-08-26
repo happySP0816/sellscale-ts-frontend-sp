@@ -2726,11 +2726,12 @@ const PlannerComponent = ({
   useEffect(() => {
     (async () => {
       if (campaignId) {
-        const project = await getFreshCurrentProject(userToken, campaignId);
+        const [project, res] = await Promise.all([
+          getFreshCurrentProject(userToken, campaignId),
+          getSegments()
+        ]);
 
-        const res = await getSegments();
         setSegment(res[0] || undefined);
-
         setCurrentProject(project);
         //show the 'launch campaign' task if a campaign is attached
         setOpenedTaskIndex(tasks.length - 1);
@@ -3074,7 +3075,23 @@ const TaskRenderer = ({
     case "REVIEW_PROSPECTS":
       return <ArchetypeFilters hideFeature={true} />;
     case "REVIEW_COMPANIES":
-      return <ContactAccountFilterModal key={currentProject?.id} segment={segment} showContactAccountFilterModal={true} setShowContactAccountFilterModal={() => {}} isModal={false}/>;
+      if (!segment) {
+        return (
+          <Flex justify="center" align="center" style={{ height: "100%" }}>
+            <Loader />
+          </Flex>
+        );
+      } else {
+        return (
+          <ContactAccountFilterModal
+            key={currentProject?.id}
+            segment={segment}
+            showContactAccountFilterModal={true}
+            setShowContactAccountFilterModal={() => {}}
+            isModal={false}
+          />
+        );
+      }
     case "VIEW_SEQUENCE":
       return (
         <Sequences

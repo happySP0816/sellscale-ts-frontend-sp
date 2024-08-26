@@ -720,7 +720,9 @@ export const ArchetypeFilters = function({
             if (item.key === "icp_fit_score") {
               const trueScore =
                 prospect.icp_fit_reason_v2 &&
-                Object.keys(prospect.icp_fit_reason_v2).length > 0 && prospect.icp_company_fit_reason && Object.keys(prospect.icp_company_fit_reason).length > 0;
+                Object.keys(prospect.icp_fit_reason_v2).length > 0 &&
+                prospect.icp_company_fit_reason &&
+                Object.keys(prospect.icp_company_fit_reason).length > 0;
 
               let humanReadableScore = "Not Scored";
 
@@ -736,13 +738,28 @@ export const ArchetypeFilters = function({
                 humanReadableScore = "VERY HIGH";
               }
 
-              const positiveCount =
-                Object.values(prospect.icp_fit_reason_v2).filter(
-                  (prospect) => prospect.answer === "YES"
-                ).length +
-                Object.values(prospect.icp_company_fit_reason).filter(
-                  (prospect) => prospect.answer === "YES"
-                ).length;
+              let positiveCount = 0;
+              let total = 0;
+
+              if (prospect.icp_fit_reason_v2) {
+                positiveCount += Object.values(
+                  prospect.icp_fit_reason_v2
+                ).filter((prospect) => prospect.answer === "YES").length;
+
+                total += Object.values(prospect.icp_fit_reason_v2).length;
+              }
+
+              if (prospect.icp_company_fit_reason) {
+                positiveCount += Object.values(
+                  prospect.icp_company_fit_reason
+                ).filter((prospect) => prospect.answer === "YES").length;
+
+                total += Object.values(prospect.icp_company_fit_reason).length;
+              }
+
+              if (total === 0) {
+                total = 1;
+              }
 
               return (
                 <Tooltip
@@ -756,9 +773,7 @@ export const ArchetypeFilters = function({
                           Prospect Score
                         </Text>
                         <Text color={"red"} fw={"bold"} size={"md"}>
-                          {`(${positiveCount} / ${Object.keys(prospect.icp_fit_reason_v2).length +
-                            Object.keys(prospect.icp_company_fit_reason).length
-                            })`}
+                          {`(${positiveCount} /${total})`}
                         </Text>
                       </Flex>
                       {prospect.icp_fit_reason_v2 &&
@@ -984,7 +999,7 @@ export const ArchetypeFilters = function({
   }, [table.getState().rowSelection]);
 
   return (
-    <Flex gap={"8px"} style={{overflowY: 'hidden', height: '100%'}}>
+    <Flex gap={"8px"} style={{ overflowY: "hidden", height: "100%" }}>
       {isLoading && <Loader />}
       {!isLoading && icp_scoring_ruleset && !hideFeature && (
         <CampaignFilters

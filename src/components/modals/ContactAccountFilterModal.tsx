@@ -41,7 +41,17 @@ interface ContactAccountFilterModalProps {
 
 export type ViewMode = "ACCOUNT" | "CONTACT";
 
-export type FilterVariant = "select" | "text" | "checkbox" | "date" | "autocomplete" | "date-range" | "multi-select" | "range" | "range-slider" | undefined;
+export type FilterVariant =
+  | "select"
+  | "text"
+  | "checkbox"
+  | "date"
+  | "autocomplete"
+  | "date-range"
+  | "multi-select"
+  | "range"
+  | "range-slider"
+  | undefined;
 
 export interface TableHeader {
   key: string;
@@ -870,9 +880,17 @@ const ContactAccountFilterModal = function({
                 humanReadableScore = "VERY HIGH";
               }
 
-              const positiveCount = Object.values(
-                prospect.icp_fit_reason_v2
-              ).filter((prospect) => prospect.answer === "YES").length;
+              let positiveCount = 0;
+
+              if (prospect.icp_fit_reason_v2) {
+                positiveCount = Object.values(
+                  prospect.icp_fit_reason_v2
+                ).filter((prospect) => prospect.answer === "YES").length;
+              }
+
+              let total = prospect.icp_fit_reason_v2
+                ? Object.values(prospect.icp_fit_reason_v2).length
+                : 1;
 
               return (
                 <Tooltip
@@ -886,8 +904,7 @@ const ContactAccountFilterModal = function({
                           Prospect Score
                         </Text>
                         <Text color={"red"} fw={"bold"} size={"md"}>
-                          {`(${positiveCount} / ${Object.keys(prospect.icp_fit_reason_v2).length
-                            })`}
+                          {`(${positiveCount} /  ${total})`}
                         </Text>
                       </Flex>
                       {prospect.icp_fit_reason_v2 &&
@@ -1143,9 +1160,17 @@ const ContactAccountFilterModal = function({
                 humanReadableScore = "VERY HIGH";
               }
 
-              const positiveCount = Object.values(
-                prospect.icp_company_fit_reason
-              ).filter((prospect) => prospect.answer === "YES").length;
+              let positiveCount = 0;
+
+              if (prospect.icp_company_fit_reason) {
+                positiveCount = Object.values(
+                  prospect.icp_company_fit_reason
+                ).filter((prospect) => prospect.answer === "YES").length;
+              }
+
+              const total = prospect.icp_company_fit_reason
+                ? Object.values(prospect.icp_company_fit_reason).length
+                : 1;
 
               return (
                 <Tooltip
@@ -1159,8 +1184,7 @@ const ContactAccountFilterModal = function({
                           Company Score
                         </Text>
                         <Text color={"red"} fw={"bold"} size={"md"}>
-                          {`(${positiveCount} / ${Object.keys(prospect.icp_company_fit_reason).length
-                            })`}
+                          {`(${positiveCount} / ${total})`}
                         </Text>
                       </Flex>
                       {prospect.icp_company_fit_reason &&

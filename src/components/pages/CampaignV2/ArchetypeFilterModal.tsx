@@ -1059,7 +1059,7 @@ export const ArchetypeFilters = function({
       <Flex
         direction={"column"}
         gap={"8px"}
-        style={{ minWidth: "750px", maxWidth: "750px" }}
+        style={{maxWidth: "1150px"}}
       >
         {selectedContacts && selectedContacts.size > 0 && (
           <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>

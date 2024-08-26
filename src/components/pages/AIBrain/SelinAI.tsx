@@ -3017,6 +3017,7 @@ const TaskRenderer = ({
     case "VIEW_PERSONALIZERS":
     return (
       <Personalizers
+        key={currentProject?.id} // Adding key to force re-render when currentProject?.id changes
         ai_researcher_id={currentProject?.ai_researcher_id}
         sequences={emailSequenceData}
         setPersonalizers={setPersonalizers}
@@ -3037,6 +3038,7 @@ const TaskRenderer = ({
     case "VIEW_SEQUENCE":
       return (
         <Sequences
+          key={currentProject?.id} // Adding key to force re-render when currentProject?.id changes
           forcedCampaignId={currentProject?.id}
           setSequences={setSequences}
           setEmailSubjectLines={setEmailSubjectLines}

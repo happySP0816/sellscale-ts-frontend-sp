@@ -65,7 +65,7 @@ interface emailSequence {
 export type emailSequencesDataType = Array<Array<emailSequence>>;
 
 export default function Sequences(props: any) {
-  const id = Number(useParams().id);
+  const id = props.forcedCampaignId || Number(useParams().id);
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 

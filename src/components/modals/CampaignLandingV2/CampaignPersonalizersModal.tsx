@@ -95,7 +95,7 @@ export default function CampaignPersonalizersModal({
   const [aiResearchers, setAiResearchers] = useState<any>([]);
   const [currentAiResearcherId, setCurrentAiResearcherId] = useState("");
   //deep copy
-  const sequences = innerProps?.sequences ? [...innerProps.sequences] : [];
+  const sequences = Array.isArray(innerProps?.sequences) ? [...innerProps.sequences] : [];
 
   //this function provides a state from the generative request, and the ability to override the data with the setter.
   const {

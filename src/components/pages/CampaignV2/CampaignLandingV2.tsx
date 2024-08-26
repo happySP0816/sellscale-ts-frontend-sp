@@ -1705,8 +1705,8 @@ export default function CampaignLandingV2(props: PropsType) {
                 linkedinInitialMessages={linkedinInitialMessages}
               />
               <Personalizers
-                data={statsData}
-                sequences={emailSequenceData}
+                ai_researcher_id={statsData?.ai_researcher_id}
+                sequences={emailSequenceData || []}
                 setPersonalizers={setPersonalizers}
                 personalizers={personalizers}
               />

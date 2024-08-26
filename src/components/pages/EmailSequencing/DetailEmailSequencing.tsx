@@ -296,7 +296,7 @@ function NewDetailEmailSequencing(props: {
 
   function getPersonalizersSection() {
     return (
-      <Personalizers data={currentProject} sequences={props.templates} setSequences={null} setPersonalizers={setPersonalizers} personalizers={personalizers} />
+      <Personalizers ai_researcher_id={currentProject?.ai_researcher_id} sequences={props.templates} setSequences={null} setPersonalizers={setPersonalizers} personalizers={personalizers} />
     );
   }
 

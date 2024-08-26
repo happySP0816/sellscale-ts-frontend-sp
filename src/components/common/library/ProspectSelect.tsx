@@ -26,7 +26,10 @@ import { IconSearch } from "@tabler/icons-react";
 import { useDebouncedState } from "@mantine/hooks";
 import _ from "lodash";
 import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
-import { prospectDrawerOpenState, prospectDrawerIdState } from "@atoms/prospectAtoms";
+import {
+  prospectDrawerOpenState,
+  prospectDrawerIdState,
+} from "@atoms/prospectAtoms";
 
 interface ProspectItemProps extends React.ComponentPropsWithoutRef<"div"> {
   label: string;
@@ -161,6 +164,7 @@ export default function ProspectSelect(props: {
   includeDrawer?: boolean;
   onFinishLoading?: (prospects: ProspectShallow[]) => void;
   selectedProspect?: number;
+  isSequenceV2?: boolean;
 }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
@@ -171,9 +175,15 @@ export default function ProspectSelect(props: {
   const [searchingProspects, setSearchingProspects] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useDebouncedState<string>("", 400);
 
-  const [prospectDrawerOpened, setProspectDrawerOpened] = useRecoilState(prospectDrawerOpenState);
-  const [prospectDrawerId, setProspectDrawerId] = useRecoilState(prospectDrawerIdState);
-  const [campaignContacts, setCampaignContacts] = useRecoilState(campaignContactsState);
+  const [prospectDrawerOpened, setProspectDrawerOpened] = useRecoilState(
+    prospectDrawerOpenState
+  );
+  const [prospectDrawerId, setProspectDrawerId] = useRecoilState(
+    prospectDrawerIdState
+  );
+  const [campaignContacts, setCampaignContacts] = useRecoilState(
+    campaignContactsState
+  );
 
   const searchProspects = async () => {
     if (lastTimeRun > Date.now() - 1000) {
@@ -188,7 +198,7 @@ export default function ProspectSelect(props: {
       searchQuery
     );
     if (result.status === "success") {
-      try{
+      try {
         setCampaignContacts(result.data);
       } catch (e) {
         console.error(e);
@@ -204,8 +214,8 @@ export default function ProspectSelect(props: {
 
       if (props.autoSelect && !selectedProspect) {
         const foundProspect = resultProspects.find(
-            (prospect) => prospect.id === props.selectedProspect
-          )
+          (prospect) => prospect.id === props.selectedProspect
+        );
         if (props.selectedProspect && props.selectedProspect !== -1) {
           setSelectedProspect(foundProspect);
           props.onChange(foundProspect);
@@ -222,11 +232,13 @@ export default function ProspectSelect(props: {
   };
 
   useEffect(() => {
-    setLoadingProspects(true);
-    searchProspects().then((res) => {
-      setLoadingProspects(false);
-    });
-  }, [searchQuery]);
+    if (props.personaId !== -1) {
+      setLoadingProspects(true);
+      searchProspects().then((res) => {
+        setLoadingProspects(false);
+      });
+    }
+  }, [searchQuery, props.personaId]);
 
   return (
     <>
@@ -256,7 +268,7 @@ export default function ProspectSelect(props: {
               return true;
             }
           },
-          onClickChange: () => {},
+          onClickChange: () => { },
           noChange: !selectedProspect,
         }}
         title={{

@@ -67,6 +67,7 @@ import OutreachSlider from "../../CampaignShell/OutreachSlider";
 import Personalizers from "./Personalizers";
 import Sequences from "./Sequences";
 import { set } from "lodash";
+import SequencesV2 from "./SequencesV2";
 // import ToneAdjuster from "./ToneAdjuster";
 
 interface StatsData {
@@ -216,9 +217,8 @@ export default function CampaignLandingV2(props: PropsType) {
     };
   };
   const userData = useRecoilValue(userDataState);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
 
   const id = props.forcedCampaignId
     ? Number(props.forcedCampaignId)
@@ -262,9 +262,8 @@ export default function CampaignLandingV2(props: PropsType) {
   const [statsData, setStatsData] = useState<StatsData | null>(null);
   const [isEditingCampaignName, setIsEditingCampaignName] = useState(false);
   const [editableText, setEditableText] = useState("");
-  const [showActivateWarningModal, setShowActivateWarningModal] = useState(
-    false
-  );
+  const [showActivateWarningModal, setShowActivateWarningModal] =
+    useState(false);
   const [showToneArea, setShowToneArea] = useState(false);
   const [selectedVoiceSequence, setSelectedVoiceSequence] = useState<any>(null);
   const [voiceBuilderOpened, setVoiceBuilderOpened] = useState(false);
@@ -339,7 +338,7 @@ export default function CampaignLandingV2(props: PropsType) {
   }, [currentProject]);
 
   const checkCanToggleLinkedin = (checkPage?: boolean) => {
-    if (checkPage && window.location.href.includes('selix')) {
+    if (checkPage && window.location.href.includes("selix")) {
       return false;
     }
     if (totalContacts === 0) {
@@ -359,7 +358,10 @@ export default function CampaignLandingV2(props: PropsType) {
       });
       return false;
     }
-    if (linkedinInitialMessages.length === 0) {
+    if (
+      linkedinInitialMessages.length === 0 &&
+      statsData?.template_mode
+    ) {
       showNotification({
         color: "red",
         title: "LinkedIn Channel",
@@ -379,7 +381,7 @@ export default function CampaignLandingV2(props: PropsType) {
   };
 
   const checkCanToggleEmail = (checkPage?: boolean) => {
-    if (checkPage && window.location.href.includes('selix')) {
+    if (checkPage && window.location.href.includes("selix")) {
       return false;
     }
     if (totalContacts === 0) {
@@ -620,15 +622,17 @@ export default function CampaignLandingV2(props: PropsType) {
       campaignId,
       channel,
       active
-    ).then((res) => {
-      !dontrefresh && refetchCampaignStatsData();
-    }).catch((error) => {
-      console.error("Error toggling persona active", error);
-      throw new Error("Error toggling persona active");
-    }
-    ).finally(() => {
-      !dontrefresh && setLoadingStats(false);
-    });
+    )
+      .then((res) => {
+        !dontrefresh && refetchCampaignStatsData();
+      })
+      .catch((error) => {
+        console.error("Error toggling persona active", error);
+        throw new Error("Error toggling persona active");
+      })
+      .finally(() => {
+        !dontrefresh && setLoadingStats(false);
+      });
     return result;
   };
 
@@ -1091,53 +1095,69 @@ export default function CampaignLandingV2(props: PropsType) {
                             let emailSuccess = false;
                             let linkedinSuccess = false;
 
-                            try {
-                              const emailResult = await togglePersonaChannel(id, "email", userToken, true, true);
-                              emailSuccess = true;
-                            } catch (e) {
-                              console.error("Error enabling email channel", e);
-                            }
+                              try {
+                                const emailResult = await togglePersonaChannel(
+                                  id,
+                                  "email",
+                                  userToken,
+                                  true,
+                                  true
+                                );
+                                emailSuccess = true;
+                              } catch (e) {
+                                console.error(
+                                  "Error enabling email channel",
+                                  e
+                                );
+                              }
 
-                            try {
-                              const linkedinResult = await togglePersonaChannel(id, "linkedin", userToken, true, true);
-                              linkedinSuccess = true;
-                            } catch (e) {
-                              console.error("Error enabling linkedin channel", e);
-                            }
+                              try {
+                                const linkedinResult =
+                                  await togglePersonaChannel(
+                                    id,
+                                    "linkedin",
+                                    userToken,
+                                    true,
+                                    true
+                                  );
+                                linkedinSuccess = true;
+                              } catch (e) {
+                                console.error(
+                                  "Error enabling linkedin channel",
+                                  e
+                                );
+                              }
 
-                            if (emailSuccess || linkedinSuccess) {
-                              showSuccessPopup();
-                            }
-                            refetchCampaignStatsData();
-                            setLoadingStats(false);
-                          })();
-
-                        }}
-                      >
-                        Launch Campaign
-                      </Button>
-                    )
-                  )}
-
+                              if (emailSuccess || linkedinSuccess) {
+                                showSuccessPopup();
+                              }
+                              refetchCampaignStatsData();
+                              setLoadingStats(false);
+                            })();
+                          }}
+                        >
+                          Launch Campaign
+                        </Button>
+                      ))}
+                  </Flex>
                 </Flex>
-              </Flex>
-              <Flex align={"center"} w={"100%"} gap={"xs"}>
-                <Flex w={"100%"} align={"center"} gap={"sm"}>
-                  <Text size={"sm"} color="gray" fw={500}>
-                    Sequence Structure:{" "}
-                  </Text>
-                  <Paper
-                    p="md"
-                    sx={{
-                      flex: 1,
-                      justifyContent: "space-between",
-                      textAlign: "center",
-                      // make background a grid of dots
-                      backgroundSize: "20px 20px",
-                    }}
-                    // withBorder
-                  >
-                    {/* <Flex justify="flex-end">
+                <Flex align={"center"} w={"100%"} gap={"xs"}>
+                  <Flex w={"100%"} align={"center"} gap={"sm"}>
+                    <Text size={"sm"} color="gray" fw={500}>
+                      Sequence Structure:{" "}
+                    </Text>
+                    <Paper
+                      p="md"
+                      sx={{
+                        flex: 1,
+                        justifyContent: "space-between",
+                        textAlign: "center",
+                        // make background a grid of dots
+                        backgroundSize: "20px 20px",
+                      }}
+                      // withBorder
+                    >
+                      {/* <Flex justify="flex-end">
                       <Tooltip
                         label={
                           <Text>
@@ -1154,468 +1174,521 @@ export default function CampaignLandingV2(props: PropsType) {
                         </ActionIcon>
                       </Tooltip>
                     </Flex> */}
-                    <Group noWrap spacing={"sm"} w={"100%"}>
-                      <Switch
-                        onChange={() => {
-                          if (!checkCanToggleEmail(true)) {
-                            return;
-                          }
-                          togglePersonaChannel(
-                            id,
-                            "email",
-                            userToken,
-                            !statsData?.email_active
-                          );
-                        }}
-                        checked={statsData?.email_active}
-                        labelPosition="left"
-                        label={
-                          <Flex
-                            gap={1}
-                            align={"center"}
-                            className="hover:cursor-pointer"
-                          >
-                            <IconMailOpened
-                              size={"1.2rem"}
-                              fill="#3B85EF"
-                              color="white"
-                            />
-                            <Text color="#3B85EF" fw={500}>
-                              Email
-                            </Text>
-                          </Flex>
-                        }
-                        w={"100%"}
-                        // miw={160}
-                        styles={{
-                          root: {
-                            minWidth: "9rem !important",
-                            border: "1px solid #D9DEE5",
-                            padding: "7px",
-                            borderRadius: "4px",
-                            background: "white",
-                          },
-                          body: {
-                            width: "100%",
-                            display: "flex",
-                            justifyContent: "space-between",
-                          },
-                        }}
-                      />
-                      <>
-                        <Divider
-                          variant="dashed"
-                          labelPosition="center"
-                          label={
-                            <Hook linkedLeft={false} linkedRight={false} />
-                          }
-                        />
-                        <Select
-                          onChange={(value) => {
-                            if (typeof value === "string") {
-                              updateConnectionType(value, id);
+                      <Group noWrap spacing={"sm"} w={"100%"}>
+                        <Switch
+                          onChange={() => {
+                            if (!checkCanToggleEmail(true)) {
+                              return;
                             }
+                            togglePersonaChannel(
+                              id,
+                              "email",
+                              userToken,
+                              !statsData?.email_active
+                            );
                           }}
-                          size="sm"
-                          value={statsData?.email_to_linkedin_connection}
-                          w={"100%"}
-                          data={[
-                            {
-                              label: "Parallel",
-                              value: "RANDOM",
-                            },
-                            {
-                              label: "📧 Sent-Only",
-                              value: "ALL_PROSPECTS",
-                            },
-                            {
-                              label: "👀 Open-Only",
-                              value: "OPENED_EMAIL_PROSPECTS_ONLY",
-                            },
-                            {
-                              label: "⚡️ Click-Only",
-                              value: "CLICKED_LINK_PROSPECTS_ONLY",
-                            },
-                          ]}
-                          placeholder="Select an event"
-                        />
-                        <Divider
-                          variant="dashed"
-                          labelPosition="center"
+                          checked={statsData?.email_active}
+                          labelPosition="left"
                           label={
-                            <Hook linkedLeft={false} linkedRight={false} />
+                            <Flex
+                              gap={1}
+                              align={"center"}
+                              className="hover:cursor-pointer"
+                            >
+                              <IconMailOpened
+                                size={"1.2rem"}
+                                fill="#3B85EF"
+                                color="white"
+                              />
+                              <Text color="#3B85EF" fw={500}>
+                                Email
+                              </Text>
+                            </Flex>
                           }
+                          w={"100%"}
+                          // miw={160}
+                          styles={{
+                            root: {
+                              minWidth: "9rem !important",
+                              border: "1px solid #D9DEE5",
+                              padding: "7px",
+                              borderRadius: "4px",
+                              background: "white",
+                            },
+                            body: {
+                              width: "100%",
+                              display: "flex",
+                              justifyContent: "space-between",
+                            },
+                          }}
                         />
-                      </>
-                      <Switch
-                        onChange={() => {
-                          if (!checkCanToggleLinkedin(true)) {
-                            return;
+                        <>
+                          <Divider
+                            variant="dashed"
+                            labelPosition="center"
+                            label={
+                              <Hook linkedLeft={false} linkedRight={false} />
+                            }
+                          />
+                          <Select
+                            onChange={(value) => {
+                              if (typeof value === "string") {
+                                updateConnectionType(value, id);
+                              }
+                            }}
+                            size="sm"
+                            value={statsData?.email_to_linkedin_connection}
+                            w={"100%"}
+                            data={[
+                              {
+                                label: "Parallel",
+                                value: "RANDOM",
+                              },
+                              {
+                                label: "📧 Sent-Only",
+                                value: "ALL_PROSPECTS",
+                              },
+                              {
+                                label: "👀 Open-Only",
+                                value: "OPENED_EMAIL_PROSPECTS_ONLY",
+                              },
+                              {
+                                label: "⚡️ Click-Only",
+                                value: "CLICKED_LINK_PROSPECTS_ONLY",
+                              },
+                            ]}
+                            placeholder="Select an event"
+                          />
+                          <Divider
+                            variant="dashed"
+                            labelPosition="center"
+                            label={
+                              <Hook linkedLeft={false} linkedRight={false} />
+                            }
+                          />
+                        </>
+                        <Switch
+                          onChange={() => {
+                            if (!checkCanToggleLinkedin(true)) {
+                              return;
+                            }
+                            togglePersonaChannel(
+                              id,
+                              "linkedin",
+                              userToken,
+                              !statsData?.linkedin_active
+                            );
+                            console.log(
+                              `LinkedIn channel for persona ${id} has been toggled.`
+                            );
+                          }}
+                          checked={statsData?.linkedin_active}
+                          labelPosition="left"
+                          label={
+                            <Flex gap={2} align={"center"}>
+                              <IconBrandLinkedin
+                                size={"1.4rem"}
+                                fill="#3B85EF"
+                                color="white"
+                              />
+                              <Text color="#3B85EF" fw={500}>
+                                Linkedin
+                              </Text>
+                            </Flex>
                           }
-                          togglePersonaChannel(
-                            id,
-                            "linkedin",
-                            userToken,
-                            !statsData?.linkedin_active
-                          );
-                          console.log(
-                            `LinkedIn channel for persona ${id} has been toggled.`
-                          );
-                        }}
-                        checked={statsData?.linkedin_active}
-                        labelPosition="left"
-                        label={
-                          <Flex gap={2} align={"center"}>
-                            <IconBrandLinkedin
-                              size={"1.4rem"}
-                              fill="#3B85EF"
-                              color="white"
+                          w={"100%"}
+                          // miw={160}
+                          styles={{
+                            root: {
+                              minWidth: "9rem !important",
+                              border: "1px solid #D9DEE5",
+                              padding: "7px",
+                              borderRadius: "4px",
+                              background: "white",
+                            },
+                            body: {
+                              width: "100%",
+                              display: "flex",
+                              justifyContent: "space-between",
+                            },
+                          }}
+                        />
+                        <Tooltip label="Swap Linkedin & Email">
+                          <ActionIcon
+                            variant="outline"
+                            color="gray"
+                            onClick={() =>
+                              showNotification({
+                                title: "",
+                                message: "Coming soon!",
+                                color: "blue",
+                                autoClose: 5000,
+                              })
+                            }
+                            className=" min-w-[37px] min-h-[37px] border-[#D9DEE5]"
+                          >
+                            <IconArrowsLeftRight
+                              color="#228be6"
+                              size={"1rem"}
                             />
-                            <Text color="#3B85EF" fw={500}>
-                              Linkedin
-                            </Text>
-                          </Flex>
-                        }
-                        w={"100%"}
-                        // miw={160}
-                        styles={{
-                          root: {
-                            minWidth: "9rem !important",
-                            border: "1px solid #D9DEE5",
-                            padding: "7px",
-                            borderRadius: "4px",
-                            background: "white",
-                          },
-                          body: {
-                            width: "100%",
-                            display: "flex",
-                            justifyContent: "space-between",
-                          },
-                        }}
-                      />
-                      <Tooltip label="Swap Linkedin & Email">
-                        <ActionIcon
-                          variant="outline"
-                          color="gray"
-                          onClick={() =>
-                            showNotification({
-                              title: "",
-                              message: "Coming soon!",
-                              color: "blue",
-                              autoClose: 5000,
-                            })
-                          }
-                          className=" min-w-[37px] min-h-[37px] border-[#D9DEE5]"
-                        >
-                          <IconArrowsLeftRight color="#228be6" size={"1rem"} />
-                        </ActionIcon>
-                      </Tooltip>
-                    </Group>
-                  </Paper>
+                          </ActionIcon>
+                        </Tooltip>
+                      </Group>
+                    </Paper>
+                  </Flex>
                 </Flex>
               </Flex>
-            </Flex>
-            {!window.location.href.includes('selix') && <Flex gap={"sm"} w={"100%"} justify={"center"} p={"lg"}>
-              <Paper w={"100%"} withBorder>
-                {loadingStats || !statsData ? (
-                  <Flex direction="row" align="center" w="100%" my="md">
-                    <Flex direction="column" align="center" w="100%" my="md">
-                      <Skeleton height={50} width="80%" />
-                    </Flex>
-                    <Flex direction="column" align="center" w="100%" my="md">
-                      <Skeleton height={50} width="80%" />
-                    </Flex>
-                    <Flex direction="column" align="center" w="100%" my="md">
-                      <Skeleton height={50} width="80%" />
-                    </Flex>
-                    <Flex direction="column" align="center" w="100%" my="md">
-                      <Skeleton height={50} width="80%" />
-                    </Flex>
-                    <Flex direction="column" align="center" w="100%" my="md">
-                      <Skeleton height={50} width="80%" />
-                    </Flex>
+              {!window.location.href.includes("selix") && (
+                <Flex gap={"sm"} w={"100%"} justify={"center"} p={"lg"}>
+                  <Paper w={"100%"} withBorder>
+                    {loadingStats || !statsData ? (
+                      <Flex direction="row" align="center" w="100%" my="md">
+                        <Flex
+                          direction="column"
+                          align="center"
+                          w="100%"
+                          my="md"
+                        >
+                          <Skeleton height={50} width="80%" />
+                        </Flex>
+                        <Flex
+                          direction="column"
+                          align="center"
+                          w="100%"
+                          my="md"
+                        >
+                          <Skeleton height={50} width="80%" />
+                        </Flex>
+                        <Flex
+                          direction="column"
+                          align="center"
+                          w="100%"
+                          my="md"
+                        >
+                          <Skeleton height={50} width="80%" />
+                        </Flex>
+                        <Flex
+                          direction="column"
+                          align="center"
+                          w="100%"
+                          my="md"
+                        >
+                          <Skeleton height={50} width="80%" />
+                        </Flex>
+                        <Flex
+                          direction="column"
+                          align="center"
+                          w="100%"
+                          my="md"
+                        >
+                          <Skeleton height={50} width="80%" />
+                        </Flex>
+                      </Flex>
+                    ) : (
+                      <Flex
+                        data-tour="campaign-stats"
+                        align={"center"}
+                        justify={"space-between"}
+                        h={"100%"}
+                        w="100%"
+                      >
+                        <Box
+                          p={"lg"}
+                          w={"100%"}
+                          h={"100%"}
+                          sx={{
+                            backgroundColor: "",
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "#F7FDFF",
+                            },
+                          }}
+                          onClick={() => {
+                            setValue("sent");
+                            handleModal(
+                              "sent",
+                              id,
+                              currentProject?.name || "",
+                              analyticsData
+                            );
+                          }}
+                        >
+                          <Flex align={"center"} gap={"xs"}>
+                            <IconSend
+                              size={"0.9rem"}
+                              color="#3B85EF"
+                              className="mb-[2px]"
+                            />
+                            <Text fw={400} size={"sm"}>
+                              Sent
+                            </Text>
+                          </Flex>
+                          <Flex align={"center"} gap={"sm"}>
+                            {loadingAnalytics ? (
+                              <Loader color="gray" variant="oval" size="sm" />
+                            ) : (
+                              <>
+                                <Text fz={24}>{analyticsData.num_sent}</Text>
+                                <Badge color={"#3B85EF"} size="xs">
+                                  {`${(100).toFixed(0)}%`}
+                                </Badge>
+                              </>
+                            )}
+                          </Flex>
+                        </Box>
+                        <Divider orientation="vertical" />
+                        <Box
+                          p={"lg"}
+                          w={"100%"}
+                          h={"100%"}
+                          sx={{
+                            backgroundColor: "",
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "#FFF7FB",
+                            },
+                          }}
+                          onClick={() => {
+                            setValue("open");
+                            handleModal(
+                              "open",
+                              id,
+                              currentProject?.name || "",
+                              analyticsData
+                            );
+                          }}
+                        >
+                          <Flex align={"center"} gap={6}>
+                            <IconChecks
+                              size={"0.9rem"}
+                              color="pink"
+                              className="mb-[2px]"
+                            />
+                            <Text fw={400} size={"sm"}>
+                              Open
+                            </Text>
+                          </Flex>
+                          <Flex align={"center"} gap={"sm"}>
+                            {loadingAnalytics ? (
+                              <Loader color="gray" variant="oval" size="sm" />
+                            ) : (
+                              <>
+                                <Text fz={24}>{analyticsData.num_opens}</Text>
+                                <Badge color="pink" size="xs">
+                                  {`${(
+                                    (analyticsData.num_opens /
+                                      (analyticsData.num_sent + 0.0001)) *
+                                    100
+                                  ).toFixed(0)}%`}
+                                </Badge>
+                              </>
+                            )}
+                          </Flex>
+                        </Box>
+                        <Divider orientation="vertical" />
+                        <Box
+                          p={"lg"}
+                          w={"100%"}
+                          h={"100%"}
+                          sx={{
+                            backgroundColor: "",
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "#FFF9F2",
+                            },
+                          }}
+                          onClick={() => {
+                            setValue("reply");
+                            handleModal(
+                              "reply",
+                              id,
+                              currentProject?.name || "",
+                              analyticsData
+                            );
+                          }}
+                        >
+                          <Flex align={"center"} gap={6}>
+                            <IconMessageCheck
+                              size={"0.9rem"}
+                              color="orange"
+                              className="mb-[2px]"
+                            />
+                            <Text fw={400} size={"sm"}>
+                              Reply
+                            </Text>
+                          </Flex>
+                          <Flex align={"center"} gap={"sm"}>
+                            {loadingAnalytics ? (
+                              <Loader color="gray" variant="oval" size="sm" />
+                            ) : (
+                              <>
+                                <Text fz={24}>{analyticsData.num_replies}</Text>
+                                <Badge color="orange" size="xs">
+                                  {`${(
+                                    (analyticsData.num_replies /
+                                      (analyticsData.num_opens + 0.0001)) *
+                                    100
+                                  ).toFixed(0)}%`}
+                                </Badge>
+                              </>
+                            )}
+                          </Flex>
+                        </Box>
+                        <Divider orientation="vertical" />
+                        <Box
+                          p={"lg"}
+                          w={"100%"}
+                          h={"100%"}
+                          sx={{
+                            backgroundColor: "",
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "#F4FBF5",
+                            },
+                          }}
+                          onClick={() => {
+                            setValue("pos_reply");
+                            handleModal(
+                              "pos_reply",
+                              id,
+                              currentProject?.name || "",
+                              analyticsData
+                            );
+                          }}
+                        >
+                          <Flex align={"center"} gap={6}>
+                            <IconMessageCheck
+                              size={"0.9rem"}
+                              color="green"
+                              className="mb-[2px]"
+                            />
+                            <Text fw={400} size={"sm"}>
+                              (+) Reply
+                            </Text>
+                          </Flex>
+                          <Flex align={"center"} gap={"sm"}>
+                            {loadingAnalytics ? (
+                              <Loader color="gray" variant="oval" size="sm" />
+                            ) : (
+                              <>
+                                <Text fz={24}>
+                                  {analyticsData.num_pos_replies}
+                                </Text>
+                                <Badge color="green" size="xs">
+                                  {`${(
+                                    (analyticsData.num_pos_replies /
+                                      (analyticsData.num_replies + 0.0001)) *
+                                    100
+                                  ).toFixed(0)}%`}
+                                </Badge>
+                              </>
+                            )}
+                          </Flex>
+                        </Box>
+                        <Divider orientation="vertical" />
+                        <Box
+                          p={"lg"}
+                          w={"100%"}
+                          h={"100%"}
+                          sx={{
+                            backgroundColor: "",
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "#F7FDFF",
+                            },
+                          }}
+                          onClick={() => {
+                            setValue("demo");
+                            handleModal("demo", id, "aaaa", analyticsData);
+                          }}
+                        >
+                          <Flex align={"center"} gap={6}>
+                            <IconCalendar
+                              size={"0.9rem"}
+                              color={"#3B85EF"}
+                              className="mb-[2px]"
+                            />
+                            <Text fw={400}>Demo</Text>
+                          </Flex>
+                          <Flex align={"center"} gap={"sm"}>
+                            {loadingAnalytics ? (
+                              <Loader color="gray" variant="oval" size="sm" />
+                            ) : (
+                              <>
+                                <Text fz={24}>{analyticsData.num_demos}</Text>
+                                <Badge color="blue" size="xs">
+                                  {`${(
+                                    (analyticsData.num_demos /
+                                      (analyticsData.num_pos_replies +
+                                        0.0001)) *
+                                    100
+                                  ).toFixed(0)}%`}
+                                </Badge>
+                              </>
+                            )}
+                          </Flex>
+                        </Box>
+                      </Flex>
+                    )}
+                  </Paper>
+                  <Flex data-tour="outreach-volume" w={"60%"}>
+                    <OutreachSlider
+                      testingVolume={testingVolume}
+                      setTestingVolume={setTestingVolume}
+                      totalContacts={totalContacts}
+                      userToken={userToken}
+                      id={id}
+                      fetchCampaignStats={fetchCampaignStats}
+                      setLoadingStats={setLoadingStats}
+                    />
                   </Flex>
-                ) : (
-                  <Flex
-                    data-tour="campaign-stats"
-                    align={"center"}
-                    justify={"space-between"}
-                    h={"100%"}
-                    w="100%"
-                  >
-                    <Box
-                      p={"lg"}
-                      w={"100%"}
-                      h={"100%"}
-                      sx={{
-                        backgroundColor: "",
-                        cursor: "pointer",
-                        "&:hover": {
-                          backgroundColor: "#F7FDFF",
-                        },
-                      }}
-                      onClick={() => {
-                        setValue("sent");
-                        handleModal(
-                          "sent",
-                          id,
-                          currentProject?.name || "",
-                          analyticsData
-                        );
-                      }}
-                    >
-                      <Flex align={"center"} gap={"xs"}>
-                        <IconSend
-                          size={"0.9rem"}
-                          color="#3B85EF"
-                          className="mb-[2px]"
-                        />
-                        <Text fw={400} size={"sm"}>
-                          Sent
-                        </Text>
-                      </Flex>
-                      <Flex align={"center"} gap={"sm"}>
-                        {loadingAnalytics ? (
-                          <Loader color="gray" variant="oval" size="sm" />
-                        ) : (
-                          <>
-                            <Text fz={24}>{analyticsData.num_sent}</Text>
-                            <Badge color={"#3B85EF"} size="xs">
-                              {`${(100).toFixed(0)}%`}
-                            </Badge>
-                          </>
-                        )}
-                      </Flex>
-                    </Box>
-                    <Divider orientation="vertical" />
-                    <Box
-                      p={"lg"}
-                      w={"100%"}
-                      h={"100%"}
-                      sx={{
-                        backgroundColor: "",
-                        cursor: "pointer",
-                        "&:hover": {
-                          backgroundColor: "#FFF7FB",
-                        },
-                      }}
-                      onClick={() => {
-                        setValue("open");
-                        handleModal(
-                          "open",
-                          id,
-                          currentProject?.name || "",
-                          analyticsData
-                        );
-                      }}
-                    >
-                      <Flex align={"center"} gap={6}>
-                        <IconChecks
-                          size={"0.9rem"}
-                          color="pink"
-                          className="mb-[2px]"
-                        />
-                        <Text fw={400} size={"sm"}>
-                          Open
-                        </Text>
-                      </Flex>
-                      <Flex align={"center"} gap={"sm"}>
-                        {loadingAnalytics ? (
-                          <Loader color="gray" variant="oval" size="sm" />
-                        ) : (
-                          <>
-                            <Text fz={24}>{analyticsData.num_opens}</Text>
-                            <Badge color="pink" size="xs">
-                              {`${(
-                                (analyticsData.num_opens /
-                                  (analyticsData.num_sent + 0.0001)) *
-                                100
-                              ).toFixed(0)}%`}
-                            </Badge>
-                          </>
-                        )}
-                      </Flex>
-                    </Box>
-                    <Divider orientation="vertical" />
-                    <Box
-                      p={"lg"}
-                      w={"100%"}
-                      h={"100%"}
-                      sx={{
-                        backgroundColor: "",
-                        cursor: "pointer",
-                        "&:hover": {
-                          backgroundColor: "#FFF9F2",
-                        },
-                      }}
-                      onClick={() => {
-                        setValue("reply");
-                        handleModal(
-                          "reply",
-                          id,
-                          currentProject?.name || "",
-                          analyticsData
-                        );
-                      }}
-                    >
-                      <Flex align={"center"} gap={6}>
-                        <IconMessageCheck
-                          size={"0.9rem"}
-                          color="orange"
-                          className="mb-[2px]"
-                        />
-                        <Text fw={400} size={"sm"}>
-                          Reply
-                        </Text>
-                      </Flex>
-                      <Flex align={"center"} gap={"sm"}>
-                        {loadingAnalytics ? (
-                          <Loader color="gray" variant="oval" size="sm" />
-                        ) : (
-                          <>
-                            <Text fz={24}>{analyticsData.num_replies}</Text>
-                            <Badge color="orange" size="xs">
-                              {`${(
-                                (analyticsData.num_replies /
-                                  (analyticsData.num_opens + 0.0001)) *
-                                100
-                              ).toFixed(0)}%`}
-                            </Badge>
-                          </>
-                        )}
-                      </Flex>
-                    </Box>
-                    <Divider orientation="vertical" />
-                    <Box
-                      p={"lg"}
-                      w={"100%"}
-                      h={"100%"}
-                      sx={{
-                        backgroundColor: "",
-                        cursor: "pointer",
-                        "&:hover": {
-                          backgroundColor: "#F4FBF5",
-                        },
-                      }}
-                      onClick={() => {
-                        setValue("pos_reply");
-                        handleModal(
-                          "pos_reply",
-                          id,
-                          currentProject?.name || "",
-                          analyticsData
-                        );
-                      }}
-                    >
-                      <Flex align={"center"} gap={6}>
-                        <IconMessageCheck
-                          size={"0.9rem"}
-                          color="green"
-                          className="mb-[2px]"
-                        />
-                        <Text fw={400} size={"sm"}>
-                          (+) Reply
-                        </Text>
-                      </Flex>
-                      <Flex align={"center"} gap={"sm"}>
-                        {loadingAnalytics ? (
-                          <Loader color="gray" variant="oval" size="sm" />
-                        ) : (
-                          <>
-                            <Text fz={24}>{analyticsData.num_pos_replies}</Text>
-                            <Badge color="green" size="xs">
-                              {`${(
-                                (analyticsData.num_pos_replies /
-                                  (analyticsData.num_replies + 0.0001)) *
-                                100
-                              ).toFixed(0)}%`}
-                            </Badge>
-                          </>
-                        )}
-                      </Flex>
-                    </Box>
-                    <Divider orientation="vertical" />
-                    <Box
-                      p={"lg"}
-                      w={"100%"}
-                      h={"100%"}
-                      sx={{
-                        backgroundColor: "",
-                        cursor: "pointer",
-                        "&:hover": {
-                          backgroundColor: "#F7FDFF",
-                        },
-                      }}
-                      onClick={() => {
-                        setValue("demo");
-                        handleModal("demo", id, "aaaa", analyticsData);
-                      }}
-                    >
-                      <Flex align={"center"} gap={6}>
-                        <IconCalendar
-                          size={"0.9rem"}
-                          color={"#3B85EF"}
-                          className="mb-[2px]"
-                        />
-                        <Text fw={400}>Demo</Text>
-                      </Flex>
-                      <Flex align={"center"} gap={"sm"}>
-                        {loadingAnalytics ? (
-                          <Loader color="gray" variant="oval" size="sm" />
-                        ) : (
-                          <>
-                            <Text fz={24}>{analyticsData.num_demos}</Text>
-                            <Badge color="blue" size="xs">
-                              {`${(
-                                (analyticsData.num_demos /
-                                  (analyticsData.num_pos_replies + 0.0001)) *
-                                100
-                              ).toFixed(0)}%`}
-                            </Badge>
-                          </>
-                        )}
-                      </Flex>
-                    </Box>
-                  </Flex>
-                )}
-              </Paper>
-              <Flex data-tour="outreach-volume" w={"60%"}>
-                <OutreachSlider
-                  testingVolume={testingVolume}
-                  setTestingVolume={setTestingVolume}
-                  totalContacts={totalContacts}
-                  userToken={userToken}
-                  id={id}
-                  fetchCampaignStats={fetchCampaignStats}
-                  setLoadingStats={setLoadingStats}
-                />
-              </Flex>
-            </Flex>}
-            {!loadingContacts && activeStep !== 3 && (
-              <Box
-                data-tour="campaign-progress"
-                px={"xl"}
-                py={"md"}
-                bg={"#FAFAFA"}
-              >
-                {!window.location.href.includes('selix') && <Stepper active={activeStep} size="xs" iconSize={28}>
-                  <Stepper.Step label="Add Contacts" />
-                  <Stepper.Step label="Setup Templates" />
-                  <Stepper.Step label="Add Personalizers" />
-                </Stepper>}
-              </Box>
-            )}
-          </Flex>) : (
-              <Flex direction="column" align="center" justify="center" gap="sm" style={{ textAlign: 'center', width: '100%', paddingTop: '16px', paddingBottom: '16px' }} id="success-popup">
-                <Box style={{ margin: '0 auto' }}>
-                  <IconCircleCheck size={48} color="green" />
+                </Flex>
+              )}
+              {!loadingContacts && activeStep !== 3 && (
+                <Box
+                  data-tour="campaign-progress"
+                  px={"xl"}
+                  py={"md"}
+                  bg={"#FAFAFA"}
+                >
+                  {!window.location.href.includes("selix") && (
+                    <Stepper active={activeStep} size="xs" iconSize={28}>
+                      <Stepper.Step label="Add Contacts" />
+                      <Stepper.Step label="Setup Templates" />
+                      <Stepper.Step label="Add Personalizers" />
+                    </Stepper>
+                  )}
                 </Box>
-                <Text size="lg" weight={500}>Amazing!</Text>
-                <Text size="md">Campaign launched Successfully</Text>
-                <Text size="sm">
-                  Campaign: <Anchor href="#" target="_blank">{currentProject?.name}</Anchor>
-                </Text>
-              </Flex>
+              )}
+            </Flex>
+          ) : (
+            <Flex
+              direction="column"
+              align="center"
+              justify="center"
+              gap="sm"
+              style={{
+                textAlign: "center",
+                width: "100%",
+                paddingTop: "16px",
+                paddingBottom: "16px",
+              }}
+              id="success-popup"
+            >
+              <Box style={{ margin: "0 auto" }}>
+                <IconCircleCheck size={48} color="green" />
+              </Box>
+              <Text size="lg" weight={500}>
+                Amazing!
+              </Text>
+              <Text size="md">Campaign launched Successfully</Text>
+              <Text size="sm">
+                Campaign:{" "}
+                <Anchor href="#" target="_blank">
+                  {currentProject?.name}
+                </Anchor>
+              </Text>
+            </Flex>
           )}
         </Flex>
       )}
@@ -1693,6 +1766,7 @@ export default function CampaignLandingV2(props: PropsType) {
               <Paper></Paper>
             </Flex>
             <Flex direction={"column"} gap={"md"} w={"80%"}>
+              {/* <SequencesV2 /> */}
               <Sequences
                 setSequences={setSequences}
                 // emailSequenceData={emailSequenceData}

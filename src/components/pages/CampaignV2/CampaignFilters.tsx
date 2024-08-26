@@ -414,7 +414,7 @@ const CampaignFilters = function({
           onClick={() => scoreCampaignFilters()}
           disabled={scoreLoading}
         >
-          {scoreLoading ? <Loader /> : "Score"}
+          {scoreLoading ? <Loader /> : `Score (${selectedContacts.size})`}
         </Button>
         <ScrollArea h={600} m={0}>
           <Accordion defaultValue="individual">

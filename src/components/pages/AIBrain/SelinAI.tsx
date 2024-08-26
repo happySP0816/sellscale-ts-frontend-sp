@@ -5,6 +5,7 @@ import {
   userTokenState,
 } from "@atoms/userAtoms";
 import posthog from "posthog-js";
+import { TransformedSegment } from "@pages/SegmentV3/SegmentV3";
 
 import {
   ActionIcon,
@@ -114,6 +115,7 @@ import { SubjectLineTemplate } from "src";
 import { ArchetypeFilters } from "@pages/CampaignV2/ArchetypeFilterModal";
 import SellScaleAssistant from "./SellScaleAssistant";
 import Personalizers from "@pages/CampaignV2/Personalizers";
+import ContactAccountFilterModal from "@modals/ContactAccountFilterModal";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit }, ref) => {
@@ -2716,6 +2718,7 @@ const PlannerComponent = ({
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
   const [selectedRewindImage, setSelectedRewindImage] = useState<string>("");
+  const [segment, setSegment] = useState<TransformedSegment | undefined>(undefined);
 
   const campaignId = threads.find((thread) => thread.id === currentSessionId)
     ?.memory?.campaign_id;
@@ -2724,12 +2727,43 @@ const PlannerComponent = ({
     (async () => {
       if (campaignId) {
         const project = await getFreshCurrentProject(userToken, campaignId);
+
+        const res = await getSegments();
+        setSegment(res[0] || undefined);
+
         setCurrentProject(project);
         //show the 'launch campaign' task if a campaign is attached
         setOpenedTaskIndex(tasks.length - 1);
       }
     })();
   }, [campaignId]);
+
+
+  const getSegments = async (
+    includeAllInClient: boolean = true,
+    tagFilter: boolean = false
+  ) => {
+    const url = new URL(`${API_URL}/segment/all`);
+    if (includeAllInClient) {
+      if (currentProject?.id !== undefined) {
+        url.searchParams.append("archetype_id", currentProject.id.toString());
+      }
+      url.searchParams.append("include_all_in_client", "true");
+    }
+    if (tagFilter) {
+      url.searchParams.append("tag_filter", "true");
+    }
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    const data = await response.json();
+    // setIsLoading(false);
+    return data.segments;
+  };
 
   return (
     <Paper p={"sm"} withBorder radius={"sm"}>
@@ -2962,8 +2996,10 @@ const PlannerComponent = ({
                       />
                     ) : (
                       <TaskRenderer
+                        // key={currentProject?.id}
                         task={task}
                         counter={counter}
+                        segment={segment}
                         // messages={messages}
                         threads={threads}
                         currentSessionId={currentSessionId}
@@ -2982,6 +3018,7 @@ const PlannerComponent = ({
 const TaskRenderer = ({
   task,
   counter,
+  segment,
   // messages,
   threads,
   currentSessionId,
@@ -2991,6 +3028,7 @@ const TaskRenderer = ({
   // messages: MessageType[],
   threads: ThreadType[];
   currentSessionId: Number | null;
+  segment?: TransformedSegment | undefined;
 }) => {
   const currentProject = useRecoilValue(currentProjectState);
   const [sequences, setSequences] = useState<any[]>([]);
@@ -3035,6 +3073,8 @@ const TaskRenderer = ({
       );
     case "REVIEW_PROSPECTS":
       return <ArchetypeFilters hideFeature={true} />;
+    case "REVIEW_COMPANIES":
+      return <ContactAccountFilterModal key={currentProject?.id} segment={segment} showContactAccountFilterModal={true} setShowContactAccountFilterModal={() => {}} isModal={false}/>;
     case "VIEW_SEQUENCE":
       return (
         <Sequences

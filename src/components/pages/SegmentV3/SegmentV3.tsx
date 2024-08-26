@@ -734,6 +734,7 @@ export default function SegmentV3(props: PropsType) {
         showContactAccountFilterModal={showViewProspectsModal}
         setShowContactAccountFilterModal={setShowViewProspectsModal}
         segment={data.find(item => item.id === selectedSegmentId)}
+        isModal={true}
       />
       {/*<Modal*/}
       {/*  opened={showViewProspectsModal}*/}

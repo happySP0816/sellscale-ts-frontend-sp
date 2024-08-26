@@ -3021,6 +3021,7 @@ const TaskRenderer = ({
     case "VIEW_SEQUENCE":
       return (
         <Sequences
+          forcedCampaignId={currentProject?.id}
           setSequences={setSequences}
           setEmailSubjectLines={setEmailSubjectLines}
           emailSubjectLines={emailSubjectLines}

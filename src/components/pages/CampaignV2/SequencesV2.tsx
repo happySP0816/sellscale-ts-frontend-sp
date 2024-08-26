@@ -31,11 +31,12 @@ import {
 } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { SubjectLineTemplate } from "src";
+import { ProspectShallow, SubjectLineTemplate } from "src";
 import { modals, openContextModal } from "@mantine/modals";
 import { fetchCampaignSequences } from "@utils/requests/campaignOverview";
 import { Contact } from "./ContactsInfiniteScroll";
 import { IconSparkles } from "@tabler/icons-react";
+import ProspectSelect from "@common/library/ProspectSelect";
 
 export default function SequencesV2() {
   const userToken = useRecoilValue(userTokenState);
@@ -112,8 +113,8 @@ export default function SequencesV2() {
         ? "email"
         : (linkedinSequenceData && linkedinSequenceData.length > 0) ||
           (linkedinInitialMessages && linkedinInitialMessages.length > 0)
-        ? "linkedin"
-        : "email"
+          ? "linkedin"
+          : "email"
     );
   }, [linkedinSequenceData, emailSequenceData, linkedinInitialMessages]);
 
@@ -130,12 +131,13 @@ export default function SequencesV2() {
       setSelectedProspect(campaignContacts[selectedProspectIndex]);
       setProspectsLoading(false);
     }
-  }, [campaignContacts, selectedProspect]);
+  }, [campaignContacts, selectedProspectIndex]);
 
   console.log("emailSequenceData: ", emailSequenceData);
   console.log("linkedinSequenceData: ", linkedinSequenceData);
   console.log("sequences: ", sequences);
   console.log("campaignContacts", campaignContacts);
+  console.log("selectedProspects: ", selectedProspect);
 
   const refetchSequenceData = async (clientArchetypeId: number) => {
     setLoadingSequences(true);
@@ -164,10 +166,10 @@ export default function SequencesV2() {
               sequence.overall_status === "PROSPECTED"
                 ? 0
                 : sequence.overall_status === "ACCEPTED"
-                ? 10
-                : sequence.overall_status === "BUMPED"
-                ? 20
-                : 0;
+                  ? 10
+                  : sequence.overall_status === "BUMPED"
+                    ? 20
+                    : 0;
             bumpedCount += statusAdjustment;
             if (!acc[bumpedCount]) acc[bumpedCount] = [];
             acc[bumpedCount].push(sequence);
@@ -238,6 +240,21 @@ export default function SequencesV2() {
       });
   };
 
+  // prospect selection onchange handler
+  const prospectOnChangeHandler = function(
+    prospect: ProspectShallow | undefined
+  ) {
+    if (prospect) {
+      const foundProspect = campaignContacts.find((p) => p.id === prospect.id);
+
+      if (foundProspect) {
+        const index = campaignContacts.findIndex(
+          (p) => p.id === foundProspect.id
+        );
+        setSelectedProspectIndex(index);
+      }
+    }
+  };
   // We also want to move voice related stuff into this Sequence Widget
 
   return (
@@ -378,10 +395,16 @@ export default function SequencesV2() {
         <Card.Section withBorder px={"xs"} py={"xs"}>
           <Flex align={"center"} justify={"space-between"} pos={"relative"}>
             <LoadingOverlay visible={prospectsLoading} />
-            <Flex align={"center"} justify={"space-between"} gap={'4px'}>
+            <Flex align={"center"} justify={"space-between"} gap={"4px"}>
               <ActionIcon disabled={selectedProspectIndex === 0} radius={"xl"}>
                 <IconArrowLeft size={16} />
               </ActionIcon>
+              <ProspectSelect
+                personaId={currentProject?.id ?? -1}
+                selectedProspect={selectedProspect?.id}
+                isSequenceV2={true}
+                onChange={prospectOnChangeHandler}
+              />
               <Button variant={"outline"} size={"xs"}>
                 <Flex
                   align={"center"}
@@ -402,7 +425,9 @@ export default function SequencesV2() {
                   </Text>
                 </Flex>
               </Button>
-              <ActionIcon disabled={selectedProspectIndex === campaignContacts.length - 1}>
+              <ActionIcon
+                disabled={selectedProspectIndex === campaignContacts.length - 1}
+              >
                 <IconArrowRight size={16} />
               </ActionIcon>
             </Flex>

@@ -1036,9 +1036,11 @@ export default function SelinAI() {
       }
     }, 3000); // Adjust the debounce delay as needed
 
+    // Reset the timer to ensure it makes requests again
     return () => {
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
+        debounceTimeoutRef.current = null;
       }
     };
   }, [prompt]);

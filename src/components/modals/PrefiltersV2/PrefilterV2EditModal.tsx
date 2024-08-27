@@ -914,7 +914,7 @@ const mergeSavedQueries = async (saved_query_id: number) => {
                   label="Included"
                   placeholder="Select options"
                   value={Array.isArray(locations) ? locations : []}
-                  // setValue={setLocations}
+                  setValue={setLocations}
                   data={Array.isArray(locations) ? locations.filter(option => option) : []}
                   setData={setLocations}
                 />

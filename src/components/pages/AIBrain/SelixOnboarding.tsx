@@ -24,15 +24,16 @@ import {
 } from "@tabler/icons";
 import { useEffect, useRef, useState } from "react";
 import SellScaleAssistant from "./SellScaleAssistant";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { useNavigate } from "react-router-dom";
 import posthog from "posthog-js";
 import Logo2 from "@assets/images/icon.svg";
 import { API_URL } from "@constants/data";
+import { setUser } from "@sentry/react";
 
 export default function SelixOnboarding() {
-  const userData = useRecoilValue(userDataState);
+  const [userData, setUserData] = useRecoilState(userDataState);
 
   const [tagline, setTagLine] = useState(userData.client?.tagline || "");
   const [description, setDescription] = useState(
@@ -435,6 +436,36 @@ export default function SelixOnboarding() {
                     prefilterIDref.current,
                     prefilter?.segment_description
                   );
+                  fetch(`${API_URL}/client/`, {
+                    method: "PATCH",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${userToken}`,
+                    },
+                    body: JSON.stringify({
+                      tagline: tagline,
+                      description: description,
+                    }),
+                  })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      if (data.status === "success") {
+                        console.log("Client data updated successfully:", data);
+                      } else {
+                        console.error("Failed to update client data:", data);
+                      }
+                    })
+                    .catch((error) => {
+                      console.error("Error updating client data:", error);
+                    });
+                    setUserData({
+                      ...userData,
+                      client: {
+                        ...userData.client,
+                        tagline: tagline,
+                        description: description,
+                      },
+                    });
                   navigate("/selix");
                 }
                 if (step < 3) setStep(step + 1);

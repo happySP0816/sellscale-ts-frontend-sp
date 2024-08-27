@@ -570,6 +570,7 @@ const mergeSavedQueries = async (saved_query_id: number) => {
         },
         body: JSON.stringify({
           company_names: [query],
+          fuzzy: true,
         }),
       });
 
@@ -607,6 +608,7 @@ const mergeSavedQueries = async (saved_query_id: number) => {
           "Authorization": `Bearer ${userToken}`,
         },
         body: JSON.stringify({
+          fuzzy: false,
           company_names: companyName.length ? companyName.split("\n") : [],
           company_urls: companyDomain.length ? companyDomain.split("\n") : [],
           company_prompt: aiPrompt.length ? aiPrompt : "",

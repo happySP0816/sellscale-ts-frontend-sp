@@ -237,7 +237,7 @@ export default function SideNavbar(props: {}) {
       position="apart"
       sx={{
         flexDirection: "column",
-        zIndex: 5000,
+        zIndex: 9,
       }}
       className={classes.navbar}
       w={NAV_BAR_SIDE_WIDTH}

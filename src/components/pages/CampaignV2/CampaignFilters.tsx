@@ -1250,57 +1250,6 @@ const CampaignFilters = function({
                       }}
                     />
                   </ItemCollapse>
-                  <ItemCollapse title={"Experience"} numberOfItem={0}>
-                    <Flex direction="column">
-                      <Title size={"14px"} fw={"500"}>
-                        Years of Experience
-                      </Title>
-                      <Flex
-                        justify={"space-between"}
-                        align={"center"}
-                        mt={"0.2rem"}
-                        w={"100%"}
-                        gap={"xs"}
-                        maw={"30vw"}
-                        direction={"column"}
-                      >
-                        <NumberInput
-                          value={individual_years_of_experience_start ?? ""}
-                          label={"min"}
-                          placeholder="Min"
-                          hideControls
-                          onChange={(value) => {
-                            if (value === "") {
-                              setIndividualYearsOfExperienceStart(null);
-                            } else {
-                              setIndividualYearsOfExperienceStart(+value);
-                            }
-                          }}
-                        />
-                        <NumberInput
-                          value={individual_years_of_experience_end ?? ""}
-                          label={"max"}
-                          placeholder="Max"
-                          hideControls
-                          onChange={(value) => {
-                            if (value === "") {
-                              setIndividualYearsOfExperienceEnd(null);
-                            } else {
-                              setIndividualYearsOfExperienceEnd(+value);
-                            }
-                          }}
-                        />
-                      </Flex>
-                      <Button
-                        mt={"0.5rem"}
-                        size="sm"
-                        ml={"auto"}
-                        onClick={() => setIndividualYearsOfExperienceEnd(100)}
-                      >
-                        Max
-                      </Button>
-                    </Flex>
-                  </ItemCollapse>
                 </Flex>
               </Accordion.Panel>
             </Accordion.Item>

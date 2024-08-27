@@ -43,7 +43,12 @@ import { showNotification } from "@mantine/notifications";
 import { moveToUnassigned } from "@utils/requests/moveToUnassigned";
 import { ProspectICP } from "@common/persona/Pulse";
 import BulkActions from "@common/persona/BulkActions_new";
-import { IconExternalLink, IconFileDownload, IconMagnet, IconTrash } from "@tabler/icons-react";
+import {
+  IconExternalLink,
+  IconFileDownload,
+  IconMagnet,
+  IconTrash,
+} from "@tabler/icons-react";
 import { openConfirmModal } from "@mantine/modals";
 import { CSVLink } from "react-csv";
 import CustomResearchPointCard from "@common/persona/CustomResearchPointCard";
@@ -61,7 +66,7 @@ export interface DataRow {
   [key: string]: any;
 }
 
-const ArchetypeFilterModal = function({
+const ArchetypeFilterModal = function ({
   showContactAccountFilterModal,
   setShowContactAccountFilterModal,
 }: ContactAccountFilterModalProps) {
@@ -73,6 +78,7 @@ const ArchetypeFilterModal = function({
       opened={showContactAccountFilterModal}
       size={"90%"}
       style={{ maxHeight: "700px", minWidth: "2000px" }}
+      zIndex={10}
       title={
         <Flex justify={"space-between"} gap={"36px"}>
           <Title order={3} style={{ width: "600px" }}>
@@ -88,7 +94,7 @@ const ArchetypeFilterModal = function({
   );
 };
 
-export const ArchetypeFilters = function({
+export const ArchetypeFilters = function ({
   hideFeature = false, //for selix
 }: {
   hideFeature?: boolean; // for selix
@@ -305,11 +311,11 @@ export const ArchetypeFilters = function({
           a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
             ? -1
             : !a.icp_fit_reason_v2 && b.icp_fit_reason_v2
-              ? 1
-              : !a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
-                ? 0
-                : Object.keys(b.icp_fit_reason_v2).length -
-                Object.keys(a.icp_fit_reason_v2).length;
+            ? 1
+            : !a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
+            ? 0
+            : Object.keys(b.icp_fit_reason_v2).length -
+              Object.keys(a.icp_fit_reason_v2).length;
 
         if (individual_fit_reason !== 0) {
           return individual_fit_reason;
@@ -626,18 +632,13 @@ export const ArchetypeFilters = function({
       return {
         header: item.title,
         accessorKey: item.key,
-        mantineTableHeadCellProps: {
-          style: {
-            borderRight: "1px solid #ddd", // Add border to the right of the header cell
-          },
-        },
-        mantineTableBodyCellProps: {
-          style: {
-            borderRight: "1px solid #ddd", // Add border to the right of the body cell
-          },
-        },
         size:
-          item.key === "icp_fit_score" || item.key === "full_name" || item.key === "company" ? 125 : 250,
+          item.key === "icp_fit_score" ||
+          item.key === "full_name" ||
+          item.key === "company" ||
+          item.key === "overall_status"
+            ? 150
+            : 250,
         enableColumnFilter:
           item.key === "icp_fit_score" || !notFilters.includes(item.key),
         filterVariant: "select" as FilterVariant,
@@ -673,6 +674,11 @@ export const ArchetypeFilters = function({
               ? ["VERY HIGH", "HIGH", "MEDIUM", "LOW", "VERY LOW"]
               : ["YES", "NO"],
         },
+        mantineTableBodyCellProps: {
+          sx: {
+            border: `1px black`,
+          },
+        },
         Header: () => {
           return (
             <Flex
@@ -689,10 +695,10 @@ export const ArchetypeFilters = function({
                   icp_scoring_ruleset_typed.company_personalizers?.includes(
                     item.key
                   )) && (
-                    <Badge size={"xs"} color={"green"}>
-                      Personalizer
-                    </Badge>
-                  )}
+                  <Badge size={"xs"} color={"green"}>
+                    Personalizer
+                  </Badge>
+                )}
                 {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && (
                   <Badge size={"xs"} color={"red"}>
                     Dealbreaker
@@ -767,6 +773,9 @@ export const ArchetypeFilters = function({
 
               return (
                 <Tooltip
+                  position="bottom"
+                  withinPortal={true}
+                  offset={8}
                   label={
                     <Flex
                       direction={"column"}
@@ -908,14 +917,14 @@ export const ArchetypeFilters = function({
                       humanReadableScore == "VERY HIGH"
                         ? "green"
                         : humanReadableScore == "HIGH"
-                          ? "blue"
-                          : humanReadableScore == "MEDIUM"
-                            ? "yellow"
-                            : humanReadableScore == "LOW"
-                              ? "orange"
-                              : humanReadableScore == "VERY LOW" && trueScore
-                                ? "red"
-                                : "gray"
+                        ? "blue"
+                        : humanReadableScore == "MEDIUM"
+                        ? "yellow"
+                        : humanReadableScore == "LOW"
+                        ? "orange"
+                        : humanReadableScore == "VERY LOW" && trueScore
+                        ? "red"
+                        : "gray"
                     }
                     fw={600}
                   >
@@ -926,12 +935,14 @@ export const ArchetypeFilters = function({
             } else if (item.key === "linkedin_url") {
               return (
                 <Tooltip label={value}>
-                  <Anchor href={'https://' + value} target="_blank">
+                  <Anchor href={"https://" + value} target="_blank">
                     <IconBrandLinkedin size={16} />
                     {value}
                   </Anchor>
                 </Tooltip>
               );
+            } else if (item.key === "overall_status") {
+              return <Badge color={"blue"}>{p[keyType]}</Badge>;
             }
             return <Text style={{ maxHeight: "2em" }}>{p[keyType]}</Text>;
           } else {
@@ -995,11 +1006,29 @@ export const ArchetypeFilters = function({
     enableStickyHeader: true,
     enableStickyFooter: true,
     enableColumnResizing: true,
+    mantineTableHeadRowProps: {
+      sx: {
+        shadow: "none",
+        boxShadow: "none",
+      },
+    },
     mantineTableProps: {
+      sx: {
+        borderCollapse: "separate",
+        border: "none",
+        borderSpacing: "0px 0px",
+      },
       withColumnBorders: true,
     },
     mantinePaginationProps: {
-      rowsPerPageOptions: ['5', '10', '25', '50', '100', "" + displayProspects.length].sort((a, b) => +a - +b)
+      rowsPerPageOptions: [
+        "5",
+        "10",
+        "25",
+        "50",
+        "100",
+        "" + displayProspects.length,
+      ].sort((a, b) => +a - +b),
     },
     mantineTableBodyCellProps: ({ row }) => {
       return {
@@ -1056,11 +1085,7 @@ export const ArchetypeFilters = function({
         />
       )}
       <Divider orientation={"vertical"} />
-      <Flex
-        direction={"column"}
-        gap={"8px"}
-        style={{maxWidth: "1150px"}}
-      >
+      <Flex direction={"column"} gap={"8px"} style={{ maxWidth: "1150px" }}>
         {selectedContacts && selectedContacts.size > 0 && (
           <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>
             <Text>Bulk Actions - {selectedContacts.size} Selected</Text>
@@ -1094,7 +1119,7 @@ export const ArchetypeFilters = function({
                       cancel: "Cancel",
                     },
                     confirmProps: { color: "red" },
-                    onCancel: () => { },
+                    onCancel: () => {},
                     onConfirm: () => {
                       triggerMoveToUnassigned();
                     },
@@ -1139,16 +1164,18 @@ export const ArchetypeFilters = function({
             style={{ minWidth: "93%" }}
             onChange={(event) => setFilteredWords(event.currentTarget.value)}
           />
-          {!hideFeature && <Tooltip label="Upload custom data points to your prospects.">
-            <Button
-              size="sm"
-              onClick={customPointHandlers.open}
-              color="gray"
-              variant="outline"
-            >
-              <IconMagnet size={16} />
-            </Button>
-          </Tooltip>}
+          {!hideFeature && (
+            <Tooltip label="Upload custom data points to your prospects.">
+              <Button
+                size="sm"
+                onClick={customPointHandlers.open}
+                color="gray"
+                variant="outline"
+              >
+                <IconMagnet size={16} />
+              </Button>
+            </Tooltip>
+          )}
           <Modal
             opened={openedCustomPoint}
             onClose={customPointHandlers.close}

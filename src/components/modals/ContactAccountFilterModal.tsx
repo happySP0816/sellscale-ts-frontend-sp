@@ -113,7 +113,7 @@ export interface ICPScoringRulesetKeys {
   individual_years_of_experience_start: number;
 }
 
-const ContactAccountFilterModal = function({
+const ContactAccountFilterModal = function ({
   showContactAccountFilterModal,
   setShowContactAccountFilterModal,
   segment,
@@ -121,7 +121,7 @@ const ContactAccountFilterModal = function({
 }: ContactAccountFilterModalProps) {
   const userToken = useRecoilValue(userTokenState);
 
-  console.log('segment is', segment);
+  console.log("segment is", segment);
 
   const [viewMode, setViewMode] = useState<ViewMode>("CONTACT");
   const [prospects, setProspects] = useState<Prospect[]>([]);
@@ -149,6 +149,7 @@ const ContactAccountFilterModal = function({
       { key: "title", title: "Title" },
       { key: "company", title: "Company" },
       { key: "linkedin_url", title: "Linkedin URL" },
+      { key: "overall_status", title: "Status" },
     ]
   );
 
@@ -159,6 +160,7 @@ const ContactAccountFilterModal = function({
     "icp_prospect_fit_score",
     "icp_company_fit_score",
     "linkedin_url",
+    "overall_status",
   ];
 
   const [companyTableHeaders, setCompanyTableHeaders] = useState<TableHeader[]>(
@@ -280,6 +282,7 @@ const ContactAccountFilterModal = function({
         { key: "title", title: "Title" },
         { key: "company", title: "Company" },
         { key: "linkedin_url", title: "Linkedin URL" },
+        { key: "overall_status", title: "Status" },
       ];
 
       const newCompanyHeaders = [
@@ -473,11 +476,11 @@ const ContactAccountFilterModal = function({
           a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
             ? -1
             : !a.icp_fit_reason_v2 && b.icp_fit_reason_v2
-              ? 1
-              : !a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
-                ? 0
-                : Object.keys(b.icp_fit_reason_v2).length -
-                Object.keys(a.icp_fit_reason_v2).length;
+            ? 1
+            : !a.icp_fit_reason_v2 && !b.icp_fit_reason_v2
+            ? 0
+            : Object.keys(b.icp_fit_reason_v2).length -
+              Object.keys(a.icp_fit_reason_v2).length;
 
         if (individual_fit_reason !== 0) {
           return individual_fit_reason;
@@ -582,11 +585,11 @@ const ContactAccountFilterModal = function({
           a.icp_company_fit_reason && !b.icp_company_fit_reason
             ? -1
             : !a.icp_company_fit_reason && b.icp_company_fit_reason
-              ? 1
-              : !a.icp_company_fit_reason && !b.icp_company_fit_reason
-                ? 0
-                : Object.keys(b.icp_company_fit_reason).length -
-                Object.keys(a.icp_company_fit_reason).length;
+            ? 1
+            : !a.icp_company_fit_reason && !b.icp_company_fit_reason
+            ? 0
+            : Object.keys(b.icp_company_fit_reason).length -
+              Object.keys(a.icp_company_fit_reason).length;
 
         if (company_fit_reason !== 0) {
           return company_fit_reason;
@@ -613,74 +616,6 @@ const ContactAccountFilterModal = function({
       setDisplayProspects(currentProspects);
     }
   }, [filteredColumns, prospects, filteredWords]);
-
-  // Checkbox Handlers for selecting contacts
-  const handleSelectContact = (contactId: number) => {
-    if (selectedContacts.has(contactId)) {
-      setSelectedContacts((prevState) => {
-        prevState.delete(contactId);
-        return new Set(prevState);
-      });
-    } else {
-      setSelectedContacts((prevState) => {
-        prevState.add(contactId);
-        return new Set(prevState);
-      });
-    }
-  };
-
-  const handleSelectAllContacts = () => {
-    if (selectedContacts.size === displayProspects.length) {
-      setSelectedContacts(new Set());
-    } else {
-      setSelectedContacts(
-        new Set(displayProspects.map((prospect) => prospect.id))
-      );
-    }
-  };
-
-  // Checkbox Handlers for selecting companies
-  const handleSelectCompany = (companyName: string) => {
-    if (selectedCompanies.has(companyName)) {
-      setSelectedCompanies((prevState) => {
-        prevState.delete(companyName);
-        return new Set(prevState);
-      });
-    } else {
-      setSelectedCompanies((prevState) => {
-        prevState.add(companyName);
-        return new Set(prevState);
-      });
-    }
-  };
-
-  const handleSelectAllCompanies = () => {
-    if (selectedCompanies.size === displayProspectAccounts.length) {
-      setSelectedCompanies(new Set());
-    } else {
-      setSelectedCompanies(
-        new Set(
-          displayProspectAccounts.map(
-            (prospectAccount) => "" + prospectAccount.company
-          )
-        )
-      );
-    }
-  };
-
-  const onSelectFilter = (key: string, value: string) => {
-    if (value === "") {
-      setFilteredColumns((prevState) => {
-        prevState.delete(key);
-        return new Map(prevState);
-      });
-    } else {
-      setFilteredColumns((prevState) => {
-        prevState.set(key, value);
-        return new Map(prevState);
-      });
-    }
-  };
 
   const onClickCreateSegment = async () => {
     const response = await fetch(
@@ -722,12 +657,7 @@ const ContactAccountFilterModal = function({
       contactTableHeaders.forEach((item) => {
         const key = item.key;
 
-        console.log("Key: ", key);
-        console.log("Prospect: ", p);
-
         const keyType = key as keyof typeof p;
-
-        console.log("Prospect value: ", p[keyType]);
 
         row[key] = p[keyType];
       });
@@ -773,16 +703,6 @@ const ContactAccountFilterModal = function({
       return {
         header: item.title,
         accessorKey: item.key,
-        mantineTableHeadCellProps: {
-          style: {
-            borderRight: "1px solid #ddd", // Add border to the right of the header cell
-          },
-        },
-        mantineTableBodyCellProps: {
-          style: {
-            borderRight: "1px solid #ddd", // Add border to the right of the body cell
-          },
-        },
         size:
           item.key === "icp_prospect_fit_score" || item.key === "full_name"
             ? 150
@@ -836,10 +756,10 @@ const ContactAccountFilterModal = function({
                 {icp_scoring_ruleset_typed.individual_personalizers?.includes(
                   item.key
                 ) && (
-                    <Badge size={"xs"} color={"green"}>
-                      Personalizer
-                    </Badge>
-                  )}
+                  <Badge size={"xs"} color={"green"}>
+                    Personalizer
+                  </Badge>
+                )}
                 {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && (
                   <Badge size={"xs"} color={"red"}>
                     Dealbreaker
@@ -900,6 +820,9 @@ const ContactAccountFilterModal = function({
 
               return (
                 <Tooltip
+                  position="bottom"
+                  withinPortal={true}
+                  offset={8}
                   label={
                     <Flex
                       direction={"column"}
@@ -978,14 +901,14 @@ const ContactAccountFilterModal = function({
                       humanReadableScore == "VERY HIGH"
                         ? "green"
                         : humanReadableScore == "HIGH"
-                          ? "blue"
-                          : humanReadableScore == "MEDIUM"
-                            ? "yellow"
-                            : humanReadableScore == "LOW"
-                              ? "orange"
-                              : humanReadableScore == "VERY LOW" && trueScore
-                                ? "red"
-                                : "gray"
+                        ? "blue"
+                        : humanReadableScore == "MEDIUM"
+                        ? "yellow"
+                        : humanReadableScore == "LOW"
+                        ? "orange"
+                        : humanReadableScore == "VERY LOW" && trueScore
+                        ? "red"
+                        : "gray"
                     }
                     fw={600}
                   >
@@ -999,6 +922,8 @@ const ContactAccountFilterModal = function({
                   {value}
                 </Anchor>
               );
+            } else if (item.key === "overall_status") {
+              return <Badge color={"blue"}>{p[keyType]}</Badge>;
             }
             return <Text style={{ maxHeight: "2em" }}>{p[keyType]}</Text>;
           } else {
@@ -1056,16 +981,6 @@ const ContactAccountFilterModal = function({
       return {
         header: item.title,
         accessorKey: item.key,
-        mantineTableHeadCellProps: {
-          style: {
-            borderRight: "1px solid #ddd", // Add border to the right of the header cell
-          },
-        },
-        mantineTableBodyCellProps: {
-          style: {
-            borderRight: "1px solid #ddd", // Add border to the right of the body cell
-          },
-        },
         size: item.key === "icp_company_fit_score" ? 150 : 250,
         enableColumnFilter:
           item.key === "icp_company_fit_score" ||
@@ -1116,10 +1031,10 @@ const ContactAccountFilterModal = function({
                 {icp_scoring_ruleset_typed.company_personalizers?.includes(
                   item.key
                 ) && (
-                    <Badge size={"xs"} color={"green"}>
-                      Personalizer
-                    </Badge>
-                  )}
+                  <Badge size={"xs"} color={"green"}>
+                    Personalizer
+                  </Badge>
+                )}
                 {icp_scoring_ruleset_typed.dealbreakers?.includes(item.key) && (
                   <Badge size={"xs"} color={"red"}>
                     Dealbreaker
@@ -1180,6 +1095,9 @@ const ContactAccountFilterModal = function({
 
               return (
                 <Tooltip
+                  position="bottom"
+                  withinPortal={true}
+                  offset={8}
                   label={
                     <Flex
                       direction={"column"}
@@ -1261,14 +1179,14 @@ const ContactAccountFilterModal = function({
                       humanReadableScore == "VERY HIGH"
                         ? "green"
                         : humanReadableScore == "HIGH"
-                          ? "blue"
-                          : humanReadableScore == "MEDIUM"
-                            ? "yellow"
-                            : humanReadableScore == "LOW"
-                              ? "orange"
-                              : humanReadableScore == "VERY LOW" && trueScore
-                                ? "red"
-                                : "gray"
+                        ? "blue"
+                        : humanReadableScore == "MEDIUM"
+                        ? "yellow"
+                        : humanReadableScore == "LOW"
+                        ? "orange"
+                        : humanReadableScore == "VERY LOW" && trueScore
+                        ? "red"
+                        : "gray"
                     }
                     fw={600}
                   >
@@ -1282,6 +1200,8 @@ const ContactAccountFilterModal = function({
                   {value}
                 </Anchor>
               );
+            } else if (item.key === "overall_status") {
+              return <Badge color={"blue"}>{p[keyType]}</Badge>;
             }
             return <Text style={{ maxHeight: "2em" }}>{p[keyType]}</Text>;
           } else {
@@ -1347,7 +1267,18 @@ const ContactAccountFilterModal = function({
     enableStickyHeader: true,
     enableStickyFooter: true,
     enableColumnResizing: true,
+    mantineTableHeadRowProps: {
+      sx: {
+        shadow: "none",
+        boxShadow: "none",
+      },
+    },
     mantineTableProps: {
+      sx: {
+        borderCollapse: "separate",
+        border: "none",
+        borderSpacing: "0px 0px",
+      },
       withColumnBorders: true,
     },
   });
@@ -1387,7 +1318,18 @@ const ContactAccountFilterModal = function({
     enableStickyHeader: true,
     enableStickyFooter: true,
     enableColumnResizing: true,
+    mantineTableHeadRowProps: {
+      sx: {
+        shadow: "none",
+        boxShadow: "none",
+      },
+    },
     mantineTableProps: {
+      sx: {
+        borderCollapse: "separate",
+        border: "none",
+        borderSpacing: "0px 0px",
+      },
       withColumnBorders: true,
     },
   });
@@ -1415,6 +1357,7 @@ const ContactAccountFilterModal = function({
   return isModal ? (
     <Modal
       onClose={() => setShowContactAccountFilterModal(false)}
+      zIndex={10}
       opened={showContactAccountFilterModal}
       size={"1100px"}
       style={{ maxHeight: "700px", maxWidth: "1100px" }}
@@ -1513,7 +1456,6 @@ const ContactAccountFilterModal = function({
             ? segment.segment_title + " Market Map View"
             : segment?.segment_title + " Segment View"}
         </Title>
-
       </Flex>
       <Flex gap={"8px"} style={{ overflowY: "hidden", height: "100%" }}>
         {isLoading && <Loader />}
@@ -1528,9 +1470,7 @@ const ContactAccountFilterModal = function({
               label={"Global Search"}
               placeholder={"Search for a specific name / company / title"}
               value={filteredWords}
-              onChange={(event) =>
-                setFilteredWords(event.currentTarget.value)
-              }
+              onChange={(event) => setFilteredWords(event.currentTarget.value)}
               style={{ minWidth: "100%" }}
             />
           </Flex>
@@ -1543,7 +1483,6 @@ const ContactAccountFilterModal = function({
       </Flex>
     </Box>
   );
+};
 
-}
-
-  export default ContactAccountFilterModal;
+export default ContactAccountFilterModal;

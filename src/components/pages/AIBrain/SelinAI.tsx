@@ -1354,6 +1354,34 @@ export default function SelinAI() {
                                 variant="transparent"
                                 color="red"
                                 size={"sm"}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setThreads((prevThreads) => prevThreads.filter((prevThread) => prevThread.id !== thread.id));
+                                  fetch(`${API_URL}/selix/delete_session`, {
+                                    method: "DELETE",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                      Authorization: `Bearer ${userToken}`,
+                                    },
+                                    body: JSON.stringify({
+                                      session_id: thread.id,
+                                    }),
+                                  })
+                                    .then((response) => {
+                                      if (!response.ok) {
+                                        return response.json().then((data) => {
+                                          throw new Error(data.error || "Failed to delete session");
+                                        });
+                                      }
+                                      return response.json();
+                                    })
+                                    .then((data) => {
+                                      console.log("Session deleted:", data.message);
+                                    })
+                                    .catch((error) => {
+                                      console.error("Error deleting session:", error);
+                                    });
+                                  }}
                               >
                                 <IconTrash size={"1rem"} />
                               </ActionIcon>
@@ -2723,9 +2751,11 @@ const PlannerComponent = ({
   const campaignId = threads.find((thread) => thread.id === currentSessionId)
     ?.memory?.campaign_id;
 
+  console.log('current thread is', threads.find((thread) => thread.id === currentSessionId));
   useEffect(() => {
     (async () => {
       if (campaignId) {
+        console.log('getting fresh project');
         const [project, res] = await Promise.all([
           getFreshCurrentProject(userToken, campaignId),
           getSegments()

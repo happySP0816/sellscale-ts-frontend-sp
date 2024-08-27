@@ -2741,6 +2741,7 @@ const PlannerComponent = ({
   counter: Number;
 }) => {
   const [opened, { toggle }] = useDisclosure(true);
+  const taskContainerRef = useRef<HTMLDivElement>(null);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
   const [currentProject, setCurrentProject] = useRecoilState(
     currentProjectState
@@ -2770,6 +2771,19 @@ const PlannerComponent = ({
       }
     })();
   }, [campaignId]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (taskContainerRef.current) {
+        taskContainerRef.current.scrollTo({
+          top: taskContainerRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+    }, 100); // Adjust the timeout duration as needed
+
+    return () => clearTimeout(timeoutId);
+  }, [tasks.length]);
 
 
   const getSegments = async (
@@ -2896,6 +2910,7 @@ const PlannerComponent = ({
           h={"55vh"}
           scrollHideDelay={4000}
           style={{ overflow: "hidden" }}
+          viewportRef={taskContainerRef}
         >
           {tasks
             ?.filter(

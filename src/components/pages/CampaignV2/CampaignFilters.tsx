@@ -1365,59 +1365,59 @@ const CampaignFilters = function({
                       }}
                     />
                   </ItemCollapse>
-                  <ItemCollapse
-                    title="Employee Count"
-                    numberOfItem={
-                      company_size_start && company_size_end ? 1 : 0
-                    }
-                  >
-                    <Flex direction="column" maw={"30vw"} gap={"4px"}>
-                      <Box
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: "1rem",
-                          alignItems: "center",
-                          marginTop: "0.2rem",
-                        }}
-                      >
-                        <NumberInput
-                          value={company_size_start ?? ""}
-                          placeholder="Min"
-                          label={"Min"}
-                          hideControls
-                          onChange={(value) => {
-                            if (value === "") {
-                              setCompanySizeStart(null);
-                            } else {
-                              setCompanySizeStart(+value);
-                            }
-                          }}
-                        />
-                        <NumberInput
-                          value={company_size_end ?? ""}
-                          placeholder="Max"
-                          label={"Max"}
-                          hideControls
-                          onChange={(value) => {
-                            if (value === "") {
-                              setCompanySizeEnd(null);
-                            } else {
-                              setCompanySizeEnd(+value);
-                            }
-                          }}
-                        />
-                      </Box>
-                      <Button
-                        mt={"0.5rem"}
-                        size="sm"
-                        ml={"auto"}
-                        onClick={() => setCompanySizeEnd(100_000)}
-                      >
-                        Max
-                      </Button>
-                    </Flex>
-                  </ItemCollapse>
+                  {/* <ItemCollapse */}
+                  {/*   title="Employee Count" */}
+                  {/*   numberOfItem={ */}
+                  {/*     company_size_start && company_size_end ? 1 : 0 */}
+                  {/*   } */}
+                  {/* > */}
+                  {/*   <Flex direction="column" maw={"30vw"} gap={"4px"}> */}
+                  {/*     <Box */}
+                  {/*       style={{ */}
+                  {/*         display: "flex", */}
+                  {/*         justifyContent: "space-between", */}
+                  {/*         gap: "1rem", */}
+                  {/*         alignItems: "center", */}
+                  {/*         marginTop: "0.2rem", */}
+                  {/*       }} */}
+                  {/*     > */}
+                  {/*       <NumberInput */}
+                  {/*         value={company_size_start ?? ""} */}
+                  {/*         placeholder="Min" */}
+                  {/*         label={"Min"} */}
+                  {/*         hideControls */}
+                  {/*         onChange={(value) => { */}
+                  {/*           if (value === "") { */}
+                  {/*             setCompanySizeStart(null); */}
+                  {/*           } else { */}
+                  {/*             setCompanySizeStart(+value); */}
+                  {/*           } */}
+                  {/*         }} */}
+                  {/*       /> */}
+                  {/*       <NumberInput */}
+                  {/*         value={company_size_end ?? ""} */}
+                  {/*         placeholder="Max" */}
+                  {/*         label={"Max"} */}
+                  {/*         hideControls */}
+                  {/*         onChange={(value) => { */}
+                  {/*           if (value === "") { */}
+                  {/*             setCompanySizeEnd(null); */}
+                  {/*           } else { */}
+                  {/*             setCompanySizeEnd(+value); */}
+                  {/*           } */}
+                  {/*         }} */}
+                  {/*       /> */}
+                  {/*     </Box> */}
+                  {/*     <Button */}
+                  {/*       mt={"0.5rem"} */}
+                  {/*       size="sm" */}
+                  {/*       ml={"auto"} */}
+                  {/*       onClick={() => setCompanySizeEnd(100_000)} */}
+                  {/*     > */}
+                  {/*       Max */}
+                  {/*     </Button> */}
+                  {/*   </Flex> */}
+                  {/* </ItemCollapse> */}
                   <ItemCollapse
                     title="Industries"
                     numberOfItem={

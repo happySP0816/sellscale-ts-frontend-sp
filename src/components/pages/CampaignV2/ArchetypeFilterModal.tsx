@@ -1,22 +1,13 @@
 import {
-  ActionIcon,
   Anchor,
   Badge,
   Box,
   Button,
-  Center,
-  Checkbox,
   Divider,
   Flex,
   HoverCard,
   Loader,
   Modal,
-  Popover,
-  ScrollArea,
-  Select,
-  Switch,
-  Table,
-  Tabs,
   Text,
   TextInput,
   Title,
@@ -27,7 +18,6 @@ import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "@constants/data";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
-import { FaFilter } from "react-icons/fa6";
 import { ICPFitReasonV2, Prospect } from "src";
 import {
   FilterVariant,
@@ -41,19 +31,12 @@ import CampaignFilters from "@pages/CampaignV2/CampaignFilters";
 import { socket } from "../../App";
 import { showNotification } from "@mantine/notifications";
 import { moveToUnassigned } from "@utils/requests/moveToUnassigned";
-import { ProspectICP } from "@common/persona/Pulse";
 import BulkActions from "@common/persona/BulkActions_new";
-import {
-  IconExternalLink,
-  IconFileDownload,
-  IconMagnet,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconFileDownload, IconMagnet, IconTrash } from "@tabler/icons-react";
 import { openConfirmModal } from "@mantine/modals";
 import { CSVLink } from "react-csv";
 import CustomResearchPointCard from "@common/persona/CustomResearchPointCard";
 import { useDisclosure } from "@mantine/hooks";
-import generate from "@babel/generator";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import { IconBrandLinkedin } from "@tabler/icons";
 
@@ -106,12 +89,14 @@ export const ArchetypeFilters = function ({
   // What we actually display
   const [displayProspects, setDisplayProspects] = useState<Prospect[]>([]);
 
-  const [filteredColumns, setFilteredColumns] = useState<Map<string, string>>(
-    new Map()
-  );
   const [filteredWords, setFilteredWords] = useState<string>("");
 
   const [displayScore, setDisplayScore] = useState<string | null>("5");
+
+  const [programmaticUpdateList, setProgrammaticUpdateList] = useState<
+    Set<number>
+  >(new Set());
+  const [AIUpdateList, setAIUpdateList] = useState<Set<number>>(new Set());
 
   // We are going to use sockets to update the ICP Scoring Ruleset
   // We are going to use sockets to update the prospects
@@ -160,7 +145,7 @@ export const ArchetypeFilters = function ({
   // if we add a new filter, we want to add it to the column
   // if we clear a filter we want to remove it from the header
   // if we update a column add it to the update columns state
-
+  // Necessary UseEffects
   useEffect(() => {
     socket.on("update_prospect_list", async (data) => {
       await refetchICP();
@@ -215,6 +200,7 @@ export const ArchetypeFilters = function ({
 
   const icp_scoring_ruleset_typed = icp_scoring_ruleset as ICPScoringRuleset;
 
+  // Necessary UseEffects
   useEffect(() => {
     if (icp_scoring_ruleset_typed) {
       const newContactHeaders = [
@@ -259,14 +245,6 @@ export const ArchetypeFilters = function ({
         }
       });
 
-      const tempIndividualSet = new Set<string>(
-        [
-          ...newContactHeaders,
-          ...programmaticContactHeaders,
-          ...individualAIHeaders,
-        ].map((item) => item.key)
-      );
-
       const tempIndividualAISet = new Set<string>(
         individualAIHeaders.map((item) => item.key)
       );
@@ -296,6 +274,8 @@ export const ArchetypeFilters = function ({
   }, [icp_scoring_ruleset, icp_scoring_ruleset_typed, prospects]);
 
   // Sorting the List
+  // Not necessary as a useEffect, can be a use Memo
+  // prospects does not have to be a useState
   useEffect(() => {
     if (data) {
       const prospectData = data as Prospect[];
@@ -328,6 +308,8 @@ export const ArchetypeFilters = function ({
     }
   }, [data]);
 
+  // Necessary Useeffect
+  // Display Prospects does not have to be a state variable
   useEffect(() => {
     if (prospects) {
       let currentProspects = prospects;
@@ -373,54 +355,9 @@ export const ArchetypeFilters = function ({
         return answer;
       });
 
-      filteredColumns.forEach((value, key) => {
-        if (!value || value === "") {
-          return;
-        }
-        if (key === "icp_fit_score") {
-          currentProspects = currentProspects.filter(
-            (prospect) => prospect.icp_fit_score === parseInt(value)
-          );
-        } else if (key === "icp_company_fit_score") {
-          currentProspects = currentProspects.filter(
-            (prospect) => prospect.icp_company_fit_score === parseInt(value)
-          );
-        } else {
-          const keyType = key as keyof ICPFitReasonV2;
-
-          if (contactTableHeaders.find((header) => header.key === key)) {
-            if (key.includes("aicomp")) {
-              currentProspects = currentProspects.filter((prospect) => {
-                const icp_company_fit_reason = prospect.icp_company_fit_reason;
-                if (!icp_company_fit_reason) {
-                  return false;
-                }
-
-                if (!icp_company_fit_reason[keyType]) {
-                  return false;
-                }
-                return icp_company_fit_reason[keyType].answer === value;
-              });
-            } else {
-              currentProspects = currentProspects.filter((prospect) => {
-                const icp_fit_reason = prospect.icp_fit_reason_v2;
-                if (!icp_fit_reason) {
-                  return false;
-                }
-
-                if (!icp_fit_reason[keyType]) {
-                  return false;
-                }
-                return icp_fit_reason[keyType].answer === value;
-              });
-            }
-          }
-        }
-      });
-
       setDisplayProspects(currentProspects);
     }
-  }, [filteredColumns, prospects, filteredWords, displayScore]);
+  }, [prospects, filteredWords, displayScore]);
 
   const triggerMoveToUnassigned = async () => {
     setRemoveProspectsLoading(true);
@@ -1067,8 +1004,6 @@ export const ArchetypeFilters = function ({
       };
     },
   });
-
-  console.log("selectedContacts: ", selectedContacts);
 
   return (
     <Flex gap={"8px"} style={{ overflowY: "hidden", height: "100%" }}>

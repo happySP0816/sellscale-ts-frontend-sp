@@ -126,21 +126,6 @@ export default function CreatePersona(props: PropsType) {
       message: "Your campaign has been created successfully.",
       color: "teal",
     });
-
-    // Create default template
-    if (props.createPersona.templateMode) {
-      await createLiTemplate(
-        userToken,
-        result.data,
-        "Great to connect!",
-        `Hi [first name]! [personalization related to them]. It’s great to connect.`,
-        true,
-        // researchPointTypes?.map((rpt) => rpt.name) || [], WE SHOULD LET THE BACKEND USE THE DEFAULT RESEARCH POINTS
-        [],
-        ""
-      );
-    }
-
     // setTimeout(() => {
     //   window.location.href = "/contacts/overview";
     // }, 3000);

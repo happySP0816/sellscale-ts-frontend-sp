@@ -31,11 +31,11 @@ import posthog from "posthog-js";
 import Logo2 from "@assets/images/icon.svg";
 import { API_URL } from "@constants/data";
 import { setUser } from "@sentry/react";
+import { getUserInfo } from "@auth/core";
 
 export default function SelixOnboarding() {
   const [userData, setUserData] = useRecoilState(userDataState);
 
-  const [tagline, setTagLine] = useState(userData.client?.tagline || "");
   const [description, setDescription] = useState(
     userData.client?.description || ""
   );
@@ -118,9 +118,25 @@ export default function SelixOnboarding() {
     });
   }, []);
 
+  const fetchUserInfo = async () => {
+    const info = await getUserInfo(userToken);
+    if (info) {
+      setTagLine(info.client?.tagline || "");
+      setDescription(info.client?.description || "");
+      
+      setUserData(info);
+      // setSdrActive(info.active);
+    }
+  };
+
   useEffect(() => {
+    if (userToken) {
+      fetchUserInfo();
+    }
     fetchSavedQueries();
   }, [userToken]);
+
+  const [tagline, setTagLine] = useState(userData.client?.tagline || "");
 
   if (showCalendly) {
     return (
@@ -458,6 +474,15 @@ export default function SelixOnboarding() {
                     .catch((error) => {
                       console.error("Error updating client data:", error);
                     });
+                    console.log('user data update payload: ', {
+                      ...userData,
+                      client: {
+                        ...userData.client,
+                        tagline: tagline,
+                        description: description,
+                      },
+                    }
+                    )
                     setUserData({
                       ...userData,
                       client: {

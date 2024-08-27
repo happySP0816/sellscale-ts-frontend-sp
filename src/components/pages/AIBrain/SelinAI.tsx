@@ -2227,7 +2227,7 @@ const SelixControlCenter = ({
           float: "left",
         }}
       >
-        <SellScaleAssistant />
+        <SellScaleAssistant refresh={refreshIcp}/>
       </Modal>
       <Flex
         px={"md"}

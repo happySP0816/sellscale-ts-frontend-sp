@@ -102,12 +102,16 @@ export default function SellScaleAssistant({
   return (
     <Box>
       <Flex mt={"md"} gap={"xl"}>
-        <Tour
-          steps={editTourSteps}
-          isOpen={editTourOpen}
-          onRequestClose={closeEditTour}
-        />
-        <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour} />
+        { !window.location.href.includes("selix") && (
+          <>
+            <Tour
+              steps={editTourSteps}
+              isOpen={editTourOpen}
+              onRequestClose={closeEditTour}
+            />
+            <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour} />
+          </>
+        )}
         {showChat && (
           <SegmentChat
             setHasNotGeneratedPrefilter={setHasNotGeneratedPrefilter}

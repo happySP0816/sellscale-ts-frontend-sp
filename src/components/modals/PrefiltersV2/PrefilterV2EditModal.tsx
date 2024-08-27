@@ -77,7 +77,7 @@ export default function PreFiltersV2EditModal({ innerProps, context, id }: { inn
   const [selectedCompanies, setselectedCompanies] = useState<string[]>([]);
   const [fetchingCompanyOptions, setFetchingCompanyOptions] = useState<boolean>(false);
   const [companyOptions, setCompanyOptions] = useState<string[]>([]);
-  const [locations, setLocations] = useState<string>("");
+  const [locations, setLocations] = useState<string[]>([]);
   const [experience, setExperience] = useState<string>("");
   const [fundraise, setFundraise] = useState<string[]>([]);
   const [filterName, setFilterName] = useState<string>("");
@@ -909,7 +909,18 @@ const mergeSavedQueries = async (saved_query_id: number) => {
                 />
               </CustomAccordionItem>
               <CustomAccordionItem value="locations" label="Locations" isActive={locations.length > 0}>
-                <MultiSelect
+
+              <CustomSelect
+                  label="Included"
+                  placeholder="Select options"
+                  value={Array.isArray(locations) ? locations : []}
+                  // setValue={setLocations}
+                  data={Array.isArray(locations) ? locations.filter(option => option) : []}
+                  setData={setLocations}
+                />
+
+                
+                {/* <MultiSelect
                   label="Locations"
                   placeholder="Enter locations"
                   data={['United States', 'Europe', 'Germany', 'India', 'United Kingdom', 'France', 'Canada', 'Australia']}
@@ -930,7 +941,7 @@ const mergeSavedQueries = async (saved_query_id: number) => {
                       minHeight: "",
                     },
                   }}
-                />
+                /> */}
               </CustomAccordionItem>
               <CustomAccordionItem value="fundraise" label="Fundraise" isActive={fundraise.length > 0}>
                 <MultiSelect

@@ -210,6 +210,8 @@ const ContactAccountFilterModal = function ({
     socket.on("update_progress", async (data) => {
       const list: number[] = data.update;
 
+      console.log("list: ", list);
+
       const newProgrammaticUpdateList = new Set(programmaticUpdateList);
       
       list.forEach(i => {
@@ -223,7 +225,7 @@ const ContactAccountFilterModal = function ({
       socket.off("update_prospect_list");
       socket.off("update_progress");
     };
-  }, []);
+  }, [programmaticUpdateList]);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["segmentProspects", segment?.id],

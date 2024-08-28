@@ -26,6 +26,7 @@ import {
   Paper,
   Badge,
   ActionIcon,
+  Progress,
 } from "@mantine/core";
 import React, { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -480,7 +481,15 @@ const MarketMapFilters = function ({
               onChange={(e) => setScoreAI(e.currentTarget.checked)}
             />
           </Flex>
-
+          {isScoring && isScoring > 0 ? (
+            <Progress
+              color={"grape"}
+              value={(isScoring - programmaticUpdates.size) * 100}
+              label={"testing"}
+            />
+          ) : (
+            <></>
+          )}
           <ScrollArea h={600} m={0}>
             <Accordion defaultValue="individual">
               <Accordion.Item value="ai_filter">
@@ -1133,6 +1142,15 @@ const MarketMapFilters = function ({
               onChange={(e) => setScoreAI(e.currentTarget.checked)}
             />
           </Flex>
+          {isScoring && isScoring > 0 ? (
+            <Progress
+              color={"grape"}
+              value={(isScoring - programmaticUpdates.size) * 100}
+              label={"testing"}
+            />
+          ) : (
+            <></>
+          )}
           <ScrollArea h={600} m={0}>
             <Accordion defaultValue="company">
               <Accordion.Item value="ai_filter">

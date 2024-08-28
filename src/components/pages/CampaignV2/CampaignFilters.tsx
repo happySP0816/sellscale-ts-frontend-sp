@@ -25,8 +25,9 @@ import {
   Accordion,
   Paper,
   ActionIcon,
+  Progress,
 } from "@mantine/core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
@@ -45,9 +46,11 @@ interface CampaignFiltersProps {
   >;
   setContactTableHeaders: React.Dispatch<React.SetStateAction<TableHeader[]>>;
   setHeaderSet: React.Dispatch<React.SetStateAction<Set<string>>>;
+  setProgrammaticUpdates: React.Dispatch<React.SetStateAction<Set<number>>>;
+  programmaticUpdates: Set<number>;
 }
 
-const CampaignFilters = function({
+const CampaignFilters = function ({
   icp_scoring_ruleset,
   prospects,
   selectedContacts,
@@ -55,11 +58,22 @@ const CampaignFilters = function({
   setContactTableHeaders,
   setUpdatedIndividualColumns,
   setHeaderSet,
+  setProgrammaticUpdates,
+  programmaticUpdates,
 }: CampaignFiltersProps) {
   const userToken = useRecoilValue(userTokenState);
-  const [viewMode, setViewMode] = useState<string | null>("CONTACT");
   const [viewIndividualAIFilters, setViewIndividualAIFilters] =
     useState<boolean>(true);
+
+  const [isScoring, setIsScoring] = useState<number>(0);
+
+  const [scoreAI, setScoreAI] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (programmaticUpdates.size === 0) {
+      setIsScoring(0);
+    }
+  }, [programmaticUpdates]);
 
   const [
     included_individual_title_keywords,
@@ -310,6 +324,15 @@ const CampaignFilters = function({
 
   const scoreCampaignFilters = async () => {
     setScoreLoading(true);
+
+    if (selectedContacts.size !== 0) {
+      setProgrammaticUpdates(new Set(selectedContacts));
+      setIsScoring(selectedContacts.size);
+    } else {
+      setProgrammaticUpdates(new Set(prospects.map((p) => p.id)));
+      setIsScoring(prospects.length);
+    }
+
     const response = await fetch(
       `${API_URL}/client/archetype/${archetype_id}/score`,
       {
@@ -361,6 +384,7 @@ const CampaignFilters = function({
           individual_ai_filters,
           company_ai_filters,
           selectedContacts: Array.from(selectedContacts),
+          score_ai: scoreAI,
         }),
       }
     );
@@ -408,14 +432,41 @@ const CampaignFilters = function({
           marginRight: "4px",
         }}
       >
-        <Button
-          color={"red"}
-          size={"md"}
-          onClick={() => scoreCampaignFilters()}
-          disabled={scoreLoading}
-        >
-          {scoreLoading ? <Loader /> : `Score (${selectedContacts.size})`}
-        </Button>
+        <Flex style={{maxWidth: "300px", minWidth: "300px"}} gap={"4px"} align={"center"}>
+          <Button
+            color={"red"}
+            size={"md"}
+            style={{width: "65%"}}
+            onClick={() => scoreCampaignFilters()}
+            disabled={scoreLoading}
+          >
+            {scoreLoading ? (
+              <Loader />
+            ) : (
+              `Score (${
+                selectedContacts.size !== 0
+                  ? selectedContacts.size
+                  : prospects.length
+              })`
+            )}
+          </Button>
+          <Switch
+            onLabel={"with AI"}
+            size={"lg"}
+            offLabel={"without AI"}
+            checked={scoreAI}
+            onChange={(e) => setScoreAI(e.currentTarget.checked)}
+          />
+        </Flex>
+        {isScoring && isScoring > 0 ? (
+          <Progress
+            color={"grape"}
+            value={(isScoring - programmaticUpdates.size) * 100}
+            label={"testing"}
+          />
+        ) : (
+          <></>
+        )}
         <ScrollArea h={600} m={0}>
           <Accordion defaultValue="individual">
             <Accordion.Item value="ai_filter">
@@ -602,7 +653,10 @@ const CampaignFilters = function({
                   </Flex>
                 )}
 
-                <Accordion styles={{ content: { padding: "2px" } }} variant={"filled"}>
+                <Accordion
+                  styles={{ content: { padding: "2px" } }}
+                  variant={"filled"}
+                >
                   <Accordion.Item value="custom_filter">
                     <Accordion.Control className="p-0">
                       Added AI Filters
@@ -925,7 +979,7 @@ const CampaignFilters = function({
                       data={included_individual_title_keywords.concat(
                         titleOptions
                       )}
-                    // setData={setIncludedIndividualTitleKeywords}
+                      // setData={setIncludedIndividualTitleKeywords}
                     />
                     <Divider />
                     <CustomSelect

@@ -96,7 +96,6 @@ export const ArchetypeFilters = function ({
   const [programmaticUpdateList, setProgrammaticUpdateList] = useState<
     Set<number>
   >(new Set());
-  const [AIUpdateList, setAIUpdateList] = useState<Set<number>>(new Set());
 
   // We are going to use sockets to update the ICP Scoring Ruleset
   // We are going to use sockets to update the prospects
@@ -152,10 +151,23 @@ export const ArchetypeFilters = function ({
       await refetch();
     });
 
+    socket.on("update_progress", async (data) => {
+      const list: number[] = data.update;
+
+      const newProgrammaticUpdateList = new Set(programmaticUpdateList);
+      
+      list.forEach(i => {
+        newProgrammaticUpdateList.delete(i);
+      })
+      
+      setProgrammaticUpdateList(newProgrammaticUpdateList);
+    })
+
     return () => {
       socket.off("update_prospect_list");
+      socket.off("update_progress");
     };
-  }, []);
+  }, [programmaticUpdateList]);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["archetypeProspects", currentProject?.id],
@@ -1017,6 +1029,8 @@ export const ArchetypeFilters = function ({
           setContactTableHeaders={setContactTableHeaders}
           setHeaderSet={setHeaderSet}
           setUpdatedIndividualColumns={setUpdatedIndividualColumns}
+          programmaticUpdates={programmaticUpdateList}
+          setProgrammaticUpdates={setProgrammaticUpdateList}
         />
       )}
       <Divider orientation={"vertical"} />

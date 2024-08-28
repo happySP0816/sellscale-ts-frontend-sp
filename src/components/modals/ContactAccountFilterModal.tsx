@@ -132,6 +132,10 @@ const ContactAccountFilterModal = function ({
     ProspectAccounts[]
   >([]);
 
+  const [programmaticUpdateList, setProgrammaticUpdateList] = useState<
+    Set<number>
+  >(new Set());
+
   const [filteredColumns, setFilteredColumns] = useState<Map<string, string>>(
     new Map()
   );
@@ -203,8 +207,21 @@ const ContactAccountFilterModal = function ({
       await refetch();
     });
 
+    socket.on("update_progress", async (data) => {
+      const list: number[] = data.update;
+
+      const newProgrammaticUpdateList = new Set(programmaticUpdateList);
+      
+      list.forEach(i => {
+        newProgrammaticUpdateList.delete(i);
+      })
+      
+      setProgrammaticUpdateList(newProgrammaticUpdateList);
+    })
+
     return () => {
       socket.off("update_prospect_list");
+      socket.off("update_progress");
     };
   }, []);
 
@@ -1419,6 +1436,8 @@ const ContactAccountFilterModal = function ({
             headerSet={headerSet}
             setViewMode={setViewMode}
             setUpdatedIndividualColumns={setUpdatedIndividualColumns}
+            programmaticUpdates={programmaticUpdateList}
+            setProgrammaticUpdates={setProgrammaticUpdateList}
           />
         )}
         <Divider orientation={"vertical"} />

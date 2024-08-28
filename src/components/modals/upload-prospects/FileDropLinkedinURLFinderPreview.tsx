@@ -207,7 +207,7 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
   }
 
   const getDupProspects = async () => {
-    if (checkCanUpload().length === 0 && (["full_name", "company"].every((column) => {
+    if (checkCanUpload().length === 0 || (["full_name", "company"].every((column) => {
         return Array.from(columnMappings.values()).includes(column)
       }) || ["first_name", "last_name", "company"].every((column) => {
         return Array.from(columnMappings.values()).includes(column)
@@ -266,6 +266,10 @@ export default function FileDropLinkedinURLFinderPreview(props: FileDropAndPrevi
       );
     }
     */
+
+    console.log("has Scrape Target: ", hasScrapeTarget);
+    console.log("failure reason: ", failureReasons);
+
     if (!hasScrapeTarget) {
       if (!["full_name", "company"].every((column) => {
         return Array.from(columnMappings.values()).includes(column)

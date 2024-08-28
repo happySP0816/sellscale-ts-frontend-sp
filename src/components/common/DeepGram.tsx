@@ -189,7 +189,6 @@ export default function DeepGram({
             <Popover
               opened={showAnimation}
               position="top"
-              disabled={!showPopup}
               withArrow
               shadow="md"
             >

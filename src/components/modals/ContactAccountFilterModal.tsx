@@ -210,8 +210,6 @@ const ContactAccountFilterModal = function ({
     socket.on("update_progress", async (data) => {
       const list: number[] = data.update;
 
-      console.log("list: ", list);
-
       const newProgrammaticUpdateList = new Set(programmaticUpdateList);
       
       list.forEach(i => {

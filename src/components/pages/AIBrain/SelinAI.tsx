@@ -3004,7 +3004,7 @@ const PlannerComponent = ({
                       <Text color="gray" size={"sm"} fw={500}>
                         {/* {moment(task.created_at).format("MM/DD/YY, h:mm a")} */}
                       </Text>
-                      <Flex align={"center"} gap={"xs"} w={90}>
+                      <Flex align={"center"} gap={"xs"} w={100}>
                         <ThemeIcon
                           color={statusColors[task.status]}
                           radius={"xl"}

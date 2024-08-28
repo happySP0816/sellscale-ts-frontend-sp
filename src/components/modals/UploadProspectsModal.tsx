@@ -318,6 +318,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
   }
 
   const userToken = useRecoilValue(userTokenState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const { getAllStrategies, patchUpdateStrategy } = useStrategiesApi(userToken);
 
@@ -443,7 +444,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                   </Flex>
                 </Paper>}
 
-                <TextInput
+                {window.location.href.includes('/campaigns') && <TextInput
                   placeholder="eg. C-Suite Sales Leaders in tech companies"
                   label={<Text mb="xs" size="lg">Campaign Name</Text>}
                   value={createdPersona}
@@ -451,12 +452,12 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                   {
                     setCreatedPersona(e.currentTarget.value)
                   }}
-                />
+                />}
                 <Stack spacing={"xs"} mt={4}>
                   <Text size={"md"} fw={500} mb={-8}>
                     Campaign Automations
                   </Text>
-                  <Paper withBorder p="sm">
+                  {window.location.href.includes('/campaigns') &&  <Paper withBorder p="sm">
                   <Switch
                     onChange={() => setFindSampleProspects(!findSampleProspects)}
                     labelPosition="left"
@@ -495,7 +496,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                       
                     </Accordion>
                   )}
-                  </Paper>
+                  </Paper>}
                    <Paper withBorder p="md">
                   <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                     <Flex direction="column" gap={"xs"} align={"flex-start"} w="100%" justify="flex-start">
@@ -879,6 +880,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
               contractSize: personaContractSize,
               templateMode: templateMode === "template",
               connectedStrategyId: connectedStrategy ? connectedStrategy.id : undefined,
+              override_archetype_id: window.location.href.includes('/campaign_v2') ? currentProject?.id : undefined,
               purpose,
               autoGenerationPayload : {
               findSampleProspects,

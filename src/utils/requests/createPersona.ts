@@ -43,6 +43,7 @@ export default async function createPersona(
     };
   },
   connectedStrategyId?: number | undefined,
+  override_archetype_id?: number | undefined
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/client/archetype`, {
     method: "POST",
@@ -60,6 +61,7 @@ export default async function createPersona(
       contract_size: extras.contractSize,
       template_mode: extras.template_mode,
       connected_strategy_id: connectedStrategyId,
+      override_archetype_id,
       linkedin_active: extras.linkedinChecked,
       email_active: extras.emailChecked,
       email_to_linkedin_connection: extras.connectionType,

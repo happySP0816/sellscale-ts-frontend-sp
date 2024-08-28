@@ -36,6 +36,7 @@ type PropsType = {
     contractSize: number;
     templateMode: boolean;
     purpose: string;
+    connectedStrategyId: number|undefined;
     autoGenerationPayload?: {
       findSampleProspects?: boolean;
       writeEmailSequenceDraft?: boolean;
@@ -114,7 +115,8 @@ export default function CreatePersona(props: PropsType) {
         connectionType,
         purpose: props.createPersona.purpose,
       },
-      autoGenerationPayload
+      autoGenerationPayload,
+      props.createPersona.connectedStrategyId
     );
     if (result.status === "error") {
       console.error("Failed to create persona & CTAs");

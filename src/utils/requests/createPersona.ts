@@ -41,7 +41,8 @@ export default async function createPersona(
       formerWorkAlum: boolean;
       feedbackBased: boolean;
     };
-  }
+  },
+  connectedStrategyId?: number | undefined,
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/client/archetype`, {
     method: "POST",
@@ -58,6 +59,7 @@ export default async function createPersona(
       contact_objective: extras.contactObjective,
       contract_size: extras.contractSize,
       template_mode: extras.template_mode,
+      connected_strategy_id: connectedStrategyId,
       linkedin_active: extras.linkedinChecked,
       email_active: extras.emailChecked,
       email_to_linkedin_connection: extras.connectionType,

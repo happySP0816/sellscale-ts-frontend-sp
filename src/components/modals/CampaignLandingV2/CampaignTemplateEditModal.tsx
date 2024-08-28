@@ -32,6 +32,7 @@ import {
   Stack,
   ThemeIcon,
   Loader,
+  Group,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { ContextModalProps, openContextModal, closeAllModals } from "@mantine/modals";
@@ -58,7 +59,7 @@ import { deterministicMantineColor } from "@utils/requests/utils";
 import { useEffect, useState, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { getEmailSubjectLineTemplates } from "@utils/requests/emailSubjectLines";
-import {DefaultVoices, SubjectLineTemplate} from "src";
+import {DefaultVoices, PersonaOverview, SubjectLineTemplate} from "src";
 import { SubjectLineItem } from "@pages/EmailSequencing/DetailEmailSequencing";
 import BracketGradientWrapper from "@common/sequence/BracketGradientWrapper";
 import { set } from "lodash";
@@ -442,7 +443,18 @@ export default function CampaignTemplateEditModal({
                   },
                 ]}
               /> */}
-              <Button color="grape" leftIcon={<IconSparkles size={"1rem"} />} size="xs" onClick={open}>
+              <Button color="grape" leftIcon={<IconSparkles size={"1rem"} />} size="xs" onClick={
+                () => {
+
+                  openContextModal({
+                    modal: 'uploadProspects',
+                    title: <Title order={3}>Generate Sequences</Title>,
+                    innerProps: { mode: 'CREATE-ONLY'},
+                  });
+                }
+
+
+              }>
                 AI Generate Sequence
               </Button>
             </Flex>

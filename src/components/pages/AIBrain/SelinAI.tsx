@@ -1742,7 +1742,7 @@ const SegmentChat = (props: any) => {
                           )}
 
                           <Text fw={600} size="xs">
-                            ✨ Creating Task: {message.action_params?.title}
+                            ✨ {message.action_title}
                           </Text>
                           {!uncollapsedCards[index] ? (
                             <IconChevronDown

@@ -24,7 +24,7 @@ import getResearchPointTypes from "@utils/requests/getResearchPointTypes";
 import { ResearchPointType } from "src";
 import { IconBrandLinkedin, IconMailOpened } from "@tabler/icons";
 import Hook from "@pages/channels/components/Hook";
-import { closeAllModals } from "@mantine/modals";
+import { closeAllModals, closeModal } from "@mantine/modals";
 
 type PropsType = {
   createPersona: {
@@ -36,6 +36,7 @@ type PropsType = {
     contractSize: number;
     templateMode: boolean;
     purpose: string;
+    override_archetype_id: number | undefined;
     connectedStrategyId: number|undefined;
     autoGenerationPayload?: {
       findSampleProspects?: boolean;
@@ -116,7 +117,8 @@ export default function CreatePersona(props: PropsType) {
         purpose: props.createPersona.purpose,
       },
       autoGenerationPayload,
-      props.createPersona.connectedStrategyId
+      props.createPersona.connectedStrategyId,
+      props.createPersona.override_archetype_id
     );
     if (result.status === "error") {
       console.error("Failed to create persona & CTAs");
@@ -168,7 +170,7 @@ export default function CreatePersona(props: PropsType) {
           loading={creatingPersona}
           fullWidth
         >
-          Create Campaign
+          {window.location.href.includes('/campaign_v2') ? 'Generate Sequences' : 'Create Campaign'}
         </Button>
       </Flex>
     </Card>

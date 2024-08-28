@@ -1511,6 +1511,7 @@ const SegmentChat = (props: any) => {
   const handleSubmit = props.handleSubmit;
   const dropzoneRef = props.dropzoneRef;
   const prompt = props.prompt;
+  const aiType = props.aiType;
   const promptRef = props.promptRef;
   const suggestion = props.suggestion;
   const suggestionHidden = props.suggestionHidden;
@@ -1535,6 +1536,15 @@ const SegmentChat = (props: any) => {
       return () => clearTimeout(timer);
     }
   }, [messages.length]);
+
+  useEffect(() => {
+    if (aiType === 'PLANNER' && viewport.current) {
+      viewport.current.scrollTo({
+        top: viewport.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [aiType]);
 
   useEffect(() => {
     if (viewport.current) {

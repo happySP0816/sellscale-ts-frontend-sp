@@ -1742,7 +1742,7 @@ const SegmentChat = (props: any) => {
                           )}
 
                           <Text fw={600} size="xs">
-                            ✨ Executing: {message.action_title}
+                            ✨ Creating Task: {message.action_params?.title}
                           </Text>
                           {!uncollapsedCards[index] ? (
                             <IconChevronDown
@@ -2764,7 +2764,6 @@ const PlannerComponent = ({
   const campaignId = threads.find((thread) => thread.id === currentSessionId)
     ?.memory?.campaign_id;
 
-  console.log('current thread is', threads.find((thread) => thread.id === currentSessionId));
   useEffect(() => {
     (async () => {
       if (campaignId) {

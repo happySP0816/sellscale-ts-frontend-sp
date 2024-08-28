@@ -29,12 +29,14 @@ import {
   IconArrowLeft,
   IconBrandLinkedin,
   IconBulb,
+  IconChartBar,
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
   IconChevronUp,
   IconEye,
   IconMailOpened,
+  IconPencil,
   IconPlus,
   IconSearch,
   IconUser,
@@ -50,6 +52,9 @@ import CreatePersona from "@common/persona/CreatePersona";
 import Hook from "@pages/channels/components/Hook";
 import CustomSelect from "@common/persona/ICPFilter/CustomSelect";
 import { currentProjectState } from "@atoms/personaAtoms";
+import { useStrategiesApi } from "@pages/Strategy/StrategyApi";
+import { showNotification } from "@mantine/notifications";
+import { set } from "lodash";
 
 export default function UploadProspectsModal({ context, id, innerProps }: ContextModalProps<{ mode: "ADD-ONLY" | "ADD-CREATE" | "CREATE-ONLY" }>) {
   const theme = useMantineTheme();
@@ -58,6 +63,7 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
   const defaultPersonas = useRef<{ value: string; label: string; group: string | undefined }[]>([]);
   const [createdPersona, setCreatedPersona] = useState("");
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
+  const [loadingStrategy, setLoadingStrategy] = useState(false);
 
   const [ctas, setCTAs] = useState<{ id: number; cta: string }[]>([]);
 
@@ -74,6 +80,25 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
   const [tab, setTab] = useState("scratch");
 
   const [defaultVoicesOptions, setDefaultVoicesOptions] = useState<DefaultVoices[]>([]);
+
+  type Strategy = {
+    archetypes: any[];
+    client_id: number;
+    created_at: string;
+    description: string;
+    end_date: string;
+    id: number;
+    num_demo: number;
+    num_pos_response: number;
+    num_sent: number;
+    sdr_img_url: string;
+    sdr_name: string;
+    start_date: string;
+    status: string;
+    title: string;
+  };
+
+const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
 
   // New System for one shot campaign generator
   const [selectedVoice, setSelectedVoice] = useState<string | null>(null);
@@ -133,7 +158,7 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
         setDefaultVoicesOptions(data)
       }
     }
-
+    handleStrategy();
     getVoices();
   }, [])
 
@@ -224,42 +249,113 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
     return res as MsgResponse;
   };
 
+  const fillInFromStrategy = async (strategy: Strategy) => {
+
+
+    type StrategyResponseData = {
+      createdPersona: string;
+      fitReason: string;
+      icpMatchingPrompt: string;
+      emailSequenceKeywords: string[];
+      liSequenceKeywords: string[];
+      liGeneralAngle: string;
+      emailGeneralAngle: string;
+      purpose: string;
+      liPainPoint: string;
+      ctaTarget: string;
+      withData: string;
+      liAssetIngestor: string;
+      emailAssetIngestor: string;
+    };
+
+    setLoadingStrategy(true);
+
+    const response = await fetch(`${API_URL}/strategies/generate_campaign_from_strategy`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        strategy_id: strategy.id,
+      }),
+    });
+
+    if (response.status === 200) {
+      const data: StrategyResponseData = await response.json();
+      setFindSampleProspects(true);
+      setNumSteps(3);
+      setNumVariance(3);
+      setCreatedPersona(data.createdPersona || '');
+      setFitReason(data.fitReason || '');
+      setICPMatchingPrompt(data.icpMatchingPrompt || '');
+      setEmailSequenceKeywords(data.emailSequenceKeywords || []);
+      setLiSequenceKeywords(data.liSequenceKeywords || []);
+      setLiGeneralAngle(data.liGeneralAngle || '');
+      setEmailGeneralAngle(data.emailGeneralAngle || '');
+      setPurpose(data.purpose || '');
+      setLiPainPoint(data.liPainPoint || '');
+      setCTATarget(data.ctaTarget || '');
+      setWithData(data.withData || '');
+      setLiAssetIngestor(data.liAssetIngestor || '');
+      setEmailAssetIngestor(data.emailAssetIngestor || '');
+      setEmailSequenceOpened(true);
+      setWriteEmailSequenceDraft(true);
+      setWriteLISequenceDraft(true);
+      setLiSequenceOpened(true);
+    } else {
+      console.error("Failed to generate from strategy");
+    }
+
+    setTab("scratch");
+
+    setLoadingStrategy(false);
+
+  }
+
   const userToken = useRecoilValue(userTokenState);
 
-  const [strategies, setStrategies] = useState([
-    {
-      title: "Account Targeting",
-      goal: "Test out if Bay Area is working better; select different meetings.",
-    },
-    {
-      title: "Similar Accounts",
-      goal: "Test out if Bay Area is working better; select different meetings.",
-    },
-    {
-      title: "Location Targeting",
-      goal: "Test out if Bay Area is working better; select different meetings.",
-    },
-    {
-      title: "Giftcard Campaign",
-      goal: "Test out if Bay Area is working better; select different meetings.",
-    },
-    {
-      title: "Location Targeting",
-      goal: "Test out if Bay Area is working better; select different meetings.",
-    },
-    {
-      title: "Giftcard Campaign",
-      goal: "Test out if Bay Area is working better; select different meetings.",
-    },
-    {
-      title: "Account Targeting",
-      goal: "Test out if Bay Area is working better; select different meetings.",
-    },
-    {
-      title: "Similar Accounts",
-      goal: "Test out if Bay Area is working better; select different meetings.",
-    },
-  ]);
+  const { getAllStrategies, patchUpdateStrategy } = useStrategiesApi(userToken);
+
+  const handleStrategy = async () => {
+    const response = await getAllStrategies();
+    setStrategyOptions(response);
+  };
+
+  // const [strategies, setStrategies] = useState([
+  //   {
+  //     title: "Account Targeting",
+  //     goal: "Test out if Bay Area is working better; select different meetings.",
+  //   },
+  //   {
+  //     title: "Similar Accounts",
+  //     goal: "Test out if Bay Area is working better; select different meetings.",
+  //   },
+  //   {
+  //     title: "Location Targeting",
+  //     goal: "Test out if Bay Area is working better; select different meetings.",
+  //   },
+  //   {
+  //     title: "Giftcard Campaign",
+  //     goal: "Test out if Bay Area is working better; select different meetings.",
+  //   },
+  //   {
+  //     title: "Location Targeting",
+  //     goal: "Test out if Bay Area is working better; select different meetings.",
+  //   },
+  //   {
+  //     title: "Giftcard Campaign",
+  //     goal: "Test out if Bay Area is working better; select different meetings.",
+  //   },
+  //   {
+  //     title: "Account Targeting",
+  //     goal: "Test out if Bay Area is working better; select different meetings.",
+  //   },
+  //   {
+  //     title: "Similar Accounts",
+  //     goal: "Test out if Bay Area is working better; select different meetings.",
+  //   },
+  // ]);
   const [pages, setPages] = useState(0);
 
   useEffect(() => {
@@ -302,6 +398,16 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
               </Center>
             ),
           },
+          {
+            value: "strategy",
+            disabled: false,
+            label: (
+              <Center>
+                <IconChartBar size="1rem" />
+                <Box ml={10}>Create from Strategy</Box>
+              </Center>
+            ),
+          },
         ]}
       />
       {tab === "scratch" ? (
@@ -329,6 +435,7 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
                   <Switch
                     onChange={() => setFindSampleProspects(!findSampleProspects)}
                     labelPosition="left"
+                    checked={findSampleProspects}
                     styles={{
                       body: {
                         width: "100%",
@@ -772,7 +879,7 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
             }}
           />
         </Stack>
-      ) : (
+      ) : tab === "voice" ? (
         <Stack spacing="xs" mt={"md"}>
           {/*<TextInput placeholder="Search strategies" rightSection={<IconSearch size={"1rem"} color="gray" />} />*/}
           <SimpleGrid cols={2}>
@@ -833,7 +940,7 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
             <Flex align={"center"}>
               <Select
                 w={100}
-                data={Array.from({ length: Math.ceil(strategies.length / 4) }, (_, i) => ({
+                data={Array.from({ length: Math.ceil(strategyOptions.length / 4) }, (_, i) => ({
                   label: `${i + 1}`,
                   value: i.toString(),
                 }))}
@@ -874,7 +981,149 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
             </Flex>
           </Paper>
         </Stack>
-      )}
+      ) : (<Stack spacing="xs" mt={"md"}>
+        {/*<TextInput placeholder="Search strategies" rightSection={<IconSearch size={"1rem"} color="gray" />} />*/}
+        <SimpleGrid cols={2}>
+          {strategyOptions.map((strategy, index) => {
+            return (
+              <Paper withBorder radius={"sm"} p={"sm"} key={index} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
+                <>
+                  <Flex align={"center"} justify={"space-between"}>
+                    <Text fw={600} size={"md"}>
+                      {strategy.title}
+                    </Text>
+                    <ActionIcon 
+                      onClick={() => {
+                        openContextModal({
+                          modal: "editStrategy",
+                          title: (
+                            <Flex align={"center"} gap={"sm"}>
+                              <IconBulb color="#228be6" size={"1.6rem"} />
+                              <Title order={2}>Edit Strategy</Title>
+                            </Flex>
+                          ),
+                          styles: {
+                            content: {
+                              minWidth: "70%",
+                            },
+                          },
+                          innerProps: {
+                            title: strategy.title,
+                            description: strategy.description,
+                            archetypes: [],
+                            status: strategy.status,
+                            startDate: strategy.start_date ? new Date(strategy.start_date) : null,
+                            endDate: strategy.end_date ? new Date(strategy.end_date) : null,
+                            onSubmit: async (
+                              title: string,
+                              description: string,
+                              archetypes: number[],
+                              status: string,
+                              startDate: Date,
+                              endDate: Date
+                            ) => {
+                              const response = await patchUpdateStrategy(
+                                strategy.id,
+                                title,
+                                description,
+                                archetypes,
+                                status,
+                                startDate,
+                                endDate
+                              );
+                              handleStrategy();
+                              // const updatedStrategy = await getStrategy(strategy.id);
+                              // setStrategy(updatedStrategy);
+                              showNotification({
+                                title: "Success",
+                                message: "Strategy updated successfully",
+                                color: "green",
+                              });
+                            },
+                          },
+                        });
+                      }}
+                    
+                    variant="light" color="blue" radius={"xl"} size={"sm"}>
+                      <IconPencil size={"0.9rem"} />
+                    </ActionIcon>
+                  </Flex>
+                
+                  <Flex gap={'4px'} mt={'8px'}>
+                    <Badge color={'purple'}>
+                      <Text size="xs" fw={700}>
+                        Start Date: {new Date(strategy.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </Text>
+                    </Badge>
+                    <Badge color={'green'}>
+                      <Text size="xs" fw={700}>
+                        End Date: {new Date(strategy.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </Text>
+                    </Badge>
+                  </Flex>
+                </>
+                <Button
+                  color="grape"
+                  loading={loadingStrategy}
+                  fullWidth
+                  mt={"sm"}
+                  onClick={() => {
+                    fillInFromStrategy(strategy).then(() => {
+                      // Handle any additional logic here if needed
+                    });
+                  }}
+                >
+                  Use
+                </Button>
+              </Paper>
+            );
+          })}
+        </SimpleGrid>
+        <Paper withBorder>
+          <Flex align={"center"}>
+            <Select
+              w={100}
+              data={Array.from({ length: Math.ceil(strategyOptions.length / 4) }, (_, i) => ({
+                label: `${i + 1}`,
+                value: i.toString(),
+              }))}
+              variant="unstyled"
+              onChange={(e) => setPages(Number(e))}
+              styles={{
+                input: {
+                  paddingLeft: "14px",
+                },
+              }}
+            />
+            <Divider orientation="vertical" />
+            <Text w={"100%"} size={"sm"} color="gray" align="center">
+              of {Math.ceil(defaultVoicesOptions.length / 4)} pages
+            </Text>
+            <Divider orientation="vertical" />
+            <ActionIcon
+              variant="transparent"
+              onClick={() => {
+                if (pages > 0) {
+                  setPages((pages) => (pages = pages - 1));
+                }
+              }}
+            >
+              <IconChevronLeft size={"0.9rem"} />
+            </ActionIcon>
+            <Divider orientation="vertical" />
+            <ActionIcon
+              variant="transparent"
+              onClick={() => {
+                if (pages < Math.ceil(defaultVoicesOptions.length / 4) - 1) {
+                  setPages((pages) => (pages = pages + 1));
+                }
+              }}
+            >
+              <IconChevronRight size={"0.9rem"} />
+            </ActionIcon>
+          </Flex>
+        </Paper>
+      </Stack>)}
     </Paper>
   );
 }

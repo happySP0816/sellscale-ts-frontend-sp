@@ -44,6 +44,7 @@ const PROSPECT_DB_COLUMNS = [
   "title",
   "override",
   "linkedin_url",
+  "email",
 ];
 
 function findBestPreviewRows(fileJSON: any[], previewAmount: number) {

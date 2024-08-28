@@ -35,12 +35,14 @@ import {
   IconChevronRight,
   IconChevronUp,
   IconEye,
+  IconInfoCircle,
   IconMailOpened,
   IconPencil,
   IconPlus,
   IconSearch,
   IconUser,
   IconUsers,
+  IconX,
 } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -97,6 +99,8 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
     status: string;
     title: string;
   };
+
+const [connectedStrategy, setConnectedStrategy] = useState<Strategy | undefined>(undefined);
 
 const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
 
@@ -418,6 +422,27 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
           <>
             {innerProps.mode === "CREATE-ONLY" ? (
               <>
+                {connectedStrategy && <Paper
+                  withBorder
+                  bg={"#E6F7FF"}
+                  px={"sm"}
+                  py={"xs"}
+                  style={{ borderColor: "#1E90FF" }}
+                >
+                  <Flex align={"center"} gap={"xs"}>
+                    <IconInfoCircle color="#1E90FF" size={"1rem"} />
+                    <Text size={"sm"} color="#1E90FF" fw={600}>
+                      Connected Strategy:{" "}
+                      <span className="font-medium text-gray-500">
+                        {connectedStrategy.title}
+                      </span>
+                    </Text>
+                    <ActionIcon size="sm" color="red" onClick={() => {setConnectedStrategy(undefined)}}>
+                      <IconX size="1rem" />
+                    </ActionIcon>
+                  </Flex>
+                </Paper>}
+
                 <TextInput
                   placeholder="eg. C-Suite Sales Leaders in tech companies"
                   label={<Text mb="xs" size="lg">Campaign Name</Text>}
@@ -853,6 +878,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
               contactObjective: contactObjective,
               contractSize: personaContractSize,
               templateMode: templateMode === "template",
+              connectedStrategyId: connectedStrategy ? connectedStrategy.id : undefined,
               purpose,
               autoGenerationPayload : {
               findSampleProspects,
@@ -1068,6 +1094,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                   fullWidth
                   mt={"sm"}
                   onClick={() => {
+                    setConnectedStrategy(strategy);
                     fillInFromStrategy(strategy).then(() => {
                       // Handle any additional logic here if needed
                     });

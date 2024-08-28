@@ -484,7 +484,7 @@ const MarketMapFilters = function ({
           {isScoring && isScoring > 0 ? (
             <Progress
               color={"grape"}
-              value={(isScoring - programmaticUpdates.size) * 100}
+              value={(isScoring - programmaticUpdates.size) / isScoring * 100}
               label={"testing"}
             />
           ) : (
@@ -1145,7 +1145,7 @@ const MarketMapFilters = function ({
           {isScoring && isScoring > 0 ? (
             <Progress
               color={"grape"}
-              value={(isScoring - programmaticUpdates.size) * 100}
+              value={(isScoring - programmaticUpdates.size) / isScoring * 100}
               label={"testing"}
             />
           ) : (

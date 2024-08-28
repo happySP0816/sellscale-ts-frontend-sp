@@ -101,7 +101,9 @@ export default function CreatePersona(props: PropsType) {
     autoGenerationPayload?: PropsType["createPersona"]["autoGenerationPayload"]
   ) => {
     setCreatingPersona(true);
-    const result = await createPersona(
+    let result;
+    try{
+    result = await createPersona(
       userToken,
       props.createPersona.name,
       props.createPersona.ctas,
@@ -120,6 +122,11 @@ export default function CreatePersona(props: PropsType) {
       props.createPersona.connectedStrategyId,
       props.createPersona.override_archetype_id
     );
+    } catch (e) {
+      console.error("Failed to create persona & CTAs", e);
+      setCreatingPersona(false);
+      return;
+    }
     if (result.status === "error") {
       console.error("Failed to create persona & CTAs");
       return;

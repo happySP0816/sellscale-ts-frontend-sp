@@ -1012,7 +1012,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
       ) : (<Stack spacing="xs" mt={"md"}>
         {/*<TextInput placeholder="Search strategies" rightSection={<IconSearch size={"1rem"} color="gray" />} />*/}
         <SimpleGrid cols={2}>
-          {strategyOptions.map((strategy, index) => {
+          {strategyOptions.slice().reverse().map((strategy, index) => {
             return (
               <Paper withBorder radius={"sm"} p={"sm"} key={index} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
                 <>

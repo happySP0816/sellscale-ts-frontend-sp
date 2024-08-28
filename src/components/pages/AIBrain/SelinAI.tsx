@@ -2764,6 +2764,8 @@ const PlannerComponent = ({
   const campaignId = threads.find((thread) => thread.id === currentSessionId)
     ?.memory?.campaign_id;
 
+  const currentThread = threads.find((thread) => thread.id === currentSessionId);
+
   useEffect(() => {
     (async () => {
       if (campaignId) {
@@ -3044,7 +3046,8 @@ const PlannerComponent = ({
                         }}
                       />
                     </Text>
-                    {currentProject && index === tasks.length - 1 ? (
+                    {/* eventually delete this */}
+                    {currentThread?.memory.campaign_id && index === tasks.length - 1 ? (
                       <CampaignLandingV2
                         showOnlyHeader
                         showLaunchButton

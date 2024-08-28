@@ -223,7 +223,7 @@ const ContactAccountFilterModal = function ({
       socket.off("update_prospect_list");
       socket.off("update_progress");
     };
-  }, []);
+  }, [programmaticUpdateList]);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["segmentProspects", segment?.id],

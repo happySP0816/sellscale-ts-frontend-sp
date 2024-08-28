@@ -497,6 +497,10 @@ export default function SequencesV2() {
     }
   };
 
+  const onEmailRegenerate = async () => {
+
+  };
+
   // We also want to move voice related stuff into this Sequence Widget
 
   return (

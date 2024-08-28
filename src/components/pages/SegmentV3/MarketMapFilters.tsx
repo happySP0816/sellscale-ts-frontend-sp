@@ -50,9 +50,11 @@ interface MarketMapFiltersProps {
   headerSet: Set<string>;
   setHeaderSet: React.Dispatch<React.SetStateAction<Set<string>>>;
   setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
+  setProgrammaticUpdates: React.Dispatch<React.SetStateAction<Set<number>>>;
+  programmaticUpdates: Set<number>;
 }
 
-const MarketMapFilters = function({
+const MarketMapFilters = function ({
   icp_scoring_ruleset,
   prospects,
   viewMode,
@@ -65,8 +67,20 @@ const MarketMapFilters = function({
   headerSet,
   setHeaderSet,
   setViewMode,
+  setProgrammaticUpdates,
+  programmaticUpdates,
 }: MarketMapFiltersProps) {
   const userToken = useRecoilValue(userTokenState);
+
+  const [isScoring, setIsScoring] = useState<number>(0);
+
+  const [scoreAI, setScoreAI] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (programmaticUpdates.size === 0) {
+      setIsScoring(0);
+    }
+  }, [programmaticUpdates]);
 
   const [
     included_individual_title_keywords,
@@ -253,217 +267,6 @@ const MarketMapFilters = function({
   const [company_ai_use_linkedin, setCompanyAIUseLinkedin] =
     useState<boolean>(false);
 
-  useEffect(() => {
-    if (included_individual_title_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "included_individual_title_keywords"
-        )
-      );
-    }
-    if (excluded_individual_title_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "excluded_individual_title_keywords"
-        )
-      );
-    }
-    if (included_individual_industry_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "included_individual_industry_keywords"
-        )
-      );
-    }
-    if (excluded_individual_industry_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "excluded_individual_industry_keywords"
-        )
-      );
-    }
-    if (
-      !individual_years_of_experience_start &&
-      individual_years_of_experience_start !== 0 &&
-      !individual_years_of_experience_end &&
-      individual_years_of_experience_end !== 0
-    ) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "individual_years_of_experience"
-        )
-      );
-    }
-    if (included_individual_skills_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "included_individual_skills_keywords"
-        )
-      );
-    }
-    if (excluded_individual_skills_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "excluded_individual_skills_keywords"
-        )
-      );
-    }
-    if (included_individual_locations_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "included_individual_locations_keywords"
-        )
-      );
-    }
-    if (excluded_individual_locations_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "excluded_individual_locations_keywords"
-        )
-      );
-    }
-    if (included_individual_generalized_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "included_individual_generalized_keywords"
-        )
-      );
-    }
-    if (excluded_individual_generalized_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "excluded_individual_generalized_keywords"
-        )
-      );
-    }
-    if (included_individual_education_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "included_individual_education_keywords"
-        )
-      );
-    }
-    if (excluded_individual_education_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "excluded_individual_education_keywords"
-        )
-      );
-    }
-    if (included_individual_seniority_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "included_individual_seniority_keywords"
-        )
-      );
-    }
-    if (excluded_individual_seniority_keywords.length === 0) {
-      setContactTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "excluded_individual_seniority_keywords"
-        )
-      );
-    }
-    if (included_company_name_keywords.length === 0) {
-      setCompanyTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "included_company_name_keywords"
-        )
-      );
-    }
-    if (excluded_company_name_keywords.length === 0) {
-      setCompanyTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "excluded_company_name_keywords"
-        )
-      );
-    }
-    if (included_company_locations_keywords.length === 0) {
-      setCompanyTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "included_company_locations_keywords"
-        )
-      );
-    }
-    if (excluded_company_locations_keywords.length === 0) {
-      setCompanyTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "excluded_company_locations_keywords"
-        )
-      );
-    }
-    if (
-      !company_size_start &&
-      company_size_start !== 0 &&
-      !company_size_end &&
-      company_size_end !== 0
-    ) {
-      setCompanyTableHeaders((prevState) =>
-        prevState.filter((item) => item.key !== "company_size")
-      );
-    }
-    if (included_company_industries_keywords.length === 0) {
-      setCompanyTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "included_company_industries_keywords"
-        )
-      );
-    }
-    if (excluded_company_industries_keywords.length === 0) {
-      setCompanyTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "excluded_company_industries_keywords"
-        )
-      );
-    }
-    if (included_company_generalized_keywords.length === 0) {
-      setCompanyTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "included_company_generalized_keywords"
-        )
-      );
-    }
-    if (excluded_company_generalized_keywords.length === 0) {
-      setCompanyTableHeaders((prevState) =>
-        prevState.filter(
-          (item) => item.key !== "excluded_company_generalized_keywords"
-        )
-      );
-    }
-  }, [
-    included_individual_title_keywords,
-    excluded_individual_title_keywords,
-    included_individual_industry_keywords,
-    excluded_individual_industry_keywords,
-    individual_years_of_experience_start,
-    individual_years_of_experience_end,
-    included_individual_skills_keywords,
-    excluded_individual_skills_keywords,
-    included_individual_locations_keywords,
-    excluded_individual_locations_keywords,
-    included_individual_generalized_keywords,
-    excluded_individual_generalized_keywords,
-    included_individual_education_keywords,
-    excluded_individual_education_keywords,
-    included_individual_seniority_keywords,
-    excluded_individual_seniority_keywords,
-    included_company_name_keywords,
-    excluded_company_name_keywords,
-    included_company_locations_keywords,
-    excluded_company_locations_keywords,
-    company_size_start,
-    company_size_end,
-    included_company_industries_keywords,
-    excluded_company_industries_keywords,
-    included_company_generalized_keywords,
-    excluded_company_generalized_keywords,
-    individual_personalizers,
-    company_personalizers,
-    dealbreakers,
-    individual_ai_filters,
-    company_ai_filters,
-  ]);
-
   const [scoreLoading, setScoreLoading] = useState(false);
 
   const queryClient = useQueryClient();
@@ -528,6 +331,15 @@ const MarketMapFilters = function({
 
   const scoreMarketMap = async () => {
     setScoreLoading(true);
+
+    if (selectedContacts.size !== 0) {
+      setProgrammaticUpdates(new Set(selectedContacts));
+      setIsScoring(selectedContacts.size);
+    } else {
+      setProgrammaticUpdates(new Set(prospects.map((p) => p.id)));
+      setIsScoring(prospects.length);
+    }
+
     const response = await fetch(`${API_URL}/segment/${segment_id}/score`, {
       method: "POST",
       headers: {
@@ -575,6 +387,7 @@ const MarketMapFilters = function({
         individual_ai_filters,
         company_ai_filters,
         selectedContacts: Array.from(selectedContacts),
+        score_ai: scoreAI,
       }),
     });
 
@@ -637,14 +450,37 @@ const MarketMapFilters = function({
             marginRight: "4px",
           }}
         >
-          <Button
-            color={"red"}
-            size={"md"}
-            onClick={() => scoreMarketMap()}
-            disabled={scoreLoading}
+          <Flex
+            style={{ maxWidth: "300px", minWidth: "300px" }}
+            gap={"4px"}
+            align={"center"}
           >
-            {scoreLoading ? <Loader /> : "Score"}
-          </Button>
+            <Button
+              color={"red"}
+              size={"md"}
+              style={{ width: "65%" }}
+              onClick={() => scoreMarketMap()}
+              disabled={scoreLoading}
+            >
+              {scoreLoading ? (
+                <Loader />
+              ) : (
+                `Score (${
+                  selectedContacts.size !== 0
+                    ? selectedContacts.size
+                    : prospects.length
+                })`
+              )}
+            </Button>
+            <Switch
+              onLabel={"with AI"}
+              size={"lg"}
+              offLabel={"without AI"}
+              checked={scoreAI}
+              onChange={(e) => setScoreAI(e.currentTarget.checked)}
+            />
+          </Flex>
+
           <ScrollArea h={600} m={0}>
             <Accordion defaultValue="individual">
               <Accordion.Item value="ai_filter">
@@ -731,7 +567,8 @@ const MarketMapFilters = function({
                       Add AI Filter
                     </Button>
                   </Flex>
-                  <Accordion styles={{ content: { padding: "2px" } }}
+                  <Accordion
+                    styles={{ content: { padding: "2px" } }}
                     variant={"filled"}
                   >
                     <Accordion.Item value="custom_filter">
@@ -924,7 +761,7 @@ const MarketMapFilters = function({
                         data={included_individual_title_keywords.concat(
                           titleOptions
                         )}
-                      // setData={setIncludedIndividualTitleKeywords}
+                        // setData={setIncludedIndividualTitleKeywords}
                       />
                       <Divider />
                       <CustomSelect
@@ -1266,14 +1103,36 @@ const MarketMapFilters = function({
             marginRight: "4px",
           }}
         >
-          <Button
-            color={"red"}
-            size={"md"}
-            onClick={() => scoreMarketMap()}
-            disabled={scoreLoading}
+          <Flex
+            style={{ maxWidth: "300px", minWidth: "300px" }}
+            gap={"4px"}
+            align={"center"}
           >
-            {scoreLoading ? <Loader /> : "Score"}
-          </Button>
+            <Button
+              color={"red"}
+              size={"md"}
+              style={{ width: "65%" }}
+              onClick={() => scoreMarketMap()}
+              disabled={scoreLoading}
+            >
+              {scoreLoading ? (
+                <Loader />
+              ) : (
+                `Score (${
+                  selectedContacts.size !== 0
+                    ? selectedContacts.size
+                    : prospects.length
+                })`
+              )}
+            </Button>
+            <Switch
+              onLabel={"with AI"}
+              size={"lg"}
+              offLabel={"without AI"}
+              checked={scoreAI}
+              onChange={(e) => setScoreAI(e.currentTarget.checked)}
+            />
+          </Flex>
           <ScrollArea h={600} m={0}>
             <Accordion defaultValue="company">
               <Accordion.Item value="ai_filter">
@@ -1357,7 +1216,8 @@ const MarketMapFilters = function({
                       Add AI Filter
                     </Button>
                   </Flex>
-                  <Accordion styles={{ content: { padding: "2px" } }} 
+                  <Accordion
+                    styles={{ content: { padding: "2px" } }}
                     variant={"filled"}
                   >
                     <Accordion.Item value="custom_filter">

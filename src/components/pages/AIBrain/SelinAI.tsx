@@ -57,6 +57,7 @@ import {
   IconLink,
   IconList,
   IconParachute,
+  IconPencil,
   IconPlus,
   IconPoint,
   IconPuzzle,
@@ -340,6 +341,32 @@ export default function SelinAI() {
 
   const navigate = useNavigate();
 
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingSessionName, setEditingSessionName] = useState<string>("");
+
+
+  const editSession = (sessionId: number, newName: string) => {
+    setEditingIndex(null);
+    setThreads((prevThreads) =>
+      prevThreads.map((prevThread) =>
+        prevThread.id === sessionId
+          ? { ...prevThread, session_name: newName }
+          : prevThread
+      )
+    );
+    fetch(`${API_URL}/selix/edit_session`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        new_name: newName,
+      }),
+    });
+  };
+  
   // console.log("current session is", currentSessionId);
 
   useEffect(() => {
@@ -1296,64 +1323,62 @@ export default function SelinAI() {
                           onMouseEnter={() => setHoverChat(thread.id)}
                           onMouseLeave={() => setHoverChat(undefined)}
                         >
-                          {/* <Flex align={"center"} gap={"sm"}>
-                            {thread.status === "ACTIVE" ? (
-                              <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
-                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              </div>
-                            ) : // </ThemeIcon>
-                            thread.status === "COMPLETE" ? (
-                              <IconCircleCheck size={"1rem"} fill="green" color="white" />
-                            ) : thread.status === "PENDING_OPERATOR" ? (
-                              // <ThemeIcon color="orange" radius={"xl"} size={"xs"} p={0} variant="light">
-                              //   <IconPoint fill="orange" color="white" size={"4rem"} />
-                              // </ThemeIcon>
-                              <div className="flex items-center justify-center bg-orange-100 rounded-full p-1 border-orange-300 border-[1px] border-solid">
-                                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                              </div>
-                            ) : (
-                              <></>
-                            )}{" "}
-                            <Text color={thread.status === "PENDING_OPERATOR" ? "orange" : "green"} fw={600}>
-                              {thread.status === "PENDING_OPERATOR" ? "IN PROGRESS" : thread.status}
-                            </Text>
-                            <ActionIcon
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setThreads((prevThreads) => prevThreads.filter((prevThread) => prevThread.id !== thread.id));
-                                //if the chat we're in is the one we're deleting, we need to get the next chat
-                                if (sessionIDRef.current === thread.id) {
-                                  const nextThread = threads.find((thread) => thread.id !== sessionIDRef.current);
-                                  if (nextThread) {
-                                    getMessages(nextThread.thread_id, nextThread.id);
-                                  } else {
-                                    handleCreateNewSession();
-                                    setAIType("PLANNER");
-                                  }
-                                }
-
-                                //query to delete thread
-                                fetch(`${API_URL}/selix/delete_session`, {
-                                  method: "DELETE",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                    Authorization: `Bearer ${userToken}`,
-                                  },
-                                  body: JSON.stringify({
-                                    session_id: thread.id,
-                                  }),
-                                });
-                              }}
-                              style={{ marginLeft: "auto" }}
-                            >
-                              <IconTrash size={"1rem"} color="red" />
-                            </ActionIcon>
-                          </Flex> */}
                           <Flex align={"center"} justify={"space-between"}>
-                            <Text fw={600}>
-                              {thread.session_name || "Untitled Session"}
-                            </Text>
-                            {hoverChat && hoverChat === thread.id && (
+                            {editingIndex === index ? (
+                              <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()}>
+                                <TextInput
+                                  value={editingSessionName}
+                                  onChange={(e) => setEditingSessionName(e.currentTarget.value)}
+                                  onBlur={() => editSession(thread.id, editingSessionName)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      editSession(thread.id, editingSessionName);
+                                    }
+                                  }}
+                                  style={{ width: `${editingSessionName.length + 2}ch` }}
+                                  rightSection={
+                                    <ActionIcon
+                                      variant="transparent"
+                                      color="green"
+                                      size={"sm"}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        editSession(thread.id, editingSessionName);
+                                      }}
+                                    >
+                                      <IconCircleCheck size={'xl'} />
+                                    </ActionIcon>
+                                  }
+                                />
+                              </Flex>
+                            ) : (
+                              <Text
+                                fw={600}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingIndex(index);
+                                  setEditingSessionName(thread.session_name);
+                                }}
+                                style={{ cursor: "text" }}
+                              >
+                                {thread.session_name || "Untitled Session"}
+                              </Text>
+                            )}
+                            {!(editingIndex === index) && hoverChat && hoverChat === thread.id && (
+                              <>
+                              <ActionIcon
+                                variant="transparent"
+                                color="blue"
+                                size={"sm"}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingIndex(index);
+                                  setEditingSessionName(thread.session_name);
+                                }}
+                                style={{ marginLeft: 'auto' }}
+                              >
+                                <IconPencil size={"1rem"} />
+                              </ActionIcon>
                               <ActionIcon
                                 variant="transparent"
                                 color="red"
@@ -1389,6 +1414,8 @@ export default function SelinAI() {
                               >
                                 <IconTrash size={"1rem"} />
                               </ActionIcon>
+                              </>
+
                             )}
                           </Flex>
                           <Flex align={"center"} gap={"xs"}>

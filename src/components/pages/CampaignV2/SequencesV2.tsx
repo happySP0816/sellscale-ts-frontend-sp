@@ -245,13 +245,13 @@ export default function SequencesV2() {
     prospect: ProspectShallow | undefined
   ) {
     if (prospect) {
-      const foundProspect = campaignContacts.find((p) => p.id === prospect.id);
+      const foundProspect = campaignContacts?.find((p) => p.id === prospect.id);
 
       if (foundProspect) {
-        const index = campaignContacts.findIndex(
+        const index = campaignContacts?.findIndex(
           (p) => p.id === foundProspect.id
         );
-        setSelectedProspectIndex(index);
+        setSelectedProspectIndex(index !== undefined ? index : -1);
       }
     }
   };
@@ -426,7 +426,7 @@ export default function SequencesV2() {
                 </Flex>
               </Button>
               <ActionIcon
-                disabled={selectedProspectIndex === campaignContacts.length - 1}
+                disabled={selectedProspectIndex === (campaignContacts?.length || 0)- 1}
               >
                 <IconArrowRight size={16} />
               </ActionIcon>

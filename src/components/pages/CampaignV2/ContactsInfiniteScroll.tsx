@@ -19,6 +19,7 @@ export interface Contact {
   avatar: string;
   title: string;
   company: string;
+  generatedText?: string;
   icp_fit_score: number;
 }
 
@@ -111,7 +112,7 @@ export function ContactsInfiniteScroll({
         //   return Array.from(uniqueContacts);
         // });
         setCampaignContacts((prevContacts) => {
-          const uniqueContacts = new Set([...prevContacts, ...newContacts.sample_contacts]);
+          const uniqueContacts = new Set([...(prevContacts || []), ...(newContacts.sample_contacts || [])]);
           return Array.from(uniqueContacts);
         });
         //refetch total contacts to update the count
@@ -304,7 +305,7 @@ export function ContactsInfiniteScroll({
               </>
             ) : (
               <>
-                {`Showing ${campaignContacts?.length} contacts of ${totalContacts < campaignContacts?.length ? campaignContacts?.length : totalContacts}`}
+                {`Showing ${campaignContacts?.length} contacts of ${campaignContacts?.length  && totalContacts < campaignContacts?.length ? campaignContacts?.length : totalContacts}`}
                 {isArchetypeUploading && (
                   <Flex direction="column" align="center" mt="xs">
                     <Text>

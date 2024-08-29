@@ -72,7 +72,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
-import { IconArrowsSplit2, IconUsersMinus, IconUsersPlus } from "@tabler/icons-react";
+import { IconArrowsSplit2, IconUserBolt, IconUserCog, IconUserScan, IconUsersMinus, IconUsersPlus } from "@tabler/icons-react";
 import { closeAllModals, openConfirmModal, openContextModal } from "@mantine/modals";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
 import { showNotification } from "@mantine/notifications";
@@ -127,6 +127,7 @@ export default function SegmentV3(props: PropsType) {
   const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
 
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
+  const [showViewProspectsModalOld, setShowViewProspectsModalOld] = useState(false);
   const [showTransferSegmentModal, setShowTransferSegmentModal] = useState(false);
   const [sdrs, setAllSDRs] = useState([] as any[]);
   const [selectedSdrId, setSelectedSdrId] = useState(null);
@@ -486,6 +487,26 @@ export default function SegmentV3(props: PropsType) {
 
   return (
     <Box>
+      {/* Old view prospects modal */}
+      <Modal
+        opened={showViewProspectsModalOld}
+        onClose={() => {
+          setShowViewProspectsModalOld(false);
+          getAllSegments(true);
+        }}
+        size="1200px"
+        // h={"500px"}
+        padding="md"
+        title="View Prospects"
+      >
+        <iframe
+          // Edit URL: https://sellscale.retool.com/editor/0037d48c-00df-11ef-9943-1fa602cbecb8/Segments%20v2%20Modules/View%20Prospect%20in%20Segment
+          src={`https://sellscale.retool.com/embedded/public/639c4389-18d5-42a5-ad68-e84fd643b5ee#authToken=${userToken}&segmentId=${selectedSegmentId}`}
+          width="100%"
+          height="700px"
+          style={{ border: "none" }}
+        ></iframe>
+      </Modal>
       {/* Create Segment Modal */}
       <Modal
         onClose={() => {
@@ -1251,6 +1272,16 @@ export default function SegmentV3(props: PropsType) {
                             >
                               <IconUsers size={"0.9rem"} />
                               View Prospects
+                            </Menu.Item>
+
+                            <Menu.Item
+                              onClick={() => {
+                                setShowViewProspectsModalOld(true);
+                                setSelectedSegmentId(item.id);
+                              }}
+                            >
+                              <IconUserBolt size={"0.9rem"} />
+                              Transfer Prospects
                             </Menu.Item>
 
                             <Menu.Divider />

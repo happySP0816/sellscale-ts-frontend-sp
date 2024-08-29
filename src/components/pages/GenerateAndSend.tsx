@@ -1,6 +1,6 @@
-import { Avatar, Badge, Box, Button, Center, Flex, Paper, SegmentedControl, Stack, Text, Textarea } from "@mantine/core";
-import { IconBrandLinkedin, IconEdit, IconLetterT, IconLoader, IconMail, IconRecordMail } from "@tabler/icons";
-import { IconSparkles } from "@tabler/icons-react";
+import { ActionIcon, Avatar, Badge, Box, Button, Center, Flex, Paper, SegmentedControl, Stack, Text, Textarea } from "@mantine/core";
+import { IconBrandLinkedin, IconEdit, IconGlobe, IconLetterT, IconLoader, IconMail, IconRecordMail, IconX } from "@tabler/icons";
+import { IconClockBolt, IconClockCog, IconSparkles } from "@tabler/icons-react";
 import { DataGrid } from "mantine-data-grid";
 import { DataTable } from "mantine-datatable";
 import { useEffect, useState } from "react";
@@ -8,13 +8,15 @@ import { useEffect, useState } from "react";
 export default function GenerateAndSend() {
   const [data, setData] = useState([
     {
-      avatar: "",
+      avatar: "https://www.figma.com/design/6tiYgFavVgP2Wz20X3G4uj/SellScale-V3?node-id=8359-44985&node-type=FRAME&t=styRm49in4GyGWml-0#",
       name: "Oliver King",
       job: "Former Quant & VC",
       part: "Helping Founder GT",
       status: false,
       linkedin: true,
       email: false,
+      message:
+        "Hi Oliver! Saw your new role in a startup. With your VC and quant background, you must have insights on software development. Interested in boosting your funnel? Let's talk!",
     },
     {
       avatar: "",
@@ -24,6 +26,8 @@ export default function GenerateAndSend() {
       status: false,
       linkedin: true,
       email: false,
+      message:
+        "Hi Etika! I noticed your new role in a startup. With your experience in talent acquisition recruitment and quantitative analysis, I bet you have some valuable insights on software development. Interested in enhancing your pipeline? Let's connect!",
     },
     {
       avatar: "",
@@ -33,6 +37,8 @@ export default function GenerateAndSend() {
       status: false,
       linkedin: false,
       email: true,
+      message:
+        "Hi Nancy! Congrats on your new startup role! Given your strong background in sales and growth analysis, I'm sure you have some sharp perspectives on software development. Let's discuss ways to elevate your funnel!",
     },
     {
       avatar: "",
@@ -42,6 +48,8 @@ export default function GenerateAndSend() {
       status: false,
       linkedin: true,
       email: false,
+      message:
+        "Hi David! Excited to see your new role in the startup world! With your managing direction and quant background, you're likely already thinking about optimizing your software development processes. Want to talk about boosting your funnel?",
     },
     {
       avatar: "",
@@ -51,12 +59,16 @@ export default function GenerateAndSend() {
       status: false,
       linkedin: true,
       email: true,
+      message:
+        "Hi Erik! I came across your recent move to a startup. Your experience in managing and quant must give you unique insights into software development. Interested in discussing how to supercharge your funnel? Let's chat!",
     },
   ]);
   const [filterData, setFilterData] = useState(data);
   const [selected, setSelected] = useState<any>(data[0]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(0);
   const [approveStatus, setApproveStatus] = useState(false);
+
+  const [message, setMessage] = useState("");
 
   const [type, setType] = useState("all");
 
@@ -74,8 +86,28 @@ export default function GenerateAndSend() {
   };
   useEffect(() => {}, [selected, selectedIndex]);
 
+  useEffect(() => {
+    setMessage(selected.message);
+  }, [selected.message]);
+
   return (
-    <Paper h={"100%"}>
+    <Paper p={"sm"}>
+      <Flex justify={"space-between"} align={"center"} p={"sm"}>
+        <Flex gap={"xs"} align={"ceter"}>
+          <IconEdit color="#228be6" size={"1.2rem"} className="mt-1" />
+          <Text size={"lg"} fw={600}>
+            Generate 5 and Send
+          </Text>
+        </Flex>
+        <Flex align={"center"} gap={"sm"}>
+          <Badge variant="outline" radius={"sm"} size="lg" color="green" leftSection={<IconClockBolt size={"1rem"} className="mt-2" />}>
+            {100}%
+          </Badge>
+          <ActionIcon variant="outline" radius={"xl"}>
+            <IconX size={"1.2rem"} />
+          </ActionIcon>
+        </Flex>
+      </Flex>
       <Flex gap={"sm"} w={"100%"}>
         <Paper bg={"#F7F8FA"} p={"md"} w={"35%"}>
           <SegmentedControl
@@ -227,12 +259,27 @@ export default function GenerateAndSend() {
                 <Text size={"sm"} fw={600} color="gray">
                   After you verify make sure to select the <span className="text-green-500">Approve</span> button.
                 </Text>
-                <Textarea
-                  value={
-                    "Hi Oliver! Saw you new role in s startup. With you VC and quant background, you must have insights on software development. Interested in boosting your funnel? Let's talk!"
-                  }
-                  disabled
-                />
+                <Flex direction={"column"} align={"end"}>
+                  <Paper radius={"sm"} bg={"#D9DEE5"} p={4} style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }} mb={-2}>
+                    <Text fw={500} size={"xs"} color="gray">
+                      {message.length}/300
+                    </Text>
+                  </Paper>
+                  <Textarea
+                    w={"100%"}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    defaultValue={selected.message}
+                    maxRows={4}
+                    autosize
+                    maxLength={300}
+                    styles={{
+                      input: {
+                        background: "#F7F8FA",
+                      },
+                    }}
+                  />
+                </Flex>
                 <Flex justify={"space-between"} mt={"md"}>
                   <Button color="grape" variant="outline" leftIcon={<IconEdit size={"1.3rem"} />}>
                     Auto Edit Using AI
@@ -309,11 +356,11 @@ export default function GenerateAndSend() {
           </Stack>
         </Paper>
       </Flex>
-      <Flex mt={"lg"} gap={"md"}>
-        <Button fullWidth variant="outline" color="gray">
+      <Flex mt={"lg"} gap={"md"} mb={"sm"}>
+        <Button size="md" fullWidth variant="outline" color="gray">
           Cancel
         </Button>
-        <Button fullWidth disabled={approveStatus}>
+        <Button size="md" fullWidth disabled={approveStatus}>
           Finish & Send
         </Button>
       </Flex>

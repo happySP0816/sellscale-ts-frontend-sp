@@ -356,6 +356,7 @@ export default function SelinAI() {
   ) => {
     let messagToSend = forcePrompt || prompt;
 
+    setRecording(false);
     //custom handle submit function to handle file uploads
     if (file) {
       const response = await fetch(`${API_URL}/selix/upload_file`, {
@@ -2162,8 +2163,10 @@ const SegmentChat = (props: any) => {
                       }
                     }, 0);
                     return newPrompt;
-                  });
-                }}
+                  }
+                  );
+                }
+                }
               />
               <Button
                 size={"xs"}

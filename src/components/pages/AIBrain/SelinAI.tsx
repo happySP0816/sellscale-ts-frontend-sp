@@ -1250,7 +1250,7 @@ export default function SelinAI() {
                 </Button>
                 <div
                   ref={containerRef}
-                  style={{ overflowX: "hidden", whiteSpace: "nowrap" }}
+                  style={{ overflowX: "auto", whiteSpace: "nowrap" }}
                 >
                   {threads
                     .sort((a, b) => b.id - a.id)
@@ -1271,6 +1271,7 @@ export default function SelinAI() {
                           radius={"sm"}
                           p={"sm"}
                           style={{
+                            cursor: "grab",
                             display: "inline-block",
                             minWidth: "350px",
                             backgroundColor:
@@ -2767,18 +2768,42 @@ const PlannerComponent = ({
   const currentThread = threads.find((thread) => thread.id === currentSessionId);
 
   useEffect(() => {
+    if (openedTaskIndex === tasks.length - 1) {
+      if (taskContainerRef.current) {
+        taskContainerRef.current.scrollTo({
+          top: taskContainerRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [openedTaskIndex]);
+
+  useEffect(() => {
     (async () => {
       if (campaignId) {
-        console.log('getting fresh project');
+
         const [project, res] = await Promise.all([
           getFreshCurrentProject(userToken, campaignId),
-          getSegments()
+          getSegments(true, false, campaignId),
         ]);
 
         setSegment(res[0] || undefined);
         setCurrentProject(project);
+
+
+        if (currentThread?.tasks.length) {
+          setOpenedTaskIndex(currentThread?.tasks.length - 1);
+        }
+        setTimeout(() => {
+          if (taskContainerRef.current) {
+            taskContainerRef.current.scrollTo({
+              top: taskContainerRef.current.scrollHeight,
+              behavior: "smooth",
+            });
+          }
+        }, 50); 
         //show the 'launch campaign' task if a campaign is attached
-        setOpenedTaskIndex(tasks.length - 1);
+
       }
     })();
   }, [campaignId]);
@@ -2799,12 +2824,13 @@ const PlannerComponent = ({
 
   const getSegments = async (
     includeAllInClient: boolean = true,
-    tagFilter: boolean = false
+    tagFilter: boolean = false,
+    forceCampaignId: number
   ) => {
     const url = new URL(`${API_URL}/segment/all`);
     if (includeAllInClient) {
       if (currentProject?.id !== undefined) {
-        url.searchParams.append("archetype_id", currentProject.id.toString());
+        url.searchParams.append("archetype_id", forceCampaignId.toString());
       }
       url.searchParams.append("include_all_in_client", "true");
     }
@@ -3051,7 +3077,7 @@ const PlannerComponent = ({
                       <CampaignLandingV2
                         showOnlyHeader
                         showLaunchButton
-                        forcedCampaignId={currentProject?.id}
+                        forcedCampaignId={currentThread?.memory.campaign_id}
                       />
                     ) : (
                       <TaskRenderer
@@ -3102,19 +3128,23 @@ const TaskRenderer = ({
   const [personalizers, setPersonalizers] = useState([]);
   const emailSequenceData = useRecoilValue(emailSequenceState);
 
+  const currentThread = threads.find(
+    (thread) => thread.id === currentSessionId
+  );
+
   switch (task.widget_type) {
     case "LAUNCH_CAMPAIGN":
       return (
         <CampaignLandingV2
           showOnlyHeader
           showLaunchButton
-          forcedCampaignId={currentProject?.id}
+          forcedCampaignId={currentThread?.memory.campaign_id}
         />
       );
     case "VIEW_PERSONALIZERS":
     return (
       <Personalizers
-        key={currentProject?.id} // Adding key to force re-render when currentProject?.id changes
+        forcedCampaignId={currentThread?.memory.campaign_id}
         ai_researcher_id={currentProject?.ai_researcher_id}
         sequences={emailSequenceData}
         setPersonalizers={setPersonalizers}

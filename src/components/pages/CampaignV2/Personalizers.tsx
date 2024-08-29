@@ -31,13 +31,12 @@ import { useRecoilState, useRecoilValue } from "recoil";
 
 export default function Personalizers(props: any) {
   const { ai_researcher_id } = props;
-
   const userToken = useRecoilValue(userTokenState);
   const [currentProject, setCurrentProject] = useRecoilState(
     currentProjectState
   );
 
-  const id = currentProject?.id || -1;
+  const id = props.forcedCampaignId || currentProject?.id || -1;
 
   const [loadingPersonalizers, setLoadingPersonalizers] = useState(false);
   const [personalizersEnabled, setPersonalizersEnabled] = useState(

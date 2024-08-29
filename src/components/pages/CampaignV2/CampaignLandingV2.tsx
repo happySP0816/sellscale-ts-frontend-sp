@@ -558,7 +558,7 @@ export default function CampaignLandingV2(props: PropsType) {
           const loadedStats = stats as StatsData;
           console.log("stats", loadedStats);
           setStatsData(loadedStats);
-          setCurrentProject(
+          !props.forcedCampaignId && setCurrentProject(
             convertStatsDataToPersonaOverview(loadedStats as StatsData)
           );
           if (loadedStats && loadedStats.testing_volume) {

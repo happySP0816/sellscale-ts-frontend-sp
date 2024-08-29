@@ -19,7 +19,6 @@ import {
   IconMicrophone2Off,
 } from "@tabler/icons";
 import { IconCircleDotFilled, IconCircleFilled } from "@tabler/icons-react";
-import { on } from "events";
 import { showNotification } from "@mantine/notifications";
 
 type DeepGramProps = {
@@ -83,6 +82,17 @@ export default function DeepGram({
     };
   }, []);
 
+useEffect(() => {
+  if (!recording) {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+    }
+    if (liveRef.current) {
+      liveRef.current.finish();
+    }
+  }
+}, [recording]);
+
   useEffect(() => {
     const requestMicrophoneAccess = async () => {
       try {
@@ -90,7 +100,6 @@ export default function DeepGram({
         console.log("Microphone access granted.");
       } catch (error) {
         console.error("Error accessing media devices.", error);
-        // alert("Permission denied. Please allow access to the microphone.");
         showNotification({
           color: "red",
           title: "Error accessing media devices",
@@ -107,7 +116,10 @@ export default function DeepGram({
   }, [transcribedText]);
 
   const initializeLive = () => {
-    const live = deepgram.listen.live({ model: "enhanced-general" });
+    const live = deepgram.listen.live({
+      model: "enhanced-general",
+    });
+
     liveRef.current = live;
 
     live.on(LiveTranscriptionEvents.Open, () => {
@@ -124,17 +136,24 @@ export default function DeepGram({
 
     live.on(LiveTranscriptionEvents.Close, (event) => {
       console.log("Connection to Deepgram closed:", event);
+      console.log("CloseEvent:", event);
+      if (event.code === 1011) {
+        console.error(
+          "Deepgram did not receive audio data or a text message within the timeout window. See https://dpgr.am/net0001"
+        );
+      }
+
     });
 
     live.on(LiveTranscriptionEvents.Error, (error) => {
       console.error("Error occurred:", error);
+      initializeLive();
     });
   };
 
   const handleToggleRecording = async () => {
     setShowAnimation(false);
     if (recording) {
-      // alert("Recording stopped");
       setRecording(false);
       setSpeaking(false);
       setTranscribing(false);
@@ -150,7 +169,6 @@ export default function DeepGram({
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
-        // alert("Recording started");
         setTranscribedText("");
         setLastText("");
         onTranscriptionChanged("");
@@ -168,10 +186,9 @@ export default function DeepGram({
           }
         };
 
-        mediaRecorder.start(300); // Collect audio data in chunks of 1 second
+        mediaRecorder.start(300);
       } catch (error) {
         console.error("Error accessing media devices.", error);
-        // alert("Permission denied. Please allow access to the microphone.");
         showNotification({
           color: "red",
           title: "Error accessing media devices",
@@ -229,21 +246,6 @@ export default function DeepGram({
             </ActionIcon>
           )}
         </HoverCard.Target>
-        {/* <HoverCard.Dropdown>
-          <Paper>
-            <Text>Transcribed Text: {transcribedText}</Text>
-            <Card withBorder mt="sm">
-              <Text fw="bold">Sample Questions</Text>
-              <Text fz="xs">
-                1. Can you describe your project?
-                <br />
-                2. What challenges are you facing?
-                <br />
-                3. What are your goals?
-              </Text>
-            </Card>
-          </Paper>
-        </HoverCard.Dropdown> */}
       </HoverCard>
     </div>
   );

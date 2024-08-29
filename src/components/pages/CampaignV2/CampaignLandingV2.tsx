@@ -68,6 +68,7 @@ import Personalizers from "./Personalizers";
 import Sequences from "./Sequences";
 import { set } from "lodash";
 import SequencesV2 from "./SequencesV2";
+import {GenerationCenter} from "./GenerationCenter";
 // import ToneAdjuster from "./ToneAdjuster";
 
 interface StatsData {
@@ -1039,15 +1040,15 @@ export default function CampaignLandingV2(props: PropsType) {
                   <Modal
                     opened={openGenerationCenter}
                     onClose={() => setOpenGenerationCenter(false)}
-                    title="Generation Center"
-                    size="85%"
+                    size="90%"
+                    title={
+                      <Flex justify="center" align="center" style={{ width: '100%', margin: '0 auto', textAlign: 'center' }}>
+                        <IconSend size={24} color="gray" style={{ marginRight: '0.5rem' }} />
+                        <Text fw={600} size={20} color="gray">Generation Center</Text>
+                      </Flex>
+                    }
                   >
-                    <iframe
-                      src={`https://sellscale.retool.com/embedded/public/ccfec2c8-2f92-42f4-97a2-d7c6dcf603ce#client_id=${userToken}`}
-                      width="100%"
-                      height="800px"
-                      style={{ border: "none" }}
-                    />
+                    <GenerationCenter/>
                   </Modal>
                   {!showOnlyHeader && (
                     <Button

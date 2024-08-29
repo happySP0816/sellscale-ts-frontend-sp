@@ -183,10 +183,10 @@ useEffect(() => {
         <Select
           label="Select Prospect"
           placeholder="Pick one"
-          data={campaignContacts.map((contact) => ({
+          data={campaignContacts?.map((contact) => ({
             value: String(contact.id),
             label: `${contact.first_name} ${contact.last_name} - ${contact.title} at ${contact.company}`
-          }))}
+          })) || []}
           value={prospectId}
           onChange={(value) => {setProspectId(value ?? ''); setGeneratedEmail(''); setGeneratedSubjectLine('');}}
           required

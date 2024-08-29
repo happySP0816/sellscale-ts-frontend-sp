@@ -20,7 +20,7 @@ const queryTriggerState = atom({
 
 const campaignContactsState = atom({
   key: "user-contacts",
-  default: (JSON.parse(localStorage.getItem("userContacts") ?? "{}") || {}) as Contact[],
+  default: (JSON.parse(localStorage.getItem("userContacts") ?? "{}") || {}) as Contact[] | undefined,
 });
 
 const emailSubjectLinesState = atom<SubjectLineTemplate[]>({

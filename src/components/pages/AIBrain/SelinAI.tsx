@@ -721,7 +721,6 @@ export default function SelinAI() {
     device_id: string;
     original_sentnece: string;
   }) => {
-    if (!recording) return;
     console.log('comparing promps: ', promptRef.current, data.original_sentnece);
     if (data.device_id === deviceIDRef.current && (promptRef.current === data.original_sentnece)) {
       setPrompt(data.message);

@@ -11,6 +11,7 @@ import {
   Box,
   LoadingOverlay,
   TextInput,
+  Avatar,
 } from "@mantine/core";
 import { valueToColor } from "@utils/general";
 import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
@@ -24,7 +25,7 @@ import {
 } from "@common/pipeline/ICPFitAndReason";
 import { IconSearch } from "@tabler/icons-react";
 import { useDebouncedState } from "@mantine/hooks";
-import _ from "lodash";
+import _, { result } from "lodash";
 import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
 import {
   prospectDrawerOpenState,
@@ -240,6 +241,19 @@ export default function ProspectSelect(props: {
     }
   }, [searchQuery, props.personaId]);
 
+  useEffect(() => {
+    let resultProspects = campaignContacts;
+
+    if (Array.isArray(resultProspects)) {
+      const foundProspect = resultProspects.find(
+        (prospect) => prospect.id === props.selectedProspect
+      );
+      if (foundProspect) {
+        setSelectedProspect(foundProspect as ProspectShallow);
+      }
+    }
+  }, [props.selectedProspect]);
+
   return (
     <>
       <ModalSelector
@@ -251,7 +265,24 @@ export default function ProspectSelect(props: {
                   <Loader size="xs" /> Loading prospects...
                 </>
               ) : (
-                selectedProspect?.full_name || "Select Prospect"
+                <Flex
+                  align={"center"}
+                  justify={"space-between"}
+                  style={{ width: "fit-content", maxWidth: "400px", overflow: "hidden" }}
+                  gap={"4px"}
+                >
+                  <Text size={"xs"} color="#37414E">
+                    Prospect:
+                  </Text>
+                  <Avatar
+                    src={selectedProspect?.img_url}
+                    radius={"xl"}
+                    size={"sm"}
+                  />
+                  <Text size={"xs"} color={"#37414E"}>
+                    {`${selectedProspect?.first_name} ${selectedProspect?.last_name} | ${selectedProspect?.title}, ${selectedProspect?.company}`}
+                  </Text>
+                </Flex>
               )}
             </Text>
           ),
@@ -268,7 +299,7 @@ export default function ProspectSelect(props: {
               return true;
             }
           },
-          onClickChange: () => { },
+          onClickChange: () => {},
           noChange: !selectedProspect,
         }}
         title={{

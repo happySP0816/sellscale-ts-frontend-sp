@@ -49,6 +49,7 @@ interface linkedinSequence {
   bump_framework_id: number;
   bumped_count: number;
   description: string;
+  bump_delay_days?: number;
 }
 
 export type linkedinSequencesDataType = Array<Array<linkedinSequence>>;
@@ -60,6 +61,7 @@ interface emailSequence {
   bump_framework_id: number;
   bumped_count: number;
   description: string;
+  sequence_delay_days?: number;
 }
 
 export type emailSequencesDataType = Array<Array<emailSequence>>;

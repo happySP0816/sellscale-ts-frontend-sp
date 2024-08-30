@@ -307,8 +307,8 @@ export default function LinkedInSequenceSection(props: {
       ? "green"
       : !bf?.etl_num_times_used ||
         (bf?.etl_num_times_used && bf?.etl_num_times_used < 10)
-        ? "gray"
-        : "red";
+      ? "gray"
+      : "red";
   };
 
   const getReplyPillText = (
@@ -466,8 +466,8 @@ export default function LinkedInSequenceSection(props: {
                         isNaN(replyRate)
                           ? "grey"
                           : replyRate > 0.5
-                            ? "green"
-                            : "red"
+                          ? "green"
+                          : "red"
                       }
                     >
                       Replied:{" "}
@@ -491,11 +491,11 @@ export default function LinkedInSequenceSection(props: {
                       : (bf0 &&
                         bf0.etl_num_times_used &&
                         bf0.etl_num_times_used < 20
-                        ? "Not enough data, "
-                        : "") +
-                      (bf0?.etl_num_times_converted || 0) +
-                      " / " +
-                      (bf0?.etl_num_times_used || 0)
+                          ? "Not enough data, "
+                          : "") +
+                        (bf0?.etl_num_times_converted || 0) +
+                        " / " +
+                        (bf0?.etl_num_times_used || 0)
                   }
                   bodyTitle={bf0?.title ?? ""}
                   // bodyText={bf0?.description ?? ""}
@@ -572,11 +572,11 @@ export default function LinkedInSequenceSection(props: {
                       : (bf1 &&
                         bf1.etl_num_times_used &&
                         bf1.etl_num_times_used < 20
-                        ? "Not enough data, "
-                        : "") +
-                      (bf1?.etl_num_times_converted || 0) +
-                      " / " +
-                      (bf1?.etl_num_times_used || 0)
+                          ? "Not enough data, "
+                          : "") +
+                        (bf1?.etl_num_times_converted || 0) +
+                        " / " +
+                        (bf1?.etl_num_times_used || 0)
                   }
                   badgeColor={bumpConversionColor(bf1, bf1Conversion)}
                   bodyTitle={bf1?.title ?? ""}
@@ -658,11 +658,11 @@ export default function LinkedInSequenceSection(props: {
                       : (bf2 &&
                         bf2.etl_num_times_used &&
                         bf2.etl_num_times_used < 20
-                        ? "Not enough data, "
-                        : "") +
-                      (bf2?.etl_num_times_converted || 0) +
-                      " / " +
-                      (bf2?.etl_num_times_used || 0)
+                          ? "Not enough data, "
+                          : "") +
+                        (bf2?.etl_num_times_converted || 0) +
+                        " / " +
+                        (bf2?.etl_num_times_used || 0)
                   }
                   bodyTitle={bf2?.title ?? ""}
                   // bodyText={bf2?.description ?? ""}
@@ -743,11 +743,11 @@ export default function LinkedInSequenceSection(props: {
                       : (bf3 &&
                         bf3.etl_num_times_used &&
                         bf3.etl_num_times_used < 20
-                        ? "Not enough data, "
-                        : "") +
-                      (bf3?.etl_num_times_converted || 0) +
-                      " / " +
-                      (bf3?.etl_num_times_used || 0)
+                          ? "Not enough data, "
+                          : "") +
+                        (bf3?.etl_num_times_converted || 0) +
+                        " / " +
+                        (bf3?.etl_num_times_used || 0)
                   }
                   bodyTitle={bf3?.title ?? ""}
                   // bodyText={bf3?.description ?? ""}
@@ -882,7 +882,7 @@ export default function LinkedInSequenceSection(props: {
         </Group>
         <PersonaUploadDrawer
           personaOverviews={currentProject ? [currentProject] : []}
-          afterUpload={() => { }}
+          afterUpload={() => {}}
         />
       </Card>
     </>
@@ -1070,14 +1070,14 @@ function BumpFrameworkSelect(props: {
             title: "Make your own framework",
             innerProps: {
               modalOpened: true,
-              openModal: () => { },
+              openModal: () => {},
               closeModal: () => {
                 queryClient.refetchQueries({
                   queryKey: [`query-get-bump-frameworks`],
                 });
                 modals.closeAll();
               },
-              backFunction: () => { },
+              backFunction: () => {},
               dataChannels: dataChannels,
               status: props.overallStatus,
               archetypeID: currentProject?.id,
@@ -1101,7 +1101,7 @@ function BumpFrameworkSelect(props: {
   );
 }
 
-interface ResearchPoint {
+export interface ResearchPoint {
   id: number;
   research_point_type: string;
   value: string;
@@ -1317,8 +1317,8 @@ export function IntroMessageSection(props: {
         {!currentProject?.template_mode && (
           <VoiceSelect
             personaId={currentProject?.id || -1}
-            onChange={(voice) => { }}
-            onFinishLoading={(voices) => { }}
+            onChange={(voice) => {}}
+            onFinishLoading={(voices) => {}}
             autoSelect
           />
         )}
@@ -1414,7 +1414,7 @@ export function IntroMessageSection(props: {
                     message={message}
                     startHovered={
                       activeTab === "personalization" ||
-                        hoveredPersonSettingsBtn
+                      hoveredPersonSettingsBtn
                         ? true
                         : undefined
                     }
@@ -1712,7 +1712,7 @@ export function IntroMessageSection(props: {
   );
 }
 
-function LiExampleInvitation(props: {
+export function LiExampleInvitation(props: {
   message: string;
   startHovered?: boolean;
   endHovered?: boolean;
@@ -1771,10 +1771,10 @@ function LiExampleInvitation(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].rootUrl +
-    liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
-      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
-        .length - 1
-    ].fileIdentifyingUrlPathSegment
+      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
+        liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
+          .length - 1
+      ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile?.firstName + " " + liSDR.miniProfile?.lastName
@@ -1834,14 +1834,14 @@ function LiExampleInvitation(props: {
   }
 
   return (
-    <Group spacing={10} sx={{ alignItems: "flex-start" }} noWrap>
+    <Group spacing={10} sx={{ alignItems: "flex-start", width: "100%" }} noWrap>
       <Box w={55}>
         <Avatar
           src={proxyURL(imgURL)}
           alt={`${name}'s Profile Picture`}
           color={valueToColor(theme, name)}
           radius="xl"
-          size="lg"
+          size="md"
         >
           {nameToInitials(name)}
         </Avatar>
@@ -1854,31 +1854,6 @@ function LiExampleInvitation(props: {
               {_.truncate(title, { length: 65 })}
             </Text>
           </Box>
-          <Group spacing={0} noWrap>
-            <Button
-              size="xs"
-              variant="subtle"
-              color="gray"
-              radius="xl"
-              sx={{
-                cursor: "not-allowed",
-              }}
-              disabled
-            >
-              Ignore
-            </Button>
-            <Button
-              size="xs"
-              variant="outline"
-              radius="xl"
-              sx={{
-                cursor: "not-allowed",
-              }}
-              disabled
-            >
-              Accept
-            </Button>
-          </Group>
         </Group>
         <Box
           sx={{
@@ -1987,21 +1962,21 @@ function LiExampleInvitation(props: {
               </Text>
             )}
           </Box>
-          <Button
-            size="xs"
-            variant="subtle"
-            color="gray"
-            radius="xl"
-            sx={{
-              cursor: "not-allowed",
-            }}
-            ml={-8}
-            compact
-          >
-            Reply to{" "}
-            {liSDR?.miniProfile?.firstName ||
-              userData.sdr_name.trim().split(" ")[0]}
-          </Button>
+          {/* <Button */}
+          {/*   size="xs" */}
+          {/*   variant="subtle" */}
+          {/*   color="gray" */}
+          {/*   radius="xl" */}
+          {/*   sx={{ */}
+          {/*     cursor: "not-allowed", */}
+          {/*   }} */}
+          {/*   ml={-8} */}
+          {/*   compact */}
+          {/* > */}
+          {/*   Reply to{" "} */}
+          {/*   {liSDR?.miniProfile?.firstName || */}
+          {/*     userData.sdr_name.trim().split(" ")[0]} */}
+          {/* </Button> */}
         </Box>
       </Stack>
     </Group>
@@ -2055,10 +2030,10 @@ function LiExampleMessage(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].rootUrl +
-    liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
-      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
-        .length - 1
-    ].fileIdentifyingUrlPathSegment
+      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
+        liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
+          .length - 1
+      ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile?.firstName + " " + liSDR.miniProfile?.lastName
@@ -2182,17 +2157,17 @@ function FrameworkCard(props: {
         cursor: "pointer",
         backgroundColor: props.active
           ? theme.fn.lighten(
-            theme.fn.variant({ variant: "filled", color: "blue" })
-              .background!,
-            0.95
-          )
+              theme.fn.variant({ variant: "filled", color: "blue" })
+                .background!,
+              0.95
+            )
           : hovered
-            ? theme.fn.lighten(
+          ? theme.fn.lighten(
               theme.fn.variant({ variant: "filled", color: "blue" })
                 .background!,
               0.99
             )
-            : undefined,
+          : undefined,
         borderColor:
           props.active || hovered
             ? theme.colors.blue[5] + "!important"
@@ -2221,10 +2196,10 @@ function FrameworkCard(props: {
                 props.conversion > 9.0
                   ? "Your open rates are above industry standards (9%). Congrats!"
                   : props.conversion <= 9.0 && props.conversion > 0.0
-                    ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
+                  ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
                     Math.round(props.conversion * 10) / 10 +
                     "%."
-                    : (props.timesUsed && props.timesUsed < 20
+                  : (props.timesUsed && props.timesUsed < 20
                       ? "Not enough data, "
                       : "") +
                     props.timesConverted +
@@ -2241,8 +2216,8 @@ function FrameworkCard(props: {
                   isNaN(props.conversion)
                     ? "grey"
                     : props.conversion > 9.0
-                      ? "green"
-                      : "red"
+                    ? "green"
+                    : "red"
                 }
               >
                 Opened:{" "}
@@ -3035,7 +3010,7 @@ function FrameworkSection(props: {
                               Math.round(
                                 (bf.etl_num_times_converted /
                                   (bf.etl_num_times_used + 0.0001)) *
-                                100
+                                  100
                               )}
                             % reply
                           </Text>
@@ -3086,7 +3061,7 @@ function FrameworkSection(props: {
                                 color="lime"
                                 variant={
                                   bf.active_transformers &&
-                                    bf.active_transformers.length > 0
+                                  bf.active_transformers.length > 0
                                     ? "filled"
                                     : "outline"
                                 }
@@ -3097,9 +3072,9 @@ function FrameworkSection(props: {
                                 }}
                               >
                                 {bf.active_transformers &&
-                                  bf.active_transformers.length > 0
+                                bf.active_transformers.length > 0
                                   ? bf.active_transformers.length +
-                                  " Research Points"
+                                    " Research Points"
                                   : "0 Research Points"}
                               </Badge>
                             </HoverCard.Target>
@@ -3119,11 +3094,11 @@ function FrameworkSection(props: {
                                 <TextWithNewline style={{ fontSize: "12px" }}>
                                   {bf.active_transformers.length > 0
                                     ? "<b>Active Research Points:</b>\n- " +
-                                    bf.active_transformers
-                                      .map((rp: any) =>
-                                        rp.replaceAll("_", " ").toLowerCase()
-                                      )
-                                      .join("\n- ")
+                                      bf.active_transformers
+                                        .map((rp: any) =>
+                                          rp.replaceAll("_", " ").toLowerCase()
+                                        )
+                                        .join("\n- ")
                                     : "Click to activate more research points"}
                                 </TextWithNewline>
                               </Paper>
@@ -3203,8 +3178,8 @@ function FrameworkSection(props: {
                                     .replaceAll(
                                       "[[",
                                       "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                      theme.colors["blue"][5] +
-                                      "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                                        theme.colors["blue"][5] +
+                                        "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
                                     )
                                     .replaceAll("]]", "</span>")
                                     .replaceAll(
@@ -3609,7 +3584,7 @@ function TemplateSection(props: {
                       {Math.round(
                         (template.times_accepted /
                           (template.times_used + 0.0001)) *
-                        100
+                          100
                       )}
                       % reply
                     </Text>
@@ -3754,8 +3729,8 @@ function TemplateSection(props: {
                                 .replaceAll(
                                   "[[",
                                   "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                  theme.colors["blue"][5] +
-                                  "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                                    theme.colors["blue"][5] +
+                                    "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
                                 )
                                 .replaceAll("]]", "</span>") as string
                             ),
@@ -4178,49 +4153,50 @@ const ProcessBar: React.FC<{
   hideAnalytics = false,
   researchPoint,
 }) => {
-    return (
-      <Flex align={"center"} gap={"0.5rem"}>
-        <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
-          <Tooltip 
+  return (
+    <Flex align={"center"} gap={"0.5rem"}>
+      <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
+        <Tooltip
           label={researchPoint ? researchPoint.value : "No value"}
-          style={{maxWidth: "300px", textWrap: "wrap"}}>
-            <Checkbox
-              size={"sm"}
-              label={<Text fw={300}>{title}</Text>}
-              checked={checked}
-              disabled={disabled}
-              variant="outline"
-              onChange={(event) => onPressItem(id, event.currentTarget.checked)}
-              color={color}
-            />
-          </Tooltip>
-          <Flex sx={{ flex: 1 }}>
-            <Divider w={"100%"} color={"#E9ECEF"} />
-          </Flex>
-          <Tooltip label="Historical Acceptance Rate" withArrow>
-            <Button
-              variant={"light"}
-              fw={700}
-              size="xs"
-              color={color}
-              radius="xl"
-              h="auto"
-              fz={"0.625rem"}
-              py={"0.125rem"}
-              px={"0.25rem"}
-            >
-              {hideAnalytics ? "Not Available" : percent + "%"}
-            </Button>
-          </Tooltip>
+          style={{ maxWidth: "300px", textWrap: "wrap" }}
+        >
+          <Checkbox
+            size={"sm"}
+            label={<Text fw={300}>{title}</Text>}
+            checked={checked}
+            disabled={disabled}
+            variant="outline"
+            onChange={(event) => onPressItem(id, event.currentTarget.checked)}
+            color={color}
+          />
+        </Tooltip>
+        <Flex sx={{ flex: 1 }}>
+          <Divider w={"100%"} color={"#E9ECEF"} />
         </Flex>
-        {!hideAnalytics && (
-          <Flex direction={"column"} sx={{ flex: 6 }}>
-            <Progress value={percent} color={color} size={"lg"} radius="xl" />
-          </Flex>
-        )}
+        <Tooltip label="Historical Acceptance Rate" withArrow>
+          <Button
+            variant={"light"}
+            fw={700}
+            size="xs"
+            color={color}
+            radius="xl"
+            h="auto"
+            fz={"0.625rem"}
+            py={"0.125rem"}
+            px={"0.25rem"}
+          >
+            {hideAnalytics ? "Not Available" : percent + "%"}
+          </Button>
+        </Tooltip>
       </Flex>
-    );
-  };
+      {!hideAnalytics && (
+        <Flex direction={"column"} sx={{ flex: 6 }}>
+          <Progress value={percent} color={color} size={"lg"} radius="xl" />
+        </Flex>
+      )}
+    </Flex>
+  );
+};
 
 export const PersonalizationCard: React.FC<{
   title: string;

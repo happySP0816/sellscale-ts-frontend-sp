@@ -716,6 +716,18 @@ export default function SelinAI() {
     }
   };
 
+  const handleUpdateTranscript = (data: {
+    message: string;
+    device_id: string;
+  }) => {
+    console.log('message:', data.message);
+    if (data.device_id === deviceIDRef.current) {
+      setPrompt(data.message);
+      promptRef.current = data.message;
+      promptLengthRef.current = data.message.length;
+    }
+  }
+
   const handleAddTaskToSession = async (data: {
     task: TaskType;
     thread_id: string;
@@ -906,6 +918,8 @@ export default function SelinAI() {
     device_id: string;
   }) => {
     //only show the suggestion if the message is for the current device
+    if (!recording)
+      return;
     if (
       data.thread_id === roomIDref.current &&
       data.device_id === deviceIDRef.current
@@ -940,6 +954,9 @@ export default function SelinAI() {
     socket.on("update-action", (data) => {
       handleUpdateTaskAndAction(data, setMessages);
     });
+    socket.on(
+      'corrected-transcript', handleUpdateTranscript
+    );
     socket.on("update-session", handleUpdateSession);
     socket.on("increment-counter", handleIncrementCounter);
     socket.on("suggestion", handleSuggestion);
@@ -962,6 +979,7 @@ export default function SelinAI() {
       socket.off("update-task", (data) => {
         handleUpdateTaskAndAction(data, setMessages);
       });
+      socket.off("corrected-transcript", handleUpdateTranscript);
       socket.off("update-session", handleUpdateSession);
       socket.off("increment-counter", handleIncrementCounter);
       socket.off("suggestion", handleSuggestion);
@@ -1493,6 +1511,7 @@ export default function SelinAI() {
           <Flex mt={"md"} gap={"xl"}>
             <LoadingOverlay visible={loadingNewChat} />
             <SegmentChat
+              deviceIDRef={deviceIDRef}
               dropzoneRef={dropzoneRef}
               suggestedFirstMessage={suggestedFirstMessage}
               setSuggestionHidden={setSuggestionHidden}
@@ -1547,12 +1566,59 @@ const SegmentChat = (props: any) => {
   const setSuggestionHidden = props.setSuggestionHidden;
   const recording = props.recording;
   const setRecording = props.setRecording;
+  const deviceIDRef = props.deviceIDRef;
+  const sessionId = props.currentSessionId;
   const setPrompt = props.setPrompt;
   const messages: MessageType[] = props.messages;
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [showLoader, setShowLoader] = useState(false);
   // const [recording, setRecording] = useState(false);
+
+const postProcessTimeout = useRef<NodeJS.Timeout | null>(null);
+
+const processTranscription = async (prompt: string) => {
+  if (!recording) {
+    return prompt;
+  }
+
+  if (postProcessTimeout.current) {
+    clearTimeout(postProcessTimeout.current);
+  }
+  postProcessTimeout.current = setTimeout(async () => {
+    try {
+      //celery task to post process the transcription
+      const response = await fetch(`${API_URL}/selix/post_process_transcription`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          device_id: deviceIDRef.current,
+          sentence_to_correct: promptRef.current,
+        }),
+      });
+    } catch (error) {
+      console.error("Error processing transcription:", error);
+    }
+  }, 4000);
+};
+
+useEffect(() => {
+  if (recording) {
+    const interval = setInterval(() => {
+      processTranscription(prompt);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  } else {
+    if (postProcessTimeout.current) {
+      clearTimeout(postProcessTimeout.current);
+    }
+  }
+}, [recording, prompt]);
 
   const viewport = useRef<any>(null);
 

@@ -719,9 +719,11 @@ export default function SelinAI() {
   const handleUpdateTranscript = (data: {
     message: string;
     device_id: string;
+    original_sentnece: string;
   }) => {
-    console.log('message:', data.message);
-    if (data.device_id === deviceIDRef.current) {
+    if (!recording) return;
+    console.log('comparing promps: ', promptRef.current, data.original_sentnece);
+    if (data.device_id === deviceIDRef.current && (promptRef.current === data.original_sentnece)) {
       setPrompt(data.message);
       promptRef.current = data.message;
       promptLengthRef.current = data.message.length;
@@ -918,8 +920,6 @@ export default function SelinAI() {
     device_id: string;
   }) => {
     //only show the suggestion if the message is for the current device
-    if (!recording)
-      return;
     if (
       data.thread_id === roomIDref.current &&
       data.device_id === deviceIDRef.current
@@ -1575,50 +1575,46 @@ const SegmentChat = (props: any) => {
   const [showLoader, setShowLoader] = useState(false);
   // const [recording, setRecording] = useState(false);
 
-const postProcessTimeout = useRef<NodeJS.Timeout | null>(null);
+const lastPromptRef = useRef<string>("");
 
-const processTranscription = async (prompt: string) => {
-  if (!recording) {
-    return prompt;
-  }
+const processTranscription = async () => {
 
-  if (postProcessTimeout.current) {
-    clearTimeout(postProcessTimeout.current);
+  try {
+    const response = await fetch(`${API_URL}/selix/post_process_transcription`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        device_id: deviceIDRef.current,
+        sentence_to_correct: promptRef.current,
+      }),
+    });
+  } catch (error) {
+    console.error("Error processing transcription:", error);
   }
-  postProcessTimeout.current = setTimeout(async () => {
-    try {
-      //celery task to post process the transcription
-      const response = await fetch(`${API_URL}/selix/post_process_transcription`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          device_id: deviceIDRef.current,
-          sentence_to_correct: promptRef.current,
-        }),
-      });
-    } catch (error) {
-      console.error("Error processing transcription:", error);
-    }
-  }, 4000);
 };
 
 useEffect(() => {
-  if (recording) {
-    const interval = setInterval(() => {
-      processTranscription(prompt);
-    }, 4000);
+  let interval: NodeJS.Timeout | null = null;
 
-    return () => clearInterval(interval);
-  } else {
-    if (postProcessTimeout.current) {
-      clearTimeout(postProcessTimeout.current);
-    }
+  if (recording) {
+    interval = setInterval(() => {
+      if (promptRef.current !== lastPromptRef.current) {
+        lastPromptRef.current = promptRef.current;
+        processTranscription();
+      }
+    }, 4000);
   }
-}, [recording, prompt]);
+
+  return () => {
+    if (interval) {
+      clearInterval(interval);
+    }
+  };
+}, [recording]);
 
   const viewport = useRef<any>(null);
 

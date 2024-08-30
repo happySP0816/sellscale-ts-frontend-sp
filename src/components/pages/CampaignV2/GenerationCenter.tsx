@@ -90,6 +90,7 @@ export const GenerationCenter: React.FC = () => {
                 if (data.campaigns) {
                     if (data.campaigns.length === 0) {
                         setCurrentPage(1);
+                        setSelectedContacts(filteredContacts ? filteredContacts.slice(0, 5).map(contact => contact.id) : [])
                     }
                     else {
                         setOutboundCampaigns(data.campaigns);
@@ -283,28 +284,6 @@ export const GenerationCenter: React.FC = () => {
                                     style={{ borderRadius: '8px' }}
                                 />
                             </Paper>
-                            <Flex direction="column" align="center" gap="md">
-
-                                <Paper shadow="sm" p="md" withBorder style={{ borderRadius: '8px' }}>
-                                    <Flex direction="row" align="center" gap="lg">
-                                        <Text weight={600} size="lg" color="#37414E">Select Dates</Text>
-                                        <Flex direction="column" align="center" gap="sm">
-                                            <Text size="sm" color="dimmed">Start Date</Text>
-                                            <Button variant="outline" color="blue" disabled style={{ borderRadius: '8px' }}>
-                                                <IconCalendar size={16} style={{ marginRight: '0.5rem' }} />
-                                                Select Date
-                                            </Button>
-                                        </Flex>
-                                        <Flex direction="column" align="center" gap="sm">
-                                            <Text size="sm" color="dimmed">End Date</Text>
-                                            <Button variant="outline" color="blue" disabled style={{ borderRadius: '8px' }}>
-                                                <IconCalendar size={16} style={{ marginRight: '0.5rem' }} />
-                                                Select Date
-                                            </Button>
-                                        </Flex>
-                                    </Flex>
-                                </Paper>
-                            </Flex>
                             <Paper shadow="sm" p="md" withBorder style={{ borderRadius: '8px', backgroundColor: 'white' }}>
                                 <Flex direction="column" align="center" gap="md">
                                     <Text weight={600} size="lg" color="#37414E">Campaign Type</Text>
@@ -537,7 +516,9 @@ export const GenerationCenter: React.FC = () => {
             ) : (<>
 
                 <Flex justify="center" align="center" gap="md" direction="column">
-                    <Button color="blue" rightIcon={<IconSend size={16} />} onClick={() => { setOutboundCampaignID(null); setCampaignUUID(null); setCurrentPage(1) }}>
+                    <Button color="blue" rightIcon={<IconSend size={16} />} onClick={() => { setOutboundCampaignID(null); setCampaignUUID(null); setCurrentPage(1) 
+                        setSelectedContacts(filteredContacts ? filteredContacts.slice(0, 5).map(contact => contact.id) : [])
+                    }}>
                         Create New Outbound Campaign
                     </Button>
                     <Select

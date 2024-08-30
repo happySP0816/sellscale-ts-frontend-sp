@@ -291,6 +291,10 @@ export interface ProspectShallow {
   merge_account_id?: string;
   merge_opportunity_id?: string;
   merge_lead_id?: string;
+  avatar?: string;
+  approved_outreach_message_id?: number;
+  approved_prospect_email_id?: number;
+  generatedText?: string;
 }
 
 export interface ProspectICP {

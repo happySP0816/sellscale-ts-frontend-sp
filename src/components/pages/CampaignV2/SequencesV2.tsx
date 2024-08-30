@@ -248,8 +248,8 @@ export default function SequencesV2() {
       emailSequenceData && emailSequenceData.length > 0
         ? "email"
         : linkedinSequenceData && linkedinSequenceData.length > 0
-          ? "linkedin"
-          : "email"
+        ? "linkedin"
+        : "email"
     );
   }, [linkedinSequenceData, emailSequenceData]);
 
@@ -287,7 +287,7 @@ export default function SequencesV2() {
   }, [stepNumber, emailSequenceData]);
 
   const { data, refetch } = useQuery({
-    queryKey: [`query-get-bump-frameworks`],
+    queryKey: [`query-get-bump-frameworks`, currentProject?.id],
     queryFn: async () => {
       if (!currentProject) return [];
       const result = await getBumpFrameworks(
@@ -412,10 +412,10 @@ export default function SequencesV2() {
               sequence.overall_status === "PROSPECTED"
                 ? 0
                 : sequence.overall_status === "ACCEPTED"
-                  ? 10
-                  : sequence.overall_status === "BUMPED"
-                    ? 20
-                    : 0;
+                ? 10
+                : sequence.overall_status === "BUMPED"
+                ? 20
+                : 0;
             bumpedCount += statusAdjustment;
             if (!acc[bumpedCount]) acc[bumpedCount] = [];
             acc[bumpedCount].push(sequence);
@@ -474,7 +474,7 @@ export default function SequencesV2() {
   };
 
   // prospect selection onchange handler
-  const prospectOnChangeHandler = function(
+  const prospectOnChangeHandler = function (
     prospect: ProspectShallow | undefined
   ) {
     if (prospect) {
@@ -635,12 +635,12 @@ export default function SequencesV2() {
           </Flex>
         </Group>
       </Card.Section>
-      {((!emailSequenceData ||
+      {(!emailSequenceData ||
         !Array.isArray(emailSequenceData) ||
         emailSequenceData.length === 0) &&
-        (!linkedinSequenceData ||
+      (!linkedinSequenceData ||
         !Array.isArray(linkedinSequenceData) ||
-        linkedinSequenceData.length === 0)) ? (
+        linkedinSequenceData.length === 0) ? (
         <Flex
           direction="column"
           align="center"
@@ -1001,7 +1001,7 @@ function EmailSequencingV2(props: {
   );
 }
 
-const NewUIEmailSequencingV2 = function(props: {
+const NewUIEmailSequencingV2 = function (props: {
   userToken: string;
   archetypeID: number;
   subjectLines: SubjectLineTemplate[];
@@ -1242,8 +1242,8 @@ function EmailPreviewHeaderV2(props: {
       const backgroundColor = part.added
         ? "#e6ffe6"
         : part.removed
-          ? "#ffe6e6"
-          : "transparent";
+        ? "#ffe6e6"
+        : "transparent";
       return (
         <span key={index} style={{ color, backgroundColor }}>
           {part.value}
@@ -1557,7 +1557,7 @@ function EmailPreviewHeaderV2(props: {
         }
         return response.json();
       })
-      .then((data) => { })
+      .then((data) => {})
       .catch((error) => {
         console.error("Error:", error);
       })
@@ -1728,8 +1728,9 @@ function EmailPreviewHeaderV2(props: {
 
               {currentProject?.is_ai_research_personalization_enabled && (
                 <div
-                  className={`${state && "absolute z-[9999] bg-[#f6f8fa] right-0 rounded-md"
-                    } flex flex-col`}
+                  className={`${
+                    state && "absolute z-[9999] bg-[#f6f8fa] right-0 rounded-md"
+                  } flex flex-col`}
                 >
                   <Flex align="center" gap="sm">
                     <Select
@@ -1772,7 +1773,7 @@ function EmailPreviewHeaderV2(props: {
                               // PUT the new voice ID to the campaign
                               const updateCampaignResponse = await fetch(
                                 API_URL +
-                                `/campaigns/${currentProject.id}/voice`,
+                                  `/campaigns/${currentProject.id}/voice`,
                                 {
                                   method: "PUT",
                                   headers: {
@@ -1935,10 +1936,11 @@ function EmailPreviewHeaderV2(props: {
                 )}
 
                 <div
-                  className={`${state &&
+                  className={`${
+                    state &&
                     !voiceGenerate &&
                     "absolute z-[9999] bg-[#f6f8fa] w-full left-0 rounded-md"
-                    }`}
+                  }`}
                 >
                   <div className="px-5">
                     <Text color="gray.6" fw={500} size="sm" mr="xs"></Text>
@@ -1986,7 +1988,7 @@ function EmailPreviewHeaderV2(props: {
                         <div
                           contentEditable={
                             currentProject?.is_ai_research_personalization_enabled &&
-                              selectedVoice !== "null"
+                            selectedVoice !== "null"
                               ? true
                               : undefined
                           }
@@ -1994,8 +1996,8 @@ function EmailPreviewHeaderV2(props: {
                             __html: DOMPurify.sanitize(
                               typeof data?.body === "string"
                                 ? data.body
-                                  .replace(/(<br\s*\/?>\s*){2,}/g, "<br />")
-                                  .replace(/\n\s*\n/g, "\n")
+                                    .replace(/(<br\s*\/?>\s*){2,}/g, "<br />")
+                                    .replace(/\n\s*\n/g, "\n")
                                 : ""
                             ),
                           }}
@@ -2308,7 +2310,7 @@ function NewDetailEmailSequencingV2(props: {
                 },
                 cancelProps: { color: "grey", variant: "outline" },
                 confirmProps: { color: "green" },
-                onCancel: () => { },
+                onCancel: () => {},
                 onConfirm: async () => {
                   const bumpedCount = props.currentTab.includes("BUMPED-")
                     ? parseInt(props.currentTab.split("-")[1])
@@ -2561,7 +2563,7 @@ function NewDetailEmailSequencingV2(props: {
                 },
                 cancelProps: { color: "grey", variant: "outline" },
                 confirmProps: { color: "green" },
-                onCancel: () => { },
+                onCancel: () => {},
                 onConfirm: async () => {
                   const result = await postCopyEmailPoolEntry(
                     userToken,
@@ -2676,8 +2678,9 @@ function NewDetailEmailSequencingV2(props: {
           <IconArrowLeft size={16} />
         </ActionIcon>
         <Badge variant={"outline"} radius={"sm"}>
-          {`Variant #${activeTemplateIndex + 1}: ${props.templates[activeTemplateIndex]?.step.title ?? ""
-            }`}
+          {`Variant #${activeTemplateIndex + 1}: ${
+            props.templates[activeTemplateIndex]?.step.title ?? ""
+          }`}
         </Badge>
         <ActionIcon
           disabled={activeTemplateIndex === props.templates.length - 1}
@@ -2957,7 +2960,7 @@ function TemplateSectionV2(props: {
                       {Math.round(
                         (template.times_accepted /
                           (template.times_used + 0.0001)) *
-                        100
+                          100
                       )}
                       % reply
                     </Text>
@@ -3096,8 +3099,8 @@ function TemplateSectionV2(props: {
                                 .replaceAll(
                                   "[[",
                                   "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                  theme.colors["blue"][5] +
-                                  "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                                    theme.colors["blue"][5] +
+                                    "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
                                 )
                                 .replaceAll("]]", "</span>") as string
                             ),
@@ -3262,7 +3265,7 @@ function TemplateSectionV2(props: {
   );
 }
 
-const LinkedinSequenceSectionV2 = function(props: {
+const LinkedinSequenceSectionV2 = function (props: {
   triggerGenerate: number;
   setTriggerGenerate: React.Dispatch<React.SetStateAction<number>>;
   stepNumber: number;
@@ -3305,7 +3308,7 @@ const LinkedinSequenceSectionV2 = function(props: {
     if (
       props.triggerGenerate !== -1 ||
       linkedinSequenceMessage?.metadata.bump_framework_id !==
-      props.sequence[currentSequenceIndex].bump_framework_id
+        props.sequence[currentSequenceIndex].bump_framework_id
     ) {
       getLiFollowUpMessage(
         props.prospectId,
@@ -3365,8 +3368,9 @@ const LinkedinSequenceSectionV2 = function(props: {
           <IconArrowLeft size={16} />
         </ActionIcon>
         <Badge variant={"outline"} radius={"sm"}>
-          {`Variant #${currentSequenceIndex + 1}: ${props.sequence[currentSequenceIndex]?.title ?? ""
-            }`}
+          {`Variant #${currentSequenceIndex + 1}: ${
+            props.sequence[currentSequenceIndex]?.title ?? ""
+          }`}
         </Badge>
         <ActionIcon
           disabled={currentSequenceIndex === props.sequence.length - 1}
@@ -3380,7 +3384,7 @@ const LinkedinSequenceSectionV2 = function(props: {
   );
 };
 
-const LinkedinIntroEditSectionCTA = function(props: {
+const LinkedinIntroEditSectionCTA = function (props: {
   userToken: string;
   prospectId?: number;
   currentProject?: PersonaOverview;
@@ -3522,7 +3526,7 @@ const LinkedinIntroEditSectionCTA = function(props: {
   );
 };
 
-const LinkedinBumpEditSection = function(props: {
+const LinkedinBumpEditSection = function (props: {
   bfs: BumpFramework[];
   framework?: BumpFramework;
   userToken: string;
@@ -3540,183 +3544,188 @@ const LinkedinBumpEditSection = function(props: {
   const [displayFrameworkSection, refreshFrameworkSection] = useRefresh();
 
   return (
-    <Stack spacing={10}>
-      {props.bfs.map((bf, index) => (
-        <Paper
-          key={index}
-          p="md"
-          mih={80}
-          sx={{
-            position: "relative",
-            cursor: "pointer",
-            border:
-              bf.id === activeFramework.id
-                ? "solid 1px #339af0 !important"
-                : undefined,
-            backgroundColor:
-              bf.id === activeFramework.id ? "#339af008 !important" : undefined,
-            flexDirection: "row",
-            display: "flex",
-          }}
-          withBorder
-        >
-          <Flex mr="md" direction={"column"}>
-            <Box
-              miw="100px"
-              mah={80}
-              sx={{
-                border: "solid 1px #339af022",
-                backgroundColor: "#339af022",
-                padding: "8px",
-                borderRadius: "4px",
-                textAlign: "center",
-                cursor: "pointer",
-              }}
-              mt="xl"
-              onClick={() => {
-                openContextModal({
-                  modal: "frameworkReplies",
-                  title: "Past Example Replies",
-                  innerProps: {
-                    bumpId: bf.id,
-                  },
-                });
-              }}
-            >
-              <Text fw="bold" fz="md" color="blue" mt="xs">
-                {bf.etl_num_times_used != null &&
-                  bf.etl_num_times_converted != null &&
-                  Math.round(
-                    (bf.etl_num_times_converted /
-                      (bf.etl_num_times_used + 0.0001)) *
-                    100
-                  )}
-                % reply
-              </Text>
-              <Text size="8px" color="blue" fz={"xs"} fw="500">
-                ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
-              </Text>
-            </Box>
-            <Button
-              onClick={() => {
-                openContextModal({
-                  modal: "frameworkReplies",
-                  title: "Past Example Usages",
-                  innerProps: {
-                    bumpId: bf.id,
-                  },
-                });
-              }}
-              size="xs"
-              mt={3}
-            >
-              View Replies
-            </Button>
-          </Flex>
-          <Box mr={40} w="100%">
-            <Flex>
-              <Text
-                size="sm"
-                fw="600"
-                mb="xs"
-                sx={{ textTransform: "uppercase" }}
-                color="gray"
-                variant="outline"
+    <Box pos={"relative"}>
+      <LoadingOverlay visible={!props.bfs || !activeFramework} />
+      <Stack spacing={10}>
+        {props.bfs.map((bf, index) => (
+          <Paper
+            key={index}
+            p="md"
+            mih={80}
+            sx={{
+              position: "relative",
+              cursor: "pointer",
+              border:
+                bf.id === activeFramework.id
+                  ? "solid 1px #339af0 !important"
+                  : undefined,
+              backgroundColor:
+                bf.id === activeFramework.id
+                  ? "#339af008 !important"
+                  : undefined,
+              flexDirection: "row",
+              display: "flex",
+            }}
+            withBorder
+          >
+            <Flex mr="md" direction={"column"}>
+              <Box
+                miw="100px"
+                mah={80}
+                sx={{
+                  border: "solid 1px #339af022",
+                  backgroundColor: "#339af022",
+                  padding: "8px",
+                  borderRadius: "4px",
+                  textAlign: "center",
+                  cursor: "pointer",
+                }}
+                mt="xl"
+                onClick={() => {
+                  openContextModal({
+                    modal: "frameworkReplies",
+                    title: "Past Example Replies",
+                    innerProps: {
+                      bumpId: bf.id,
+                    },
+                  });
+                }}
               >
-                {bf.title}
-              </Text>
-              {/* Hovercard for transformers */}
-
-              <HoverCard width={280} shadow="md">
-                <HoverCard.Target>
-                  <Badge
-                    leftSection={
-                      <IconSearch size="0.8rem" style={{ marginTop: 4 }} />
-                    }
-                    color="lime"
-                    variant={
-                      bf.active_transformers &&
-                        bf.active_transformers.length > 0
-                        ? "filled"
-                        : "outline"
-                    }
-                    ml="xs"
-                    size="xs"
-                    onClick={() => {
-                      toggle();
-                    }}
-                  >
-                    {bf.active_transformers && bf.active_transformers.length > 0
-                      ? bf.active_transformers.length + " Research Points"
-                      : "0 Research Points"}
-                  </Badge>
-                </HoverCard.Target>
-                <HoverCard.Dropdown
-                  style={{
-                    backgroundColor: "rgb(34, 37, 41)",
-                    padding: 0,
-                  }}
+                <Text fw="bold" fz="md" color="blue" mt="xs">
+                  {bf.etl_num_times_used != null &&
+                    bf.etl_num_times_converted != null &&
+                    Math.round(
+                      (bf.etl_num_times_converted /
+                        (bf.etl_num_times_used + 0.0001)) *
+                        100
+                    )}
+                  % reply
+                </Text>
+                <Text size="8px" color="blue" fz={"xs"} fw="500">
+                  ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
+                </Text>
+              </Box>
+              <Button
+                onClick={() => {
+                  openContextModal({
+                    modal: "frameworkReplies",
+                    title: "Past Example Usages",
+                    innerProps: {
+                      bumpId: bf.id,
+                    },
+                  });
+                }}
+                size="xs"
+                mt={3}
+              >
+                View Replies
+              </Button>
+            </Flex>
+            <Box mr={40} w="100%">
+              <Flex>
+                <Text
+                  size="sm"
+                  fw="600"
+                  mb="xs"
+                  sx={{ textTransform: "uppercase" }}
+                  color="gray"
+                  variant="outline"
                 >
-                  <Paper
+                  {bf.title}
+                </Text>
+                {/* Hovercard for transformers */}
+
+                <HoverCard width={280} shadow="md">
+                  <HoverCard.Target>
+                    <Badge
+                      leftSection={
+                        <IconSearch size="0.8rem" style={{ marginTop: 4 }} />
+                      }
+                      color="lime"
+                      variant={
+                        bf.active_transformers &&
+                        bf.active_transformers.length > 0
+                          ? "filled"
+                          : "outline"
+                      }
+                      ml="xs"
+                      size="xs"
+                      onClick={() => {
+                        toggle();
+                      }}
+                    >
+                      {bf.active_transformers &&
+                      bf.active_transformers.length > 0
+                        ? bf.active_transformers.length + " Research Points"
+                        : "0 Research Points"}
+                    </Badge>
+                  </HoverCard.Target>
+                  <HoverCard.Dropdown
                     style={{
                       backgroundColor: "rgb(34, 37, 41)",
-                      color: "white",
-                      padding: 10,
+                      padding: 0,
                     }}
                   >
-                    <TextWithNewline style={{ fontSize: "12px" }}>
-                      {bf.active_transformers.length > 0
-                        ? "<b>Active Research Points:</b>\n- " +
-                        bf.active_transformers
-                          .map((rp: any) =>
-                            rp.replaceAll("_", " ").toLowerCase()
-                          )
-                          .join("\n- ")
-                        : "Click to activate more research points"}
-                    </TextWithNewline>
-                  </Paper>
-                </HoverCard.Dropdown>
-              </HoverCard>
+                    <Paper
+                      style={{
+                        backgroundColor: "rgb(34, 37, 41)",
+                        color: "white",
+                        padding: 10,
+                      }}
+                    >
+                      <TextWithNewline style={{ fontSize: "12px" }}>
+                        {bf.active_transformers.length > 0
+                          ? "<b>Active Research Points:</b>\n- " +
+                            bf.active_transformers
+                              .map((rp: any) =>
+                                rp.replaceAll("_", " ").toLowerCase()
+                              )
+                              .join("\n- ")
+                          : "Click to activate more research points"}
+                      </TextWithNewline>
+                    </Paper>
+                  </HoverCard.Dropdown>
+                </HoverCard>
 
-              {/* <BumpFrameworkAssets bump_framework_id={bf.id} /> */}
+                {/* <BumpFrameworkAssets bump_framework_id={bf.id} /> */}
 
-              {/* {bf.human_feedback && ( */}
-              {/*   <HoverCard width={280} shadow="md"> */}
-              {/*     <HoverCard.Target> */}
-              {/*       <Badge */}
-              {/*         leftSection={<IconBulb size="0.8rem" />} */}
-              {/*         color="grape" */}
-              {/*         variant="filled" */}
-              {/*         ml="xs" */}
-              {/*         size="xs" */}
-              {/*       > */}
-              {/*         Fine Tuned */}
-              {/*       </Badge> */}
-              {/*     </HoverCard.Target> */}
-              {/*     <HoverCard.Dropdown */}
-              {/*       style={{ */}
-              {/*         backgroundColor: "rgb(34, 37, 41)", */}
-              {/*         padding: 0, */}
-              {/*       }} */}
-              {/*     > */}
-              {/*       <Paper */}
-              {/*         style={{ */}
-              {/*           backgroundColor: "rgb(34, 37, 41)", */}
-              {/*           color: "white", */}
-              {/*           padding: 10, */}
-              {/*         }} */}
-              {/*       > */}
-              {/*         <TextWithNewline style={{ fontSize: "12px" }}> */}
-              {/*           {"<b>Additional Instructions:</b>\n" + */}
-              {/*             bf.human_feedback} */}
-              {/*         </TextWithNewline> */}
-              {/*       </Paper> */}
-              {/*     </HoverCard.Dropdown> */}
-              {/*   </HoverCard> */}
-              {/* )} */}
-            </Flex>
-            <Card withBorder w="100%" sx={{}}>
-              {/* {editing ? (
+                {/* {bf.human_feedback && ( */}
+                {/*   <HoverCard width={280} shadow="md"> */}
+                {/*     <HoverCard.Target> */}
+                {/*       <Badge */}
+                {/*         leftSection={<IconBulb size="0.8rem" />} */}
+                {/*         color="grape" */}
+                {/*         variant="filled" */}
+                {/*         ml="xs" */}
+                {/*         size="xs" */}
+                {/*       > */}
+                {/*         Fine Tuned */}
+                {/*       </Badge> */}
+                {/*     </HoverCard.Target> */}
+                {/*     <HoverCard.Dropdown */}
+                {/*       style={{ */}
+                {/*         backgroundColor: "rgb(34, 37, 41)", */}
+                {/*         padding: 0, */}
+                {/*       }} */}
+                {/*     > */}
+                {/*       <Paper */}
+                {/*         style={{ */}
+                {/*           backgroundColor: "rgb(34, 37, 41)", */}
+                {/*           color: "white", */}
+                {/*           padding: 10, */}
+                {/*         }} */}
+                {/*       > */}
+                {/*         <TextWithNewline style={{ fontSize: "12px" }}> */}
+                {/*           {"<b>Additional Instructions:</b>\n" + */}
+                {/*             bf.human_feedback} */}
+                {/*         </TextWithNewline> */}
+                {/*       </Paper> */}
+                {/*     </HoverCard.Dropdown> */}
+                {/*   </HoverCard> */}
+                {/* )} */}
+              </Flex>
+              <Card withBorder w="100%" sx={{}}>
+                {/* {editing ? (
                               <FocusTrap active={true}>
                                 <Textarea
                                   placeholder='Instructions'
@@ -3738,132 +3747,133 @@ const LinkedinBumpEditSection = function(props: {
                                 />
                               </FocusTrap>
                             ) : ( */}
-              <Text style={{ fontSize: "0.9rem", lineHeight: 2 }}>
-                <div
-                  // onClick={() => {
-                  //   setEditing(true);
-                  // }}
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(
-                      bf.description
-                        .replaceAll(
-                          "[[",
-                          "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                          theme.colors["blue"][5] +
-                          "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
-                        )
-                        .replaceAll("]]", "</span>")
-                        .replaceAll(
-                          "\n",
-                          `<br style="display: block; content: ' '; margin: 10px 0 "/>`
-                        ) as string
-                    ),
-                  }}
-                />
-              </Text>
-            </Card>
-          </Box>
-          <Box sx={{ justifyContent: "right" }} ml="auto">
-            <Switch
-              sx={{ cursor: "pointer" }}
-              checked={bf.active}
-              onChange={(checked) => {
-                setLoading(true);
-                const result = patchBumpFramework(
-                  props.userToken,
-                  bf.id,
-                  bf.overall_status,
-                  bf.title,
-                  bf.description,
-                  bf.bump_length,
-                  bf.bumped_count,
-                  bf.bump_delay_days,
-                  !bf.active,
-                  bf.use_account_research,
-                  bf.transformer_blocklist
-                )
-                  .then(() => {
-                    showNotification({
-                      title: "Success",
-                      message: "Bump Framework enabled",
-                      color: "green",
-                    });
-                  })
-                  .finally(() => {
-                    (async () => {
-                      await queryClient.refetchQueries({
-                        queryKey: [`query-get-bump-frameworks`],
+                <Text style={{ fontSize: "0.9rem", lineHeight: 2 }}>
+                  <div
+                    // onClick={() => {
+                    //   setEditing(true);
+                    // }}
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(
+                        bf.description
+                          .replaceAll(
+                            "[[",
+                            "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
+                              theme.colors["blue"][5] +
+                              "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                          )
+                          .replaceAll("]]", "</span>")
+                          .replaceAll(
+                            "\n",
+                            `<br style="display: block; content: ' '; margin: 10px 0 "/>`
+                          ) as string
+                      ),
+                    }}
+                  />
+                </Text>
+              </Card>
+            </Box>
+            <Box sx={{ justifyContent: "right" }} ml="auto">
+              <Switch
+                sx={{ cursor: "pointer" }}
+                checked={bf.active}
+                onChange={(checked) => {
+                  setLoading(true);
+                  const result = patchBumpFramework(
+                    props.userToken,
+                    bf.id,
+                    bf.overall_status,
+                    bf.title,
+                    bf.description,
+                    bf.bump_length,
+                    bf.bumped_count,
+                    bf.bump_delay_days,
+                    !bf.active,
+                    bf.use_account_research,
+                    bf.transformer_blocklist
+                  )
+                    .then(() => {
+                      showNotification({
+                        title: "Success",
+                        message: "Bump Framework enabled",
+                        color: "green",
                       });
-                      setLoading(false);
-                    })();
-                    setChanged(false);
-                  });
-              }}
-            />
-            <Button
-              mt="xs"
-              variant="subtle"
-              radius="xl"
-              size="sm"
-              compact
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                // setEditing(true);
-                openContextModal({
-                  modal: "liBfTemplate",
-                  title: "Edit Template",
-                  innerProps: {
-                    mode: "EDIT",
-                    editProps: {
-                      bf: bf,
-                      templateId: bf.id,
-                      title: bf.title,
-                      message: bf.description,
-                      active: bf.active,
-                      humanFeedback: bf.human_feedback,
-                      blockList: bf.transformer_blocklist,
-                      onChange: (framework: BumpFramework) => {
-                        setActiveFramework(framework);
-                        refreshFrameworkSection();
+                    })
+                    .finally(() => {
+                      (async () => {
+                        await queryClient.refetchQueries({
+                          queryKey: [`query-get-bump-frameworks`],
+                        });
+                        setLoading(false);
+                      })();
+                      setChanged(false);
+                    });
+                }}
+              />
+              <Button
+                mt="xs"
+                variant="subtle"
+                radius="xl"
+                size="sm"
+                compact
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  // setEditing(true);
+                  openContextModal({
+                    modal: "liBfTemplate",
+                    title: "Edit Template",
+                    innerProps: {
+                      mode: "EDIT",
+                      editProps: {
+                        bf: bf,
+                        templateId: bf.id,
+                        title: bf.title,
+                        message: bf.description,
+                        active: bf.active,
+                        humanFeedback: bf.human_feedback,
+                        blockList: bf.transformer_blocklist,
+                        onChange: (framework: BumpFramework) => {
+                          setActiveFramework(framework);
+                          refreshFrameworkSection();
+                        },
                       },
+                      // message: bf.description,
+                      // handleSubmit: async (message: string) => {
+                      //   form.setFieldValue('promptInstructions', message);
+                      //   // setChanged(true);
+                      //   // setEditing(false);
+                      //   const result = await patchBumpFramework(
+                      //     userToken,
+                      //     bf.id,
+                      //     bf.overall_status,
+                      //     bf.title,
+                      //     message,
+                      //     bf.bump_length,
+                      //     bf.bumped_count,
+                      //     bf.bump_delay_days,
+                      //     bf.active,
+                      //     bf.use_account_research,
+                      //     bf.transformer_blocklist
+                      //   );
+                      //   await queryClient.refetchQueries({
+                      //     queryKey: [`query-get-bump-frameworks`],
+                      //   });
+                      // },
                     },
-                    // message: bf.description,
-                    // handleSubmit: async (message: string) => {
-                    //   form.setFieldValue('promptInstructions', message);
-                    //   // setChanged(true);
-                    //   // setEditing(false);
-                    //   const result = await patchBumpFramework(
-                    //     userToken,
-                    //     bf.id,
-                    //     bf.overall_status,
-                    //     bf.title,
-                    //     message,
-                    //     bf.bump_length,
-                    //     bf.bumped_count,
-                    //     bf.bump_delay_days,
-                    //     bf.active,
-                    //     bf.use_account_research,
-                    //     bf.transformer_blocklist
-                    //   );
-                    //   await queryClient.refetchQueries({
-                    //     queryKey: [`query-get-bump-frameworks`],
-                    //   });
-                    // },
-                  },
-                });
-              }}
-            >
-              Edit
-            </Button>
-          </Box>
-        </Paper>
-      ))}
-    </Stack>
+                  });
+                }}
+              >
+                Edit
+              </Button>
+            </Box>
+          </Paper>
+        ))}
+      </Stack>
+    </Box>
   );
 };
 
-const LinkedinIntroSectionV2 = function(props: {
+const LinkedinIntroSectionV2 = function (props: {
   prospectId: number;
   userToken: string;
   templates?: Templates[];
@@ -4086,7 +4096,7 @@ const LinkedinIntroSectionV2 = function(props: {
                       (note: any, index: number) => {
                         const researchPointId =
                           linkedinInitialMessages.meta_data?.research_points[
-                          index
+                            index
                           ];
 
                         const researchPointType = researchPointTypes?.find(
@@ -4144,8 +4154,8 @@ const LinkedinIntroSectionV2 = function(props: {
             {!props.currentProject?.template_mode && (
               <VoiceSelect
                 personaId={props.currentProject?.id || -1}
-                onChange={(voice) => { }}
-                onFinishLoading={(voices) => { }}
+                onChange={(voice) => {}}
+                onFinishLoading={(voices) => {}}
                 autoSelect
               />
             )}
@@ -4164,8 +4174,9 @@ const LinkedinIntroSectionV2 = function(props: {
               <IconArrowLeft size={16} />
             </ActionIcon>
             <Badge variant={"outline"} radius={"sm"}>
-              {`Variant #${templateIndex + 1}: ${props.templates[templateIndex].title ?? ""
-                }`}
+              {`Variant #${templateIndex + 1}: ${
+                props.templates[templateIndex].title ?? ""
+              }`}
             </Badge>
             <ActionIcon
               disabled={templateIndex === props.templates.length - 1}
@@ -4270,7 +4281,7 @@ export function ProspectSelect2(props: {
               return true;
             }
           },
-          onClickChange: () => { },
+          onClickChange: () => {},
           noChange: !selectedProspect,
         }}
         title={{

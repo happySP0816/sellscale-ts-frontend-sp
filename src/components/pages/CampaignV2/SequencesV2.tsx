@@ -40,6 +40,7 @@ import {
   Progress,
   Modal,
   Textarea,
+  Skeleton,
 } from "@mantine/core";
 import {
   IconArrowLeft,
@@ -634,164 +635,191 @@ export default function SequencesV2() {
           </Flex>
         </Group>
       </Card.Section>
-      <Card
-        withBorder
-        py={"sx"}
-        radius={"md"}
-        mt={"12px"}
-        style={{
-          borderColor: theme.colors.blue[4],
-        }}
-      >
-        {!isEditing && (
-          <Card.Section withBorder px={"xs"} py={"xs"} mb={"16px"}>
-            <Flex align={"center"} justify={"space-between"} pos={"relative"}>
-              <Flex align={"center"} justify={"space-between"} gap={"4px"}>
-                <ActionIcon
-                  disabled={selectedProspectIndex === 0}
-                  onClick={() =>
-                    setSelectedProspectIndex((prevValue) => prevValue - 1)
-                  }
-                  radius={"xl"}
+      {!emailSequenceData ||
+        !Array.isArray(emailSequenceData) ||
+        emailSequenceData.length === 0 ||
+        !linkedinSequenceData ||
+        !Array.isArray(linkedinSequenceData) ||
+        linkedinSequenceData.length === 0 ? (
+        <Flex
+          direction="column"
+          align="center"
+          justify="center"
+          m="auto"
+          mt="sm"
+        >
+          <Skeleton height={30} radius="xl" width="80%" />
+          <Skeleton height={20} radius="xl" width="60%" mt="sm" />
+          <Skeleton height={20} radius="xl" width="60%" mt="sm" />
+          <Flex align="center" gap="sm" mt="sm">
+            <Loader color="gray" variant="dots" size="md" />
+            <Text color="gray" size="md" className="loading-animation">
+              No Sequences or adding Sequences. Please check back later.
+            </Text>
+          </Flex>
+        </Flex>
+      ) : (
+        <Card
+          withBorder
+          py={"sx"}
+          radius={"md"}
+          mt={"12px"}
+          style={{
+            borderColor: theme.colors.blue[4],
+          }}
+        >
+          {!isEditing && (
+            <Card.Section withBorder px={"xs"} py={"xs"} mb={"16px"}>
+              <Flex align={"center"} justify={"space-between"} pos={"relative"}>
+                <Flex align={"center"} justify={"space-between"} gap={"4px"}>
+                  <ActionIcon
+                    disabled={selectedProspectIndex === 0}
+                    onClick={() =>
+                      setSelectedProspectIndex((prevValue) => prevValue - 1)
+                    }
+                    radius={"xl"}
+                  >
+                    <IconArrowLeft size={16} />
+                  </ActionIcon>
+                  <ProspectSelect2
+                    personaId={currentProject?.id ?? -1}
+                    selectedProspect={selectedProspect?.id}
+                    isSequenceV2={true}
+                    onChange={prospectOnChangeHandler}
+                  />
+                  <ActionIcon
+                    disabled={
+                      selectedProspectIndex === campaignContacts.length - 1
+                    }
+                    onClick={() =>
+                      setSelectedProspectIndex((prevValue) => prevValue + 1)
+                    }
+                    radius={"xl"}
+                  >
+                    <IconArrowRight size={16} />
+                  </ActionIcon>
+                </Flex>
+                <Button
+                  size="xs"
+                  color={"grape"}
+                  onClick={() => onRegenerate()}
+                  leftIcon={<IconSparkles />}
                 >
-                  <IconArrowLeft size={16} />
-                </ActionIcon>
-                <ProspectSelect2
-                  personaId={currentProject?.id ?? -1}
-                  selectedProspect={selectedProspect?.id}
-                  isSequenceV2={true}
-                  onChange={prospectOnChangeHandler}
-                />
-                <ActionIcon
-                  disabled={
-                    selectedProspectIndex === campaignContacts.length - 1
-                  }
-                  onClick={() =>
-                    setSelectedProspectIndex((prevValue) => prevValue + 1)
-                  }
-                  radius={"xl"}
-                >
-                  <IconArrowRight size={16} />
-                </ActionIcon>
+                  Regenerate
+                </Button>
               </Flex>
-              <Button
-                size="xs"
-                color={"grape"}
-                onClick={() => onRegenerate()}
-                leftIcon={<IconSparkles />}
-              >
-                Regenerate
-              </Button>
-            </Flex>
-          </Card.Section>
-        )}
-        <Flex gap={"8px"} my={"auto"} pos={"relative"}>
-          <LoadingOverlay visible={loadingSequences} />
-          {/* This will have a steps side bar and the main one. The main one will render either LinkedinCTA, LinkedinTemplate, EmailTemplate */}
-          <Card
-            p="md"
-            radius={"md"}
-            withBorder
-            style={{
-              minHeight: "100%",
-              minWidth: "fit-content",
-              maxWidth: "fit-content",
-            }}
-          >
-            <Card.Section inheritPadding>
-              <Text align={"center"} size={"xs"}>
-                Steps:
-              </Text>
             </Card.Section>
-            {viewTab === "linkedin" ? linkedinSteps : emailSteps}
-          </Card>
-          {isEditing ? (
-            <>
-              {stepNumber === 0 &&
-                viewTab === "linkedin" &&
-                !currentProject?.template_mode && (
-                  <LinkedinIntroEditSectionCTA
-                    currentProject={currentProject ?? undefined}
+          )}
+          <Flex gap={"8px"} my={"auto"} pos={"relative"}>
+            <LoadingOverlay visible={loadingSequences} />
+            {/* This will have a steps side bar and the main one. The main one will render either LinkedinCTA, LinkedinTemplate, EmailTemplate */}
+            <Card
+              p="md"
+              radius={"md"}
+              withBorder
+              style={{
+                minHeight: "100%",
+                minWidth: "fit-content",
+                maxWidth: "fit-content",
+              }}
+            >
+              <Card.Section inheritPadding>
+                <Text align={"center"} size={"xs"}>
+                  Steps:
+                </Text>
+              </Card.Section>
+              {viewTab === "linkedin" ? linkedinSteps : emailSteps}
+            </Card>
+            {isEditing ? (
+              <>
+                {stepNumber === 0 &&
+                  viewTab === "linkedin" &&
+                  !currentProject?.template_mode && (
+                    <LinkedinIntroEditSectionCTA
+                      currentProject={currentProject ?? undefined}
+                      userToken={userToken}
+                      prospectId={selectedProspect?.id}
+                    />
+                  )}
+                {stepNumber === 0 &&
+                  viewTab === "linkedin" &&
+                  currentProject?.template_mode && (
+                    <TemplateSectionV2
+                      onFoundTemplate={setSelectedTemplateId}
+                    />
+                  )}
+                {stepNumber !== 0 && viewTab === "linkedin" && (
+                  <LinkedinBumpEditSection
+                    bfs={
+                      data
+                        ? data.filter((b) => b.bumped_count === stepNumber - 1)
+                        : []
+                    }
                     userToken={userToken}
-                    prospectId={selectedProspect?.id}
                   />
                 )}
-              {stepNumber === 0 &&
-                viewTab === "linkedin" &&
-                currentProject?.template_mode && (
-                  <TemplateSectionV2 onFoundTemplate={setSelectedTemplateId} />
+                {viewTab === "email" && (
+                  <EmailSequencingV2
+                    subjectLines={emailSubjectLines}
+                    userToken={userToken}
+                    currentProject={currentProject ?? undefined}
+                    isEditing={isEditing}
+                    prospectId={selectedProspect?.id ?? -1}
+                    emailTab={emailTab ?? "PROSPECTED"}
+                    stepNumber={stepNumber}
+                    triggerGenerate={triggerGenerate}
+                    setTriggerGenerate={setTriggerGenerate}
+                  />
                 )}
-              {stepNumber !== 0 && viewTab === "linkedin" && (
-                <LinkedinBumpEditSection
-                  bfs={
-                    data
-                      ? data.filter((b) => b.bumped_count === stepNumber - 1)
-                      : []
-                  }
-                  userToken={userToken}
-                />
-              )}
-              {viewTab === "email" && (
-                <EmailSequencingV2
-                  subjectLines={emailSubjectLines}
-                  userToken={userToken}
-                  currentProject={currentProject ?? undefined}
-                  isEditing={isEditing}
-                  prospectId={selectedProspect?.id ?? -1}
-                  emailTab={emailTab ?? "PROSPECTED"}
-                  stepNumber={stepNumber}
-                  triggerGenerate={triggerGenerate}
-                  setTriggerGenerate={setTriggerGenerate}
-                />
-              )}
-            </>
-          ) : (
-            <>
-              {stepNumber === 0 && viewTab === "linkedin" && (
-                <LinkedinIntroSectionV2
-                  prospectId={selectedProspect ? selectedProspect.id : -1}
-                  userToken={userToken}
-                  templates={templates ? templates : []}
-                  currentProject={currentProject ?? undefined}
-                  setSelectedTemplateId={setSelectedTemplateId}
-                  selectedTemplateId={selectedTemplateId}
-                  triggerGenerate={triggerGenerate}
-                  setTriggerGenerate={setTriggerGenerate}
-                  setLinkedinInitialMessages={setLinkedinInitialMessages}
-                />
-              )}
-              {stepNumber !== 0 && viewTab === "linkedin" && (
-                <LinkedinSequenceSectionV2
-                  triggerGenerate={triggerGenerate}
-                  stepNumber={stepNumber}
-                  sequence={
-                    linkedinSequenceData.find(
-                      (item) => item[0].bumped_count === stepNumber - 1
-                    ) ?? []
-                  }
-                  userToken={userToken}
-                  currentProject={currentProject ?? undefined}
-                  prospectId={selectedProspect?.id ?? -1}
-                  setTriggerGenerate={setTriggerGenerate}
-                />
-              )}
-              {viewTab === "email" && (
-                <EmailSequencingV2
-                  subjectLines={emailSubjectLines}
-                  userToken={userToken}
-                  currentProject={currentProject ?? undefined}
-                  isEditing={isEditing}
-                  prospectId={selectedProspect?.id ?? -1}
-                  emailTab={emailTab ?? "PROSPECTED"}
-                  stepNumber={stepNumber}
-                  triggerGenerate={triggerGenerate}
-                  setTriggerGenerate={setTriggerGenerate}
-                />
-              )}
-            </>
-          )}
-        </Flex>
-      </Card>
+              </>
+            ) : (
+              <>
+                {stepNumber === 0 && viewTab === "linkedin" && (
+                  <LinkedinIntroSectionV2
+                    prospectId={selectedProspect ? selectedProspect.id : -1}
+                    userToken={userToken}
+                    templates={templates ? templates : []}
+                    currentProject={currentProject ?? undefined}
+                    setSelectedTemplateId={setSelectedTemplateId}
+                    selectedTemplateId={selectedTemplateId}
+                    triggerGenerate={triggerGenerate}
+                    setTriggerGenerate={setTriggerGenerate}
+                    setLinkedinInitialMessages={setLinkedinInitialMessages}
+                  />
+                )}
+                {stepNumber !== 0 && viewTab === "linkedin" && (
+                  <LinkedinSequenceSectionV2
+                    triggerGenerate={triggerGenerate}
+                    stepNumber={stepNumber}
+                    sequence={
+                      linkedinSequenceData.find(
+                        (item) => item[0].bumped_count === stepNumber - 1
+                      ) ?? []
+                    }
+                    userToken={userToken}
+                    currentProject={currentProject ?? undefined}
+                    prospectId={selectedProspect?.id ?? -1}
+                    setTriggerGenerate={setTriggerGenerate}
+                  />
+                )}
+                {viewTab === "email" && (
+                  <EmailSequencingV2
+                    subjectLines={emailSubjectLines}
+                    userToken={userToken}
+                    currentProject={currentProject ?? undefined}
+                    isEditing={isEditing}
+                    prospectId={selectedProspect?.id ?? -1}
+                    emailTab={emailTab ?? "PROSPECTED"}
+                    stepNumber={stepNumber}
+                    triggerGenerate={triggerGenerate}
+                    setTriggerGenerate={setTriggerGenerate}
+                  />
+                )}
+              </>
+            )}
+          </Flex>
+        </Card>
+      )}
     </Card>
   );
 }

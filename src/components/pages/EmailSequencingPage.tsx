@@ -81,7 +81,7 @@ import {
   toggleEmailAccounts,
 } from "@utils/requests/smartlead";
 
-type EmailSequenceStepBuckets = {
+export type EmailSequenceStepBuckets = {
   PROSPECTED: {
     total: number;
     templates: EmailSequenceStep[];

@@ -58,9 +58,11 @@ export default function DuplicateCampaignModal({
 
   const onDuplicateCampaign = async () => {
     const archetype = archetypes?.find((a) => a.id === archetypeId);
+    console.log("archetype: ", archetype);
     if (!archetype) return;
 
     setLoading(true);
+    console.log("on duplicate campaign");
     const response = await clonePersona(
       userToken,
       archetype.id,

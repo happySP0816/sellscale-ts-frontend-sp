@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, Flex, Text, Textarea, Loader, Paper, Stack, Center, Badge, Avatar, TextInput, SegmentedControl, Checkbox, ScrollArea, Modal, Box, SimpleGrid, Select } from '@mantine/core';
+import { Button, Flex, Text, Textarea, Loader, Paper, Stack, Center, Badge, Avatar, TextInput, SegmentedControl, Checkbox, ScrollArea, Modal, Box, SimpleGrid, Select, Table } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { API_URL } from '@constants/data';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -67,44 +67,44 @@ export const GenerationCenter: React.FC = () => {
     const [outboundCampaigns, setOutboundCampaigns] = useState<OutboundCampaign[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(-1);
 
+    const fetchCampaignsByArchetype = async (archetypeId: number) => {
+        if (archetypeId === -1) {
+            return;
+        }
+        try {
+            const response = await fetch(`${API_URL}/campaigns/campaigns_by_archetype/${archetypeId}`, {
+                method: 'GET',
+                // headers: {
+                //     'Content-Type': 'application/json',
+                //     Authorization: `Bearer ${userToken}`,
+                // },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch campaigns by archetype');
+            }
+
+            const data = await response.json();
+            if (data.campaigns) {
+                if (data.campaigns.length === 0) {
+                    setCurrentPage(1);
+                    setSelectedContacts(filteredContacts ? filteredContacts.slice(0, 5).map(contact => contact.id) : [])
+                }
+                else {
+                    setOutboundCampaigns(data.campaigns);
+                    setCurrentPage(0);
+                    console.log('Campaigns:', data.campaigns);
+                }
+                // You can set the campaigns data to state or use it as needed
+            } else {
+                console.log('No campaigns found for the given archetype.');
+            }
+        } catch (error) {
+            console.error('Error fetching campaigns by archetype:', error);
+        }
+    };
+    
     useEffect(() => {
-
-        const fetchCampaignsByArchetype = async (archetypeId: number) => {
-            if (archetypeId === -1) {
-                return;
-            }
-            try {
-                const response = await fetch(`${API_URL}/campaigns/campaigns_by_archetype/${archetypeId}`, {
-                    method: 'GET',
-                    // headers: {
-                    //     'Content-Type': 'application/json',
-                    //     Authorization: `Bearer ${userToken}`,
-                    // },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch campaigns by archetype');
-                }
-
-                const data = await response.json();
-                if (data.campaigns) {
-                    if (data.campaigns.length === 0) {
-                        setCurrentPage(1);
-                        setSelectedContacts(filteredContacts ? filteredContacts.slice(0, 5).map(contact => contact.id) : [])
-                    }
-                    else {
-                        setOutboundCampaigns(data.campaigns);
-                        setCurrentPage(0);
-                        console.log('Campaigns:', data.campaigns);
-                    }
-                    // You can set the campaigns data to state or use it as needed
-                } else {
-                    console.log('No campaigns found for the given archetype.');
-                }
-            } catch (error) {
-                console.error('Error fetching campaigns by archetype:', error);
-            }
-        };
 
         fetchCampaignsByArchetype(currentProject?.id || -1);
 
@@ -242,6 +242,9 @@ export const GenerationCenter: React.FC = () => {
     useEffect(() => {
         if (currentPage === 1 && !campaignUUID) {
             setSelectedContacts(filteredContacts ? filteredContacts.slice(0, 5).map(contact => contact.id) : []);
+        }
+        if (currentPage === 0){
+            fetchCampaignsByArchetype(currentProject?.id || -1);
         }
     }, [currentPage, campaignUUID]);
         
@@ -434,84 +437,110 @@ export const GenerationCenter: React.FC = () => {
                     )}
                 </Flex>}
                 <ScrollArea style={{ height: 'calc(100vh - 200px)' }}>
-                    <Stack spacing="md" style={{ backgroundColor: '#f0f8ff', padding: '1rem', borderRadius: '8px' }}>
-                        <SimpleGrid cols={4} spacing="lg">
-                            {filteredContacts?.map((contact) => (
-                                <Paper
-                                    key={contact.id}
-                                    shadow="sm"
-                                    p="md"
-                                    withBorder
-                                    style={{
-                                        borderRadius: '8px',
-                                        transition: 'transform 0.2s, box-shadow 0.2s',
-                                        cursor: 'pointer',
-                                        ...(selectedContacts.includes(contact.id) && {
-                                            boxShadow: '0 0 15px rgba(0, 123, 255, 0.6)',
-                                            border: '1px solid #007bff',
-                                        }),
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                    onClick={() => handleContactClick(contact.id)}
-                                >
-                                    <Flex direction="column" align="center" gap="md">
-                                        <Avatar src={contact.avatar} radius="xl" size="lg" />
-                                        <Text weight={500} size="lg">{contact.first_name + ' ' + contact.last_name}</Text>
-                                        <Text size="sm" color="dimmed" unselectable="on">{contact.title} at {contact.company}</Text>
-                                        <Badge size="md" color={
-                                            contact.icp_fit_score === 0 ? "red" :
-                                                contact.icp_fit_score === 1 ? "orange" :
-                                                    contact.icp_fit_score === 2 ? "yellow" :
-                                                        contact.icp_fit_score === 3 ? "green" :
-                                                            contact.icp_fit_score === 4 ? "blue" : "gray"
-                                        }>
-                                            {contact.icp_fit_score === 0 ? "Very Low" :
-                                                contact.icp_fit_score === 1 ? "Low" :
-                                                    contact.icp_fit_score === 2 ? "Medium" :
-                                                        contact.icp_fit_score === 3 ? "High" :
-                                                            contact.icp_fit_score === 4 ? "Very High" : "Not Scored"}
-                                        </Badge>
-                                        {!outboundCampaignID && <Checkbox
-                                            checked={selectedContacts.includes(contact.id)}
-                                            label="Select Contact"
-                                        />}
-                                        {generatedMessageStatus?.jobs_list?.find(job => job.prospect_id === contact.id) && (
+                    <Stack spacing="md" style={{ backgroundColor: 'white', padding: '1rem', borderRadius: '8px' }}>
+                        <Table>
+                            <thead>
+                                <tr>
+                                    {!outboundCampaignID && <th>Select</th>}
+                                    {outboundCampaignID &&<th>{''}</th>}
+                                    <th>{''}</th>
+                                    <th>Name</th>
+                                    <th>Title & Company</th>
+                                    <th>ICP Fit Score</th>
+                                    
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                    {/* <th>Generated Text</th> */}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredContacts?.map((contact) => (
+                                    
+                                    <tr
+                                        key={contact.id}
+                                        style={{
+                                            cursor: 'pointer',
+                                            transition: 'transform 0.2s, box-shadow 0.2s',
+                                            ...(selectedContacts.includes(contact.id) && {
+                                                boxShadow: '0 0 15px rgba(0, 123, 255, 0.6)',
+                                            }),
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                        onClick={() => handleContactClick(contact.id)}
+                                    >
+                                        <td>
+                                            {!outboundCampaignID && <Checkbox
+                                                checked={selectedContacts.includes(contact.id)}
+                                                label="Select"
+                                            />}
+                                        </td>
+                                        <td>
+                                            <Avatar src={contact.avatar} radius="xl" size="lg" />
+                                        </td>
+                                        <td>
+                                            <Text weight={500} size="lg">{contact.first_name + ' ' + contact.last_name}</Text>
+                                        </td>
+                                        <td>
+                                            <Text size="sm" color="dimmed" unselectable="on">{contact.title} at {contact.company}</Text>
+                                        </td>
+                                        <td>
                                             <Badge size="md" color={
-                                                generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'PENDING' ? "yellow" :
-                                                    generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'IN_PROGRESS' ? "blue" :
-                                                        generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'COMPLETED' ? "green" :
-                                                            generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'FAILED' ? "red" : "gray"
+                                                contact.icp_fit_score === 0 ? "red" :
+                                                    contact.icp_fit_score === 1 ? "orange" :
+                                                        contact.icp_fit_score === 2 ? "yellow" :
+                                                            contact.icp_fit_score === 3 ? "green" :
+                                                                contact.icp_fit_score === 4 ? "blue" : "gray"
                                             }>
-                                                {generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'PENDING' ? (
-                                                    <>
-                                                        <Loader size="xs" /> Pending
-                                                    </>
-                                                ) : generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'IN_PROGRESS' ? (
-                                                    <>
-                                                        <IconMailOpened size={16} /> In Progress
-                                                    </>
-                                                ) : generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'COMPLETED' ? (
-                                                    <>
-                                                        <IconMail size={16} /> Completed
-                                                    </>
-                                                ) : generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'FAILED' ? (
-                                                    <>
-                                                        <IconMail size={16} /> Failed
-                                                    </>
-                                                ) : null}
+                                                {contact.icp_fit_score === 0 ? "Very Low" :
+                                                    contact.icp_fit_score === 1 ? "Low" :
+                                                        contact.icp_fit_score === 2 ? "Medium" :
+                                                            contact.icp_fit_score === 3 ? "High" :
+                                                                contact.icp_fit_score === 4 ? "Very High" : "Not Scored"}
                                             </Badge>
-                                        )}
-                                        {generatedMessageStatus?.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'COMPLETED' && <Button onClick={() => setIframeOpen(true)}>Review</Button>}
-                                        {contact.generatedText ? (
-                                            <Text align="center" mt="md">{contact.generatedText}</Text>
-                                        ) : (
-                                            <></>
-                                        )}
-                                    </Flex>
-                                </Paper>
-                            ))}
-                        </SimpleGrid>
+                                        </td>
+                                        <td>
+                                            {generatedMessageStatus?.jobs_list?.find(job => job.prospect_id === contact.id) && (
+                                                <Badge size="md" color={
+                                                    generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'PENDING' ? "yellow" :
+                                                        generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'IN_PROGRESS' ? "blue" :
+                                                            generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'COMPLETED' ? "green" :
+                                                                generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'FAILED' ? "red" : "gray"
+                                                }>
+                                                    {generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'PENDING' ? (
+                                                        <>
+                                                            <Loader size="xs" /> Pending
+                                                        </>
+                                                    ) : generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'IN_PROGRESS' ? (
+                                                        <>
+                                                            <IconMailOpened size={16} /> In Progress
+                                                        </>
+                                                    ) : generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'COMPLETED' ? (
+                                                        <>
+                                                            <IconMail size={16} /> Completed
+                                                        </>
+                                                    ) : generatedMessageStatus.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'FAILED' ? (
+                                                        <>
+                                                            <IconMail size={16} /> Failed
+                                                        </>
+                                                    ) : null}
+                                                </Badge>
+                                            )}
+                                        </td>
+                                        <td>
+                                            {generatedMessageStatus?.jobs_list.find(job => job.prospect_id === contact.id)?.status === 'COMPLETED' && <Button onClick={() => setIframeOpen(true)}>Review</Button>}
+                                        </td>
+                                        {/* <td>
+                                            {contact.generatedText ? (
+                                                <Text align="center" mt="md">{contact.generatedText}</Text>
+                                            ) : (
+                                                <></>
+                                            )}
+                                        </td> */}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
                     </Stack>
                 </ScrollArea>
             </> : currentPage === 1 ? (<>

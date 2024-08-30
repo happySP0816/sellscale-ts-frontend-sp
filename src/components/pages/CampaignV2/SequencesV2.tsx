@@ -170,7 +170,7 @@ export default function SequencesV2() {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const theme = useMantineTheme();
-  const campaignContacts = useRecoilValue(campaignContactsState);
+  const campaignContacts = useRecoilValue(campaignContactsState) ?? [];
 
   // View Tab
   const [viewTab, setViewTab] = useState<string>("linkedin");

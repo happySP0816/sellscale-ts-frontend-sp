@@ -17,7 +17,7 @@ import { valueToColor } from "@utils/general";
 import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
 import { useState, useEffect, forwardRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { ProspectShallow } from "src";
+import { Prospect, ProspectShallow } from "src";
 import ModalSelector from "./ModalSelector";
 import {
   ICPFitPillOnly,
@@ -166,6 +166,7 @@ export default function ProspectSelect(props: {
   onFinishLoading?: (prospects: ProspectShallow[]) => void;
   selectedProspect?: number;
   isSequenceV2?: boolean;
+  prospects?: Prospect[];
 }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
@@ -235,9 +236,14 @@ export default function ProspectSelect(props: {
   useEffect(() => {
     if (props.personaId !== -1) {
       setLoadingProspects(true);
-      searchProspects().then((res) => {
+
+      if (!props.prospects || props.prospects.length === 0) {
+        searchProspects().then((res) => {
+          setLoadingProspects(false);
+        });
+      } else {
         setLoadingProspects(false);
-      });
+      }
     }
   }, [searchQuery, props.personaId]);
 
@@ -268,7 +274,11 @@ export default function ProspectSelect(props: {
                 <Flex
                   align={"center"}
                   justify={"space-between"}
-                  style={{ width: "fit-content", maxWidth: "400px", overflow: "hidden" }}
+                  style={{
+                    width: "fit-content",
+                    maxWidth: "400px",
+                    overflow: "hidden",
+                  }}
                   gap={"4px"}
                 >
                   <Text size={"xs"} color="#37414E">

@@ -43,13 +43,14 @@ import { useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { IntroMessageSection } from "@common/sequence/LinkedInSequenceSection";
 
-interface linkedinSequence {
+export interface linkedinSequence {
   active: boolean;
   assets: any[];
   bump_framework_id: number;
   bumped_count: number;
   description: string;
   bump_delay_days?: number;
+  title?: string;
 }
 
 export type linkedinSequencesDataType = Array<Array<linkedinSequence>>;
@@ -62,6 +63,7 @@ interface emailSequence {
   bumped_count: number;
   description: string;
   sequence_delay_days?: number;
+  overall_status?: string;
 }
 
 export type emailSequencesDataType = Array<Array<emailSequence>>;

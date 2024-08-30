@@ -359,10 +359,7 @@ export default function CampaignLandingV2(props: PropsType) {
       });
       return false;
     }
-    if (
-      linkedinInitialMessages.length === 0 &&
-      statsData?.template_mode
-    ) {
+    if (linkedinInitialMessages.length === 0 && statsData?.template_mode) {
       showNotification({
         color: "red",
         title: "LinkedIn Channel",
@@ -1696,7 +1693,7 @@ export default function CampaignLandingV2(props: PropsType) {
       {!showOnlyHeader && (
         <>
           <Flex gap={"lg"} mt={"md"}>
-            <Flex direction={"column"} w={"24vw"} gap={"lg"}>
+            <Flex direction={"column"} style={{minWidth: "28%"}} gap={"lg"}>
               {loadingContacts ? (
                 <Paper p={"md"}>
                   <Skeleton height={30} radius="xl" width="40%" />
@@ -1766,19 +1763,23 @@ export default function CampaignLandingV2(props: PropsType) {
               </Paper>
               <Paper></Paper>
             </Flex>
-            <Flex direction={"column"} gap={"md"} w={"80%"}>
+            <Flex
+              direction={"column"}
+              gap={"md"}
+              style={{ maxWidth: "75%", minWidth: "75%" }}
+            >
               <SequencesV2 />
-              <Sequences
-                setSequences={setSequences}
-                // emailSequenceData={emailSequenceData}
-                // linkedinSequenceData={linkedinSequenceData}
-                // setEmailSequenceData={setEmailSequenceData}
-                // setLinkedinSequenceData={setLinkedinSequenceData}
-                setEmailSubjectLines={setEmailSubjectLines}
-                emailSubjectLines={emailSubjectLines}
-                setLinkedinInitialMessages={setLinkedinInitialMessages}
-                linkedinInitialMessages={linkedinInitialMessages}
-              />
+              {/* <Sequences */}
+              {/*   setSequences={setSequences} */}
+              {/*   // emailSequenceData={emailSequenceData} */}
+              {/*   // linkedinSequenceData={linkedinSequenceData} */}
+              {/*   // setEmailSequenceData={setEmailSequenceData} */}
+              {/*   // setLinkedinSequenceData={setLinkedinSequenceData} */}
+              {/*   setEmailSubjectLines={setEmailSubjectLines} */}
+              {/*   emailSubjectLines={emailSubjectLines} */}
+              {/*   setLinkedinInitialMessages={setLinkedinInitialMessages} */}
+              {/*   linkedinInitialMessages={linkedinInitialMessages} */}
+              {/* /> */}
               <Personalizers
                 ai_researcher_id={statsData?.ai_researcher_id}
                 sequences={emailSequenceData || []}

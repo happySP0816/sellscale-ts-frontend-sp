@@ -223,6 +223,8 @@ function NewDetailEmailSequencing(props: {
 
   const [displayTitle, refreshTitle] = useRefresh();
 
+  const [personalizers, setPersonalizers] = useState<any>([]);
+
   // Active Template States
   const [activeTemplate, setTemplate] = useState<EmailSequenceStep>();
   const [activeSubjectLine, setSubjectLine] = useState<SubjectLineTemplate>();
@@ -292,7 +294,6 @@ function NewDetailEmailSequencing(props: {
     return <></>;
   }
 
-  const [personalizers, setPersonalizers] = useState<any>([]);
 
   function getPersonalizersSection() {
     return (

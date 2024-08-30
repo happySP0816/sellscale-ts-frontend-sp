@@ -745,8 +745,6 @@ export default function App() {
   const [searchParams] = useSearchParams();
   const params2 = useParams();
 
-  console.log("params2: ", params2);
-
   useEffect(() => {
     (async () => {
       if (!isLoggedIn()) {

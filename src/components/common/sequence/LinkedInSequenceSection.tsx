@@ -1302,8 +1302,6 @@ export function IntroMessageSection(props: {
     });
   }, [prospectId, selectedTemplateId]);
 
-  console.log("meta_data", messageMetaData);
-
   // if (!currentProject) return <></>;
   return (
     <Stack ml="xl" spacing={0} sx={{ width: "100%" }}>

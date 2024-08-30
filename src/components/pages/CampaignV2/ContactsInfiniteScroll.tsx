@@ -19,6 +19,8 @@ export interface Contact {
   avatar: string;
   title: string;
   company: string;
+  approved_prospect_email_id?: number;
+  approved_outreach_message_id?: number;
   generatedText?: string;
   icp_fit_score: number;
 }

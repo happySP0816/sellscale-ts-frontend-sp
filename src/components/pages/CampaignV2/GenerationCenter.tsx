@@ -238,6 +238,14 @@ export const GenerationCenter: React.FC = () => {
         return isInSearchTerm;
     });
 
+
+    useEffect(() => {
+        if (currentPage === 1 && !campaignUUID) {
+            setSelectedContacts(filteredContacts ? filteredContacts.slice(0, 5).map(contact => contact.id) : []);
+        }
+    }, [currentPage, campaignUUID]);
+        
+
     return (
         <Flex direction="column" gap="lg" p="lg" style={{ backgroundColor: '', borderRadius: '8px' }}>
             {currentPage === 1 ? <> {iframeOpen && (
@@ -515,33 +523,35 @@ export const GenerationCenter: React.FC = () => {
             </>
             ) : (<>
 
-                <Flex justify="center" align="center" gap="md" direction="column">
-                    <Button color="blue" rightIcon={<IconSend size={16} />} onClick={() => { setOutboundCampaignID(null); setCampaignUUID(null); setCurrentPage(1) 
-                        setSelectedContacts(filteredContacts ? filteredContacts.slice(0, 5).map(contact => contact.id) : [])
-                    }}>
-                        Create New Outbound Campaign
-                    </Button>
-                    <Select
-                        label={<Text>Existing Outbound Campaigns</Text>}
-                        placeholder="Choose existing"
-                        data={outboundCampaigns.length > 0 ? outboundCampaigns.map((campaign: OutboundCampaign) => ({
-                            value: campaign.id.toString(),
-                            label: campaign.campaign_type === 'LINKEDIN' ? `LinkedIn - ${campaign.name}` :
-                                   campaign.campaign_type === 'EMAIL' ? `Email - ${campaign.name}` :
-                                   `${campaign.name} - ${campaign.campaign_type}`
-                        })) : [{ value: '', label: 'No campaigns available' }]}
-                        style={{ width: '200px' }}
-                        onChange={(value: any) => {
-                            setOutboundCampaignID(parseInt(value));
-                            setGenerationType(outboundCampaigns.find(campaign => campaign.id === parseInt(value))?.campaign_type === 'LINKEDIN' ? 'linkedin' : 'email');
-                            setCampaignUUID(outboundCampaigns.find(campaign => campaign.id === parseInt(value))?.uuid || null);
+                <Paper shadow="sm" p="md" withBorder style={{ borderRadius: '8px', backgroundColor: '#f9f9f9', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+                    <Flex justify="center" align="center" gap="md" direction="column">
+                        <Button color="blue" rightIcon={<IconSend size={16} />} onClick={() => { 
+                            setOutboundCampaignID(null); 
+                            setCampaignUUID(null); 
                             setCurrentPage(1);
-                            getGeneratedMessageStatus(parseInt(value));
-                        }
-                        }
-                    />
-
-                </Flex>
+                        }}>
+                            Create New Outbound Campaign
+                        </Button>
+                        <Select
+                            label={<Text>Existing Outbound Campaigns</Text>}
+                            placeholder="Choose existing"
+                            data={outboundCampaigns.length > 0 ? outboundCampaigns.map((campaign: OutboundCampaign) => ({
+                                value: campaign.id.toString(),
+                                label: campaign.campaign_type === 'LINKEDIN' ? `LinkedIn - ${campaign.name}` :
+                                       campaign.campaign_type === 'EMAIL' ? `Email - ${campaign.name}` :
+                                       `${campaign.name} - ${campaign.campaign_type}`
+                            })) : [{ value: '', label: 'No campaigns available' }]}
+                            style={{ width: '100%' }}
+                            onChange={(value: any) => {
+                                setOutboundCampaignID(parseInt(value));
+                                setGenerationType(outboundCampaigns.find(campaign => campaign.id === parseInt(value))?.campaign_type === 'LINKEDIN' ? 'linkedin' : 'email');
+                                setCampaignUUID(outboundCampaigns.find(campaign => campaign.id === parseInt(value))?.uuid || null);
+                                setCurrentPage(1);
+                                getGeneratedMessageStatus(parseInt(value));
+                            }}
+                        />
+                    </Flex>
+                </Paper>
 
             </>)}
         </Flex>

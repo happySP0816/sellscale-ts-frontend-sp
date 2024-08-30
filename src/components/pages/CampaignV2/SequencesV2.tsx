@@ -635,12 +635,12 @@ export default function SequencesV2() {
           </Flex>
         </Group>
       </Card.Section>
-      {!emailSequenceData ||
+      {((!emailSequenceData ||
         !Array.isArray(emailSequenceData) ||
-        emailSequenceData.length === 0 ||
-        !linkedinSequenceData ||
+        emailSequenceData.length === 0) &&
+        (!linkedinSequenceData ||
         !Array.isArray(linkedinSequenceData) ||
-        linkedinSequenceData.length === 0 ? (
+        linkedinSequenceData.length === 0)) ? (
         <Flex
           direction="column"
           align="center"

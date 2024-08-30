@@ -270,7 +270,7 @@ export default function SequencesV2() {
   }, [campaignContacts, selectedProspectIndex]);
 
   useEffect(() => {
-    if (selectedTemplateId === -1 && templates) {
+    if (selectedTemplateId === -1 && templates && templates[0]) {
       setSelectedTemplateId(templates[0].id);
     }
   }, [templates]);
@@ -278,7 +278,9 @@ export default function SequencesV2() {
   useEffect(() => {
     if (emailSequenceData && Array.isArray(emailSequenceData)) {
       if (stepNumber || stepNumber >= 0) {
-        setEmailTab(emailSequenceData[stepNumber][0].overall_status ?? null);
+        if (emailSequenceData[stepNumber] && emailSequenceData[stepNumber][0]) {
+          setEmailTab(emailSequenceData[stepNumber][0].overall_status ?? null);
+        }
       }
     }
   }, [stepNumber, emailSequenceData]);
@@ -2625,17 +2627,17 @@ function NewDetailEmailSequencingV2(props: {
   return (
     <Stack style={{ width: "100%" }}>
       <ScrollArea h={300}>
-      {!props.isEditing && (
-        <EmailPreviewHeaderV2
-          currentTab={props.currentTab}
-          template={activeTemplate}
-          subjectLine={activeSubjectLine}
-          prospectId={props.prospectId}
-          triggerGenerate={props.triggerGenerate}
-          stepNumber={props.stepNumber}
-          setTriggerGenerate={props.setTriggerGenerate}
-        />
-      )}
+        {!props.isEditing && (
+          <EmailPreviewHeaderV2
+            currentTab={props.currentTab}
+            template={activeTemplate}
+            subjectLine={activeSubjectLine}
+            prospectId={props.prospectId}
+            triggerGenerate={props.triggerGenerate}
+            stepNumber={props.stepNumber}
+            setTriggerGenerate={props.setTriggerGenerate}
+          />
+        )}
       </ScrollArea>
       <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>
         <ActionIcon
@@ -2657,7 +2659,6 @@ function NewDetailEmailSequencingV2(props: {
           <IconArrowRight size={16} />
         </ActionIcon>
       </Flex>
-
 
       {props.isEditing &&
         (props.currentTab === "PROSPECTED" ? (

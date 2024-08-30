@@ -987,7 +987,7 @@ function BumpFrameworkSelect(props: {
                 id: index,
                 name: template.name + template.tone + template.labels?.join(""),
                 content: (
-                  <Flex>
+                  <Flex key={index}>
                     <Text ml="sm" size="sm" fw="500" mt="4px" mr="lg">
                       {template.name}
                     </Text>
@@ -1010,6 +1010,7 @@ function BumpFrameworkSelect(props: {
                             mr="4px"
                             mt="4px"
                             color="gray"
+                            key={x}
                           >
                             {x}
                           </Badge>
@@ -4110,6 +4111,7 @@ export const PersonalizationSection = (props: {
         <Flex direction={"column"} gap={"0.5rem"}>
           {allItems.map((item) => (
             <ProcessBar
+              key={item.id}
               id={item.id}
               title={item.title}
               percent={item.accepted ?? 0}

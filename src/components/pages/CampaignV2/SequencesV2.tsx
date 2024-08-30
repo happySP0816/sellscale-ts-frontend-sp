@@ -336,7 +336,7 @@ export default function SequencesV2() {
           }}
         >
           {emailSequenceData.map((item, index) => {
-            return <Stepper.Step style={{ backgroundColor: "transparent" }} />;
+            return <Stepper.Step key={index} style={{ backgroundColor: "transparent" }} />;
           })}
         </Stepper>
       );
@@ -374,10 +374,10 @@ export default function SequencesV2() {
           }}
         >
           <Stepper.Step style={{ backgroundColor: "transparent" }} />
-          {linkedinSequenceData.map((item) => {
+          {linkedinSequenceData.map((item, index) => {
             const lSequence = item[0];
 
-            return <Stepper.Step style={{ backgroundColor: "transparent" }} />;
+            return <Stepper.Step key={index} style={{ backgroundColor: "transparent" }} />;
           })}
         </Stepper>
       );
@@ -574,6 +574,7 @@ export default function SequencesV2() {
                     refetchSequenceData,
                     setCreateTemplateBuilder,
                     // setSequences,
+                    prospectId: selectedProspect?.id,
                   },
                   centered: true,
                   styles: {

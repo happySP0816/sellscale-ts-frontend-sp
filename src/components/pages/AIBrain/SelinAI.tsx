@@ -35,6 +35,7 @@ import {
   Kbd,
   Group,
   Tooltip,
+  HoverCard,
 } from "@mantine/core";
 import {
   IconBrowser,
@@ -71,6 +72,7 @@ import {
   Dispatch,
   Fragment,
   Key,
+  memo,
   SetStateAction,
   useEffect,
   useRef,
@@ -260,6 +262,7 @@ export interface MemoryType {
   session_name: string;
   strategy_id: number;
   campaign_id: number;
+  memory_state: string;
   tab: "STRATEGY_CREATOR" | "PLANNER" | "BROWSER" | "ICP";
   search?: {
     query: string;
@@ -344,7 +347,6 @@ export default function SelinAI() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingSessionName, setEditingSessionName] = useState<string>("");
 
-
   const editSession = (sessionId: number, newName: string) => {
     setEditingIndex(null);
     setThreads((prevThreads) =>
@@ -366,7 +368,7 @@ export default function SelinAI() {
       }),
     });
   };
-  
+
   // console.log("current session is", currentSessionId);
 
   useEffect(() => {
@@ -721,13 +723,20 @@ export default function SelinAI() {
     device_id: string;
     original_sentnece: string;
   }) => {
-    console.log('comparing promps: ', promptRef.current, data.original_sentnece);
-    if (data.device_id === deviceIDRef.current && (promptRef.current === data.original_sentnece)) {
+    console.log(
+      "comparing promps: ",
+      promptRef.current,
+      data.original_sentnece
+    );
+    if (
+      data.device_id === deviceIDRef.current &&
+      promptRef.current === data.original_sentnece
+    ) {
       setPrompt(data.message);
       promptRef.current = data.message;
       promptLengthRef.current = data.message.length;
     }
-  }
+  };
 
   const handleAddTaskToSession = async (data: {
     task: TaskType;
@@ -953,9 +962,7 @@ export default function SelinAI() {
     socket.on("update-action", (data) => {
       handleUpdateTaskAndAction(data, setMessages);
     });
-    socket.on(
-      'corrected-transcript', handleUpdateTranscript
-    );
+    socket.on("corrected-transcript", handleUpdateTranscript);
     socket.on("update-session", handleUpdateSession);
     socket.on("increment-counter", handleIncrementCounter);
     socket.on("suggestion", handleSuggestion);
@@ -1342,17 +1349,30 @@ export default function SelinAI() {
                         >
                           <Flex align={"center"} justify={"space-between"}>
                             {editingIndex === index ? (
-                              <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()}>
+                              <Flex
+                                align={"center"}
+                                gap={"sm"}
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 <TextInput
                                   value={editingSessionName}
-                                  onChange={(e) => setEditingSessionName(e.currentTarget.value)}
-                                  onBlur={() => editSession(thread.id, editingSessionName)}
+                                  onChange={(e) =>
+                                    setEditingSessionName(e.currentTarget.value)
+                                  }
+                                  onBlur={() =>
+                                    editSession(thread.id, editingSessionName)
+                                  }
                                   onKeyDown={(e) => {
                                     if (e.key === "Enter") {
-                                      editSession(thread.id, editingSessionName);
+                                      editSession(
+                                        thread.id,
+                                        editingSessionName
+                                      );
                                     }
                                   }}
-                                  style={{ width: `${editingSessionName.length + 2}ch` }}
+                                  style={{
+                                    width: `${editingSessionName.length + 2}ch`,
+                                  }}
                                   rightSection={
                                     <ActionIcon
                                       variant="transparent"
@@ -1360,10 +1380,13 @@ export default function SelinAI() {
                                       size={"sm"}
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        editSession(thread.id, editingSessionName);
+                                        editSession(
+                                          thread.id,
+                                          editingSessionName
+                                        );
                                       }}
                                     >
-                                      <IconCircleCheck size={'xl'} />
+                                      <IconCircleCheck size={"xl"} />
                                     </ActionIcon>
                                   }
                                 />
@@ -1381,59 +1404,78 @@ export default function SelinAI() {
                                 {thread.session_name || "Untitled Session"}
                               </Text>
                             )}
-                            {!(editingIndex === index) && hoverChat && hoverChat === thread.id && (
-                              <>
-                              <ActionIcon
-                                variant="transparent"
-                                color="blue"
-                                size={"sm"}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingIndex(index);
-                                  setEditingSessionName(thread.session_name);
-                                }}
-                                style={{ marginLeft: 'auto' }}
-                              >
-                                <IconPencil size={"1rem"} />
-                              </ActionIcon>
-                              <ActionIcon
-                                variant="transparent"
-                                color="red"
-                                size={"sm"}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setThreads((prevThreads) => prevThreads.filter((prevThread) => prevThread.id !== thread.id));
-                                  fetch(`${API_URL}/selix/delete_session`, {
-                                    method: "DELETE",
-                                    headers: {
-                                      "Content-Type": "application/json",
-                                      Authorization: `Bearer ${userToken}`,
-                                    },
-                                    body: JSON.stringify({
-                                      session_id: thread.id,
-                                    }),
-                                  })
-                                    .then((response) => {
-                                      if (!response.ok) {
-                                        return response.json().then((data) => {
-                                          throw new Error(data.error || "Failed to delete session");
+                            {!(editingIndex === index) &&
+                              hoverChat &&
+                              hoverChat === thread.id && (
+                                <>
+                                  <ActionIcon
+                                    variant="transparent"
+                                    color="blue"
+                                    size={"sm"}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingIndex(index);
+                                      setEditingSessionName(
+                                        thread.session_name
+                                      );
+                                    }}
+                                    style={{ marginLeft: "auto" }}
+                                  >
+                                    <IconPencil size={"1rem"} />
+                                  </ActionIcon>
+                                  <ActionIcon
+                                    variant="transparent"
+                                    color="red"
+                                    size={"sm"}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setThreads((prevThreads) =>
+                                        prevThreads.filter(
+                                          (prevThread) =>
+                                            prevThread.id !== thread.id
+                                        )
+                                      );
+                                      fetch(`${API_URL}/selix/delete_session`, {
+                                        method: "DELETE",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                          Authorization: `Bearer ${userToken}`,
+                                        },
+                                        body: JSON.stringify({
+                                          session_id: thread.id,
+                                        }),
+                                      })
+                                        .then((response) => {
+                                          if (!response.ok) {
+                                            return response
+                                              .json()
+                                              .then((data) => {
+                                                throw new Error(
+                                                  data.error ||
+                                                    "Failed to delete session"
+                                                );
+                                              });
+                                          }
+                                          return response.json();
+                                        })
+                                        .then((data) => {
+                                          console.log(
+                                            "Session deleted:",
+                                            data.message
+                                          );
+                                        })
+                                        .catch((error) => {
+                                          console.error(
+                                            "Error deleting session:",
+                                            error
+                                          );
                                         });
-                                      }
-                                      return response.json();
-                                    })
-                                    .then((data) => {
-                                      console.log("Session deleted:", data.message);
-                                    })
-                                    .catch((error) => {
-                                      console.error("Error deleting session:", error);
-                                    });
-                                  }}
-                              >
-                                <IconTrash size={"1rem"} />
-                              </ActionIcon>
-                              </>
-
-                            )}
+                                    }}
+                                  >
+                                    <IconTrash size={"1rem"} />
+                                  </ActionIcon>
+                                </>
+                              )}
                           </Flex>
                           <Flex align={"center"} gap={"xs"}>
                             {thread.status === "ACTIVE" && (
@@ -1529,6 +1571,10 @@ export default function SelinAI() {
               setRecording={setRecording}
               aiType={aiType}
               currentSessionId={sessionIDRef.current}
+              memoryState={
+                threads.find((thread) => thread.id === sessionIDRef.current)
+                  ?.memory.memory_state
+              }
               // generateResponse={generateResponse}
               // chatContent={chatContent}
               // setChatContent={setChatContent}
@@ -1574,46 +1620,48 @@ const SegmentChat = (props: any) => {
   const [showLoader, setShowLoader] = useState(false);
   // const [recording, setRecording] = useState(false);
 
-const lastPromptRef = useRef<string>("");
+  const lastPromptRef = useRef<string>("");
 
-const processTranscription = async () => {
-
-  try {
-    const response = await fetch(`${API_URL}/selix/post_process_transcription`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userToken}`,
-      },
-      body: JSON.stringify({
-        session_id: sessionId,
-        device_id: deviceIDRef.current,
-        sentence_to_correct: promptRef.current,
-      }),
-    });
-  } catch (error) {
-    console.error("Error processing transcription:", error);
-  }
-};
-
-useEffect(() => {
-  let interval: NodeJS.Timeout | null = null;
-
-  if (recording) {
-    interval = setInterval(() => {
-      if (promptRef.current !== lastPromptRef.current) {
-        lastPromptRef.current = promptRef.current;
-        processTranscription();
-      }
-    }, 4000);
-  }
-
-  return () => {
-    if (interval) {
-      clearInterval(interval);
+  const processTranscription = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/selix/post_process_transcription`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            session_id: sessionId,
+            device_id: deviceIDRef.current,
+            sentence_to_correct: promptRef.current,
+          }),
+        }
+      );
+    } catch (error) {
+      console.error("Error processing transcription:", error);
     }
   };
-}, [recording]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (recording) {
+      interval = setInterval(() => {
+        if (promptRef.current !== lastPromptRef.current) {
+          lastPromptRef.current = promptRef.current;
+          processTranscription();
+        }
+      }, 4000);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [recording]);
 
   const viewport = useRef<any>(null);
 
@@ -1628,7 +1676,7 @@ useEffect(() => {
   }, [messages.length]);
 
   useEffect(() => {
-    if (aiType === 'PLANNER' && viewport.current) {
+    if (aiType === "PLANNER" && viewport.current) {
       viewport.current.scrollTo({
         top: viewport.current.scrollHeight,
         behavior: "smooth",
@@ -1693,6 +1741,32 @@ useEffect(() => {
       >
         <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
         <Text fw={600}>Chat with Selix</Text>
+        <HoverCard width={280} shadow="md">
+          <HoverCard.Target>
+            <Text
+              ml={"auto"}
+              size={"xs"}
+              color="gray"
+              sx={{ pointer: "cursor" }}
+            >
+              <Badge color="pink" variant="outline">
+                🧠
+              </Badge>
+            </Text>
+          </HoverCard.Target>
+          <HoverCard.Dropdown>
+            <Title order={5} mb="xs">
+              🧠 Selix Memory
+            </Title>
+            <Card withBorder>
+              {props.memoryState?.split("\n").map((line, index) => (
+                <Text key={index} size="xs" mb="xs">
+                  {line.replace("- ", "- 💡 ")}
+                </Text>
+              ))}
+            </Card>
+          </HoverCard.Dropdown>
+        </HoverCard>
       </Flex>
       <Divider bg="gray" />
       <ScrollArea
@@ -2251,10 +2325,8 @@ useEffect(() => {
                       }
                     }, 0);
                     return newPrompt;
-                  }
-                  );
-                }
-                }
+                  });
+                }}
               />
               <Button
                 size={"xs"}
@@ -2359,7 +2431,7 @@ const SelixControlCenter = ({
           float: "left",
         }}
       >
-        <SellScaleAssistant refresh={refreshIcp}/>
+        <SellScaleAssistant refresh={refreshIcp} />
       </Modal>
       <Flex
         px={"md"}
@@ -2851,12 +2923,16 @@ const PlannerComponent = ({
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
   const [selectedRewindImage, setSelectedRewindImage] = useState<string>("");
-  const [segment, setSegment] = useState<TransformedSegment | undefined>(undefined);
+  const [segment, setSegment] = useState<TransformedSegment | undefined>(
+    undefined
+  );
 
   const campaignId = threads.find((thread) => thread.id === currentSessionId)
     ?.memory?.campaign_id;
 
-  const currentThread = threads.find((thread) => thread.id === currentSessionId);
+  const currentThread = threads.find(
+    (thread) => thread.id === currentSessionId
+  );
 
   useEffect(() => {
     if (openedTaskIndex === tasks.length - 1) {
@@ -2872,7 +2948,6 @@ const PlannerComponent = ({
   useEffect(() => {
     (async () => {
       if (campaignId) {
-
         const [project, res] = await Promise.all([
           getFreshCurrentProject(userToken, campaignId),
           getSegments(true, false, campaignId),
@@ -2880,7 +2955,6 @@ const PlannerComponent = ({
 
         setSegment(res[0] || undefined);
         setCurrentProject(project);
-
 
         if (currentThread?.tasks.length) {
           setOpenedTaskIndex(currentThread?.tasks.length - 1);
@@ -2892,9 +2966,8 @@ const PlannerComponent = ({
               behavior: "smooth",
             });
           }
-        }, 50); 
+        }, 50);
         //show the 'launch campaign' task if a campaign is attached
-
       }
     })();
   }, [campaignId]);
@@ -2911,7 +2984,6 @@ const PlannerComponent = ({
 
     return () => clearTimeout(timeoutId);
   }, [tasks.length]);
-
 
   const getSegments = async (
     includeAllInClient: boolean = true,
@@ -3164,7 +3236,8 @@ const PlannerComponent = ({
                       />
                     </Text>
                     {/* eventually delete this */}
-                    {currentThread?.memory.campaign_id && index === tasks.length - 1 ? (
+                    {currentThread?.memory.campaign_id &&
+                    index === tasks.length - 1 ? (
                       <CampaignLandingV2
                         showOnlyHeader
                         showLaunchButton
@@ -3233,15 +3306,15 @@ const TaskRenderer = ({
         />
       );
     case "VIEW_PERSONALIZERS":
-    return (
-      <Personalizers
-        forcedCampaignId={currentThread?.memory.campaign_id}
-        ai_researcher_id={currentProject?.ai_researcher_id}
-        sequences={emailSequenceData}
-        setPersonalizers={setPersonalizers}
-        personalizers={personalizers}
-      />
-    );
+      return (
+        <Personalizers
+          forcedCampaignId={currentThread?.memory.campaign_id}
+          ai_researcher_id={currentProject?.ai_researcher_id}
+          sequences={emailSequenceData}
+          setPersonalizers={setPersonalizers}
+          personalizers={personalizers}
+        />
+      );
     case "VIEW_STRATEGY":
       return (
         <SelinStrategy

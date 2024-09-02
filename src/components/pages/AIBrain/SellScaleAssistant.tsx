@@ -102,14 +102,18 @@ export default function SellScaleAssistant({
   return (
     <Box>
       <Flex mt={"md"} gap={"xl"}>
-        { !window.location.href.includes("selix") && (
+        {!window.location.href.includes("selix") && (
           <>
             <Tour
               steps={editTourSteps}
               isOpen={editTourOpen}
               onRequestClose={closeEditTour}
             />
-            <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour} />
+            <Tour
+              steps={steps}
+              isOpen={isTourOpen}
+              onRequestClose={closeTour}
+            />
           </>
         )}
         {showChat && (
@@ -154,12 +158,14 @@ const SegmentChat = (props: any) => {
   const [chatContent, setChatContent] = useState<any>([
     {
       sender: "chatbot",
-      query: "Hey there! I'm SellScale AI, your friendly chatbot for creating sales segments.",
+      query:
+        "Hey there! I'm SellScale AI, your friendly chatbot for creating sales segments.",
       created_at: moment().format("MMMM D, h:mm a"),
     },
     {
       sender: "chatbot",
-      query: "To get started, tell me a bit about your business or who you're targeting.",
+      query:
+        "To get started, tell me a bit about your business or who you're targeting.",
       created_at: moment().format("MMMM D, h:mm a"),
     },
   ]);

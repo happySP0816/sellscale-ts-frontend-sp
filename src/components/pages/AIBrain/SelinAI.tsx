@@ -1759,7 +1759,7 @@ const SegmentChat = (props: any) => {
               🧠 Selix Memory
             </Title>
             <Card withBorder>
-              {props.memoryState?.split("\n").map((line, index) => (
+              {props.memoryState?.split("\n").map((line: any, index: any) => (
                 <Text key={index} size="xs" mb="xs">
                   {line.replace("- ", "- 💡 ")}
                 </Text>

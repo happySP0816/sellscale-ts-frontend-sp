@@ -1094,8 +1094,6 @@ export function PersonCampaignCard(props: {
                               <Text fw={600}>{item.prospect_name}</Text>
                             </Flex>
                             <Flex align={"center"} gap={10} w={"100%"} mt={3}>
-                            <br></br>
-                            <Text>{item.prospect_id}</Text>
                               <Text>ICP Score: </Text>
                               <Badge
                                 color={

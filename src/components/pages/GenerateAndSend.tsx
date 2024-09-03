@@ -1,13 +1,15 @@
 import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
+import RichTextArea from "@common/library/RichTextArea";
 import { API_URL } from "@constants/data";
-import { ActionIcon, Avatar, Badge, Box, Button, Center, Flex, Paper, SegmentedControl, Stack, Table, Text, Textarea } from "@mantine/core";
+import { ActionIcon, Avatar, Badge, Box, Button, Center, Flex, Paper, ScrollArea, SegmentedControl, Stack, Table, Text, Textarea } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { IconBrandLinkedin, IconEdit, IconGlobe, IconLetterT, IconLoader, IconMail, IconRecordMail, IconX } from "@tabler/icons";
 import { IconClockBolt, IconClockCog, IconSparkles } from "@tabler/icons-react";
+import { JSONContent } from "@tiptap/react";
 import { DataGrid } from "mantine-data-grid";
 import { DataTable } from "mantine-datatable";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { a } from "react-spring";
 import { useRecoilValue } from "recoil";
 import { PersonaOverview, ProspectShallow } from "src";
@@ -31,6 +33,7 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(0);
   const [approveStatus, setApproveStatus] = useState(false);
   const [regeneratingMessage, setRegeneratingMessage] = useState(false);
+  const [updatingMessage, setUpdatingMessage] = useState(false);
 
   type CampaignAnalytics = {
     "# Acceptances": number | null;
@@ -78,14 +81,21 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
 
   type ProspectOutreachInfo = {
     ai_approved: boolean;
+    ai_approved_2: boolean;
     blocking_problems: any[];
     completion: string;
+    completion_2: string;
+    few_shot_prompt: string | null;
     full_name: string;
     highlighted_words: any[];
+    highlighted_words_2: any[];
     message_id: number;
+    message_id_2: number;
     problems: any[];
-    prospect_info: ProspectShallow | undefined;
+    prompt: string;
+    prospect_email_id?: number;
     prospect_id: number;
+    prospect_info: ProspectShallow | undefined;
     ai_research_answers: AIResearchAnswer[];
   };
 
@@ -145,6 +155,53 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
 
   setApprovingCampaign(false);
 }
+
+  const handleSave = async (message_id: number, update: string) => {
+
+    //Email
+      setUpdatingMessage(true);
+
+      try {
+        const response = await fetch(`${API_URL}/message_generation/`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            message_id: message_id,
+            update: update,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update message');
+        }
+
+        const data = await response;
+        console.log('Updated message:', data);
+
+        showNotification({
+          title: 'Message Updated',
+          message: 'The message has been updated successfully',
+        });
+
+
+      } catch (error) {
+        console.error('Error updating message:', error);
+
+        showNotification({
+          title: 'Failed to update message',
+          message: 'An error occurred while updating the message',
+          color: 'red',
+        });
+
+      }
+
+      setUpdatingMessage(false);
+
+  }
+
 
   const patchMessageApproval = async (message_id: number, approval: boolean) => {
     try {
@@ -310,12 +367,19 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
       setData(transformedData);
       setFilterData(transformedData);
       setMessage(transformedData[0].completion);
+      if (transformedData[0].completion_2){
+        emailBody.current = (transformedData[0].completion_2);
+        emailBodyRaw.current = (transformedData[0].completion_2);
+      }
       setSelected(transformedData[0]);
 
     }
   }, [outboundCampaignInfo]);
 
   const [message, setMessage] = useState("");
+  const emailBody = useRef("");
+  const emailBodyRaw = useRef<string | JSONContent>('');
+  const [copyAltered, setCopyAltered] = useState(false);
 
   const [type, setType] = useState("all");
 
@@ -402,6 +466,9 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
               },
             ]}
           />
+          <ScrollArea 
+          h={'100vh'}
+          >
           <Table
             highlightOnHover
             withColumnBorders
@@ -446,8 +513,23 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
               </tr>
             </thead>
             <tbody>
+              
               {filterData.map((record: ProspectOutreachInfo, index) => (
-                <tr key={index} onClick={() => { setSelected(record); setSelectedIndex(index); setMessage(outboundCampaignInfo?.campaign_details.prospects[index].completion || '')}} style={{ background: index === selectedIndex ? "#3B85EF10" : "white" }}>
+                <tr
+                  key={index}
+                  onClick={() => {
+                    console.log('selected is', record);
+                    setSelected(record);
+                    setSelectedIndex(index);
+                    setMessage(record.completion || '');
+                    if (record.completion_2) {
+                      emailBody.current = (record.completion_2);
+                      emailBodyRaw.current = (record.completion_2);
+                    }
+                    setCopyAltered(false);
+                  }}
+                  style={{ background: index === selectedIndex ? "#3B85EF10" : "white" }}
+                >
                   <td>
                     <Flex w={"100%"} h={"100%"} px={4} py={"xs"} align={"center"} justify={"start"}>
                       <Text size={"sm"} fw={500} color="gray">
@@ -486,6 +568,7 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
               ))}
             </tbody>
           </Table>
+          </ScrollArea>
         </Paper>
         {selected && selected.prospect_info && <Paper bg={"#F7F8FA"} p={"md"} w={"65%"}>
           <Stack spacing={"sm"}>
@@ -565,7 +648,7 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
                   <Textarea
                     w={"100%"}
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={(e) => {setCopyAltered(true); setMessage(e.target.value)}}
                     defaultValue={selected.completion}
                     maxRows={4}
                     autosize
@@ -577,13 +660,84 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
                     }}
                   />
                 </Flex>
+                {selected.completion_2 && <Flex direction={"column"} align={"end"}>
+                  <Paper radius={"sm"} bg={"#D9DEE5"} p={4} style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }} mb={-2}>
+                   
+                  </Paper>
+                  <RichTextArea
+                  onChange={(value, rawValue) => {
+                    emailBodyRaw.current = rawValue;
+                    emailBody.current = value;
+                    // setDescription(value);
+                    setCopyAltered(true);
+                    console.log(value);
+                  }}
+                  value={emailBodyRaw.current}
+                />
+                </Flex>}
                 <Flex justify={"space-between"} mt={"md"}>
                   <Button onClick={()=> {autoEditMessage(selected.message_id)} } disabled = {outboundCampaignInfo?.campaign_details.campaign_raw.campaign_type === "EMAIL"}color="grape" variant="outline" leftIcon={<IconEdit size={"1.3rem"} />}>
                     Auto Edit Using AI
                   </Button>
-                  <Button loading={regeneratingMessage} onClick={regenerateMessage(selected.prospect_id, selected.message_id)} color="grape" leftIcon={<IconSparkles size={"1.3rem"} />}>
-                    Regenerate
-                  </Button>
+                  <Flex gap={"sm"}>
+                    <Button loading={regeneratingMessage} onClick={regenerateMessage(selected.prospect_id, selected.message_id)} color="grape" leftIcon={<IconSparkles size={"1.3rem"} />}>
+                      Regenerate
+                    </Button>
+                    <Button
+                      loading={updatingMessage}
+                      onClick={() => {
+                        if (outboundCampaignInfo?.campaign_details.campaign_raw.campaign_type === 'EMAIL') {
+                          if (selected.message_id_2) {
+                            handleSave(selected.message_id_2, emailBody.current);
+                          }
+                          if (selected.message_id) {
+                            handleSave(selected.message_id, message);
+                          }
+                        } else if (outboundCampaignInfo?.campaign_details.campaign_raw.campaign_type === 'LINKEDIN') {
+                          if (selected.message_id) {
+                            handleSave(selected.message_id, message);
+                          }
+                        }
+                        setCopyAltered(false);
+                        
+                        //update the underlying data and filtered data states
+                        setFilterData((prevFilterData) => {
+                          return prevFilterData.map((item) =>
+                            item.message_id === selected.message_id ? { ...item, completion: message } : item
+                          );
+                        });
+
+                        setData((prevData) => {
+                          return prevData.map((item) =>
+                            item.message_id === selected.message_id ? { ...item, completion: message } : item
+                          );
+                        });
+
+                        //check for email body and update if it exists
+
+                        if (selected.completion_2) {
+                          setFilterData((prevFilterData) => {
+                            return prevFilterData.map((item) =>
+                              item.message_id === selected.message_id ? { ...item, completion_2: emailBody.current } : item
+                            );
+                          });
+
+                          setData((prevData) => {
+                            return prevData.map((item) =>
+                              item.message_id === selected.message_id ? { ...item, completion_2: emailBody.current } : item
+                            );
+                          });
+                        }
+
+
+
+                      }}
+                      disabled={!copyAltered}
+                      color="blue"
+                    >
+                      Save
+                    </Button>
+                  </Flex>
                 </Flex>
               </Stack>
             </Paper>

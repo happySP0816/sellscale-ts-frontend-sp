@@ -1050,6 +1050,7 @@ export default function CampaignLandingV2(props: PropsType) {
                   </Modal>
                   {!showOnlyHeader && (
                     <Button
+                      loading={loadingContacts}
                       disabled={!window.location.href.includes("ishan")}
                       size="sm"
                       color="blue"

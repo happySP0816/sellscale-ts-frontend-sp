@@ -174,9 +174,9 @@ type PropsType = {
 export default function SequencesV2(props: PropsType) {
   const params = useParams();
   const userToken = useRecoilValue(userTokenState);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const theme = useMantineTheme();
   const [campaignContacts, setCampaignContacts] = useRecoilState(
     campaignContactsState
@@ -237,6 +237,12 @@ export default function SequencesV2(props: PropsType) {
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any>(
     {}
   );
+
+  const triggerProjectRefresh = async function () {
+    const project = await getFreshCurrentProject(userToken, params?.id ? +params?.id : -1);
+
+    setCurrentProject(project);
+  }
 
   const [triggerGenerate, setTriggerGenerate] = useState(0);
 
@@ -789,6 +795,7 @@ export default function SequencesV2(props: PropsType) {
                       currentProject={currentProject ?? undefined}
                       userToken={userToken}
                       prospectId={selectedProspect?.id}
+                      triggerProjectRefresh={triggerProjectRefresh}
                     />
                   )}
                 {stepNumber === 0 &&
@@ -3446,6 +3453,7 @@ const LinkedinIntroEditSectionCTA = function (props: {
   userToken: string;
   prospectId?: number;
   currentProject?: PersonaOverview;
+  triggerProjectRefresh: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<string | null>("personalization");
   const [
@@ -3569,6 +3577,8 @@ const LinkedinIntroEditSectionCTA = function (props: {
                 props.currentProject?.id || -1,
                 items.filter((x) => !x.checked).map((x) => x.id)
               );
+
+              props.triggerProjectRefresh();
             }}
           />
         </ScrollArea>

@@ -8,6 +8,7 @@ import { fetchCampaignContacts } from '@utils/requests/campaignOverview';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { IconArrowLeft, IconBrandLinkedin, IconCalendar, IconMail, IconMailOpened, IconSend } from '@tabler/icons';
 import { Calendar } from '@fullcalendar/core';
+import GenerateAndSend from '@pages/GenerateAndSend';
 
 export const GenerationCenter: React.FC = () => {
 
@@ -65,6 +66,7 @@ export const GenerationCenter: React.FC = () => {
     const [generatedMessageStatus, setGeneratedMessageStatus] = useState<GenerationStatuses | null>(null);
     const [iframeOpen, setIframeOpen] = useState(false);
     const [outboundCampaigns, setOutboundCampaigns] = useState<OutboundCampaign[]>([]);
+    // const [currentPage, setCurrentPage] = useState<number>(-1);
     const [currentPage, setCurrentPage] = useState<number>(-1);
 
     const fetchCampaignsByArchetype = async (archetypeId: number) => {
@@ -238,15 +240,16 @@ export const GenerationCenter: React.FC = () => {
         return isInSearchTerm;
     });
 
+    //uncomment when done
 
-    useEffect(() => {
-        if (currentPage === 1 && !campaignUUID) {
-            setSelectedContacts(filteredContacts ? filteredContacts.slice(0, 5).map(contact => contact.id) : []);
-        }
-        if (currentPage === 0){
-            fetchCampaignsByArchetype(currentProject?.id || -1);
-        }
-    }, [currentPage, campaignUUID]);
+    // useEffect(() => {
+    //     if (currentPage === 1 && !campaignUUID) {
+    //         setSelectedContacts(filteredContacts ? filteredContacts.slice(0, 5).map(contact => contact.id) : []);
+    //     }
+    //     if (currentPage === 0){
+    //         fetchCampaignsByArchetype(currentProject?.id || -1);
+    //     }
+    // }, [currentPage, campaignUUID]);
         
 
     return (
@@ -265,14 +268,7 @@ export const GenerationCenter: React.FC = () => {
                         },
                     }}
                 >
-                    <Box style={{ width: '100%', height: '100%' }}>
-                        <iframe
-                            src={`https://sellscale.retool.com/embedded/public/eb93cfac-cfed-4d65-b45f-459ffc546bce#campaign_uuid=${campaignUUID}`}
-                            width="100%"
-                            height="100%"
-                            style={{ border: 'none', flex: 1 }}
-                        ></iframe>
-                    </Box>
+                    <GenerateAndSend outboundCampaignId={outboundCampaignID} campaignUUID={campaignUUID} />
                 </Modal>
             )}
                 <Button

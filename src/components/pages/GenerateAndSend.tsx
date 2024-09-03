@@ -1,11 +1,18 @@
-import { ActionIcon, Avatar, Badge, Box, Button, Center, Flex, Paper, SegmentedControl, Stack, Text, Textarea } from "@mantine/core";
+import { currentProjectState } from "@atoms/personaAtoms";
+import { userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
+import { ActionIcon, Avatar, Badge, Box, Button, Center, Flex, Paper, SegmentedControl, Stack, Table, Text, Textarea } from "@mantine/core";
+import { showNotification } from "@mantine/notifications";
 import { IconBrandLinkedin, IconEdit, IconGlobe, IconLetterT, IconLoader, IconMail, IconRecordMail, IconX } from "@tabler/icons";
 import { IconClockBolt, IconClockCog, IconSparkles } from "@tabler/icons-react";
 import { DataGrid } from "mantine-data-grid";
 import { DataTable } from "mantine-datatable";
 import { useEffect, useState } from "react";
+import { a } from "react-spring";
+import { useRecoilValue } from "recoil";
+import { PersonaOverview, ProspectShallow } from "src";
 
-export default function GenerateAndSend() {
+export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { outboundCampaignId: number | null; campaignUUID: string | null }) {
   interface ContactData {
     avatar: string;
     name: string;
@@ -17,89 +24,321 @@ export default function GenerateAndSend() {
     message: string;
   }
 
-  const [data, setData] = useState<ContactData[]>([
-    {
-      avatar: "https://www.figma.com/design/6tiYgFavVgP2Wz20X3G4uj/SellScale-V3?node-id=8359-44985&node-type=FRAME&t=styRm49in4GyGWml-0#",
-      name: "Oliver King",
-      job: "Former Quant & VC",
-      part: "Helping Founder GT",
-      status: false,
-      linkedin: true,
-      email: false,
-      message:
-        "Hi Oliver! Saw your new role in a startup. With your VC and quant background, you must have insights on software development. Interested in boosting your funnel? Let's talk!",
-    },
-    {
-      avatar: "",
-      name: "Etika Srivastava",
-      job: "Talent Acquisition Recruiter",
-      part: "HCL Tech",
-      status: false,
-      linkedin: true,
-      email: false,
-      message:
-        "Hi Etika! I noticed your new role in a startup. With your experience in talent acquisition recruitment and quantitative analysis, I bet you have some valuable insights on software development. Interested in enhancing your pipeline? Let's connect!",
-    },
-    {
-      avatar: "",
-      name: "Nancy Ice",
-      job: "Sales Head",
-      part: "XM Telecom",
-      status: false,
-      linkedin: false,
-      email: true,
-      message:
-        "Hi Nancy! Congrats on your new startup role! Given your strong background in sales and growth analysis, I'm sure you have some sharp perspectives on software development. Let's discuss ways to elevate your funnel!",
-    },
-    {
-      avatar: "",
-      name: "David Bekk",
-      job: "Managing Director",
-      part: "Meewa",
-      status: false,
-      linkedin: true,
-      email: false,
-      message:
-        "Hi David! Excited to see your new role in the startup world! With your managing direction and quant background, you're likely already thinking about optimizing your software development processes. Want to talk about boosting your funnel?",
-    },
-    {
-      avatar: "",
-      name: "Erik Thomas",
-      job: "Head of Department",
-      part: "LM Infotech",
-      status: false,
-      linkedin: true,
-      email: true,
-      message:
-        "Hi Erik! I came across your recent move to a startup. Your experience in managing and quant must give you unique insights into software development. Interested in discussing how to supercharge your funnel? Let's chat!",
-    },
-  ]);
-  const [filterData, setFilterData] = useState(data);
-  const [selected, setSelected] = useState<any>(data[0]);
+  const [data, setData] = useState<ProspectOutreachInfo[]>([]);
+
+  const [filterData, setFilterData] = useState<ProspectOutreachInfo[]>([]);
+  const [selected, setSelected] = useState<ProspectOutreachInfo | undefined>(data?.[0] || {});
   const [selectedIndex, setSelectedIndex] = useState<number | null>(0);
   const [approveStatus, setApproveStatus] = useState(false);
+  const [regeneratingMessage, setRegeneratingMessage] = useState(false);
+
+  type CampaignAnalytics = {
+    "# Acceptances": number | null;
+    "# Demos": number | null;
+    "# Replies": number | null;
+    "# Sent": number | null;
+    "Campaign End date": string;
+    "Campaign ID": number;
+    "Campaign Name": string;
+    "Campaign Start date": string;
+    "Campaign Type": string;
+    "Companies Demos": number | null;
+  };
+
+  type CampaignRaw = {
+    campaign_end_date: string;
+    campaign_start_date: string;
+    campaign_type: string;
+    canonical_name: string;
+    client_archetype_id: number;
+    client_sdr_id: number;
+    cost: number | null;
+    ctas: any[];
+    id: number;
+    is_daily_generation: boolean;
+    name: string;
+    priority_rating: number;
+    prospect_ids: number[];
+    receipt_link: string | null;
+    status: string;
+    uuid: string;
+  };
+  type AIResearchAnswer = {
+    citations: string[];
+    created_at: string;
+    id: number;
+    is_yes_response: boolean;
+    prospect_id: number;
+    question_id: number;
+    raw_response: string;
+    relevancy_explanation: string;
+    short_summary: string;
+    updated_at: string;
+  };
+
+  type ProspectOutreachInfo = {
+    ai_approved: boolean;
+    blocking_problems: any[];
+    completion: string;
+    full_name: string;
+    highlighted_words: any[];
+    message_id: number;
+    problems: any[];
+    prospect_info: ProspectShallow | undefined;
+    prospect_id: number;
+    ai_research_answers: AIResearchAnswer[];
+  };
+
+  type OutboundCampaignInfo = {
+    campaign_details: {
+      campaign_analytics: CampaignAnalytics;
+      campaign_raw: CampaignRaw;
+      client_archetype: PersonaOverview;
+      prospects: ProspectOutreachInfo[];
+    };
+    message: string;
+  };
+
+  const [outboundCampaignInfo, setOutboundCampaignInfo] = useState<OutboundCampaignInfo | null>(null);
+  const userToken = useRecoilValue(userTokenState);
+  const currentProject = useRecoilValue(currentProjectState);
+  const [approvingCampaign, setApprovingCampaign] = useState(false);
+
+  const approveCampaign = async () => {
+
+    setApprovingCampaign(true);
+    try {
+      const response = await fetch(`${API_URL}/campaigns/mark_initial_review_complete`, {
+        method: 'POST',
+        body: JSON.stringify({
+          campaign_id: outboundCampaignInfo?.campaign_details.campaign_raw.id,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to approve campaign');
+      }
+
+      const data = await response.json();
+      console.log('Approved campaign:', data);
+
+      showNotification({
+        title: 'Campaign Approved',
+        message: 'The campaign has been approved successfully',
+      });
+
+    } catch (error) {
+
+      showNotification({
+        title: 'Failed to approve campaign',
+        message: 'An error occurred while approving the campaign',
+        color: 'red',
+      });
+
+      console.error('Error approving campaign:', error);
+
+  }
+
+  setApprovingCampaign(false);
+}
+
+  const patchMessageApproval = async (message_id: number, approval: boolean) => {
+    try {
+      const response = await fetch(`${API_URL}/message_generation/${message_id}/patch_message_ai_approve`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          new_ai_approve_status: approval,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to unapprove message');
+      }
+
+      const data = await response.json();
+      console.log('Unapproved message:', data);
+
+
+    } catch (error) {
+      console.error('Error unapproving message:', error);
+    }
+  }
+
+  const regenerateMessage = (prospect_id: number, message_id?:number) => async () => {
+
+    console.log('test')
+
+    setRegeneratingMessage(true);
+
+    //Email
+    if (outboundCampaignInfo?.campaign_details.campaign_raw.campaign_type === 'EMAIL') {
+
+      try {
+        const response = await fetch(`${API_URL}/message_generation/email/body/regenerate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            prospect_id: prospect_id,
+            campaign_uuid: campaignUUID,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to regenerate message');
+        }
+
+        const data = await response;
+        // setMessage(data.completion);
+        console.log('Regenerated message:', data);
+        //trigger refresh of this component 
+
+      setOutboundCampaignInfo((prevInfo) => {
+        if (prevInfo) {
+          return {
+            ...prevInfo,
+          };
+        }
+        return prevInfo;
+      });
+
+      } catch (error) {
+        console.error('Error regenerating message:', error);
+      }
+
+    }
+
+    //Linkedin
+    else {
+      
+      try {
+        const response = await fetch(`${API_URL}/message_generation/pick_new_approved_message`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            prospect_id: prospect_id,
+            message_id: message_id,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to regenerate message');
+        }
+
+        const data = await response;
+        // setMessage(data.completion);
+        console.log('Regenerated message:', data);
+      } catch (error) {
+        console.error('Error regenerating message:', error);
+      }
+    }
+
+    setRegeneratingMessage(false);
+  }
+
+
+
+  const autoEditMessage = async (message_id: number) => {
+    try {
+      const response = await fetch(`${API_URL}/ml/get_aree_fix/${message_id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch auto-edit message');
+      }
+
+      const data = await response.json();
+      setMessage(data.completion);
+      console.log('Fetched auto-edit message:', data);
+      // You can add further processing of the data here if needed
+    } catch (error) {
+      console.error('Error fetching auto-edit message:', error);
+    }
+  }
+
+
+  useEffect(() => {
+    const fetchCampaignData = async () => {
+      try {
+        const response = await fetch(`${API_URL}/campaigns/uuid/${campaignUUID}?approved_filter=${'None'}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch campaign data');
+        }
+
+        const data: OutboundCampaignInfo = await response.json();
+        setOutboundCampaignInfo(data);
+        console.log('Fetched campaign data:', data);
+      } catch (error) {
+        console.error('Error fetching campaign data:', error);
+      }
+    };
+
+    fetchCampaignData();
+  }, [campaignUUID, userToken]);
+  
+  useEffect(() => {
+    if (outboundCampaignInfo) {
+      console.log('prospects are:', outboundCampaignInfo.campaign_details.prospects);
+      const transformedData = outboundCampaignInfo.campaign_details.prospects.map((prospect) => ({
+        ...prospect,
+      })) as ProspectOutreachInfo[];
+      setData(transformedData);
+      setFilterData(transformedData);
+      setMessage(transformedData[0].completion);
+      setSelected(transformedData[0]);
+
+    }
+  }, [outboundCampaignInfo]);
 
   const [message, setMessage] = useState("");
 
   const [type, setType] = useState("all");
 
+  // This function handles the approval of a selected item. It updates the status of the selected item to true,
+  // updates the filtered data, and moves the selection to the next item in the list. If all items are approved,
+  // it sets the approveStatus to true.
   const handleApprove = () => {
     if (selectedIndex !== null) {
       const newData = [...data];
-      newData[selectedIndex].status = true;
+      newData[selectedIndex].ai_approved = true;
       setFilterData(newData);
       setSelectedIndex((item) => (item !== null ? (item < data.length - 1 ? item + 1 : 0) : null));
       setSelected(data[selectedIndex < data.length - 1 ? selectedIndex + 1 : 0]);
-      if (newData.every((item) => item.status)) {
+      if (newData.every((item) => item.ai_approved)) {
         setApproveStatus(true);
       }
     }
   };
   useEffect(() => {}, [selected, selectedIndex]);
 
-  useEffect(() => {
-    setMessage(selected.message);
-  }, [selected.message]);
+  // useEffect(() => {
+  //   setMessage(selected.message);
+  // }, [selected.message]);
 
   return (
     <Paper p={"sm"}>
@@ -107,7 +346,7 @@ export default function GenerateAndSend() {
         <Flex gap={"xs"} align={"ceter"}>
           <IconEdit color="#228be6" size={"1.2rem"} className="mt-1" />
           <Text size={"lg"} fw={600}>
-            Generate 5 and Send
+            {outboundCampaignInfo?.campaign_details.campaign_raw.name}
           </Text>
         </Flex>
         <Flex align={"center"} gap={"sm"}>
@@ -125,8 +364,11 @@ export default function GenerateAndSend() {
             fullWidth
             onChange={(value) => {
               setType(value);
-              if (value !== "all") {
-                setFilterData(data.filter((item) => item.status === (value === "ready" ? true : false)));
+              if (value === "warning") {
+                setFilterData(data.filter((item) => item.ai_approved !== true));
+              }
+              if (value === "ready") {
+                setFilterData(data.filter((item) => item.ai_approved === true));
               }
               if (value === "all") setFilterData(data);
             }}
@@ -160,19 +402,18 @@ export default function GenerateAndSend() {
               },
             ]}
           />
-          <DataTable
-            records={filterData || []}
+          <Table
             highlightOnHover
             withColumnBorders
-            height={"fit-content"}
+            // height={"fit-content"}
             withBorder
-            onRowClick={(record, index) => {
-              setSelected(record);
-              setSelectedIndex(index);
-            }}
-            rowStyle={(record, index) => {
-              return { background: index === selectedIndex ? "#3B85EF10" : "white" };
-            }}
+            // onRowClick={(record, index) => {
+            //   setSelected(record);
+            //   setSelectedIndex(index);
+            // }}
+            // rowStyle={(record, index) => {
+            //   return { background: index === selectedIndex ? "#3B85EF10" : "white" };
+            // }}
             mt={"sm"}
             sx={{
               cursor: "pointer",
@@ -183,82 +424,127 @@ export default function GenerateAndSend() {
                 background: "#f0f0f0",
               },
             }}
-            columns={[
-              {
-                accessor: "id",
-                title: (
+          >
+            <thead>
+              <tr>
+                <th>
                   <Flex align={"center"} gap={"3px"}>
                     <Text color="gray">#</Text>
                   </Flex>
-                ),
-                render: (_, index) => {
-                  return (
+                </th>
+                <th>
+                  <Flex align={"center"} gap={"3px"}>
+                    {/* <IconLetterT color="gray" size={"0.9rem"} /> */}
+                    <Text color="gray">Prospect</Text>
+                  </Flex>
+                </th>
+                <th>
+                  <Flex align={"center"} gap={"3px"}>
+                    <IconLoader color="gray" size={"0.9rem"} />
+                  </Flex>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filterData.map((record: ProspectOutreachInfo, index) => (
+                <tr key={index} onClick={() => { setSelected(record); setSelectedIndex(index); setMessage(outboundCampaignInfo?.campaign_details.prospects[index].completion || '')}} style={{ background: index === selectedIndex ? "#3B85EF10" : "white" }}>
+                  <td>
                     <Flex w={"100%"} h={"100%"} px={4} py={"xs"} align={"center"} justify={"start"}>
                       <Text size={"sm"} fw={500} color="gray">
                         {index + 1}
                       </Text>
                     </Flex>
-                  );
-                },
-              },
-              {
-                accessor: "prospect_name",
-                title: (
-                  <Flex align={"center"} gap={"3px"}>
-                    <IconLetterT color="gray" size={"0.9rem"} />
-                    <Text color="gray">Company Name</Text>
-                  </Flex>
-                ),
-                render: ({ avatar, name, job, part, linkedin, email }) => {
-                  return (
+                  </td>
+                  <td>
                     <Flex w={"100%"} gap={"sm"} h={"100%"} px={4} py={"xs"} align={"center"} justify={"start"}>
-                      <Avatar src={avatar} size={"md"} radius={"xl"} />
+                      <Avatar src={record.prospect_info?.img_url} size={"md"} radius={"xl"} />
                       <Box>
                         <Flex align={"center"} gap={"xs"}>
-                          <Text fw={500}>{name}</Text>
-                          {linkedin && <IconBrandLinkedin fill="#228be6" color="white" size={"1.3rem"} />}
-                          {email && <IconMail fill="#228be6" color="white" size={"1.3rem"} />}
+                          <Text fw={500}>{record.full_name}</Text>
+                          {outboundCampaignInfo?.campaign_details?.campaign_raw?.campaign_type === 'LINKEDIN' && <IconBrandLinkedin fill="#228be6" color="white" size={"1.3rem"} />}
+                          {outboundCampaignInfo?.campaign_details?.campaign_raw?.campaign_type === 'EMAIL' && <IconMail fill="#228be6" color="white" size={"1.3rem"} />}
                         </Flex>
                         <Flex>
                           <Text size={"xs"} color="gray" fw={500}>
-                            {job}
+                            {record.prospect_info?.title}
                           </Text>
                         </Flex>
                         <Flex>
                           <Text size={"xs"} color="gray" fw={500}>
-                            {part}
+                            {record.prospect_info?.company}
                           </Text>
                         </Flex>
                       </Box>
                     </Flex>
-                  );
-                },
-              },
-              {
-                accessor: "status",
-                title: (
-                  <Flex align={"center"} gap={"3px"}>
-                    <IconLoader color="gray" size={"0.9rem"} />
-                  </Flex>
-                ),
-                render: ({ status }) => {
-                  return (
+                  </td>
+                  <td>
                     <Flex w={"100%"} h={"100%"} align={"center"} px={4} py={"xs"} justify={"start"}>
-                      {status ? <div className="rounded-full w-4 h-4 bg-green-500"></div> : <div className="rounded-full w-4 h-4 bg-red-600"></div>}
+                      {record.ai_approved ? <div className="rounded-full w-4 h-4 bg-green-500"></div> : <div className="rounded-full w-4 h-4 bg-red-600"></div>}
                     </Flex>
-                  );
-                },
-              },
-            ]}
-          />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
         </Paper>
-        <Paper bg={"#F7F8FA"} p={"md"} w={"65%"}>
+        {selected && selected.prospect_info && <Paper bg={"#F7F8FA"} p={"md"} w={"65%"}>
           <Stack spacing={"sm"}>
             <Flex gap={"sm"}>
-              <Button fullWidth color="red">
+              <Button 
+                onClick={() => {
+                  setSelected((prevSelected) => {
+                    if (prevSelected) {
+                      return { ...prevSelected, ai_approved: false };
+                    }
+                    return prevSelected;
+                  });
+
+                  setFilterData((prevFilterData) => {
+                    return prevFilterData.map((item) =>
+                      item.message_id === selected.message_id ? { ...item, ai_approved: false } : item
+                    );
+                  });
+
+                  setData((prevData) => {
+                    return prevData.map((item) =>
+                      item.message_id === selected.message_id ? { ...item, ai_approved: false } : item
+                    );
+                  });
+
+                  patchMessageApproval(selected.message_id, false);
+                }}
+                disabled={selected.ai_approved === false}
+              fullWidth color="red">
                 Unapprove Message
               </Button>
-              <Button fullWidth color="green" onClick={handleApprove} disabled={approveStatus}>
+              <Button 
+                onClick={() => {
+                  setSelected((prevSelected) => {
+                    if (prevSelected) {
+                      return { ...prevSelected, ai_approved: true };
+                    }
+                    return prevSelected;
+                  });
+
+                  setFilterData((prevFilterData) => {
+                    return prevFilterData.map((item) =>
+                      item.message_id === selected.message_id ? { ...item, ai_approved: true } : item
+                    );
+                  });
+
+                  setData((prevData) => {
+                    return prevData.map((item) =>
+                      item.message_id === selected.message_id ? { ...item, ai_approved: true } : item
+                    );
+                  });
+
+                  handleApprove();
+                  patchMessageApproval(selected.message_id, true);
+                }}
+                disabled={selected.ai_approved === true}
+                fullWidth 
+                color="green"
+              >
                 Approve Message
               </Button>
             </Flex>
@@ -280,7 +566,7 @@ export default function GenerateAndSend() {
                     w={"100%"}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    defaultValue={selected.message}
+                    defaultValue={selected.completion}
                     maxRows={4}
                     autosize
                     maxLength={300}
@@ -292,10 +578,10 @@ export default function GenerateAndSend() {
                   />
                 </Flex>
                 <Flex justify={"space-between"} mt={"md"}>
-                  <Button color="grape" variant="outline" leftIcon={<IconEdit size={"1.3rem"} />}>
+                  <Button onClick={()=> {autoEditMessage(selected.message_id)} } disabled = {outboundCampaignInfo?.campaign_details.campaign_raw.campaign_type === "EMAIL"}color="grape" variant="outline" leftIcon={<IconEdit size={"1.3rem"} />}>
                     Auto Edit Using AI
                   </Button>
-                  <Button color="grape" leftIcon={<IconSparkles size={"1.3rem"} />}>
+                  <Button loading={regeneratingMessage} onClick={regenerateMessage(selected.prospect_id, selected.message_id)} color="grape" leftIcon={<IconSparkles size={"1.3rem"} />}>
                     Regenerate
                   </Button>
                 </Flex>
@@ -304,15 +590,15 @@ export default function GenerateAndSend() {
             <Paper p={"sm"} withBorder>
               <Flex justify={"space-between"}>
                 <Flex align={"center"} gap={"sm"}>
-                  <Avatar src={selected?.avatar} size={"lg"} radius={"xl"} />
+                  <Avatar src={selected.prospect_info.img_url} size={"lg"} radius={"xl"} />
                   <Box>
                     <Flex align={"center"} gap={"sm"}>
-                      <Text fw={600}>{selected?.name}</Text>
-                      {selected?.linkedin && <IconBrandLinkedin fill="#228be6" color="white" size={"1.3rem"} />}
-                      {selected?.email && <IconMail fill="#228be6" color="white" size={"1.3rem"} />}
+                      <Text fw={600}>{selected?.prospect_info.full_name}</Text>
+                      {outboundCampaignInfo?.campaign_details?.campaign_raw?.campaign_type === 'LINKEDIN' && <IconBrandLinkedin fill="#228be6" color="white" size={"1.3rem"} />}
+                      {outboundCampaignInfo?.campaign_details.campaign_raw.campaign_type === 'EMAIL' && <IconMail fill="#228be6" color="white" size={"1.3rem"} />}
                     </Flex>
                     <Text color="gray" size={"sm"} fw={500}>
-                      {selected?.job}
+                      {selected?.prospect_info.title}
                     </Text>
                   </Box>
                 </Flex>
@@ -321,57 +607,46 @@ export default function GenerateAndSend() {
                 </Badge>
               </Flex>
               <Text color="gray" fw={500} size={"sm"} mt={"sm"}>
-                Company Voice Used: <span className="text-black">SS-Baseline Linkedin(#32)</span>
+                Voice Used: <span className="text-black">{currentProject?.ai_voice_id}</span>
               </Text>
             </Paper>
-            <Paper withBorder radius={"sm"} p={"sm"}>
-              <Text fw={"600"} size={"lg"}>
-                CTA Used<span className="text-gray-500">(Linkedin only)</span>
-              </Text>
-              <Paper withBorder radius={"sm"} p={"xs"} mt={"sm"} style={{ borderColor: "#3B85EF", backgroundColor: "#3B85EF10" }}>
-                <Text size={"sm"} fw={500}>
-                  Interested in boosting your top of funnel? Let's chat about how we can help.
+            {outboundCampaignInfo?.campaign_details?.campaign_raw?.ctas?.length ? (
+              <Paper withBorder radius={"sm"} p={"sm"}>
+                <Text fw={"600"} size={"lg"}>
+                  CTA Used<span className="text-gray-500">(Linkedin only)</span>
                 </Text>
+                <Paper withBorder radius={"sm"} p={"xs"} mt={"sm"} style={{ borderColor: "#3B85EF", backgroundColor: "#3B85EF10" }}>
+                  <Text size={"sm"} fw={500}>
+                    {selected.completion}
+                  </Text>
+                </Paper>
               </Paper>
-            </Paper>
-            <Paper withBorder radius={"sm"} p={"sm"}>
+            ) : null}
+            {selected.ai_research_answers.length !== 0 && <Paper withBorder radius={"sm"} p={"sm"}>
               <Text size={"lg"} fw={600}>
                 Research
               </Text>
-              <Stack spacing={"lg"} mt={"sm"}>
-                <Box>
-                  <Text fw={500} size={"sm"} color="gray">
-                    🔥 Current Job Industry
-                  </Text>
-                  <Paper ml={"md"} mt={"xs"} withBorder p={"xs"} style={{ borderColor: "#3B85EF", backgroundColor: "#3B85EF10" }}>
-                    <Text size={"sm"} fw={500}>
-                      {"Stealth Startup works in the software development industry"}
+              {selected.ai_research_answers && <Stack spacing={"lg"} mt={"sm"}>
+                {selected.ai_research_answers?.map((answer: AIResearchAnswer, index: number) => (
+                  <Box key={index}>
+                    <Text fw={500} size={"sm"} color="gray">
+                      {answer.short_summary}
                     </Text>
-                  </Paper>
-                </Box>
-                <Box>
-                  <Text fw={500} size={"sm"} color="gray">
-                    🔥 Year of Expereince at current job
-                  </Text>
-                  <Paper ml={"md"} mt={"xs"} withBorder p={"xs"} style={{ borderColor: "#3B85EF", backgroundColor: "#3B85EF10" }}>
-                    <Text size={"sm"} fw={500}>
-                      {"Just started at Stealth Startup."}
-                    </Text>
-                  </Paper>
-                </Box>
-                <Paper withBorder p={"xs"} mt={"md"} style={{ borderColor: "#3B85EF", backgroundColor: "#3B85EF10" }}>
-                  123
-                </Paper>
-              </Stack>
-            </Paper>
+                    <Paper ml={"md"} mt={"xs"} withBorder p={"xs"} style={{ borderColor: "#3B85EF", backgroundColor: "#3B85EF10" }}>
+                      <Text size={"sm"} fw={500}>
+                        {answer.relevancy_explanation}
+                      </Text>
+                    </Paper>
+                  </Box>
+                ))}
+              </Stack>}
+            </Paper>}
           </Stack>
-        </Paper>
+        </Paper>}
       </Flex>
       <Flex mt={"lg"} gap={"md"} mb={"sm"}>
-        <Button size="md" fullWidth variant="outline" color="gray">
-          Cancel
-        </Button>
-        <Button size="md" fullWidth disabled={approveStatus}>
+      
+        <Button loading={approvingCampaign} onClick={approveCampaign} size="md" fullWidth disabled={!data.every(item => item.ai_approved)}>
           Finish & Send
         </Button>
       </Flex>

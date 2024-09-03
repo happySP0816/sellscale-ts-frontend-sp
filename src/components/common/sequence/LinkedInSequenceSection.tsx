@@ -3932,7 +3932,6 @@ export const PersonalizationSection = (props: {
         ),
         id: rp.name,
         checked: !props.blocklist.includes(rp.name),
-        disabled: !!currentProject?.transformer_blocklist?.includes(rp.name),
       };
     });
 
@@ -3953,11 +3952,11 @@ export const PersonalizationSection = (props: {
   }, [researchPointTypes]);
 
   const [prospectItems, setProspectItems] = useState<
-    { title: string; id: string; checked: boolean; disabled: boolean }[]
+    { title: string; id: string; checked: boolean; }[]
   >([]);
 
   const [companyItems, setCompanyItems] = useState<
-    { title: string; id: string; checked: boolean; disabled: boolean }[]
+    { title: string; id: string; checked: boolean; }[]
   >([]);
 
   const { data, isFetching } = useQuery({
@@ -4070,8 +4069,6 @@ export const PersonalizationSection = (props: {
       return items;
     });
   }
-
-  console.log("all Items: ", allItems);
 
   return (
     <Flex direction="column">

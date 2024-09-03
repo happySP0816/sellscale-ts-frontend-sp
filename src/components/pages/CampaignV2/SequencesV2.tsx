@@ -149,6 +149,7 @@ import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
 import Personalizers from "./Personalizers";
 import { socket } from "../../App";
 import { diffWords } from "diff";
+import { getFreshCurrentProject } from "@auth/core";
 
 interface Templates {
   active: boolean;
@@ -168,7 +169,8 @@ interface Templates {
 export default function SequencesV2() {
   const params = useParams();
   const userToken = useRecoilValue(userTokenState);
-  const currentProject = useRecoilValue(currentProjectState);
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const theme = useMantineTheme();
   const campaignContacts = useRecoilValue(campaignContactsState) ?? [];
 
@@ -222,6 +224,12 @@ export default function SequencesV2() {
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any>(
     {}
   );
+
+  const triggerProjectRefresh = async function () {
+    const project = await getFreshCurrentProject(userToken, params?.id ? +params?.id : -1);
+
+    setCurrentProject(project);
+  }
 
   const [triggerGenerate, setTriggerGenerate] = useState(0);
 
@@ -740,6 +748,7 @@ export default function SequencesV2() {
                       currentProject={currentProject ?? undefined}
                       userToken={userToken}
                       prospectId={selectedProspect?.id}
+                      triggerProjectRefresh={triggerProjectRefresh}
                     />
                   )}
                 {stepNumber === 0 &&
@@ -3389,6 +3398,7 @@ const LinkedinIntroEditSectionCTA = function (props: {
   userToken: string;
   prospectId?: number;
   currentProject?: PersonaOverview;
+  triggerProjectRefresh: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<string | null>("personalization");
   const [personalizationItemsCount, setPersonalizationItemsCount] =
@@ -3510,6 +3520,8 @@ const LinkedinIntroEditSectionCTA = function (props: {
                 props.currentProject?.id || -1,
                 items.filter((x) => !x.checked).map((x) => x.id)
               );
+
+              props.triggerProjectRefresh();
             }}
           />
         </ScrollArea>

@@ -3996,7 +3996,7 @@ export const PersonalizationSection = (props: {
   useEffect(() => {
     setAllItems(
       prospectItems
-        .map((x) => {
+        .map((x: any) => {
           return {
             ...x,
             type: "PROSPECT",
@@ -4012,7 +4012,7 @@ export const PersonalizationSection = (props: {
             };
           })
         )
-        .sort((a, b) => {
+        .sort((a: any, b: any) => {
           if (a.accepted === null && b.accepted === null) return 0;
           if (a.accepted === null) return 1;
           if (b.accepted === null) return -1;
@@ -4032,7 +4032,7 @@ export const PersonalizationSection = (props: {
   }
 
   const markAll = (newLabel: boolean) => {
-    setProspectItems((prev) => {
+    setProspectItems((prev: any) => {
       const items = [...prev];
       items.map((i) => {
         i.checked = newLabel;
@@ -4057,7 +4057,7 @@ export const PersonalizationSection = (props: {
   };
 
   function setProfileChecked(itemId: string, checked: boolean) {
-    setProspectItems((prev) => {
+    setProspectItems((prev: any) => {
       const items = [...prev];
       items.map((i) => {
         if (i.id === itemId) {

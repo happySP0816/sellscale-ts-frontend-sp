@@ -129,6 +129,7 @@ import ConnectSegmentModal from "@modals/SegmentV3/ConnectSegmentModal";
 import StrategyDeleteModal from "@modals/AIBrain/StrategyDeleteModal";
 import CampaignFilterModal from "@modals/CampaignFilterModal";
 import AccountContactFiltersModal from "@modals/AccountContactFiltersModal";
+import OverrideProspectsModal from "@modals/OverrideProspectsModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -956,6 +957,7 @@ export default function App() {
               connectSegment: ConnectSegmentModal,
               campaignFilter: CampaignFilterModal,
               accountcontactFilterModal: AccountContactFiltersModal,
+              overrideProspectsModal: OverrideProspectsModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

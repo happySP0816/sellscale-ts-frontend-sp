@@ -69,6 +69,7 @@ import Sequences from "./Sequences";
 import { set } from "lodash";
 import SequencesV2 from "./SequencesV2";
 import {GenerationCenter} from "./GenerationCenter";
+import GenerateAndSend from "@pages/GenerateAndSend";
 // import ToneAdjuster from "./ToneAdjuster";
 
 interface StatsData {
@@ -1045,7 +1046,7 @@ export default function CampaignLandingV2(props: PropsType) {
                       </Flex>
                     }
                   >
-                    <GenerationCenter/>
+                    <GenerateAndSend></GenerateAndSend>
                   </Modal>
                   {!showOnlyHeader && (
                     <Button

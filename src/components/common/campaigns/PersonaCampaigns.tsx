@@ -1323,7 +1323,9 @@ export function PersonCampaignCard(props: {
                       <Box px={15} py={12} w={"100%"}>
                         <Flex justify={"space-between"}>
                           <Text color="#817e7e" fw={600}>
-                            Last Message From Prospect:
+                            {item?.last_message_from_prospect?.includes("no response yet.") 
+                              ? "Last Message From You:" 
+                              : "Last Message From Prospect:"}
                           </Text>
                           <Text color="#817e7e">
                             {item.last_message_timestamp}
@@ -1347,9 +1349,11 @@ export function PersonCampaignCard(props: {
                             borderRadius: "10px",
                           }}
                         >
-                          <Text fw={500}>
-                            {item?.last_message_from_prospect}
-                          </Text>
+                       <Text fw={500}>
+                        {item?.last_message_from_prospect?.includes("no response yet.") 
+                          ? item?.last_message_from_prospect.split("no response yet.###")[1] 
+                          : item?.last_message_from_prospect}
+                      </Text>
                         </Box>
                       </Box>
                     </Flex>
@@ -1386,6 +1390,17 @@ export function PersonCampaignCard(props: {
       .then((response) => response.text())
       .then((result) => {
         channelOpen();
+
+      const parsedResult = JSON.parse(result).analytics;
+      parsedResult.forEach((item: any) => {
+        if (item?.last_message_from_prospect?.includes("no response yet.")) {
+          item.no_response_yet = true;
+        } else {
+          item.no_response_yet = false;
+        }
+      });
+      setCampaignList(parsedResult);
+
         setCampaignList(JSON.parse(result).analytics);
       })
       .catch((error) => console.log("error", error));

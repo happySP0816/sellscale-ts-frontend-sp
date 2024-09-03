@@ -442,7 +442,11 @@ export default function CampaignDrilldownModal({
                         borderRadius: "10px",
                       }}
                     >
-                      <Text fw={500}>{item?.last_message_from_prospect}</Text>
+                      <Text fw={500}>
+                        {item?.last_message_from_prospect?.includes("no response yet.") 
+                          ? item?.last_message_from_prospect.split("no response yet.###")[1] 
+                          : item?.last_message_from_prospect}
+                      </Text>
                     </Box>
                   </Box>
                 </Flex>

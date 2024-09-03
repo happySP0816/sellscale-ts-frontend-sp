@@ -177,8 +177,9 @@ export default function LinkedInSequenceSection(props: {
   const [activeCard, setActiveCard] = useState(0);
 
   const userToken = useRecoilValue(userTokenState);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
 
   const [loading, setLoading] = useState(false);
 
@@ -1114,8 +1115,9 @@ export function IntroMessageSection(props: {
 }) {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const queryClient = useQueryClient();
 
   const prospectId = props.prospectId;
@@ -1135,13 +1137,19 @@ export function IntroMessageSection(props: {
   const [hoveredCTA, setHoveredCTA] = useState(false);
 
   const [activeTab, setActiveTab] = useState<string | null>("none");
-  const { hovered: hoveredPersonSettingsBtn, ref: refPersonSettingsBtn } =
-    useHover<HTMLButtonElement>();
-  const { hovered: hoveredYourCTAsBtn, ref: refYourCTAsBtn } =
-    useHover<HTMLButtonElement>();
+  const {
+    hovered: hoveredPersonSettingsBtn,
+    ref: refPersonSettingsBtn,
+  } = useHover<HTMLButtonElement>();
+  const {
+    hovered: hoveredYourCTAsBtn,
+    ref: refYourCTAsBtn,
+  } = useHover<HTMLButtonElement>();
 
-  const [personalizationItemsCount, setPersonalizationItemsCount] =
-    useState<number>();
+  const [
+    personalizationItemsCount,
+    setPersonalizationItemsCount,
+  ] = useState<number>();
   const [ctasItemsCount, setCtasItemsCount] = useState<number>();
 
   const openPersonalizationSettings = () => {
@@ -1156,10 +1164,14 @@ export function IntroMessageSection(props: {
 
   const [ctaModalOpened, setCtaModalOpened] = useState(false);
 
-  const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
-    useState<boolean>(false);
-  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] =
-    useState<string>();
+  const [
+    humanFeedbackForTemplateChanged,
+    setHumanFeedbackForTemplateChanged,
+  ] = useState<boolean>(false);
+  const [
+    humanFeedbackForTemplate,
+    setHumanFeedbackForTemplate,
+  ] = useState<string>();
 
   const theme = useMantineTheme();
 
@@ -1473,10 +1485,9 @@ export function IntroMessageSection(props: {
                               const researchPointId =
                                 messageMetaData?.research_points[index];
 
-                              const researchPointType =
-                                researchPointTypes?.find(
-                                  (item) => item.id === researchPointId
-                                );
+                              const researchPointType = researchPointTypes?.find(
+                                (item) => item.id === researchPointId
+                              );
 
                               return (
                                 <List.Item key={index}>
@@ -1897,7 +1908,7 @@ export function LiExampleInvitation(props: {
                   {endMessage}
                 </Text> */}
                 <TextWithNewline style={{ fontSize: "12px" }}>
-                  {`${startMessage} ${endMessage}`}
+                  {message}
                 </TextWithNewline>
                 <Text
                   ml={5}
@@ -2402,8 +2413,10 @@ function FrameworkSection(props: {
   const [openedCollapse, { toggle: toggleCollapse }] = useDisclosure(true);
   const [activeTab, setActiveTab] = useState<string | null>("none");
   const [descriptionEditState, setDescriptionEditState] = useState(false);
-  const [personalizationItemsCount, setPersonalizationItemsCount] =
-    useState<number>();
+  const [
+    personalizationItemsCount,
+    setPersonalizationItemsCount,
+  ] = useState<number>();
   const [personalizationItemIds, setPersonalizationItemIds] = useState(
     props.framework?.transformer_blocklist
   );
@@ -2467,10 +2480,9 @@ function FrameworkSection(props: {
   const [savingSettings, setSavingSettings] = useState(false);
 
   const bfs = useMemo(() => {
-    return (
-      templateShowAll
-        ? props.frameworks
-        : props.frameworks.filter((a) => a.active)
+    return (templateShowAll
+      ? props.frameworks
+      : props.frameworks.filter((a) => a.active)
     )
       .filter((v) => v && v.bumped_count == props.bumpCount)
       .filter(
@@ -3373,10 +3385,14 @@ function TemplateSection(props: {
   const currentProject = useRecoilValue(currentProjectState);
   const [opened, { toggle }] = useDisclosure(true);
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
-  const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
-    useState<boolean>(false);
-  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] =
-    useState<string>();
+  const [
+    humanFeedbackForTemplateChanged,
+    setHumanFeedbackForTemplateChanged,
+  ] = useState<boolean>(false);
+  const [
+    humanFeedbackForTemplate,
+    setHumanFeedbackForTemplate,
+  ] = useState<string>();
 
   const [templateActivesShow, setTemplateActivesShow] = useState([true]);
   useEffect(() => {

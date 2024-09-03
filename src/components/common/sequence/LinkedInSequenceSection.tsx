@@ -3967,12 +3967,12 @@ export const PersonalizationSection = (props: {
     );
   }, [researchPointTypes]);
 
-  const [prospectItems, setProspectItems] = useState<
-    { title: string; id: string; checked: boolean; }[]
+  const [prospectItems, setProspectItems]: any = useState<
+    { title: string; id: string; checked: boolean }[]
   >([]);
 
   const [companyItems, setCompanyItems] = useState<
-    { title: string; id: string; checked: boolean; }[]
+    { title: string; id: string; checked: boolean }[]
   >([]);
 
   const { data, isFetching } = useQuery({

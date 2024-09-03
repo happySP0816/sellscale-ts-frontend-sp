@@ -242,14 +242,14 @@ export const GenerationCenter: React.FC = () => {
 
     //uncomment when done
 
-    // useEffect(() => {
-    //     if (currentPage === 1 && !campaignUUID) {
-    //         setSelectedContacts(filteredContacts ? filteredContacts.slice(0, 5).map(contact => contact.id) : []);
-    //     }
-    //     if (currentPage === 0){
-    //         fetchCampaignsByArchetype(currentProject?.id || -1);
-    //     }
-    // }, [currentPage, campaignUUID]);
+    useEffect(() => {
+        if (currentPage === 1 && !campaignUUID) {
+            setSelectedContacts(filteredContacts ? filteredContacts.slice(0, 5).map(contact => contact.id) : []);
+        }
+        if (currentPage === 0){
+            fetchCampaignsByArchetype(currentProject?.id || -1);
+        }
+    }, [currentPage, campaignUUID]);
         
 
     return (

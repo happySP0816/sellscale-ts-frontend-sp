@@ -119,6 +119,7 @@ import { ArchetypeFilters } from "@pages/CampaignV2/ArchetypeFilterModal";
 import SellScaleAssistant from "./SellScaleAssistant";
 import Personalizers from "@pages/CampaignV2/Personalizers";
 import ContactAccountFilterModal from "@modals/ContactAccountFilterModal";
+import SequencesV2 from "@pages/CampaignV2/SequencesV2";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit }, ref) => {
@@ -1759,11 +1760,13 @@ const SegmentChat = (props: any) => {
               🧠 Selix Memory
             </Title>
             <Card withBorder>
-              {props.memoryState?.split("\n").map((line, index) => (
-                <Text key={index} size="xs" mb="xs">
-                  {line.replace("- ", "- 💡 ")}
-                </Text>
-              ))}
+              {props.memoryState
+                ?.split("\n")
+                .map((line: any, index: number) => (
+                  <Text key={index} size="xs" mb="xs">
+                    {line.replace("- ", "- 💡 ")}
+                  </Text>
+                ))}
             </Card>
           </HoverCard.Dropdown>
         </HoverCard>
@@ -3279,7 +3282,10 @@ const TaskRenderer = ({
   currentSessionId: Number | null;
   segment?: TransformedSegment | undefined;
 }) => {
-  const currentProject = useRecoilValue(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
+  const [lastLoadedProjectId, setLastLoadedProjectId] = useState<number>(-1);
   const [sequences, setSequences] = useState<any[]>([]);
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>(
     []
@@ -3290,11 +3296,22 @@ const TaskRenderer = ({
   >(emailSubjectLinesState);
 
   const [personalizers, setPersonalizers] = useState([]);
+  const userToken = useRecoilValue(userTokenState);
   const emailSequenceData = useRecoilValue(emailSequenceState);
 
   const currentThread = threads.find(
     (thread) => thread.id === currentSessionId
   );
+
+  useEffect(() => {
+    if (currentProject?.id && currentProject?.id !== lastLoadedProjectId) {
+      setLastLoadedProjectId(currentProject?.id);
+      (async (campaignId: any) => {
+        const project = await getFreshCurrentProject(userToken, campaignId);
+        setCurrentProject(project);
+      })(currentProject?.id);
+    }
+  }, [currentProject?.id]);
 
   switch (task.widget_type) {
     case "LAUNCH_CAMPAIGN":
@@ -3346,14 +3363,14 @@ const TaskRenderer = ({
       }
     case "VIEW_SEQUENCE":
       return (
-        <Sequences
-          key={currentProject?.id} // Adding key to force re-render when currentProject?.id changes
+        <SequencesV2
+          // key={currentProject?.id} // Adding key to force re-render when currentProject?.id changes
           forcedCampaignId={currentProject?.id}
-          setSequences={setSequences}
-          setEmailSubjectLines={setEmailSubjectLines}
-          emailSubjectLines={emailSubjectLines}
-          setLinkedinInitialMessages={setLinkedinInitialMessages}
-          linkedinInitialMessages={linkedinInitialMessages}
+          // setSequences={setSequences}
+          // setEmailSubjectLines={setEmailSubjectLines}
+          // emailSubjectLines={emailSubjectLines}
+          // setLinkedinInitialMessages={setLinkedinInitialMessages}
+          // linkedinInitialMessages={linkedinInitialMessages}
         />
       );
     default:

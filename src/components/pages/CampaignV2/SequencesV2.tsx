@@ -81,6 +81,7 @@ import {
   openModal,
 } from "@mantine/modals";
 import {
+  fetchCampaignContacts,
   fetchCampaignSequences,
   fetchCampaignStats,
 } from "@utils/requests/campaignOverview";
@@ -149,6 +150,7 @@ import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
 import Personalizers from "./Personalizers";
 import { socket } from "../../App";
 import { diffWords } from "diff";
+import { getFreshCurrentProject } from "@auth/core";
 
 interface Templates {
   active: boolean;
@@ -165,12 +167,20 @@ interface Templates {
   title: string;
 }
 
-export default function SequencesV2() {
+type PropsType = {
+  forcedCampaignId?: number;
+};
+
+export default function SequencesV2(props: PropsType) {
   const params = useParams();
   const userToken = useRecoilValue(userTokenState);
-  const currentProject = useRecoilValue(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const theme = useMantineTheme();
-  const campaignContacts = useRecoilValue(campaignContactsState) ?? [];
+  const [campaignContacts, setCampaignContacts] = useRecoilState(
+    campaignContactsState
+  );
 
   // View Tab
   const [viewTab, setViewTab] = useState<string>("linkedin");
@@ -179,8 +189,10 @@ export default function SequencesV2() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   // Prospects
-  const [selectedProspect, setSelectedProspect] =
-    useState<ProspectShallow | null>(null);
+  const [
+    selectedProspect,
+    setSelectedProspect,
+  ] = useState<ProspectShallow | null>(null);
   const [selectedProspectIndex, setSelectedProspectIndex] = useState(0);
 
   // Sequences
@@ -190,8 +202,10 @@ export default function SequencesV2() {
     setEmailSequenceGenerationInProgress,
   ] = useState(false);
 
-  const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] =
-    useState<any>(0);
+  const [
+    linkedinInitialMessageViewing,
+    setLinkedinInitialMessageViewing,
+  ] = useState<any>(0);
 
   const [
     linkedinSequenceGenerationInProgress,
@@ -212,8 +226,9 @@ export default function SequencesV2() {
   const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(
     linkedinSequenceState
   );
-  const [emailSequenceData, setEmailSequenceData] =
-    useRecoilState(emailSequenceState);
+  const [emailSequenceData, setEmailSequenceData] = useRecoilState(
+    emailSequenceState
+  );
 
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
 
@@ -228,6 +243,29 @@ export default function SequencesV2() {
   const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<
     SubjectLineTemplate[]
   >(emailSubjectLinesState);
+
+  useEffect(() => {
+    if (props.forcedCampaignId) {
+      refetchSequenceData(props.forcedCampaignId);
+
+      (async (campaignId: number) => {
+        const project = await getFreshCurrentProject(userToken, campaignId);
+        setCurrentProject(project);
+
+        const initialContacts = await fetchCampaignContacts(
+          userToken,
+          campaignId,
+          0,
+          10,
+          "",
+          false
+        );
+        setCampaignContacts(
+          Array.from(new Set(initialContacts.sample_contacts))
+        );
+      })(props.forcedCampaignId);
+    }
+  }, [props.forcedCampaignId]);
 
   const { data: templates, isFetching: isFetchingTemplates } = useQuery({
     queryKey: [`query-get-li-templates`],
@@ -336,7 +374,12 @@ export default function SequencesV2() {
           }}
         >
           {emailSequenceData.map((item, index) => {
-            return <Stepper.Step key={index} style={{ backgroundColor: "transparent" }} />;
+            return (
+              <Stepper.Step
+                key={index}
+                style={{ backgroundColor: "transparent" }}
+              />
+            );
           })}
         </Stepper>
       );
@@ -377,7 +420,12 @@ export default function SequencesV2() {
           {linkedinSequenceData.map((item, index) => {
             const lSequence = item[0];
 
-            return <Stepper.Step key={index} style={{ backgroundColor: "transparent" }} />;
+            return (
+              <Stepper.Step
+                key={index}
+                style={{ backgroundColor: "transparent" }}
+              />
+            );
           })}
         </Stepper>
       );
@@ -429,8 +477,9 @@ export default function SequencesV2() {
 
         const handleSequences = (sequences: any[], type: string) => {
           const groupedSequences = groupSequencesByBumpedCount(sequences);
-          const orderedGroupedSequences =
-            orderGroupedSequences(groupedSequences);
+          const orderedGroupedSequences = orderGroupedSequences(
+            groupedSequences
+          );
           setSequences(orderedGroupedSequences);
           // setType(type);
           if (type === "linkedin") {
@@ -478,12 +527,11 @@ export default function SequencesV2() {
     prospect: ProspectShallow | undefined
   ) {
     if (prospect) {
-      const foundProspect = campaignContacts.find((p) => p.id === prospect.id);
+      const foundProspect = campaignContacts?.find((p) => p.id === prospect.id);
 
       if (foundProspect) {
-        const index = campaignContacts.findIndex(
-          (p) => p.id === foundProspect.id
-        );
+        const index =
+          campaignContacts?.findIndex((p) => p.id === foundProspect.id) || 0;
         setSelectedProspectIndex(index);
       }
     }
@@ -690,6 +738,7 @@ export default function SequencesV2() {
                   />
                   <ActionIcon
                     disabled={
+                      campaignContacts &&
                       selectedProspectIndex === campaignContacts.length - 1
                     }
                     onClick={() =>
@@ -883,8 +932,10 @@ function EmailSequencingV2(props: {
       templates: [],
     },
   } as EmailSequenceStepBuckets);
-  const [sequenceBucketsState, setSequenceBucketsState] =
-    useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
+  const [
+    sequenceBucketsState,
+    setSequenceBucketsState,
+  ] = useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
 
   const triggerGetEmailSequenceSteps = async () => {
     setLoading(true);
@@ -1291,8 +1342,10 @@ function EmailPreviewHeaderV2(props: {
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { prospectId, currentTab, template, subjectLine }]: any =
-        queryKey;
+      const [
+        _key,
+        { prospectId, currentTab, template, subjectLine },
+      ]: any = queryKey;
 
       if (!props.subjectLine?.id || !props.template?.step.id) {
         return null;
@@ -1826,31 +1879,33 @@ function EmailPreviewHeaderV2(props: {
                       onChange={async (value) => {
                         try {
                           setLoadingBankData(true);
-                          const [updateVoiceResponse, fewShotResponse] =
-                            await Promise.all([
-                              fetch(API_URL + `/ml/voices`, {
-                                method: "PUT",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `Bearer ${userToken}`,
-                                },
-                                body: JSON.stringify({
-                                  voice_id: value === "null" ? null : value,
-                                  archetype_id: currentProject.id,
-                                }),
+                          const [
+                            updateVoiceResponse,
+                            fewShotResponse,
+                          ] = await Promise.all([
+                            fetch(API_URL + `/ml/voices`, {
+                              method: "PUT",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${userToken}`,
+                              },
+                              body: JSON.stringify({
+                                voice_id: value === "null" ? null : value,
+                                archetype_id: currentProject.id,
                               }),
-                              fetch(API_URL + `/ml/few-shot`, {
-                                method: "POST",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `Bearer ${userToken}`,
-                                },
-                                body: JSON.stringify({
-                                  voice_id: value === "null" ? null : value,
-                                  client_archetype_id: currentProject.id,
-                                }),
+                            }),
+                            fetch(API_URL + `/ml/few-shot`, {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${userToken}`,
+                              },
+                              body: JSON.stringify({
+                                voice_id: value === "null" ? null : value,
+                                client_archetype_id: currentProject.id,
                               }),
-                            ]);
+                            }),
+                          ]);
 
                           setLoadingBankData(false);
 
@@ -2753,8 +2808,10 @@ function TemplateSectionV2(props: {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
-  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] =
-    useState<string>();
+  const [
+    humanFeedbackForTemplate,
+    setHumanFeedbackForTemplate,
+  ] = useState<string>();
 
   const [templateActivesShow, setTemplateActivesShow] = useState([true]);
   useEffect(() => {
@@ -3391,8 +3448,10 @@ const LinkedinIntroEditSectionCTA = function (props: {
   currentProject?: PersonaOverview;
 }) {
   const [activeTab, setActiveTab] = useState<string | null>("personalization");
-  const [personalizationItemsCount, setPersonalizationItemsCount] =
-    useState<number>();
+  const [
+    personalizationItemsCount,
+    setPersonalizationItemsCount,
+  ] = useState<number>();
   const [ctasItemsCount, setCtasItemsCount] = useState<number>();
 
   // get research points for selected prospect
@@ -4258,12 +4317,17 @@ export function ProspectSelect2(props: {
                     Prospect:
                   </Text>
                   <Avatar
-                    src={selectedProspect?.img_url}
+                    src={
+                      "https://ui-avatars.com/api/?background=random&name=" +
+                      selectedProspect?.full_name
+                    }
                     radius={"xl"}
-                    size={"sm"}
+                    size={"xs"}
                   />
                   <Text size={"xs"} color={"#37414E"}>
-                    {`${selectedProspect?.first_name} ${selectedProspect?.last_name} | ${selectedProspect?.title}, ${selectedProspect?.company}`}
+                    {selectedProspect
+                      ? `${selectedProspect.first_name} ${selectedProspect.last_name} | ${selectedProspect.title}, ${selectedProspect.company}`
+                      : "loading..."}
                   </Text>
                 </Flex>
               )}

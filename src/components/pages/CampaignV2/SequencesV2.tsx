@@ -1,12 +1,5 @@
 import { currentProjectState } from "@atoms/personaAtoms";
-import {
-  campaignContactsState,
-  emailSequenceState,
-  emailSubjectLinesState,
-  linkedinSequenceState,
-  userDataState,
-  userTokenState,
-} from "@atoms/userAtoms";
+import { campaignContactsState, emailSequenceState, emailSubjectLinesState, linkedinSequenceState, userDataState, userTokenState } from "@atoms/userAtoms";
 import {
   ActionIcon,
   Avatar,
@@ -74,42 +67,18 @@ import {
   SpamScoreResults,
   SubjectLineTemplate,
 } from "src";
-import {
-  modals,
-  openConfirmModal,
-  openContextModal,
-  openModal,
-} from "@mantine/modals";
-import {
-  fetchCampaignSequences,
-  fetchCampaignStats,
-} from "@utils/requests/campaignOverview";
+import { modals, openConfirmModal, openContextModal, openModal } from "@mantine/modals";
+import { fetchCampaignSequences, fetchCampaignStats } from "@utils/requests/campaignOverview";
 import { IconSparkles } from "@tabler/icons-react";
-import {
-  createLiConvoSim,
-  generateInitialMessageForLiConvoSim,
-  getLiConvoSim,
-} from "@utils/requests/linkedinConvoSimulation";
-import getResearchPointTypes, {
-  getResearchPoint,
-} from "@utils/requests/getResearchPointTypes";
+import { createLiConvoSim, generateInitialMessageForLiConvoSim, getLiConvoSim } from "@utils/requests/linkedinConvoSimulation";
+import getResearchPointTypes, { getResearchPoint } from "@utils/requests/getResearchPointTypes";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  LiExampleInvitation,
-  PersonalizationSection,
-  ResearchPoint,
-} from "@common/sequence/LinkedInSequenceSection";
-import {
-  getLiTemplates,
-  updateLiTemplate,
-} from "@utils/requests/linkedinTemplates";
+import { LiExampleInvitation, PersonalizationSection, ResearchPoint } from "@common/sequence/LinkedInSequenceSection";
+import { getLiTemplates, updateLiTemplate } from "@utils/requests/linkedinTemplates";
 import _ from "lodash";
 import { useParams } from "react-router-dom";
 import { useDebouncedState, useDisclosure } from "@mantine/hooks";
-import {
-  prospectDrawerIdState,
-  prospectDrawerOpenState,
-} from "@atoms/prospectAtoms";
+import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import ModalSelector from "@common/library/ModalSelector";
 import { ICPFitPillOnly } from "@common/pipeline/ICPFitAndReason";
 import { generateBumpLiMessage } from "@utils/requests/generateBumpLiMessage";
@@ -125,23 +94,13 @@ import useRefresh from "@common/library/use-refresh";
 import InitialMessageTemplateSelector from "@common/sequence/InitialMessageTemplateSelector";
 import LinkedinInitialMessageTemplate from "@common/sequence/LinkedinInitialMessageTemplate";
 import { API_URL } from "@constants/data";
-import {
-  postGenerateFollowupEmail,
-  postGenerateInitialEmail,
-} from "@utils/requests/emailMessageGeneration";
+import { postGenerateFollowupEmail, postGenerateInitialEmail } from "@utils/requests/emailMessageGeneration";
 import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
 import { getEmailSubjectLineTemplates } from "@utils/requests/emailSubjectLines";
-import {
-  createEmailSequenceStep,
-  getEmailSequenceSteps,
-  patchSequenceStep,
-} from "@utils/requests/emailSequencing";
+import { createEmailSequenceStep, getEmailSequenceSteps, patchSequenceStep } from "@utils/requests/emailSequencing";
 import { EmailSequenceStepBuckets } from "@pages/EmailSequencingPage";
 import React from "react";
-import DetailEmailSequencing, {
-  EmailBodyItem,
-  SubjectLineItem,
-} from "@pages/EmailSequencing/DetailEmailSequencing";
+import DetailEmailSequencing, { EmailBodyItem, SubjectLineItem } from "@pages/EmailSequencing/DetailEmailSequencing";
 import EmailSequenceStepModal from "@modals/EmailSequenceStepModal";
 import EmailTemplateLibraryModal from "@modals/EmailTemplateLibraryModal";
 import postCopyEmailPoolEntry from "@utils/requests/postCopyEmailLibraryItem";
@@ -179,24 +138,16 @@ export default function SequencesV2() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   // Prospects
-  const [selectedProspect, setSelectedProspect] =
-    useState<ProspectShallow | null>(null);
+  const [selectedProspect, setSelectedProspect] = useState<ProspectShallow | null>(null);
   const [selectedProspectIndex, setSelectedProspectIndex] = useState(0);
 
   // Sequences
   const [loadingSequences, setLoadingSequences] = useState(true);
-  const [
-    emailSequenceGenerationInProgress,
-    setEmailSequenceGenerationInProgress,
-  ] = useState(false);
+  const [emailSequenceGenerationInProgress, setEmailSequenceGenerationInProgress] = useState(false);
 
-  const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] =
-    useState<any>(0);
+  const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] = useState<any>(0);
 
-  const [
-    linkedinSequenceGenerationInProgress,
-    setLinkedinSequenceGenerationInProgress,
-  ] = useState(false);
+  const [linkedinSequenceGenerationInProgress, setLinkedinSequenceGenerationInProgress] = useState(false);
 
   const [sequences, setSequences] = useState<any[]>([]);
 
@@ -209,34 +160,25 @@ export default function SequencesV2() {
   const [emailTab, setEmailTab] = useState<string | null>(null);
 
   // Moving message generation into the sequences tab
-  const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(
-    linkedinSequenceState
-  );
-  const [emailSequenceData, setEmailSequenceData] =
-    useRecoilState(emailSequenceState);
+  const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(linkedinSequenceState);
+  const [emailSequenceData, setEmailSequenceData] = useRecoilState(emailSequenceState);
 
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
 
   const [prospectsLoading, setProspectsLoading] = useState(true);
 
-  const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any>(
-    {}
-  );
+  const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any>({});
 
   const [triggerGenerate, setTriggerGenerate] = useState(0);
 
-  const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<
-    SubjectLineTemplate[]
-  >(emailSubjectLinesState);
+  const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<SubjectLineTemplate[]>(emailSubjectLinesState);
 
   const { data: templates, isFetching: isFetchingTemplates } = useQuery({
     queryKey: [`query-get-li-templates`],
     queryFn: async () => {
       const response = await getLiTemplates(userToken, currentProject!.id);
 
-      return response.status === "success"
-        ? (response.data as Templates[])
-        : [];
+      return response.status === "success" ? (response.data as Templates[]) : [];
     },
     refetchOnWindowFocus: false,
     enabled: !!currentProject && !!currentProject.template_mode,
@@ -244,13 +186,7 @@ export default function SequencesV2() {
 
   // Default on a sequence tab
   useEffect(() => {
-    setViewTab(
-      emailSequenceData && emailSequenceData.length > 0
-        ? "email"
-        : linkedinSequenceData && linkedinSequenceData.length > 0
-        ? "linkedin"
-        : "email"
-    );
+    setViewTab(emailSequenceData && emailSequenceData.length > 0 ? "email" : linkedinSequenceData && linkedinSequenceData.length > 0 ? "linkedin" : "email");
   }, [linkedinSequenceData, emailSequenceData]);
 
   // Load Sequence Data
@@ -263,9 +199,7 @@ export default function SequencesV2() {
   // Load selected Prospect
   useEffect(() => {
     if (campaignContacts && campaignContacts.length > 0) {
-      setSelectedProspect(
-        campaignContacts[selectedProspectIndex] as ProspectShallow
-      );
+      setSelectedProspect(campaignContacts[selectedProspectIndex] as ProspectShallow);
       setProspectsLoading(false);
     }
   }, [campaignContacts, selectedProspectIndex]);
@@ -388,34 +322,19 @@ export default function SequencesV2() {
 
   const refetchSequenceData = async (clientArchetypeId: number) => {
     setLoadingSequences(true);
-    const sequencesPromise = fetchCampaignSequences(
-      userToken,
-      clientArchetypeId
-    );
+    const sequencesPromise = fetchCampaignSequences(userToken, clientArchetypeId);
     sequencesPromise
       .then((sequencesData) => {
-        setEmailSequenceGenerationInProgress(
-          sequencesData.email_seq_generation_in_progress
-        );
-        setLinkedinSequenceGenerationInProgress(
-          sequencesData.li_seq_generation_in_progress
-        );
+        setEmailSequenceGenerationInProgress(sequencesData.email_seq_generation_in_progress);
+        setLinkedinSequenceGenerationInProgress(sequencesData.li_seq_generation_in_progress);
 
         setEmailSubjectLines(sequencesData.email_subject_lines);
-        setLinkedinInitialMessageViewing(
-          sequencesData.initial_message_templates?.[0]?.title
-        );
+        setLinkedinInitialMessageViewing(sequencesData.initial_message_templates?.[0]?.title);
         const groupSequencesByBumpedCount = (sequences: any[]) =>
           sequences.reduce((acc: any, sequence: any) => {
             let bumpedCount = sequence.bumped_count || 0;
             const statusAdjustment =
-              sequence.overall_status === "PROSPECTED"
-                ? 0
-                : sequence.overall_status === "ACCEPTED"
-                ? 10
-                : sequence.overall_status === "BUMPED"
-                ? 20
-                : 0;
+              sequence.overall_status === "PROSPECTED" ? 0 : sequence.overall_status === "ACCEPTED" ? 10 : sequence.overall_status === "BUMPED" ? 20 : 0;
             bumpedCount += statusAdjustment;
             if (!acc[bumpedCount]) acc[bumpedCount] = [];
             acc[bumpedCount].push(sequence);
@@ -429,8 +348,7 @@ export default function SequencesV2() {
 
         const handleSequences = (sequences: any[], type: string) => {
           const groupedSequences = groupSequencesByBumpedCount(sequences);
-          const orderedGroupedSequences =
-            orderGroupedSequences(groupedSequences);
+          const orderedGroupedSequences = orderGroupedSequences(groupedSequences);
           setSequences(orderedGroupedSequences);
           // setType(type);
           if (type === "linkedin") {
@@ -440,26 +358,13 @@ export default function SequencesV2() {
           }
         };
 
-        if (
-          sequencesData.linkedin_sequence.length > 0 &&
-          sequencesData.email_sequence.length === 0
-        ) {
+        if (sequencesData.linkedin_sequence.length > 0 && sequencesData.email_sequence.length === 0) {
           handleSequences(sequencesData.linkedin_sequence, "linkedin");
-        } else if (
-          sequencesData.email_sequence.length > 0 &&
-          sequencesData.linkedin_sequence.length === 0
-        ) {
+        } else if (sequencesData.email_sequence.length > 0 && sequencesData.linkedin_sequence.length === 0) {
           handleSequences(sequencesData.email_sequence, "email");
-        } else if (
-          sequencesData.email_sequence.length > 0 &&
-          sequencesData.linkedin_sequence.length > 0
-        ) {
+        } else if (sequencesData.email_sequence.length > 0 && sequencesData.linkedin_sequence.length > 0) {
           handleSequences(sequencesData.email_sequence, "email");
-          setLinkedinSequenceData(
-            orderGroupedSequences(
-              groupSequencesByBumpedCount(sequencesData.linkedin_sequence)
-            )
-          );
+          setLinkedinSequenceData(orderGroupedSequences(groupSequencesByBumpedCount(sequencesData.linkedin_sequence)));
         } else {
           setSequences([]);
           setEmailSequenceData([]);
@@ -474,16 +379,12 @@ export default function SequencesV2() {
   };
 
   // prospect selection onchange handler
-  const prospectOnChangeHandler = function (
-    prospect: ProspectShallow | undefined
-  ) {
+  const prospectOnChangeHandler = function (prospect: ProspectShallow | undefined) {
     if (prospect) {
       const foundProspect = campaignContacts.find((p) => p.id === prospect.id);
 
       if (foundProspect) {
-        const index = campaignContacts.findIndex(
-          (p) => p.id === foundProspect.id
-        );
+        const index = campaignContacts.findIndex((p) => p.id === foundProspect.id);
         setSelectedProspectIndex(index);
       }
     }
@@ -499,13 +400,8 @@ export default function SequencesV2() {
   // We also want to move voice related stuff into this Sequence Widget
 
   return (
-    <Card
-      shadow={"sm"}
-      padding={"md"}
-      radius={"md"}
-      withBorder
-      style={{ maxWidth: "100%", minWidth: "100%", minHeight: "300px" }}
-    >
+    <Card shadow={"sm"} padding={"md"} radius={"md"} withBorder style={{ maxWidth: "100%", minWidth: "100%", minHeight: "300px" }}>
+      123
       <Card.Section withBorder inheritPadding py={"xs"}>
         <Group position="apart">
           <Text fw={600} size={16} color="#37414E">
@@ -527,32 +423,21 @@ export default function SequencesV2() {
                   value: "email",
                   label: (
                     <Center style={{ gap: 4 }}>
-                      <IconMailOpened
-                        size={"1.2rem"}
-                        fill="orange"
-                        color="white"
-                      />
+                      <IconMailOpened size={"1.2rem"} fill="orange" color="white" />
                       <Text fw={500}>Email</Text>
                     </Center>
                   ),
-                  disabled:
-                    !emailSequenceData || !Array.isArray(emailSequenceData),
+                  disabled: !emailSequenceData || !Array.isArray(emailSequenceData),
                 },
                 {
                   value: "linkedin",
                   label: (
                     <Center style={{ gap: 4 }}>
-                      <IconBrandLinkedin
-                        size={"1.4rem"}
-                        fill="#3B85EF"
-                        color="white"
-                      />
+                      <IconBrandLinkedin size={"1.4rem"} fill="#3B85EF" color="white" />
                       <Text fw={500}>Linkedin</Text>
                     </Center>
                   ),
-                  disabled:
-                    !linkedinSequenceData ||
-                    !Array.isArray(linkedinSequenceData),
+                  disabled: !linkedinSequenceData || !Array.isArray(linkedinSequenceData),
                 },
               ]}
             />
@@ -561,7 +446,8 @@ export default function SequencesV2() {
               onClick={() => {
                 openContextModal({
                   modal: "campaignTemplateEditModal",
-                  title: <Title order={3}>Sequence Builder</Title>,
+                  withCloseButton: false,
+                  // title: <Title order={3}>Sequence Builder</Title>,
                   innerProps: {
                     sequenceType: viewTab,
                     linkedinInitialMessages,
@@ -605,27 +491,16 @@ export default function SequencesV2() {
               <Group spacing="xs" align="center">
                 <span
                   style={{
-                    color: !isEditing
-                      ? theme.colors.blue[6]
-                      : theme.colors.gray[7],
+                    color: !isEditing ? theme.colors.blue[6] : theme.colors.gray[7],
                     opacity: !isEditing ? 1 : 0.5,
                   }}
                 >
                   Simulate
                 </span>
-                <Switch
-                  size="md"
-                  checked={isEditing}
-                  onChange={(event) =>
-                    setIsEditing(event.currentTarget.checked)
-                  }
-                  color="blue"
-                />
+                <Switch size="md" checked={isEditing} onChange={(event) => setIsEditing(event.currentTarget.checked)} color="blue" />
                 <span
                   style={{
-                    color: isEditing
-                      ? theme.colors.blue[6]
-                      : theme.colors.gray[7],
+                    color: isEditing ? theme.colors.blue[6] : theme.colors.gray[7],
                     opacity: isEditing ? 1 : 0.5,
                   }}
                 >
@@ -636,19 +511,9 @@ export default function SequencesV2() {
           </Flex>
         </Group>
       </Card.Section>
-      {(!emailSequenceData ||
-        !Array.isArray(emailSequenceData) ||
-        emailSequenceData.length === 0) &&
-      (!linkedinSequenceData ||
-        !Array.isArray(linkedinSequenceData) ||
-        linkedinSequenceData.length === 0) ? (
-        <Flex
-          direction="column"
-          align="center"
-          justify="center"
-          m="auto"
-          mt="sm"
-        >
+      {(!emailSequenceData || !Array.isArray(emailSequenceData) || emailSequenceData.length === 0) &&
+      (!linkedinSequenceData || !Array.isArray(linkedinSequenceData) || linkedinSequenceData.length === 0) ? (
+        <Flex direction="column" align="center" justify="center" m="auto" mt="sm">
           <Skeleton height={30} radius="xl" width="80%" />
           <Skeleton height={20} radius="xl" width="60%" mt="sm" />
           <Skeleton height={20} radius="xl" width="60%" mt="sm" />
@@ -673,13 +538,7 @@ export default function SequencesV2() {
             <Card.Section withBorder px={"xs"} py={"xs"} mb={"16px"}>
               <Flex align={"center"} justify={"space-between"} pos={"relative"}>
                 <Flex align={"center"} justify={"space-between"} gap={"4px"}>
-                  <ActionIcon
-                    disabled={selectedProspectIndex === 0}
-                    onClick={() =>
-                      setSelectedProspectIndex((prevValue) => prevValue - 1)
-                    }
-                    radius={"xl"}
-                  >
+                  <ActionIcon disabled={selectedProspectIndex === 0} onClick={() => setSelectedProspectIndex((prevValue) => prevValue - 1)} radius={"xl"}>
                     <IconArrowLeft size={16} />
                   </ActionIcon>
                   <ProspectSelect2
@@ -689,23 +548,14 @@ export default function SequencesV2() {
                     onChange={prospectOnChangeHandler}
                   />
                   <ActionIcon
-                    disabled={
-                      selectedProspectIndex === campaignContacts.length - 1
-                    }
-                    onClick={() =>
-                      setSelectedProspectIndex((prevValue) => prevValue + 1)
-                    }
+                    disabled={selectedProspectIndex === campaignContacts.length - 1}
+                    onClick={() => setSelectedProspectIndex((prevValue) => prevValue + 1)}
                     radius={"xl"}
                   >
                     <IconArrowRight size={16} />
                   </ActionIcon>
                 </Flex>
-                <Button
-                  size="xs"
-                  color={"grape"}
-                  onClick={() => onRegenerate()}
-                  leftIcon={<IconSparkles />}
-                >
+                <Button size="xs" color={"grape"} onClick={() => onRegenerate()} leftIcon={<IconSparkles />}>
                   Regenerate
                 </Button>
               </Flex>
@@ -733,31 +583,12 @@ export default function SequencesV2() {
             </Card>
             {isEditing ? (
               <>
-                {stepNumber === 0 &&
-                  viewTab === "linkedin" &&
-                  !currentProject?.template_mode && (
-                    <LinkedinIntroEditSectionCTA
-                      currentProject={currentProject ?? undefined}
-                      userToken={userToken}
-                      prospectId={selectedProspect?.id}
-                    />
-                  )}
-                {stepNumber === 0 &&
-                  viewTab === "linkedin" &&
-                  currentProject?.template_mode && (
-                    <TemplateSectionV2
-                      onFoundTemplate={setSelectedTemplateId}
-                    />
-                  )}
+                {stepNumber === 0 && viewTab === "linkedin" && !currentProject?.template_mode && (
+                  <LinkedinIntroEditSectionCTA currentProject={currentProject ?? undefined} userToken={userToken} prospectId={selectedProspect?.id} />
+                )}
+                {stepNumber === 0 && viewTab === "linkedin" && currentProject?.template_mode && <TemplateSectionV2 onFoundTemplate={setSelectedTemplateId} />}
                 {stepNumber !== 0 && viewTab === "linkedin" && (
-                  <LinkedinBumpEditSection
-                    bfs={
-                      data
-                        ? data.filter((b) => b.bumped_count === stepNumber - 1)
-                        : []
-                    }
-                    userToken={userToken}
-                  />
+                  <LinkedinBumpEditSection bfs={data ? data.filter((b) => b.bumped_count === stepNumber - 1) : []} userToken={userToken} />
                 )}
                 {viewTab === "email" && (
                   <EmailSequencingV2
@@ -792,11 +623,7 @@ export default function SequencesV2() {
                   <LinkedinSequenceSectionV2
                     triggerGenerate={triggerGenerate}
                     stepNumber={stepNumber}
-                    sequence={
-                      linkedinSequenceData.find(
-                        (item) => item[0].bumped_count === stepNumber - 1
-                      ) ?? []
-                    }
+                    sequence={linkedinSequenceData.find((item) => item[0].bumped_count === stepNumber - 1) ?? []}
                     userToken={userToken}
                     currentProject={currentProject ?? undefined}
                     prospectId={selectedProspect?.id ?? -1}
@@ -836,23 +663,14 @@ function EmailSequencingV2(props: {
   triggerGenerate: number;
   setTriggerGenerate: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const [subjectLineTemplates, setSubjectLineTemplates] = useState<
-    SubjectLineTemplate[]
-  >([]);
+  const [subjectLineTemplates, setSubjectLineTemplates] = useState<SubjectLineTemplate[]>([]);
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [
-    addNewSequenceStepOpened,
-    { open: openSequenceStep, close: closeSequenceStep },
-  ] = useDisclosure();
+  const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] = useDisclosure();
 
   const triggerGetEmailSubjectLineTemplates = async () => {
-    const result = await getEmailSubjectLineTemplates(
-      props.userToken,
-      props.currentProject?.id as number,
-      false
-    );
+    const result = await getEmailSubjectLineTemplates(props.userToken, props.currentProject?.id as number, false);
     if (result.status != "success") {
       showNotification({
         title: "Error",
@@ -861,8 +679,7 @@ function EmailSequencingV2(props: {
       });
     }
 
-    const templates = result.data
-      .subject_line_templates as SubjectLineTemplate[];
+    const templates = result.data.subject_line_templates as SubjectLineTemplate[];
 
     setSubjectLineTemplates(templates);
     return;
@@ -883,18 +700,12 @@ function EmailSequencingV2(props: {
       templates: [],
     },
   } as EmailSequenceStepBuckets);
-  const [sequenceBucketsState, setSequenceBucketsState] =
-    useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
+  const [sequenceBucketsState, setSequenceBucketsState] = useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
 
   const triggerGetEmailSequenceSteps = async () => {
     setLoading(true);
 
-    const result = await getEmailSequenceSteps(
-      props.userToken,
-      [],
-      [],
-      [props.currentProject?.id as number]
-    );
+    const result = await getEmailSequenceSteps(props.userToken, [], [], [props.currentProject?.id as number]);
 
     if (result.status !== "success") {
       setLoading(false);
@@ -923,8 +734,7 @@ function EmailSequencingV2(props: {
         templates: [],
       },
     } as EmailSequenceStepBuckets;
-    for (const bumpFramework of result.data
-      .sequence_steps as EmailSequenceStep[]) {
+    for (const bumpFramework of result.data.sequence_steps as EmailSequenceStep[]) {
       const status = bumpFramework.step.overall_status;
       if (status === "PROSPECTED") {
         newsequenceBuckets.PROSPECTED.total += 1;
@@ -1019,9 +829,7 @@ const NewUIEmailSequencingV2 = function (props: {
   emailTab: string;
   setTriggerGenerate: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const [selectedTemplates, setSelectedTemplates] = React.useState<
-    EmailSequenceStep[]
-  >(props.templateBuckets?.PROSPECTED.templates);
+  const [selectedTemplates, setSelectedTemplates] = React.useState<EmailSequenceStep[]>(props.templateBuckets?.PROSPECTED.templates);
 
   const viewport = useRef<HTMLDivElement>(null);
   const scrollToTop = () => viewport.current!.scrollTo({ top: 0 });
@@ -1091,9 +899,7 @@ function EmailPreviewHeaderV2(props: {
   const [progressStep, setProgressStep] = useState<Number>(0);
   const roomIDref = useRef<string>("");
   const [canSave, setCanSave] = useState<boolean>(false);
-  const [sections, setSections] = useState<
-    { value: number; color: string; label: string }[]
-  >([]);
+  const [sections, setSections] = useState<{ value: number; color: string; label: string }[]>([]);
   const [fewShots, setFewShots] = useState<
     {
       id: number;
@@ -1157,9 +963,7 @@ function EmailPreviewHeaderV2(props: {
         });
         if (response.ok) {
           const data = await response.json();
-          const selectedVoiceData = data.find(
-            (voice: any) => voice.id === selectedVoiceId
-          );
+          const selectedVoiceData = data.find((voice: any) => voice.id === selectedVoiceId);
           if (selectedVoiceData) {
             setSelectedVoice(selectedVoiceData.name);
           }
@@ -1190,10 +994,7 @@ function EmailPreviewHeaderV2(props: {
   const fetchAssignedVoice = async () => {
     try {
       setLoadingBankData(true);
-      const data = await fetchCampaignStats(
-        userToken,
-        currentProject?.id || -1
-      );
+      const data = await fetchCampaignStats(userToken, currentProject?.id || -1);
       setSelectedVoiceId(data.ai_voice_id);
       if (data.ai_voice_id) {
         const response = await fetch(API_URL + "/ml/few-shot", {
@@ -1240,11 +1041,7 @@ function EmailPreviewHeaderV2(props: {
     const diff = diffWords(strippedOriginal, strippedEdited);
     return diff.map((part: any, index: any) => {
       const color = part.added ? "green" : part.removed ? "red" : "black";
-      const backgroundColor = part.added
-        ? "#e6ffe6"
-        : part.removed
-        ? "#ffe6e6"
-        : "transparent";
+      const backgroundColor = part.added ? "#e6ffe6" : part.removed ? "#ffe6e6" : "transparent";
       return (
         <span key={index} style={{ color, backgroundColor }}>
           {part.value}
@@ -1291,8 +1088,7 @@ function EmailPreviewHeaderV2(props: {
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { prospectId, currentTab, template, subjectLine }]: any =
-        queryKey;
+      const [_key, { prospectId, currentTab, template, subjectLine }]: any = queryKey;
 
       if (!props.subjectLine?.id || !props.template?.step.id) {
         return null;
@@ -1300,40 +1096,31 @@ function EmailPreviewHeaderV2(props: {
 
       if (currentTab === "PROSPECTED") {
         //magic subject line generation will call the research endpoint.
-        if (
-          subjectLine.is_magic_subject_line ||
-          currentProject?.is_ai_research_personalization_enabled
-        ) {
+        if (subjectLine.is_magic_subject_line || currentProject?.is_ai_research_personalization_enabled) {
           setCanSave(false);
           if (prospectId === 0) {
             return;
           }
           setSections([]);
-          const room_id = Array.from(
-            { length: 16 },
-            () => Math.random().toString(36)[2]
-          ).join("");
+          const room_id = Array.from({ length: 16 }, () => Math.random().toString(36)[2]).join("");
           roomIDref.current = room_id;
           socket.emit("join-room", {
             payload: { room_id: room_id },
           });
-          const response = await fetch(
-            API_URL + "/ml/simulate-magic-subject-line",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${userToken}`,
-              },
-              body: JSON.stringify({
-                sequence_id: props.template.step.id,
-                prospect_id: Number(prospectId),
-                archetype_id: currentProject?.id,
-                subject_line_id: subjectLine.id,
-                room_id,
-              }),
-            }
-          );
+          const response = await fetch(API_URL + "/ml/simulate-magic-subject-line", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${userToken}`,
+            },
+            body: JSON.stringify({
+              sequence_id: props.template.step.id,
+              prospect_id: Number(prospectId),
+              archetype_id: currentProject?.id,
+              subject_line_id: subjectLine.id,
+              room_id,
+            }),
+          });
           if (response.ok) {
             const data = await response.json();
 
@@ -1353,12 +1140,7 @@ function EmailPreviewHeaderV2(props: {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
         }
-        return await generateInitialEmail(
-          prospectId,
-          currentTab,
-          template,
-          subjectLine
-        );
+        return await generateInitialEmail(prospectId, currentTab, template, subjectLine);
       } else {
         return await generateFollowUpEmail(prospectId, currentTab, template);
       }
@@ -1366,12 +1148,7 @@ function EmailPreviewHeaderV2(props: {
     refetchOnWindowFocus: false,
   });
 
-  const generateInitialEmail = async (
-    prospectId: number,
-    currentTab: string,
-    template: EmailSequenceStep,
-    subjectLine: SubjectLineTemplate
-  ) => {
+  const generateInitialEmail = async (prospectId: number, currentTab: string, template: EmailSequenceStep, subjectLine: SubjectLineTemplate) => {
     if (!prospectId || currentTab !== "PROSPECTED") {
       return {
         subject_line: null,
@@ -1382,15 +1159,7 @@ function EmailPreviewHeaderV2(props: {
     }
 
     try {
-      const response = await postGenerateInitialEmail(
-        userToken,
-        prospectId,
-        template.step.id,
-        null,
-        subjectLine.id,
-        null,
-        null
-      );
+      const response = await postGenerateInitialEmail(userToken, prospectId, template.step.id, null, subjectLine.id, null, null);
       if (response.status === "success") {
         const email_body = response.data.email_body;
         const subject_line = response.data.subject_line;
@@ -1402,35 +1171,21 @@ function EmailPreviewHeaderV2(props: {
           });
         }
 
-        const subjectLineSpamWords =
-          subject_line.spam_detection_results?.spam_words || [];
+        const subjectLineSpamWords = subject_line.spam_detection_results?.spam_words || [];
         let subjectLineCompletion = subject_line.completion;
         if (subjectLineSpamWords && subjectLineSpamWords.length > 0) {
           subjectLineSpamWords.forEach((badWord: string) => {
-            const spannedWord =
-              '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' +
-              badWord +
-              "</span>";
-            subjectLineCompletion = subjectLineCompletion.replace(
-              new RegExp(badWord, "g"),
-              spannedWord
-            );
+            const spannedWord = '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' + badWord + "</span>";
+            subjectLineCompletion = subjectLineCompletion.replace(new RegExp(badWord, "g"), spannedWord);
           });
         }
 
-        const emailBodySpamWords =
-          email_body.spam_detection_results?.spam_words || [];
+        const emailBodySpamWords = email_body.spam_detection_results?.spam_words || [];
         let emailBodyCompletion = email_body.completion;
         if (emailBodySpamWords && emailBodySpamWords.length > 0) {
           emailBodySpamWords.forEach((badWord: string) => {
-            const spannedWord =
-              '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' +
-              badWord +
-              "</span>";
-            emailBodyCompletion = emailBodyCompletion.replace(
-              new RegExp(badWord, "g"),
-              spannedWord
-            );
+            const spannedWord = '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' + badWord + "</span>";
+            emailBodyCompletion = emailBodyCompletion.replace(new RegExp(badWord, "g"), spannedWord);
           });
         }
 
@@ -1454,11 +1209,7 @@ function EmailPreviewHeaderV2(props: {
     };
   };
 
-  const generateFollowUpEmail = async (
-    prospectId: number,
-    currentTab: string,
-    template: EmailSequenceStep
-  ) => {
+  const generateFollowUpEmail = async (prospectId: number, currentTab: string, template: EmailSequenceStep) => {
     if (currentTab === "PROSPECTED") {
       return {
         subject_line: null,
@@ -1469,14 +1220,7 @@ function EmailPreviewHeaderV2(props: {
     }
 
     try {
-      const response = await postGenerateFollowupEmail(
-        userToken,
-        prospectId,
-        null,
-        template.step.id,
-        null,
-        null
-      );
+      const response = await postGenerateFollowupEmail(userToken, prospectId, null, template.step.id, null, null);
       if (response.status === "success") {
         const email_body = response.data.email_body;
         if (!email_body) {
@@ -1486,19 +1230,12 @@ function EmailPreviewHeaderV2(props: {
             icon: <IconX radius="sm" />,
           });
         }
-        const emailBodySpamWords =
-          email_body.spam_detection_results?.spam_words || [];
+        const emailBodySpamWords = email_body.spam_detection_results?.spam_words || [];
         let emailBodyCompletion = email_body.completion;
         if (emailBodySpamWords && emailBodySpamWords.length > 0) {
           emailBodySpamWords.forEach((badWord: string) => {
-            const spannedWord =
-              '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' +
-              badWord +
-              "</span>";
-            emailBodyCompletion = emailBodyCompletion.replace(
-              new RegExp(badWord, "g"),
-              spannedWord
-            );
+            const spannedWord = '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' + badWord + "</span>";
+            emailBodyCompletion = emailBodyCompletion.replace(new RegExp(badWord, "g"), spannedWord);
           });
         }
 
@@ -1571,22 +1308,11 @@ function EmailPreviewHeaderV2(props: {
   return (
     <Stack>
       {voiceBankOpen && (
-        <Modal
-          opened={voiceBankOpen}
-          onClose={() => setVoiceBankOpen(false)}
-          size="lg"
-          padding="none"
-          radius="md"
-          style={{ zIndex: 9999 }}
-        >
+        <Modal opened={voiceBankOpen} onClose={() => setVoiceBankOpen(false)} size="lg" padding="none" radius="md" style={{ zIndex: 9999 }}>
           <Paper radius="md" style={{ zIndex: 9999, padding: "20px" }}>
             <Flex justify="center" mb="md">
               <Text size="lg" weight={700}>
-                Bank for{" "}
-                <i>
-                  {aiVoices.find((voice) => voice.id === selectedVoiceId)
-                    ?.name || "Unknown Voice"}
-                </i>
+                Bank for <i>{aiVoices.find((voice) => voice.id === selectedVoiceId)?.name || "Unknown Voice"}</i>
               </Text>
             </Flex>
             <ScrollArea
@@ -1609,11 +1335,7 @@ function EmailPreviewHeaderV2(props: {
                       backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#ffffff",
                     }}
                   >
-                    <Flex
-                      direction="row"
-                      justify="space-between"
-                      align="center"
-                    >
+                    <Flex direction="row" justify="space-between" align="center">
                       <Text
                         ml="sm"
                         style={{
@@ -1626,17 +1348,11 @@ function EmailPreviewHeaderV2(props: {
                         <div>
                           {getHighlightedDiff(
                             shot.original_string,
-                            shot.edited_string.includes("##########")
-                              ? shot.edited_string.split("##########")[1]
-                              : shot.edited_string
+                            shot.edited_string.includes("##########") ? shot.edited_string.split("##########")[1] : shot.edited_string
                           )}
                         </div>
                       </Text>
-                      <ActionIcon
-                        color="red"
-                        onClick={modifyFewShot(index, 0)}
-                        variant="light"
-                      >
+                      <ActionIcon color="red" onClick={modifyFewShot(index, 0)} variant="light">
                         <IconTrash size={16} />
                       </ActionIcon>
                     </Flex>
@@ -1647,11 +1363,7 @@ function EmailPreviewHeaderV2(props: {
             </ScrollArea>
           </Paper>
           <Divider mt="md" />
-          <Box
-            mt="md"
-            p="md"
-            style={{ backgroundColor: "#f9f9f9", borderRadius: "8px" }}
-          >
+          <Box mt="md" p="md" style={{ backgroundColor: "#f9f9f9", borderRadius: "8px" }}>
             <Text size="md" weight={700} mb="sm">
               Add New Few-Shot Example
             </Text>
@@ -1708,9 +1420,7 @@ function EmailPreviewHeaderV2(props: {
               <div
                 className={`absolute bg-[#f6f8fa] right-0 rounded-md top-4 transition-all duration-300 z-[9999] `}
                 style={{
-                  transform: voiceGenerate
-                    ? "translateY(-10px) "
-                    : "translateY(45px)",
+                  transform: voiceGenerate ? "translateY(-10px) " : "translateY(45px)",
                   filter: voiceGenerate ? "opacity(1)" : "opacity(0)",
                 }}
               >
@@ -1728,11 +1438,7 @@ function EmailPreviewHeaderV2(props: {
               </div>
 
               {currentProject?.is_ai_research_personalization_enabled && (
-                <div
-                  className={`${
-                    state && "absolute z-[9999] bg-[#f6f8fa] right-0 rounded-md"
-                  } flex flex-col`}
-                >
+                <div className={`${state && "absolute z-[9999] bg-[#f6f8fa] right-0 rounded-md"} flex flex-col`}>
                   <Flex align="center" gap="sm">
                     <Select
                       label="Assign Voice"
@@ -1740,20 +1446,17 @@ function EmailPreviewHeaderV2(props: {
                       onCreate={(query) => {
                         const createVoice = async () => {
                           try {
-                            const response = await fetch(
-                              API_URL + "/ml/voices",
-                              {
-                                method: "POST",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `Bearer ${userToken}`,
-                                },
-                                body: JSON.stringify({
-                                  name: query,
-                                  client_archetype_id: currentProject.id,
-                                }),
-                              }
-                            );
+                            const response = await fetch(API_URL + "/ml/voices", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${userToken}`,
+                              },
+                              body: JSON.stringify({
+                                name: query,
+                                client_archetype_id: currentProject.id,
+                              }),
+                            });
                             if (response.ok) {
                               const newVoice = await response.json();
                               const newVoiceItem = {
@@ -1764,33 +1467,26 @@ function EmailPreviewHeaderV2(props: {
                                 ...prevVoices,
                                 {
                                   client_id: newVoice.client_id,
-                                  client_sdr_created_by:
-                                    newVoice.client_sdr_created_by,
+                                  client_sdr_created_by: newVoice.client_sdr_created_by,
                                   id: newVoice.id,
                                   name: newVoice.name,
                                 },
                               ]);
 
                               // PUT the new voice ID to the campaign
-                              const updateCampaignResponse = await fetch(
-                                API_URL +
-                                  `/campaigns/${currentProject.id}/voice`,
-                                {
-                                  method: "PUT",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                    Authorization: `Bearer ${userToken}`,
-                                  },
-                                  body: JSON.stringify({
-                                    voice_id: newVoice.id,
-                                  }),
-                                }
-                              );
+                              const updateCampaignResponse = await fetch(API_URL + `/campaigns/${currentProject.id}/voice`, {
+                                method: "PUT",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `Bearer ${userToken}`,
+                                },
+                                body: JSON.stringify({
+                                  voice_id: newVoice.id,
+                                }),
+                              });
 
                               if (!updateCampaignResponse.ok) {
-                                console.error(
-                                  "Failed to update campaign with new voice"
-                                );
+                                console.error("Failed to update campaign with new voice");
                               }
 
                               refetch();
@@ -1820,37 +1516,34 @@ function EmailPreviewHeaderV2(props: {
                           label: voice.name,
                         })),
                       ]}
-                      value={
-                        selectedVoiceId ? selectedVoiceId.toString() : "null"
-                      }
+                      value={selectedVoiceId ? selectedVoiceId.toString() : "null"}
                       onChange={async (value) => {
                         try {
                           setLoadingBankData(true);
-                          const [updateVoiceResponse, fewShotResponse] =
-                            await Promise.all([
-                              fetch(API_URL + `/ml/voices`, {
-                                method: "PUT",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `Bearer ${userToken}`,
-                                },
-                                body: JSON.stringify({
-                                  voice_id: value === "null" ? null : value,
-                                  archetype_id: currentProject.id,
-                                }),
+                          const [updateVoiceResponse, fewShotResponse] = await Promise.all([
+                            fetch(API_URL + `/ml/voices`, {
+                              method: "PUT",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${userToken}`,
+                              },
+                              body: JSON.stringify({
+                                voice_id: value === "null" ? null : value,
+                                archetype_id: currentProject.id,
                               }),
-                              fetch(API_URL + `/ml/few-shot`, {
-                                method: "POST",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `Bearer ${userToken}`,
-                                },
-                                body: JSON.stringify({
-                                  voice_id: value === "null" ? null : value,
-                                  client_archetype_id: currentProject.id,
-                                }),
+                            }),
+                            fetch(API_URL + `/ml/few-shot`, {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${userToken}`,
+                              },
+                              body: JSON.stringify({
+                                voice_id: value === "null" ? null : value,
+                                client_archetype_id: currentProject.id,
                               }),
-                            ]);
+                            }),
+                          ]);
 
                           setLoadingBankData(false);
 
@@ -1860,21 +1553,16 @@ function EmailPreviewHeaderV2(props: {
 
                           if (fewShotResponse.ok) {
                             const fewShotData = await fewShotResponse.json();
-                            const decomposedFewShotData = fewShotData.map(
-                              (item: { edited_string: string }) => ({
-                                ...item,
-                                edited_string: item.edited_string,
-                              })
-                            );
+                            const decomposedFewShotData = fewShotData.map((item: { edited_string: string }) => ({
+                              ...item,
+                              edited_string: item.edited_string,
+                            }));
                             setFewShots(decomposedFewShotData);
                           } else {
                             console.error("Failed to fetch few-shot data");
                           }
                         } catch (error) {
-                          console.error(
-                            "Error updating voice or fetching few-shot data:",
-                            error
-                          );
+                          console.error("Error updating voice or fetching few-shot data:", error);
                         }
                         if (value === "null") {
                           setSelectedVoiceId(null);
@@ -1890,13 +1578,7 @@ function EmailPreviewHeaderV2(props: {
                         fewShots &&
                         fewShots.length > 0 &&
                         selectedVoiceId !== null && (
-                          <Button
-                            size="xs"
-                            onClick={() => setVoiceBankOpen(true)}
-                            color="blue"
-                            radius={"md"}
-                            style={{ transform: "translateX(-50px)" }}
-                          >
+                          <Button size="xs" onClick={() => setVoiceBankOpen(true)} color="blue" radius={"md"} style={{ transform: "translateX(-50px)" }}>
                             Open Voice Bank
                           </Button>
                         )
@@ -1914,12 +1596,7 @@ function EmailPreviewHeaderV2(props: {
         <Box>
           {props.subjectLine && props.template && (
             <Paper withBorder style={{ borderColor: "#228be6" }} radius={"sm"}>
-              <Flex
-                align={"center"}
-                justify={"space-between"}
-                px={"lg"}
-                py={"sm"}
-              >
+              <Flex align={"center"} justify={"space-between"} px={"lg"} py={"sm"}>
                 <Flex align={"center"} gap={4}>
                   <IconMail size={"0.9rem"} color="#228be6" />
                   <Text fw={500} color="gray" size={"xs"}>
@@ -1932,26 +1609,16 @@ function EmailPreviewHeaderV2(props: {
               </Flex>
               <Divider color="gray" />
               <Paper className="relative">
-                {state && (
-                  <div className=" fixed w-screen h-screen top-0 left-0 z-[9000] bg-[#7d7d7d]/[60%]"></div>
-                )}
+                {state && <div className=" fixed w-screen h-screen top-0 left-0 z-[9000] bg-[#7d7d7d]/[60%]"></div>}
 
-                <div
-                  className={`${
-                    state &&
-                    !voiceGenerate &&
-                    "absolute z-[9999] bg-[#f6f8fa] w-full left-0 rounded-md"
-                  }`}
-                >
+                <div className={`${state && !voiceGenerate && "absolute z-[9999] bg-[#f6f8fa] w-full left-0 rounded-md"}`}>
                   <div className="px-5">
                     <Text color="gray.6" fw={500} size="sm" mr="xs"></Text>
                     {!isFetching && (
                       <Text mt="xs" mb="xs" color="gray.8" fw={700} size="sm">
                         <div
                           dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(
-                              data?.subject_line ?? ""
-                            ),
+                            __html: DOMPurify.sanitize(data?.subject_line ?? ""),
                           }}
                         />
                       </Text>
@@ -1977,29 +1644,16 @@ function EmailPreviewHeaderV2(props: {
                     )}
 
                     {isFetching ? (
-                      <Flex
-                        justify="center"
-                        align="center"
-                        style={{ height: "300px" }}
-                      >
+                      <Flex justify="center" align="center" style={{ height: "300px" }}>
                         <Loader color="grape" />
                       </Flex>
                     ) : (
                       <>
                         <div
-                          contentEditable={
-                            currentProject?.is_ai_research_personalization_enabled &&
-                            selectedVoice !== "null"
-                              ? true
-                              : undefined
-                          }
+                          contentEditable={currentProject?.is_ai_research_personalization_enabled && selectedVoice !== "null" ? true : undefined}
                           dangerouslySetInnerHTML={{
                             __html: DOMPurify.sanitize(
-                              typeof data?.body === "string"
-                                ? data.body
-                                    .replace(/(<br\s*\/?>\s*){2,}/g, "<br />")
-                                    .replace(/\n\s*\n/g, "\n")
-                                : ""
+                              typeof data?.body === "string" ? data.body.replace(/(<br\s*\/?>\s*){2,}/g, "<br />").replace(/\n\s*\n/g, "\n") : ""
                             ),
                           }}
                           onInput={(e) => {
@@ -2015,10 +1669,7 @@ function EmailPreviewHeaderV2(props: {
                             whiteSpace: "pre-wrap",
                           }}
                           onClick={() => {
-                            if (
-                              currentProject?.is_ai_research_personalization_enabled &&
-                              selectedVoice !== "null"
-                            ) {
+                            if (currentProject?.is_ai_research_personalization_enabled && selectedVoice !== "null") {
                               handleGenerate();
                             }
                           }}
@@ -2026,19 +1677,10 @@ function EmailPreviewHeaderV2(props: {
                         {state && (
                           <>
                             <Flex justify={"space-between"} mt={"sm"}>
-                              <Button
-                                variant="outline"
-                                color="gray"
-                                onClick={() => setState(false)}
-                              >
+                              <Button variant="outline" color="gray" onClick={() => setState(false)}>
                                 Cancel
                               </Button>
-                              <Button
-                                disabled={!canSave}
-                                onClick={() =>
-                                  handleSave(data.body, changedTemplate)
-                                }
-                              >
+                              <Button disabled={!canSave} onClick={() => handleSave(data.body, changedTemplate)}>
                                 Save to voice memory
                               </Button>
                             </Flex>
@@ -2048,17 +1690,9 @@ function EmailPreviewHeaderV2(props: {
                       </>
                     )}
                   </div>
-                  {isFetching &&
-                    currentProject.is_ai_research_personalization_enabled &&
-                    props.currentTab === "PROSPECTED" && (
-                      <Progress
-                        mt="md"
-                        size="xl"
-                        radius="xl"
-                        sections={sections}
-                        animate
-                      />
-                    )}
+                  {isFetching && currentProject.is_ai_research_personalization_enabled && props.currentTab === "PROSPECTED" && (
+                    <Progress mt="md" size="xl" radius="xl" sections={sections} animate />
+                  )}
 
                   {state && (
                     <Flex className="px-5 flex-col" gap={"sm"} mb={"sm"}>
@@ -2073,13 +1707,9 @@ function EmailPreviewHeaderV2(props: {
                           Templates
                         </Text>
                         <Flex align={"center"} gap={"sm"} ml={16}>
+                          <Badge radius={"xs"}>{props?.template?.step.title || ""}</Badge>
                           <Badge radius={"xs"}>
-                            {props?.template?.step.title || ""}
-                          </Badge>
-                          <Badge radius={"xs"}>
-                            {props?.subjectLine?.is_magic_subject_line
-                              ? "magic subject line"
-                              : props?.subjectLine?.subject_line || ""}
+                            {props?.subjectLine?.is_magic_subject_line ? "magic subject line" : props?.subjectLine?.subject_line || ""}
                           </Badge>
                         </Flex>
                       </Flex>
@@ -2089,16 +1719,9 @@ function EmailPreviewHeaderV2(props: {
                         </Text>
                         <Box>
                           <List withPadding size={"sm"}>
-                            {data?.ai_research?.map(
-                              (
-                                research: { short_summary: string },
-                                index: number
-                              ) => (
-                                <List.Item key={index}>
-                                  {research.short_summary}
-                                </List.Item>
-                              )
-                            )}
+                            {data?.ai_research?.map((research: { short_summary: string }, index: number) => (
+                              <List.Item key={index}>{research.short_summary}</List.Item>
+                            ))}
                           </List>
                         </Box>
                       </Flex>
@@ -2144,22 +1767,10 @@ function NewDetailEmailSequencingV2(props: {
     setActiveTab(newTab);
   };
   // Modal States
-  const [
-    bodyLibraryOpened,
-    { open: openBodyLibrary, close: closeBodyLibrary },
-  ] = useDisclosure();
-  const [
-    createEmailTemplateOpened,
-    { open: openCreateEmailTemplate, close: closeCreateEmailTemplate },
-  ] = useDisclosure();
-  const [
-    createSubjectLineOpened,
-    { open: openCreateSubject, close: closeCreateSubject },
-  ] = useDisclosure();
-  const [
-    subjectLibraryOpened,
-    { open: openSubjectLibrary, close: closeSubjectLibrary },
-  ] = useDisclosure();
+  const [bodyLibraryOpened, { open: openBodyLibrary, close: closeBodyLibrary }] = useDisclosure();
+  const [createEmailTemplateOpened, { open: openCreateEmailTemplate, close: closeCreateEmailTemplate }] = useDisclosure();
+  const [createSubjectLineOpened, { open: openCreateSubject, close: closeCreateSubject }] = useDisclosure();
+  const [subjectLibraryOpened, { open: openSubjectLibrary, close: closeSubjectLibrary }] = useDisclosure();
 
   useEffect(() => {
     if (props.templates.length > 0) {
@@ -2176,10 +1787,7 @@ function NewDetailEmailSequencingV2(props: {
     }
   }, [props.templates, activeTemplateIndex]);
 
-  const triggerPatchEmailBodyTemplateTitle = async (
-    template: EmailSequenceStep,
-    title: string
-  ) => {
+  const triggerPatchEmailBodyTemplateTitle = async (template: EmailSequenceStep, title: string) => {
     try {
       setLoading(true);
       const result = await patchSequenceStep(
@@ -2219,10 +1827,7 @@ function NewDetailEmailSequencingV2(props: {
       refreshTitle();
     }
   };
-  const debouncedTriggerPatchEmailBodyTemplateTitle = _.debounce(
-    triggerPatchEmailBodyTemplateTitle,
-    200
-  );
+  const debouncedTriggerPatchEmailBodyTemplateTitle = _.debounce(triggerPatchEmailBodyTemplateTitle, 200);
 
   if (currentProject === null) {
     return <></>;
@@ -2248,12 +1853,7 @@ function NewDetailEmailSequencingV2(props: {
             <Title order={3}>Templates</Title>
           </Box>
           <Flex>
-            <Button
-              variant="light"
-              leftIcon={<IconPlus size="1.0rem" />}
-              radius={"sm"}
-              onClick={openCreateEmailTemplate}
-            >
+            <Button variant="light" leftIcon={<IconPlus size="1.0rem" />} radius={"sm"} onClick={openCreateEmailTemplate}>
               New
             </Button>
           </Flex>
@@ -2263,17 +1863,11 @@ function NewDetailEmailSequencingV2(props: {
             templateType={"BODY"}
             onSelect={(template: EmailTemplate) => {
               openConfirmModal({
-                title: (
-                  <Title order={3}>
-                    Use "{template.name || "N/A"}" Template{" "}
-                  </Title>
-                ),
+                title: <Title order={3}>Use "{template.name || "N/A"}" Template </Title>,
                 children: (
                   <>
                     <Text fs="italic" fz="sm">
-                      Review the details of the "{template.name || "N/A"}"
-                      template below. You can always edit the template after
-                      importing.
+                      Review the details of the "{template.name || "N/A"}" template below. You can always edit the template after importing.
                     </Text>
                     <Text mt="sm" fw="light">
                       Name:
@@ -2313,17 +1907,13 @@ function NewDetailEmailSequencingV2(props: {
                 confirmProps: { color: "green" },
                 onCancel: () => {},
                 onConfirm: async () => {
-                  const bumpedCount = props.currentTab.includes("BUMPED-")
-                    ? parseInt(props.currentTab.split("-")[1])
-                    : null;
+                  const bumpedCount = props.currentTab.includes("BUMPED-") ? parseInt(props.currentTab.split("-")[1]) : null;
                   const result = await postCopyEmailPoolEntry(
                     userToken,
                     template.template_type,
                     currentProject!.id,
                     template.id,
-                    props.currentTab.includes("BUMPED-")
-                      ? "BUMPED"
-                      : props.currentTab,
+                    props.currentTab.includes("BUMPED-") ? "BUMPED" : props.currentTab,
                     bumpedCount,
                     template.transformer_blocklist
                   );
@@ -2355,31 +1945,17 @@ function NewDetailEmailSequencingV2(props: {
               props.refetch();
             }}
             isDefault={true}
-            status={
-              props.currentTab.includes("BUMPED-") ? "BUMPED" : props.currentTab
-            }
+            status={props.currentTab.includes("BUMPED-") ? "BUMPED" : props.currentTab}
             archetypeID={currentProject!.id}
-            bumpedCount={
-              props.currentTab.includes("BUMPED-")
-                ? parseInt(props.currentTab.split("-")[1])
-                : null
-            }
-            onFinish={async (
-              title: any,
-              sequence: any,
-              isDefault: any,
-              status: any,
-              substatus: any
-            ) => {
+            bumpedCount={props.currentTab.includes("BUMPED-") ? parseInt(props.currentTab.split("-")[1]) : null}
+            onFinish={async (title: any, sequence: any, isDefault: any, status: any, substatus: any) => {
               const result = await createEmailSequenceStep(
                 userToken,
                 currentProject!.id,
                 status ?? "",
                 title,
                 sequence,
-                props.currentTab.includes("BUMPED-")
-                  ? parseInt(props.currentTab.split("-")[1])
-                  : null,
+                props.currentTab.includes("BUMPED-") ? parseInt(props.currentTab.split("-")[1]) : null,
                 isDefault,
                 substatus
               );
@@ -2388,10 +1964,7 @@ function NewDetailEmailSequencingV2(props: {
           />
         </Group>
         <Box>
-          <Accordion
-            variant="contained"
-            defaultValue={`${activeTemplate?.step.id}`}
-          >
+          <Accordion variant="contained" defaultValue={`${activeTemplate?.step.id}`}>
             {props.templates
               .sort((a, b) => {
                 if (a.step.active && !b.step.active) {
@@ -2417,10 +1990,7 @@ function NewDetailEmailSequencingV2(props: {
                                     <TextInput
                                       defaultValue={template.step.title}
                                       onBlur={(e) => {
-                                        debouncedTriggerPatchEmailBodyTemplateTitle(
-                                          template,
-                                          e.currentTarget.value
-                                        );
+                                        debouncedTriggerPatchEmailBodyTemplateTitle(template, e.currentTarget.value);
                                       }}
                                     />
                                   ),
@@ -2442,11 +2012,7 @@ function NewDetailEmailSequencingV2(props: {
                             radius="lg"
                             size="xs"
                             color="violet"
-                            variant={
-                              activeTemplate?.step.id === template.step.id
-                                ? "filled"
-                                : "outline"
-                            }
+                            variant={activeTemplate?.step.id === template.step.id ? "filled" : "outline"}
                             compact
                             onClick={(e) => {
                               e.preventDefault();
@@ -2460,10 +2026,7 @@ function NewDetailEmailSequencingV2(props: {
                       </Group>
                     </Accordion.Control>
                     <Accordion.Panel>
-                      <EmailBodyItem
-                        template={template}
-                        refetch={props.refetch}
-                      />
+                      <EmailBodyItem template={template} refetch={props.refetch} />
                     </Accordion.Panel>
                   </Accordion.Item>
                 );
@@ -2482,22 +2045,10 @@ function NewDetailEmailSequencingV2(props: {
             <Title order={3}>Templates</Title>
           </Box>
           <Flex>
-            <Button
-              onClick={openSubjectLibrary}
-              variant="outline"
-              radius="md"
-              color="blue"
-              mr="xs"
-              leftIcon={<IconBooks size="1.0rem" />}
-            >
+            <Button onClick={openSubjectLibrary} variant="outline" radius="md" color="blue" mr="xs" leftIcon={<IconBooks size="1.0rem" />}>
               Template Library
             </Button>
-            <Button
-              variant="light"
-              leftIcon={<IconPlus size="1.0rem" />}
-              radius={"sm"}
-              onClick={openCreateSubject}
-            >
+            <Button variant="light" leftIcon={<IconPlus size="1.0rem" />} radius={"sm"} onClick={openCreateSubject}>
               Add Custom Template
             </Button>
           </Flex>
@@ -2516,17 +2067,11 @@ function NewDetailEmailSequencingV2(props: {
             templateType={"SUBJECT_LINE"}
             onSelect={(template: EmailTemplate) => {
               openConfirmModal({
-                title: (
-                  <Title order={3}>
-                    Use "{template.name || "N/A"}" Template{" "}
-                  </Title>
-                ),
+                title: <Title order={3}>Use "{template.name || "N/A"}" Template </Title>,
                 children: (
                   <>
                     <Text fs="italic" fz="sm">
-                      Review the details of the "{template.name || "N/A"}"
-                      template below. You can always edit the template after
-                      importing.
+                      Review the details of the "{template.name || "N/A"}" template below. You can always edit the template after importing.
                     </Text>
                     <Text mt="sm" fw="light">
                       Name:
@@ -2596,10 +2141,7 @@ function NewDetailEmailSequencingV2(props: {
           />
         </Group>
         <Box style={{ minWidth: "100%" }}>
-          <Accordion
-            variant="contained"
-            defaultValue={`${activeSubjectLine?.id}`}
-          >
+          <Accordion variant="contained" defaultValue={`${activeSubjectLine?.id}`}>
             {props.subjectLines
               .sort((a, b) => {
                 if (a.active && !b.active) {
@@ -2628,11 +2170,7 @@ function NewDetailEmailSequencingV2(props: {
                     size="xs"
                     radius="lg"
                     color="violet"
-                    variant={
-                      activeSubjectLine?.id === subjectLine.id
-                        ? "filled"
-                        : "outline"
-                    }
+                    variant={activeSubjectLine?.id === subjectLine.id ? "filled" : "outline"}
                     compact
                     onClick={(e) => {
                       e.preventDefault();
@@ -2643,10 +2181,7 @@ function NewDetailEmailSequencingV2(props: {
                     Regen Example
                   </Button>
 
-                  <SubjectLineItem
-                    subjectLine={subjectLine}
-                    refetch={props.refetch}
-                  />
+                  <SubjectLineItem subjectLine={subjectLine} refetch={props.refetch} />
                 </Box>
               ))}
           </Accordion>
@@ -2671,17 +2206,11 @@ function NewDetailEmailSequencingV2(props: {
         )}
       </ScrollArea>
       <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>
-        <ActionIcon
-          disabled={activeTemplateIndex === 0}
-          onClick={() => setActiveTemplateIndex((prevValue) => prevValue - 1)}
-          radius={"xl"}
-        >
+        <ActionIcon disabled={activeTemplateIndex === 0} onClick={() => setActiveTemplateIndex((prevValue) => prevValue - 1)} radius={"xl"}>
           <IconArrowLeft size={16} />
         </ActionIcon>
         <Badge variant={"outline"} radius={"sm"}>
-          {`Variant #${activeTemplateIndex + 1}: ${
-            props.templates[activeTemplateIndex]?.step.title ?? ""
-          }`}
+          {`Variant #${activeTemplateIndex + 1}: ${props.templates[activeTemplateIndex]?.step.title ?? ""}`}
         </Badge>
         <ActionIcon
           disabled={activeTemplateIndex === props.templates.length - 1}
@@ -2694,11 +2223,7 @@ function NewDetailEmailSequencingV2(props: {
 
       {props.isEditing &&
         (props.currentTab === "PROSPECTED" ? (
-          <Tabs
-            onTabChange={handleTabChange}
-            variant="outline"
-            defaultValue="body"
-          >
+          <Tabs onTabChange={handleTabChange} variant="outline" defaultValue="body">
             <Tabs.List>
               <Tabs.Tab
                 value="subject_line"
@@ -2708,10 +2233,7 @@ function NewDetailEmailSequencingV2(props: {
               >
                 Subject Lines
               </Tabs.Tab>
-              <Tabs.Tab
-                value="body"
-                style={{ fontWeight: activeTab === "body" ? "bold" : "normal" }}
-              >
+              <Tabs.Tab value="body" style={{ fontWeight: activeTab === "body" ? "bold" : "normal" }}>
                 Body
               </Tabs.Tab>
               <Tabs.Tab
@@ -2745,16 +2267,13 @@ function NewDetailEmailSequencingV2(props: {
   );
 }
 
-function TemplateSectionV2(props: {
-  onFoundTemplate: (templateId: number) => void;
-}) {
+function TemplateSectionV2(props: { onFoundTemplate: (templateId: number) => void }) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
-  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] =
-    useState<string>();
+  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] = useState<string>();
 
   const [templateActivesShow, setTemplateActivesShow] = useState([true]);
   useEffect(() => {
@@ -2771,9 +2290,7 @@ function TemplateSectionV2(props: {
         setSelectedTemplateId(response.data[0].id);
         setHumanFeedbackForTemplate(response.data[0].additional_instructions);
       }
-      return response.status === "success"
-        ? (response.data as Record<string, any>[])
-        : [];
+      return response.status === "success" ? (response.data as Record<string, any>[]) : [];
     },
     refetchOnWindowFocus: false,
     enabled: !!currentProject && !!currentProject.template_mode,
@@ -2912,11 +2429,7 @@ function TemplateSectionV2(props: {
           <Stack mt="xs">
             {templates
               ?.filter((t: any) => templateActivesShow.includes(t.active))
-              .sort((a: any, b: any) =>
-                a.active != b.active
-                  ? -(a.active - b.active)
-                  : a.title - b.title
-              )
+              .sort((a: any, b: any) => (a.active != b.active ? -(a.active - b.active) : a.title - b.title))
               .map((template, index) => (
                 <Paper
                   key={index}
@@ -2925,23 +2438,15 @@ function TemplateSectionV2(props: {
                   sx={{
                     position: "relative",
                     cursor: "pointer",
-                    border:
-                      selectedTemplateId === template.id
-                        ? "solid 1px #339af0 !important"
-                        : "",
-                    backgroundColor:
-                      selectedTemplateId === template.id
-                        ? "#339af008 !important"
-                        : "",
+                    border: selectedTemplateId === template.id ? "solid 1px #339af0 !important" : "",
+                    backgroundColor: selectedTemplateId === template.id ? "#339af008 !important" : "",
                     flexDirection: "row",
                     display: "flex",
                   }}
                   withBorder
                   onClick={() => {
                     setSelectedTemplateId(template.id);
-                    setHumanFeedbackForTemplate(
-                      template.additional_instructions
-                    );
+                    setHumanFeedbackForTemplate(template.additional_instructions);
                   }}
                 >
                   <Box
@@ -2958,12 +2463,7 @@ function TemplateSectionV2(props: {
                     mr="md"
                   >
                     <Text fw="bold" fz="md" color="blue" mt="xs">
-                      {Math.round(
-                        (template.times_accepted /
-                          (template.times_used + 0.0001)) *
-                          100
-                      )}
-                      % reply
+                      {Math.round((template.times_accepted / (template.times_used + 0.0001)) * 100)}% reply
                     </Text>
                     <Text color="blue" size="xs">
                       {template.times_accepted} / {template.times_used} times
@@ -2972,14 +2472,7 @@ function TemplateSectionV2(props: {
 
                   <Box mr={40} w="100%">
                     <Flex>
-                      <Text
-                        size="sm"
-                        fw="600"
-                        mb="xs"
-                        sx={{ textTransform: "uppercase" }}
-                        color="gray"
-                        variant="outline"
-                      >
+                      <Text size="sm" fw="600" mb="xs" sx={{ textTransform: "uppercase" }} color="gray" variant="outline">
                         {template.title}
                       </Text>
                       {/* Hovercard for transformers */}
@@ -3004,61 +2497,38 @@ function TemplateSectionV2(props: {
                         </HoverCard.Dropdown>
                       </HoverCard> */}
 
-                      {template.research_points &&
-                        template.research_points.length > 0 && (
-                          <HoverCard width={280} shadow="md">
-                            <HoverCard.Target>
-                              <Badge
-                                leftSection={
-                                  <IconSearch
-                                    size="0.8rem"
-                                    style={{ marginTop: 4 }}
-                                  />
-                                }
-                                color="lime"
-                                variant="filled"
-                                ml="xs"
-                                size="xs"
-                              >
-                                {template.research_points.length} Research
-                                Points
-                              </Badge>
-                            </HoverCard.Target>
-                            <HoverCard.Dropdown
+                      {template.research_points && template.research_points.length > 0 && (
+                        <HoverCard width={280} shadow="md">
+                          <HoverCard.Target>
+                            <Badge leftSection={<IconSearch size="0.8rem" style={{ marginTop: 4 }} />} color="lime" variant="filled" ml="xs" size="xs">
+                              {template.research_points.length} Research Points
+                            </Badge>
+                          </HoverCard.Target>
+                          <HoverCard.Dropdown
+                            style={{
+                              backgroundColor: "rgb(34, 37, 41)",
+                              padding: 0,
+                            }}
+                          >
+                            <Paper
                               style={{
                                 backgroundColor: "rgb(34, 37, 41)",
-                                padding: 0,
+                                color: "white",
+                                padding: 10,
                               }}
                             >
-                              <Paper
-                                style={{
-                                  backgroundColor: "rgb(34, 37, 41)",
-                                  color: "white",
-                                  padding: 10,
-                                }}
-                              >
-                                <TextWithNewline style={{ fontSize: "12px" }}>
-                                  {"<b>Active Research Points:</b>\n- " +
-                                    template.research_points
-                                      .map((rp: any) =>
-                                        rp.replaceAll("_", " ").toLowerCase()
-                                      )
-                                      .join("\n- ")}
-                                </TextWithNewline>
-                              </Paper>
-                            </HoverCard.Dropdown>
-                          </HoverCard>
-                        )}
+                              <TextWithNewline style={{ fontSize: "12px" }}>
+                                {"<b>Active Research Points:</b>\n- " +
+                                  template.research_points.map((rp: any) => rp.replaceAll("_", " ").toLowerCase()).join("\n- ")}
+                              </TextWithNewline>
+                            </Paper>
+                          </HoverCard.Dropdown>
+                        </HoverCard>
+                      )}
                       {template.additional_instructions && (
                         <HoverCard width={280} shadow="md">
                           <HoverCard.Target>
-                            <Badge
-                              leftSection={<IconBulb size="0.8rem" />}
-                              color="grape"
-                              variant="filled"
-                              ml="xs"
-                              size="xs"
-                            >
+                            <Badge leftSection={<IconBulb size="0.8rem" />} color="grape" variant="filled" ml="xs" size="xs">
                               Fine Tuned
                             </Badge>
                           </HoverCard.Target>
@@ -3076,8 +2546,7 @@ function TemplateSectionV2(props: {
                               }}
                             >
                               <TextWithNewline style={{ fontSize: "12px" }}>
-                                {"<b>Additional Instructions:</b>\n" +
-                                  template.additional_instructions}
+                                {"<b>Additional Instructions:</b>\n" + template.additional_instructions}
                               </TextWithNewline>
                             </Paper>
                           </HoverCard.Dropdown>
@@ -3088,8 +2557,7 @@ function TemplateSectionV2(props: {
                       withBorder
                       w="100%"
                       sx={{
-                        backgroundColor:
-                          selectedTemplateId == template.id ? "" : "#fbfbfb",
+                        backgroundColor: selectedTemplateId == template.id ? "" : "#fbfbfb",
                       }}
                     >
                       <Text style={{ fontSize: "0.9rem", lineHeight: 2 }}>
@@ -3117,14 +2585,7 @@ function TemplateSectionV2(props: {
                       checked={template.active}
                       onChange={(e) => {
                         if (!currentProject) return;
-                        updateLiTemplate(
-                          userToken,
-                          currentProject.id,
-                          template.id,
-                          template.title,
-                          template.message,
-                          e.target.checked
-                        ).then((res) => {
+                        updateLiTemplate(userToken, currentProject.id, template.id, template.title, template.message, e.target.checked).then((res) => {
                           queryClient.invalidateQueries({
                             queryKey: [`query-get-li-templates`],
                           });
@@ -3176,16 +2637,12 @@ function TemplateSectionV2(props: {
                 <IconChevronDown
                   size="1rem"
                   style={{
-                    transform:
-                      templateActivesShow.length === 1 ? "" : "rotate(180deg)",
+                    transform: templateActivesShow.length === 1 ? "" : "rotate(180deg)",
                   }}
                 />
               }
             >
-              Show{" "}
-              {templateActivesShow.includes(true)
-                ? "All Templates"
-                : "Active Templates Only"}
+              Show {templateActivesShow.includes(true) ? "All Templates" : "Active Templates Only"}
             </Button>
           )}
         </Stack>
@@ -3276,27 +2733,13 @@ const LinkedinSequenceSectionV2 = function (props: {
   prospectId: number;
 }) {
   const [currentSequenceIndex, setCurrentSequenceIndex] = useState(0);
-  const [
-    linkedinSequenceMessageGenerationInProgress,
-    setLinkedinSequenceMessageGenerationInProgress,
-  ] = useState(false);
+  const [linkedinSequenceMessageGenerationInProgress, setLinkedinSequenceMessageGenerationInProgress] = useState(false);
   const [linkedinSequenceMessage, setLinkedinSequenceMessage] = useState<any>();
 
-  const getLiFollowUpMessage = async (
-    prospectId: number,
-    useCache: boolean,
-    bump_framework_id: number,
-    bumped_count: number
-  ) => {
+  const getLiFollowUpMessage = async (prospectId: number, useCache: boolean, bump_framework_id: number, bumped_count: number) => {
     if (!props.currentProject) return null;
     setLinkedinSequenceMessageGenerationInProgress(true);
-    const result = await generateBumpLiMessage(
-      props.userToken,
-      prospectId,
-      bump_framework_id,
-      bumped_count,
-      useCache
-    );
+    const result = await generateBumpLiMessage(props.userToken, prospectId, bump_framework_id, bumped_count, useCache);
 
     setLinkedinSequenceMessageGenerationInProgress(false);
 
@@ -3306,29 +2749,15 @@ const LinkedinSequenceSectionV2 = function (props: {
   useEffect(() => {
     if (!props.prospectId || props.prospectId === -1) return;
 
-    if (
-      props.triggerGenerate !== -1 ||
-      linkedinSequenceMessage?.metadata.bump_framework_id !==
-        props.sequence[currentSequenceIndex].bump_framework_id
-    ) {
-      getLiFollowUpMessage(
-        props.prospectId,
-        false,
-        props.sequence[currentSequenceIndex].bump_framework_id,
-        props.stepNumber
-      ).then((msg: any) => {
+    if (props.triggerGenerate !== -1 || linkedinSequenceMessage?.metadata.bump_framework_id !== props.sequence[currentSequenceIndex].bump_framework_id) {
+      getLiFollowUpMessage(props.prospectId, false, props.sequence[currentSequenceIndex].bump_framework_id, props.stepNumber).then((msg: any) => {
         if (msg) {
           setLinkedinSequenceMessage(msg);
         }
         props.setTriggerGenerate(-1);
       });
     }
-  }, [
-    props.prospectId,
-    props.triggerGenerate,
-    currentSequenceIndex,
-    props.stepNumber,
-  ]);
+  }, [props.prospectId, props.triggerGenerate, currentSequenceIndex, props.stepNumber]);
 
   return (
     <Card withBorder sx={{ maxWidth: "90%", minWidth: "90%" }}>
@@ -3353,25 +2782,15 @@ const LinkedinSequenceSectionV2 = function (props: {
         <LoadingOverlay visible={linkedinSequenceMessageGenerationInProgress} />
 
         {linkedinSequenceMessage && (
-          <LiExampleInvitation
-            message={linkedinSequenceMessage.message
-              .replace("--------------------", "")
-              .replace("--------------------", "")}
-          />
+          <LiExampleInvitation message={linkedinSequenceMessage.message.replace("--------------------", "").replace("--------------------", "")} />
         )}
       </Box>
       <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>
-        <ActionIcon
-          disabled={currentSequenceIndex === 0}
-          onClick={() => setCurrentSequenceIndex((prevValue) => prevValue - 1)}
-          radius={"xl"}
-        >
+        <ActionIcon disabled={currentSequenceIndex === 0} onClick={() => setCurrentSequenceIndex((prevValue) => prevValue - 1)} radius={"xl"}>
           <IconArrowLeft size={16} />
         </ActionIcon>
         <Badge variant={"outline"} radius={"sm"}>
-          {`Variant #${currentSequenceIndex + 1}: ${
-            props.sequence[currentSequenceIndex]?.title ?? ""
-          }`}
+          {`Variant #${currentSequenceIndex + 1}: ${props.sequence[currentSequenceIndex]?.title ?? ""}`}
         </Badge>
         <ActionIcon
           disabled={currentSequenceIndex === props.sequence.length - 1}
@@ -3385,42 +2804,24 @@ const LinkedinSequenceSectionV2 = function (props: {
   );
 };
 
-const LinkedinIntroEditSectionCTA = function (props: {
-  userToken: string;
-  prospectId?: number;
-  currentProject?: PersonaOverview;
-}) {
+const LinkedinIntroEditSectionCTA = function (props: { userToken: string; prospectId?: number; currentProject?: PersonaOverview }) {
   const [activeTab, setActiveTab] = useState<string | null>("personalization");
-  const [personalizationItemsCount, setPersonalizationItemsCount] =
-    useState<number>();
+  const [personalizationItemsCount, setPersonalizationItemsCount] = useState<number>();
   const [ctasItemsCount, setCtasItemsCount] = useState<number>();
 
   // get research points for selected prospect
   const { data: researchPoints, refetch } = useQuery({
     queryKey: [`query-get-research-points`, props.prospectId],
     queryFn: async () => {
-      const response = await getResearchPoint(
-        props.userToken,
-        props.prospectId!
-      );
+      const response = await getResearchPoint(props.userToken, props.prospectId!);
 
-      return response.status === "success"
-        ? (response.data as ResearchPoint[])
-        : [];
+      return response.status === "success" ? (response.data as ResearchPoint[]) : [];
     },
     enabled: !!props.prospectId,
   });
 
   return (
-    <Tabs
-      value={activeTab}
-      onTabChange={setActiveTab}
-      variant="pills"
-      keepMounted={true}
-      radius="md"
-      defaultValue="none"
-      allowTabDeactivation
-    >
+    <Tabs value={activeTab} onTabChange={setActiveTab} variant="pills" keepMounted={true} radius="md" defaultValue="none" allowTabDeactivation>
       <Tabs.List>
         <Tabs.Tab
           // ref={refPersonSettingsBtn}
@@ -3429,15 +2830,7 @@ const LinkedinIntroEditSectionCTA = function (props: {
           rightSection={
             <>
               {personalizationItemsCount ? (
-                <Badge
-                  w={16}
-                  h={16}
-                  sx={{ pointerEvents: "none" }}
-                  variant="filled"
-                  size="xs"
-                  p={0}
-                  color="teal.6"
-                >
+                <Badge w={16} h={16} sx={{ pointerEvents: "none" }} variant="filled" size="xs" p={0} color="teal.6">
                   {personalizationItemsCount}
                 </Badge>
               ) : (
@@ -3463,15 +2856,7 @@ const LinkedinIntroEditSectionCTA = function (props: {
           rightSection={
             <>
               {ctasItemsCount ? (
-                <Badge
-                  w={16}
-                  h={16}
-                  sx={{ pointerEvents: "none" }}
-                  variant="filled"
-                  size="xs"
-                  p={0}
-                  color="blue.5"
-                >
+                <Badge w={16} h={16} sx={{ pointerEvents: "none" }} variant="filled" size="xs" p={0} color="blue.5">
                   {ctasItemsCount}
                 </Badge>
               ) : (
@@ -3496,13 +2881,9 @@ const LinkedinIntroEditSectionCTA = function (props: {
         <ScrollArea h={300}>
           <PersonalizationSection
             researchPoints={researchPoints}
-            blocklist={
-              props.currentProject?.transformer_blocklist_initial ?? []
-            }
+            blocklist={props.currentProject?.transformer_blocklist_initial ?? []}
             onItemsChange={async (items) => {
-              setPersonalizationItemsCount(
-                items.filter((x: any) => x.checked).length
-              );
+              setPersonalizationItemsCount(items.filter((x: any) => x.checked).length);
 
               // Update transformer blocklist
               const result = await updateInitialBlocklist(
@@ -3527,11 +2908,7 @@ const LinkedinIntroEditSectionCTA = function (props: {
   );
 };
 
-const LinkedinBumpEditSection = function (props: {
-  bfs: BumpFramework[];
-  framework?: BumpFramework;
-  userToken: string;
-}) {
+const LinkedinBumpEditSection = function (props: { bfs: BumpFramework[]; framework?: BumpFramework; userToken: string }) {
   const [opened, { toggle }] = useDisclosure(false);
   const [loading, setLoading] = useState(false);
 
@@ -3539,9 +2916,7 @@ const LinkedinBumpEditSection = function (props: {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
 
-  const [activeFramework, setActiveFramework] = useState<BumpFramework>(
-    props.framework ?? props.bfs[0]
-  );
+  const [activeFramework, setActiveFramework] = useState<BumpFramework>(props.framework ?? props.bfs[0]);
   const [displayFrameworkSection, refreshFrameworkSection] = useRefresh();
 
   return (
@@ -3556,14 +2931,8 @@ const LinkedinBumpEditSection = function (props: {
             sx={{
               position: "relative",
               cursor: "pointer",
-              border:
-                bf.id === activeFramework.id
-                  ? "solid 1px #339af0 !important"
-                  : undefined,
-              backgroundColor:
-                bf.id === activeFramework.id
-                  ? "#339af008 !important"
-                  : undefined,
+              border: bf.id === activeFramework.id ? "solid 1px #339af0 !important" : undefined,
+              backgroundColor: bf.id === activeFramework.id ? "#339af008 !important" : undefined,
               flexDirection: "row",
               display: "flex",
             }}
@@ -3595,11 +2964,7 @@ const LinkedinBumpEditSection = function (props: {
                 <Text fw="bold" fz="md" color="blue" mt="xs">
                   {bf.etl_num_times_used != null &&
                     bf.etl_num_times_converted != null &&
-                    Math.round(
-                      (bf.etl_num_times_converted /
-                        (bf.etl_num_times_used + 0.0001)) *
-                        100
-                    )}
+                    Math.round((bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 100)}
                   % reply
                 </Text>
                 <Text size="8px" color="blue" fz={"xs"} fw="500">
@@ -3624,14 +2989,7 @@ const LinkedinBumpEditSection = function (props: {
             </Flex>
             <Box mr={40} w="100%">
               <Flex>
-                <Text
-                  size="sm"
-                  fw="600"
-                  mb="xs"
-                  sx={{ textTransform: "uppercase" }}
-                  color="gray"
-                  variant="outline"
-                >
+                <Text size="sm" fw="600" mb="xs" sx={{ textTransform: "uppercase" }} color="gray" variant="outline">
                   {bf.title}
                 </Text>
                 {/* Hovercard for transformers */}
@@ -3639,26 +2997,16 @@ const LinkedinBumpEditSection = function (props: {
                 <HoverCard width={280} shadow="md">
                   <HoverCard.Target>
                     <Badge
-                      leftSection={
-                        <IconSearch size="0.8rem" style={{ marginTop: 4 }} />
-                      }
+                      leftSection={<IconSearch size="0.8rem" style={{ marginTop: 4 }} />}
                       color="lime"
-                      variant={
-                        bf.active_transformers &&
-                        bf.active_transformers.length > 0
-                          ? "filled"
-                          : "outline"
-                      }
+                      variant={bf.active_transformers && bf.active_transformers.length > 0 ? "filled" : "outline"}
                       ml="xs"
                       size="xs"
                       onClick={() => {
                         toggle();
                       }}
                     >
-                      {bf.active_transformers &&
-                      bf.active_transformers.length > 0
-                        ? bf.active_transformers.length + " Research Points"
-                        : "0 Research Points"}
+                      {bf.active_transformers && bf.active_transformers.length > 0 ? bf.active_transformers.length + " Research Points" : "0 Research Points"}
                     </Badge>
                   </HoverCard.Target>
                   <HoverCard.Dropdown
@@ -3676,12 +3024,7 @@ const LinkedinBumpEditSection = function (props: {
                     >
                       <TextWithNewline style={{ fontSize: "12px" }}>
                         {bf.active_transformers.length > 0
-                          ? "<b>Active Research Points:</b>\n- " +
-                            bf.active_transformers
-                              .map((rp: any) =>
-                                rp.replaceAll("_", " ").toLowerCase()
-                              )
-                              .join("\n- ")
+                          ? "<b>Active Research Points:</b>\n- " + bf.active_transformers.map((rp: any) => rp.replaceAll("_", " ").toLowerCase()).join("\n- ")
                           : "Click to activate more research points"}
                       </TextWithNewline>
                     </Paper>
@@ -3763,10 +3106,7 @@ const LinkedinBumpEditSection = function (props: {
                               "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
                           )
                           .replaceAll("]]", "</span>")
-                          .replaceAll(
-                            "\n",
-                            `<br style="display: block; content: ' '; margin: 10px 0 "/>`
-                          ) as string
+                          .replaceAll("\n", `<br style="display: block; content: ' '; margin: 10px 0 "/>`) as string
                       ),
                     }}
                   />
@@ -3885,9 +3225,7 @@ const LinkedinIntroSectionV2 = function (props: {
   triggerGenerate: number;
   setTriggerGenerate: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any>(
-    {}
-  );
+  const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any>({});
 
   const [templateIndex, setTemplateIndex] = useState(0);
 
@@ -3901,27 +3239,15 @@ const LinkedinIntroSectionV2 = function (props: {
   const { data: researchPointTypes } = useQuery({
     queryKey: [`query-get-research-point-types`],
     queryFn: async () => {
-      const response = await getResearchPointTypes(
-        props.userToken,
-        props.currentProject ? props.currentProject.id : undefined
-      );
-      return response.status === "success"
-        ? (response.data as ResearchPointType[])
-        : [];
+      const response = await getResearchPointTypes(props.userToken, props.currentProject ? props.currentProject.id : undefined);
+      return response.status === "success" ? (response.data as ResearchPointType[]) : [];
     },
     refetchOnWindowFocus: false,
   });
 
-  const [
-    linkedinInitialMessageGenerationInProgress,
-    setLinkedinInitialMessageGenerationInProgress,
-  ] = useState(false);
+  const [linkedinInitialMessageGenerationInProgress, setLinkedinInitialMessageGenerationInProgress] = useState(false);
 
-  const getIntroMessage = async (
-    prospectId: number,
-    forceRegenerate: boolean = false,
-    selectedTemplateId?: number
-  ) => {
+  const getIntroMessage = async (prospectId: number, forceRegenerate: boolean = false, selectedTemplateId?: number) => {
     if (!props.currentProject) return null;
     if (prospectId === -1) return null;
     setLinkedinInitialMessageGenerationInProgress(true);
@@ -3932,28 +3258,16 @@ const LinkedinIntroSectionV2 = function (props: {
       };
     });
 
-    let convoResponse = await getLiConvoSim(
-      props.userToken,
-      undefined,
-      prospectId
-    );
+    let convoResponse = await getLiConvoSim(props.userToken, undefined, prospectId);
 
     if (convoResponse.status !== "success" || forceRegenerate) {
       // If convo doesn't exist, create it
-      const createResponse = await createLiConvoSim(
-        props.userToken,
-        props.currentProject.id,
-        prospectId
-      );
+      const createResponse = await createLiConvoSim(props.userToken, props.currentProject.id, prospectId);
       if (createResponse.status !== "success") {
         setLinkedinInitialMessageGenerationInProgress(false);
         return null;
       }
-      const initMsgResponse = await generateInitialMessageForLiConvoSim(
-        props.userToken,
-        createResponse.data,
-        selectedTemplateId
-      );
+      const initMsgResponse = await generateInitialMessageForLiConvoSim(props.userToken, createResponse.data, selectedTemplateId);
       if (initMsgResponse.status !== "success") {
         setLinkedinInitialMessageGenerationInProgress(false);
         return null;
@@ -3961,18 +3275,12 @@ const LinkedinIntroSectionV2 = function (props: {
       convoResponse = await getLiConvoSim(props.userToken, createResponse.data);
     } else if (convoResponse.data.messages.length === 0) {
       // If convo exists but no messages, generate initial message
-      const initMsgResponse = await generateInitialMessageForLiConvoSim(
-        props.userToken,
-        convoResponse.data.simulation.id
-      );
+      const initMsgResponse = await generateInitialMessageForLiConvoSim(props.userToken, convoResponse.data.simulation.id);
       if (initMsgResponse.status !== "success") {
         setLinkedinInitialMessageGenerationInProgress(false);
         return null;
       }
-      convoResponse = await getLiConvoSim(
-        props.userToken,
-        convoResponse.data.simulation.id
-      );
+      convoResponse = await getLiConvoSim(props.userToken, convoResponse.data.simulation.id);
     }
 
     setLinkedinInitialMessageGenerationInProgress(false);
@@ -3983,9 +3291,7 @@ const LinkedinIntroSectionV2 = function (props: {
         setLinkedinInitialMessages(convoResponse.data.messages[0]);
 
         if (convoResponse.data.messages[0].meta_data.template_id) {
-          props.setSelectedTemplateId(
-            convoResponse.data.messages[0].meta_data.template_id
-          );
+          props.setSelectedTemplateId(convoResponse.data.messages[0].meta_data.template_id);
         }
       } else {
         return null;
@@ -3997,11 +3303,7 @@ const LinkedinIntroSectionV2 = function (props: {
 
   useEffect(() => {
     if (props.prospectId && props.triggerGenerate === 0) {
-      getIntroMessage(
-        props.prospectId,
-        true,
-        props.selectedTemplateId === -1 ? undefined : props.selectedTemplateId
-      );
+      getIntroMessage(props.prospectId, true, props.selectedTemplateId === -1 ? undefined : props.selectedTemplateId);
     }
   }, [props.prospectId, props.triggerGenerate, props.selectedTemplateId]);
 
@@ -4041,153 +3343,96 @@ const LinkedinIntroSectionV2 = function (props: {
         p="sm"
         h={300}
       >
-        <LoadingOverlay
-          visible={linkedinInitialMessageGenerationInProgress}
-          zIndex={10}
-        />
-        {linkedinInitialMessages.message && (
-          <LiExampleInvitation message={linkedinInitialMessages.message} />
-        )}
+        <LoadingOverlay visible={linkedinInitialMessageGenerationInProgress} zIndex={10} />
+        {linkedinInitialMessages.message && <LiExampleInvitation message={linkedinInitialMessages.message} />}
       </Box>
 
-      {linkedinInitialMessages.meta_data &&
-        !props.currentProject?.template_mode && (
-          <Group py="xs" noWrap>
-            <HoverCard width={280} shadow="md" position="bottom">
-              <HoverCard.Target>
-                <Badge
-                  variant={"outline"}
-                  radius={"sm"}
-                  color="green"
-                  styles={{ root: { textTransform: "initial" } }}
-                >
-                  Personalizations:{" "}
-                  <Text fw={500} span>
-                    {linkedinInitialMessages.meta_data?.notes?.length}
-                  </Text>
-                </Badge>
-              </HoverCard.Target>
-              <HoverCard.Dropdown>
-                {linkedinInitialMessages.meta_data?.combined ? (
-                  <List>
-                    {linkedinInitialMessages.meta_data?.combined.map(
-                      (combined_data: any, index: number) => {
-                        return (
-                          <List.Item key={index}>
-                            <Flex direction={"column"}>
-                              <Text fz="sm" fw={"bold"}>
-                                {_.startCase(
-                                  combined_data.research_point_type
-                                    .toLowerCase()
-                                    .replaceAll("_", " ")
-                                    .replace("aicomp", "")
-                                    .replace("aiind", "")
-                                )}
-                              </Text>
-                              <Text fz="sm">{combined_data.value}</Text>
-                            </Flex>
-                          </List.Item>
-                        );
-                      }
-                    )}
-                  </List>
-                ) : (
-                  <List>
-                    {linkedinInitialMessages.meta_data?.notes?.map(
-                      (note: any, index: number) => {
-                        const researchPointId =
-                          linkedinInitialMessages.meta_data?.research_points[
-                            index
-                          ];
+      {linkedinInitialMessages.meta_data && !props.currentProject?.template_mode && (
+        <Group py="xs" noWrap>
+          <HoverCard width={280} shadow="md" position="bottom">
+            <HoverCard.Target>
+              <Badge variant={"outline"} radius={"sm"} color="green" styles={{ root: { textTransform: "initial" } }}>
+                Personalizations:{" "}
+                <Text fw={500} span>
+                  {linkedinInitialMessages.meta_data?.notes?.length}
+                </Text>
+              </Badge>
+            </HoverCard.Target>
+            <HoverCard.Dropdown>
+              {linkedinInitialMessages.meta_data?.combined ? (
+                <List>
+                  {linkedinInitialMessages.meta_data?.combined.map((combined_data: any, index: number) => {
+                    return (
+                      <List.Item key={index}>
+                        <Flex direction={"column"}>
+                          <Text fz="sm" fw={"bold"}>
+                            {_.startCase(combined_data.research_point_type.toLowerCase().replaceAll("_", " ").replace("aicomp", "").replace("aiind", ""))}
+                          </Text>
+                          <Text fz="sm">{combined_data.value}</Text>
+                        </Flex>
+                      </List.Item>
+                    );
+                  })}
+                </List>
+              ) : (
+                <List>
+                  {linkedinInitialMessages.meta_data?.notes?.map((note: any, index: number) => {
+                    const researchPointId = linkedinInitialMessages.meta_data?.research_points[index];
 
-                        const researchPointType = researchPointTypes?.find(
-                          (item) => item.id === researchPointId
-                        );
+                    const researchPointType = researchPointTypes?.find((item) => item.id === researchPointId);
 
-                        return (
-                          <List.Item key={index}>
-                            <Flex direction="column">
-                              {researchPointType && (
-                                <Text fz="sm" fw={"bold"}>
-                                  {_.startCase(
-                                    researchPointType.name
-                                      .toLowerCase()
-                                      .replaceAll("_", " ")
-                                      .replace("aicomp", "")
-                                      .replace("aiind", "")
-                                  )}
-                                </Text>
-                              )}
-                              <Text fz="sm">
-                                {linkedinInitialMessages.meta_data?.notes}
-                              </Text>
-                              <Text fz="sm">{note}</Text>
-                            </Flex>
-                          </List.Item>
-                        );
-                      }
-                    )}
-                  </List>
-                )}
-              </HoverCard.Dropdown>
-            </HoverCard>
-            <HoverCard width={280} shadow="md" position={"bottom"}>
-              <HoverCard.Target>
-                <Badge
-                  color="blue"
-                  styles={{ root: { textTransform: "initial" } }}
-                  variant={"outline"}
-                  radius={"sm"}
-                  w={"250px"}
-                >
-                  CTA Used:{" "}
-                  <Text fw={500} span>
-                    {_.truncate(linkedinInitialMessages.meta_data.cta, {
-                      length: 45,
-                    })}
-                  </Text>
-                </Badge>
-              </HoverCard.Target>
-              <HoverCard.Dropdown>
-                <Text size="sm">{linkedinInitialMessages.meta_data.cta}</Text>
-              </HoverCard.Dropdown>
-            </HoverCard>
-            {!props.currentProject?.template_mode && (
-              <VoiceSelect
-                personaId={props.currentProject?.id || -1}
-                onChange={(voice) => {}}
-                onFinishLoading={(voices) => {}}
-                autoSelect
-              />
-            )}
-          </Group>
-        )}
+                    return (
+                      <List.Item key={index}>
+                        <Flex direction="column">
+                          {researchPointType && (
+                            <Text fz="sm" fw={"bold"}>
+                              {_.startCase(researchPointType.name.toLowerCase().replaceAll("_", " ").replace("aicomp", "").replace("aiind", ""))}
+                            </Text>
+                          )}
+                          <Text fz="sm">{linkedinInitialMessages.meta_data?.notes}</Text>
+                          <Text fz="sm">{note}</Text>
+                        </Flex>
+                      </List.Item>
+                    );
+                  })}
+                </List>
+              )}
+            </HoverCard.Dropdown>
+          </HoverCard>
+          <HoverCard width={280} shadow="md" position={"bottom"}>
+            <HoverCard.Target>
+              <Badge color="blue" styles={{ root: { textTransform: "initial" } }} variant={"outline"} radius={"sm"} w={"250px"}>
+                CTA Used:{" "}
+                <Text fw={500} span>
+                  {_.truncate(linkedinInitialMessages.meta_data.cta, {
+                    length: 45,
+                  })}
+                </Text>
+              </Badge>
+            </HoverCard.Target>
+            <HoverCard.Dropdown>
+              <Text size="sm">{linkedinInitialMessages.meta_data.cta}</Text>
+            </HoverCard.Dropdown>
+          </HoverCard>
+          {!props.currentProject?.template_mode && (
+            <VoiceSelect personaId={props.currentProject?.id || -1} onChange={(voice) => {}} onFinishLoading={(voices) => {}} autoSelect />
+          )}
+        </Group>
+      )}
 
-      {linkedinInitialMessages.meta_data &&
-        props.currentProject?.template_mode &&
-        props.templates && (
-          <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>
-            <ActionIcon
-              disabled={templateIndex === 0}
-              onClick={() => setTemplateIndex((prevValue) => prevValue - 1)}
-              radius={"xl"}
-            >
-              <IconArrowLeft size={16} />
-            </ActionIcon>
-            <Badge variant={"outline"} radius={"sm"}>
-              {`Variant #${templateIndex + 1}: ${
-                props.templates[templateIndex].title ?? ""
-              }`}
-            </Badge>
-            <ActionIcon
-              disabled={templateIndex === props.templates.length - 1}
-              onClick={() => setTemplateIndex((prevValue) => prevValue + 1)}
-              radius={"xl"}
-            >
-              <IconArrowRight size={16} />
-            </ActionIcon>
-          </Flex>
-        )}
+      {linkedinInitialMessages.meta_data && props.currentProject?.template_mode && props.templates && (
+        <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>
+          <ActionIcon disabled={templateIndex === 0} onClick={() => setTemplateIndex((prevValue) => prevValue - 1)} radius={"xl"}>
+            <IconArrowLeft size={16} />
+          </ActionIcon>
+          <Badge variant={"outline"} radius={"sm"}>
+            {`Variant #${templateIndex + 1}: ${props.templates[templateIndex].title ?? ""}`}
+          </Badge>
+          <ActionIcon disabled={templateIndex === props.templates.length - 1} onClick={() => setTemplateIndex((prevValue) => prevValue + 1)} radius={"xl"}>
+            <IconArrowRight size={16} />
+          </ActionIcon>
+        </Flex>
+      )}
     </Card>
   );
 };
@@ -4210,23 +3455,15 @@ export function ProspectSelect2(props: {
   const [searchingProspects, setSearchingProspects] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useDebouncedState<string>("", 400);
 
-  const [prospectDrawerOpened, setProspectDrawerOpened] = useRecoilState(
-    prospectDrawerOpenState
-  );
-  const [prospectDrawerId, setProspectDrawerId] = useRecoilState(
-    prospectDrawerIdState
-  );
-  const [campaignContacts, setCampaignContacts] = useRecoilState(
-    campaignContactsState
-  );
+  const [prospectDrawerOpened, setProspectDrawerOpened] = useRecoilState(prospectDrawerOpenState);
+  const [prospectDrawerId, setProspectDrawerId] = useRecoilState(prospectDrawerIdState);
+  const [campaignContacts, setCampaignContacts] = useRecoilState(campaignContactsState);
 
   useEffect(() => {
     let resultProspects = campaignContacts;
 
     if (Array.isArray(resultProspects)) {
-      const foundProspect = resultProspects.find(
-        (prospect) => prospect.id === props.selectedProspect
-      );
+      const foundProspect = resultProspects.find((prospect) => prospect.id === props.selectedProspect);
       if (foundProspect) {
         setSelectedProspect(foundProspect as ProspectShallow);
       }
@@ -4257,11 +3494,7 @@ export function ProspectSelect2(props: {
                   <Text size={"xs"} color="#37414E">
                     Prospect:
                   </Text>
-                  <Avatar
-                    src={selectedProspect?.img_url}
-                    radius={"xl"}
-                    size={"sm"}
-                  />
+                  <Avatar src={selectedProspect?.img_url} radius={"xl"} size={"sm"} />
                   <Text size={"xs"} color={"#37414E"}>
                     {`${selectedProspect?.first_name} ${selectedProspect?.last_name} | ${selectedProspect?.title}, ${selectedProspect?.company}`}
                   </Text>
@@ -4318,12 +3551,7 @@ export function ProspectSelect2(props: {
         })}
         header={{
           content: (
-            <TextInput
-              placeholder="Search for prospects"
-              w={550}
-              onChange={(e) => setSearchQuery(e.currentTarget.value)}
-              icon={<IconSearch size={14} />}
-            />
+            <TextInput placeholder="Search for prospects" w={550} onChange={(e) => setSearchQuery(e.currentTarget.value)} icon={<IconSearch size={14} />} />
           ),
         }}
       />

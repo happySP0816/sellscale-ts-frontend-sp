@@ -420,7 +420,7 @@ export default function CampaignDrilldownModal({
                   <Box px={15} py={12} w={"100%"}>
                     <Flex justify={"space-between"}>
                       <Text color="#817e7e" fw={600}>
-                        Last Message From Prozspect:
+                        Last Message From Prospect:
                       </Text>
                       <Text color="#817e7e">{new Date(item.last_message_timestamp).toLocaleString([], { hour: '2-digit', minute: '2-digit', year: 'numeric', month: '2-digit', day: '2-digit' })}</Text>
                     </Flex>

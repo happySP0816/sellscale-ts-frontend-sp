@@ -6,7 +6,18 @@ import { DataTable } from "mantine-datatable";
 import { useEffect, useState } from "react";
 
 export default function GenerateAndSend() {
-  const [data, setData] = useState([
+  interface ContactData {
+    avatar: string;
+    name: string;
+    job: string;
+    part: string;
+    status: boolean;
+    linkedin: boolean;
+    email: boolean;
+    message: string;
+  }
+
+  const [data, setData] = useState<ContactData[]>([
     {
       avatar: "https://www.figma.com/design/6tiYgFavVgP2Wz20X3G4uj/SellScale-V3?node-id=8359-44985&node-type=FRAME&t=styRm49in4GyGWml-0#",
       name: "Oliver King",

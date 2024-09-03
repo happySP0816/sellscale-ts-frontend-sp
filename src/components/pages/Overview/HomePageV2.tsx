@@ -1,29 +1,10 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Card,
-  Divider,
-  Flex,
-  Grid,
-  Loader,
-  Paper,
-  Switch,
-  Text,
-  rem,
-  useMantineTheme,
-} from "@mantine/core";
+import { Badge, Box, Button, Card, Divider, Flex, Grid, Loader, Paper, Switch, Text, rem, useMantineTheme } from "@mantine/core";
 
 import WhiteLogo from "../../../../public/favicon.svg";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { DatePickerInput } from "@mantine/dates";
-import {
-  IconCalendar,
-  IconCircle,
-  IconInfoCircle,
-  IconPoint,
-} from "@tabler/icons";
+import { IconCalendar, IconCircle, IconInfoCircle, IconPoint } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import TodayActivityV2 from "./TodayActivityV2";
 import { CampaignAnalyticsData } from "@common/campaigns/CampaignAnalytics";
@@ -92,10 +73,7 @@ export function LineChart() {
     for (let i = 0; i < labels.length; i++) {
       const date = new Date(labels[i]);
       const dayOfWeek = date.getDay();
-      const isSpecificWeekend =
-        date.getFullYear() === 2024 &&
-        date.getMonth() === 5 &&
-        (date.getDate() === 8 || date.getDate() === 9);
+      const isSpecificWeekend = date.getFullYear() === 2024 && date.getMonth() === 5 && (date.getDate() === 8 || date.getDate() === 9);
       if (dayOfWeek !== 0 && dayOfWeek !== 6 && !isSpecificWeekend) {
         // 0 is Sunday, 6 is Saturday
         filteredData.push(data[i]);
@@ -128,26 +106,11 @@ export function LineChart() {
   let outboundLabels = [];
 
   if (!loading) {
-    ({ data: demosData, labels: demosLabels } = processData(
-      modes[currentMode]?.data.demos,
-      modes[currentMode]?.labels
-    ));
-    ({ data: positiveRepliesData, labels: positiveRepliesLabels } = processData(
-      modes[currentMode]?.data.positive_replies,
-      modes[currentMode]?.labels
-    ));
-    ({ data: repliesData, labels: repliesLabels } = processData(
-      modes[currentMode]?.data.replies,
-      modes[currentMode]?.labels
-    ));
-    ({ data: acceptancesData, labels: acceptancesLabels } = processData(
-      modes[currentMode]?.data.acceptances,
-      modes[currentMode]?.labels
-    ));
-    ({ data: outboundData, labels: outboundLabels } = processData(
-      modes[currentMode]?.data.outbound,
-      modes[currentMode]?.labels
-    ));
+    ({ data: demosData, labels: demosLabels } = processData(modes[currentMode]?.data.demos, modes[currentMode]?.labels));
+    ({ data: positiveRepliesData, labels: positiveRepliesLabels } = processData(modes[currentMode]?.data.positive_replies, modes[currentMode]?.labels));
+    ({ data: repliesData, labels: repliesLabels } = processData(modes[currentMode]?.data.replies, modes[currentMode]?.labels));
+    ({ data: acceptancesData, labels: acceptancesLabels } = processData(modes[currentMode]?.data.acceptances, modes[currentMode]?.labels));
+    ({ data: outboundData, labels: outboundLabels } = processData(modes[currentMode]?.data.outbound, modes[currentMode]?.labels));
   }
 
   const chartData = {
@@ -238,37 +201,19 @@ export function LineChart() {
   const matches = useMediaQuery("(max-width: 400px)");
 
   return (
-    <Card
-      shadow="md"
-      withBorder
-      py={15}
-      px={20}
-      style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
-      w={"100%"}
-    >
-      <Flex
-        align={{ base: "start", md: "center" }}
-        gap={"sm"}
-        justify={"space-between"}
-        direction={{ base: "column", sm: "row" }}
-      >
+    <Card shadow="md" withBorder py={15} px={20} style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }} w={"100%"}>
+      <Flex align={{ base: "start", md: "center" }} gap={"sm"} justify={"space-between"} direction={{ base: "column", sm: "row" }}>
         <Text fw={700} size={"lg"}>
           Total Outbound
         </Text>
-        <Flex
-          gap={"sm"}
-          align={{ base: "start", md: "center" }}
-          direction={{ base: "column", sm: "row" }}
-        >
+        <Flex gap={"sm"} align={{ base: "start", md: "center" }} direction={{ base: "column", sm: "row" }}>
           <Switch
             size="xs"
             color="blue"
             labelPosition="left"
             label="Show Cumulative:"
             checked={isCumulativeMode}
-            onChange={(event) =>
-              setIsCumulativeMode(event.currentTarget.checked)
-            }
+            onChange={(event) => setIsCumulativeMode(event.currentTarget.checked)}
             styles={{
               root: {
                 border: "1px solid #e9ecef",
@@ -314,10 +259,7 @@ export default function HomePageV2() {
   const [numOperatorDashItems, setNumOperatorDashItems] = useState(0);
   const [request, setRequest] = useState("");
 
-  const [
-    campaignAnalyticData,
-    setCampaignAnalyticData,
-  ] = useState<CampaignAnalyticsData>({
+  const [campaignAnalyticData, setCampaignAnalyticData] = useState<CampaignAnalyticsData>({
     sentOutreach: 0,
     accepted: 0,
     activeConvos: 0,
@@ -372,37 +314,16 @@ export default function HomePageV2() {
   }, []);
 
   return (
-    <Flex
-      p={{ base: "xs", md: "lg" }}
-      maw={"1250px"}
-      gap={"md"}
-      direction={"column"}
-      ml="auto"
-      mr="auto"
-    >
-      <Flex
-        align={{ base: "start", md: "center" }}
-        gap={{ base: "sm" }}
-        justify={"space-between"}
-        direction={{ base: "column", sm: "row" }}
-      >
-        <Flex
-          gap={"sm"}
-          align={{ base: "start", md: "center" }}
-          w={{ base: "100%", lg: "fit-content" }}
-        >
+    <Flex p={{ base: "xs", md: "lg" }} maw={"1250px"} gap={"md"} direction={"column"} ml="auto" mr="auto">
+      <Flex align={{ base: "start", md: "center" }} gap={{ base: "sm" }} justify={"space-between"} direction={{ base: "column", sm: "row" }}>
+        <Flex gap={"sm"} align={{ base: "start", md: "center" }} w={{ base: "100%", lg: "fit-content" }}>
           <img src={WhiteLogo} className="w-[20px] h-[20px] md:mt-0 mt-1" />
           <Text fw={600} size={"xl"}>
             Hey {userData.sdr_name}, here's your overview
           </Text>
         </Flex>
         <DatePickerInput
-          icon={
-            <IconCalendar
-              style={{ width: rem(18), height: rem(18) }}
-              stroke={1.5}
-            />
-          }
+          icon={<IconCalendar style={{ width: rem(18), height: rem(18) }} stroke={1.5} />}
           w={{ base: "100%", md: 200 }}
           value={value.toDate()}
           onChange={(value) => setValue(moment(value))}
@@ -411,20 +332,19 @@ export default function HomePageV2() {
       </Flex>
       <TodayActivityV2 aiActivityData={aiActivityData} />
       <PositiveResponses />
-      <Divider w={"100%"} />
-      <Flex gap={"lg"} direction={{ base: "column", lg: "row" }}>
-        <LineChart />
-        <OperatorDashboardV2
-          onOperatorDashboardEntriesChange={(task: Task[]) => {
-            setNumOperatorDashItems(task.length);
-          }}
-        />
-      </Flex>
-
-      <PipelineOverviewV2 />
+      {/* <Divider w={"100%"} /> */}
+      <OperatorDashboardV2
+        onOperatorDashboardEntriesChange={(task: Task[]) => {
+          setNumOperatorDashItems(task.length);
+        }}
+      />
+      <LineChart />
+      {/* <Flex gap={"lg"} direction={{ base: "column", lg: "row" }}> */}
+      {/* </Flex> */}
 
       <CampaignUtilization />
       <UnreadInboxes />
+      <PipelineOverviewV2 />
     </Flex>
   );
 }

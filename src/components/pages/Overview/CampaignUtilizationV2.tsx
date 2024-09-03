@@ -19,6 +19,7 @@ import {
   Paper,
   Card,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import {
   IconBolt,
@@ -239,10 +240,12 @@ export default function CampaignUtilization() {
     fetchUtilizationData();
   }, [loading]);
 
+  const [opened, { toggle }] = useDisclosure(false);
+
   return (
     <div>
       <Flex py={"lg"} gap={"lg"} direction={{ base: "column", md: "row" }}>
-        <Flex direction={"column"} gap={"sm"} w={{ base: "100%", md: "70%" }}>
+        <Flex direction={"column"} gap={"sm"} w={{ base: "100%" }}>
           <Flex align={"center"} gap={"5px"}>
             <Text
               style={{
@@ -258,7 +261,7 @@ export default function CampaignUtilization() {
               <Badge sx={{ background: "#228be6", color: "white" }}>{activeCampaign?.length}</Badge>
             </Text>
             <Divider w={"100%"} />
-            <Flex>
+            {/* <Flex>
               <ActionIcon
                 onClick={() => {
                   if (page > 0) setPage((page) => (page = page - 1));
@@ -273,9 +276,11 @@ export default function CampaignUtilization() {
               >
                 <IconChevronRight />
               </ActionIcon>
-            </Flex>
+            </Flex> */}
           </Flex>
-          <Paper withBorder p={0} mt={5}>
+          <UsedCampaign activeCampaign={activeCampaign} />
+          <UnusedCampaign />
+          {/* <Paper withBorder p={0} mt={5}>
             <DataGrid
               data={activeCampaign.slice(page * 5, page * 5 + 5)}
               highlightOnHover
@@ -453,32 +458,32 @@ export default function CampaignUtilization() {
                 },
               })}
             />
-          </Paper>
+          </Paper> */}
         </Flex>
-        <Flex gap={"md"} direction={"column"} w={{ base: "100%", md: "30%" }}>
-          <Flex align={"center"} gap={"5px"}>
-            <Text
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                whiteSpace: "nowrap",
-              }}
-              fw={700}
-              size={"lg"}
-            >
-              <span>Utilization</span>
+      </Flex>
+      {/* <Flex gap={"md"} direction={"column"} w={{ base: "100%", md: "30%" }}>
+        <Flex align={"center"} gap={"5px"}>
+          <Text
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              whiteSpace: "nowrap",
+            }}
+            fw={700}
+            size={"lg"}
+          >
+            <span>Utilization</span>
+          </Text>
+          <Divider w={"100%"} />
+        </Flex>
+        <Card px={"md"} radius={"md"} w={"100%"} withBorder>
+          <Flex align={"center"} justify={"space-between"} w={"100%"}>
+            <Text size={"sm"} fw={500} color="gray" sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+              <div className=" rounded-full bg-[#3b84ef] w-[8px] h-[8px]"></div>
+              Seat Utilization
             </Text>
-            <Divider w={"100%"} />
-            {/* <ActionIcon onClick={activeToggle}>{activeOpened ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon> */}
-          </Flex>
-          <Card px={"md"} radius={"md"} w={"100%"} withBorder>
-            <Flex align={"center"} justify={"space-between"} w={"100%"}>
-              <Text size={"sm"} fw={500} color="gray" sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                <div className=" rounded-full bg-[#3b84ef] w-[8px] h-[8px]"></div>
-                Seat Utilization
-              </Text>
-              {/* <Popover width={390} position="bottom" withArrow shadow="lg">
+            <Popover width={390} position="bottom" withArrow shadow="lg">
                   <Popover.Target>
                     <Badge
                       color="blue"
@@ -538,104 +543,372 @@ export default function CampaignUtilization() {
                       })}
                     </ScrollArea>
                   </Popover.Dropdown>
-                </Popover> */}
-            </Flex>
-            <Flex align={"center"} gap={"lg"}>
-              <Text color="gray">
+                </Popover>
+          </Flex>
+          <Flex align={"center"} gap={"lg"}>
+            <Text color="gray">
+              <span
+                style={{
+                  fontSize: "32px",
+                  fontWeight: "500",
+                  color: "black",
+                }}
+              >
+                {outboundData?.seat_active || 0}{" "}
                 <span
                   style={{
                     fontSize: "32px",
                     fontWeight: "500",
-                    color: "black",
+                    color: "gray",
                   }}
                 >
-                  {outboundData?.seat_active || 0}{" "}
-                  <span
-                    style={{
-                      fontSize: "32px",
-                      fontWeight: "500",
-                      color: "gray",
-                    }}
-                  >
-                    {" "}
-                    / {outboundData?.seat_total || 0}
-                  </span>
-                </span>{" "}
-              </Text>
-              <div className="w-[80px] relative">
-                <Doughnut data={seat_data} options={piechartOptions} />
-                <Flex
-                  style={{
-                    position: "absolute",
-                    top: "35px",
-                    width: "100%",
-                    alignItems: "center",
-                  }}
-                  direction={"column"}
-                >
-                  <Text fw={600} size={"xl"}>
-                    {Math.min(100, Math.floor(((outboundData?.seat_active || 0) / (outboundData?.seat_total || 1)) * 100))}%
-                  </Text>{" "}
-                </Flex>
-              </div>
-            </Flex>
-            <Text color="gray" fw={500}>
-              Seats with Active Campaings
+                  {" "}
+                  / {outboundData?.seat_total || 0}
+                </span>
+              </span>{" "}
             </Text>
-          </Card>
+            <div className="w-[80px] relative">
+              <Doughnut data={seat_data} options={piechartOptions} />
+              <Flex
+                style={{
+                  position: "absolute",
+                  top: "35px",
+                  width: "100%",
+                  alignItems: "center",
+                }}
+                direction={"column"}
+              >
+                <Text fw={600} size={"xl"}>
+                  {Math.min(100, Math.floor(((outboundData?.seat_active || 0) / (outboundData?.seat_total || 1)) * 100))}%
+                </Text>{" "}
+              </Flex>
+            </div>
+          </Flex>
+          <Text color="gray" fw={500}>
+            Seats with Active Campaings
+          </Text>
+        </Card>
 
-          <Card px={"md"} radius={"md"} w={"100%"} withBorder>
-            <Flex align={"center"} justify={"space-between"} w={"100%"}>
-              <Text size={"sm"} fw={500} color="gray" sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                <div className=" rounded-full bg-[#d444f1] w-[8px] h-[8px]"></div>
-                Message Utilization
-              </Text>
-            </Flex>
-            <Flex align={"center"} gap={"lg"}>
-              <Text color="gray">
+        <Card px={"md"} radius={"md"} w={"100%"} withBorder>
+          <Flex align={"center"} justify={"space-between"} w={"100%"}>
+            <Text size={"sm"} fw={500} color="gray" sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+              <div className=" rounded-full bg-[#d444f1] w-[8px] h-[8px]"></div>
+              Message Utilization
+            </Text>
+          </Flex>
+          <Flex align={"center"} gap={"lg"}>
+            <Text color="gray">
+              <span
+                style={{
+                  fontSize: "32px",
+                  fontWeight: "500",
+                  color: "black",
+                }}
+              >
+                {outboundData?.message_active?.toLocaleString() || 0}
                 <span
                   style={{
                     fontSize: "32px",
                     fontWeight: "500",
-                    color: "black",
+                    color: "gray",
                   }}
                 >
-                  {outboundData?.message_active?.toLocaleString() || 0}
-                  <span
-                    style={{
-                      fontSize: "32px",
-                      fontWeight: "500",
-                      color: "gray",
-                    }}
-                  >
-                    {" "}
-                    / {outboundData?.message_total?.toLocaleString() || 0}
-                  </span>
-                </span>{" "}
-              </Text>
-              <div className="w-[80px] relative">
-                <Doughnut data={message_data} options={piechartOptions} />
-                <Flex
-                  style={{
-                    position: "absolute",
-                    top: "35px",
-                    width: "100%",
-                    alignItems: "center",
-                  }}
-                  direction={"column"}
-                >
-                  <Text fw={600} size={"xl"}>
-                    {Math.min(100, Math.floor(((outboundData?.message_active || 0) / (outboundData?.message_total || 1)) * 100))}%
-                  </Text>{" "}
-                </Flex>
-              </div>
-            </Flex>
-            <Text color="gray" fw={500}>
-              Available Sending Out
+                  {" "}
+                  / {outboundData?.message_total?.toLocaleString() || 0}
+                </span>
+              </span>{" "}
             </Text>
-          </Card>
-        </Flex>
-      </Flex>
+            <div className="w-[80px] relative">
+              <Doughnut data={message_data} options={piechartOptions} />
+              <Flex
+                style={{
+                  position: "absolute",
+                  top: "35px",
+                  width: "100%",
+                  alignItems: "center",
+                }}
+                direction={"column"}
+              >
+                <Text fw={600} size={"xl"}>
+                  {Math.min(100, Math.floor(((outboundData?.message_active || 0) / (outboundData?.message_total || 1)) * 100))}%
+                </Text>{" "}
+              </Flex>
+            </div>
+          </Flex>
+          <Text color="gray" fw={500}>
+            Available Sending Out
+          </Text>
+        </Card>
+      </Flex> */}
     </div>
   );
 }
+
+const UsedCampaign = (props: any) => {
+  const [opened, { toggle }] = useDisclosure(false);
+  return (
+    <Paper withBorder radius={"sm"} p={"sm"}>
+      <Flex align={"center"} justify={"space-between"}>
+        <Text fw={700} size={"md"}>
+          Used
+        </Text>
+        <Badge variant="filled">2/5 seats</Badge>
+      </Flex>
+      <Paper withBorder radius={"sm"} p={"xs"} mt={"sm"}>
+        <Flex align={"center"} justify={"space-between"}>
+          <Flex align={"center"} gap={4}>
+            <Avatar src={""} size={"sm"} radius={"xl"} />
+            <Text fw={500} size={"sm"}>
+              Ishan Sharma
+            </Text>
+          </Flex>
+          <Flex align={"center"} gap={"xs"}>
+            <Flex gap={4}>
+              <Badge radius={"sm"}>2</Badge>
+              <Text size={"sm"} fw={400} color="gray">
+                active campaign
+              </Text>
+            </Flex>
+            <Divider orientation="vertical" />
+            <Flex gap={4}>
+              <Badge radius={"sm"} color="orange">
+                +4
+              </Badge>
+              <Text size={"sm"} fw={400} color="gray">
+                sent yesterday
+              </Text>
+            </Flex>
+            <Divider orientation="vertical" />
+            <Flex gap={4}>
+              <Badge radius={"sm"} color="green">
+                +5
+              </Badge>
+              <Text size={"sm"} fw={400} color="gray">
+                sent today
+              </Text>
+            </Flex>
+            <ActionIcon variant="light" onClick={toggle}>
+              <IconChevronDown size={"1rem"} />
+            </ActionIcon>
+          </Flex>
+        </Flex>
+        <Collapse in={opened}>
+          <DataGrid
+            data={props.activeCampaign}
+            mt={"sm"}
+            highlightOnHover
+            withSorting
+            withColumnBorders
+            withBorder
+            sx={{
+              cursor: "pointer",
+              "& .mantine-10xyzsm>tbody>tr>td": {
+                padding: "0px",
+              },
+              "& tr": {
+                background: "white",
+              },
+            }}
+            columns={[
+              {
+                accessorKey: "Status",
+                minSize: 120,
+                maxSize: 120,
+                header: () => (
+                  <Flex align={"center"} gap={"3px"}>
+                    <IconLoader color="gray" size={"0.9rem"} />
+                    <Text color="gray">Status</Text>
+                  </Flex>
+                ),
+                cell: (cell) => {
+                  const { status } = cell.row.original;
+
+                  return (
+                    <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"center"}>
+                      <Badge>{status}</Badge>
+                    </Flex>
+                  );
+                },
+              },
+              {
+                accessorKey: "campaigns",
+                minSize: 330,
+                maxSize: 400,
+                header: () => (
+                  <Flex align={"center"} gap={"3px"}>
+                    <IconTargetArrow color="gray" size={"0.9rem"} />
+                    <Text color="gray">Campaigns</Text>
+                  </Flex>
+                ),
+
+                cell: (cell) => {
+                  const { campaign, num_total_linkedin, num_total_email } = cell.row.original;
+
+                  return (
+                    <Flex w={"100%"} px={"sm"} h={"100%"} align={"center"} gap={"md"}>
+                      <Flex>
+                        <Text lineClamp={1}>{campaign}</Text>
+                      </Flex>
+
+                      <Flex w={"100%"} align={"center"} gap={3}>
+                        {num_total_email > 0 && <IconMail size={"1.3rem"} fill="#228be6" color="white" />}
+                        {num_total_linkedin > 0 && <IconBrandLinkedin size={"1.3rem"} fill="#228be6" color="white" />}
+                      </Flex>
+                    </Flex>
+                  );
+                },
+              },
+              {
+                accessorKey: "Progress",
+                header: () => (
+                  <Flex align={"center"} gap={"3px"}>
+                    <IconBolt color="gray" size={"0.9rem"} />
+                    <Text color="gray">Progress</Text>
+                  </Flex>
+                ),
+                enableResizing: true,
+                cell: (cell) => {
+                  const { num_used_total, num_total } = cell.row.original;
+
+                  return (
+                    <Flex direction={"column"} justify={"center"} w={"100%"} h={"100%"} py={"sm"}>
+                      <Flex w={"100%"} align={"center"} gap={"8px"} px={"xs"}>
+                        <Progress value={(num_used_total / num_total) * 100} w={"100%"} />
+                        <Text color="#228be6" fw={500}>
+                          {Math.round((num_used_total / num_total) * 100)}%
+                        </Text>
+                      </Flex>
+                      <Flex align={"center"} justify={"space-between"} px={"sm"}>
+                        <Flex align={"center"}>
+                          <Text fw={500}>
+                            {num_used_total} / {num_total} <span className="text-gray-500">Sent</span>
+                          </Text>
+                          {/* {Math.round((num_total - num_used_total) / 20) < 3 ? <IconPoint fill="gray" color="white" /> : null} */}
+                          {/* <Text
+                                color={"red"}
+                                sx={{
+                                  display: Math.round((num_total - num_used_total) / 20) < 3 ? "block" : "none",
+                                }}
+                              >
+                                {Math.round((num_total - num_used_total) / 20)} day
+                                {Math.round((num_total - num_used_total) / 20) < 3 ? "s" : ""} left
+                              </Text> */}
+                        </Flex>
+                        <Flex align={"center"} gap={"xs"}>
+                          <Flex gap={4}>
+                            <Badge radius={"sm"} color="orange">
+                              +4
+                            </Badge>
+                            <Text size={"sm"} fw={400} color="gray">
+                              sent yesterday
+                            </Text>
+                          </Flex>
+                          <Divider orientation="vertical" />
+                          <Flex gap={4}>
+                            <Badge radius={"sm"} color="green">
+                              +5
+                            </Badge>
+                            <Text size={"sm"} fw={400} color="gray">
+                              sent today
+                            </Text>
+                          </Flex>
+                        </Flex>
+                      </Flex>
+                    </Flex>
+                  );
+                },
+              },
+            ]}
+            options={{
+              enableFilters: true,
+            }}
+            // loading={loading}
+            w={"100%"}
+            styles={(theme) => ({
+              thead: {
+                height: "44px",
+                backgroundColor: theme.colors.gray[0],
+                "::after": {
+                  backgroundColor: "transparent",
+                },
+              },
+
+              wrapper: {
+                gap: 0,
+              },
+              scrollArea: {
+                paddingBottom: 0,
+                gap: 0,
+              },
+
+              dataCellContent: {
+                width: "100%",
+              },
+            })}
+          />
+        </Collapse>
+      </Paper>
+    </Paper>
+  );
+};
+
+const UnusedCampaign = () => {
+  const data = [
+    {
+      avatar: "",
+      name: "Ishan Sharma",
+      capacity: 300,
+      linkedin: 80,
+    },
+    {
+      avatar: "",
+      name: "Paul Wesley",
+      capacity: 300,
+      linkedin: 80,
+    },
+  ];
+  return (
+    <Paper withBorder radius={"sm"} p={"sm"}>
+      <Flex align={"center"} justify={"space-between"}>
+        <Text fw={700} size={"md"}>
+          Unused
+        </Text>
+        <Badge variant="filled">2/5 seats</Badge>
+      </Flex>
+      {data.map((item, index) => {
+        return (
+          <Paper withBorder radius={"sm"} p={"sm"} mt={"sm"}>
+            <Flex align={"center"} justify={"space-between"}>
+              <Flex align={"center"} gap={4}>
+                <Avatar src={item.avatar} size={"sm"} radius={"xl"} />
+                <Text fw={500} size={"sm"}>
+                  {item.name}
+                </Text>
+              </Flex>
+              <Flex align={"center"} gap={"xs"}>
+                <Flex gap={4}>
+                  <Text size={"sm"} fw={400} color="gray">
+                    Unused Capacity:
+                  </Text>
+                  <Badge radius={"sm"} color="grape">
+                    {item.capacity}
+                  </Badge>
+                  <Text size={"sm"} fw={400} color="gray">
+                    Mails per week
+                  </Text>
+                </Flex>
+                <Divider orientation="vertical" />
+                <Flex gap={4}>
+                  <Badge radius={"sm"}>{item.linkedin}</Badge>
+                  <Text size={"sm"} fw={400} color="gray">
+                    Linkedin per week
+                  </Text>
+                </Flex>
+              </Flex>
+            </Flex>
+          </Paper>
+        );
+      })}
+    </Paper>
+  );
+};

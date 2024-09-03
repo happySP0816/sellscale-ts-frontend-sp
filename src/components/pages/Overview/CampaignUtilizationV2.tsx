@@ -645,209 +645,474 @@ export default function CampaignUtilization() {
 }
 
 const UsedCampaign = (props: any) => {
-  const [opened, { toggle }] = useDisclosure(false);
+  const [opened, setOpened] = useState<string | null>(null);
+  const data = [
+    {
+      campaign: "🐵 Forbes Cloud 100 campaign",
+      email_active: false,
+      linkedin_active: true,
+      num_total: 80,
+      num_total_email: 72,
+      num_total_linkedin: 80,
+      num_used_email: 72,
+      num_used_linkedin: 42,
+      num_used_total: 42,
+      persona_id: 1180,
+      rep: "Ishan Sharma",
+      rep_profile_picture:
+        "https://media.licdn.com/dms/image/v2/D5603AQEmqpPkyD8rDw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1648973407416?e=1730937600&v=beta&t=qYku3BZIUJXBnZ8dIFQhxSf5R9PBJ018JRUknOmQnjw",
+      status: "active",
+    },
+    {
+      campaign: "🐵 test1",
+      email_active: false,
+      linkedin_active: true,
+      num_total: 100,
+      num_total_email: 52,
+      num_total_linkedin: 40,
+      num_used_email: 32,
+      num_used_linkedin: 47,
+      num_used_total: 63,
+      persona_id: 1180,
+      rep: "Ishan Sharma",
+      rep_profile_picture:
+        "https://media.licdn.com/dms/image/v2/D5603AQEmqpPkyD8rDw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1648973407416?e=1730937600&v=beta&t=qYku3BZIUJXBnZ8dIFQhxSf5R9PBJ018JRUknOmQnjw",
+      status: "active",
+    },
+    {
+      campaign: "🐵 test1",
+      email_active: false,
+      linkedin_active: true,
+      num_total: 100,
+      num_total_email: 52,
+      num_total_linkedin: 40,
+      num_used_email: 32,
+      num_used_linkedin: 47,
+      num_used_total: 23,
+      persona_id: 1153,
+      rep: "Anton Sokolov",
+      rep_profile_picture:
+        "https://media.licdn.com/dms/image/v2/D5603AQEmqpPkyD8rDw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1648973407416?e=1730937600&v=beta&t=qYku3BZIUJXBnZ8dIFQhxSf5R9PBJ018JRUknOmQnjw",
+      status: "active",
+    },
+  ];
+
+  const groupedData = data.reduce((acc: any, item: any) => {
+    const { persona_id } = item;
+    if (!acc[persona_id]) {
+      acc[persona_id] = [];
+    }
+    acc[persona_id].push(item);
+    return acc;
+  }, {});
+
+  console.log("---------", groupedData);
+
   return (
     <Paper withBorder radius={"sm"} p={"sm"}>
       <Flex align={"center"} justify={"space-between"}>
         <Text fw={700} size={"md"}>
           Used
         </Text>
-        <Badge variant="filled">2/5 seats</Badge>
+        <Badge variant="filled">{2}/5 seats</Badge>
       </Flex>
-      <Paper withBorder radius={"sm"} p={"xs"} mt={"sm"}>
-        <Flex align={"center"} justify={"space-between"}>
-          <Flex align={"center"} gap={4}>
-            <Avatar src={""} size={"sm"} radius={"xl"} />
-            <Text fw={500} size={"sm"}>
-              Ishan Sharma
-            </Text>
+      {Object.entries(groupedData).map(([key, value]: [string, any]) => (
+        <Paper withBorder radius={"sm"} p={"xs"} mt={"sm"}>
+          <Flex align={"center"} justify={"space-between"}>
+            <Flex align={"center"} gap={4}>
+              <Avatar src={value[0].rep_profile_picture} size={"sm"} radius={"xl"} />
+              <Text fw={500} size={"sm"}>
+                {/* {item.rep} */}
+                {value[0].rep}
+              </Text>
+            </Flex>
+            <Flex align={"center"} gap={"xs"}>
+              <Flex gap={4}>
+                <Badge radius={"sm"}>{value.reduce((acc: any, item: any) => acc + item.num_used_total, 0)}</Badge>
+                <Text size={"sm"} fw={400} color="gray">
+                  active campaign
+                </Text>
+              </Flex>
+              <Divider orientation="vertical" />
+              <Flex gap={4}>
+                <Badge radius={"sm"} color="orange">
+                  +4
+                </Badge>
+                <Text size={"sm"} fw={400} color="gray">
+                  sent yesterday
+                </Text>
+              </Flex>
+              <Divider orientation="vertical" />
+              <Flex gap={4}>
+                <Badge radius={"sm"} color="green">
+                  +5
+                </Badge>
+                <Text size={"sm"} fw={400} color="gray">
+                  sent today
+                </Text>
+              </Flex>
+              <ActionIcon variant="light" onClick={() => setOpened(opened === key ? null : key)}>
+                <IconChevronDown size={"1rem"} />
+              </ActionIcon>
+            </Flex>
           </Flex>
-          <Flex align={"center"} gap={"xs"}>
-            <Flex gap={4}>
-              <Badge radius={"sm"}>2</Badge>
-              <Text size={"sm"} fw={400} color="gray">
-                active campaign
-              </Text>
-            </Flex>
-            <Divider orientation="vertical" />
-            <Flex gap={4}>
-              <Badge radius={"sm"} color="orange">
-                +4
-              </Badge>
-              <Text size={"sm"} fw={400} color="gray">
-                sent yesterday
-              </Text>
-            </Flex>
-            <Divider orientation="vertical" />
-            <Flex gap={4}>
-              <Badge radius={"sm"} color="green">
-                +5
-              </Badge>
-              <Text size={"sm"} fw={400} color="gray">
-                sent today
-              </Text>
-            </Flex>
-            <ActionIcon variant="light" onClick={toggle}>
-              <IconChevronDown size={"1rem"} />
-            </ActionIcon>
-          </Flex>
-        </Flex>
-        <Collapse in={opened}>
-          <DataGrid
-            data={props.activeCampaign}
-            mt={"sm"}
-            highlightOnHover
-            withSorting
-            withColumnBorders
-            withBorder
-            sx={{
-              cursor: "pointer",
-              "& .mantine-10xyzsm>tbody>tr>td": {
-                padding: "0px",
-              },
-              "& tr": {
-                background: "white",
-              },
-            }}
-            columns={[
-              {
-                accessorKey: "Status",
-                minSize: 120,
-                maxSize: 120,
-                header: () => (
-                  <Flex align={"center"} gap={"3px"}>
-                    <IconLoader color="gray" size={"0.9rem"} />
-                    <Text color="gray">Status</Text>
-                  </Flex>
-                ),
-                cell: (cell) => {
-                  const { status } = cell.row.original;
-
-                  return (
-                    <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"center"}>
-                      <Badge>{status}</Badge>
-                    </Flex>
-                  );
+          <Collapse in={opened === key}>
+            <DataGrid
+              data={value}
+              mt={"sm"}
+              highlightOnHover
+              withSorting
+              withColumnBorders
+              withBorder
+              sx={{
+                cursor: "pointer",
+                "& .mantine-10xyzsm>tbody>tr>td": {
+                  padding: "0px",
                 },
-              },
-              {
-                accessorKey: "campaigns",
-                minSize: 330,
-                maxSize: 400,
-                header: () => (
-                  <Flex align={"center"} gap={"3px"}>
-                    <IconTargetArrow color="gray" size={"0.9rem"} />
-                    <Text color="gray">Campaigns</Text>
-                  </Flex>
-                ),
-
-                cell: (cell) => {
-                  const { campaign, num_total_linkedin, num_total_email } = cell.row.original;
-
-                  return (
-                    <Flex w={"100%"} px={"sm"} h={"100%"} align={"center"} gap={"md"}>
-                      <Flex>
-                        <Text lineClamp={1}>{campaign}</Text>
-                      </Flex>
-
-                      <Flex w={"100%"} align={"center"} gap={3}>
-                        {num_total_email > 0 && <IconMail size={"1.3rem"} fill="#228be6" color="white" />}
-                        {num_total_linkedin > 0 && <IconBrandLinkedin size={"1.3rem"} fill="#228be6" color="white" />}
-                      </Flex>
-                    </Flex>
-                  );
+                "& tr": {
+                  background: "white",
                 },
-              },
-              {
-                accessorKey: "Progress",
-                header: () => (
-                  <Flex align={"center"} gap={"3px"}>
-                    <IconBolt color="gray" size={"0.9rem"} />
-                    <Text color="gray">Progress</Text>
-                  </Flex>
-                ),
-                enableResizing: true,
-                cell: (cell) => {
-                  const { num_used_total, num_total } = cell.row.original;
+              }}
+              columns={[
+                {
+                  accessorKey: "Status",
+                  minSize: 120,
+                  maxSize: 120,
+                  header: () => (
+                    <Flex align={"center"} gap={"3px"}>
+                      <IconLoader color="gray" size={"0.9rem"} />
+                      <Text color="gray">Status</Text>
+                    </Flex>
+                  ),
+                  cell: (cell: any) => {
+                    const { status } = cell.row.original;
 
-                  return (
-                    <Flex direction={"column"} justify={"center"} w={"100%"} h={"100%"} py={"sm"}>
-                      <Flex w={"100%"} align={"center"} gap={"8px"} px={"xs"}>
-                        <Progress value={(num_used_total / num_total) * 100} w={"100%"} />
-                        <Text color="#228be6" fw={500}>
-                          {Math.round((num_used_total / num_total) * 100)}%
-                        </Text>
+                    return (
+                      <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"center"}>
+                        <Badge>{status}</Badge>
                       </Flex>
-                      <Flex align={"center"} justify={"space-between"} px={"sm"}>
-                        <Flex align={"center"}>
-                          <Text fw={500}>
-                            {num_used_total} / {num_total} <span className="text-gray-500">Sent</span>
+                    );
+                  },
+                },
+                {
+                  accessorKey: "campaigns",
+                  minSize: 330,
+                  maxSize: 400,
+                  header: () => (
+                    <Flex align={"center"} gap={"3px"}>
+                      <IconTargetArrow color="gray" size={"0.9rem"} />
+                      <Text color="gray">Campaigns</Text>
+                    </Flex>
+                  ),
+
+                  cell: (cell: any) => {
+                    const { campaign, num_total_linkedin, num_total_email } = cell.row.original;
+
+                    return (
+                      <Flex w={"100%"} px={"sm"} h={"100%"} align={"center"} gap={"md"}>
+                        <Flex>
+                          <Text lineClamp={1}>{campaign}</Text>
+                        </Flex>
+
+                        <Flex w={"100%"} align={"center"} gap={3}>
+                          {num_total_email > 0 && <IconMail size={"1.3rem"} fill="#228be6" color="white" />}
+                          {num_total_linkedin > 0 && <IconBrandLinkedin size={"1.3rem"} fill="#228be6" color="white" />}
+                        </Flex>
+                      </Flex>
+                    );
+                  },
+                },
+                {
+                  accessorKey: "Progress",
+                  header: () => (
+                    <Flex align={"center"} gap={"3px"}>
+                      <IconBolt color="gray" size={"0.9rem"} />
+                      <Text color="gray">Progress</Text>
+                    </Flex>
+                  ),
+                  enableResizing: true,
+                  cell: (cell: any) => {
+                    const { num_used_total, num_total } = cell.row.original;
+
+                    return (
+                      <Flex direction={"column"} justify={"center"} w={"100%"} h={"100%"} py={"sm"}>
+                        <Flex w={"100%"} align={"center"} gap={"8px"} px={"xs"}>
+                          <Progress value={(num_used_total / num_total) * 100} w={"100%"} />
+                          <Text color="#228be6" fw={500}>
+                            {Math.round((num_used_total / num_total) * 100)}%
                           </Text>
-                          {/* {Math.round((num_total - num_used_total) / 20) < 3 ? <IconPoint fill="gray" color="white" /> : null} */}
-                          {/* <Text
-                                color={"red"}
-                                sx={{
-                                  display: Math.round((num_total - num_used_total) / 20) < 3 ? "block" : "none",
-                                }}
-                              >
-                                {Math.round((num_total - num_used_total) / 20)} day
-                                {Math.round((num_total - num_used_total) / 20) < 3 ? "s" : ""} left
-                              </Text> */}
                         </Flex>
-                        <Flex align={"center"} gap={"xs"}>
-                          <Flex gap={4}>
-                            <Badge radius={"sm"} color="orange">
-                              +4
-                            </Badge>
-                            <Text size={"sm"} fw={400} color="gray">
-                              sent yesterday
+                        <Flex align={"center"} justify={"space-between"} px={"sm"}>
+                          <Flex align={"center"}>
+                            <Text fw={500}>
+                              {num_used_total} / {num_total} <span className="text-gray-500">Sent</span>
                             </Text>
+                            {/* {Math.round((num_total - num_used_total) / 20) < 3 ? <IconPoint fill="gray" color="white" /> : null} */}
+                            {/* <Text
+                                    color={"red"}
+                                    sx={{
+                                      display: Math.round((num_total - num_used_total) / 20) < 3 ? "block" : "none",
+                                    }}
+                                  >
+                                    {Math.round((num_total - num_used_total) / 20)} day
+                                    {Math.round((num_total - num_used_total) / 20) < 3 ? "s" : ""} left
+                                  </Text> */}
                           </Flex>
-                          <Divider orientation="vertical" />
-                          <Flex gap={4}>
-                            <Badge radius={"sm"} color="green">
-                              +5
-                            </Badge>
-                            <Text size={"sm"} fw={400} color="gray">
-                              sent today
-                            </Text>
+                          <Flex align={"center"} gap={"xs"}>
+                            <Flex gap={4}>
+                              <Badge radius={"sm"} color="orange">
+                                +4
+                              </Badge>
+                              <Text size={"sm"} fw={400} color="gray">
+                                sent yesterday
+                              </Text>
+                            </Flex>
+                            <Divider orientation="vertical" />
+                            <Flex gap={4}>
+                              <Badge radius={"sm"} color="green">
+                                +5
+                              </Badge>
+                              <Text size={"sm"} fw={400} color="gray">
+                                sent today
+                              </Text>
+                            </Flex>
                           </Flex>
                         </Flex>
                       </Flex>
-                    </Flex>
-                  );
+                    );
+                  },
                 },
-              },
-            ]}
-            options={{
-              enableFilters: true,
-            }}
-            // loading={loading}
-            w={"100%"}
-            styles={(theme) => ({
-              thead: {
-                height: "44px",
-                backgroundColor: theme.colors.gray[0],
-                "::after": {
-                  backgroundColor: "transparent",
+              ]}
+              options={{
+                enableFilters: true,
+              }}
+              // loading={loading}
+              w={"100%"}
+              styles={(theme) => ({
+                thead: {
+                  height: "44px",
+                  backgroundColor: theme.colors.gray[0],
+                  "::after": {
+                    backgroundColor: "transparent",
+                  },
                 },
-              },
 
-              wrapper: {
-                gap: 0,
-              },
-              scrollArea: {
-                paddingBottom: 0,
-                gap: 0,
-              },
+                wrapper: {
+                  gap: 0,
+                },
+                scrollArea: {
+                  paddingBottom: 0,
+                  gap: 0,
+                },
 
-              dataCellContent: {
-                width: "100%",
-              },
-            })}
-          />
-        </Collapse>
-      </Paper>
+                dataCellContent: {
+                  width: "100%",
+                },
+              })}
+            />
+          </Collapse>
+        </Paper>
+        // <div key={key}>
+        //   {value.map((item, index) => {
+        //     return (
+        //       <Paper withBorder radius={"sm"} p={"xs"} mt={"sm"}>
+        //         <Flex align={"center"} justify={"space-between"}>
+        //           <Flex align={"center"} gap={4}>
+        //             <Avatar src={""} size={"sm"} radius={"xl"} />
+        //             <Text fw={500} size={"sm"}>
+        //               {item.rep}
+        //             </Text>
+        //           </Flex>
+        //           <Flex align={"center"} gap={"xs"}>
+        //             <Flex gap={4}>
+        //               <Badge radius={"sm"}>{item.num_used_total}</Badge>
+        //               <Text size={"sm"} fw={400} color="gray">
+        //                 active campaign
+        //               </Text>
+        //             </Flex>
+        //             <Divider orientation="vertical" />
+        //             <Flex gap={4}>
+        //               <Badge radius={"sm"} color="orange">
+        //                 +4
+        //               </Badge>
+        //               <Text size={"sm"} fw={400} color="gray">
+        //                 sent yesterday
+        //               </Text>
+        //             </Flex>
+        //             <Divider orientation="vertical" />
+        //             <Flex gap={4}>
+        //               <Badge radius={"sm"} color="green">
+        //                 +5
+        //               </Badge>
+        //               <Text size={"sm"} fw={400} color="gray">
+        //                 sent today
+        //               </Text>
+        //             </Flex>
+        //             <ActionIcon variant="light" onClick={toggle}>
+        //               <IconChevronDown size={"1rem"} />
+        //             </ActionIcon>
+        //           </Flex>
+        //         </Flex>
+        //         <Collapse in={opened}>
+        //           <DataGrid
+        //             data={value}
+        //             mt={"sm"}
+        //             highlightOnHover
+        //             withSorting
+        //             withColumnBorders
+        //             withBorder
+        //             sx={{
+        //               cursor: "pointer",
+        //               "& .mantine-10xyzsm>tbody>tr>td": {
+        //                 padding: "0px",
+        //               },
+        //               "& tr": {
+        //                 background: "white",
+        //               },
+        //             }}
+        //             columns={[
+        //               {
+        //                 accessorKey: "Status",
+        //                 minSize: 120,
+        //                 maxSize: 120,
+        //                 header: () => (
+        //                   <Flex align={"center"} gap={"3px"}>
+        //                     <IconLoader color="gray" size={"0.9rem"} />
+        //                     <Text color="gray">Status</Text>
+        //                   </Flex>
+        //                 ),
+        //                 cell: (cell) => {
+        //                   const { status } = cell.row.original;
+
+        //                   return (
+        //                     <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"center"}>
+        //                       <Badge>{status}</Badge>
+        //                     </Flex>
+        //                   );
+        //                 },
+        //               },
+        //               {
+        //                 accessorKey: "campaigns",
+        //                 minSize: 330,
+        //                 maxSize: 400,
+        //                 header: () => (
+        //                   <Flex align={"center"} gap={"3px"}>
+        //                     <IconTargetArrow color="gray" size={"0.9rem"} />
+        //                     <Text color="gray">Campaigns</Text>
+        //                   </Flex>
+        //                 ),
+
+        //                 cell: (cell) => {
+        //                   const { campaign, num_total_linkedin, num_total_email } = cell.row.original;
+
+        //                   return (
+        //                     <Flex w={"100%"} px={"sm"} h={"100%"} align={"center"} gap={"md"}>
+        //                       <Flex>
+        //                         <Text lineClamp={1}>{campaign}</Text>
+        //                       </Flex>
+
+        //                       <Flex w={"100%"} align={"center"} gap={3}>
+        //                         {num_total_email > 0 && <IconMail size={"1.3rem"} fill="#228be6" color="white" />}
+        //                         {num_total_linkedin > 0 && <IconBrandLinkedin size={"1.3rem"} fill="#228be6" color="white" />}
+        //                       </Flex>
+        //                     </Flex>
+        //                   );
+        //                 },
+        //               },
+        //               {
+        //                 accessorKey: "Progress",
+        //                 header: () => (
+        //                   <Flex align={"center"} gap={"3px"}>
+        //                     <IconBolt color="gray" size={"0.9rem"} />
+        //                     <Text color="gray">Progress</Text>
+        //                   </Flex>
+        //                 ),
+        //                 enableResizing: true,
+        //                 cell: (cell) => {
+        //                   const { num_used_total, num_total } = cell.row.original;
+
+        //                   return (
+        //                     <Flex direction={"column"} justify={"center"} w={"100%"} h={"100%"} py={"sm"}>
+        //                       <Flex w={"100%"} align={"center"} gap={"8px"} px={"xs"}>
+        //                         <Progress value={(num_used_total / num_total) * 100} w={"100%"} />
+        //                         <Text color="#228be6" fw={500}>
+        //                           {Math.round((num_used_total / num_total) * 100)}%
+        //                         </Text>
+        //                       </Flex>
+        //                       <Flex align={"center"} justify={"space-between"} px={"sm"}>
+        //                         <Flex align={"center"}>
+        //                           <Text fw={500}>
+        //                             {num_used_total} / {num_total} <span className="text-gray-500">Sent</span>
+        //                           </Text>
+        //                           {/* {Math.round((num_total - num_used_total) / 20) < 3 ? <IconPoint fill="gray" color="white" /> : null} */}
+        //                           {/* <Text
+        //                             color={"red"}
+        //                             sx={{
+        //                               display: Math.round((num_total - num_used_total) / 20) < 3 ? "block" : "none",
+        //                             }}
+        //                           >
+        //                             {Math.round((num_total - num_used_total) / 20)} day
+        //                             {Math.round((num_total - num_used_total) / 20) < 3 ? "s" : ""} left
+        //                           </Text> */}
+        //                         </Flex>
+        //                         <Flex align={"center"} gap={"xs"}>
+        //                           <Flex gap={4}>
+        //                             <Badge radius={"sm"} color="orange">
+        //                               +4
+        //                             </Badge>
+        //                             <Text size={"sm"} fw={400} color="gray">
+        //                               sent yesterday
+        //                             </Text>
+        //                           </Flex>
+        //                           <Divider orientation="vertical" />
+        //                           <Flex gap={4}>
+        //                             <Badge radius={"sm"} color="green">
+        //                               +5
+        //                             </Badge>
+        //                             <Text size={"sm"} fw={400} color="gray">
+        //                               sent today
+        //                             </Text>
+        //                           </Flex>
+        //                         </Flex>
+        //                       </Flex>
+        //                     </Flex>
+        //                   );
+        //                 },
+        //               },
+        //             ]}
+        //             options={{
+        //               enableFilters: true,
+        //             }}
+        //             // loading={loading}
+        //             w={"100%"}
+        //             styles={(theme) => ({
+        //               thead: {
+        //                 height: "44px",
+        //                 backgroundColor: theme.colors.gray[0],
+        //                 "::after": {
+        //                   backgroundColor: "transparent",
+        //                 },
+        //               },
+
+        //               wrapper: {
+        //                 gap: 0,
+        //               },
+        //               scrollArea: {
+        //                 paddingBottom: 0,
+        //                 gap: 0,
+        //               },
+
+        //               dataCellContent: {
+        //                 width: "100%",
+        //               },
+        //             })}
+        //           />
+        //         </Collapse>
+        //       </Paper>
+        //     );
+        //   })}
+        // </div>
+      ))}
     </Paper>
   );
 };

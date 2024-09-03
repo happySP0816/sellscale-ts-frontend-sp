@@ -12,10 +12,15 @@ import {
   ThemeIcon,
   rem,
   useMantineTheme,
-} from '@mantine/core';
-import { convertDateToLocalTime, nameToInitials, proxyURL, valueToColor } from '@utils/general';
-import TextAreaWithAI from '@common/library/TextAreaWithAI';
-import { useRef, useState } from 'react';
+} from "@mantine/core";
+import {
+  convertDateToLocalTime,
+  nameToInitials,
+  proxyURL,
+  valueToColor,
+} from "@utils/general";
+import TextAreaWithAI from "@common/library/TextAreaWithAI";
+import { useRef, useState } from "react";
 import {
   IconBriefcase,
   IconBuilding,
@@ -24,14 +29,17 @@ import {
   IconPencil,
   IconTargetArrow,
   IconUser,
-} from '@tabler/icons';
+} from "@tabler/icons";
 
-import { patchLIMessage } from '@utils/requests/patchLIMessage';
-import { useRecoilValue } from 'recoil';
-import { userTokenState } from '@atoms/userAtoms';
-import { showNotification } from '@mantine/notifications';
-import ICPFitPill from '@common/pipeline/ICPFitAndReason';
-import { removeProspectFromContactList } from '@common/prospectDetails/ProspectDetailsRemove';
+import { patchLIMessage } from "@utils/requests/patchLIMessage";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import { showNotification } from "@mantine/notifications";
+import ICPFitPill from "@common/pipeline/ICPFitAndReason";
+import {
+  removeProspectFromContactList,
+  sendQueuedLinkedinInvite,
+} from "@common/prospectDetails/ProspectDetailsRemove";
 
 type MessageItemProps = {
   prospect_id: number;
@@ -49,6 +57,7 @@ type MessageItemProps = {
   sending_at: string;
   refresh: () => void;
   onDelete: (prospect_id: number) => void;
+  onSend?: (prospect_id: number) => void;
 };
 
 export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
@@ -56,7 +65,9 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
   const userToken = useRecoilValue(userTokenState);
 
   const original_completion = useRef(props.completion);
-  const [messageCompletion, setMessageCompletion] = useState<string>(props.completion);
+  const [messageCompletion, setMessageCompletion] = useState<string>(
+    props.completion
+  );
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -65,10 +76,10 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
 
     if (messageCompletion.length > 300) {
       showNotification({
-        id: 'message-too-long',
-        title: 'Message too long',
-        message: 'Your message cannot be longer than 300 characters',
-        color: 'red',
+        id: "message-too-long",
+        title: "Message too long",
+        message: "Your message cannot be longer than 300 characters",
+        color: "red",
         autoClose: false,
       });
       setIsLoading(false);
@@ -77,10 +88,10 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
 
     if (messageCompletion.length === 0) {
       showNotification({
-        id: 'message-too-short',
-        title: 'Message too short',
-        message: 'Your message cannot be empty',
-        color: 'red',
+        id: "message-too-short",
+        title: "Message too short",
+        message: "Your message cannot be empty",
+        color: "red",
         autoClose: false,
       });
       setIsLoading(false);
@@ -89,34 +100,39 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
 
     if (messageCompletion.trim() === original_completion.current.trim()) {
       showNotification({
-        id: 'message-not-changed',
-        title: 'Message not changed',
-        message: 'Your message has not been changed',
-        color: 'red',
+        id: "message-not-changed",
+        title: "Message not changed",
+        message: "Your message has not been changed",
+        color: "red",
         autoClose: false,
       });
       setIsLoading(false);
       return;
     }
 
-    const response = await patchLIMessage(userToken, props.message_id, messageCompletion);
-    if (response.status === 'success') {
+    const response = await patchLIMessage(
+      userToken,
+      props.message_id,
+      messageCompletion
+    );
+    if (response.status === "success") {
       setIsEditing(false);
       showNotification({
-        id: 'message-updated',
-        title: 'Message updated',
-        message: 'Your message has been updated successfully',
-        color: 'green',
+        id: "message-updated",
+        title: "Message updated",
+        message: "Your message has been updated successfully",
+        color: "green",
         autoClose: 3000,
       });
       setIsLoading(false);
       original_completion.current = messageCompletion;
     } else {
       showNotification({
-        id: 'message-updated',
-        title: 'Message update failed',
-        message: 'Your message could not be updated. If problem persists, please contact support.',
-        color: 'red',
+        id: "message-updated",
+        title: "Message update failed",
+        message:
+          "Your message could not be updated. If problem persists, please contact support.",
+        color: "red",
         autoClose: false,
       });
     }
@@ -127,21 +143,25 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
   const triggerRemoveProspectFromContactList = async () => {
     setIsLoading(true);
 
-    const response = await removeProspectFromContactList(props.prospect_id, userToken);
-    if (response.status === 'success') {
+    const response = await removeProspectFromContactList(
+      props.prospect_id,
+      userToken
+    );
+    if (response.status === "success") {
       showNotification({
-        id: 'prospect-removed',
-        title: 'Prospect removed',
-        message: 'This prospect has been removed successfully',
-        color: 'green',
+        id: "prospect-removed",
+        title: "Prospect removed",
+        message: "This prospect has been removed successfully",
+        color: "green",
         autoClose: 3000,
       });
     } else {
       showNotification({
-        id: 'prospect-removed',
-        title: 'Prospect removal failed',
-        message: 'This prospect could not be removed. Please try again, or contact support.',
-        color: 'red',
+        id: "prospect-removed",
+        title: "Prospect removal failed",
+        message:
+          "This prospect could not be removed. Please try again, or contact support.",
+        color: "red",
         autoClose: false,
       });
     }
@@ -153,44 +173,49 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
   return (
     <Card
       style={{
-        overflow: 'visible',
+        overflow: "visible",
         paddingTop: 0,
         paddingBottom: 0,
       }}
     >
       <LoadingOverlay visible={isLoading} />
-      <Flex direction='row' gap={'xs'}>
+      <Flex direction="row" gap={"xs"}>
         <Flex
-          direction='column'
-          justify={'space-between'}
-          w={'30%'}
-          pr={'xs'}
-          pt={'sm'}
-          pb={'sm'}
+          direction="column"
+          justify={"space-between"}
+          w={"30%"}
+          pr={"xs"}
+          pt={"sm"}
+          pb={"sm"}
           sx={(theme) => ({ borderRight: `1px solid ${theme.colors.gray[4]}` })}
         >
-          <Flex direction='column' rowGap={'xs'}>
+          <Flex direction="column" rowGap={"xs"}>
             <Anchor
               href={`https://app.sellscale.com/setup/linkedin/${props.prospect_id}`}
-              target='_blank'
+              target="_blank"
             >
               <Badge
-                variant='light'
+                variant="light"
                 fullWidth
                 rightSection={
-                  <ActionIcon size='xs' color='blue' radius='xl' variant='transparent'>
+                  <ActionIcon
+                    size="xs"
+                    color="blue"
+                    radius="xl"
+                    variant="transparent"
+                  >
                     <IconExternalLink size={rem(12)} />
                   </ActionIcon>
                 }
                 styles={{
                   inner: {
                     flex: 1,
-                    width: '100%',
+                    width: "100%",
                   },
                 }}
               >
-                <Flex justify={'space-between'} w={'100%'} style={{ flex: 1 }}>
-                  <Flex align={'center'} gap={'xs'}>
+                <Flex justify={"space-between"} w={"100%"} style={{ flex: 1 }}>
+                  <Flex align={"center"} gap={"xs"}>
                     <IconTargetArrow size={rem(12)} />
 
                     <Text>{props.archetype}</Text>
@@ -199,17 +224,17 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
               </Badge>
             </Anchor>
 
-            <Flex gap={'xs'} align={'center'}>
+            <Flex gap={"xs"} align={"center"}>
               <Avatar
                 src={proxyURL(props.img_url)}
                 alt={props.full_name}
                 color={valueToColor(theme, props.full_name)}
-                radius='lg'
+                radius="lg"
                 size={28}
               >
                 {nameToInitials(props.full_name)}
               </Avatar>
-              <Text fw='bold' fz='xl'>
+              <Text fw="bold" fz="xl">
                 {props.full_name}
               </Text>
               <Box>
@@ -220,56 +245,66 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
                 />
               </Box>
             </Flex>
-            <Flex direction={'column'}>
-              <Flex gap={'xs'} align={'center'}>
+            <Flex direction={"column"}>
+              <Flex gap={"xs"} align={"center"}>
                 <IconUser size={rem(16)} color={theme.colors.gray[6]} />
-                <Text color='gray.6' fw={500} fz={'sm'}>
+                <Text color="gray.6" fw={500} fz={"sm"}>
                   {props.archetype}
                 </Text>
               </Flex>
-              <Flex gap={'xs'} align={'center'}>
+              <Flex gap={"xs"} align={"center"}>
                 <IconBriefcase size={rem(16)} color={theme.colors.gray[6]} />
-                <Text color='gray.6' fw={500} fz={'sm'}>
+                <Text color="gray.6" fw={500} fz={"sm"}>
                   {props.title}
                 </Text>
               </Flex>
-              <Flex gap={'xs'} align={'center'}>
+              <Flex gap={"xs"} align={"center"}>
                 <IconBuilding size={rem(16)} color={theme.colors.gray[6]} />
-                <Text color='gray.6' fw={500} fz={'sm'}>
+                <Text color="gray.6" fw={500} fz={"sm"}>
                   {props.company}
                 </Text>
               </Flex>
 
-              <Text color='gray.6' fw={500} fz={'sm'} style={{ display: 'flex' }}>
-                Created:{' '}
-                <Text fw={700}>&nbsp;{convertDateToLocalTime(new Date(props.created_at))}</Text>{' '}
-                &nbsp;| Sending:{' '}
-                <Text fw={700}>&nbsp;{convertDateToLocalTime(new Date(props.sending_at))}</Text>
+              <Text
+                color="gray.6"
+                fw={500}
+                fz={"sm"}
+                style={{ display: "flex" }}
+              >
+                Created:{" "}
+                <Text fw={700}>
+                  &nbsp;{convertDateToLocalTime(new Date(props.created_at))}
+                </Text>{" "}
+                &nbsp;| Sending:{" "}
+                <Text fw={700}>
+                  &nbsp;{convertDateToLocalTime(new Date(props.sending_at))}
+                </Text>
               </Text>
             </Flex>
           </Flex>
         </Flex>
-        <Flex direction={'column'} pos='relative' w={'70%'} pt={'sm'} pb={'sm'}>
+        <Flex direction={"column"} pos="relative" w={"70%"} pt={"sm"} pb={"sm"}>
           <TextAreaWithAI
             onDelete={triggerRemoveProspectFromContactList}
             hasDeleteButton
-            placeholder='Write your message here...'
-            label='Message:'
+            hasSendButton
+            placeholder="Write your message here..."
+            label="Message:"
             styles={(theme) => ({
               root: {
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
               },
               wrapper: {
                 flex: 1,
-                marginTop: '8px',
+                marginTop: "8px",
               },
               input: {
-                height: '100%',
+                height: "100%",
               },
               label: {
-                display: 'block',
+                display: "block",
                 color: theme.colors.gray[8],
               },
             })}
@@ -278,35 +313,56 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
               setIsEditing(true);
             }}
             value={messageCompletion}
+            onSendNow={(
+              setSendLoading: React.Dispatch<React.SetStateAction<boolean>>
+            ) => {
+              setSendLoading(true);
+              sendQueuedLinkedinInvite(props.prospect_id, userToken);
+
+              setTimeout(() => {
+                showNotification({
+                  id: "queued-linkedin-invite-sent" + props.prospect_id,
+                  title: "Queued LinkedIn invite sent",
+                  message:
+                    "Your queued LinkedIn invite has been sent successfully to " +
+                    props.full_name,
+                  color: "green",
+                  autoClose: 3000,
+                });
+                props.onSend && props.onSend(props.prospect_id);
+                props.refresh();
+                setSendLoading(false);
+              }, 5000);
+            }}
           />
           {!isEditing && (
             <Button
               onClick={() => setIsEditing(true)}
-              color='dark'
-              variant='light'
-              radius='xl'
-              size='xs'
+              color="dark"
+              variant="light"
+              radius="xl"
+              size="xs"
               compact
               fw={700}
-              leftIcon={<IconPencil size='0.8rem' />}
+              leftIcon={<IconPencil size="0.8rem" />}
               styles={{
                 leftIcon: {
                   marginRight: 3,
                 },
                 label: {
-                  color: 'white',
+                  color: "white",
                 },
-                root: { position: 'absolute', bottom: '20px', right: '10px' },
+                root: { position: "absolute", bottom: "20px", right: "10px" },
               }}
             >
               Edit
             </Button>
           )}
           {isEditing && (
-            <Flex justify='space-between' mt='sm'>
+            <Flex justify="space-between" mt="sm">
               <Button
-                variant='light'
-                color='red'
+                variant="light"
+                color="red"
                 onClick={() => {
                   setIsEditing(false);
                   setMessageCompletion(original_completion.current);
@@ -314,7 +370,11 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
               >
                 Cancel
               </Button>
-              <Button variant='light' color='green' onClick={() => triggerPatchLIMessage()}>
+              <Button
+                variant="light"
+                color="green"
+                onClick={() => triggerPatchLIMessage()}
+              >
                 Save
               </Button>
             </Flex>

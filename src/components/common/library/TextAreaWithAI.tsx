@@ -15,7 +15,13 @@ import {
   Styles,
   TextInputStylesNames,
 } from "@mantine/core";
-import { IconPencil, IconRobot, IconTrash, IconX } from "@tabler/icons";
+import {
+  IconPencil,
+  IconRobot,
+  IconSend,
+  IconTrash,
+  IconX,
+} from "@tabler/icons";
 import { API_URL } from "@constants/data";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -38,6 +44,10 @@ type PropsType = {
   onAIGenerateClicked?: () => void;
   styles?: Styles<TextInputStylesNames, Record<string, any>>;
   hasDeleteButton?: boolean;
+  hasSendButton?: boolean;
+  onSendNow?: (
+    setSendLoading: React.Dispatch<React.SetStateAction<boolean>>
+  ) => void;
   onDelete?: () => void;
 };
 
@@ -60,6 +70,7 @@ export default function TextAreaWithAI(props: PropsType) {
 
   const [editingLoading, setEditingLoading] = React.useState(false);
   const [editInstruction, setEditInstruction] = React.useState("");
+  const [sendLoading, setSendLoading] = React.useState(false);
   const userToken = useRecoilValue(userTokenState);
 
   const editTextViaAPI = () => {
@@ -218,6 +229,36 @@ export default function TextAreaWithAI(props: PropsType) {
           )}
         </Popover.Dropdown>
       </Popover>
+      {props.hasSendButton && (
+        <Button
+          color="green"
+          variant="light"
+          radius="xl"
+          size="xs"
+          compact
+          fw={700}
+          loading={sendLoading}
+          onClick={() => {
+            if (props.onSendNow) {
+              props.onSendNow(setSendLoading);
+            }
+          }}
+          sx={{
+            position: "absolute",
+            top: props.label ? 0 : 7,
+            right: 170,
+            zIndex: 100,
+          }}
+          leftIcon={<IconSend size="0.8rem" />}
+          styles={{
+            leftIcon: {
+              marginRight: 3,
+            },
+          }}
+        >
+          Send
+        </Button>
+      )}
       {props.hasDeleteButton && (
         <Button
           color="red"
@@ -264,7 +305,7 @@ export default function TextAreaWithAI(props: PropsType) {
           onChange={(e) => {
             props.onChange &&
               props.onChange(
-                e as unknown as React.ChangeEvent<HTMLTextAreaElement>
+                (e as unknown) as React.ChangeEvent<HTMLTextAreaElement>
               );
           }}
           disabled={props.disabled}

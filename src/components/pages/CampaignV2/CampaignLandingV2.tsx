@@ -1046,7 +1046,7 @@ export default function CampaignLandingV2(props: PropsType) {
                       </Flex>
                     }
                   >
-                    <GenerateAndSend></GenerateAndSend>
+                    <GenerationCenter/>
                   </Modal>
                   {!showOnlyHeader && (
                     <Button

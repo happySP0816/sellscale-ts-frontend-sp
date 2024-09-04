@@ -3,7 +3,7 @@ import axios from "axios";
 import { API_URL } from "@constants/data";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
-import { Card, Text, Title, Button, Group, Box, Flex, useMantineTheme, Loader, Stack, Grid, Badge, ActionIcon, SimpleGrid } from "@mantine/core";
+import { Card, Text, Title, Button, Group, Box, Flex, useMantineTheme, Loader, Stack, Grid, Badge, ActionIcon, SimpleGrid, Divider } from "@mantine/core";
 import { IconArrowRight, IconChevronLeft, IconChevronRight, IconCircle, IconCircleCheck, IconTargetArrow } from "@tabler/icons";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
@@ -125,33 +125,35 @@ const OperatorDashboardV2 = (props: PropsType) => {
         {!noItems && (
           <Box>
             <Flex align={"center"} gap={"sm"} justify={"space-between"}>
-              <Flex align={"center"} gap={6}>
+              <Flex align={"center"} gap={6} w={"100%"}>
                 <Title order={4} sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
                   {title}
                 </Title>
                 <Badge variant="filled">{tasks.length}</Badge>
+                <Divider w={"80%"} />
               </Flex>
-
               <Flex>
                 <ActionIcon
                   onClick={() => {
                     if (page > 0) setPage((page) => (page = page - 1));
                   }}
+                  disabled={page === 0}
                 >
                   <IconChevronLeft />
                 </ActionIcon>
                 <ActionIcon
                   onClick={() => {
-                    if (page < Math.ceil(tasks.length / 2) - 1) setPage((page) => (page = page + 1));
+                    if (page < Math.ceil(tasks.length / 4) - 1) setPage((page) => (page = page + 1));
                   }}
+                  disabled={page === Math.ceil(tasks.length / 4) - 1}
                 >
                   <IconChevronRight />
                 </ActionIcon>
               </Flex>
             </Flex>
 
-            <SimpleGrid cols={1} mt={"sm"}>
-              {tasks.slice(page * 2, page * 2 + 2).map((item, index: number) => {
+            <SimpleGrid cols={4} mt={"sm"}>
+              {tasks.slice(page * 4, page * 4 + 4).map((item, index: number) => {
                 return (
                   <Card withBorder mb="xs" p="md" key={index} h={"100%"}>
                     <Flex direction={"column"} gap={"sm"} justify={"space-between"} h={"100%"}>
@@ -197,12 +199,12 @@ const OperatorDashboardV2 = (props: PropsType) => {
                       {item.status !== "PENDING" ? (
                         <Button
                           component="a"
-                          w={"fit-content"}
                           variant="outline"
                           color={"green"}
                           // onClick={() => redirectToTask(task.id)}
                           disabled={true}
                           loading={fetchingComplete && currentTaskId === item.id}
+                          fullWidth
                         >
                           {"  "} <IconCircleCheck size={16} color={theme.colors.gray[5]} />
                           Reviewed
@@ -210,11 +212,11 @@ const OperatorDashboardV2 = (props: PropsType) => {
                       ) : (
                         <Button
                           component="a"
-                          w={"fit-content"}
                           variant="outline"
                           color={"red"}
                           onClick={() => redirectToTask(item.id)}
                           loading={fetchingComplete && currentTaskId === item.id}
+                          fullWidth
                         >
                           Review
                           {"  "} <IconArrowRight size={16} color="red" />

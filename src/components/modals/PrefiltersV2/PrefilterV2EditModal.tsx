@@ -1,6 +1,11 @@
+import {
+  prospectUploadDrawerIdState,
+  prospectUploadDrawerOpenState,
+} from "@atoms/uploadAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import CustomSelect from "@common/persona/ICPFilter/CustomSelect";
 import { API_URL } from "@constants/data";
+import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
 import {
   Accordion,
   Avatar,
@@ -21,6 +26,11 @@ import {
   Textarea,
   Title,
   ActionIcon,
+  Modal,
+  Space,
+  Table,
+  Checkbox,
+  Loader,
 } from "@mantine/core";
 import { closeAllModals, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -37,7 +47,7 @@ import { nameToInitials, valueToColor } from "@utils/general";
 import e from "cors";
 import { debounce } from "lodash";
 import { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import CreateSegmentModal from "./CreateSegmentModal";
 
 interface AccordionItemProps {
@@ -46,6 +56,18 @@ interface AccordionItemProps {
   isActive: boolean;
   children: React.ReactNode;
   amount?: number;
+}
+
+export interface NewContacts {
+  archetype_id: string;
+  client_id: string;
+  client_sdr_id: string;
+  company: string;
+  full_name: string;
+  linkedin_url: string;
+  segment_id: string;
+  title: string;
+  twitter_url: string;
 }
 
 const CustomAccordionItem = ({
@@ -87,6 +109,9 @@ export default function PreFiltersV2EditModal({
 
   const userToken = useRecoilValue(userTokenState);
 
+  const [uploadId, setUploadId] = useRecoilState(prospectUploadDrawerIdState);
+  const [opened, setOpened] = useRecoilState(prospectUploadDrawerOpenState);
+
   const [name, setName] = useState<string>("");
   const [jobTitles, setJobTitles] = useState<string[]>([]);
   const [seniority, setSeniority] = useState<string[]>([]);
@@ -101,9 +126,8 @@ export default function PreFiltersV2EditModal({
   const [companyName, setcompanyName] = useState<string>("");
   const [companyKeywords, setCompanyKeywords] = useState<string[]>([]);
   const [selectedCompanies, setselectedCompanies] = useState<string[]>([]);
-  const [fetchingCompanyOptions, setFetchingCompanyOptions] = useState<boolean>(
-    false
-  );
+  const [fetchingCompanyOptions, setFetchingCompanyOptions] =
+    useState<boolean>(false);
   const [companyOptions, setCompanyOptions] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>([]);
   const [experience, setExperience] = useState<string>("");
@@ -115,10 +139,8 @@ export default function PreFiltersV2EditModal({
     []
   );
   const [technology, setTechnology] = useState<string[]>([]);
-  const [
-    technologyOptionsWithUids,
-    setTechnologyOptionsWithUids,
-  ] = useState<any>({});
+  const [technologyOptionsWithUids, setTechnologyOptionsWithUids] =
+    useState<any>({});
   const [technologyOptions, setTechnologyOptions] = useState<string[]>([]);
   const [eventTypes, setEventTypes] = useState<string[]>([]);
   const [days, setDays] = useState<number>(0);
@@ -136,6 +158,69 @@ export default function PreFiltersV2EditModal({
   const [prospects, setProspects] = useState([]);
   const [loadingProspects, setLoadingProsepcts] = useState(false);
   const [totalFound, setTotalFound] = useState(innerProps.numResults || 0);
+
+  const [duplicateModalOpen, setDuplicateModalOpen] = useState<boolean>(false);
+  const [openUploadDrawerId, setOpenUploadDrawerId] = useState<number | null>(
+    null
+  );
+
+  const [newContacts, setNewContacts] = useState<NewContacts[]>([]);
+  const [duplicateContacts, setDuplicateContacts] = useState<any[]>([]);
+
+  const [uploadLoading, setUploadLoading] = useState<boolean>(false);
+
+  const setOverrideAll = (override: boolean, same_archetype: boolean) => {
+    if (duplicateContacts) {
+      setDuplicateContacts((prevState) =>
+        prevState!.map((prospect) => {
+          if (same_archetype) {
+            if (prospect.same_archetype) {
+              return { ...prospect, override: override };
+            }
+
+            return prospect;
+          } else {
+            if (!prospect.same_archetype) {
+              return { ...prospect, override: override };
+            }
+
+            return prospect;
+          }
+        })
+      );
+    }
+  };
+
+  const uploadProspects = async () => {
+    setUploadLoading(true);
+    const response = await fetch(
+      `${API_URL}/prospect/add_prospects_post_apollo_query`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          duplicate: duplicateContacts,
+          new: newContacts,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const jsonResponse = await response.json();
+    const uploadHistoryId = await jsonResponse.id;
+
+    setDuplicateModalOpen(false);
+    setUploadId(uploadHistoryId);
+    setOpenUploadDrawerId(uploadHistoryId);
+    setOpened(true);
+    setUploadLoading(false);
+  };
 
   // return (
   //   <iframe
@@ -582,9 +667,10 @@ export default function PreFiltersV2EditModal({
             setSelectedNumEmployees(
               queryDetails.data.organization_num_employees_ranges || []
             );
-            const technologyBreadcrumbs = queryDetails.results.breadcrumbs.filter(
-              (breadcrumb: any) => breadcrumb.label === "Use at least one of"
-            );
+            const technologyBreadcrumbs =
+              queryDetails.results.breadcrumbs.filter(
+                (breadcrumb: any) => breadcrumb.label === "Use at least one of"
+              );
 
             if (technologyBreadcrumbs.length > 0) {
               const technologyNames = technologyBreadcrumbs.map(
@@ -1108,6 +1194,192 @@ export default function PreFiltersV2EditModal({
 
   return (
     <Box>
+      <UploadDetailsDrawer />
+      <Modal
+        opened={duplicateModalOpen}
+        onClose={() => setDuplicateModalOpen(false)}
+        title="Ready To Upload?"
+        size={"1100px"}
+      >
+        {duplicateContacts && duplicateContacts.length !== 0 && (
+          <>
+            <Text>
+              We have found some prospects that are already added to your
+              prospect database.
+            </Text>
+            <Text>
+              Please check the prospects that you want to overwrite and move to
+              your new segment/campaign.
+            </Text>
+            <Text>We will also reset the prospect's status</Text>
+            <Space h={"xl"} />
+            <Text>Click "Yes, let's do it! 🚀" whenever you are ready.</Text>
+            <Space h={"xl"} />
+
+            <Accordion
+              variant={"separated"}
+              defaultValue={"duplicate-different-archetypes"}
+            >
+              <Accordion.Item value={"duplicate-different-archetypes"}>
+                <Accordion.Control>
+                  Prospects from different campaigns
+                </Accordion.Control>
+                <Accordion.Panel>
+                  <Table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <Checkbox
+                            onChange={(event) =>
+                              setOverrideAll(event.currentTarget.checked, false)
+                            }
+                            checked={duplicateContacts
+                              .filter((item) => !item.same_archetype)
+                              .every((item) => item.override)}
+                          />
+                        </th>
+                        <th>Name</th>
+                        <th>Company</th>
+                        <th>Title</th>
+                        <th>SDR</th>
+                        <th>Segment</th>
+                        <th>Campaign</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {duplicateContacts
+                        .filter((prospect) => !prospect.same_archetype)
+                        .map((prospect) => {
+                          return (
+                            <tr key={prospect.row}>
+                              <td>
+                                <Checkbox
+                                  checked={prospect.override}
+                                  onChange={(event) => {
+                                    setDuplicateContacts((prevState) => {
+                                      return prevState!.map((item) => {
+                                        if (item.row === prospect.row) {
+                                          return {
+                                            ...item,
+                                            override:
+                                              event.currentTarget.checked,
+                                          };
+                                        }
+
+                                        return item;
+                                      });
+                                    });
+                                  }}
+                                />
+                              </td>
+                              <td>{prospect.full_name}</td>
+                              <td>{prospect.company}</td>
+                              <td>{prospect.title}</td>
+                              <td>{prospect.sdr}</td>
+                              <td>{prospect.segment_title ?? "None"}</td>
+                              <td>{prospect.archetype}</td>
+                              <td>{prospect.status}</td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </Table>
+                </Accordion.Panel>
+              </Accordion.Item>
+              <Accordion.Item value={"duplicate-same-archetypes"}>
+                <Accordion.Control>
+                  Prospects from the current campaign
+                </Accordion.Control>
+                <Accordion.Panel>
+                  <Table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <Checkbox
+                            onChange={(event) =>
+                              setOverrideAll(event.currentTarget.checked, true)
+                            }
+                            checked={duplicateContacts
+                              .filter((item) => item.same_archetype)
+                              .every((item) => item.override)}
+                          />
+                        </th>
+                        <th>Name</th>
+                        <th>Company</th>
+                        <th>Title</th>
+                        <th>SDR</th>
+                        <th>Segment</th>
+                        <th>Campaign</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {duplicateContacts
+                        .filter((prospect) => prospect.same_archetype)
+                        .map((prospect) => {
+                          return (
+                            <tr key={prospect.row}>
+                              <td>
+                                <Checkbox
+                                  checked={prospect.override}
+                                  onChange={(event) => {
+                                    setDuplicateContacts((prevState) => {
+                                      return prevState!.map((item) => {
+                                        if (item.row === prospect.row) {
+                                          return {
+                                            ...item,
+                                            override:
+                                              event.currentTarget.checked,
+                                          };
+                                        }
+
+                                        return item;
+                                      });
+                                    });
+                                  }}
+                                />
+                              </td>
+                              <td>{prospect.full_name}</td>
+                              <td>{prospect.company}</td>
+                              <td>{prospect.title}</td>
+                              <td>{prospect.sdr}</td>
+                              <td>{prospect.segment_title ?? "None"}</td>
+                              <td>{prospect.archetype}</td>
+                              <td>{prospect.status}</td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </Table>
+                </Accordion.Panel>
+              </Accordion.Item>
+            </Accordion>
+          </>
+        )}
+        {duplicateContacts && duplicateContacts.length === 0 && (
+          <>
+            <Text>We’re ready to Upload the prospects!</Text>
+          </>
+        )}
+        <Space h={"96px"} />
+        <Flex justify={"space-between"}>
+          <Button
+            onClick={() => {
+              close();
+              setOverrideAll(false, true);
+              setOverrideAll(false, false);
+            }}
+            variant={"outline"}
+            color={"gray"}
+          >
+            Skip All
+          </Button>
+          <Button onClick={() => uploadProspects()}>
+            {uploadLoading ? <Loader /> : "Upload! 🚀"}
+          </Button>
+        </Flex>
+      </Modal>
       <CreateSegmentModal
         numContactsLimit={totalFound}
         filters={generateQueryPayload()}
@@ -1121,6 +1393,9 @@ export default function PreFiltersV2EditModal({
           // props.refetch();
         }}
         archetypeID={-1}
+        setDuplicateContacts={setDuplicateContacts}
+        setNewContacts={setNewContacts}
+        setDuplicateModalOpen={setDuplicateModalOpen}
       />
       {!hideSaveFeature && (
         <TextInput

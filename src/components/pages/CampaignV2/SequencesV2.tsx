@@ -186,8 +186,10 @@ export default function SequencesV2(props: any) {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   // Prospects
-  const [selectedProspect, setSelectedProspect] =
-    useState<ProspectShallow | null>(null);
+  const [
+    selectedProspect,
+    setSelectedProspect,
+  ] = useState<ProspectShallow | null>(null);
   const [selectedProspectIndex, setSelectedProspectIndex] = useState(0);
 
   // Sequences
@@ -197,8 +199,10 @@ export default function SequencesV2(props: any) {
     setEmailSequenceGenerationInProgress,
   ] = useState(false);
 
-  const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] =
-    useState<any>(0);
+  const [
+    linkedinInitialMessageViewing,
+    setLinkedinInitialMessageViewing,
+  ] = useState<any>(0);
 
   const [
     linkedinSequenceGenerationInProgress,
@@ -219,8 +223,9 @@ export default function SequencesV2(props: any) {
   const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(
     linkedinSequenceState
   );
-  const [emailSequenceData, setEmailSequenceData] =
-    useRecoilState(emailSequenceState);
+  const [emailSequenceData, setEmailSequenceData] = useRecoilState(
+    emailSequenceState
+  );
 
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
 
@@ -446,8 +451,9 @@ export default function SequencesV2(props: any) {
 
         const handleSequences = (sequences: any[], type: string) => {
           const groupedSequences = groupSequencesByBumpedCount(sequences);
-          const orderedGroupedSequences =
-            orderGroupedSequences(groupedSequences);
+          const orderedGroupedSequences = orderGroupedSequences(
+            groupedSequences
+          );
           setSequences(orderedGroupedSequences);
           // setType(type);
           if (type === "linkedin") {
@@ -523,7 +529,6 @@ export default function SequencesV2(props: any) {
       withBorder
       style={{ maxWidth: "100%", minWidth: "100%", minHeight: "300px" }}
     >
-      123
       <Card.Section withBorder inheritPadding py={"xs"}>
         <Group position="apart">
           <Text fw={600} size={16} color="#37414E">
@@ -907,8 +912,10 @@ function EmailSequencingV2(props: {
       templates: [],
     },
   } as EmailSequenceStepBuckets);
-  const [sequenceBucketsState, setSequenceBucketsState] =
-    useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
+  const [
+    sequenceBucketsState,
+    setSequenceBucketsState,
+  ] = useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
 
   const triggerGetEmailSequenceSteps = async () => {
     setLoading(true);
@@ -1315,8 +1322,10 @@ function EmailPreviewHeaderV2(props: {
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { prospectId, currentTab, template, subjectLine }]: any =
-        queryKey;
+      const [
+        _key,
+        { prospectId, currentTab, template, subjectLine },
+      ]: any = queryKey;
 
       if (!props.subjectLine?.id || !props.template?.step.id) {
         return null;
@@ -1850,31 +1859,33 @@ function EmailPreviewHeaderV2(props: {
                       onChange={async (value) => {
                         try {
                           setLoadingBankData(true);
-                          const [updateVoiceResponse, fewShotResponse] =
-                            await Promise.all([
-                              fetch(API_URL + `/ml/voices`, {
-                                method: "PUT",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `Bearer ${userToken}`,
-                                },
-                                body: JSON.stringify({
-                                  voice_id: value === "null" ? null : value,
-                                  archetype_id: currentProject.id,
-                                }),
+                          const [
+                            updateVoiceResponse,
+                            fewShotResponse,
+                          ] = await Promise.all([
+                            fetch(API_URL + `/ml/voices`, {
+                              method: "PUT",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${userToken}`,
+                              },
+                              body: JSON.stringify({
+                                voice_id: value === "null" ? null : value,
+                                archetype_id: currentProject.id,
                               }),
-                              fetch(API_URL + `/ml/few-shot`, {
-                                method: "POST",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `Bearer ${userToken}`,
-                                },
-                                body: JSON.stringify({
-                                  voice_id: value === "null" ? null : value,
-                                  client_archetype_id: currentProject.id,
-                                }),
+                            }),
+                            fetch(API_URL + `/ml/few-shot`, {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${userToken}`,
+                              },
+                              body: JSON.stringify({
+                                voice_id: value === "null" ? null : value,
+                                client_archetype_id: currentProject.id,
                               }),
-                            ]);
+                            }),
+                          ]);
 
                           setLoadingBankData(false);
 
@@ -2777,8 +2788,10 @@ function TemplateSectionV2(props: {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
-  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] =
-    useState<string>();
+  const [
+    humanFeedbackForTemplate,
+    setHumanFeedbackForTemplate,
+  ] = useState<string>();
 
   const [templateActivesShow, setTemplateActivesShow] = useState([true]);
   useEffect(() => {
@@ -3415,8 +3428,10 @@ const LinkedinIntroEditSectionCTA = function (props: {
   currentProject?: PersonaOverview;
 }) {
   const [activeTab, setActiveTab] = useState<string | null>("personalization");
-  const [personalizationItemsCount, setPersonalizationItemsCount] =
-    useState<number>();
+  const [
+    personalizationItemsCount,
+    setPersonalizationItemsCount,
+  ] = useState<number>();
   const [ctasItemsCount, setCtasItemsCount] = useState<number>();
 
   // get research points for selected prospect

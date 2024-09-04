@@ -174,8 +174,10 @@ export default function CampaignTemplateEditModal({
   const [searchQuery, setSearchQuery] = useState("");
   const [manuallyAddedTemplate, setManuallyAddedTemplate] = useState("");
   const [loading, setLoading] = useState(false);
-  const [emailSubjectLineModalOpened, setEmailSubjectLineModalOpened] =
-    useState(false);
+  const [
+    emailSubjectLineModalOpened,
+    setEmailSubjectLineModalOpened,
+  ] = useState(false);
   const [addingLinkedinAsset, setAddingLinkedinAsset] = useState(false);
   const [loadingMagicSubjectLine, setLoadingMagicSubjectLine] = useState(false);
   const [addedTemplate, setAddedTemplate] = useState<AssetType | null>(
@@ -233,8 +235,10 @@ export default function CampaignTemplateEditModal({
   };
 
   const [activeTab, setActiveTab] = useState<string | null>("personalization");
-  const [personalizationItemsCount, setPersonalizationItemsCount] =
-    useState<number>();
+  const [
+    personalizationItemsCount,
+    setPersonalizationItemsCount,
+  ] = useState<number>();
   const [ctasItemsCount, setCtasItemsCount] = useState<number>();
 
   const userToken = useRecoilValue(userTokenState);
@@ -1534,166 +1538,163 @@ export default function CampaignTemplateEditModal({
                   </ScrollArea>
                 )}
 
-              {sequenceType === "email" &&
-                currentStepNum === "subjectLines" && (
-                  <ScrollArea
-                    viewportRef={viewport}
-                    h={350}
-                    px="sm"
-                    style={{ position: "relative" }}
+              {sequenceType === "email" && currentStepNum === "subjectLines" && (
+                <ScrollArea
+                  viewportRef={viewport}
+                  h={350}
+                  px="sm"
+                  style={{ position: "relative" }}
+                >
+                  {emailSubjectLines.map((subjectLine: SubjectLineTemplate) => {
+                    return (
+                      <SubjectLineItem
+                        subjectLine={subjectLine}
+                        refetch={async () =>
+                          await innerProps.refetchSequenceData(
+                            innerProps.campaignId
+                          )
+                        }
+                      />
+                    );
+                  })}
+                  <CreateEmailSubjectLineModal
+                    modalOpened={emailSubjectLineModalOpened}
+                    openModal={() => console.log("Open Modal")}
+                    closeModal={() => {
+                      setEmailSubjectLineModalOpened(false);
+                      innerProps.refetchSequenceData(
+                        Number(currentProject?.id || -1)
+                      );
+                    }}
+                    backFunction={() => {
+                      setEmailSubjectLineModalOpened(false);
+                      innerProps.refetchSequenceData(
+                        Number(currentProject?.id || -1)
+                      );
+                    }}
+                    archetypeID={currentProject?.id || -1}
+                  />
+                  <div
+                    style={{
+                      position: "sticky",
+                      bottom: 0,
+                      background: "white",
+                      padding: "8px 0",
+                    }}
                   >
-                    {emailSubjectLines.map(
-                      (subjectLine: SubjectLineTemplate) => {
-                        return (
-                          <SubjectLineItem
-                            subjectLine={subjectLine}
-                            refetch={async () =>
-                              await innerProps.refetchSequenceData(
-                                innerProps.campaignId
-                              )
-                            }
-                          />
-                        );
-                      }
-                    )}
-                    <CreateEmailSubjectLineModal
-                      modalOpened={emailSubjectLineModalOpened}
-                      openModal={() => console.log("Open Modal")}
-                      closeModal={() => {
-                        setEmailSubjectLineModalOpened(false);
-                        innerProps.refetchSequenceData(
-                          Number(currentProject?.id || -1)
-                        );
-                      }}
-                      backFunction={() => {
-                        setEmailSubjectLineModalOpened(false);
-                        innerProps.refetchSequenceData(
-                          Number(currentProject?.id || -1)
-                        );
-                      }}
-                      archetypeID={currentProject?.id || -1}
-                    />
-                    <div
-                      style={{
-                        position: "sticky",
-                        bottom: 0,
-                        background: "white",
-                        padding: "8px 0",
-                      }}
+                    <Button
+                      color="blue"
+                      leftIcon={<IconPlus size={"0.9rem"} />}
+                      onClick={() => setEmailSubjectLineModalOpened(true)}
+                      fullWidth
                     >
+                      Add Subject line
+                    </Button>
+                    {emailSequenceData.length > 0 && (
                       <Button
-                        color="blue"
+                        loading={generatingSubjectLines}
+                        mt="sm"
+                        color="grape"
                         leftIcon={<IconPlus size={"0.9rem"} />}
-                        onClick={() => setEmailSubjectLineModalOpened(true)}
+                        onClick={generateEmailSubjectLines}
                         fullWidth
                       >
-                        Add Subject line
+                        Generate Subject Lines
                       </Button>
-                      {emailSequenceData.length > 0 && (
+                    )}
+                    <Flex align="center" mt="xl">
+                      {!addedTheMagic && (
                         <Button
-                          loading={generatingSubjectLines}
-                          mt="sm"
-                          color="grape"
-                          leftIcon={<IconPlus size={"0.9rem"} />}
-                          onClick={generateEmailSubjectLines}
+                          disabled={addedTheMagic}
+                          style={{
+                            background:
+                              !currentProject?.ai_researcher_id ||
+                              !currentProject.is_ai_research_personalization_enabled
+                                ? "grey"
+                                : "linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))",
+                            color: "white",
+                            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                            backdropFilter: "blur(10px)",
+                            padding: "10px 20px",
+                            transition:
+                              "background 0.3s ease, box-shadow 0.3s ease",
+                            border: "1px solid grey",
+                          }}
+                          leftIcon={<IconSparkles size={"0.9rem"} />}
+                          loading={loadingMagicSubjectLine}
+                          onClick={async () => {
+                            if (
+                              !currentProject?.ai_researcher_id ||
+                              !currentProject.is_ai_research_personalization_enabled
+                            ) {
+                              showNotification({
+                                title: "Action Required",
+                                message:
+                                  "Please enable AI Personalization and attach an AI Researcher with research questions.",
+                                color: "red",
+                              });
+                              return;
+                            }
+                            setLoadingMagicSubjectLine(true);
+                            try {
+                              await createEmailSubjectLineTemplate(
+                                userToken,
+                                currentProject?.id || -1,
+                                "",
+                                true
+                              );
+                              await innerProps.refetchSequenceData(
+                                Number(currentProject?.id || -1)
+                              );
+                            } finally {
+                              setLoadingMagicSubjectLine(false);
+                              // closeAllModals();
+                            }
+                          }}
                           fullWidth
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background =
+                              "linear-gradient(135deg, rgba(75,0,130,1), rgba(0,255,255,1))";
+                            e.currentTarget.style.boxShadow =
+                              "0 6px 8px rgba(0, 0, 0, 0.2)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget.style.background =
+                              "linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))"),
+                              (e.currentTarget.style.boxShadow =
+                                "0 4px 6px rgba(0, 0, 0, 0.1)");
+                          }}
                         >
-                          Generate Subject Lines
+                          Add Magic Subject Line
+                          <Tooltip
+                            multiline
+                            label={
+                              <Text size="sm">
+                                SellScale will generate a clever subject line{" "}
+                                <br></br>
+                                using its research and contextual knowledge{" "}
+                                <br></br>
+                                about the campaign, prospect, and the chosen
+                                sequence.
+                              </Text>
+                            }
+                            withArrow
+                            position="top"
+                          >
+                            <Text
+                              color="white"
+                              size="xl"
+                              style={{ marginLeft: "30px" }}
+                            >
+                              <IconQuestionMark size={"1rem"} color="white" />
+                            </Text>
+                          </Tooltip>
                         </Button>
                       )}
-                      <Flex align="center" mt="xl">
-                        {!addedTheMagic && (
-                          <Button
-                            disabled={addedTheMagic}
-                            style={{
-                              background:
-                                !currentProject?.ai_researcher_id ||
-                                !currentProject.is_ai_research_personalization_enabled
-                                  ? "grey"
-                                  : "linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))",
-                              color: "white",
-                              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                              backdropFilter: "blur(10px)",
-                              padding: "10px 20px",
-                              transition:
-                                "background 0.3s ease, box-shadow 0.3s ease",
-                              border: "1px solid grey",
-                            }}
-                            leftIcon={<IconSparkles size={"0.9rem"} />}
-                            loading={loadingMagicSubjectLine}
-                            onClick={async () => {
-                              if (
-                                !currentProject?.ai_researcher_id ||
-                                !currentProject.is_ai_research_personalization_enabled
-                              ) {
-                                showNotification({
-                                  title: "Action Required",
-                                  message:
-                                    "Please enable AI Personalization and attach an AI Researcher with research questions.",
-                                  color: "red",
-                                });
-                                return;
-                              }
-                              setLoadingMagicSubjectLine(true);
-                              try {
-                                await createEmailSubjectLineTemplate(
-                                  userToken,
-                                  currentProject?.id || -1,
-                                  "",
-                                  true
-                                );
-                                await innerProps.refetchSequenceData(
-                                  Number(currentProject?.id || -1)
-                                );
-                              } finally {
-                                setLoadingMagicSubjectLine(false);
-                                // closeAllModals();
-                              }
-                            }}
-                            fullWidth
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background =
-                                "linear-gradient(135deg, rgba(75,0,130,1), rgba(0,255,255,1))";
-                              e.currentTarget.style.boxShadow =
-                                "0 6px 8px rgba(0, 0, 0, 0.2)";
-                            }}
-                            onMouseLeave={(e) => {
-                              (e.currentTarget.style.background =
-                                "linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))"),
-                                (e.currentTarget.style.boxShadow =
-                                  "0 4px 6px rgba(0, 0, 0, 0.1)");
-                            }}
-                          >
-                            Add Magic Subject Line
-                            <Tooltip
-                              multiline
-                              label={
-                                <Text size="sm">
-                                  SellScale will generate a clever subject line{" "}
-                                  <br></br>
-                                  using its research and contextual knowledge{" "}
-                                  <br></br>
-                                  about the campaign, prospect, and the chosen
-                                  sequence.
-                                </Text>
-                              }
-                              withArrow
-                              position="top"
-                            >
-                              <Text
-                                color="white"
-                                size="xl"
-                                style={{ marginLeft: "30px" }}
-                              >
-                                <IconQuestionMark size={"1rem"} color="white" />
-                              </Text>
-                            </Tooltip>
-                          </Button>
-                        )}
-                      </Flex>
-                    </div>
-                  </ScrollArea>
-                )}
+                    </Flex>
+                  </div>
+                </ScrollArea>
+              )}
               {/* {sequenceType === "email" && (
                 <ScrollArea viewportRef={viewport} h={350} px="sm" style={{ position: "relative" }}>
                   {emailSubjectLines.map((subjectLine: SubjectLineTemplate) => {
@@ -1862,7 +1863,6 @@ export default function CampaignTemplateEditModal({
           </Paper>
         </Flex>
       )}
-      props. props. props.
       <OneshotModal
         oneshotOpened={oneshotOpened}
         close={close}

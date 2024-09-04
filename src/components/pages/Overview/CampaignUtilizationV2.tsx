@@ -43,6 +43,7 @@ import {
 import { IconInfoTriangle } from "@tabler/icons-react";
 import { nameToInitials, valueToColor } from "@utils/general";
 import { deactivatePersona } from "@utils/requests/postPersonaDeactivation";
+import axios from "axios";
 import { DataGrid } from "mantine-data-grid";
 import { useEffect, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
@@ -131,19 +132,39 @@ export default function CampaignUtilization() {
   const [seatData, setSeatData] = useState<seatDataType[]>([]);
   const [outboundData, setOutboundData] = useState<outboundType>();
 
-  const [activeCampaign, setActiveCampaign] = useState<activeCampaignType[]>([]);
+  const [activeCampaign, setActiveCampaign] = useState<activeCampaignType[]>(
+    []
+  );
 
   const [loading, setLoading] = useState(false);
 
   const [page, setPage] = useState(0);
+
+  const [campaignUsedData, setCampaignUsedData] = useState([]);
+  const [campaignUnusedData, setCampaignUnusedData] = useState([]);
 
   const seat_data = {
     labels: ["Label 1", "Label 2"],
     datasets: [
       {
         data: [
-          Math.min(100, Math.floor(((outboundData?.seat_active || 0) / (outboundData?.seat_total || 1)) * 100)),
-          100 - Math.min(100, Math.floor(((outboundData?.seat_active || 0) / (outboundData?.seat_total || 1)) * 100)),
+          Math.min(
+            100,
+            Math.floor(
+              ((outboundData?.seat_active || 0) /
+                (outboundData?.seat_total || 1)) *
+                100
+            )
+          ),
+          100 -
+            Math.min(
+              100,
+              Math.floor(
+                ((outboundData?.seat_active || 0) /
+                  (outboundData?.seat_total || 1)) *
+                  100
+              )
+            ),
         ],
         backgroundColor: ["#3b84ef", "#eaecf0"],
         borderWidth: 0,
@@ -156,8 +177,23 @@ export default function CampaignUtilization() {
     datasets: [
       {
         data: [
-          Math.min(100, Math.floor(((outboundData?.message_active || 0) / (outboundData?.message_total || 1)) * 100)),
-          100 - Math.min(100, Math.floor(((outboundData?.message_active || 0) / (outboundData?.message_total || 1)) * 100)),
+          Math.min(
+            100,
+            Math.floor(
+              ((outboundData?.message_active || 0) /
+                (outboundData?.message_total || 1)) *
+                100
+            )
+          ),
+          100 -
+            Math.min(
+              100,
+              Math.floor(
+                ((outboundData?.message_active || 0) /
+                  (outboundData?.message_total || 1)) *
+                  100
+              )
+            ),
         ],
         backgroundColor: ["#d444f1", "#eaecf0"],
         borderWidth: 0,
@@ -236,8 +272,35 @@ export default function CampaignUtilization() {
       }
     };
 
+    const fetchCampaignData = async () => {
+      const response = await axios.post(
+        `${API_URL}/campaigns/used`,
+        {
+          client_id: userData.id,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      setCampaignUnusedData(
+        response.data?.data.results.filter(
+          (item: any) => item.used_vs_unsed === "UNUSED"
+        )
+      );
+      setCampaignUsedData(
+        response.data?.data.results.filter(
+          (item: any) => item.used_vs_unsed === "USED"
+        )
+      );
+    };
+
     handleGetOutboundData();
     fetchUtilizationData();
+    fetchCampaignData();
   }, [loading]);
 
   const [opened, { toggle }] = useDisclosure(false);
@@ -258,7 +321,9 @@ export default function CampaignUtilization() {
               size={"lg"}
             >
               <span>Campaigns</span>
-              <Badge sx={{ background: "#228be6", color: "white" }}>{activeCampaign?.length}</Badge>
+              <Badge sx={{ background: "#228be6", color: "white" }}>
+                {campaignUsedData?.length + campaignUnusedData.length}
+              </Badge>
             </Text>
             <Divider w={"100%"} />
             {/* <Flex>
@@ -278,187 +343,8 @@ export default function CampaignUtilization() {
               </ActionIcon>
             </Flex> */}
           </Flex>
-          <UsedCampaign activeCampaign={activeCampaign} />
-          <UnusedCampaign />
-          {/* <Paper withBorder p={0} mt={5}>
-            <DataGrid
-              data={activeCampaign.slice(page * 5, page * 5 + 5)}
-              highlightOnHover
-              withSorting
-              withColumnBorders
-              withBorder
-              sx={{
-                cursor: "pointer",
-                "& .mantine-10xyzsm>tbody>tr>td": {
-                  padding: "0px",
-                },
-                "& tr": {
-                  background: "white",
-                },
-              }}
-              columns={[
-                {
-                  accessorKey: "Status",
-                  minSize: 120,
-                  maxSize: 120,
-                  header: () => (
-                    <Flex align={"center"} gap={"3px"}>
-                      <IconLoader color="gray" size={"0.9rem"} />
-                      <Text color="gray">Status</Text>
-                    </Flex>
-                  ),
-                  cell: (cell) => {
-                    const { status } = cell.row.original;
-
-                    return (
-                      <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"center"}>
-                        <Badge>{status}</Badge>
-                      </Flex>
-                    );
-                  },
-                },
-                {
-                  accessorKey: "campaigns",
-                  minSize: 330,
-                  maxSize: 330,
-                  header: () => (
-                    <Flex align={"center"} gap={"3px"}>
-                      <IconTargetArrow color="gray" size={"0.9rem"} />
-                      <Text color="gray">Campaigns</Text>
-                    </Flex>
-                  ),
-
-                  cell: (cell) => {
-                    const { campaign, num_total_linkedin, num_total_email } = cell.row.original;
-
-                    return (
-                      <Flex w={"100%"} px={"sm"} h={"100%"} align={"center"} gap={"md"}>
-                        <Flex>
-                          <Text lineClamp={1}>{campaign}</Text>
-                        </Flex>
-
-                        <Flex w={"100%"} align={"center"} gap={3}>
-                          {num_total_email > 0 && <IconMail size={"1.3rem"} fill="#228be6" color="white" />}
-                          {num_total_linkedin > 0 && <IconBrandLinkedin size={"1.3rem"} fill="#228be6" color="white" />}
-                        </Flex>
-                      </Flex>
-                    );
-                  },
-                },
-                {
-                  accessorKey: "sdr",
-                  minSize: 140,
-                  maxSize: 140,
-                  header: () => (
-                    <Flex align={"center"} gap={"3px"}>
-                      <IconTargetArrow color="gray" size={"0.9rem"} />
-                      <Text color="gray">SDR</Text>
-                    </Flex>
-                  ),
-                  cell: (cell) => {
-                    const { rep, rep_profile_picture } = cell.row.original;
-
-                    return (
-                      <Flex gap={"sm"} w={"100%"} px={"sm"} h={"100%"} align={"center"}>
-                        <Avatar src={rep_profile_picture} color={valueToColor(theme, rep)} radius={"xl"}>
-                          {nameToInitials(rep)}
-                        </Avatar>
-                        <Text fw={500}>{rep.split(" ")[0] + " " + rep.split(" ")[1].slice(0, 1) + "."}</Text>
-                      </Flex>
-                    );
-                  },
-                },
-                {
-                  accessorKey: "Progress",
-                  header: () => (
-                    <Flex align={"center"} gap={"3px"}>
-                      <IconBolt color="gray" size={"0.9rem"} />
-                      <Text color="gray">Progress</Text>
-                    </Flex>
-                  ),
-                  maxSize: 220,
-                  minSize: 220,
-                  enableResizing: true,
-                  cell: (cell) => {
-                    const { num_used_total, num_total } = cell.row.original;
-
-                    return (
-                      <Flex direction={"column"} align={"center"} justify={"center"} w={"100%"} h={"100%"} py={"sm"}>
-                        <Flex w={"100%"} align={"center"} gap={"8px"} px={"xs"}>
-                          <Progress value={(num_used_total / num_total) * 100} w={"100%"} />
-                          <Text color="#228be6" fw={500}>
-                            {Math.round((num_used_total / num_total) * 100)}%
-                          </Text>
-                        </Flex>
-                        <Flex align={"center"}>
-                          <Text fw={500}>
-                            {num_used_total} / {num_total} <span style={{ color: "gray !important" }}>Sent</span>
-                          </Text>
-                          {Math.round((num_total - num_used_total) / 20) < 3 ? <IconPoint fill="gray" color="white" /> : null}
-                          <Text
-                            color={"red"}
-                            sx={{
-                              display: Math.round((num_total - num_used_total) / 20) < 3 ? "block" : "none",
-                            }}
-                          >
-                            {Math.round((num_total - num_used_total) / 20)} day
-                            {Math.round((num_total - num_used_total) / 20) < 3 ? "s" : ""} left
-                          </Text>
-                        </Flex>
-                      </Flex>
-                    );
-                  },
-                },
-                {
-                  accessorKey: "active",
-                  maxSize: 100,
-                  minSize: 100,
-                  header: () => (
-                    <Flex align={"center"} gap={"3px"}>
-                      <IconCalendar color="gray" size={"0.9rem"} />
-                      <Text color="gray">Active</Text>
-                    </Flex>
-                  ),
-                  enableResizing: true,
-                  cell: (cell) => {
-                    const { persona_id, rep_id } = cell.row.original;
-
-                    return (
-                      <Flex direction={"column"} align={"center"} justify={"center"} gap={"xs"} py={"lg"} w={"100%"} h={"100%"}>
-                        <Switch checked disabled={rep_id == userId ? false : true} onClick={() => handleDeactive(persona_id)} />
-                      </Flex>
-                    );
-                  },
-                },
-              ]}
-              options={{
-                enableFilters: true,
-              }}
-              loading={loading}
-              w={"100%"}
-              styles={(theme) => ({
-                thead: {
-                  height: "44px",
-                  backgroundColor: theme.colors.gray[0],
-                  "::after": {
-                    backgroundColor: "transparent",
-                  },
-                },
-
-                wrapper: {
-                  gap: 0,
-                },
-                scrollArea: {
-                  paddingBottom: 0,
-                  gap: 0,
-                },
-
-                dataCellContent: {
-                  width: "100%",
-                },
-              })}
-            />
-          </Paper> */}
+          <UsedCampaign activeCampaign={campaignUsedData} />
+          <UnusedCampaign data={campaignUnusedData} />
         </Flex>
       </Flex>
       {/* <Flex gap={"md"} direction={"column"} w={{ base: "100%", md: "30%" }}>
@@ -646,66 +532,15 @@ export default function CampaignUtilization() {
 
 const UsedCampaign = (props: any) => {
   const [opened, setOpened] = useState<string | null>(null);
-  const data = [
-    {
-      campaign: "🐵 Forbes Cloud 100 campaign",
-      email_active: false,
-      linkedin_active: true,
-      num_total: 80,
-      num_total_email: 72,
-      num_total_linkedin: 80,
-      num_used_email: 72,
-      num_used_linkedin: 42,
-      num_used_total: 42,
-      persona_id: 1180,
-      rep: "Ishan Sharma",
-      rep_profile_picture:
-        "https://media.licdn.com/dms/image/v2/D5603AQEmqpPkyD8rDw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1648973407416?e=1730937600&v=beta&t=qYku3BZIUJXBnZ8dIFQhxSf5R9PBJ018JRUknOmQnjw",
-      status: "active",
-    },
-    {
-      campaign: "🐵 test1",
-      email_active: false,
-      linkedin_active: true,
-      num_total: 100,
-      num_total_email: 52,
-      num_total_linkedin: 40,
-      num_used_email: 32,
-      num_used_linkedin: 47,
-      num_used_total: 63,
-      persona_id: 1180,
-      rep: "Ishan Sharma",
-      rep_profile_picture:
-        "https://media.licdn.com/dms/image/v2/D5603AQEmqpPkyD8rDw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1648973407416?e=1730937600&v=beta&t=qYku3BZIUJXBnZ8dIFQhxSf5R9PBJ018JRUknOmQnjw",
-      status: "active",
-    },
-    {
-      campaign: "🐵 test1",
-      email_active: false,
-      linkedin_active: true,
-      num_total: 100,
-      num_total_email: 52,
-      num_total_linkedin: 40,
-      num_used_email: 32,
-      num_used_linkedin: 47,
-      num_used_total: 23,
-      persona_id: 1153,
-      rep: "Anton Sokolov",
-      rep_profile_picture:
-        "https://media.licdn.com/dms/image/v2/D5603AQEmqpPkyD8rDw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1648973407416?e=1730937600&v=beta&t=qYku3BZIUJXBnZ8dIFQhxSf5R9PBJ018JRUknOmQnjw",
-      status: "active",
-    },
-  ];
 
-  const groupedData = data.reduce((acc: any, item: any) => {
-    const { persona_id } = item;
-    if (!acc[persona_id]) {
-      acc[persona_id] = [];
+  const groupedData = props?.activeCampaign.reduce((acc: any, item: any) => {
+    const { name } = item;
+    if (!acc[name]) {
+      acc[name] = [];
     }
-    acc[persona_id].push(item);
+    acc[name].push(item);
     return acc;
   }, {});
-
   console.log("---------", groupedData);
 
   return (
@@ -716,422 +551,261 @@ const UsedCampaign = (props: any) => {
         </Text>
         <Badge variant="filled">{2}/5 seats</Badge>
       </Flex>
-      {Object.entries(groupedData).map(([key, value]: [string, any]) => (
-        <Paper withBorder radius={"sm"} p={"xs"} mt={"sm"}>
-          <Flex align={"center"} justify={"space-between"}>
-            <Flex align={"center"} gap={4}>
-              <Avatar src={value[0].rep_profile_picture} size={"sm"} radius={"xl"} />
-              <Text fw={500} size={"sm"}>
-                {/* {item.rep} */}
-                {value[0].rep}
-              </Text>
+      {groupedData &&
+        Object.entries(groupedData).map(([key, value]: [string, any]) => (
+          <Paper withBorder radius={"sm"} p={"xs"} mt={"sm"}>
+            <Flex align={"center"} justify={"space-between"}>
+              <Flex align={"center"} gap={4}>
+                <Avatar src={value[0].img_url} size={"sm"} radius={"xl"} />
+                <Text fw={500} size={"sm"}>
+                  {value[0].name}
+                </Text>
+              </Flex>
+              <Flex align={"center"} gap={"xs"}>
+                <Flex gap={4}>
+                  <Badge radius={"sm"}>
+                    {value.reduce(
+                      (acc: any, item: any) => acc + item.num_active_campaigns,
+                      0
+                    )}
+                  </Badge>
+                  <Text size={"sm"} fw={400} color="gray">
+                    active campaign
+                  </Text>
+                </Flex>
+                <Divider orientation="vertical" />
+                <Flex gap={4}>
+                  <Badge radius={"sm"} color="orange">
+                    {value.reduce(
+                      (acc: any, item: any) => acc + item.sent_yesterday,
+                      0
+                    )}
+                  </Badge>
+                  <Text size={"sm"} fw={400} color="gray">
+                    sent yesterday
+                  </Text>
+                </Flex>
+                <Divider orientation="vertical" />
+                <Flex gap={4}>
+                  <Badge radius={"sm"} color="green">
+                    {value.reduce(
+                      (acc: any, item: any) => acc + item.sent_today,
+                      0
+                    )}
+                  </Badge>
+                  <Text size={"sm"} fw={400} color="gray">
+                    sent today
+                  </Text>
+                </Flex>
+                <ActionIcon
+                  variant="light"
+                  onClick={() => setOpened(opened === key ? null : key)}
+                >
+                  <IconChevronDown size={"1rem"} />
+                </ActionIcon>
+              </Flex>
             </Flex>
-            <Flex align={"center"} gap={"xs"}>
-              <Flex gap={4}>
-                <Badge radius={"sm"}>{value.reduce((acc: any, item: any) => acc + item.num_used_total, 0)}</Badge>
-                <Text size={"sm"} fw={400} color="gray">
-                  active campaign
-                </Text>
-              </Flex>
-              <Divider orientation="vertical" />
-              <Flex gap={4}>
-                <Badge radius={"sm"} color="orange">
-                  +4
-                </Badge>
-                <Text size={"sm"} fw={400} color="gray">
-                  sent yesterday
-                </Text>
-              </Flex>
-              <Divider orientation="vertical" />
-              <Flex gap={4}>
-                <Badge radius={"sm"} color="green">
-                  +5
-                </Badge>
-                <Text size={"sm"} fw={400} color="gray">
-                  sent today
-                </Text>
-              </Flex>
-              <ActionIcon variant="light" onClick={() => setOpened(opened === key ? null : key)}>
-                <IconChevronDown size={"1rem"} />
-              </ActionIcon>
-            </Flex>
-          </Flex>
-          <Collapse in={opened === key}>
-            <DataGrid
-              data={value}
-              mt={"sm"}
-              highlightOnHover
-              withSorting
-              withColumnBorders
-              withBorder
-              sx={{
-                cursor: "pointer",
-                "& .mantine-10xyzsm>tbody>tr>td": {
-                  padding: "0px",
-                },
-                "& tr": {
-                  background: "white",
-                },
-              }}
-              columns={[
-                {
-                  accessorKey: "Status",
-                  minSize: 120,
-                  maxSize: 120,
-                  header: () => (
-                    <Flex align={"center"} gap={"3px"}>
-                      <IconLoader color="gray" size={"0.9rem"} />
-                      <Text color="gray">Status</Text>
-                    </Flex>
-                  ),
-                  cell: (cell: any) => {
-                    const { status } = cell.row.original;
-
-                    return (
-                      <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"center"}>
-                        <Badge>{status}</Badge>
-                      </Flex>
-                    );
+            <Collapse in={opened === key}>
+              <DataGrid
+                data={value}
+                mt={"sm"}
+                highlightOnHover
+                withSorting
+                withColumnBorders
+                withBorder
+                sx={{
+                  cursor: "pointer",
+                  "& .mantine-10xyzsm>tbody>tr>td": {
+                    padding: "0px",
                   },
-                },
-                {
-                  accessorKey: "campaigns",
-                  minSize: 330,
-                  maxSize: 400,
-                  header: () => (
-                    <Flex align={"center"} gap={"3px"}>
-                      <IconTargetArrow color="gray" size={"0.9rem"} />
-                      <Text color="gray">Campaigns</Text>
-                    </Flex>
-                  ),
-
-                  cell: (cell: any) => {
-                    const { campaign, num_total_linkedin, num_total_email } = cell.row.original;
-
-                    return (
-                      <Flex w={"100%"} px={"sm"} h={"100%"} align={"center"} gap={"md"}>
-                        <Flex>
-                          <Text lineClamp={1}>{campaign}</Text>
-                        </Flex>
-
-                        <Flex w={"100%"} align={"center"} gap={3}>
-                          {num_total_email > 0 && <IconMail size={"1.3rem"} fill="#228be6" color="white" />}
-                          {num_total_linkedin > 0 && <IconBrandLinkedin size={"1.3rem"} fill="#228be6" color="white" />}
-                        </Flex>
-                      </Flex>
-                    );
+                  "& tr": {
+                    background: "white",
                   },
-                },
-                {
-                  accessorKey: "Progress",
-                  header: () => (
-                    <Flex align={"center"} gap={"3px"}>
-                      <IconBolt color="gray" size={"0.9rem"} />
-                      <Text color="gray">Progress</Text>
-                    </Flex>
-                  ),
-                  enableResizing: true,
-                  cell: (cell: any) => {
-                    const { num_used_total, num_total } = cell.row.original;
+                }}
+                columns={[
+                  {
+                    accessorKey: "Status",
+                    minSize: 120,
+                    maxSize: 120,
+                    header: () => (
+                      <Flex align={"center"} gap={"3px"}>
+                        <IconLoader color="gray" size={"0.9rem"} />
+                        <Text color="gray">Status</Text>
+                      </Flex>
+                    ),
+                    cell: (cell: any) => {
+                      const { campaign_status } = cell.row.original;
 
-                    return (
-                      <Flex direction={"column"} justify={"center"} w={"100%"} h={"100%"} py={"sm"}>
-                        <Flex w={"100%"} align={"center"} gap={"8px"} px={"xs"}>
-                          <Progress value={(num_used_total / num_total) * 100} w={"100%"} />
-                          <Text color="#228be6" fw={500}>
-                            {Math.round((num_used_total / num_total) * 100)}%
-                          </Text>
+                      return (
+                        <Flex
+                          w={"100%"}
+                          h={"100%"}
+                          px={"sm"}
+                          align={"center"}
+                          justify={"center"}
+                        >
+                          <Badge>{campaign_status}</Badge>
                         </Flex>
-                        <Flex align={"center"} justify={"space-between"} px={"sm"}>
-                          <Flex align={"center"}>
-                            <Text fw={500}>
-                              {num_used_total} / {num_total} <span className="text-gray-500">Sent</span>
+                      );
+                    },
+                  },
+                  {
+                    accessorKey: "campaigns",
+                    minSize: 430,
+                    maxSize: 400,
+                    header: () => (
+                      <Flex align={"center"} gap={"3px"}>
+                        <IconTargetArrow color="gray" size={"0.9rem"} />
+                        <Text color="gray">Campaigns</Text>
+                      </Flex>
+                    ),
+
+                    cell: (cell: any) => {
+                      const { archetype, linkedin_volume, email_volume } =
+                        cell.row.original;
+
+                      return (
+                        <Flex
+                          w={"100%"}
+                          px={"sm"}
+                          h={"100%"}
+                          align={"center"}
+                          gap={"md"}
+                        >
+                          <Flex>
+                            <Text lineClamp={1}>{archetype}</Text>
+                          </Flex>
+
+                          <Flex w={"100%"} align={"center"} gap={3}>
+                            {email_volume > 0 && (
+                              <IconMail
+                                size={"1.3rem"}
+                                fill="#228be6"
+                                color="white"
+                              />
+                            )}
+                            {linkedin_volume > 0 && (
+                              <IconBrandLinkedin
+                                size={"1.3rem"}
+                                fill="#228be6"
+                                color="white"
+                              />
+                            )}
+                          </Flex>
+                        </Flex>
+                      );
+                    },
+                  },
+                  {
+                    accessorKey: "Progress",
+                    header: () => (
+                      <Flex align={"center"} gap={"3px"}>
+                        <IconBolt color="gray" size={"0.9rem"} />
+                        <Text color="gray">Progress</Text>
+                      </Flex>
+                    ),
+                    enableResizing: true,
+                    cell: (cell: any) => {
+                      const {
+                        num_sent,
+                        num_prospects,
+                        sent_today,
+                        sent_yesterday,
+                      } = cell.row.original;
+
+                      return (
+                        <Flex
+                          direction={"column"}
+                          justify={"center"}
+                          w={"100%"}
+                          h={"100%"}
+                          py={"sm"}
+                        >
+                          <Flex
+                            w={"100%"}
+                            align={"center"}
+                            gap={"8px"}
+                            px={"xs"}
+                          >
+                            <Progress
+                              value={(num_sent / num_prospects) * 100}
+                              w={"100%"}
+                            />
+                            <Text color="#228be6" fw={500}>
+                              {Math.round((num_sent / num_prospects) * 100)}%
                             </Text>
-                            {/* {Math.round((num_total - num_used_total) / 20) < 3 ? <IconPoint fill="gray" color="white" /> : null} */}
-                            {/* <Text
-                                    color={"red"}
-                                    sx={{
-                                      display: Math.round((num_total - num_used_total) / 20) < 3 ? "block" : "none",
-                                    }}
-                                  >
-                                    {Math.round((num_total - num_used_total) / 20)} day
-                                    {Math.round((num_total - num_used_total) / 20) < 3 ? "s" : ""} left
-                                  </Text> */}
                           </Flex>
-                          <Flex align={"center"} gap={"xs"}>
-                            <Flex gap={4}>
-                              <Badge radius={"sm"} color="orange">
-                                +4
-                              </Badge>
-                              <Text size={"sm"} fw={400} color="gray">
-                                sent yesterday
+                          <Flex
+                            align={"center"}
+                            justify={"space-between"}
+                            px={"sm"}
+                          >
+                            <Flex align={"center"}>
+                              <Text fw={500}>
+                                {num_sent} / {num_prospects}{" "}
+                                <span className="text-gray-500">Sent</span>
                               </Text>
                             </Flex>
-                            <Divider orientation="vertical" />
-                            <Flex gap={4}>
-                              <Badge radius={"sm"} color="green">
-                                +5
-                              </Badge>
-                              <Text size={"sm"} fw={400} color="gray">
-                                sent today
-                              </Text>
+                            <Flex align={"center"} gap={"xs"}>
+                              <Flex gap={4}>
+                                <Badge radius={"sm"} color="orange">
+                                  {sent_yesterday}
+                                </Badge>
+                                <Text size={"sm"} fw={400} color="gray">
+                                  sent yesterday
+                                </Text>
+                              </Flex>
+                              <Divider orientation="vertical" />
+                              <Flex gap={4}>
+                                <Badge radius={"sm"} color="green">
+                                  {sent_today}
+                                </Badge>
+                                <Text size={"sm"} fw={400} color="gray">
+                                  sent today
+                                </Text>
+                              </Flex>
                             </Flex>
                           </Flex>
                         </Flex>
-                      </Flex>
-                    );
+                      );
+                    },
                   },
-                },
-              ]}
-              options={{
-                enableFilters: true,
-              }}
-              // loading={loading}
-              w={"100%"}
-              styles={(theme) => ({
-                thead: {
-                  height: "44px",
-                  backgroundColor: theme.colors.gray[0],
-                  "::after": {
-                    backgroundColor: "transparent",
+                ]}
+                options={{
+                  enableFilters: true,
+                }}
+                // loading={loading}
+                w={"100%"}
+                styles={(theme) => ({
+                  thead: {
+                    height: "44px",
+                    backgroundColor: theme.colors.gray[0],
+                    "::after": {
+                      backgroundColor: "transparent",
+                    },
                   },
-                },
 
-                wrapper: {
-                  gap: 0,
-                },
-                scrollArea: {
-                  paddingBottom: 0,
-                  gap: 0,
-                },
+                  wrapper: {
+                    gap: 0,
+                  },
+                  scrollArea: {
+                    paddingBottom: 0,
+                    gap: 0,
+                  },
 
-                dataCellContent: {
-                  width: "100%",
-                },
-              })}
-            />
-          </Collapse>
-        </Paper>
-        // <div key={key}>
-        //   {value.map((item, index) => {
-        //     return (
-        //       <Paper withBorder radius={"sm"} p={"xs"} mt={"sm"}>
-        //         <Flex align={"center"} justify={"space-between"}>
-        //           <Flex align={"center"} gap={4}>
-        //             <Avatar src={""} size={"sm"} radius={"xl"} />
-        //             <Text fw={500} size={"sm"}>
-        //               {item.rep}
-        //             </Text>
-        //           </Flex>
-        //           <Flex align={"center"} gap={"xs"}>
-        //             <Flex gap={4}>
-        //               <Badge radius={"sm"}>{item.num_used_total}</Badge>
-        //               <Text size={"sm"} fw={400} color="gray">
-        //                 active campaign
-        //               </Text>
-        //             </Flex>
-        //             <Divider orientation="vertical" />
-        //             <Flex gap={4}>
-        //               <Badge radius={"sm"} color="orange">
-        //                 +4
-        //               </Badge>
-        //               <Text size={"sm"} fw={400} color="gray">
-        //                 sent yesterday
-        //               </Text>
-        //             </Flex>
-        //             <Divider orientation="vertical" />
-        //             <Flex gap={4}>
-        //               <Badge radius={"sm"} color="green">
-        //                 +5
-        //               </Badge>
-        //               <Text size={"sm"} fw={400} color="gray">
-        //                 sent today
-        //               </Text>
-        //             </Flex>
-        //             <ActionIcon variant="light" onClick={toggle}>
-        //               <IconChevronDown size={"1rem"} />
-        //             </ActionIcon>
-        //           </Flex>
-        //         </Flex>
-        //         <Collapse in={opened}>
-        //           <DataGrid
-        //             data={value}
-        //             mt={"sm"}
-        //             highlightOnHover
-        //             withSorting
-        //             withColumnBorders
-        //             withBorder
-        //             sx={{
-        //               cursor: "pointer",
-        //               "& .mantine-10xyzsm>tbody>tr>td": {
-        //                 padding: "0px",
-        //               },
-        //               "& tr": {
-        //                 background: "white",
-        //               },
-        //             }}
-        //             columns={[
-        //               {
-        //                 accessorKey: "Status",
-        //                 minSize: 120,
-        //                 maxSize: 120,
-        //                 header: () => (
-        //                   <Flex align={"center"} gap={"3px"}>
-        //                     <IconLoader color="gray" size={"0.9rem"} />
-        //                     <Text color="gray">Status</Text>
-        //                   </Flex>
-        //                 ),
-        //                 cell: (cell) => {
-        //                   const { status } = cell.row.original;
-
-        //                   return (
-        //                     <Flex w={"100%"} h={"100%"} px={"sm"} align={"center"} justify={"center"}>
-        //                       <Badge>{status}</Badge>
-        //                     </Flex>
-        //                   );
-        //                 },
-        //               },
-        //               {
-        //                 accessorKey: "campaigns",
-        //                 minSize: 330,
-        //                 maxSize: 400,
-        //                 header: () => (
-        //                   <Flex align={"center"} gap={"3px"}>
-        //                     <IconTargetArrow color="gray" size={"0.9rem"} />
-        //                     <Text color="gray">Campaigns</Text>
-        //                   </Flex>
-        //                 ),
-
-        //                 cell: (cell) => {
-        //                   const { campaign, num_total_linkedin, num_total_email } = cell.row.original;
-
-        //                   return (
-        //                     <Flex w={"100%"} px={"sm"} h={"100%"} align={"center"} gap={"md"}>
-        //                       <Flex>
-        //                         <Text lineClamp={1}>{campaign}</Text>
-        //                       </Flex>
-
-        //                       <Flex w={"100%"} align={"center"} gap={3}>
-        //                         {num_total_email > 0 && <IconMail size={"1.3rem"} fill="#228be6" color="white" />}
-        //                         {num_total_linkedin > 0 && <IconBrandLinkedin size={"1.3rem"} fill="#228be6" color="white" />}
-        //                       </Flex>
-        //                     </Flex>
-        //                   );
-        //                 },
-        //               },
-        //               {
-        //                 accessorKey: "Progress",
-        //                 header: () => (
-        //                   <Flex align={"center"} gap={"3px"}>
-        //                     <IconBolt color="gray" size={"0.9rem"} />
-        //                     <Text color="gray">Progress</Text>
-        //                   </Flex>
-        //                 ),
-        //                 enableResizing: true,
-        //                 cell: (cell) => {
-        //                   const { num_used_total, num_total } = cell.row.original;
-
-        //                   return (
-        //                     <Flex direction={"column"} justify={"center"} w={"100%"} h={"100%"} py={"sm"}>
-        //                       <Flex w={"100%"} align={"center"} gap={"8px"} px={"xs"}>
-        //                         <Progress value={(num_used_total / num_total) * 100} w={"100%"} />
-        //                         <Text color="#228be6" fw={500}>
-        //                           {Math.round((num_used_total / num_total) * 100)}%
-        //                         </Text>
-        //                       </Flex>
-        //                       <Flex align={"center"} justify={"space-between"} px={"sm"}>
-        //                         <Flex align={"center"}>
-        //                           <Text fw={500}>
-        //                             {num_used_total} / {num_total} <span className="text-gray-500">Sent</span>
-        //                           </Text>
-        //                           {/* {Math.round((num_total - num_used_total) / 20) < 3 ? <IconPoint fill="gray" color="white" /> : null} */}
-        //                           {/* <Text
-        //                             color={"red"}
-        //                             sx={{
-        //                               display: Math.round((num_total - num_used_total) / 20) < 3 ? "block" : "none",
-        //                             }}
-        //                           >
-        //                             {Math.round((num_total - num_used_total) / 20)} day
-        //                             {Math.round((num_total - num_used_total) / 20) < 3 ? "s" : ""} left
-        //                           </Text> */}
-        //                         </Flex>
-        //                         <Flex align={"center"} gap={"xs"}>
-        //                           <Flex gap={4}>
-        //                             <Badge radius={"sm"} color="orange">
-        //                               +4
-        //                             </Badge>
-        //                             <Text size={"sm"} fw={400} color="gray">
-        //                               sent yesterday
-        //                             </Text>
-        //                           </Flex>
-        //                           <Divider orientation="vertical" />
-        //                           <Flex gap={4}>
-        //                             <Badge radius={"sm"} color="green">
-        //                               +5
-        //                             </Badge>
-        //                             <Text size={"sm"} fw={400} color="gray">
-        //                               sent today
-        //                             </Text>
-        //                           </Flex>
-        //                         </Flex>
-        //                       </Flex>
-        //                     </Flex>
-        //                   );
-        //                 },
-        //               },
-        //             ]}
-        //             options={{
-        //               enableFilters: true,
-        //             }}
-        //             // loading={loading}
-        //             w={"100%"}
-        //             styles={(theme) => ({
-        //               thead: {
-        //                 height: "44px",
-        //                 backgroundColor: theme.colors.gray[0],
-        //                 "::after": {
-        //                   backgroundColor: "transparent",
-        //                 },
-        //               },
-
-        //               wrapper: {
-        //                 gap: 0,
-        //               },
-        //               scrollArea: {
-        //                 paddingBottom: 0,
-        //                 gap: 0,
-        //               },
-
-        //               dataCellContent: {
-        //                 width: "100%",
-        //               },
-        //             })}
-        //           />
-        //         </Collapse>
-        //       </Paper>
-        //     );
-        //   })}
-        // </div>
-      ))}
+                  dataCellContent: {
+                    width: "100%",
+                  },
+                })}
+              />
+            </Collapse>
+          </Paper>
+        ))}
     </Paper>
   );
 };
 
-const UnusedCampaign = () => {
-  const data = [
-    {
-      avatar: "",
-      name: "Ishan Sharma",
-      capacity: 300,
-      linkedin: 80,
-    },
-    {
-      avatar: "",
-      name: "Paul Wesley",
-      capacity: 300,
-      linkedin: 80,
-    },
-  ];
+const UnusedCampaign = (props: any) => {
   return (
     <Paper withBorder radius={"sm"} p={"sm"}>
       <Flex align={"center"} justify={"space-between"}>
@@ -1140,40 +814,41 @@ const UnusedCampaign = () => {
         </Text>
         <Badge variant="filled">2/5 seats</Badge>
       </Flex>
-      {data.map((item, index) => {
-        return (
-          <Paper withBorder radius={"sm"} p={"sm"} mt={"sm"}>
-            <Flex align={"center"} justify={"space-between"}>
-              <Flex align={"center"} gap={4}>
-                <Avatar src={item.avatar} size={"sm"} radius={"xl"} />
-                <Text fw={500} size={"sm"}>
-                  {item.name}
-                </Text>
-              </Flex>
-              <Flex align={"center"} gap={"xs"}>
-                <Flex gap={4}>
-                  <Text size={"sm"} fw={400} color="gray">
-                    Unused Capacity:
-                  </Text>
-                  <Badge radius={"sm"} color="grape">
-                    {item.capacity}
-                  </Badge>
-                  <Text size={"sm"} fw={400} color="gray">
-                    Mails per week
+      {props.data &&
+        props.data.map((item: any, index: number) => {
+          return (
+            <Paper withBorder radius={"sm"} p={"sm"} mt={"sm"} key={index}>
+              <Flex align={"center"} justify={"space-between"}>
+                <Flex align={"center"} gap={4}>
+                  <Avatar src={item.img_url} size={"sm"} radius={"xl"} />
+                  <Text fw={500} size={"sm"}>
+                    {item.name}
                   </Text>
                 </Flex>
-                <Divider orientation="vertical" />
-                <Flex gap={4}>
-                  <Badge radius={"sm"}>{item.linkedin}</Badge>
-                  <Text size={"sm"} fw={400} color="gray">
-                    Linkedin per week
-                  </Text>
+                <Flex align={"center"} gap={"xs"}>
+                  <Flex gap={4}>
+                    <Text size={"sm"} fw={400} color="gray">
+                      Unused Capacity:
+                    </Text>
+                    <Badge radius={"sm"} color="grape">
+                      {item.email_volume}
+                    </Badge>
+                    <Text size={"sm"} fw={400} color="gray">
+                      Mails per week
+                    </Text>
+                  </Flex>
+                  <Divider orientation="vertical" />
+                  <Flex gap={4}>
+                    <Badge radius={"sm"}>{item.linkedin_volume}</Badge>
+                    <Text size={"sm"} fw={400} color="gray">
+                      Linkedin per week
+                    </Text>
+                  </Flex>
                 </Flex>
               </Flex>
-            </Flex>
-          </Paper>
-        );
-      })}
+            </Paper>
+          );
+        })}
     </Paper>
   );
 };

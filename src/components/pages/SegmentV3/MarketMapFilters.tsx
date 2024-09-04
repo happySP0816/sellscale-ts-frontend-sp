@@ -514,7 +514,7 @@ const MarketMapFilters = function ({
                       }
                     />
                     <Textarea
-                      placeholder="Enter AI prompt here. A question to score your list."
+                      placeholder="Enter AI prompt here. A question to score your list. You must include [[prospect]] into your prompt."
                       value={individual_ai_prompt}
                       label="AI Filter"
                       withAsterisk
@@ -547,7 +547,7 @@ const MarketMapFilters = function ({
                       }
                     />
                     <Button
-                      disabled={!individual_ai_title || !individual_ai_prompt}
+                      disabled={!individual_ai_title || !individual_ai_prompt || !individual_ai_prompt.includes("[[prospect]]")}
                       onClick={() => {
                         const key =
                           "aiind_" +
@@ -1175,7 +1175,7 @@ const MarketMapFilters = function ({
                       }
                     />
                     <Textarea
-                      placeholder="Enter AI prompt here. A question to score your list."
+                      placeholder="Enter AI prompt here. A question to score your list. You must include [[company]] into your prompt"
                       value={company_ai_prompt}
                       label="AI Filter"
                       withAsterisk
@@ -1208,7 +1208,7 @@ const MarketMapFilters = function ({
                       }
                     />
                     <Button
-                      disabled={!company_ai_title || !company_ai_prompt}
+                      disabled={!company_ai_title || !company_ai_prompt || !company_ai_prompt.includes("[[company]]")}
                       onClick={() => {
                         const key =
                           "aicomp_" +

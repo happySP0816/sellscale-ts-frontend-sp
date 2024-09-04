@@ -533,6 +533,9 @@ export default function CampaignUtilization() {
 const UsedCampaign = (props: any) => {
   const [opened, setOpened] = useState<string | null>(null);
 
+  console.log("++++++++", props);
+  console.log(props.activeCampaign);
+
   const groupedData = props?.activeCampaign.reduce((acc: any, item: any) => {
     const { name } = item;
     if (!acc[name]) {
@@ -549,7 +552,9 @@ const UsedCampaign = (props: any) => {
         <Text fw={700} size={"md"}>
           Used
         </Text>
-        <Badge variant="filled">{2}/5 seats</Badge>
+        <Badge variant="filled">
+          {Object.keys(groupedData).length} active seats
+        </Badge>
       </Flex>
       {groupedData &&
         Object.entries(groupedData).map(([key, value]: [string, any]) => (
@@ -661,8 +666,11 @@ const UsedCampaign = (props: any) => {
                     ),
 
                     cell: (cell: any) => {
-                      const { archetype, linkedin_volume, email_volume } =
-                        cell.row.original;
+                      const {
+                        archetype,
+                        linkedin_volume,
+                        email_volume,
+                      } = cell.row.original;
 
                       return (
                         <Flex
@@ -812,7 +820,9 @@ const UnusedCampaign = (props: any) => {
         <Text fw={700} size={"md"}>
           Unused
         </Text>
-        <Badge variant="filled">2/5 seats</Badge>
+        <Badge variant="filled" color="red">
+          {props.data.length} unused seats
+        </Badge>
       </Flex>
       {props.data &&
         props.data.map((item: any, index: number) => {

@@ -82,6 +82,9 @@ export const ArchetypeFilters = function ({
 }: {
   hideFeature?: boolean; // for selix
 }) {
+
+  const isSelix: boolean = hideFeature;
+
   const userToken = useRecoilValue(userTokenState);
 
   const [prospects, setProspects] = useState<Prospect[]>([]);
@@ -1020,7 +1023,7 @@ export const ArchetypeFilters = function ({
   return (
     <Flex gap={"8px"} style={{ overflowY: "hidden", height: "100%" }}>
       {isLoading && <Loader />}
-      {!isLoading && icp_scoring_ruleset && !hideFeature && (
+      {!isLoading && icp_scoring_ruleset && !isSelix && (
         <CampaignFilters
           prospects={prospects}
           icp_scoring_ruleset={icp_scoring_ruleset}
@@ -1079,7 +1082,7 @@ export const ArchetypeFilters = function ({
               </Button>
             </Tooltip>
             <BulkActions
-              hideFeature={hideFeature}
+              hideFeature={isSelix}
               selectedProspects={prospects.filter((prospect) =>
                 selectedContacts.has(prospect.id)
               )}
@@ -1113,7 +1116,7 @@ export const ArchetypeFilters = function ({
             style={{ minWidth: "93%" }}
             onChange={(event) => setFilteredWords(event.currentTarget.value)}
           />
-          {!hideFeature && (
+          {!isSelix && (
             <Tooltip label="Upload custom data points to your prospects.">
               <Button
                 size="sm"
@@ -1139,7 +1142,7 @@ export const ArchetypeFilters = function ({
         </Flex>
         <Flex
           className="border border-[#ced4da] rounded-md border-solid"
-          style={{ minWidth: hideFeature ? "100%" : "800px", maxWidth: "800px" }}
+          style={{ minWidth: isSelix ? "100%" : "800px", maxWidth: "800px" }}
         >
           {["5", "4", "3", "2", "1", "0"].map((item) => {
             let label = "All";
@@ -1194,7 +1197,7 @@ export const ArchetypeFilters = function ({
             );
           })}
         </Flex>
-        <Box style={{ maxWidth: hideFeature ? "50vw" : "100%" }}>
+        <Box style={{ maxWidth: isSelix ? "50vw" : "100%" }}>
           {icp_scoring_ruleset_typed && <MantineReactTable table={table} />}
         </Box>
       </Flex>

@@ -622,9 +622,9 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
             ]}
             label="Campaign Progress"
           />
-        <Button mb = 'sm' loading={approvingCampaign} onClick={approveCampaign} size="md" fullWidth disabled={!data.every(item => item.ai_approved)}>
-          Finish & Send
-        </Button>
+        {!data.every(item => item.message_status === 'SENT') && <Button mb = 'sm' loading={approvingCampaign} onClick={approveCampaign} size="md" fullWidth disabled={!data.every(item => item.ai_approved)|| outboundCampaignInfo?.campaign_details.campaign_raw.status === 'COMPLETE' }>
+          {outboundCampaignInfo?.campaign_details.campaign_raw.status === 'COMPLETE' ? 'Campaign Approved' : 'Finish & Send'}
+        </Button>}
           <Stack spacing={"sm"}>
             {selected.message_status !== 'SENT' ? <Flex gap={"sm"}>
               <Button 

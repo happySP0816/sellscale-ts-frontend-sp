@@ -9,6 +9,7 @@ import { currentProjectState } from '@atoms/personaAtoms';
 import { IconArrowLeft, IconBrandLinkedin, IconCalendar, IconMail, IconMailOpened, IconSend } from '@tabler/icons';
 import { Calendar } from '@fullcalendar/core';
 import GenerateAndSend from '@pages/GenerateAndSend';
+import { set } from 'lodash';
 
 export const GenerationCenter: React.FC = () => {
 
@@ -261,7 +262,7 @@ export const GenerationCenter: React.FC = () => {
                 <Modal
                     size="100%"
                     opened={iframeOpen}
-                    onClose={() => {setIframeOpen(false); setCurrentPage(0)}}
+                    onClose={() => {setIframeOpen(false); setCurrentPage(0); setCampaignUUID(null); setOutboundCampaignID(null); fetchCampaignsByArchetype(currentProject?.id || -1);}}
                     styles={{
                         body: {
                             flex: 1,
@@ -349,6 +350,11 @@ export const GenerationCenter: React.FC = () => {
                         </Flex>
                     </Paper>
                 )}
+                                {outboundCampaignID && (
+                    <Title order={2} align="center" mt="xl">
+                        {outboundCampaigns.find(campaign => campaign.id === outboundCampaignID)?.name}
+                    </Title>
+                )}
                 {!outboundCampaignID && <Flex gap="sm" mt="md" justify="center">
                     {generationType === 'linkedin' ? (
                         <Button
@@ -435,11 +441,6 @@ export const GenerationCenter: React.FC = () => {
                         </Button>
                     )}
                 </Flex>}
-                {outboundCampaignID && (
-                    <Title order={2} align="center" mt="xl">
-                        {outboundCampaigns.find(campaign => campaign.id === outboundCampaignID)?.name}
-                    </Title>
-                )}
                 <ScrollArea style={{ height: 'calc(100vh - 200px)' }}>
                     <Stack spacing="md" style={{ backgroundColor: 'white', padding: '1rem', borderRadius: '8px' }}>
                         <Table>
@@ -565,6 +566,11 @@ export const GenerationCenter: React.FC = () => {
                         }}>
                             Create New Outbound Campaign
                         </Button>
+
+                        <div id="calendar"></div>
+         
+
+
                         <Title order={3} align="center" mb="md">
                             Existing Outbound Campaigns
                         </Title>
@@ -573,6 +579,10 @@ export const GenerationCenter: React.FC = () => {
                                 <tr>
                                     <th>Campaign Name</th>
                                     <th>Campaign Type</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -596,6 +606,17 @@ export const GenerationCenter: React.FC = () => {
                                     >
                                         <td>{campaign.name}</td>
                                         <td>{campaign.campaign_type}</td>
+                                        <td>{new Date(campaign.campaign_start_date).toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })}</td>
+                                        <td>{new Date(campaign.campaign_end_date).toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })}</td>
+                                        <td>{campaign.priority_rating}</td>
+                                        <td>
+                                            {campaign.status === 'CANCELLED' && <Badge color="red">{campaign.status}</Badge>}
+                                            {campaign.status === 'COMPLETE' && <Badge color="green">{campaign.status}</Badge>}
+                                            {campaign.status === 'INITIAL_EDIT_COMPLETE' && <Badge color="blue">{campaign.status}</Badge>}
+                                            {campaign.status === 'NEEDS_REVIEW' && <Badge color="orange">{campaign.status}</Badge>}
+                                            {campaign.status !== 'CANCELLED' && campaign.status !== 'COMPLETE' && campaign.status !== 'INITIAL_EDIT_COMPLETE' && campaign.status !== 'NEEDS_REVIEW' && <Badge>{campaign.status}</Badge>}
+                                        </td>
+
                                     </tr>
                                 ))}
                             </tbody>

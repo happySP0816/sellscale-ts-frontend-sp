@@ -1324,7 +1324,7 @@ export function PersonCampaignCard(props: {
                         <Flex justify={"space-between"}>
                           <Text color="#817e7e" fw={600}>
                             {item?.last_message_from_prospect?.includes("no response yet.") 
-                              ? "Last Message From Prospect:" 
+                              ? "Last Message From You:" 
                               : "Last Message From Prospect:"}
                           </Text>
                           <Text color="#817e7e">
@@ -1351,7 +1351,7 @@ export function PersonCampaignCard(props: {
                         >
                        <Text fw={500}>
                         {item?.last_message_from_prospect?.includes("no response yet.") 
-                          ? item?.last_message_from_prospect
+                          ? item?.last_message_from_prospect.split("no response yet.###")[1]
                           : item?.last_message_from_prospect}
                       </Text>
                         </Box>
@@ -1418,7 +1418,7 @@ export function PersonCampaignCard(props: {
       );
     } else if (value === "reply") {
       return campaignList?.filter(
-        (item: any) => item.to_status === "ACTIVE_CONVO"
+        (item: any) => item.to_status.includes("ACTIVE_CONVO") // will catch all active convo statuses
       );
     } else if (value === "demo") {
       return campaignList?.filter((item: any) => item.to_status === "DEMO_SET");

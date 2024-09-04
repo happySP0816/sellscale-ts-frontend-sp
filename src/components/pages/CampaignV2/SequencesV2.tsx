@@ -81,6 +81,7 @@ import {
   openModal,
 } from "@mantine/modals";
 import {
+  fetchCampaignContacts,
   fetchCampaignSequences,
   fetchCampaignStats,
 } from "@utils/requests/campaignOverview";
@@ -149,6 +150,7 @@ import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
 import Personalizers from "./Personalizers";
 import { socket } from "../../App";
 import { diffWords } from "diff";
+import { getFreshCurrentProject } from "@auth/core";
 
 interface Templates {
   active: boolean;
@@ -175,9 +177,13 @@ export default function SequencesV2(props: any) {
   } = props;
   const params = useParams();
   const userToken = useRecoilValue(userTokenState);
-  const currentProject = useRecoilValue(currentProjectState);
+  
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const theme = useMantineTheme();
-  const campaignContacts = useRecoilValue(campaignContactsState) ?? [];
+  const [campaignContacts, setCampaignContacts] = useRecoilState(
+    campaignContactsState
+  );
 
   // View Tab
   const [viewTab, setViewTab] = useState<string>("linkedin");
@@ -235,11 +241,40 @@ export default function SequencesV2(props: any) {
     {}
   );
 
+  const triggerProjectRefresh = async function () {
+    const project = await getFreshCurrentProject(userToken, params?.id ? +params?.id : -1);
+
+    setCurrentProject(project);
+  }
+
   const [triggerGenerate, setTriggerGenerate] = useState(0);
 
   const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<
     SubjectLineTemplate[]
   >(emailSubjectLinesState);
+
+  useEffect(() => {
+    if (props.forcedCampaignId) {
+      refetchSequenceData(props.forcedCampaignId);
+
+      (async (campaignId: number) => {
+        const project = await getFreshCurrentProject(userToken, campaignId);
+        setCurrentProject(project);
+
+        const initialContacts = await fetchCampaignContacts(
+          userToken,
+          campaignId,
+          0,
+          10,
+          "",
+          false
+        );
+        setCampaignContacts(
+          Array.from(new Set(initialContacts.sample_contacts))
+        );
+      })(props.forcedCampaignId);
+    }
+  }, [props.forcedCampaignId]);
 
   const { data: templates, isFetching: isFetchingTemplates } = useQuery({
     queryKey: [`query-get-li-templates`],
@@ -501,12 +536,11 @@ export default function SequencesV2(props: any) {
     prospect: ProspectShallow | undefined
   ) {
     if (prospect) {
-      const foundProspect = campaignContacts.find((p) => p.id === prospect.id);
+      const foundProspect = campaignContacts?.find((p) => p.id === prospect.id);
 
       if (foundProspect) {
-        const index = campaignContacts.findIndex(
-          (p) => p.id === foundProspect.id
-        );
+        const index =
+          campaignContacts?.findIndex((p) => p.id === foundProspect.id) || 0;
         setSelectedProspectIndex(index);
       }
     }
@@ -719,6 +753,7 @@ export default function SequencesV2(props: any) {
                   />
                   <ActionIcon
                     disabled={
+                      campaignContacts &&
                       selectedProspectIndex === campaignContacts.length - 1
                     }
                     onClick={() =>
@@ -769,6 +804,7 @@ export default function SequencesV2(props: any) {
                       currentProject={currentProject ?? undefined}
                       userToken={userToken}
                       prospectId={selectedProspect?.id}
+                      triggerProjectRefresh={triggerProjectRefresh}
                     />
                   )}
                 {stepNumber === 0 &&
@@ -3426,6 +3462,7 @@ const LinkedinIntroEditSectionCTA = function (props: {
   userToken: string;
   prospectId?: number;
   currentProject?: PersonaOverview;
+  triggerProjectRefresh: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<string | null>("personalization");
   const [
@@ -3549,6 +3586,8 @@ const LinkedinIntroEditSectionCTA = function (props: {
                 props.currentProject?.id || -1,
                 items.filter((x) => !x.checked).map((x) => x.id)
               );
+
+              props.triggerProjectRefresh();
             }}
           />
         </ScrollArea>
@@ -4297,12 +4336,17 @@ export function ProspectSelect2(props: {
                     Prospect:
                   </Text>
                   <Avatar
-                    src={selectedProspect?.img_url}
+                    src={
+                      "https://ui-avatars.com/api/?background=random&name=" +
+                      selectedProspect?.full_name
+                    }
                     radius={"xl"}
-                    size={"sm"}
+                    size={"xs"}
                   />
                   <Text size={"xs"} color={"#37414E"}>
-                    {`${selectedProspect?.first_name} ${selectedProspect?.last_name} | ${selectedProspect?.title}, ${selectedProspect?.company}`}
+                    {selectedProspect
+                      ? `${selectedProspect.first_name} ${selectedProspect.last_name} | ${selectedProspect.title}, ${selectedProspect.company}`
+                      : "loading..."}
                   </Text>
                 </Flex>
               )}

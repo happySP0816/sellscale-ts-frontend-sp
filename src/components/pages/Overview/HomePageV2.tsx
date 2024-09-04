@@ -314,15 +314,13 @@ export default function HomePageV2() {
   const [numOperatorDashItems, setNumOperatorDashItems] = useState(0);
   const [request, setRequest] = useState("");
 
-  const [
-    campaignAnalyticData,
-    setCampaignAnalyticData,
-  ] = useState<CampaignAnalyticsData>({
-    sentOutreach: 0,
-    accepted: 0,
-    activeConvos: 0,
-    demos: 0,
-  });
+  const [campaignAnalyticData, setCampaignAnalyticData] =
+    useState<CampaignAnalyticsData>({
+      sentOutreach: 0,
+      accepted: 0,
+      activeConvos: 0,
+      demos: 0,
+    });
 
   const [aiActivityData, setAiActivityData] = useState<TodayActivityData>({
     totalActivity: 0,
@@ -411,20 +409,19 @@ export default function HomePageV2() {
       </Flex>
       <TodayActivityV2 aiActivityData={aiActivityData} />
       <PositiveResponses />
-      <Divider w={"100%"} />
-      <Flex gap={"lg"} direction={{ base: "column", lg: "row" }}>
-        <LineChart />
-        <OperatorDashboardV2
-          onOperatorDashboardEntriesChange={(task: Task[]) => {
-            setNumOperatorDashItems(task.length);
-          }}
-        />
-      </Flex>
-
-      <PipelineOverviewV2 />
+      {/* <Divider w={"100%"} /> */}
+      <OperatorDashboardV2
+        onOperatorDashboardEntriesChange={(task: Task[]) => {
+          setNumOperatorDashItems(task.length);
+        }}
+      />
+      <LineChart />
+      {/* <Flex gap={"lg"} direction={{ base: "column", lg: "row" }}> */}
+      {/* </Flex> */}
 
       <CampaignUtilization />
       <UnreadInboxes />
+      <PipelineOverviewV2 />
     </Flex>
   );
 }

@@ -597,10 +597,10 @@ const router = sentryCreateBrowserRouter([
         path: "/selix_onboarding",
         element: <SelixOnboarding />,
       },
-      {
-        path: "/generate",
-        element: <GenerateAndSend />,
-      },
+      // {
+      //   path: "/generate",
+      //   element: <GenerateAndSend />,
+      // },
     ],
   },
 ]);

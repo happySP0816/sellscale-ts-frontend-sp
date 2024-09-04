@@ -26,7 +26,8 @@ import {
   SimpleGrid,
   SegmentedControl,
   Center,
-  Tooltip, Switch,
+  Tooltip,
+  Switch,
 } from "@mantine/core";
 import posthog from "posthog-js";
 
@@ -372,7 +373,7 @@ export default function SegmentV3(props: PropsType) {
     }
     fetch(
       `${API_URL}/segment/all` +
-        (type === "company" ? "?include_all_in_client=true" : (type === "marketMap" ? "?only_market_map=true" : "")) +
+        (type === "company" ? "?include_all_in_client=true" : type === "marketMap" ? "?only_market_map=true" : "") +
         (tagFilter !== -1 ? `${type === "company" ? "&" : "?"}tag_filter=${tagFilter}` : ""),
       {
         method: "GET",
@@ -398,10 +399,9 @@ export default function SegmentV3(props: PropsType) {
         setTotalInFilters(totalProspectsInPreFilters);
 
         if (type === "marketMap") {
-          setData(transformedSegments.filter(segment => segment.is_market_map));
-        }
-        else {
-          setData(transformedSegments.filter(segment => !segment.is_market_map));
+          setData(transformedSegments.filter((segment) => segment.is_market_map));
+        } else {
+          setData(transformedSegments.filter((segment) => !segment.is_market_map));
         }
       })
       .finally(() => {
@@ -484,6 +484,7 @@ export default function SegmentV3(props: PropsType) {
   }, [false, showAllSegments, currentTime, type]);
 
   const [selected, setSelected] = useState<any>([]);
+  const [disconnectCampaignModal, setDisconnectCampaignModal] = useState(false);
 
   return (
     <Box>
@@ -513,23 +514,28 @@ export default function SegmentV3(props: PropsType) {
           if (isMarketMapSegment) {
             setIsMarketMapSegment(false);
           }
-          setShowCreateSegmentModal(false)
+          setShowCreateSegmentModal(false);
         }}
-        opened={showCreateSegmentModal} size="sm">
+        opened={showCreateSegmentModal}
+        size="sm"
+      >
         <Title order={4}>{isMarketMapSegment ? "Create Market Map" : "Create Segment"}</Title>
         <Text size={"sm"} color="gray" fw={500} mt={"sm"} mb={"md"}>
-          {isMarketMapSegment ? "Create a market map to filter and rank your clients and campaigns" :
-            "Create a new segment to organize your contacts and campaigns"}
+          {isMarketMapSegment
+            ? "Create a market map to filter and rank your clients and campaigns"
+            : "Create a new segment to organize your contacts and campaigns"}
         </Text>
         <TextInput
           label={isMarketMapSegment ? "Market Map Name" : "Segment Name"}
           placeholder={isMarketMapSegment ? "Enter Market Map Name" : "Enter Segment Name"}
           required
           mb={"sm"}
-          onChange={(e) => setCreateSegmentName(e.target.value)} />
+          onChange={(e) => setCreateSegmentName(e.target.value)}
+        />
         <Flex gap={"md"} mt="xl">
           <Button
-            fullWidth size="xs"
+            fullWidth
+            size="xs"
             radius={"md"}
             variant="outline"
             color="gray"
@@ -565,11 +571,47 @@ export default function SegmentV3(props: PropsType) {
           getAllSegments(true);
           setConnectCampaignView("SELECT_METHOD");
         }}
-        size="sm"
+        size="550px"
         padding="md"
-        title="Connect to Campaign"
+        centered
+        title={
+          <Flex align={"center"} gap={"xs"}>
+            <IconTargetArrow color="#228be6" size={"1.4rem"} />
+            <Text fw={600} size={"lg"}>
+              Change Campaign
+            </Text>
+          </Flex>
+        }
       >
-        {connectCampaignView === "SELECT_METHOD" ? (
+        <Text size={"sm"} fw={400} align="center" mb={"sm"}>
+          This segment is connected to <span className="font-semibold">Marketing Leaders</span> campaign. Select the campaign you want to connect with instead.
+        </Text>
+        <PersonaSelect
+          onChange={(v: any) => {
+            if (!v || v.length === 0) {
+              return;
+            }
+            setSelectedCampaignId(v[0]["archetype_id"]);
+          }}
+          disabled={false}
+          label=""
+          description=""
+        />
+        <Flex align={"center"} gap={"sm"} mt={"lg"}>
+          <Button variant="outline" color="gray" fullWidth onClick={() => setShowConnectCampaignModal(false)}>
+            Go Back
+          </Button>
+          <Button
+            fullWidth
+            disabled={!selectedCampaignId || !selectedSegmentId}
+            onClick={() => {
+              connectCampaignToSegment(true);
+            }}
+          >
+            Connect to Campaign
+          </Button>
+        </Flex>
+        {/* {connectCampaignView === "SELECT_METHOD" ? (
           <>
             <Title>Select method</Title>
             <Text color="gray" size="sm">
@@ -639,7 +681,43 @@ export default function SegmentV3(props: PropsType) {
               Connect to Campaign
             </Button>
           </>
-        )}
+        )} */}
+      </Modal>
+      <Modal
+        opened={disconnectCampaignModal}
+        onClose={() => {
+          setDisconnectCampaignModal(false);
+        }}
+        size="550px"
+        padding="md"
+        centered
+        title={
+          <Flex align={"center"} gap={"xs"}>
+            <IconButterfly color="red" size={"1.4rem"} />
+            <Text fw={600} size={"lg"}>
+              Disconnect from Campaign?
+            </Text>
+          </Flex>
+        }
+      >
+        <Text size={"sm"} fw={400} align="center" mb={"sm"}>
+          This segment is connected to <span className="font-semibold">Marketing Leaders</span> campaign. Are you sure you want to disconnect it from the
+          campaign?
+        </Text>
+        <Flex align={"center"} gap={"sm"} mt={"lg"}>
+          <Button variant="outline" color="gray" fullWidth onClick={() => setDisconnectCampaignModal(false)}>
+            Go Back
+          </Button>
+          <Button
+            fullWidth
+            color="red"
+            onClick={() => {
+              alert("clicked disconnect function!");
+            }}
+          >
+            Disconnect
+          </Button>
+        </Flex>
       </Modal>
       <Modal
         opened={showAutoDownloadModal}
@@ -754,7 +832,7 @@ export default function SegmentV3(props: PropsType) {
       <ContactAccountFilterModal
         showContactAccountFilterModal={showViewProspectsModal}
         setShowContactAccountFilterModal={setShowViewProspectsModal}
-        segment={data.find(item => item.id === selectedSegmentId)}
+        segment={data.find((item) => item.id === selectedSegmentId)}
         isModal={true}
       />
       {/*<Modal*/}
@@ -822,11 +900,11 @@ export default function SegmentV3(props: PropsType) {
                   {
                     value: "marketMap",
                     label: (
-                      <Center style={{ gap: 4}}>
+                      <Center style={{ gap: 4 }}>
                         <Text fw={500}>Market Maps</Text>
                       </Center>
-                    )
-                  }
+                    ),
+                  },
                 ]}
               />
             </Flex>
@@ -1287,38 +1365,40 @@ export default function SegmentV3(props: PropsType) {
                             <Menu.Divider />
                             <Menu.Label>Change</Menu.Label>
 
-                            {!item.is_market_map && <Menu.Item
-                              onClick={() => {
-                                openContextModal({
-                                  modal: "connectSegment",
-                                  title: (
-                                    <Group position="apart">
-                                      <div>
-                                        <Title
-                                          order={3}
-                                          sx={{
-                                            display: "flex",
-                                            gap: "8px",
-                                            alignItems: "center",
-                                          }}
-                                        >
-                                          <IconFileDownload color="#228be6" style={{ marginTop: "-5px" }} />
-                                          Auto Import Prospects via Webhook
-                                        </Title>
-                                      </div>
-                                    </Group>
-                                  ),
-                                  innerProps: {
-                                    id: item.id,
-                                    setSelected: setSelected,
-                                    selected: selected,
-                                  },
-                                });
-                              }}
-                            >
-                              <IconWebhook size={"0.9rem"} />
-                              Connect to Segment
-                            </Menu.Item>}
+                            {!item.is_market_map && (
+                              <Menu.Item
+                                onClick={() => {
+                                  openContextModal({
+                                    modal: "connectSegment",
+                                    title: (
+                                      <Group position="apart">
+                                        <div>
+                                          <Title
+                                            order={3}
+                                            sx={{
+                                              display: "flex",
+                                              gap: "8px",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            <IconFileDownload color="#228be6" style={{ marginTop: "-5px" }} />
+                                            Auto Import Prospects via Webhook
+                                          </Title>
+                                        </div>
+                                      </Group>
+                                    ),
+                                    innerProps: {
+                                      id: item.id,
+                                      setSelected: setSelected,
+                                      selected: selected,
+                                    },
+                                  });
+                                }}
+                              >
+                                <IconWebhook size={"0.9rem"} />
+                                Connect to Segment
+                              </Menu.Item>
+                            )}
                             <Menu.Item
                               onClick={() => {
                                 duplicateSegment(item.id, true);
@@ -1327,43 +1407,43 @@ export default function SegmentV3(props: PropsType) {
                               <IconCopy size={"0.9rem"} />
                               Duplicate Segment
                             </Menu.Item>
-                            {!item.is_market_map &&
+                            {!item.is_market_map && (
                               <Menu.Item
-                              onClick={() => {
-                                setSelectedSegmentId(item.id);
-                                openContextModal({
-                                  modal: "splitSegment",
-                                  title: (
-                                    <Group position="apart">
-                                      <div>
-                                        <Title
-                                          order={3}
-                                          sx={{
-                                            display: "flex",
-                                            gap: "8px",
-                                            alignItems: "center",
-                                          }}
-                                        >
-                                          <IconButterfly color="#228be6" style={{ marginTop: "-5px" }} />
-                                          Split Segment
-                                        </Title>
-                                      </div>
-                                    </Group>
-                                  ),
-                                  innerProps: {
-                                    currentSegment: data.filter((segment: any) => {
-                                      return segment.id === item.id;
-                                    })[0],
-                                    onSplit: (segmentId: any, numberOfBatches: any) => {
-                                      createNSubsegments(segmentId, numberOfBatches, true);
+                                onClick={() => {
+                                  setSelectedSegmentId(item.id);
+                                  openContextModal({
+                                    modal: "splitSegment",
+                                    title: (
+                                      <Group position="apart">
+                                        <div>
+                                          <Title
+                                            order={3}
+                                            sx={{
+                                              display: "flex",
+                                              gap: "8px",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            <IconButterfly color="#228be6" style={{ marginTop: "-5px" }} />
+                                            Split Segment
+                                          </Title>
+                                        </div>
+                                      </Group>
+                                    ),
+                                    innerProps: {
+                                      currentSegment: data.filter((segment: any) => {
+                                        return segment.id === item.id;
+                                      })[0],
+                                      onSplit: (segmentId: any, numberOfBatches: any) => {
+                                        createNSubsegments(segmentId, numberOfBatches, true);
+                                      },
                                     },
-                                  },
-                                });
-                              }}
-                            >
-                              Split Segment
-                            </Menu.Item>
-                            }
+                                  });
+                                }}
+                              >
+                                Split Segment
+                              </Menu.Item>
+                            )}
                             <Menu.Divider />
                             <Menu.Label color="red">Danger zone</Menu.Label>
                             <Menu.Item
@@ -1376,54 +1456,54 @@ export default function SegmentV3(props: PropsType) {
                               <IconUsersMinus size={"0.9rem"} />
                               Transfer to Teammate
                             </Menu.Item>
-                            {!item.is_market_map &&
+                            {!item.is_market_map && (
                               <Menu.Item
-                              color="red"
-                              onClick={() =>
-                                openContextModal({
-                                  modal: "resetsegment",
-                                  title: (
-                                    <Group position="apart">
-                                      <div>
-                                        <Title
-                                          order={3}
-                                          color="red"
-                                          sx={{
-                                            display: "flex",
-                                            gap: "8px",
-                                            alignItems: "center",
-                                          }}
-                                        >
-                                          Are you sure you want to reset?
-                                        </Title>
-                                      </div>
-                                    </Group>
-                                  ),
-                                  styles: (theme) => ({
-                                    header: {
-                                      margin: 0,
+                                color="red"
+                                onClick={() =>
+                                  openContextModal({
+                                    modal: "resetsegment",
+                                    title: (
+                                      <Group position="apart">
+                                        <div>
+                                          <Title
+                                            order={3}
+                                            color="red"
+                                            sx={{
+                                              display: "flex",
+                                              gap: "8px",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            Are you sure you want to reset?
+                                          </Title>
+                                        </div>
+                                      </Group>
+                                    ),
+                                    styles: (theme) => ({
+                                      header: {
+                                        margin: 0,
+                                      },
+                                      content: {
+                                        minWidth: "200px",
+                                        maxWidth: "500px !important",
+                                      },
+                                    }),
+                                    innerProps: {
+                                      currentSegment: {
+                                        segment_title: item.segment_title,
+                                        segment_id: item.id,
+                                      },
+                                      onClick: (segment_id: number, segment_title: string) => {
+                                        resetSegment(segment_id, segment_title, true);
+                                      },
                                     },
-                                    content: {
-                                      minWidth: "200px",
-                                      maxWidth: "500px !important",
-                                    },
-                                  }),
-                                  innerProps: {
-                                    currentSegment: {
-                                      segment_title: item.segment_title,
-                                      segment_id: item.id,
-                                    },
-                                    onClick: (segment_id: number, segment_title: string) => {
-                                      resetSegment(segment_id, segment_title, true);
-                                    },
-                                  },
-                                })
-                              }
-                            >
-                              <IconRefresh size={"0.9rem"} />
-                              Reset Segment
-                            </Menu.Item>
-                            }
+                                  })
+                                }
+                              >
+                                <IconRefresh size={"0.9rem"} />
+                                Reset Segment
+                              </Menu.Item>
+                            )}
                             <Menu.Item
                               color="red"
                               onClick={() =>
@@ -1543,25 +1623,33 @@ export default function SegmentV3(props: PropsType) {
                       {/* <Button rightIcon={<IconArrowRight size={"0.9rem"} />} mt={"sm"}>
                       Create Campaign
                     </Button> */}
-                      {!item.is_market_map && <Button
-                        variant={item.client_archetype?.archetype ? "outline" : "filled"}
-                        color="blue"
-                        mt={"sm"}
-                        fullWidth
-                        leftIcon={!item.client_archetype?.archetype ? null : <IconTargetArrow size={"0.9rem"} />}
-                        rightIcon={!item.client_archetype?.archetype ? <IconArrowRight size={"0.9rem"} /> : null}
-                        fw={600}
-                        sx={{ fontSize: "12px" }}
-                        disabled={item.client_sdr.id !== userData.id}
-                        onClick={() => {
-                          setShowConnectCampaignModal(true);
-                          setSelectedSegmentId(item.id);
-                        }}
-                      >
-                        {item.client_archetype?.archetype
-                          ? item.client_archetype.archetype?.substring(0, 22) + (item.client_archetype.archetype.length > 22 ? "..." : "")
-                          : "Connect to Campaign"}
-                      </Button>}
+                      {!item.is_market_map && (
+                        <Flex mt={"sm"} align={"center"} gap={"sm"}>
+                          <Button
+                            variant={item.client_archetype?.archetype ? "outline" : "filled"}
+                            color="blue"
+                            fullWidth
+                            leftIcon={!item.client_archetype?.archetype ? null : <IconTargetArrow size={"0.9rem"} />}
+                            rightIcon={!item.client_archetype?.archetype ? <IconArrowRight size={"0.9rem"} /> : null}
+                            fw={600}
+                            sx={{ fontSize: "12px" }}
+                            disabled={item.client_sdr.id !== userData.id}
+                            onClick={() => {
+                              setShowConnectCampaignModal(true);
+                              setSelectedSegmentId(item.id);
+                            }}
+                          >
+                            {item.client_archetype?.archetype
+                              ? item.client_archetype.archetype?.substring(0, 22) + (item.client_archetype.archetype.length > 22 ? "..." : "")
+                              : "Connect to Campaign"}
+                          </Button>
+                          {item.client_archetype?.archetype && (
+                            <ActionIcon color="red" variant="filled" size={"lg"} onClick={() => setDisconnectCampaignModal(true)}>
+                              <IconButterfly size={"1rem"} />
+                            </ActionIcon>
+                          )}
+                        </Flex>
+                      )}
                     </Box>
                   </Paper>
                 );
@@ -1614,10 +1702,12 @@ const SegmentTags = (props: any) => {
               <IconPlus size={"0.9rem"} />
             </ActionIcon>
           ) : (
-            <Button leftIcon={<IconPlus size={"0.9rem"} />}
-                    color={props.item?.is_market_map ? "violet" : "blue"}
-                    size="xs"
-                    onClick={() => setPopoverOpened(true)}>
+            <Button
+              leftIcon={<IconPlus size={"0.9rem"} />}
+              color={props.item?.is_market_map ? "violet" : "blue"}
+              size="xs"
+              onClick={() => setPopoverOpened(true)}
+            >
               Add Tag
             </Button>
           )}

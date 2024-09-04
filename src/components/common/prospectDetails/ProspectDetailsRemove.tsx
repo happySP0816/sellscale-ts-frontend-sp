@@ -50,6 +50,46 @@ export async function removeProspectFromContactList(
     });
 }
 
+export async function sendQueuedLinkedinInvite(
+  prospectId: number,
+  userToken: string
+): Promise<MsgResponse> {
+  return await fetch(
+    `${API_URL}/prospect/send_queued_linkedin_invite`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prospect_id: prospectId })
+    }
+  )
+    .then(async (r) => {
+      if (r.status === 200) {
+        return {
+          status: "success",
+          title: `Success`,
+          message: `Queued LinkedIn invite sent successfully.`,
+        } satisfies MsgResponse;
+      } else {
+        return {
+          status: "error",
+          title: `Error (${r.status})`,
+          message: "Error while sending queued LinkedIn invite.",
+        } satisfies MsgResponse;
+      }
+    })
+    .catch((e) => {
+      console.error(e);
+      return {
+        status: "error",
+        title: `Error while sending queued LinkedIn invite.`,
+        message: e.message as string,
+      } satisfies MsgResponse;
+    });
+}
+
 export default function ProspectDetailsRemove(
   props: ProspectDetailsRemoveProps
 ) {

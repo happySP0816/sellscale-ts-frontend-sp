@@ -50,6 +50,7 @@ import getPersonas, {
   getUploadDetails,
 } from '@utils/requests/getPersonas';
 import _ from 'lodash';
+import { socket } from '../App';
 
 type UploadData = {
   total: number;
@@ -87,6 +88,18 @@ export default function UploadDetailsDrawer() {
     failed: 0,
     disqualified: 0,
   });
+
+
+  useEffect(() => {
+    socket.on(`update_progress_status ${uploadId}`, (data) => {
+      refetch();
+    })
+
+    return () => {
+      socket.off(`update_progress_status ${uploadId}`);
+    }
+  })
+
   // Fetch upload details (table data)
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-upload-details-${uploadId}`, {}],
@@ -149,6 +162,7 @@ export default function UploadDetailsDrawer() {
     refetchOnWindowFocus: false,
     refetchInterval: 10000,
   });
+
   const dRows = (data ?? []).filter((row) => {
     if (categoryFilter === 'success') {
       return row.status === 'UPLOAD_COMPLETE';
@@ -205,7 +219,10 @@ export default function UploadDetailsDrawer() {
   }, [opened]);
 
   return (
-    <Drawer.Root size='44rem' position='right' opened={opened} onClose={close}>
+    <Drawer.Root size='44rem' position='right' opened={opened} onClose={() => {
+      setUploadId(-1);
+      close()
+    }}>
       <Drawer.Overlay />
       <Drawer.Content>
         <Drawer.Header bg={'blue'}>
@@ -219,7 +236,10 @@ export default function UploadDetailsDrawer() {
                 color: 'white',
                 borderRadius: '20px',
               }}
-              onClick={() => setOpened(false)}
+              onClick={() => {
+                setOpened(false);
+                setUploadId(-1);
+              }}
             />
           </Flex>
         </Drawer.Header>

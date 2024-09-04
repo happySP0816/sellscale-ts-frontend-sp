@@ -229,6 +229,11 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
                       oldMessages.filter((i) => i.prospect_id !== prospect_id)
                     )
                   }
+                  onSend={(prospect_id) =>
+                      setAllMessages((oldMessages) =>
+                        oldMessages.filter((i) => i.prospect_id !== prospect_id)
+                      )
+                  }
                   created_at={messageItem.created_at}
                   sending_at={new Date(new Date().getTime() + i * 20 * 60000).toUTCString()}
                 />

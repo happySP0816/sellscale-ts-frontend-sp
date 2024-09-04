@@ -557,9 +557,10 @@ export default function CampaignLandingV2(props: PropsType) {
           const loadedStats = stats as StatsData;
           console.log("stats", loadedStats);
           setStatsData(loadedStats);
-          !props.forcedCampaignId && setCurrentProject(
-            convertStatsDataToPersonaOverview(loadedStats as StatsData)
-          );
+          !props.forcedCampaignId &&
+            setCurrentProject(
+              convertStatsDataToPersonaOverview(loadedStats as StatsData)
+            );
           if (loadedStats && loadedStats.testing_volume) {
             setTestingVolume(loadedStats.testing_volume);
           }
@@ -918,74 +919,69 @@ export default function CampaignLandingV2(props: PropsType) {
             borderRadius: "6px",
           }}
         >
-         { !window.location.href.includes('selix') && <Tour steps={steps} isOpen={isTourOpen} onRequestClose={closeTour} />}
-          {!successPopup ? (<Flex direction={"column"} w={"100%"}>
-            {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
-            <Flex
-              justify={"space-between"}
-              p={"lg"}
-              pb={0}
-              direction={"column"}
-            >
+          {!window.location.href.includes("selix") && (
+            <Tour
+              steps={steps}
+              isOpen={isTourOpen}
+              onRequestClose={closeTour}
+            />
+          )}
+          {!successPopup ? (
+            <Flex direction={"column"} w={"100%"}>
+              {/* <Flex justify={"space-between"} align={"center"} p={"lg"} pb={0}> */}
               <Flex
-                gap={"sm"}
-                align={"center"}
-                justify="space-between"
-                w="100%"
+                justify={"space-between"}
+                p={"lg"}
+                pb={0}
+                direction={"column"}
               >
-                <Flex justify="space-between" w="100%">
-                  <Flex>
-                    <Tooltip
-                      arrowPosition="center"
-                      position="top-start"
-                      withArrow
-                      label={
-                        <Flex align={"center"} gap={"sm"} px={"sm"} py={5}>
-                          <Text color="gray" size={"xs"} fw={600}>
-                            Created by:
-                          </Text>
-                          <Avatar
-                            size={"sm"}
-                            src={userData.img_url}
-                            sx={{ borderRadius: "50%" }}
-                          />
-                          <Text fw={600} size={"xs"}>
-                            {statsData?.sdr_name}
-                          </Text>
-                          <Divider orientation="vertical" />
-                          <Text color="gray" size={"xs"} fw={600}>
-                            Created:
-                          </Text>
-                          <Text fw={600} size={"xs"}>
-                            {new Date(statsData.created_at).toLocaleString(
-                              "en-US",
-                              {
-                                dateStyle: "full",
-                              }
-                            )}
-                          </Text>
-                        </Flex>
-                      }
-                    >
-                      {isEditingCampaignName ? (
-                        <TextInput
-                          value={editableText}
-                          onChange={(e) =>
-                            setEditableText(e.currentTarget.value)
-                          }
-                          onBlur={() => {
-                            setIsEditingCampaignName(false);
-                            setStatsData((prevData: any) => ({
-                              ...prevData,
-                              archetype_name: editableText,
-                            }));
-                            updateCampaignName(
-                              editableText,
-                              currentProject?.id || -1
-                            );
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
+                <Flex
+                  gap={"sm"}
+                  align={"center"}
+                  justify="space-between"
+                  w="100%"
+                >
+                  <Flex justify="space-between" w="100%">
+                    <Flex>
+                      <Tooltip
+                        arrowPosition="center"
+                        position="top-start"
+                        withArrow
+                        label={
+                          <Flex align={"center"} gap={"sm"} px={"sm"} py={5}>
+                            <Text color="gray" size={"xs"} fw={600}>
+                              Created by:
+                            </Text>
+                            <Avatar
+                              size={"sm"}
+                              src={userData.img_url}
+                              sx={{ borderRadius: "50%" }}
+                            />
+                            <Text fw={600} size={"xs"}>
+                              {statsData?.sdr_name}
+                            </Text>
+                            <Divider orientation="vertical" />
+                            <Text color="gray" size={"xs"} fw={600}>
+                              Created:
+                            </Text>
+                            <Text fw={600} size={"xs"}>
+                              {new Date(statsData.created_at).toLocaleString(
+                                "en-US",
+                                {
+                                  dateStyle: "full",
+                                }
+                              )}
+                            </Text>
+                          </Flex>
+                        }
+                      >
+                        {isEditingCampaignName ? (
+                          <TextInput
+                            value={editableText}
+                            onChange={(e) =>
+                              setEditableText(e.currentTarget.value)
+                            }
+                            onBlur={() => {
                               setIsEditingCampaignName(false);
                               setStatsData((prevData: any) => ({
                                 ...prevData,
@@ -995,105 +991,138 @@ export default function CampaignLandingV2(props: PropsType) {
                                 editableText,
                                 currentProject?.id || -1
                               );
-                            }
-                          }}
-                          autoFocus
-                          style={{ width: `${editableText.length + 2}ch` }}
-                        />
-                      ) : (
-                        <Text
-                          fw={600}
-                          size={20}
-                          onClick={() => {
-                            setEditableText(`${statsData?.archetype_name}`);
-                            setIsEditingCampaignName(true);
-                          }}
-                          style={{ cursor: "text" }}
-                        >
-                          {statsData?.emoji}{" "}
-                          {statsData?.archetype_name?.substring(0, 70)}
-                          {statsData?.archetype_name?.length > 70 && "..."}
-                        </Text>
-                      )}
-                    </Tooltip>
-                    <Badge
-                      data-tour="campaign-status"
-                      tt={"uppercase"}
-                      variant="outline"
-                      size="lg"
-                      color={
-                        status === "SETUP"
-                          ? "orange"
-                          : status === "ACTIVE"
-                          ? "green"
-                          : status === "INACTIVE"
-                          ? "red"
-                          : "gray"
-                      }
-                      ml={"sm"}
-                    >
-                      {status}
-                    </Badge>
-                  </Flex>
-                  <Modal
-                    opened={openGenerationCenter}
-                    onClose={() => setOpenGenerationCenter(false)}
-                    size="90%"
-                    title={
-                      <Flex justify="center" align="center" style={{ width: '100%', margin: '0 auto', textAlign: 'center' }}>
-                        <IconSend size={24} color="gray" style={{ marginRight: '0.5rem' }} />
-                        <Text fw={600} size={20} color="gray">Generation Center</Text>
-                      </Flex>
-                    }
-                  >
-                    <GenerationCenter/>
-                  </Modal>
-                  {!showOnlyHeader && (
-                    <Button
-                      loading={loadingContacts}
-                      disabled={!window.location.href.includes("ishan")}
-                      size="sm"
-                      color="blue"
-                      onClick={() => setOpenGenerationCenter(true)}
-                    >
-                      Generate & Send
-                    </Button>
-                  )}
-                  {props.showLaunchButton && (
-                    statsData?.linkedin_active || statsData?.email_active ? (
-                      <Flex
-                        align="center"
-                        color="green"
-                        style={{ fontWeight: 'bold', fontSize: '1rem', color: 'green' }}
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                setIsEditingCampaignName(false);
+                                setStatsData((prevData: any) => ({
+                                  ...prevData,
+                                  archetype_name: editableText,
+                                }));
+                                updateCampaignName(
+                                  editableText,
+                                  currentProject?.id || -1
+                                );
+                              }
+                            }}
+                            autoFocus
+                            style={{ width: `${editableText.length + 2}ch` }}
+                          />
+                        ) : (
+                          <Text
+                            fw={600}
+                            size={20}
+                            onClick={() => {
+                              setEditableText(`${statsData?.archetype_name}`);
+                              setIsEditingCampaignName(true);
+                            }}
+                            style={{ cursor: "text" }}
+                          >
+                            {statsData?.emoji}{" "}
+                            {statsData?.archetype_name?.substring(0, 70)}
+                            {statsData?.archetype_name?.length > 70 && "..."}
+                          </Text>
+                        )}
+                      </Tooltip>
+                      <Badge
+                        data-tour="campaign-status"
+                        tt={"uppercase"}
+                        variant="outline"
+                        size="lg"
+                        color={
+                          status === "SETUP"
+                            ? "orange"
+                            : status === "ACTIVE"
+                            ? "green"
+                            : status === "INACTIVE"
+                            ? "red"
+                            : "gray"
+                        }
+                        ml={"sm"}
                       >
-                        <IconCheck size="1rem" style={{ marginRight: '0.5rem', color: 'green' }} />
-                        Campaign Launched
-                      </Flex>
-                    ) : (
+                        {status}
+                      </Badge>
+                    </Flex>
+                    <Modal
+                      opened={openGenerationCenter}
+                      onClose={() => setOpenGenerationCenter(false)}
+                      size="90%"
+                      title={
+                        <Flex
+                          justify="center"
+                          align="center"
+                          style={{
+                            width: "100%",
+                            margin: "0 auto",
+                            textAlign: "center",
+                          }}
+                        >
+                          <IconSend
+                            size={24}
+                            color="gray"
+                            style={{ marginRight: "0.5rem" }}
+                          />
+                          <Text fw={600} size={20} color="gray">
+                            Generation Center
+                          </Text>
+                        </Flex>
+                      }
+                    >
+                      <GenerationCenter />
+                    </Modal>
+                    {!showOnlyHeader && (
                       <Button
+                        disabled={!window.location.href.includes("ishan")}
                         size="sm"
-                        color="green"
-                        onClick={() => {
-                          showNotification({
-                            title: "Campaign Launching 🚀",
-                            message: "This campaign will be enabled momentarily",
-                            color: "blue",
-                            autoClose: 5000,
-                          });
-                          fetch(`${API_URL}/echo/send-slack-message`, {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                              message: `⚠️⚠️⚠️\nUser ${statsData?.sdr_name} launched '${statsData?.archetype_name}' campaign.\n⚠️⚠️⚠️`,
-                              webhook_key: "selix-sessions",
-                            }),
-                          });
-                          (async () => {
-                            setLoadingStats(true);
-                            let emailSuccess = false;
-                            let linkedinSuccess = false;
+                        color="blue"
+                        onClick={() => setOpenGenerationCenter(true)}
+                      >
+                        Generate & Send
+                      </Button>
+                    )}
+                    {props.showLaunchButton &&
+                      (statsData?.linkedin_active || statsData?.email_active ? (
+                        <Flex
+                          align="center"
+                          color="green"
+                          style={{
+                            fontWeight: "bold",
+                            fontSize: "1rem",
+                            color: "green",
+                          }}
+                        >
+                          <IconCheck
+                            size="1rem"
+                            style={{ marginRight: "0.5rem", color: "green" }}
+                          />
+                          Campaign Launched
+                        </Flex>
+                      ) : (
+                        <Button
+                          size="sm"
+                          color="green"
+                          onClick={() => {
+                            showNotification({
+                              title: "Campaign Launching 🚀",
+                              message:
+                                "This campaign will be enabled momentarily",
+                              color: "blue",
+                              autoClose: 5000,
+                            });
+                            fetch(`${API_URL}/echo/send-slack-message`, {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                message: `⚠️⚠️⚠️\nUser ${statsData?.sdr_name} launched '${statsData?.archetype_name}' campaign.\n⚠️⚠️⚠️`,
+                                webhook_key: "selix-sessions",
+                              }),
+                            });
+                            (async () => {
+                              setLoadingStats(true);
+                              let emailSuccess = false;
+                              let linkedinSuccess = false;
 
                               try {
                                 const emailResult = await togglePersonaChannel(
@@ -1695,7 +1724,7 @@ export default function CampaignLandingV2(props: PropsType) {
       {!showOnlyHeader && (
         <>
           <Flex gap={"lg"} mt={"md"}>
-            <Flex direction={"column"} style={{minWidth: "28%"}} gap={"lg"}>
+            <Flex direction={"column"} style={{ minWidth: "28%" }} gap={"lg"}>
               {loadingContacts ? (
                 <Paper p={"md"}>
                   <Skeleton height={30} radius="xl" width="40%" />
@@ -1770,7 +1799,13 @@ export default function CampaignLandingV2(props: PropsType) {
               gap={"md"}
               style={{ maxWidth: "75%", minWidth: "75%" }}
             >
-              <SequencesV2 />
+              <SequencesV2
+                checkCanToggleEmail={checkCanToggleEmail}
+                togglePersonaChannel={togglePersonaChannel}
+                statsData={statsData}
+                checkCanToggleLinkedin={checkCanToggleLinkedin}
+                updateConnectionType={updateConnectionType}
+              />
               {/* <Sequences */}
               {/*   setSequences={setSequences} */}
               {/*   // emailSequenceData={emailSequenceData} */}

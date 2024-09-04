@@ -167,11 +167,14 @@ interface Templates {
   title: string;
 }
 
-type PropsType = {
-  forcedCampaignId?: number;
-};
-
-export default function SequencesV2(props: PropsType) {
+export default function SequencesV2(props: any) {
+  const {
+    checkCanToggleEmail,
+    togglePersonaChannel,
+    statsData,
+    checkCanToggleLinkedin,
+    updateConnectionType,
+  } = props;
   const params = useParams();
   const userToken = useRecoilValue(userTokenState);
   
@@ -615,7 +618,8 @@ export default function SequencesV2(props: PropsType) {
               onClick={() => {
                 openContextModal({
                   modal: "campaignTemplateEditModal",
-                  title: <Title order={3}>Sequence Builder</Title>,
+                  withCloseButton: false,
+                  // title: <Title order={3}>Sequence Builder</Title>,
                   innerProps: {
                     sequenceType: viewTab,
                     linkedinInitialMessages,
@@ -629,6 +633,11 @@ export default function SequencesV2(props: PropsType) {
                     setCreateTemplateBuilder,
                     // setSequences,
                     prospectId: selectedProspect?.id,
+                    checkCanToggleEmail: checkCanToggleEmail,
+                    togglePersonaChannel: togglePersonaChannel,
+                    statsData: statsData,
+                    checkCanToggleLinkedin: checkCanToggleLinkedin,
+                    updateConnectionType: updateConnectionType,
                   },
                   centered: true,
                   styles: {

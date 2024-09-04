@@ -1730,6 +1730,12 @@ const SegmentChat = (props: any) => {
     setRecording(false);
   }, [shouldSubmit]);
 
+  const selixMemoryTitleTranslations: { [key: string]: string } = {
+    campaigns: "Currently working on: ",
+    needs_user_input: "Need your input: ",
+    needs_ai_input: "Other to-do's: ",
+  };
+
   return (
     <Paper withBorder shadow="sm" radius={"md"} w={"35%"} h={"100%"}>
       <Flex
@@ -1742,7 +1748,7 @@ const SegmentChat = (props: any) => {
       >
         <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
         <Text fw={600}>Chat with Selix</Text>
-        <HoverCard width={280} shadow="md">
+        <HoverCard width={400} shadow="md">
           <HoverCard.Target>
             <Text
               ml={"auto"}
@@ -1759,14 +1765,54 @@ const SegmentChat = (props: any) => {
             <Title order={5} mb="xs">
               🧠 Selix Memory
             </Title>
-            <Card withBorder>
-              {props.memoryState
-                ?.split("\n")
-                .map((line: any, index: number) => (
-                  <Text key={index} size="xs" mb="xs">
-                    {line.replace("- ", "- 💡 ")}
-                  </Text>
-                ))}
+            <Card withBorder mah={600} p="md" sx={{ overflow: "auto" }}>
+              {props.memoryState &&
+                Object.keys(props.memoryState).map((x: string) => {
+                  return (
+                    <Box mb="md">
+                      <Text size="sm" color="gray" fw="500">
+                        {selixMemoryTitleTranslations[x]}
+                      </Text>
+
+                      {Array.isArray(props.memoryState[x]) &&
+                        props.memoryState[x].map((y: any) => (
+                          <>
+                            <Badge
+                              ml="4px"
+                              color={y["highlighted"] ? "pink" : "gray"}
+                              variant={y["highlighted"] ? "filled" : "outline"}
+                            >
+                              <HoverCard width={500} shadow="md" withinPortal>
+                                <HoverCard.Target>
+                                  <Text>
+                                    {y["title"].substring(0, 45) +
+                                      (y["title"].length > 45 ? "..." : "")}
+                                  </Text>
+                                </HoverCard.Target>
+                                <HoverCard.Dropdown maw={500}>
+                                  <Text size="sm" color="black" fw={600}>
+                                    {y["title"]}
+                                  </Text>
+                                  <Text size="xs" color="gray" fw={400}>
+                                    {y["memory"]}
+                                  </Text>
+                                  {y["highlighted"] && (
+                                    <Badge
+                                      size="xs"
+                                      color="pink"
+                                      variant="filled"
+                                    >
+                                      💡 This is a prioritized memory
+                                    </Badge>
+                                  )}
+                                </HoverCard.Dropdown>
+                              </HoverCard>
+                            </Badge>
+                          </>
+                        ))}
+                    </Box>
+                  );
+                })}
             </Card>
           </HoverCard.Dropdown>
         </HoverCard>

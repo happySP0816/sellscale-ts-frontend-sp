@@ -250,7 +250,7 @@ export const GenerationCenter: React.FC = () => {
         if (currentPage === 0){
             fetchCampaignsByArchetype(currentProject?.id || -1);
         }
-        if (campaignUUID && generatedMessageStatus?.jobs_list.every(job => job.status === 'COMPLETED' || job.status === 'FAILED')) {
+        if (campaignUUID && generatedMessageStatus?.jobs_list && generatedMessageStatus?.jobs_list?.length > 0 && generatedMessageStatus?.jobs_list.every(job => job.status === 'COMPLETED' || job.status === 'FAILED')) {
             setIframeOpen(true);
         }
     }, [currentPage, campaignUUID, generatedMessageStatus]);

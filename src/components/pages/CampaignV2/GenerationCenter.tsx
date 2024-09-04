@@ -565,11 +565,7 @@ export const GenerationCenter: React.FC = () => {
                             setCurrentPage(1);
                         }}>
                             Create New Outbound Campaign
-                        </Button>
-
-                        <div id="calendar"></div>
-         
-
+                        </Button>         
 
                         <Title order={3} align="center" mb="md">
                             Existing Outbound Campaigns

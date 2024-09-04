@@ -221,7 +221,7 @@ export const GenerationCenter: React.FC = () => {
         );
     };
 
-    const filteredContacts = campaignContacts?.filter(contact => {
+    const filteredContacts = Array.isArray(campaignContacts) ? campaignContacts.filter(contact => {
         const isInSearchTerm = `${contact.first_name} ${contact.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
             contact.title.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -239,7 +239,7 @@ export const GenerationCenter: React.FC = () => {
         }
 
         return isInSearchTerm;
-    });
+    }) : [];
 
     //uncomment when done
 

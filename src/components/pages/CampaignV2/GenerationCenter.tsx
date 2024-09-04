@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, Flex, Text, Textarea, Loader, Paper, Stack, Center, Badge, Avatar, TextInput, SegmentedControl, Checkbox, ScrollArea, Modal, Box, SimpleGrid, Select, Table } from '@mantine/core';
+import { Button, Flex, Text, Textarea, Loader, Paper, Stack, Center, Badge, Avatar, TextInput, SegmentedControl, Checkbox, ScrollArea, Modal, Box, SimpleGrid, Select, Table, Title } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { API_URL } from '@constants/data';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -249,7 +249,10 @@ export const GenerationCenter: React.FC = () => {
         if (currentPage === 0){
             fetchCampaignsByArchetype(currentProject?.id || -1);
         }
-    }, [currentPage, campaignUUID]);
+        if (generatedMessageStatus?.jobs_list.every(job => job.status === 'COMPLETED' || job.status === 'FAILED')) {
+            setIframeOpen(true);
+        }
+    }, [currentPage, campaignUUID, generatedMessageStatus]);
         
 
     return (
@@ -258,7 +261,7 @@ export const GenerationCenter: React.FC = () => {
                 <Modal
                     size="100%"
                     opened={iframeOpen}
-                    onClose={() => setIframeOpen(false)}
+                    onClose={() => {setIframeOpen(false); setCurrentPage(0)}}
                     styles={{
                         body: {
                             flex: 1,
@@ -432,6 +435,11 @@ export const GenerationCenter: React.FC = () => {
                         </Button>
                     )}
                 </Flex>}
+                {outboundCampaignID && (
+                    <Title order={2} align="center" mt="xl">
+                        {outboundCampaigns.find(campaign => campaign.id === outboundCampaignID)?.name}
+                    </Title>
+                )}
                 <ScrollArea style={{ height: 'calc(100vh - 200px)' }}>
                     <Stack spacing="md" style={{ backgroundColor: 'white', padding: '1rem', borderRadius: '8px' }}>
                         <Table>
@@ -548,7 +556,7 @@ export const GenerationCenter: React.FC = () => {
             </>
             ) : (<>
 
-                <Paper shadow="sm" p="md" withBorder style={{ borderRadius: '8px', backgroundColor: '#f9f9f9', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+                <Paper shadow="sm" p="md" withBorder style={{ borderRadius: '8px', backgroundColor: '#f9f9f9', width: '100%', maxWidth: '100%', margin: '0 auto' }}>
                     <Flex justify="center" align="center" gap="md" direction="column">
                         <Button color="blue" rightIcon={<IconSend size={16} />} onClick={() => { 
                             setOutboundCampaignID(null); 
@@ -557,24 +565,44 @@ export const GenerationCenter: React.FC = () => {
                         }}>
                             Create New Outbound Campaign
                         </Button>
-                        <Select
-                            label={<Text>Existing Outbound Campaigns</Text>}
-                            placeholder="Choose existing"
-                            data={outboundCampaigns.length > 0 ? outboundCampaigns.map((campaign: OutboundCampaign) => ({
-                                value: campaign.id.toString(),
-                                label: campaign.campaign_type === 'LINKEDIN' ? `LinkedIn - ${campaign.name}` :
-                                       campaign.campaign_type === 'EMAIL' ? `Email - ${campaign.name}` :
-                                       `${campaign.name} - ${campaign.campaign_type}`
-                            })) : [{ value: '', label: 'No campaigns available' }]}
-                            style={{ width: '100%' }}
-                            onChange={(value: any) => {
-                                setOutboundCampaignID(parseInt(value));
-                                setGenerationType(outboundCampaigns.find(campaign => campaign.id === parseInt(value))?.campaign_type === 'LINKEDIN' ? 'linkedin' : 'email');
-                                setCampaignUUID(outboundCampaigns.find(campaign => campaign.id === parseInt(value))?.uuid || null);
-                                setCurrentPage(1);
-                                getGeneratedMessageStatus(parseInt(value));
-                            }}
-                        />
+                        <Title order={3} align="center" mb="md">
+                            Existing Outbound Campaigns
+                        </Title>
+                        <Table>
+                            <thead>
+                                <tr>
+                                    <th>Campaign Name</th>
+                                    <th>Campaign Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {outboundCampaigns.map((campaign: OutboundCampaign) => (
+                                    <tr 
+                                        key={campaign.id} 
+                                        onClick={() => {
+                                            setOutboundCampaignID(campaign.id);
+                                            setGenerationType(campaign.campaign_type === 'LINKEDIN' ? 'linkedin' : 'email');
+                                            setCampaignUUID(campaign.uuid || null);
+                                            setCurrentPage(1);
+                                            getGeneratedMessageStatus(campaign.id);
+                                        }}
+                                        style={{ cursor: 'pointer' }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.backgroundColor = '#f0f0f0';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                        }}
+                                    >
+                                        <td>{campaign.name}</td>
+                                        <td>{campaign.campaign_type}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+                        {outboundCampaigns.length === 0 && (
+                            <Text>No campaigns available</Text>
+                        )}
                     </Flex>
                 </Paper>
 

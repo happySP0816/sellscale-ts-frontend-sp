@@ -2,7 +2,7 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import RichTextArea from "@common/library/RichTextArea";
 import { API_URL } from "@constants/data";
-import { ActionIcon, Avatar, Badge, Box, Button, Center, Flex, Paper, ScrollArea, SegmentedControl, Stack, Table, Text, Textarea } from "@mantine/core";
+import { ActionIcon, Avatar, Badge, Box, Button, Center, Flex, LoadingOverlay, Paper, Progress, ScrollArea, SegmentedControl, Stack, Table, Text, Textarea } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { IconBrandLinkedin, IconEdit, IconGlobe, IconLetterT, IconLoader, IconMail, IconRecordMail, IconX } from "@tabler/icons";
 import { IconClockBolt, IconClockCog, IconSparkles } from "@tabler/icons-react";
@@ -29,6 +29,7 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
   const [data, setData] = useState<ProspectOutreachInfo[]>([]);
 
   const [filterData, setFilterData] = useState<ProspectOutreachInfo[]>([]);
+  const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<ProspectOutreachInfo | undefined>(data?.[0] || {});
   const [selectedIndex, setSelectedIndex] = useState<number | null>(0);
   const [approveStatus, setApproveStatus] = useState(false);
@@ -92,6 +93,8 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
     message_id: number;
     message_id_2: number;
     problems: any[];
+    message_status: string;
+    message_status_2: string;
     prompt: string;
     prospect_email_id?: number;
     prospect_id: number;
@@ -334,6 +337,7 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
 
   useEffect(() => {
     const fetchCampaignData = async () => {
+      setLoading(true);
       try {
         const response = await fetch(`${API_URL}/campaigns/uuid/${campaignUUID}?approved_filter=${'None'}`, {
           method: 'GET',
@@ -353,6 +357,7 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
       } catch (error) {
         console.error('Error fetching campaign data:', error);
       }
+      setLoading(false);
     };
 
     fetchCampaignData();
@@ -360,7 +365,13 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
   
   useEffect(() => {
     if (outboundCampaignInfo) {
-      console.log('prospects are:', outboundCampaignInfo.campaign_details.prospects);
+      const hasArtProspect = outboundCampaignInfo.campaign_details.prospects.some(prospect => prospect.full_name.toLowerCase().includes('art '));
+      if (hasArtProspect) {
+        const artProspectIndex = outboundCampaignInfo.campaign_details.prospects.findIndex(prospect => prospect.full_name.toLowerCase().includes('art '));
+        console.log('Art prospect:', outboundCampaignInfo.campaign_details.prospects[artProspectIndex]);
+      } else {
+        console.log('No prospect with name "Art" found');
+      }
       const transformedData = outboundCampaignInfo.campaign_details.prospects.map((prospect) => ({
         ...prospect,
       })) as ProspectOutreachInfo[];
@@ -415,13 +426,14 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
         </Flex>
         <Flex align={"center"} gap={"sm"}>
           <Badge variant="outline" radius={"sm"} size="lg" color="green" leftSection={<IconClockBolt size={"1rem"} className="mt-2" />}>
-            {100}%
+            {Math.round(data.length && data.filter(item => item.ai_approved).length / data.length * 100)}%
           </Badge>
           <ActionIcon variant="outline" radius={"xl"}>
             <IconX size={"1.2rem"} />
           </ActionIcon>
         </Flex>
       </Flex>
+      <LoadingOverlay visible={loading} overlayBlur={2}/>
       <Flex gap={"sm"} w={"100%"}>
         <Paper bg={"#F7F8FA"} p={"md"} w={"35%"}>
           <SegmentedControl
@@ -429,10 +441,13 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
             onChange={(value) => {
               setType(value);
               if (value === "warning") {
-                setFilterData(data.filter((item) => item.ai_approved !== true));
+                setFilterData(data.filter((item) => item.problems.length > 0));
               }
               if (value === "ready") {
-                setFilterData(data.filter((item) => item.ai_approved === true));
+                setFilterData(data.filter((item) => item.ai_approved === true && item.message_status !== 'SENT'));
+              }
+              if (value === "sent") {
+                setFilterData(data.filter((item) => item.message_status === 'SENT'));
               }
               if (value === "all") setFilterData(data);
             }}
@@ -461,6 +476,15 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
                   <Center style={{ gap: 10 }}>
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     <span>Ready to send</span>
+                  </Center>
+                ),
+              },
+              {
+                value: "sent",
+                label: (
+                  <Center style={{ gap: 10 }}>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>Sent</span>
                   </Center>
                 ),
               },
@@ -556,12 +580,28 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
                             {record.prospect_info?.company}
                           </Text>
                         </Flex>
+                       {record.message_status === 'SENT' && <Button
+                        size="xs"
+                        variant="default"
+                        compact
+                        component="a"
+                        target="_blank"
+                        href={`/prospects/${record.prospect_id}`}
+                      >
+                        Open Convo
+                      </Button>}
                       </Box>
                     </Flex>
                   </td>
                   <td>
                     <Flex w={"100%"} h={"100%"} align={"center"} px={4} py={"xs"} justify={"start"}>
-                      {record.ai_approved ? <div className="rounded-full w-4 h-4 bg-green-500"></div> : <div className="rounded-full w-4 h-4 bg-red-600"></div>}
+                      {record.message_status === 'SENT' ? (
+                        <div className="rounded-full w-4 h-4 bg-blue-500"></div>
+                      ) : record.ai_approved ? (
+                        <div className="rounded-full w-4 h-4 bg-green-500"></div>
+                      ) : (
+                        <div className="rounded-full w-4 h-4 bg-red-600"></div>
+                      )}
                     </Flex>
                   </td>
                 </tr>
@@ -571,8 +611,22 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
           </ScrollArea>
         </Paper>
         {selected && selected.prospect_info && <Paper bg={"#F7F8FA"} p={"md"} w={"65%"}>
+        <Progress
+            value={(data.filter(item => item.ai_approved).length / data.length) * 100}
+            mb="sm"
+            size="xl"
+            radius="xl"
+            sections={[
+              { value: (data.filter(item => item.ai_approved).length / data.length) * 100, color: 'green',  label: `Approved (${((data.filter(item => item.ai_approved).length / data.length) * 100).toFixed(0)}%)` },
+              { value: (data.filter(item => !item.ai_approved).length / data.length) * 100, color: 'red', label: `Unapproved (${((data.filter(item => !item.ai_approved).length / data.length) * 100).toFixed(0)}%)` },
+            ]}
+            label="Campaign Progress"
+          />
+        <Button mb = 'sm' loading={approvingCampaign} onClick={approveCampaign} size="md" fullWidth disabled={!data.every(item => item.ai_approved)}>
+          Finish & Send
+        </Button>
           <Stack spacing={"sm"}>
-            <Flex gap={"sm"}>
+            {selected.message_status !== 'SENT' ? <Flex gap={"sm"}>
               <Button 
                 onClick={() => {
                   setSelected((prevSelected) => {
@@ -630,7 +684,11 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
               >
                 Approve Message
               </Button>
-            </Flex>
+            </Flex> : <Flex gap={"sm"}>
+                <Button fullWidth color={'lime'}>
+                  Message Sent
+                </Button>
+              </Flex>}
             <Paper p={"sm"} radius={"sm"} withBorder>
               <Stack spacing={"sm"}>
                 <Text fw={600} size={"lg"}>
@@ -676,11 +734,11 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
                 />
                 </Flex>}
                 <Flex justify={"space-between"} mt={"md"}>
-                  <Button onClick={()=> {autoEditMessage(selected.message_id)} } disabled = {outboundCampaignInfo?.campaign_details.campaign_raw.campaign_type === "EMAIL"}color="grape" variant="outline" leftIcon={<IconEdit size={"1.3rem"} />}>
+                  <Button onClick={()=> {autoEditMessage(selected.message_id)} } disabled = {true}color="grape" variant="outline" leftIcon={<IconEdit size={"1.3rem"} />}>
                     Auto Edit Using AI
                   </Button>
                   <Flex gap={"sm"}>
-                    <Button loading={regeneratingMessage} onClick={regenerateMessage(selected.prospect_id, selected.message_id)} color="grape" leftIcon={<IconSparkles size={"1.3rem"} />}>
+                    <Button loading={regeneratingMessage} disabled={true} onClick={regenerateMessage(selected.prospect_id, selected.message_id)} color="grape" leftIcon={<IconSparkles size={"1.3rem"} />}>
                       Regenerate
                     </Button>
                     <Button
@@ -799,10 +857,6 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
         </Paper>}
       </Flex>
       <Flex mt={"lg"} gap={"md"} mb={"sm"}>
-      
-        <Button loading={approvingCampaign} onClick={approveCampaign} size="md" fullWidth disabled={!data.every(item => item.ai_approved)}>
-          Finish & Send
-        </Button>
       </Flex>
     </Paper>
   );

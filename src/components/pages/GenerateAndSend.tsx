@@ -377,10 +377,10 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
       })) as ProspectOutreachInfo[];
       setData(transformedData);
       setFilterData(transformedData);
-      setMessage(transformedData[0].completion);
-      if (transformedData[0].completion_2){
-        emailBody.current = (transformedData[0].completion_2);
-        emailBodyRaw.current = (transformedData[0].completion_2);
+      setMessage(transformedData[0]?.completion);
+      if (transformedData[0]?.completion_2){
+        emailBody.current = (transformedData[0]?.completion_2);
+        emailBodyRaw.current = (transformedData[0]?.completion_2);
       }
       setSelected(transformedData[0]);
 

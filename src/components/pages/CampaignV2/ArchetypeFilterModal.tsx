@@ -1139,7 +1139,7 @@ export const ArchetypeFilters = function ({
         </Flex>
         <Flex
           className="border border-[#ced4da] rounded-md border-solid"
-          style={{ minWidth: "800px", maxWidth: "800px" }}
+          style={{ minWidth: hideFeature ? "100%" : "800px", maxWidth: "800px" }}
         >
           {["5", "4", "3", "2", "1", "0"].map((item) => {
             let label = "All";
@@ -1194,7 +1194,7 @@ export const ArchetypeFilters = function ({
             );
           })}
         </Flex>
-        <Box>
+        <Box style={{ maxWidth: hideFeature ? "50vw" : "100%" }}>
           {icp_scoring_ruleset_typed && <MantineReactTable table={table} />}
         </Box>
       </Flex>

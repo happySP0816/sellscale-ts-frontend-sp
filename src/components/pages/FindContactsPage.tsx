@@ -190,6 +190,11 @@ export default function FindContactsPage() {
               {tabHover && "Contact Database"}
             </Tabs.Tab>
           </Tooltip>
+          <Tooltip label="Segments" position="bottom">
+            <Tabs.Tab value="segments" icon={<IconTable size="0.9rem" />} onClick={() => setTab("sellscale-db")}>
+              {tabHover && "Segments"}
+            </Tabs.Tab>
+          </Tooltip>
           {/* <Tabs.Tab value="by-csv" icon={<IconUpload size="0.9rem" />} onClick={() => setTab("by-csv")}> */}
           {/*   {tabHover && "Upload CSV"} */}
           {/* </Tabs.Tab> */}

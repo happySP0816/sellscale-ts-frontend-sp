@@ -63,6 +63,7 @@ import {
   IconPoint,
   IconPuzzle,
   IconSend,
+  IconSettings,
   IconTrash,
   IconTriangleInverted,
   IconX,
@@ -1169,42 +1170,49 @@ export default function SelinAI() {
             }}
           ></div>
 
-
-          {window.location.href.includes('internal') && <div
-            style={{
-              position: "absolute",
-              top: "10px",
-              right: "10px",
-              fontSize: "2rem",
-              zIndex: 9999,
-              cursor: "pointer",
-              transition: "transform 0.2s, color 0.2s, text-shadow 0.2s, background-color 0.2s, border-radius 0.2s, box-shadow 0.2s, opacity 0.2s",
-            }}
-            onClick={() => {
-              const currentSessionId = sessionIDRef.current;
-              window.open(`https://sellscale.retool.com/apps/d844610e-5523-11ef-8ac7-4fac094b8e83/Selix%20MVP/Selix%20AI%20-%20Internal%20Operations%20View#session_id=${currentSessionId}`, '_blank');
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "rotate(20deg) scale(1.2)";
-              e.currentTarget.style.color = "purple";
-              e.currentTarget.style.textShadow = "2px 2px 5px rgba(0, 0, 0, 0.3)";
-              e.currentTarget.style.backgroundColor = "yellowgreen";
-              e.currentTarget.style.borderRadius = "50%";
-              e.currentTarget.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
-              e.currentTarget.style.opacity = "0.8";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "rotate(0deg) scale(1)";
-              e.currentTarget.style.color = "black";
-              e.currentTarget.style.textShadow = "none";
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.borderRadius = "0";
-              e.currentTarget.style.boxShadow = "none";
-              e.currentTarget.style.opacity = "1";
-            }}
-          >
-            {'🤖'}
-          </div>}
+          {window.location.href.includes("internal") && (
+            <div
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                fontSize: "2rem",
+                zIndex: 9999,
+                cursor: "pointer",
+                transition:
+                  "transform 0.2s, color 0.2s, text-shadow 0.2s, background-color 0.2s, border-radius 0.2s, box-shadow 0.2s, opacity 0.2s",
+              }}
+              onClick={() => {
+                const currentSessionId = sessionIDRef.current;
+                window.open(
+                  `https://sellscale.retool.com/apps/d844610e-5523-11ef-8ac7-4fac094b8e83/Selix%20MVP/Selix%20AI%20-%20Internal%20Operations%20View#session_id=${currentSessionId}`,
+                  "_blank"
+                );
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "rotate(20deg) scale(1.2)";
+                e.currentTarget.style.color = "purple";
+                e.currentTarget.style.textShadow =
+                  "2px 2px 5px rgba(0, 0, 0, 0.3)";
+                e.currentTarget.style.backgroundColor = "yellowgreen";
+                e.currentTarget.style.borderRadius = "50%";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 8px rgba(0, 0, 0, 0.2)";
+                e.currentTarget.style.opacity = "0.8";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "rotate(0deg) scale(1)";
+                e.currentTarget.style.color = "black";
+                e.currentTarget.style.textShadow = "none";
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.borderRadius = "0";
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.opacity = "1";
+              }}
+            >
+              {"🤖"}
+            </div>
+          )}
 
           <Card withBorder radius={"sm"}>
             <Flex align={"center"} justify={"space-between"}>
@@ -1614,6 +1622,10 @@ export default function SelinAI() {
                 threads.find((thread) => thread.id === sessionIDRef.current)
                   ?.memory.memory_state
               }
+              memory={
+                threads.find((thread) => thread.id === sessionIDRef.current)
+                  ?.memory
+              }
               // generateResponse={generateResponse}
               // chatContent={chatContent}
               // setChatContent={setChatContent}
@@ -1836,9 +1848,20 @@ const SegmentChat = (props: any) => {
             </Text>
           </HoverCard.Target>
           <HoverCard.Dropdown>
-            <Title order={5} mb="xs">
-              🧠 Selix Memory
-            </Title>
+            <Flex justify="space-between" align="center" mb="xs">
+              <Title order={5}>🧠 Selix Memory</Title>
+
+              {props.memory?.session_mode && (
+                <Tooltip
+                  label={"Current Goal: " + props.memory.session_current_goal}
+                  withArrow
+                >
+                  <Badge color="gray" variant="outline" radius={4} ml="auto">
+                    ⚙️ {props.memory.session_mode?.replace("_", " ")}
+                  </Badge>
+                </Tooltip>
+              )}
+            </Flex>
             <Card withBorder mah={600} p="md" sx={{ overflow: "auto" }}>
               {props.memoryState &&
                 Object.keys(props.memoryState).map((x: string) => {

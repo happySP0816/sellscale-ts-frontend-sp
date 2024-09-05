@@ -209,7 +209,7 @@ export const PersonaGeneral = () => {
       {/* Danger Zone */}
       <Card withBorder shadow="sm" w="100%" sx={{ backgroundColor: "#f8f9fa" }}>
         <Title order={4}>Campaign Toggle</Title>
-        <Text size="xs">This will turn on or off the campaign.</Text>
+        <Text size="xs">This will turn the campaign on or off.</Text>
         <Card
           mt="sm"
           withBorder

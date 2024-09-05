@@ -9,7 +9,7 @@ import { API_URL } from "@constants/data";
  * @param url
  * @returns - MsgResponse
  */
-export async function createProspectFromLinkedinLink(userToken: string, archetypeID: number | null, url: string): Promise<MsgResponse> {
+export async function createProspectFromLinkedinLink(userToken: string, archetypeID: number | null, url: string, override?: boolean): Promise<MsgResponse> {
   // If archetypeID is undefined, it will default to the user's unassigned_contact archetype
   const effectiveArchetypeID = archetypeID === null ? -1 : archetypeID; // Assuming -1 is the ID for unassigned_contact archetype
 
@@ -25,6 +25,7 @@ export async function createProspectFromLinkedinLink(userToken: string, archetyp
         archetype_id: effectiveArchetypeID,
         url: url,
         live: true,
+        override: override ? override : false,
       })
     }
   );

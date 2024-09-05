@@ -66,7 +66,7 @@ import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
 import EditProspectModal from "@modals/EditProspectModal";
 import { proxyURL, valueToColor, nameToInitials } from "@utils/general";
-import { IconAffiliate, IconAlarm, IconCircleCheck, IconEdit, IconHomeHeart, IconSeeding, IconX } from "@tabler/icons";
+import { IconAffiliate, IconAlarm, IconCircleCheck, IconEdit, IconHomeHeart, IconMail, IconSeeding, IconUser, IconX } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import getDemoFeedback from "@utils/requests/getDemoFeedback";
 import DemoFeedbackCard from "@common/demo_feedback/DemoFeedbackCard";
@@ -448,36 +448,34 @@ export default function ProjectDetails(props: {
                 </Flex>
               </Flex>
 
+
+              <Flex gap={"xs"} align={"center"} wrap={"wrap"} mt={5}>
+                <IconUser stroke={1.5} size={18} className={classes.icon} />
+                <Text size="xs" color="dimmed">
+                  {data?.details.full_name || "N/A"}
+                </Text>
+              </Flex>
+
               {data?.details.title && (
                 <Group noWrap spacing={10} mt={3}>
                   <IconBriefcase stroke={1.5} size={18} className={classes.icon} />
-                  <Text size="xs">{data.details.title}</Text>
-                </Group>
-              )}
-
-              {data?.data.location && (
-                <Group noWrap spacing={10} mt={5}>
-                  <IconHomeHeart stroke={1.5} size={16} className={classes.icon} />
-                  <Text size="xs" color="dimmed">
-                    {data.data.location}
-                  </Text>
-                </Group>
-              )}
-
-              {data?.details.company && (
-                <Group noWrap spacing={10} mt={5}>
-                  <IconBuildingStore stroke={1.5} size={18} className={classes.icon} />
-                  <Text size="xs" component="a" target="_blank" rel="noopener noreferrer" href={data.company?.url || undefined}>
-                    {data.details.company} {data.company?.url && <IconExternalLink size="0.55rem" />}
-                  </Text>
-                </Group>
-              )}
-
-              {data?.data.company_hq && (
-                <Group noWrap spacing={10} mt={5}>
-                  <IconBuildingStore stroke={1.5} size={16} className={classes.icon} />
-                  <Text size="xs" color="dimmed">
-                    {data.data.company_hq}
+                  <Text size="xs">
+                    {data.details.title}
+                    {data?.details.company && (
+                      <>
+                        {" at "}
+                        <Text
+                          size="xs"
+                          component="a"
+                          href={data.company.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ fontWeight: 'bold', color: '#1a73e8', textDecoration: 'underline' }}
+                        >
+                          {data.details.company}
+                        </Text>
+                      </>
+                    )}
                   </Text>
                 </Group>
               )}
@@ -487,6 +485,26 @@ export default function ProjectDetails(props: {
                   <IconBrandLinkedin stroke={1.5} size={18} className={classes.icon} />
                   <Text size="xs" component="a" target="_blank" rel="noopener noreferrer" href={`https://www.linkedin.com/in/${linkedin_public_id}`}>
                     linkedin.com/in/{linkedin_public_id} <IconExternalLink size="0.55rem" />
+                  </Text>
+                </Group>
+              )}
+              {data?.email?.email && (
+                <Group noWrap spacing={10} mt={5}>
+                  <IconMail stroke={1.5} size={18} className={classes.icon} />
+                  <Text
+                    size="xs"
+                    component="a"
+                    href={`mailto:${data?.email?.email}`}
+                  >
+                    {data?.email?.email} <IconExternalLink size="0.55rem" />
+                  </Text>
+                </Group>
+              )}
+              {data?.data.location && (
+                <Group noWrap spacing={10} mt={5}>
+                  <IconHomeHeart stroke={1.5} size={16} className={classes.icon} />
+                  <Text size="xs" color="dimmed">
+                    {data.data.location}
                   </Text>
                 </Group>
               )}
@@ -515,7 +533,7 @@ export default function ProjectDetails(props: {
                         <Button size={'xs'} variant={'outline'}
                                 disabled={loadingStateFindPhoneNumber}
                                 onClick={() => onClickRevealNumber()}>
-                          {loadingStateFindPhoneNumber ? <Loader /> : "Click here to reveal phone number" }
+                          {loadingStateFindPhoneNumber ? <Loader /> : "Reveal phone number" }
                         </Button>
                       </HoverCard.Target>
                       <HoverCard.Dropdown>

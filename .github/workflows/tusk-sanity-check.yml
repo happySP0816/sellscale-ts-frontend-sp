@@ -1,0 +1,56 @@
+# This allows Tusk to manually run workflows to check lint/build/tests before creating a PR.
+# See https://docs.usetusk.ai/tusk-github-workflow for more information.
+# If you have any questions, please reach out to support@usetusk.ai.
+
+name: Tusk Sanity Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      taskId:
+        description: "Tusk Task ID"
+        required: true
+      runType:
+        description: "Tusk Run Type"
+        required: true
+      runId:
+        description: "Tusk Run ID"
+        required: true
+
+jobs:
+  sanity_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log inputs
+        run: |
+          echo "Tusk Task ID: ${{ github.event.inputs.taskId }}"
+          echo "Tusk Run Type: ${{ github.event.inputs.runType }}"
+          echo "Tusk Run ID: ${{ github.event.inputs.runId }}"
+          echo "Current Branch: ${{ github.ref }}"
+          echo "Repository default branch: ${{ github.event.repository.default_branch }}"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Set Node.js v20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --no-save
+
+      # TODO: Run prettier (and eslint?)
+      # - name: Lint fix
+      #   run: npm run lint:fix
+
+      # TODO: Uncomment once we run prettier/eslint
+      # - uses: stefanzweifel/git-auto-commit-action@v5
+      #   with:
+      #     commit_message: "fix(${{ github.run_id }}): auto linting"
+      #     skip_fetch: true
+      #     skip_checkout: true
+
+      - name: Check build
+        run: npm run build

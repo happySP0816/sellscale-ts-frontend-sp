@@ -451,31 +451,25 @@ export default function ProjectDetails(props: {
 
               <Flex gap={"xs"} align={"center"} wrap={"wrap"} mt={5}>
                 <IconUser stroke={1.5} size={18} className={classes.icon} />
-                <Text size="xs" color="dimmed">
+                <Text size="sm">
                   {data?.details.full_name || "N/A"}
                 </Text>
               </Flex>
 
               {data?.details.title && (
                 <Group noWrap spacing={10} mt={3}>
-                  <IconBriefcase stroke={1.5} size={18} className={classes.icon} />
+                  <IconBriefcase stroke={1.5} size={28} className={classes.icon} />
                   <Text size="xs">
                     {data.details.title}
-                    {data?.details.company && (
-                      <>
-                        {" at "}
-                        <Text
-                          size="xs"
-                          component="a"
-                          href={data.company.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ fontWeight: 'bold', color: '#1a73e8', textDecoration: 'underline' }}
-                        >
-                          {data.details.company}
-                        </Text>
-                      </>
-                    )}
+                  </Text>
+                </Group>
+              )}
+              {data?.details.company && data?.company.url && (
+                <Group noWrap spacing={10} mt={3}>
+                  <IconBuildingStore stroke={1.5} size={18} className={classes.icon} />
+                  <Text size="xs" component="a" target="_blank" rel="noopener noreferrer" href={data.company.url}>
+                    {data.details.company}
+                    <IconExternalLink size="0.55rem" style={{ marginLeft: 5 }} />
                   </Text>
                 </Group>
               )}
@@ -503,7 +497,7 @@ export default function ProjectDetails(props: {
               {data?.data.location && (
                 <Group noWrap spacing={10} mt={5}>
                   <IconHomeHeart stroke={1.5} size={16} className={classes.icon} />
-                  <Text size="xs" color="dimmed">
+                  <Text size="xs">
                     {data.data.location}
                   </Text>
                 </Group>

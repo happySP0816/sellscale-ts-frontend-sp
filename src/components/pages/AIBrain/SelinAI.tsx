@@ -1181,7 +1181,7 @@ export default function SelinAI() {
             }}
             onClick={() => {
               const currentSessionId = sessionIDRef.current;
-              window.open(`https://sellscale.retool.com/embedded/public/9c345c84-6f5c-4f90-aec0-a45ed0bbeb00#session_id=${currentSessionId}`, '_blank');
+              window.open(`https://sellscale.retool.com/apps/d844610e-5523-11ef-8ac7-4fac094b8e83/Selix%20MVP/Selix%20AI%20-%20Internal%20Operations%20View#session_id=${currentSessionId}`, '_blank');
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "rotate(20deg) scale(1.2)";

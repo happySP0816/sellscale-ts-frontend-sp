@@ -221,7 +221,7 @@ export const GenerationCenter: React.FC = () => {
         );
     };
 
-    const filteredContacts = campaignContacts?.filter(contact => {
+    const filteredContacts = Array.isArray(campaignContacts) ? campaignContacts.filter(contact => {
         const isInSearchTerm = `${contact.first_name} ${contact.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
             contact.title.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -239,7 +239,7 @@ export const GenerationCenter: React.FC = () => {
         }
 
         return isInSearchTerm;
-    });
+    }) : [];
 
     //uncomment when done
 
@@ -250,7 +250,7 @@ export const GenerationCenter: React.FC = () => {
         if (currentPage === 0){
             fetchCampaignsByArchetype(currentProject?.id || -1);
         }
-        if (campaignUUID && generatedMessageStatus?.jobs_list.every(job => job.status === 'COMPLETED' || job.status === 'FAILED')) {
+        if (campaignUUID && generatedMessageStatus?.jobs_list && generatedMessageStatus?.jobs_list?.length > 0 && generatedMessageStatus?.jobs_list.every(job => job.status === 'COMPLETED' || job.status === 'FAILED')) {
             setIframeOpen(true);
         }
     }, [currentPage, campaignUUID, generatedMessageStatus]);

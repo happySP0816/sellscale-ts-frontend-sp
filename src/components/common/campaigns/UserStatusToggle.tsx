@@ -24,14 +24,14 @@ const UserStatusToggle: React.FC<{
     if (result.status === 'success') {
       onChangeUserStatusSuccess?.(false);
       showNotification({
-        title: 'Persona Deactivated',
-        message: 'Your persona has been deactivated.',
+        title: 'Campaign Deactivated',
+        message: 'Your campaign has been deactivated.',
         color: 'blue',
       });
     } else {
       showNotification({
         title: 'Error',
-        message: 'There was an error deactivating your persona.',
+        message: 'There was an error deactivating your campaign.',
         color: 'red',
       });
     }
@@ -47,14 +47,14 @@ const UserStatusToggle: React.FC<{
     if (result.status === 'success') {
       onChangeUserStatusSuccess?.(false);
       showNotification({
-        title: 'Persona Deactivated',
-        message: 'Your persona has been deactivated.',
+        title: 'Campaign Deactivated',
+        message: 'Your campaign has been deactivated.',
         color: 'blue',
       });
     } else {
       showNotification({
         title: 'Error',
-        message: 'There was an error deactivating your persona.',
+        message: 'There was an error deactivating your campaign.',
         color: 'red',
       });
     }
@@ -70,14 +70,14 @@ const UserStatusToggle: React.FC<{
     if (result.status === 'success') {
       onChangeUserStatusSuccess?.(true);
       showNotification({
-        title: 'Persona Activated',
-        message: 'Your persona has been activated.',
+        title: 'Campaign Activated',
+        message: 'Your campaign has been activated.',
         color: 'green',
       });
     } else {
       showNotification({
         title: 'Error',
-        message: 'There was an error activating your persona.',
+        message: 'There was an error activating your campaign.',
         color: 'red',
       });
     }
@@ -86,18 +86,18 @@ const UserStatusToggle: React.FC<{
   const handleUserStatusChanges = async () => {
     if (isActive) {
       openConfirmModal({
-        title: <Title order={3}>Deactivate Persona</Title>,
+        title: <Title order={3}>Deactivate Campaign</Title>,
         children: (
           <>
             <Text fs='italic'>Please read the deactivation options below carefully.</Text>
             <Text mt='md'>
-              <b>Pause Campaign:</b> Pausing this persona will prevent any new message generation,
+              <b>Pause Campaign:</b> Pausing this campaign will prevent any new message generation,
               but Prospects still in the pipeline will continue to receive messages.
             </Text>
             <Text mt='xs'>
               <b>Finish Campaign:</b> Finishing this campaign will wipe all messages from the
               pipeline and stop any and all contact with Prospects. This will also move all
-              uncontacted prospects in this campaign to the unassigned persona.
+              uncontacted prospects in this campaign to the unassigned campaign.
             </Text>
           </>
         ),

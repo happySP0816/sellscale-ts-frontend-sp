@@ -65,6 +65,7 @@ import {
   IconSend,
   IconTrash,
   IconTriangleInverted,
+  IconX,
 } from "@tabler/icons";
 import { IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
@@ -1730,6 +1731,42 @@ const SegmentChat = (props: any) => {
     setRecording(false);
   }, [shouldSubmit]);
 
+  const changeMemoryStatus = async (memoryId: number, status: string) => {
+    try {
+      const response = await fetch(`${API_URL}/selix/change_memory_status`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          memory_id: memoryId,
+          new_status: status,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showNotification({
+          title: "Memory Status Changed",
+          message: result.message,
+          color: "green",
+          icon: <IconCircleCheck />,
+        });
+      } else {
+        showNotification({
+          title: "Error Changing Memory Status",
+          message: result.error || "Failed to change memory status",
+          color: "red",
+          icon: <IconX />,
+        });
+      }
+    } catch (error) {
+      console.error("Error changing memory status:", error);
+    }
+  };
+
   const selixMemoryTitleTranslations: { [key: string]: string } = {
     campaigns: "Currently working on: ",
     needs_user_input: "Need your input: ",
@@ -1777,14 +1814,49 @@ const SegmentChat = (props: any) => {
                       {Array.isArray(props.memoryState[x]) &&
                         props.memoryState[x].map((y: any) => (
                           <>
-                            <Badge
+                            <Box
                               ml="4px"
-                              color={y["highlighted"] ? "pink" : "gray"}
-                              variant={y["highlighted"] ? "filled" : "outline"}
+                              sx={{
+                                border: `${
+                                  y["highlighted"] ? "2" : "1"
+                                }px solid`,
+                                borderColor: y["highlighted"] ? "pink" : "gray",
+                                borderRadius: "8px",
+                                position: "relative",
+                                display: "inline-block",
+                                cursor: "pointer",
+                                fontSize: "10px",
+                                padding: "2px",
+                                marginBottom: "4px",
+                                marginRight: "4px",
+                                paddingLeft: "8px",
+                                paddingRight: "8px",
+                                paddingTop: "2px",
+                                paddingBottom: "2px",
+                              }}
+                              onMouseEnter={(e) => {
+                                const target: any = e.currentTarget;
+                                if (x === "campaigns") {
+                                  return;
+                                }
+                                target.querySelector(
+                                  ".hover-icons"
+                                )!.style.display = "flex";
+                              }}
+                              onMouseLeave={(e) => {
+                                const target: any = e.currentTarget;
+                                if (x === "campaigns") {
+                                  return;
+                                }
+                                target.querySelector(
+                                  ".hover-icons"
+                                )!.style.display = "none";
+                              }}
+                              id={`memory-${y.memory}`}
                             >
                               <HoverCard width={500} shadow="md" withinPortal>
                                 <HoverCard.Target>
-                                  <Text>
+                                  <Text p="0" m="0" size="xs" color="black">
                                     {y["title"].substring(0, 45) +
                                       (y["title"].length > 45 ? "..." : "")}
                                   </Text>
@@ -1807,7 +1879,53 @@ const SegmentChat = (props: any) => {
                                   )}
                                 </HoverCard.Dropdown>
                               </HoverCard>
-                            </Badge>
+                              <Flex
+                                className="hover-icons"
+                                sx={{
+                                  display: "none",
+                                  position: "absolute",
+                                  top: "4px",
+                                  right: "4px",
+                                  gap: "4px",
+                                  backgroundColor: "white",
+                                }}
+                              >
+                                <Tooltip label="Mark as Cancelled" withArrow>
+                                  <ActionIcon
+                                    size="xs"
+                                    color="red"
+                                    onClick={() => {
+                                      changeMemoryStatus(y.id, "CANCELLED");
+                                      const target = document.getElementById(
+                                        `memory-${y.memory}`
+                                      );
+                                      if (target) {
+                                        target.style.display = "none";
+                                      }
+                                    }}
+                                  >
+                                    <IconX size={12} />
+                                  </ActionIcon>
+                                </Tooltip>
+                                <Tooltip label="Mark as Complete" withArrow>
+                                  <ActionIcon
+                                    size="xs"
+                                    color="green"
+                                    onClick={() => {
+                                      changeMemoryStatus(y.id, "COMPLETE");
+                                      const target = document.getElementById(
+                                        `memory-${y.memory}`
+                                      );
+                                      if (target) {
+                                        target.style.display = "none";
+                                      }
+                                    }}
+                                  >
+                                    <IconCheck size={12} />
+                                  </ActionIcon>
+                                </Tooltip>
+                              </Flex>
+                            </Box>
                           </>
                         ))}
                     </Box>

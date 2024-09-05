@@ -67,7 +67,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
       userToken,
       currentProject?.id || -1,
       url,
-      duplicateContacts[0]?.override,
+      duplicateContacts.length > 0 ? duplicateContacts[0].override : true
     );
     if (result.status === "success") {
       showNotification({

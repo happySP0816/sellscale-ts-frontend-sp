@@ -988,7 +988,18 @@ const ContactAccountFilterModal = function ({
                           <span style={{ fontWeight: "bold" }}>
                             {`Last Updated:  `}
                           </span>
-                          {value.last_run}
+                          {new Date(value.last_run + " UTC").toLocaleString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                              hour12: true,
+                            }
+                          )}
                         </Text>
                       )}
                     </Flex>
@@ -1282,7 +1293,18 @@ const ContactAccountFilterModal = function ({
                           <span style={{ fontWeight: "bold" }}>
                             {`Last Updated:  `}
                           </span>
-                          {value.last_run}
+                          {new Date(value.last_run + " UTC").toLocaleString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                              hour12: true,
+                            }
+                          )}
                         </Text>
                       )}
                     </Flex>

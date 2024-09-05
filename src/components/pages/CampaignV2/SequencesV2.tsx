@@ -177,7 +177,7 @@ export default function SequencesV2(props: any) {
   } = props;
   const params = useParams();
   const userToken = useRecoilValue(userTokenState);
-  
+
   const [currentProject, setCurrentProject] =
     useRecoilState(currentProjectState);
   const theme = useMantineTheme();
@@ -192,10 +192,8 @@ export default function SequencesV2(props: any) {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   // Prospects
-  const [
-    selectedProspect,
-    setSelectedProspect,
-  ] = useState<ProspectShallow | null>(null);
+  const [selectedProspect, setSelectedProspect] =
+    useState<ProspectShallow | null>(null);
   const [selectedProspectIndex, setSelectedProspectIndex] = useState(0);
 
   // Sequences
@@ -205,10 +203,8 @@ export default function SequencesV2(props: any) {
     setEmailSequenceGenerationInProgress,
   ] = useState(false);
 
-  const [
-    linkedinInitialMessageViewing,
-    setLinkedinInitialMessageViewing,
-  ] = useState<any>(0);
+  const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] =
+    useState<any>(0);
 
   const [
     linkedinSequenceGenerationInProgress,
@@ -229,9 +225,8 @@ export default function SequencesV2(props: any) {
   const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(
     linkedinSequenceState
   );
-  const [emailSequenceData, setEmailSequenceData] = useRecoilState(
-    emailSequenceState
-  );
+  const [emailSequenceData, setEmailSequenceData] =
+    useRecoilState(emailSequenceState);
 
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
 
@@ -242,10 +237,13 @@ export default function SequencesV2(props: any) {
   );
 
   const triggerProjectRefresh = async function () {
-    const project = await getFreshCurrentProject(userToken, params?.id ? +params?.id : -1);
+    const project = await getFreshCurrentProject(
+      userToken,
+      params?.id ? +params?.id : -1
+    );
 
     setCurrentProject(project);
-  }
+  };
 
   const [triggerGenerate, setTriggerGenerate] = useState(0);
 
@@ -486,9 +484,8 @@ export default function SequencesV2(props: any) {
 
         const handleSequences = (sequences: any[], type: string) => {
           const groupedSequences = groupSequencesByBumpedCount(sequences);
-          const orderedGroupedSequences = orderGroupedSequences(
-            groupedSequences
-          );
+          const orderedGroupedSequences =
+            orderGroupedSequences(groupedSequences);
           setSequences(orderedGroupedSequences);
           // setType(type);
           if (type === "linkedin") {
@@ -948,10 +945,8 @@ function EmailSequencingV2(props: {
       templates: [],
     },
   } as EmailSequenceStepBuckets);
-  const [
-    sequenceBucketsState,
-    setSequenceBucketsState,
-  ] = useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
+  const [sequenceBucketsState, setSequenceBucketsState] =
+    useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
 
   const triggerGetEmailSequenceSteps = async () => {
     setLoading(true);
@@ -1358,10 +1353,8 @@ function EmailPreviewHeaderV2(props: {
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [
-        _key,
-        { prospectId, currentTab, template, subjectLine },
-      ]: any = queryKey;
+      const [_key, { prospectId, currentTab, template, subjectLine }]: any =
+        queryKey;
 
       if (!props.subjectLine?.id || !props.template?.step.id) {
         return null;
@@ -1895,33 +1888,31 @@ function EmailPreviewHeaderV2(props: {
                       onChange={async (value) => {
                         try {
                           setLoadingBankData(true);
-                          const [
-                            updateVoiceResponse,
-                            fewShotResponse,
-                          ] = await Promise.all([
-                            fetch(API_URL + `/ml/voices`, {
-                              method: "PUT",
-                              headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `Bearer ${userToken}`,
-                              },
-                              body: JSON.stringify({
-                                voice_id: value === "null" ? null : value,
-                                archetype_id: currentProject.id,
+                          const [updateVoiceResponse, fewShotResponse] =
+                            await Promise.all([
+                              fetch(API_URL + `/ml/voices`, {
+                                method: "PUT",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `Bearer ${userToken}`,
+                                },
+                                body: JSON.stringify({
+                                  voice_id: value === "null" ? null : value,
+                                  archetype_id: currentProject.id,
+                                }),
                               }),
-                            }),
-                            fetch(API_URL + `/ml/few-shot`, {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `Bearer ${userToken}`,
-                              },
-                              body: JSON.stringify({
-                                voice_id: value === "null" ? null : value,
-                                client_archetype_id: currentProject.id,
+                              fetch(API_URL + `/ml/few-shot`, {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `Bearer ${userToken}`,
+                                },
+                                body: JSON.stringify({
+                                  voice_id: value === "null" ? null : value,
+                                  client_archetype_id: currentProject.id,
+                                }),
                               }),
-                            }),
-                          ]);
+                            ]);
 
                           setLoadingBankData(false);
 
@@ -2740,78 +2731,81 @@ function NewDetailEmailSequencingV2(props: {
             setTriggerGenerate={props.setTriggerGenerate}
           />
         )}
-      </ScrollArea>
-      <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>
-        <ActionIcon
-          disabled={activeTemplateIndex === 0}
-          onClick={() => setActiveTemplateIndex((prevValue) => prevValue - 1)}
-          radius={"xl"}
-        >
-          <IconArrowLeft size={16} />
-        </ActionIcon>
-        <Badge variant={"outline"} radius={"sm"}>
-          {`Variant #${activeTemplateIndex + 1}: ${
-            props.templates[activeTemplateIndex]?.step.title ?? ""
-          }`}
-        </Badge>
-        <ActionIcon
-          disabled={activeTemplateIndex === props.templates.length - 1}
-          onClick={() => setActiveTemplateIndex((prevValue) => prevValue + 1)}
-          radius={"xl"}
-        >
-          <IconArrowRight size={16} />
-        </ActionIcon>
-      </Flex>
-
-      {props.isEditing &&
-        (props.currentTab === "PROSPECTED" ? (
-          <Tabs
-            onTabChange={handleTabChange}
-            variant="outline"
-            defaultValue="body"
+        <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>
+          <ActionIcon
+            disabled={activeTemplateIndex === 0}
+            onClick={() => setActiveTemplateIndex((prevValue) => prevValue - 1)}
+            radius={"xl"}
           >
-            <Tabs.List>
-              <Tabs.Tab
-                value="subject_line"
-                style={{
-                  fontWeight: activeTab === "subject_line" ? "bold" : "normal",
-                }}
-              >
-                Subject Lines
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="body"
-                style={{ fontWeight: activeTab === "body" ? "bold" : "normal" }}
-              >
-                Body
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="personalizers"
-                style={{
-                  fontWeight: activeTab === "personalizers" ? "bold" : "normal",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                Personalizers
-              </Tabs.Tab>
-            </Tabs.List>
+            <IconArrowLeft size={16} />
+          </ActionIcon>
+          <Badge variant={"outline"} radius={"sm"}>
+            {`Variant #${activeTemplateIndex + 1}: ${
+              props.templates[activeTemplateIndex]?.step.title ?? ""
+            }`}
+          </Badge>
+          <ActionIcon
+            disabled={activeTemplateIndex === props.templates.length - 1}
+            onClick={() => setActiveTemplateIndex((prevValue) => prevValue + 1)}
+            radius={"xl"}
+          >
+            <IconArrowRight size={16} />
+          </ActionIcon>
+        </Flex>
+        {props.isEditing &&
+          (props.currentTab === "PROSPECTED" ? (
+            <Tabs
+              onTabChange={handleTabChange}
+              variant="outline"
+              defaultValue="body"
+            >
+              <Tabs.List>
+                <Tabs.Tab
+                  value="subject_line"
+                  style={{
+                    fontWeight:
+                      activeTab === "subject_line" ? "bold" : "normal",
+                  }}
+                >
+                  Subject Lines
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="body"
+                  style={{
+                    fontWeight: activeTab === "body" ? "bold" : "normal",
+                  }}
+                >
+                  Body
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="personalizers"
+                  style={{
+                    fontWeight:
+                      activeTab === "personalizers" ? "bold" : "normal",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  Personalizers
+                </Tabs.Tab>
+              </Tabs.List>
 
-            <Tabs.Panel value="subject_line">
-              <Box pt="xs">{getEmailSubjectLineSection()}</Box>
-            </Tabs.Panel>
+              <Tabs.Panel value="subject_line">
+                <Box pt="xs">{getEmailSubjectLineSection()}</Box>
+              </Tabs.Panel>
 
-            <Tabs.Panel value="body">
-              <Box pt="xs">{getEmailBodySection()}</Box>
-            </Tabs.Panel>
+              <Tabs.Panel value="body">
+                <Box pt="xs">{getEmailBodySection()}</Box>
+              </Tabs.Panel>
 
-            <Tabs.Panel value="personalizers">
-              <Box pt="xs">{getPersonalizersSection()}</Box>
-            </Tabs.Panel>
-          </Tabs>
-        ) : (
-          <>{getEmailBodySection()}</>
-        ))}
+              <Tabs.Panel value="personalizers">
+                <Box pt="xs">{getPersonalizersSection()}</Box>
+              </Tabs.Panel>
+            </Tabs>
+          ) : (
+            <>{getEmailBodySection()}</>
+          ))}
+      </ScrollArea>
     </Stack>
   );
 }
@@ -2824,10 +2818,8 @@ function TemplateSectionV2(props: {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
-  const [
-    humanFeedbackForTemplate,
-    setHumanFeedbackForTemplate,
-  ] = useState<string>();
+  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] =
+    useState<string>();
 
   const [templateActivesShow, setTemplateActivesShow] = useState([true]);
   useEffect(() => {
@@ -3465,10 +3457,8 @@ const LinkedinIntroEditSectionCTA = function (props: {
   triggerProjectRefresh: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<string | null>("personalization");
-  const [
-    personalizationItemsCount,
-    setPersonalizationItemsCount,
-  ] = useState<number>();
+  const [personalizationItemsCount, setPersonalizationItemsCount] =
+    useState<number>();
   const [ctasItemsCount, setCtasItemsCount] = useState<number>();
 
   // get research points for selected prospect

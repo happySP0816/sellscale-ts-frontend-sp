@@ -18,8 +18,10 @@ import {
   useMantineTheme,
   Paper,
   Card,
+  Title,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import {
   IconBolt,
@@ -242,6 +244,32 @@ export default function CampaignUtilization() {
     setLoading(false);
   };
 
+  const fetchCampaignData = async () => {
+    const response = await axios.post(
+      `${API_URL}/campaigns/used`,
+      {
+        client_id: userData.id,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+
+    setCampaignUnusedData(
+      response.data?.data.results.filter(
+        (item: any) => item.used_vs_unsed === "UNUSED"
+      )
+    );
+    setCampaignUsedData(
+      response.data?.data.results.filter(
+        (item: any) => item.used_vs_unsed === "USED"
+      )
+    );
+  };
+
   useEffect(() => {
     const fetchUtilizationData = async () => {
       const response = await fetch(`${API_URL}/utilizationv2/`, {
@@ -270,32 +298,6 @@ export default function CampaignUtilization() {
         const data = await response.json();
         setOutboundData(data);
       }
-    };
-
-    const fetchCampaignData = async () => {
-      const response = await axios.post(
-        `${API_URL}/campaigns/used`,
-        {
-          client_id: userData.id,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-
-      setCampaignUnusedData(
-        response.data?.data.results.filter(
-          (item: any) => item.used_vs_unsed === "UNUSED"
-        )
-      );
-      setCampaignUsedData(
-        response.data?.data.results.filter(
-          (item: any) => item.used_vs_unsed === "USED"
-        )
-      );
     };
 
     handleGetOutboundData();
@@ -532,6 +534,8 @@ export default function CampaignUtilization() {
 
 const UsedCampaign = (props: any) => {
   const [opened, setOpened] = useState<string | null>(null);
+  const userData = useRecoilValue(userDataState);
+  const userToken = useRecoilValue(userTokenState);
 
   console.log("++++++++", props);
   console.log(props.activeCampaign);
@@ -545,6 +549,43 @@ const UsedCampaign = (props: any) => {
     return acc;
   }, {});
   console.log("---------", groupedData);
+
+  const triggerHardPersonaDeactivation = async (id: number) => {
+
+    const result = await deactivatePersona(userToken, id, true);
+    if (result.status === "success") {
+      showNotification({
+        title: "Campaign Deactivated",
+        message: "Your persona has been deactivated.",
+        color: "blue",
+      });
+      // setCurrentProject({ ...currentProject, active: false });
+    } else {
+      showNotification({
+        title: "Error",
+        message: "There was an error deactivating your persona.",
+        color: "red",
+      });
+    }
+  };
+
+  const triggerBasicPersonaDeactivation = async (id: number) => {
+
+    const result = await deactivatePersona(userToken, id, false);
+    if (result.status === "success") {
+      showNotification({
+        title: "Campaign Deactivated",
+        message: "Your persona has been deactivated.",
+        color: "blue",
+      });
+    } else {
+      showNotification({
+        title: "Error",
+        message: "There was an error deactivating your persona.",
+        color: "red",
+      });
+    }
+  };
 
   return (
     <Paper withBorder radius={"sm"} p={"sm"}>
@@ -639,7 +680,8 @@ const UsedCampaign = (props: any) => {
                       </Flex>
                     ),
                     cell: (cell: any) => {
-                      const { campaign_status } = cell.row.original;
+                      const { campaign_status, archetype, campaign_ids } = cell.row.original;
+                      const campaign_id = campaign_ids[0];
 
                       return (
                         <Flex
@@ -649,7 +691,58 @@ const UsedCampaign = (props: any) => {
                           align={"center"}
                           justify={"center"}
                         >
-                          <Badge>{campaign_status}</Badge>
+                          <Badge 
+                            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                            onClick={() => {
+                              if (userData.role === 'ADMIN') {
+                                openConfirmModal({
+                                  title: (
+                                    <Title order={3}>
+                                      Deactivate Persona - {archetype}
+                                    </Title>
+                                  ),
+                                  children: (
+                                    <>
+                                      <Text fs="italic">
+                                        Please read the deactivation options below carefully.
+                                      </Text>
+                                      <Text mt="md">
+                                        <b>Pause Campaign:</b> Deactivating this persona will
+                                        prevent any new message generation, but Prospects
+                                        still in the pipeline will continue to receive
+                                        messages.
+                                      </Text>
+                                      <Text mt="xs">
+                                        <b>Finish Campaign:</b> Hard deactivating this persona
+                                        will wipe all messages from the pipeline and stop any
+                                        and all contact with Prospects. Hard deactivating may
+                                        take a few minutes.
+                                      </Text>
+                                    </>
+                                  ),
+                                  labels: {
+                                    confirm: "Pause Campaign",
+                                    cancel: "Finish Campaign",
+                                  },
+                                  cancelProps: { color: "red", variant: "outline" },
+                                  confirmProps: { color: "red" },
+                                  onCancel: () => {
+                                    triggerHardPersonaDeactivation(campaign_id);
+                                    //update the data for this cell
+                                    window.location.reload()
+
+                                  },
+                                  onConfirm: () => {
+                                    triggerBasicPersonaDeactivation(campaign_id);
+                                    //update the data for this cell
+                                    window.location.reload()
+                                  },
+                                });
+                              }
+                            }}
+                          >
+                            <Text>{campaign_status}{userData.role === 'ADMIN' ? ' \u{1F50D}' : ''}</Text>
+                          </Badge>
                         </Flex>
                       );
                     },

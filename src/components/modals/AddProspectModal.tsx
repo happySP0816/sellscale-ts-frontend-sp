@@ -133,7 +133,7 @@ export default function AddProspectModal({
         userToken,
         innerProps.archetypeId,
         formValue.linkedinURL,
-        duplicateContacts[0].override
+        duplicateContacts.length > 0 ? duplicateContacts[0].override : true
       );
       if (createResponse.status !== "success") {
         setLoading(false);

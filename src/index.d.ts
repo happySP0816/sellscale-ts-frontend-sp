@@ -245,6 +245,8 @@ export interface ICPFitReasonV2 {
     answer: string,
     reasoning: string,
     source: string,
+    last_run?: string,
+    question?: string,
   }
 }
 

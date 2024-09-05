@@ -34,7 +34,7 @@ import { API_URL } from "@constants/data";
 import { useQueryClient } from "@tanstack/react-query";
 import { showNotification } from "@mantine/notifications";
 import { IconSparkles } from "@tabler/icons-react";
-import { IconTrash, IconUser, IconUsers } from "@tabler/icons";
+import { IconChevronLeft, IconTrash, IconUser, IconUsers } from "@tabler/icons";
 
 interface CampaignFiltersProps {
   prospects: Prospect[];
@@ -48,6 +48,7 @@ interface CampaignFiltersProps {
   setHeaderSet: React.Dispatch<React.SetStateAction<Set<string>>>;
   setProgrammaticUpdates: React.Dispatch<React.SetStateAction<Set<number>>>;
   programmaticUpdates: Set<number>;
+  setCollapseFilters: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const CampaignFilters = function ({
@@ -60,6 +61,7 @@ const CampaignFilters = function ({
   setHeaderSet,
   setProgrammaticUpdates,
   programmaticUpdates,
+  setCollapseFilters,
 }: CampaignFiltersProps) {
   const userToken = useRecoilValue(userTokenState);
   const [viewIndividualAIFilters, setViewIndividualAIFilters] =
@@ -420,6 +422,9 @@ const CampaignFilters = function ({
       <Title size={"h4"} color={"purple"}>
         <Flex gap={"4px"} justify={"space-between"} align={"center"}>
           <Text>Filter Contacts</Text>
+          <ActionIcon onClick={() => setCollapseFilters(true)}>
+            <IconChevronLeft />
+          </ActionIcon>
         </Flex>
       </Title>
       <Box

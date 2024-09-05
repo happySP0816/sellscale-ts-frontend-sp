@@ -1,4 +1,5 @@
 import {
+    ActionIcon,
   Anchor,
   Badge,
   Box,
@@ -38,7 +39,7 @@ import { CSVLink } from "react-csv";
 import CustomResearchPointCard from "@common/persona/CustomResearchPointCard";
 import { useDisclosure } from "@mantine/hooks";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import { IconBrandLinkedin } from "@tabler/icons";
+import { IconBrandLinkedin, IconChevronRight } from "@tabler/icons";
 
 interface ContactAccountFilterModalProps {
   showContactAccountFilterModal: boolean;
@@ -92,6 +93,8 @@ export const ArchetypeFilters = function ({
   const [filteredWords, setFilteredWords] = useState<string>("");
 
   const [displayScore, setDisplayScore] = useState<string | null>("5");
+
+  const [collapseFilters, setCollapseFilters] = useState<boolean>(false);
 
   const [programmaticUpdateList, setProgrammaticUpdateList] = useState<
     Set<number>
@@ -155,13 +158,13 @@ export const ArchetypeFilters = function ({
       const list: number[] = data.update;
 
       const newProgrammaticUpdateList = new Set(programmaticUpdateList);
-      
-      list.forEach(i => {
+
+      list.forEach((i) => {
         newProgrammaticUpdateList.delete(i);
-      })
-      
+      });
+
       setProgrammaticUpdateList(newProgrammaticUpdateList);
-    })
+    });
 
     return () => {
       socket.off("update_prospect_list");
@@ -678,10 +681,10 @@ export const ArchetypeFilters = function ({
             const keyType = item.key as keyof typeof p;
             if (item.key === "icp_fit_score") {
               const trueScore =
-                prospect.icp_fit_reason_v2 &&
-                Object.keys(prospect.icp_fit_reason_v2).length > 0 &&
-                prospect.icp_company_fit_reason &&
-                Object.keys(prospect.icp_company_fit_reason).length > 0;
+                (prospect.icp_fit_reason_v2 &&
+                  Object.keys(prospect.icp_fit_reason_v2).length > 0) ||
+                (prospect.icp_company_fit_reason &&
+                  Object.keys(prospect.icp_company_fit_reason).length > 0);
 
               let humanReadableScore = "Not Scored";
 
@@ -897,7 +900,7 @@ export const ArchetypeFilters = function ({
           } else {
             if (value) {
               return !updatedIndividualColumns.has(item.key) ? (
-                <HoverCard>
+                <HoverCard position="bottom" withinPortal>
                   <HoverCard.Target>
                     {value.answer === "LOADING" ? (
                       <Loader size={"xs"} />
@@ -917,12 +920,28 @@ export const ArchetypeFilters = function ({
                         {value.reasoning}
                       </Text>
                       <Divider />
-                      <Text>
+                      <Text size={"xs"}>
                         <span style={{ fontWeight: "bold" }}>
                           {`Source:  `}
                         </span>
                         {value.source}
                       </Text>
+                      {value.question && (
+                        <Text size={"xs"}>
+                          <span style={{ fontWeight: "bold" }}>
+                            {`Question:  `}
+                          </span>
+                          {value.question}
+                        </Text>
+                      )}
+                      {value.last_run && (
+                        <Text size={"xs"}>
+                          <span style={{ fontWeight: "bold" }}>
+                            {`Last Updated:  `}
+                          </span>
+                          {value.last_run}
+                        </Text>
+                      )}
                     </Flex>
                   </HoverCard.Dropdown>
                 </HoverCard>
@@ -1020,7 +1039,7 @@ export const ArchetypeFilters = function ({
   return (
     <Flex gap={"8px"} style={{ overflowY: "hidden", height: "100%" }}>
       {isLoading && <Loader />}
-      {!isLoading && icp_scoring_ruleset && !hideFeature && (
+      {!isLoading && icp_scoring_ruleset && !hideFeature && !collapseFilters && (
         <CampaignFilters
           prospects={prospects}
           icp_scoring_ruleset={icp_scoring_ruleset}
@@ -1031,10 +1050,16 @@ export const ArchetypeFilters = function ({
           setUpdatedIndividualColumns={setUpdatedIndividualColumns}
           programmaticUpdates={programmaticUpdateList}
           setProgrammaticUpdates={setProgrammaticUpdateList}
+          setCollapseFilters={setCollapseFilters}
         />
       )}
+      {collapseFilters && (
+        <ActionIcon onClick={() => setCollapseFilters(false)}>
+          <IconChevronRight /> 
+        </ActionIcon>
+      )}
       <Divider orientation={"vertical"} />
-      <Flex direction={"column"} gap={"8px"} style={{ maxWidth: "1150px" }}>
+      <Flex direction={"column"} gap={"8px"} style={{ maxWidth: collapseFilters ? "1450px" : "1150px" }}>
         {selectedContacts && selectedContacts.size > 0 && (
           <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>
             <Text>Bulk Actions - {selectedContacts.size} Selected</Text>

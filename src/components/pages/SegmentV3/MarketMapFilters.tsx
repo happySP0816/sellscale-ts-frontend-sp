@@ -34,7 +34,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import { useQueryClient } from "@tanstack/react-query";
 import { showNotification } from "@mantine/notifications";
-import { IconSparkles, IconTrash, IconUser } from "@tabler/icons-react";
+import { IconChevronLeft, IconSparkles, IconTrash, IconUser } from "@tabler/icons-react";
 
 interface MarketMapFiltersProps {
   prospects: Prospect[];
@@ -53,6 +53,7 @@ interface MarketMapFiltersProps {
   setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
   setProgrammaticUpdates: React.Dispatch<React.SetStateAction<Set<number>>>;
   programmaticUpdates: Set<number>;
+  setCollapseFilters: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const MarketMapFilters = function ({
@@ -70,6 +71,7 @@ const MarketMapFilters = function ({
   setViewMode,
   setProgrammaticUpdates,
   programmaticUpdates,
+  setCollapseFilters,
 }: MarketMapFiltersProps) {
   const userToken = useRecoilValue(userTokenState);
 
@@ -438,6 +440,9 @@ const MarketMapFilters = function ({
             }}
             checked={viewMode === "ACCOUNT"}
           />
+          <ActionIcon onClick={() => setCollapseFilters(true)}>
+            <IconChevronLeft />
+          </ActionIcon>
         </Flex>
       </Title>
       {viewMode === "CONTACT" ? (
@@ -485,7 +490,7 @@ const MarketMapFilters = function ({
             <Progress
               color={"grape"}
               value={(isScoring - programmaticUpdates.size) / isScoring * 100}
-              label={"testing"}
+              label={"scoring"}
             />
           ) : (
             <></>

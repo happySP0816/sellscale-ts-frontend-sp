@@ -33,6 +33,7 @@ import { FaFilter } from "react-icons/fa6";
 import { socket } from "../App";
 import { DataRow } from "@pages/CampaignV2/ArchetypeFilterModal";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
+import { IconChevronRight } from "@tabler/icons";
 
 interface ContactAccountFilterModalProps {
   showContactAccountFilterModal: boolean;
@@ -136,6 +137,8 @@ const ContactAccountFilterModal = function ({
     Set<number>
   >(new Set());
 
+  const [collapseFilters, setCollapseFilters] = useState<boolean>(false);
+
   const [filteredColumns, setFilteredColumns] = useState<Map<string, string>>(
     new Map()
   );
@@ -211,13 +214,13 @@ const ContactAccountFilterModal = function ({
       const list: number[] = data.update;
 
       const newProgrammaticUpdateList = new Set(programmaticUpdateList);
-      
-      list.forEach(i => {
+
+      list.forEach((i) => {
         newProgrammaticUpdateList.delete(i);
-      })
-      
+      });
+
       setProgrammaticUpdateList(newProgrammaticUpdateList);
-    })
+    });
 
     return () => {
       socket.off("update_prospect_list");
@@ -946,7 +949,7 @@ const ContactAccountFilterModal = function ({
           } else {
             if (value) {
               return !updatedIndividualColumns.has(item.key) ? (
-                <HoverCard>
+                <HoverCard position="bottom" withinPortal>
                   <HoverCard.Target>
                     {value.answer === "LOADING" ? (
                       <Loader size={"xs"} />
@@ -966,12 +969,28 @@ const ContactAccountFilterModal = function ({
                         {value.reasoning}
                       </Text>
                       <Divider />
-                      <Text>
+                      <Text size={"xs"}>
                         <span style={{ fontWeight: "bold" }}>
                           {`Source:  `}
                         </span>
                         {value.source}
                       </Text>
+                      {value.question && (
+                        <Text size={"xs"}>
+                          <span style={{ fontWeight: "bold" }}>
+                            {`Question:  `}
+                          </span>
+                          {value.question}
+                        </Text>
+                      )}
+                      {value.last_run && (
+                        <Text size={"xs"}>
+                          <span style={{ fontWeight: "bold" }}>
+                            {`Last Updated:  `}
+                          </span>
+                          {value.last_run}
+                        </Text>
+                      )}
                     </Flex>
                   </HoverCard.Dropdown>
                 </HoverCard>
@@ -1224,7 +1243,7 @@ const ContactAccountFilterModal = function ({
           } else {
             if (value) {
               return !updatedCompanyColumns.has(item.key) ? (
-                <HoverCard>
+                <HoverCard position="bottom" withinPortal>
                   <HoverCard.Target>
                     {value.answer === "LOADING" ? (
                       <Loader size={"xs"} />
@@ -1244,12 +1263,28 @@ const ContactAccountFilterModal = function ({
                         {value.reasoning}
                       </Text>
                       <Divider />
-                      <Text>
+                      <Text size={"xs"}>
                         <span style={{ fontWeight: "bold" }}>
                           {`Source:  `}
                         </span>
                         {value.source}
                       </Text>
+                      {value.question && (
+                        <Text size={"xs"}>
+                          <span style={{ fontWeight: "bold" }}>
+                            {`Question:  `}
+                          </span>
+                          {value.question}
+                        </Text>
+                      )}
+                      {value.last_run && (
+                        <Text size={"xs"}>
+                          <span style={{ fontWeight: "bold" }}>
+                            {`Last Updated:  `}
+                          </span>
+                          {value.last_run}
+                        </Text>
+                      )}
                     </Flex>
                   </HoverCard.Dropdown>
                 </HoverCard>
@@ -1266,8 +1301,6 @@ const ContactAccountFilterModal = function ({
       };
     });
   }, [prospects, updatedCompanyColumns, icp_scoring_ruleset_typed]);
-
-  console.log("generatedData: ", generatedProspectData);
 
   const contactTable = useMantineReactTable({
     columns: generatedProspectColumns,
@@ -1376,11 +1409,11 @@ const ContactAccountFilterModal = function ({
       onClose={() => setShowContactAccountFilterModal(false)}
       zIndex={10}
       opened={showContactAccountFilterModal}
-      size={"1100px"}
-      style={{ maxHeight: "700px", maxWidth: "1100px" }}
+      size={"90%"}
+      style={{ maxHeight: "700px", minWidth: "2000px" }}
       title={
         <Flex justify={"space-between"} gap={"36px"}>
-          <Title order={3} style={{ maxWidth: "300px" }}>
+          <Title order={3} style={{ maxWidth: "600px" }}>
             {segment?.is_market_map
               ? segment.segment_title + " Market Map View"
               : segment?.segment_title + " Segment View"}
@@ -1422,7 +1455,7 @@ const ContactAccountFilterModal = function ({
     >
       <Flex gap={"8px"} style={{ overflowY: "hidden", height: "100%" }}>
         {isLoading && <Loader />}
-        {!isLoading && icp_scoring_ruleset && (
+        {!isLoading && icp_scoring_ruleset && !collapseFilters && (
           <MarketMapFilters
             prospects={prospects}
             viewMode={viewMode}
@@ -1438,13 +1471,19 @@ const ContactAccountFilterModal = function ({
             setUpdatedIndividualColumns={setUpdatedIndividualColumns}
             programmaticUpdates={programmaticUpdateList}
             setProgrammaticUpdates={setProgrammaticUpdateList}
+            setCollapseFilters={setCollapseFilters}
           />
+        )}
+        {collapseFilters && (
+          <ActionIcon onClick={() => setCollapseFilters(false)}>
+            <IconChevronRight />
+          </ActionIcon>
         )}
         <Divider orientation={"vertical"} />
         <Flex
           direction={"column"}
           gap={"8px"}
-          style={{ minWidth: "750px", maxWidth: "750px" }}
+          style={{ maxWidth: collapseFilters ? "1430px" : "1150px" }}
         >
           <Flex gap={"4px"} align={"end"} justify="space-between">
             <TextInput
@@ -1468,7 +1507,7 @@ const ContactAccountFilterModal = function ({
       </Flex>
     </Modal>
   ) : (
-    <Box style={{ maxHeight: "700px", maxWidth: "1100px" }}>
+    <Box style={{ maxWidth: collapseFilters ? "1450px" : "1150px" }}>
       <Flex justify={"space-between"} gap={"36px"}>
         <Title order={3} style={{ maxWidth: "100%" }}>
           {segment?.is_market_map

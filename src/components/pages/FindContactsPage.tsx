@@ -136,7 +136,7 @@ export default function FindContactsPage() {
         <Divider mt={"sm"} />
       </Box>
       <Tabs
-        defaultValue="sellscale-db"
+        defaultValue="sellscale-db-v2"
         mt="md"
         orientation="vertical"
         keepMounted={false}
@@ -187,11 +187,6 @@ export default function FindContactsPage() {
         <Tabs.List grow onMouseOver={() => setTabHover(true)} onMouseLeave={() => setTabHover(false)}>
           <Tooltip label="Advanced - SellScale Database V2" position="bottom">
             <Tabs.Tab value="sellscale-db-v2" icon={<IconDatabase size="0.9rem" />} onClick={() => setTab("sellscale-db-v2")}>
-              {tabHover && "Contact Database V2"}
-            </Tabs.Tab>
-          </Tooltip>
-          <Tooltip label="Advanced - SellScale Database" position="bottom">
-            <Tabs.Tab value="sellscale-db" icon={<IconDatabase size="0.9rem" />} onClick={() => setTab("sellscale-db")}>
               {tabHover && "Contact Database"}
             </Tabs.Tab>
           </Tooltip>
@@ -365,15 +360,6 @@ export default function FindContactsPage() {
           )} */}
         {/* </Tabs.Panel> */}
 
-        <Tabs.Panel value="sellscale-db" pt="xs" style={{ position: "relative" }}>
-          {userToken && (
-            <iframe
-              src={"https://sellscale.retool.com/embedded/public/7559b6ce-6f20-4649-9240-a2dd6429323e#authToken=" + userToken + "&campaign_id=" + activePersona}
-              style={{ width: "100%", height: window.innerHeight + 120 }}
-              frameBorder={0}
-            />
-          )}
-        </Tabs.Panel>
 
         <Tabs.Panel value="sellscale-db-v2" pt="xs" style={{ position: "relative", padding: "30px" }}>
           {userToken && (

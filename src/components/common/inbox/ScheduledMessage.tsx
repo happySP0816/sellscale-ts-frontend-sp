@@ -2,7 +2,7 @@ import { useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 import { Button, Collapse, Divider, Flex, Indicator, Modal, Popover, Text, TextInput } from '@mantine/core';
 import { Calendar } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
-import { getScheduledMessages } from "@utils/requests/getConversation";
+import { getHiddenUntil, getScheduledMessages } from "@utils/requests/getConversation";
 import { IconCalendar, IconCalendarTime, IconEdit, IconPencil, IconTrash } from '@tabler/icons';
 import { DatePicker, DatePickerProps } from '@mantine/dates';
 import moment from 'moment';
@@ -38,6 +38,7 @@ export const ScheduledMessage = forwardRef(({ openedProspectId }: { openedProspe
     status: string;
     type: string;
   }[]>([]);
+  const [hiddenUntil, setHiddenUntil] = useState<Date | null>(null);
 
   const userToken = useRecoilValue(userTokenState);
 
@@ -62,8 +63,15 @@ export const ScheduledMessage = forwardRef(({ openedProspectId }: { openedProspe
     });
   };
 
+  const fetchHiddenUntil = () => {
+    getHiddenUntil(userToken, openedProspectId).then((res) => {
+      setHiddenUntil(new Date(res.data.hidden_until));
+    });
+  }
+
   useEffect(() => {
     fetchScheduledMessages();
+    fetchHiddenUntil();
   }, []);
 
   useImperativeHandle(ref, () => ({
@@ -73,7 +81,7 @@ export const ScheduledMessage = forwardRef(({ openedProspectId }: { openedProspe
   const [value, setValue] = useState<Date | null>(null);
   return (
     <>
-    {scheduledMessages.length ? (
+    {scheduledMessages.length || hiddenUntil ? (
       <>
         <Flex
           bg={'blue'}
@@ -85,11 +93,15 @@ export const ScheduledMessage = forwardRef(({ openedProspectId }: { openedProspe
         >
           <Flex align={'center'} gap={'sm'}>
             <IconCalendarTime size={'1rem'} color='white' style={{ marginTop: '-1px' }} />
-            <Text color='white'>{scheduledMessages.length} Scheduled {scheduledMessages.length > 1 ? 'Messages' : 'Message'}</Text>
+            <Text color='white'>
+              {hiddenUntil 
+                ? `Outbound scheduled to resume ${moment(hiddenUntil).format('MMM DD, YYYY')}` 
+                : `${scheduledMessages.length} Scheduled ${scheduledMessages.length > 1 ? 'Messages' : 'Message'}`}
+            </Text>
           </Flex>
-          <Button onClick={toggle} style={{ backgroundColor: 'rgba(231, 245, 255, .1)' }} color='white'>
+          {!hiddenUntil && <Button onClick={toggle} style={{ backgroundColor: 'rgba(231, 245, 255, .1)' }} color='white'>
             {opened ? 'Hide' : 'View'}
-          </Button>
+          </Button>}
         </Flex>
         <Collapse in={opened} style={{ backgroundColor: 'white' }}>
           <Flex direction={'column'} style={{ border: '1px solid #dee2e6', borderBottomLeftRadius: '6px', borderBottomRightRadius: '6px' }} p={'md'} gap={'sm'}>

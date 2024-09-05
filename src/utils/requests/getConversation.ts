@@ -40,3 +40,19 @@ export async function getScheduledMessages(
   );
   return await processResponse(response);
 }
+
+export async function getHiddenUntil(
+  userToken: string,
+  prospectId: number
+): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/voyager/hidden_until?prospect_id=${prospectId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  return await processResponse(response);
+}

@@ -49,7 +49,7 @@ import Tour from "reactour";
 import Logo from "../../../assets/images/logo.png";
 import { DataGrid } from "mantine-data-grid";
 import { API_URL } from "@constants/data";
-import { openContextModal } from "@mantine/modals";
+import { closeAllModals, closeModal, openContextModal } from "@mantine/modals";
 import { set } from "lodash";
 import DeepGram from "@common/DeepGram";
 

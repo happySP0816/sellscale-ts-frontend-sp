@@ -24,7 +24,7 @@ import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { createProspectFromLinkedinLink } from "@utils/requests/createProspectFromLinkedinLink";
 import { getProspectByID } from "@utils/requests/getProspectByID";
-import { generateInitialLiMessage } from "@utils/requests/generateInitialLiMessage";
+import { generateInitialLiMessage, generateReferralInitialLiMessage } from "@utils/requests/generateInitialLiMessage";
 import { sendLiOutreachConnection } from "@utils/requests/sendLiOutreachConnection";
 import { IconBrandLinkedin, IconMail } from "@tabler/icons";
 import { openComposeEmailModal } from "@common/prospectDetails/ProspectDetailsViewEmails";
@@ -38,7 +38,7 @@ export default function SendOutreachModal({
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
 
-  const [outreachType, setOutreachType] = useState<Channel | null>(!innerProps.email ? 'LINKEDIN' : null);
+  const [outreachType, setOutreachType] = useState<Channel | null>(null);
 
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
@@ -52,11 +52,11 @@ export default function SendOutreachModal({
   useEffect(() => {
     (async () => {
       // Generate initial message
-      const messageResponse = await generateInitialLiMessage(
+      const messageResponse = await generateReferralInitialLiMessage(
         userToken,
         innerProps.prospectId
       );
-      form.setFieldValue("message", messageResponse.data.message);
+      form.setFieldValue("message", messageResponse.connection_message);
       setLoading(false);
     })();
   }, []);
@@ -146,7 +146,7 @@ export default function SendOutreachModal({
           <Button leftIcon={<IconBrandLinkedin size={'0.9rem'} />} onClick={() => setOutreachType('LINKEDIN')}>
             LinkedIn
           </Button>
-          <Button leftIcon={<IconMail size={'0.9rem'} />} color='yellow' onClick={() => {
+          <Button leftIcon={<IconMail size={'0.9rem'} />} color='yellow' disabled onClick={() => {
             // TEMP: Just use the email sending modal for now
             openComposeEmailModal(
               userToken,

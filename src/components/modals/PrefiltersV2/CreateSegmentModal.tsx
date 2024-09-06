@@ -421,7 +421,7 @@ export default function CreateSegmentModal(props: CreateSegment) {
                 >
                   {loading
                     ? "Finding Duplicates"
-                    : "Create & Upload {numContacts} Contacts"}
+                    : `Create & Upload ${numContacts} Contacts`}
                 </Button>
               </Flex>
             </>

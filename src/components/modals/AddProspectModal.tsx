@@ -314,7 +314,7 @@ export default function AddProspectModal({
                       <th>
                         <Checkbox
                           onChange={(event) =>
-                            setOverrideAll(event.current.checked, true)
+                            setOverrideAll(event.target.checked, true)
                           }
                           checked={duplicateContacts
                             .filter((item) => item.same_archetype)
@@ -345,7 +345,7 @@ export default function AddProspectModal({
                                       if (item.row === prospect.row) {
                                         return {
                                           ...item,
-                                          override: event.currentTarget.checked,
+                                          override: event.target.checked,
                                         };
                                       }
 

@@ -23,12 +23,9 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
-import { Archetype, CTA } from "src";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { createProspectFromLinkedinLink } from "@utils/requests/createProspectFromLinkedinLink";
-import { getProspectByID } from "@utils/requests/getProspectByID";
-import { generateInitialLiMessage } from "@utils/requests/generateInitialLiMessage";
 import { updateProspect } from "@utils/requests/updateProspect";
 import { addProspectReferral } from "@utils/requests/addProspectReferral";
 import { API_URL } from "@constants/data";
@@ -251,7 +248,7 @@ export default function AddProspectModal({
                       <th>
                         <Checkbox
                           onChange={(event) =>
-                            setOverrideAll(event.currentTarget.checked, false)
+                            setOverrideAll(event.target.checked, false)
                           }
                           checked={duplicateContacts
                             .filter((item) => !item.same_archetype)
@@ -317,7 +314,7 @@ export default function AddProspectModal({
                       <th>
                         <Checkbox
                           onChange={(event) =>
-                            setOverrideAll(event.currentTarget.checked, true)
+                            setOverrideAll(event.current.checked, true)
                           }
                           checked={duplicateContacts
                             .filter((item) => item.same_archetype)

@@ -27,3 +27,23 @@ export async function generateInitialLiMessage(userToken: string, prospectId: nu
   return await processResponse(response, 'data');
 
 }
+
+export async function generateReferralInitialLiMessage(userToken: string, prospectId: number): Promise<any> {
+
+  const response = await fetch(
+    `${API_URL}/message_generation/generate_referral_init_li_message`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prospect_id: prospectId,
+      })
+    }
+  );
+
+  return await response.json();
+
+}

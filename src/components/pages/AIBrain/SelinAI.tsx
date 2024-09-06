@@ -2618,6 +2618,7 @@ const SelixControlCenter = ({
   const [popoverOpenedArray, setPopoverOpenedArray] = useState<boolean[]>(
     [1, 1, 1]?.map(() => false)
   );
+  const userToken = useRecoilValue(userTokenState);
 
   const [showICPModal, setShowICPModal] = useState(false);
   const [refreshIcp, setRefreshIcp] = useState(false);
@@ -2691,6 +2692,17 @@ const SelixControlCenter = ({
               return;
             }
             setAIType(value);
+            fetch(`${API_URL}/selix/set_session_tab`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${userToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                session_id: currentSessionId,
+                tab: value,
+              }),
+            });
           }}
           w={"100%"}
           styles={{

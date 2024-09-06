@@ -95,6 +95,7 @@ import SegmentEditPrefilterModal from "@modals/SegmentV2/SegmentEditPrefilterMod
 import ClearSegmentModal from "@modals/SegmentV2/ClearSegmentModal";
 import DeleteSegmentModal from "@modals/SegmentV2/DeleteSegmentModal";
 import DuplicateCampaignModal from "@modals/DuplicateCampaignModal";
+import SingleEmailCampaignModal from "@modals/SingleEmailCampaignModal";
 
 import posthog from "posthog-js";
 import WebsiteIntentSplitModal from "@modals/WebsiteIntentsplitModal";
@@ -927,6 +928,7 @@ export default function App() {
               deletesegment: DeleteSegmentModal,
               resetsegment: ResetSegmentModal,
               duplicateCampaign: DuplicateCampaignModal,
+              singleEmailCampaignModal: SingleEmailCampaignModal,
               websiteintentsplit: WebsiteIntentSplitModal,
               championChange: ChampionChangeModal,
               campaignPersonalizersModal: CampaignPersonalizersModal,

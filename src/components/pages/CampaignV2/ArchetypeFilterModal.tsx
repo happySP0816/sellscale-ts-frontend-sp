@@ -1,5 +1,5 @@
 import {
-    ActionIcon,
+  ActionIcon,
   Anchor,
   Badge,
   Box,
@@ -83,7 +83,6 @@ export const ArchetypeFilters = function ({
 }: {
   hideFeature?: boolean; // for selix
 }) {
-
   const isSelix: boolean = hideFeature;
 
   const userToken = useRecoilValue(userTokenState);
@@ -115,6 +114,7 @@ export const ArchetypeFilters = function ({
       { key: "title", title: "Title" },
       { key: "company", title: "Company" },
       { key: "linkedin_url", title: "Linkedin URL" },
+      { key: "email", title: "Email" },
       { key: "overall_status", title: "Status" },
     ]
   );
@@ -125,6 +125,7 @@ export const ArchetypeFilters = function ({
     "company",
     "icp_fit_score",
     "linkedin_url",
+    "email",
     "overall_status",
   ];
 
@@ -227,6 +228,7 @@ export const ArchetypeFilters = function ({
         { key: "title", title: "Title" },
         { key: "company", title: "Company" },
         { key: "linkedin_url", title: "Linkedin URL" },
+        { key: "email", title: "Email" },
         { key: "overall_status", title: "Status" },
       ];
 
@@ -898,8 +900,25 @@ export const ArchetypeFilters = function ({
               );
             } else if (item.key === "overall_status") {
               return <Badge color={"blue"}>{p[keyType]}</Badge>;
+            } else if (item.key === "email" && !p[keyType]) {
+              return (
+                <Tooltip
+                  position="bottom"
+                  withinPortal={true}
+                  offset={8}
+                  label={"Email is revealed when the campaign is launched."}
+                >
+                  <Box style={{ textWrap: "wrap", maxWidth: "250px" }}>
+                    <Text truncate>{p[keyType] ? p[keyType] : "Not Found"}</Text>
+                  </Box>
+                </Tooltip>
+              );
             }
-            return <Text style={{ maxHeight: "2em" }}>{p[keyType]}</Text>;
+            return (
+              <Box style={{ textWrap: "wrap", maxWidth: "250px" }}>
+                <Text truncate>{p[keyType] ? p[keyType] : "Not Found"}</Text>
+              </Box>
+            );
           } else {
             if (value) {
               return !updatedIndividualColumns.has(item.key) ? (
@@ -965,7 +984,7 @@ export const ArchetypeFilters = function ({
                 </Text>
               );
             } else {
-              return "";
+              return "Not Scored";
             }
           }
         },
@@ -1053,27 +1072,34 @@ export const ArchetypeFilters = function ({
   return (
     <Flex gap={"8px"} style={{ overflowY: "hidden", height: "100%" }}>
       {isLoading && <Loader />}
-      {!isLoading && icp_scoring_ruleset && !hideFeature && !collapseFilters && (
-        <CampaignFilters
-          prospects={prospects}
-          icp_scoring_ruleset={icp_scoring_ruleset}
-          selectedContacts={selectedContacts}
-          archetype_id={currentProject?.id}
-          setContactTableHeaders={setContactTableHeaders}
-          setHeaderSet={setHeaderSet}
-          setUpdatedIndividualColumns={setUpdatedIndividualColumns}
-          programmaticUpdates={programmaticUpdateList}
-          setProgrammaticUpdates={setProgrammaticUpdateList}
-          setCollapseFilters={setCollapseFilters}
-        />
-      )}
+      {!isLoading &&
+        icp_scoring_ruleset &&
+        !hideFeature &&
+        !collapseFilters && (
+          <CampaignFilters
+            prospects={prospects}
+            icp_scoring_ruleset={icp_scoring_ruleset}
+            selectedContacts={selectedContacts}
+            archetype_id={currentProject?.id}
+            setContactTableHeaders={setContactTableHeaders}
+            setHeaderSet={setHeaderSet}
+            setUpdatedIndividualColumns={setUpdatedIndividualColumns}
+            programmaticUpdates={programmaticUpdateList}
+            setProgrammaticUpdates={setProgrammaticUpdateList}
+            setCollapseFilters={setCollapseFilters}
+          />
+        )}
       {collapseFilters && (
         <ActionIcon onClick={() => setCollapseFilters(false)}>
-          <IconChevronRight /> 
+          <IconChevronRight />
         </ActionIcon>
       )}
       <Divider orientation={"vertical"} />
-      <Flex direction={"column"} gap={"8px"} style={{ maxWidth: collapseFilters ? "1450px" : "1150px" }}>
+      <Flex
+        direction={"column"}
+        gap={"8px"}
+        style={{ maxWidth: collapseFilters ? "1450px" : "1150px" }}
+      >
         {selectedContacts && selectedContacts.size > 0 && (
           <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>
             <Text>Bulk Actions - {selectedContacts.size} Selected</Text>

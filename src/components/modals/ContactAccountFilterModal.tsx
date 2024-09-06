@@ -156,6 +156,7 @@ const ContactAccountFilterModal = function ({
       { key: "title", title: "Title" },
       { key: "company", title: "Company" },
       { key: "linkedin_url", title: "Linkedin URL" },
+      { key: "email", title: "Email" },
       { key: "overall_status", title: "Status" },
     ]
   );
@@ -167,6 +168,7 @@ const ContactAccountFilterModal = function ({
     "icp_prospect_fit_score",
     "icp_company_fit_score",
     "linkedin_url",
+    "email",
     "overall_status",
   ];
 
@@ -302,6 +304,7 @@ const ContactAccountFilterModal = function ({
         { key: "title", title: "Title" },
         { key: "company", title: "Company" },
         { key: "linkedin_url", title: "Linkedin URL" },
+        { key: "email", title: "Email" },
         { key: "overall_status", title: "Status" },
       ];
 
@@ -944,8 +947,25 @@ const ContactAccountFilterModal = function ({
               );
             } else if (item.key === "overall_status") {
               return <Badge color={"blue"}>{p[keyType]}</Badge>;
+            } else if (item.key === "email") {
+              return (
+                <Tooltip
+                  position="bottom"
+                  withinPortal={true}
+                  offset={8}
+                  label={"Email is revealed when the campaign is launched."}
+                >
+                  <Box style={{ textWrap: "wrap" }}>
+                    <Text truncate>{p[keyType] ? p[keyType] : "Not Found"}</Text>
+                  </Box>
+                </Tooltip>
+              );
             }
-            return <Text style={{ maxHeight: "2em" }}>{p[keyType]}</Text>;
+            return (
+              <Box style={{ textWrap: "wrap" }}>
+                <Text truncate>{p[keyType] ? p[keyType] : "Not Found"}</Text>
+              </Box>
+            );
           } else {
             if (value) {
               return !updatedIndividualColumns.has(item.key) ? (
@@ -1250,7 +1270,11 @@ const ContactAccountFilterModal = function ({
             } else if (item.key === "overall_status") {
               return <Badge color={"blue"}>{p[keyType]}</Badge>;
             }
-            return <Text style={{ maxHeight: "2em" }}>{p[keyType]}</Text>;
+            return (
+              <Box style={{ textWrap: "wrap", maxWidth: "250px" }}>
+                <Text truncate>{p[keyType] ? p[keyType] : "Not Found"}</Text>
+              </Box>
+            );
           } else {
             if (value) {
               return !updatedCompanyColumns.has(item.key) ? (

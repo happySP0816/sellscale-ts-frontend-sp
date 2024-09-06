@@ -455,6 +455,20 @@ export default function PersonaCampaigns() {
                 >
                   Duplicate Campaign
                 </Menu.Item>
+                <Menu.Item
+                  icon={<IconMail size="1rem" />}
+                  onClick={() => {
+                    openContextModal({
+                      modal: "singleEmailCampaignModal",
+                      title: <Title order={3}>Single Email Campaign</Title>,
+                      innerProps: {
+                        fetchAllCampaigns: fetchCampaignPersonas,
+                      },
+                    });
+                  }}
+                >
+                  Single Email Campaign
+                </Menu.Item>
               </Menu.Dropdown>
             </Menu>
           </Button.Group>

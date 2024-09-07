@@ -1,6 +1,7 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import RichTextArea from "@common/library/RichTextArea";
 import { API_URL } from "@constants/data";
+import { debounce } from 'lodash';
 import {
   Button,
   Text,
@@ -19,15 +20,18 @@ import {
   Title,
   MultiSelect,
   Checkbox,
+  Loader,
 } from "@mantine/core";
 import { closeAllModals, ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconAlignJustified, IconAlignLeft, IconAlignRight } from "@tabler/icons";
+import { IconAlignJustified, IconAlignLeft, IconAlignRight, IconCheck } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { JSONContent } from "@tiptap/react";
+import { set } from "lodash";
 import { useState, useEffect, useRef } from "react";
 import { useRecoilValue } from "recoil";
 import { ProspectShallow } from "src";
+import { isLinkedInURL } from "@utils/general";
 
 export default function SingleEmailCampaignModal({
   context,
@@ -41,7 +45,7 @@ export default function SingleEmailCampaignModal({
 
   const [loading, setLoading] = useState(false);
   const [fromEmail, setFromEmail] = useState("SellScale CSM <csm@sellscale.com>");
-  const [toEmail, setToEmail] = useState("Rajnikant Mohan from X Telecom <rmohan@xtel.com>");
+  const [toEmail, setToEmail] = useState<string[]>([]);
   const [ccEmail, setCcEmail] = useState("");
   const [bccEmail, setBccEmail] = useState("");
   const [ccEmailList, setCcEmailList] = useState<string[]>([]);
@@ -56,6 +60,56 @@ export default function SingleEmailCampaignModal({
 
   const [emailRecipients, setEmailRecipients] = useState<ProspectShallow[] | null>(null);
   const [availableEmails, setAvailableEmails] = useState<string[]>([]);
+  const [options, setOptions] = useState<SelectProps["data"]>([]);
+
+  const [prospectOptions, setProspectOptions] = useState<SelectProps["data"]>([]);
+
+  const isValidLinkedInUrl = (url: string) => {
+    const linkedInRegex = /^(https?:\/\/)?(www\.)?linkedin\.com\/.*$/;
+    return linkedInRegex.test(url);
+  };
+
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  }
+
+  // const searchExistingProspects = debounce(async (query) => {
+  //   if (query.trim().length === 0) return;
+
+  //   try {
+  //     const response = await fetch(`${API_URL}/prospect/search_existing_prospects`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${userToken}`,
+  //       },
+  //       body: JSON.stringify({ query }),
+  //     });
+
+  //     const data = await response.json();
+
+  //     setProspectOptions(
+  //       data.data.map((prospect: any) => ({
+  //         value: prospect.value,
+  //         label: prospect.label,
+  //       }))
+  //     );
+
+  //     console.log('options are ', data.data.map((prospect: any) => ({
+  //       value: prospect.value,
+  //       label: prospect.label,
+  //     })));
+  //     console.log('to email is ', toEmail);
+
+
+  //     // Handle the data as needed
+  //     console.log(data);
+  //   } catch (error) {
+  //     console.error("Error fetching existing prospects:", error);
+  //   }
+  // }, 300);
+  
 
   const onSendEmail = async () => {
 
@@ -75,7 +129,7 @@ export default function SingleEmailCampaignModal({
       },
       body: JSON.stringify({
         from_email: emailDomains[0],
-        to_email: toEmail.split(',').map(email => email.trim()).map(Number),
+        to_email: toEmail.map(email => email.trim()).map(Number),
         cc_email: ccEmail,
         bcc_email: bccEmail,
         cc_email_list: ccEmailList,
@@ -119,19 +173,22 @@ export default function SingleEmailCampaignModal({
       });
   };
 
+
+
   useEffect(() => {
     getAvailableEmailRecipients();
   }, []);
+
   return (
     <Paper p="lg" shadow="sm" radius="md" style={{ position: "relative", backgroundColor: theme.colors.gray[0] }}>
       <Stack spacing="md">
-      <MultiSelect
+        <MultiSelect
           label={
             <span style={{ color: emailDomains.length > 0 ? theme.colors.dark[9] : theme.colors.red[6] }}>
               Email to Send From: *
             </span>
           }
-          value={emailDomains}
+          value={emailDomains.length > 0 ? emailDomains : (availableEmails?.[0] ? [availableEmails[0]] : [])}
           onChange={(values) => setEmailDomains(values.slice(-1))}
           data={availableEmails?.map((email, index) => ({
             value: email,
@@ -146,26 +203,93 @@ export default function SingleEmailCampaignModal({
           size="md"
           mb="sm"
         />
+
         <MultiSelect
           label="To:"
-          value={toEmail ? toEmail.split(", ") : []}
-          onChange={(values) => {
-            setToEmail(values.join(", "));
-          }}
-          data={emailRecipients?.map((recipient, index) => ({
-            value: recipient.id.toString(),
-            label: `${recipient.full_name} - ${recipient.title} at ${recipient.company}`,
-            key: index, // Ensure unique key for each recipient
-          })) || []}
-          searchable
           creatable
-          getCreateLabel={(query) => `+ Create ${query}`}
-          style={{ flexGrow: 1 }}
-          clearable
-          radius="md"
+          searchable
+          data={options}
+          value={toEmail}
+          placeholder="Linkedin URL or email address"
           size="md"
+          onChange={(values) => setToEmail(values)}
+          onCreate={(query) => {
+            const newEmail = query.trim();
+
+            if (isLinkedInURL(newEmail)) {
+              const getEmailFromLinkedinURL = async (url: string) => {
+                if (!url) {
+                  return;
+                }
+
+                showNotification({
+                  title: "Getting Email...",
+                  message: `Getting email for ${url}`,
+                  color: "teal",
+                });
+
+                try {
+                  const response = await fetch(`${API_URL}/prospect/email_from_linkedin_url`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${userToken}`,
+                    },
+                    body: JSON.stringify({
+                      linkedin_url: url,
+                    }),
+                  });
+
+                  const data = await response.json();
+
+                  if (!data.email) {
+                    showNotification({
+                      title: "Email Not Found",
+                      message: `Email not found for ${url}`,
+                      color: "red",
+                    });
+                    setOptions([])
+                    setToEmail([])
+                    return;
+                  }
+
+                  const newEmail = data.email;
+                  const newOption = { value: `${newEmail}-${Date.now()}`, label: newEmail };
+                  setOptions([newOption]);
+                  setToEmail([newOption.value]);
+                } catch (error) {
+                  showNotification({
+                    title: "Error",
+                    message: `An error occurred while fetching email for ${url}`,
+                    color: "red",
+                  });
+                }
+              };
+              getEmailFromLinkedinURL(newEmail);
+              const newOption = { value: `${newEmail}-${Date.now()}`, label: newEmail };
+              setOptions((prevOptions) => [...prevOptions, newOption]);
+              setToEmail((prevEmails) => [...prevEmails, newOption.value]);
+              return newOption.value;
+            } else if (isValidEmail(newEmail)) {
+              const newOption = { value: `${newEmail}-${Date.now()}`, label: newEmail };
+              setOptions((prevOptions) => [...prevOptions, newOption]);
+              setToEmail((prevEmails) => [...prevEmails, newOption.value]);
+              return newOption.value;
+            } else {
+              showNotification({
+                title: "Invalid Email",
+                message: `Please enter a valid email address`,
+                color: "red",
+              });
+              return null;
+            }
+          }}
+          getCreateLabel={(query) => `+ Add ${query}`}
+          shouldCreate={(query, data) => query.trim().length > 0 && !data.some(item => item.value === query.trim())}
+          clearable
+          rightSection={isValidLinkedInUrl(toEmail[toEmail.length - 1]) && <Loader size="xs" />}
         />
-        <Group position="apart" mt="sm">
+        {toEmail.length > 0 && <Group position="apart" mt="sm">
           <Checkbox
             label="CC"
             checked={ccEmail !== ""}
@@ -178,7 +302,7 @@ export default function SingleEmailCampaignModal({
             onChange={(e) => setBccEmail(e.currentTarget.checked ? "bcc@example.com" : "")}
             size="md"
           />
-        </Group>
+        </Group>}
         {ccEmail && (
           <MultiSelect
             label="CC Email List"

@@ -1,14 +1,43 @@
-import { Avatar, Badge, Box, Button, Flex, Paper, Stack, Switch, Text } from "@mantine/core";
+import {
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Flex,
+  Paper,
+  Stack,
+  Switch,
+  Text,
+} from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
-import { IconBuilding, IconClock, IconInfoCircle, IconLetterT, IconLoader, IconSwitch, IconTargetArrow, IconToggleRight, IconUser } from "@tabler/icons";
+import {
+  IconBuilding,
+  IconClock,
+  IconInfoCircle,
+  IconLetterT,
+  IconLoader,
+  IconSwitch,
+  IconTargetArrow,
+  IconToggleRight,
+  IconUser,
+} from "@tabler/icons";
 import { DataGrid } from "mantine-data-grid";
 
-export default function OverrideProspectsModal({ context, id, innerProps }: ContextModalProps<{ data: any }>) {
+export default function OverrideProspectsModal({
+  context,
+  id,
+  innerProps,
+}: ContextModalProps<{ data: any }>) {
   return (
     <Stack spacing={"sm"}>
       <Text fw={400} color="gray" size={"sm"}>
-        Ready to Upload? <span className="font-semibold text-black">We have found some prospects that are already to your prospect database.</span>
-        Please check the prospects that you want to overwrite and move to your new segment/campaign.
+        Ready to Upload?{" "}
+        <span className="font-semibold text-black">
+          We have found some prospects that are already to your prospect
+          database.
+        </span>
+        Please check the prospects that you want to overwrite and move to your
+        new segment/campaign.
       </Text>
       <DataGrid
         data={innerProps.data}
@@ -27,7 +56,7 @@ export default function OverrideProspectsModal({ context, id, innerProps }: Cont
             maxSize: 250,
             minSize: 250,
             cell: (cell) => {
-              const { avatar, full_name } = cell.row.original;
+              const { avatar, full_name }: any = cell.row.original;
 
               return (
                 <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
@@ -51,7 +80,13 @@ export default function OverrideProspectsModal({ context, id, innerProps }: Cont
               const { company } = cell.row.original;
 
               return (
-                <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
                   <Text fw={500}>{company}</Text>
                 </Flex>
               );
@@ -93,7 +128,13 @@ export default function OverrideProspectsModal({ context, id, innerProps }: Cont
               const { sdr } = cell.row.original;
 
               return (
-                <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
                   <Text fw={500}>{sdr}</Text>
                 </Flex>
               );
@@ -112,10 +153,16 @@ export default function OverrideProspectsModal({ context, id, innerProps }: Cont
 
             enableResizing: true,
             cell: (cell) => {
-              const { segment_title } = cell.row.original;
+              const { segment_title }: any = cell.row.original;
 
               return (
-                <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
                   <Text fw={500}>{segment_title ? segment_title : "None"}</Text>
                 </Flex>
               );
@@ -134,10 +181,16 @@ export default function OverrideProspectsModal({ context, id, innerProps }: Cont
 
             enableResizing: true,
             cell: (cell) => {
-              const { archetype } = cell.row.original;
+              const { archetype }: any = cell.row.original;
 
               return (
-                <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
                   <Text fw={500}>{archetype}</Text>
                 </Flex>
               );
@@ -157,7 +210,13 @@ export default function OverrideProspectsModal({ context, id, innerProps }: Cont
               const { status } = cell.row.original;
 
               return (
-                <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
                   <Badge>{status}</Badge>
                 </Flex>
               );
@@ -176,10 +235,16 @@ export default function OverrideProspectsModal({ context, id, innerProps }: Cont
 
             enableResizing: true,
             cell: (cell) => {
-              const { linkedin_url } = cell.row.original;
+              const { linkedin_url }: any = cell.row.original;
 
               return (
-                <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
                   <Flex justify={"space-between"} w={"100%"}>
                     <Switch checked={linkedin_url && true} />
                   </Flex>
@@ -203,7 +268,14 @@ export default function OverrideProspectsModal({ context, id, innerProps }: Cont
               const { email } = cell.row.original;
 
               return (
-                <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                <Flex
+                  align={"center"}
+                  justify={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
                   <Switch checked={email && true} />
                 </Flex>
               );
@@ -216,7 +288,12 @@ export default function OverrideProspectsModal({ context, id, innerProps }: Cont
           },
         }}
       />
-      <Paper mt={"xs"} withBorder p={"xs"} style={{ borderColor: "orange", backgroundColor: "#FEF0C769" }}>
+      <Paper
+        mt={"xs"}
+        withBorder
+        p={"xs"}
+        style={{ borderColor: "orange", backgroundColor: "#FEF0C769" }}
+      >
         <Flex align={"center"} gap={5}>
           <IconInfoCircle color="orange" />
           <Text size={"sm"} fw={500} color="orange">

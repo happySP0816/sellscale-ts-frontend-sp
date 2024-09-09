@@ -195,6 +195,8 @@ export default function SingleEmailCampaignModal({
     setLinkedinRequire(false);
   };
 
+  console.log("============", availableEmails);
+
   return (
     <Paper style={{ position: "relative" }}>
       <Divider />
@@ -204,20 +206,22 @@ export default function SingleEmailCampaignModal({
         </Text>
         <MultiSelect
           itemComponent={SelectItem}
-          // value={emailDomains.length > 0 ? emailDomains : availableEmails?.[0] ? [availableEmails[0]] : []}
+          value={emailDomains.length > 0 ? emailDomains : availableEmails?.[0] ? [availableEmails[0]] : []}
           data={
-            availableEmails?.map((email, index) => ({
-              value: email,
-              label: email,
-              key: index,
-            })) || []
+            (availableEmails &&
+              availableEmails?.map((email, index) => ({
+                value: email,
+                label: email,
+                key: index,
+              }))) ||
+            []
           }
-          disableSelectedItemFiltering
+          onChange={(values) => setEmailDomains(values.slice(-1))}
           w={"100%"}
           nothingFound="Nobody here"
           maxDropdownHeight={400}
           icon={
-            !change && (
+            availableEmails.length > 0 ? null : (
               <Flex align={"center"} gap={4}>
                 <Avatar src={""} size={"xs"} radius={"xl"} />
                 <Text fw={500} size={"sm"}>
@@ -230,11 +234,6 @@ export default function SingleEmailCampaignModal({
               </Flex>
             )
           }
-          onChange={(value) => {
-            console.log(value);
-            if (value.length > 0) setChange(true);
-            else setChange(false);
-          }}
           styles={{
             icon: {
               width: "260px",
@@ -243,55 +242,157 @@ export default function SingleEmailCampaignModal({
           }}
           size="xs"
         />
-        {/* <MultiSelect
-          // label={<span style={{ color: emailDomains.length > 0 ? theme.colors.dark[9] : theme.colors.red[6] }}>Email to Send From: *</span>}
-          // value={emailDomains.length > 0 ? emailDomains : availableEmails?.[0] ? [availableEmails[0]] : []}
-          onChange={(values) => setEmailDomains(values)}
-          data={
-            availableEmails?.map((email, index) => ({
-              value: email,
-              label: email,
-              key: index,
-            })) || []
+      </Flex>
+      <Flex align={"center"} gap={"xs"} mt={6}>
+        <Text size={"sm"} color="gray" fw={500} miw={45}>
+          To:
+        </Text>
+        <MultiSelect
+          w={"100%"}
+          creatable
+          searchable
+          data={options}
+          value={toEmail}
+          placeholder="Enter email address or Linkedin URL"
+          size="xs"
+          onChange={(values) => setToEmail(values)}
+          onCreate={(query) => {
+            const newEmail = query.trim();
+
+            if (isLinkedInURL(newEmail)) {
+              const getEmailFromLinkedinURL = async (url: string) => {
+                if (!url) {
+                  return;
+                }
+
+                showNotification({
+                  title: "Getting Email...",
+                  message: `Getting email for ${url}`,
+                  color: "teal",
+                });
+
+                try {
+                  const response = await fetch(`${API_URL}/prospect/email_from_linkedin_url`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${userToken}`,
+                    },
+                    body: JSON.stringify({
+                      linkedin_url: url,
+                    }),
+                  });
+
+                  const data = await response.json();
+
+                  if (!data.email) {
+                    showNotification({
+                      title: "Email Not Found",
+                      message: `Email not found for ${url}`,
+                      color: "red",
+                    });
+                    setOptions([]);
+                    setToEmail([]);
+                    return;
+                  }
+
+                  const newEmail = data.email;
+                  const newOption = { value: `${newEmail}-${Date.now()}`, label: newEmail };
+                  setOptions([newOption]);
+                  setToEmail([newOption.value]);
+                } catch (error) {
+                  showNotification({
+                    title: "Error",
+                    message: `An error occurred while fetching email for ${url}`,
+                    color: "red",
+                  });
+                }
+              };
+              getEmailFromLinkedinURL(newEmail);
+              const newOption = { value: `${newEmail}-${Date.now()}`, label: newEmail };
+              setOptions((prevOptions) => [...prevOptions, newOption]);
+              setToEmail((prevEmails) => [...prevEmails, newOption.value]);
+              return newOption.value;
+            } else if (isValidEmail(newEmail)) {
+              const newOption = { value: `${newEmail}-${Date.now()}`, label: newEmail };
+              setOptions((prevOptions) => [...prevOptions, newOption]);
+              setToEmail((prevEmails) => [...prevEmails, newOption.value]);
+              return newOption.value;
+            } else {
+              showNotification({
+                title: "Invalid Email",
+                message: `Please enter a valid email address`,
+                color: "red",
+              });
+              return null;
+            }
+          }}
+          getCreateLabel={(query) => `+ Add ${query}`}
+          shouldCreate={(query, data) => query.trim().length > 0 && !data.some((item) => item.value === query.trim())}
+          clearable
+          rightSection={isValidLinkedInUrl(toEmail[toEmail.length - 1]) && <Loader size="xs" />}
+        />
+        {toEmail.length > 0 && (
+          <Flex align={"center"} gap={"xs"}>
+            <Button variant="default" size="xs" onClick={() => setCcEmail("cc@example.com")}>
+              +CC
+            </Button>
+            <Button variant="default" size="xs" onClick={() => setBccEmail("bcc@example.com")}>
+              +BCC
+            </Button>
+          </Flex>
+        )}
+      </Flex>
+      {ccEmail && (
+        <MultiSelect
+          label={
+            <Text color="gray" fw={500} size={"xs"}>
+              CC Email List
+            </Text>
           }
+          value={ccEmailList}
+          onChange={(values) => setCcEmailList(values)}
+          data={ccEmailList.map((email, index) => ({
+            value: email,
+            label: email,
+            key: index,
+          }))}
           creatable
           searchable
           getCreateLabel={(query) => `+ Add ${query}`}
           clearable
-          radius="md"
-          size="md"
-          mb="sm"
-          itemComponent={SelectItem}
-          filter={(value, selected, item) => {
-            return (
-              !selected &&
-              (item.label?.toLowerCase().includes(value.toLowerCase().trim()) || item.description?.toLowerCase().includes(value.toLowerCase().trim()))
-            );
-          }}
-        /> */}
-      </Flex>
-      <Flex align={"center"} gap={"xs"} mt={6}>
-        <Text size={"sm"} color="gray" fw={500} w={68}>
-          To:
-        </Text>
-        <TextInput
-          placeholder="Enter email address or Linkedin URL"
+          mt={"md"}
           size="xs"
-          w={"100%"}
-          onChange={handleLinkedinRequired}
-          rightSection={linkedinRequire && <Loader color="gray" size="xs" />}
         />
-        <Button variant="default" size="xs">
-          +CC
-        </Button>
-        <Button variant="default" size="xs">
-          +BCC
-        </Button>
-      </Flex>
+      )}
+      {bccEmail && (
+        <MultiSelect
+          label={
+            <Text color="gray" fw={500} size={"xs"}>
+              BCC Email List
+            </Text>
+          }
+          value={bccEmailList}
+          onChange={(values) => setBccEmailList(values)}
+          data={bccEmailList.map((email, index) => ({
+            value: email,
+            label: email,
+            key: index,
+          }))}
+          creatable
+          searchable
+          getCreateLabel={(query) => `+ Add ${query}`}
+          clearable
+          size="xs"
+          mb="sm"
+        />
+      )}
       <TextInput
-        mt={"sm"}
+        value={subject}
+        onChange={(e) => setSubject(e.currentTarget.value)}
+        mt={"xs"}
         label={
-          <Text color="gray" fw={500} size={"sm"}>
+          <Text color="gray" fw={500} size={"xs"}>
             SUBJECT:
           </Text>
         }

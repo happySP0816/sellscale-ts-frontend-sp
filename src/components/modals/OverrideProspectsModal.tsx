@@ -1,20 +1,9 @@
-import { Avatar, Badge, Box, Button, Flex, Paper, Stack, Text } from "@mantine/core";
-import { IconClock, IconInfoCircle, IconLetterT, IconLoader, IconTargetArrow, IconUser } from "@tabler/icons";
+import { Avatar, Badge, Box, Button, Flex, Paper, Stack, Switch, Text } from "@mantine/core";
+import { ContextModalProps } from "@mantine/modals";
+import { IconBuilding, IconClock, IconInfoCircle, IconLetterT, IconLoader, IconSwitch, IconTargetArrow, IconToggleRight, IconUser } from "@tabler/icons";
 import { DataGrid } from "mantine-data-grid";
 
-export default function OverrideProspectsModal() {
-  const data = [
-    {
-      avatar: "",
-      name: "Etika Srivastava",
-      job: "Talent Acquisition Recruiter",
-      company: "HCLTech",
-      sdr: "Ishan Sharma",
-      segment: null,
-      campaign: "Physician Outreach S1",
-      status: "prospect",
-    },
-  ];
+export default function OverrideProspectsModal({ context, id, innerProps }: ContextModalProps<{ data: any }>) {
   return (
     <Stack spacing={"sm"}>
       <Text fw={400} color="gray" size={"sm"}>
@@ -22,7 +11,7 @@ export default function OverrideProspectsModal() {
         Please check the prospects that you want to overwrite and move to your new segment/campaign.
       </Text>
       <DataGrid
-        data={data}
+        data={innerProps.data}
         withBorder
         withColumnBorders
         withRowSelection
@@ -35,22 +24,57 @@ export default function OverrideProspectsModal() {
                 <Text color="gray">Prospect Name</Text>
               </Flex>
             ),
-            maxSize: 320,
-            minSize: 320,
+            maxSize: 250,
+            minSize: 250,
             cell: (cell) => {
-              const { avatar, job, company, name } = cell.row.original;
+              const { avatar, full_name } = cell.row.original;
 
               return (
                 <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
                   <Avatar src={avatar} size={"md"} radius={"xl"} />
-                  <Box>
-                    <Text fw={500}>{name}</Text>
-                    <Flex>
-                      <Text size={"xs"} color="gray" fw={500}>
-                        {job} <span className="font-semibold text-[14px]">@{company}</span>
-                      </Text>
-                    </Flex>
-                  </Box>
+                  <Text fw={500}>{full_name}</Text>
+                </Flex>
+              );
+            },
+          },
+          {
+            accessorKey: "company",
+            header: () => (
+              <Flex align={"center"} gap={"3px"}>
+                <IconBuilding color="gray" size={"0.9rem"} />
+                <Text color="gray">Company</Text>
+              </Flex>
+            ),
+
+            enableResizing: true,
+            cell: (cell) => {
+              const { company } = cell.row.original;
+
+              return (
+                <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                  <Text fw={500}>{company}</Text>
+                </Flex>
+              );
+            },
+          },
+          {
+            accessorKey: "title",
+            header: () => (
+              <Flex align={"center"} gap={"3px"}>
+                <IconLetterT color="gray" size={"0.9rem"} />
+                <Text color="gray">Title</Text>
+              </Flex>
+            ),
+            maxSize: 200,
+            minSize: 200,
+            cell: (cell) => {
+              const { title } = cell.row.original;
+
+              return (
+                <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
+                  <Text fw={500} lineClamp={2} maw={200}>
+                    {title}
+                  </Text>
                 </Flex>
               );
             },
@@ -77,6 +101,8 @@ export default function OverrideProspectsModal() {
           },
           {
             accessorKey: "segment",
+            maxSize: 240,
+            minSize: 240,
             header: () => (
               <Flex align={"center"} gap={"3px"}>
                 <IconClock color="gray" size={"0.9rem"} />
@@ -86,17 +112,19 @@ export default function OverrideProspectsModal() {
 
             enableResizing: true,
             cell: (cell) => {
-              const { segment } = cell.row.original;
+              const { segment_title } = cell.row.original;
 
               return (
                 <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
-                  <Text fw={500}>{segment ? segment : "None"}</Text>
+                  <Text fw={500}>{segment_title ? segment_title : "None"}</Text>
                 </Flex>
               );
             },
           },
           {
-            accessorKey: "segment",
+            accessorKey: "campaign",
+            maxSize: 240,
+            minSize: 240,
             header: () => (
               <Flex align={"center"} gap={"3px"}>
                 <IconTargetArrow color="gray" size={"0.9rem"} />
@@ -106,11 +134,11 @@ export default function OverrideProspectsModal() {
 
             enableResizing: true,
             cell: (cell) => {
-              const { campaign } = cell.row.original;
+              const { archetype } = cell.row.original;
 
               return (
                 <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
-                  <Text fw={500}>{campaign}</Text>
+                  <Text fw={500}>{archetype}</Text>
                 </Flex>
               );
             },
@@ -131,6 +159,52 @@ export default function OverrideProspectsModal() {
               return (
                 <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
                   <Badge>{status}</Badge>
+                </Flex>
+              );
+            },
+          },
+          {
+            accessorKey: "linkedin",
+            maxSize: 100,
+            minSize: 100,
+            header: () => (
+              <Flex align={"center"} gap={"3px"}>
+                <IconToggleRight color="gray" size={"0.9rem"} />
+                <Text color="gray">Linkedin</Text>
+              </Flex>
+            ),
+
+            enableResizing: true,
+            cell: (cell) => {
+              const { linkedin_url } = cell.row.original;
+
+              return (
+                <Flex align={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                  <Flex justify={"space-between"} w={"100%"}>
+                    <Switch checked={linkedin_url && true} />
+                  </Flex>
+                </Flex>
+              );
+            },
+          },
+          {
+            accessorKey: "email",
+            maxSize: 100,
+            minSize: 100,
+            header: () => (
+              <Flex align={"center"} gap={"3px"}>
+                <IconToggleRight color="gray" size={"0.9rem"} />
+                <Text color="gray">Email</Text>
+              </Flex>
+            ),
+
+            enableResizing: true,
+            cell: (cell) => {
+              const { email } = cell.row.original;
+
+              return (
+                <Flex align={"center"} justify={"center"} gap={"xs"} py={"sm"} w={"100%"} h={"100%"}>
+                  <Switch checked={email && true} />
                 </Flex>
               );
             },

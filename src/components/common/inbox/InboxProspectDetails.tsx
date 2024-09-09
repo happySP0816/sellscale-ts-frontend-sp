@@ -30,7 +30,9 @@ import {
   Radio,
   TextInput,
   Checkbox,
-  SimpleGrid, HoverCard, Loader,
+  SimpleGrid,
+  HoverCard,
+  Loader,
 } from "@mantine/core";
 import {
   IconBriefcase,
@@ -42,7 +44,8 @@ import {
   IconTrash,
   IconExternalLink,
   IconPencil,
-  IconUserEdit, IconPhone,
+  IconUserEdit,
+  IconPhone,
 } from "@tabler/icons-react";
 import { openedProspectIdState, currentConvoChannelState } from "@atoms/inboxAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
@@ -146,7 +149,11 @@ export default function ProjectDetails(props: {
 
   let showCRM = userData?.client_sync_crm !== null;
 
-  const { data, isFetching, refetch: refetchProspectDetails } = useQuery({
+  const {
+    data,
+    isFetching,
+    refetch: refetchProspectDetails,
+  } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
     queryFn: async () => {
       const response = await getProspectByID(userToken, openedProspectId);
@@ -176,11 +183,11 @@ export default function ProjectDetails(props: {
   const onClickRevealNumber = async () => {
     setLoadingStateFindPhoneNumber(true);
     const response = await fetch(`${API_URL}/prospect/get-phone-number/${openedProspectId}`, {
-      method: 'GET',
+      method: "GET",
       headers: {
         Authorization: `Bearer ${userToken}`,
-      }
-    })
+      },
+    });
 
     const jsonResponse = await response.json();
 
@@ -191,8 +198,7 @@ export default function ProjectDetails(props: {
           message: "We are currently fetching the number in the background. It might take a while.",
           color: "blue",
         });
-      }
-      else {
+      } else {
         showNotification({
           title: "Success Fetching the Number",
           message: "We have fetched the number successfully!",
@@ -211,7 +217,7 @@ export default function ProjectDetails(props: {
 
     refetchProspectDetails();
     setLoadingStateFindPhoneNumber(false);
-  }
+  };
 
   let statusValue = data?.details?.linkedin_status || "ACCEPTED";
 
@@ -329,10 +335,10 @@ export default function ProjectDetails(props: {
 
   function formatPhoneNumber(phoneNumber: string) {
     // Remove any non-numeric characters except for the plus sign at the start
-    phoneNumber = phoneNumber.replace(/[^\d+]/g, '');
+    phoneNumber = phoneNumber.replace(/[^\d+]/g, "");
 
     // Check if the phone number starts with +1 and has the correct length
-    if (phoneNumber.startsWith('+1') && phoneNumber.length === 12) {
+    if (phoneNumber.startsWith("+1") && phoneNumber.length === 12) {
       // Extract parts of the phone number
       const countryCode = phoneNumber.substring(0, 2); // +1
       const areaCode = phoneNumber.substring(2, 5); // 234
@@ -372,13 +378,13 @@ export default function ProjectDetails(props: {
             <Button radius={"xs"} ml="auto" mt="0" onClick={openProspectModal} color="gray" variant="subtle" rightIcon={<IconPencil size={"1rem"} />}></Button>
           </Flex>
 
-          <Flex align={"center"} gap={"md"}>
+          <Flex align={"start"} gap={"md"}>
             <Flex direction={"column"} align={"center"} maw={"8rem"}>
               <Avatar
-                w="100%"
-                h={"auto"}
-                mih={"8rem"}
-                miw={"8rem"}
+                // w="100%"
+                // h={"auto"}
+                h={"6rem"}
+                w={"6rem"}
                 sx={{ backgroundColor: theme.colors.gray[0] }}
                 src={proxyURL(data?.details.profile_pic)}
                 color={valueToColor(theme, data?.details.full_name)}
@@ -424,6 +430,13 @@ export default function ProjectDetails(props: {
 
                     refetchState();
                   }}
+                  styles={{
+                    label: {
+                      fontSize: "10px",
+                      display: "flex",
+                      alignItems: "center",
+                    },
+                  }}
                 />
               </Card>
               {!deactivateAiEngagementStatus && (
@@ -432,36 +445,28 @@ export default function ProjectDetails(props: {
                 </Badge>
               )}
             </Flex>
-
             <Box maw={"60%"} w={"100%"}>
-              <Flex gap={"sm"} wrap={"wrap"}>
-                <Flex gap={"xs"} align={"center"} wrap={"wrap"}>
-                  <Text fw={700} fz={"xs"} color="gray.6">
-                    ICP Score
-                  </Text>
-                  <ICPFitPill
-                    size="sm"
-                    icp_fit_score={data?.details.icp_fit_score || 0}
-                    icp_fit_reason={data?.details.icp_fit_reason || ""}
-                    archetype={data?.details.persona || ""}
-                  />
-                </Flex>
-              </Flex>
-
-
-              <Flex gap={"xs"} align={"center"} wrap={"wrap"} mt={5}>
-                <IconUser stroke={1.5} size={18} className={classes.icon} />
-                <Text size="sm">
+              <Flex align={"center"} gap={"sm"}>
+                <Text size={"lg"} fw={700}>
                   {data?.details.full_name || "N/A"}
                 </Text>
+                <Divider orientation="vertical" mt={5} h={"16px"} />
+                <Text fw={600} fz={"xs"} color="gray.6">
+                  ICP Score
+                </Text>
+                <ICPFitPill
+                  size="sm"
+                  icp_fit_score={data?.details.icp_fit_score || 0}
+                  icp_fit_reason={data?.details.icp_fit_reason || ""}
+                  archetype={data?.details.persona || ""}
+                />
               </Flex>
 
               {data?.details.title && (
                 <Group noWrap spacing={10} mt={3}>
-                  <IconBriefcase stroke={1.5} size={28} className={classes.icon} />
-                  <Text size="xs">
-                    {data.details.title}
-                  </Text>
+                  <IconBriefcase stroke={1.5} size={"1.1rem"} className={classes.icon} />
+                  <Text size="xs">{data.details.title}</Text>
+                  <IconExternalLink size={"0.8rem"} color="#228be6" />
                 </Group>
               )}
               {data?.details.company && data?.company.url && (
@@ -485,37 +490,31 @@ export default function ProjectDetails(props: {
               {data?.email?.email && (
                 <Group noWrap spacing={10} mt={5}>
                   <IconMail stroke={1.5} size={18} className={classes.icon} />
-                  <Text
-                    size="xs"
-                    component="a"
-                    href={`mailto:${data?.email?.email}`}
-                  >
+                  <Text size="xs" component="a" href={`mailto:${data?.email?.email}`}>
                     {data?.email?.email} <IconExternalLink size="0.55rem" />
                   </Text>
                 </Group>
               )}
-              {data?.data.location && (
+              {/* {data?.data.location && (
                 <Group noWrap spacing={10} mt={5}>
                   <IconHomeHeart stroke={1.5} size={16} className={classes.icon} />
-                  <Text size="xs">
-                    {data.data.location}
+                  <Text size="xs">{data.data.location}</Text>
+                </Group>
+              )} */}
+
+              {/* {data?.email.email && (
+                <EmailStoreView email={data.email.email} emailStore={data.data.email_store} isValid={data.data.valid_primary_email} />
+                <Group noWrap spacing={10} mt={5}>
+                  <IconMail stroke={1.5} size={18} className={classes.icon} />
+                  <Text
+                    size="xs"
+                    component="a"
+                    href={`mailto:${data.email.email}`}
+                  >
+                    {data.email.email} <IconExternalLink size="0.55rem" />
                   </Text>
                 </Group>
-              )}
-
-              {data?.email.email && (
-                <EmailStoreView email={data.email.email} emailStore={data.data.email_store} isValid={data.data.valid_primary_email} />
-                // <Group noWrap spacing={10} mt={5}>
-                //   <IconMail stroke={1.5} size={18} className={classes.icon} />
-                //   <Text
-                //     size="xs"
-                //     component="a"
-                //     href={`mailto:${data.email.email}`}
-                //   >
-                //     {data.email.email} <IconExternalLink size="0.55rem" />
-                //   </Text>
-                // </Group>
-              )}
+              )} */}
 
               {
                 // User did not click reveal phone number yet
@@ -524,16 +523,12 @@ export default function ProjectDetails(props: {
                     <IconPhone stroke={1.5} size={18} className={classes.icon} />
                     <HoverCard width={280} shadow="md" closeDelay={200}>
                       <HoverCard.Target>
-                        <Button size={'xs'} variant={'outline'}
-                                disabled={loadingStateFindPhoneNumber}
-                                onClick={() => onClickRevealNumber()}>
-                          {loadingStateFindPhoneNumber ? <Loader /> : "Reveal phone number" }
+                        <Button size={"xs"} variant={"outline"} disabled={loadingStateFindPhoneNumber} onClick={() => onClickRevealNumber()}>
+                          {loadingStateFindPhoneNumber ? <Loader /> : "Reveal phone number"}
                         </Button>
                       </HoverCard.Target>
                       <HoverCard.Dropdown>
-                        <Text size="sm">
-                          We will try to find the prospect's phone number.
-                        </Text>
+                        <Text size="sm">We will try to find the prospect's phone number.</Text>
                       </HoverCard.Dropdown>
                     </HoverCard>
                   </Group>
@@ -546,25 +541,25 @@ export default function ProjectDetails(props: {
                     <IconPhone stroke={1.5} size={18} className={classes.icon} />
                     <HoverCard width={280} shadow="md" closeDelay={200}>
                       <HoverCard.Target>
-                        <Text size={'xs'} variant={'outline'}>Phone number not found</Text>
+                        <Text size={"xs"} variant={"outline"}>
+                          Phone number not found
+                        </Text>
                       </HoverCard.Target>
                       <HoverCard.Dropdown>
-                        <Text size="sm">
-                          We could not retrieve the phone number at this time. Please contact the SellScale team for further details.
-                        </Text>
+                        <Text size="sm">We could not retrieve the phone number at this time. Please contact the SellScale team for further details.</Text>
                       </HoverCard.Dropdown>
                     </HoverCard>
                   </Group>
                 )
               }
-              {
-                data?.phone.reveal_phone_number && data?.phone.phone_number && (
-                  <Group noWrap spacing={10} mt={5}>
-                    <IconPhone stroke={1.5} size={18} className={classes.icon} />
-                    <Text>{data?.phone.phone_number === "finding" ? "currently finding phone number in the background." : formatPhoneNumber(data?.phone.phone_number)}</Text>
-                  </Group>
-                )
-              }
+              {data?.phone.reveal_phone_number && data?.phone.phone_number && (
+                <Group noWrap spacing={10} mt={5}>
+                  <IconPhone stroke={1.5} size={18} className={classes.icon} />
+                  <Text size="xs" fw={500}>
+                    {data?.phone.phone_number === "finding" ? "currently finding phone number in the background." : formatPhoneNumber(data?.phone.phone_number)}
+                  </Text>
+                </Group>
+              )}
 
               {data?.details.address && (
                 <Group noWrap spacing={10} mt={5}>

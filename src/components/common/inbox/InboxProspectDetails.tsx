@@ -33,6 +33,7 @@ import {
   SimpleGrid,
   HoverCard,
   Loader,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconBriefcase,
@@ -47,12 +48,18 @@ import {
   IconUserEdit,
   IconPhone,
 } from "@tabler/icons-react";
-import { openedProspectIdState, currentConvoChannelState } from "@atoms/inboxAtoms";
+import {
+  openedProspectIdState,
+  currentConvoChannelState,
+} from "@atoms/inboxAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { getProspectByID, getProspectShallowByID } from "@utils/requests/getProspectByID";
+import {
+  getProspectByID,
+  getProspectShallowByID,
+} from "@utils/requests/getProspectByID";
 
 import { Channel, DemoFeedback, ProspectDetails, ProspectShallow } from "src";
 import { ProspectDetailsResearchTabs } from "@common/prospectDetails/ProspectDetailsResearch";
@@ -63,20 +70,40 @@ import { useDisclosure, useHover } from "@mantine/hooks";
 import { DatePicker } from "@mantine/dates";
 import ProspectDemoDateSelector from "@common/prospectDetails/ProspectDemoDateSelector";
 import DemoFeedbackDrawer from "@drawers/DemoFeedbackDrawer";
-import { demosDrawerOpenState, demosDrawerProspectIdState } from "@atoms/dashboardAtoms";
+import {
+  demosDrawerOpenState,
+  demosDrawerProspectIdState,
+} from "@atoms/dashboardAtoms";
 import _, { set } from "lodash";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
 import EditProspectModal from "@modals/EditProspectModal";
 import { proxyURL, valueToColor, nameToInitials } from "@utils/general";
-import { IconAffiliate, IconAlarm, IconCircleCheck, IconEdit, IconHomeHeart, IconMail, IconSeeding, IconUser, IconX } from "@tabler/icons";
+import {
+  IconAffiliate,
+  IconAlarm,
+  IconCircleCheck,
+  IconEdit,
+  IconHomeHeart,
+  IconMail,
+  IconSeeding,
+  IconUser,
+  IconX,
+} from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import getDemoFeedback from "@utils/requests/getDemoFeedback";
 import DemoFeedbackCard from "@common/demo_feedback/DemoFeedbackCard";
 import displayNotification from "@utils/notificationFlow";
-import { snoozeProspect, snoozeProspectEmail } from "@utils/requests/snoozeProspect";
+import {
+  snoozeProspect,
+  snoozeProspectEmail,
+} from "@utils/requests/snoozeProspect";
 import EmailStoreView from "@common/prospectDetails/EmailStoreView";
-import { labelizeConvoSubstatus, prospectEmailStatuses, prospectStatuses } from "@common/inbox/utils";
+import {
+  labelizeConvoSubstatus,
+  prospectEmailStatuses,
+  prospectStatuses,
+} from "@common/inbox/utils";
 import { patchProspectAIEnabled } from "@utils/requests/patchProspectAIEnabled";
 import { patchProspect } from "@utils/requests/patchProspect";
 import { setDemoSetProspect } from "@utils/requests/setDemoSetProspect";
@@ -129,15 +156,25 @@ export default function ProjectDetails(props: {
   const { hovered: icpHovered, ref: icpRef } = useHover();
 
   const userToken = useRecoilValue(userTokenState);
-  const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
+  const [openedProspectId, setOpenedProspectId] = useRecoilState(
+    openedProspectIdState
+  );
   const openedOutboundChannel = useRecoilValue(currentConvoChannelState);
 
-  const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(demosDrawerOpenState);
+  const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(
+    demosDrawerOpenState
+  );
 
-  const [drawerProspectId, setDrawerProspectId] = useRecoilState(demosDrawerProspectIdState);
+  const [drawerProspectId, setDrawerProspectId] = useRecoilState(
+    demosDrawerProspectIdState
+  );
 
-  const [openedNotInterestedPopover, setOpenedNotInterestedPopover] = useState(false);
-  const [openedNotQualifiedPopover, setOpenedNotQualifiedPopover] = useState(false);
+  const [openedNotInterestedPopover, setOpenedNotInterestedPopover] = useState(
+    false
+  );
+  const [openedNotQualifiedPopover, setOpenedNotQualifiedPopover] = useState(
+    false
+  );
   const [loadingNotInterested, setLoadingNotInterested] = useState(false);
   const [loadingNotQualified, setLoadingNotQualified] = useState(false);
 
@@ -145,19 +182,20 @@ export default function ProjectDetails(props: {
   const [demoSetType, setDemoSetType] = useState("DIRECT");
   const [handoffText, setHandoffText] = useState("");
 
-  const [loadingStateFindPhoneNumber, setLoadingStateFindPhoneNumber] = useState(false);
+  const [
+    loadingStateFindPhoneNumber,
+    setLoadingStateFindPhoneNumber,
+  ] = useState(false);
 
   let showCRM = userData?.client_sync_crm !== null;
 
-  const {
-    data,
-    isFetching,
-    refetch: refetchProspectDetails,
-  } = useQuery({
+  const { data, isFetching, refetch: refetchProspectDetails } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
     queryFn: async () => {
       const response = await getProspectByID(userToken, openedProspectId);
-      return response.status === "success" ? (response.data as ProspectDetails) : null;
+      return response.status === "success"
+        ? (response.data as ProspectDetails)
+        : null;
     },
     enabled: openedProspectId !== -1,
   });
@@ -166,7 +204,9 @@ export default function ProjectDetails(props: {
     queryKey: [`query-get-prospect-demo-feedback-${openedProspectId}`],
     queryFn: async () => {
       const response = await getDemoFeedback(userToken, openedProspectId);
-      return response.status === "success" ? (response.data as DemoFeedback[]) : null;
+      return response.status === "success"
+        ? (response.data as DemoFeedback[])
+        : null;
     },
     enabled: openedProspectId !== -1,
   });
@@ -174,20 +214,28 @@ export default function ProjectDetails(props: {
   const { data: prospect } = useQuery({
     queryKey: [`query-get-dashboard-prospect-shallow-${openedProspectId}`],
     queryFn: async () => {
-      const response = await getProspectShallowByID(userToken, openedProspectId);
-      return response.status === "success" ? (response.data as ProspectShallow) : null;
+      const response = await getProspectShallowByID(
+        userToken,
+        openedProspectId
+      );
+      return response.status === "success"
+        ? (response.data as ProspectShallow)
+        : null;
     },
     enabled: openedProspectId !== -1,
   });
 
   const onClickRevealNumber = async () => {
     setLoadingStateFindPhoneNumber(true);
-    const response = await fetch(`${API_URL}/prospect/get-phone-number/${openedProspectId}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-      },
-    });
+    const response = await fetch(
+      `${API_URL}/prospect/get-phone-number/${openedProspectId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
 
     const jsonResponse = await response.json();
 
@@ -195,7 +243,8 @@ export default function ProjectDetails(props: {
       if (jsonResponse.fetching) {
         showNotification({
           title: "Fetching the Number",
-          message: "We are currently fetching the number in the background. It might take a while.",
+          message:
+            "We are currently fetching the number in the background. It might take a while.",
           color: "blue",
         });
       } else {
@@ -221,17 +270,34 @@ export default function ProjectDetails(props: {
 
   let statusValue = data?.details?.linkedin_status || "ACCEPTED";
 
-  const [deactivateAiEngagementStatus, setDeactivateAiEngagementStatus] = useState(!prospect?.deactivate_ai_engagement);
-  if (props.emailStatuses || openedOutboundChannel === "EMAIL" || openedOutboundChannel === "SMARTLEAD") {
+  const [
+    deactivateAiEngagementStatus,
+    setDeactivateAiEngagementStatus,
+  ] = useState(!prospect?.deactivate_ai_engagement);
+  if (
+    props.emailStatuses ||
+    openedOutboundChannel === "EMAIL" ||
+    openedOutboundChannel === "SMARTLEAD"
+  ) {
     statusValue = props.currentEmailStatus || "ACTIVE_CONVO";
   }
 
-  const [notInterestedDisqualificationReason, setNotInterestedDisqualificationReason] = useState("");
-  const [notQualifiedDisqualificationReason, setNotQualifiedDisqualificationReason] = useState("");
+  const [
+    notInterestedDisqualificationReason,
+    setNotInterestedDisqualificationReason,
+  ] = useState("");
+  const [
+    notQualifiedDisqualificationReason,
+    setNotQualifiedDisqualificationReason,
+  ] = useState("");
 
-  const [editProspectModalOpened, { open: openProspectModal, close: closeProspectModal }] = useDisclosure();
+  const [
+    editProspectModalOpened,
+    { open: openProspectModal, close: closeProspectModal },
+  ] = useDisclosure();
 
-  const linkedin_public_id = data?.li.li_profile?.split("/in/")[1]?.split("/")[0] ?? "";
+  const linkedin_public_id =
+    data?.li.li_profile?.split("/in/")[1]?.split("/")[0] ?? "";
 
   useEffect(() => {
     setDeactivateAiEngagementStatus(!prospect?.deactivate_ai_engagement);
@@ -240,7 +306,8 @@ export default function ProjectDetails(props: {
   // Set the notes in the input box when the data is loaded in
   useEffect(() => {
     if (notesRef.current) {
-      notesRef.current.value = data?.details.notes[data?.details.notes.length - 1]?.note ?? "";
+      notesRef.current.value =
+        data?.details.notes[data?.details.notes.length - 1]?.note ?? "";
     }
   }, [data]);
 
@@ -259,7 +326,11 @@ export default function ProjectDetails(props: {
     }
 
     if (notesRef.current) {
-      const result = await updateProspectNote(userToken, openedProspectId, notesRef.current.value);
+      const result = await updateProspectNote(
+        userToken,
+        openedProspectId,
+        notesRef.current.value
+      );
       if (result.status === "success") {
         showNotification({
           title: "Note saved",
@@ -294,10 +365,26 @@ export default function ProjectDetails(props: {
   };
 
   // For changing the status of the prospect
-  const changeStatus = async (status: string, changeProspect?: boolean, disqualification_reason?: string | null) => {
-    if (props.emailStatuses || openedOutboundChannel === "EMAIL" || openedOutboundChannel === "SMARTLEAD") {
+  const changeStatus = async (
+    status: string,
+    changeProspect?: boolean,
+    disqualification_reason?: string | null
+  ) => {
+    if (
+      props.emailStatuses ||
+      openedOutboundChannel === "EMAIL" ||
+      openedOutboundChannel === "SMARTLEAD"
+    ) {
       // HARD CODE IN THE EMAIL FOR NOW
-      const response = await updateChannelStatus(openedProspectId, userToken, "EMAIL", status, false, false, disqualification_reason);
+      const response = await updateChannelStatus(
+        openedProspectId,
+        userToken,
+        "EMAIL",
+        status,
+        false,
+        false,
+        disqualification_reason
+      );
       if (response.status !== "success") {
         showNotification({
           title: "Error",
@@ -324,7 +411,15 @@ export default function ProjectDetails(props: {
       //   props.refetchSmartleadProspects();
       // }
     } else {
-      await updateChannelStatus(openedProspectId, userToken, openedOutboundChannel.toUpperCase() as Channel, status, false, false, disqualification_reason);
+      await updateChannelStatus(
+        openedProspectId,
+        userToken,
+        openedOutboundChannel.toUpperCase() as Channel,
+        status,
+        false,
+        false,
+        disqualification_reason
+      );
     }
 
     refetchState();
@@ -355,7 +450,13 @@ export default function ProjectDetails(props: {
 
   if (!openedProspectId || openedProspectId == -1) {
     return (
-      <Flex direction="column" align="left" p="sm" mt="lg" h={`calc(${INBOX_PAGE_HEIGHT} - 100px)`}>
+      <Flex
+        direction="column"
+        align="left"
+        p="sm"
+        mt="lg"
+        h={`calc(${INBOX_PAGE_HEIGHT} - 100px)`}
+      >
         <Skeleton height={50} circle mb="xl" />
         <Skeleton height={8} radius="xl" />
         <Skeleton height={8} mt={6} radius="xl" />
@@ -366,16 +467,39 @@ export default function ProjectDetails(props: {
   }
 
   return (
-    <Flex gap={0} wrap="nowrap" direction="column" h={"100%"} bg={"white"} sx={{ borderLeft: "0.0625rem solid #dee2e6" }}>
+    <Flex
+      gap={0}
+      wrap="nowrap"
+      direction="column"
+      h={"100%"}
+      bg={"white"}
+      sx={{ borderLeft: "0.0625rem solid #dee2e6" }}
+    >
       <ScrollArea h="100dvh">
         <Stack spacing={0} mt={"md"} px={"md"}>
           <Flex>
             {/* make the badge a box with border radius 0px */}
-            <Badge color="blue" variant="outline" sx={{ borderRadius: 0 }} w="100%">
-              {data?.data.archetype_name.substring(0, 50)} {data?.data?.archetype_name && data?.data.archetype_name.length > 50 && "..."}
+            <Badge
+              color="blue"
+              variant="outline"
+              sx={{ borderRadius: 0 }}
+              w="100%"
+            >
+              {data?.data.archetype_name.substring(0, 50)}{" "}
+              {data?.data?.archetype_name &&
+                data?.data.archetype_name.length > 50 &&
+                "..."}
             </Badge>
 
-            <Button radius={"xs"} ml="auto" mt="0" onClick={openProspectModal} color="gray" variant="subtle" rightIcon={<IconPencil size={"1rem"} />}></Button>
+            <Button
+              radius={"xs"}
+              ml="auto"
+              mt="0"
+              onClick={openProspectModal}
+              color="gray"
+              variant="subtle"
+              rightIcon={<IconPencil size={"1rem"} />}
+            ></Button>
           </Flex>
 
           <Flex align={"start"} gap={"md"}>
@@ -408,25 +532,30 @@ export default function ProjectDetails(props: {
                   labelPosition="left"
                   label="AI Enabled"
                   onChange={(event) => {
-                    setDeactivateAiEngagementStatus(event.currentTarget.checked);
+                    setDeactivateAiEngagementStatus(
+                      event.currentTarget.checked
+                    );
 
-                    patchProspectAIEnabled(userToken, openedProspectId).then((result) => {
-                      if (result.status === "success") {
-                        showNotification({
-                          title: "Success",
-                          message: "AI Enabled status updated.",
-                          color: "green",
-                          autoClose: 3000,
-                        });
-                      } else {
-                        showNotification({
-                          title: "Error",
-                          message: "Something went wrong. Please try again later.",
-                          color: "red",
-                          autoClose: 5000,
-                        });
+                    patchProspectAIEnabled(userToken, openedProspectId).then(
+                      (result) => {
+                        if (result.status === "success") {
+                          showNotification({
+                            title: "Success",
+                            message: "AI Enabled status updated.",
+                            color: "green",
+                            autoClose: 3000,
+                          });
+                        } else {
+                          showNotification({
+                            title: "Error",
+                            message:
+                              "Something went wrong. Please try again later.",
+                            color: "red",
+                            autoClose: 5000,
+                          });
+                        }
                       }
-                    });
+                    );
 
                     refetchState();
                   }}
@@ -445,10 +574,18 @@ export default function ProjectDetails(props: {
                 </Badge>
               )}
             </Flex>
-            <Box maw={"60%"} w={"100%"}>
+            <Box maw={"70%"} w={"100%"}>
               <Flex align={"center"} gap={"sm"}>
                 <Text size={"lg"} fw={700}>
-                  {data?.details.full_name || "N/A"}
+                  {(data?.details?.full_name?.length || 0) > 16 ? (
+                    <Tooltip label={data?.details.full_name}>
+                      <span>
+                        {data?.details.full_name.substring(0, 16) + "..."}
+                      </span>
+                    </Tooltip>
+                  ) : (
+                    data?.details.full_name
+                  )}
                 </Text>
                 <Divider orientation="vertical" mt={5} h={"16px"} />
                 <Text fw={600} fz={"xs"} color="gray.6">
@@ -464,34 +601,81 @@ export default function ProjectDetails(props: {
 
               {data?.details.title && (
                 <Group noWrap spacing={10} mt={3}>
-                  <IconBriefcase stroke={1.5} size={"1.1rem"} className={classes.icon} />
+                  <IconBriefcase
+                    stroke={1.5}
+                    size={"1.1rem"}
+                    className={classes.icon}
+                  />
                   <Text size="xs">{data.details.title}</Text>
-                  <IconExternalLink size={"0.8rem"} color="#228be6" />
                 </Group>
               )}
+
               {data?.details.company && data?.company.url && (
                 <Group noWrap spacing={10} mt={3}>
-                  <IconBuildingStore stroke={1.5} size={18} className={classes.icon} />
-                  <Text size="xs" component="a" target="_blank" rel="noopener noreferrer" href={data.company.url}>
+                  <IconBuildingStore
+                    stroke={1.5}
+                    size={18}
+                    className={classes.icon}
+                  />
+                  <Text
+                    size="xs"
+                    component="a"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={data.company.url}
+                  >
                     {data.details.company}
-                    <IconExternalLink size="0.55rem" style={{ marginLeft: 5 }} />
+                    <IconExternalLink
+                      size="0.7rem"
+                      color={theme.colors.blue[6]}
+                      style={{ marginLeft: "0.25rem" }}
+                    />
                   </Text>
+                </Group>
+              )}
+
+              {data?.data?.location && (
+                <Group noWrap spacing={10} mt={3}>
+                  <IconMap2 stroke={1.5} size={18} className={classes.icon} />
+                  <Text size="xs">{data.data.location}</Text>
                 </Group>
               )}
 
               {linkedin_public_id && (
                 <Group noWrap spacing={10} mt={5}>
-                  <IconBrandLinkedin stroke={1.5} size={18} className={classes.icon} />
-                  <Text size="xs" component="a" target="_blank" rel="noopener noreferrer" href={`https://www.linkedin.com/in/${linkedin_public_id}`}>
-                    linkedin.com/in/{linkedin_public_id} <IconExternalLink size="0.55rem" />
+                  <IconBrandLinkedin
+                    stroke={1.5}
+                    size={18}
+                    className={classes.icon}
+                  />
+                  <Text
+                    size="xs"
+                    component="a"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`https://www.linkedin.com/in/${linkedin_public_id}`}
+                  >
+                    linkedin.com/in/{linkedin_public_id}{" "}
+                    <IconExternalLink
+                      size="0.7rem"
+                      color={theme.colors.blue[6]}
+                    />
                   </Text>
                 </Group>
               )}
               {data?.email?.email && (
                 <Group noWrap spacing={10} mt={5}>
                   <IconMail stroke={1.5} size={18} className={classes.icon} />
-                  <Text size="xs" component="a" href={`mailto:${data?.email?.email}`}>
-                    {data?.email?.email} <IconExternalLink size="0.55rem" />
+                  <Text
+                    size="xs"
+                    component="a"
+                    href={`mailto:${data?.email?.email}`}
+                  >
+                    {data?.email?.email}{" "}
+                    <IconExternalLink
+                      size="0.7rem"
+                      color={theme.colors.blue[6]}
+                    />
                   </Text>
                 </Group>
               )}
@@ -520,15 +704,34 @@ export default function ProjectDetails(props: {
                 // User did not click reveal phone number yet
                 !data?.phone.reveal_phone_number && (
                   <Group noWrap spacing={10} mt={5}>
-                    <IconPhone stroke={1.5} size={18} className={classes.icon} />
+                    <IconPhone
+                      stroke={1.5}
+                      size={18}
+                      className={classes.icon}
+                    />
                     <HoverCard width={280} shadow="md" closeDelay={200}>
                       <HoverCard.Target>
-                        <Button size={"xs"} variant={"outline"} disabled={loadingStateFindPhoneNumber} onClick={() => onClickRevealNumber()}>
-                          {loadingStateFindPhoneNumber ? <Loader /> : "Reveal phone number"}
+                        <Button
+                          size={"10px"}
+                          pl={"10px"}
+                          pr={"10px"}
+                          pt={"5px"}
+                          pb={"5px"}
+                          variant={"outline"}
+                          disabled={loadingStateFindPhoneNumber}
+                          onClick={() => onClickRevealNumber()}
+                        >
+                          {loadingStateFindPhoneNumber ? (
+                            <Loader />
+                          ) : (
+                            "Reveal phone number"
+                          )}
                         </Button>
                       </HoverCard.Target>
                       <HoverCard.Dropdown>
-                        <Text size="sm">We will try to find the prospect's phone number.</Text>
+                        <Text size="sm">
+                          We will try to find the prospect's phone number.
+                        </Text>
                       </HoverCard.Dropdown>
                     </HoverCard>
                   </Group>
@@ -538,7 +741,11 @@ export default function ProjectDetails(props: {
                 // User clicked reveal, but there is no phone number
                 data?.phone.reveal_phone_number && !data?.phone.phone_number && (
                   <Group noWrap spacing={10} mt={5}>
-                    <IconPhone stroke={1.5} size={18} className={classes.icon} />
+                    <IconPhone
+                      stroke={1.5}
+                      size={18}
+                      className={classes.icon}
+                    />
                     <HoverCard width={280} shadow="md" closeDelay={200}>
                       <HoverCard.Target>
                         <Text size={"xs"} variant={"outline"}>
@@ -546,7 +753,10 @@ export default function ProjectDetails(props: {
                         </Text>
                       </HoverCard.Target>
                       <HoverCard.Dropdown>
-                        <Text size="sm">We could not retrieve the phone number at this time. Please contact the SellScale team for further details.</Text>
+                        <Text size="sm">
+                          We could not retrieve the phone number at this time.
+                          Please contact the SellScale team for further details.
+                        </Text>
                       </HoverCard.Dropdown>
                     </HoverCard>
                   </Group>
@@ -556,7 +766,9 @@ export default function ProjectDetails(props: {
                 <Group noWrap spacing={10} mt={5}>
                   <IconPhone stroke={1.5} size={18} className={classes.icon} />
                   <Text size="xs" fw={500}>
-                    {data?.phone.phone_number === "finding" ? "currently finding phone number in the background." : formatPhoneNumber(data?.phone.phone_number)}
+                    {data?.phone.phone_number === "finding"
+                      ? "currently finding phone number in the background."
+                      : formatPhoneNumber(data?.phone.phone_number)}
                   </Text>
                 </Group>
               )}
@@ -582,58 +794,62 @@ export default function ProjectDetails(props: {
         </Stack>
         <Divider mt={"sm"} />
         <Box>
-          {!statusValue.startsWith("DEMO_") && statusValue !== "ACCEPTED" && statusValue !== "RESPONDED" && (
-            <>
-              <Box style={{ flexBasis: "10%" }} my={10}>
-                <Flex gap={"md"} align={"center"} px={"md"}>
-                  <div>
-                    <Text fw={700} fz={"sm"}>
-                      Reply Label
-                    </Text>
-                  </div>
-                  <Select
-                    size="xs"
-                    styles={{
-                      root: { flex: 1 },
-                      input: {
-                        backgroundColor: theme.colors["blue"][0],
-                        borderColor: theme.colors["blue"][4],
-                        color: theme.colors.blue[6],
-                        fontWeight: 700,
-                        "&:focus": {
+          {!statusValue.startsWith("DEMO_") &&
+            statusValue !== "ACCEPTED" &&
+            statusValue !== "RESPONDED" && (
+              <>
+                <Box style={{ flexBasis: "10%" }} my={10}>
+                  <Flex gap={"md"} align={"center"} px={"md"}>
+                    <div>
+                      <Text fw={700} fz={"sm"}>
+                        Reply Label
+                      </Text>
+                    </div>
+                    <Select
+                      size="xs"
+                      styles={{
+                        root: { flex: 1 },
+                        input: {
+                          backgroundColor: theme.colors["blue"][0],
                           borderColor: theme.colors["blue"][4],
+                          color: theme.colors.blue[6],
+                          fontWeight: 700,
+                          "&:focus": {
+                            borderColor: theme.colors["blue"][4],
+                          },
                         },
-                      },
-                      rightSection: {
-                        svg: {
-                          color: `${theme.colors.gray[6]}!important`,
+                        rightSection: {
+                          svg: {
+                            color: `${theme.colors.gray[6]}!important`,
+                          },
                         },
-                      },
-                      item: {
-                        "&[data-selected], &[data-selected]:hover": {
-                          backgroundColor: theme.colors["blue"][6],
+                        item: {
+                          "&[data-selected], &[data-selected]:hover": {
+                            backgroundColor: theme.colors["blue"][6],
+                          },
                         },
-                      },
-                    }}
-                    data={
-                      props.emailStatuses || openedOutboundChannel === "EMAIL" || openedOutboundChannel === "SMARTLEAD"
-                        ? prospectEmailStatuses
-                        : prospectStatuses
-                    }
-                    value={statusValue}
-                    onChange={async (value) => {
-                      if (!value) {
-                        return;
+                      }}
+                      data={
+                        props.emailStatuses ||
+                        openedOutboundChannel === "EMAIL" ||
+                        openedOutboundChannel === "SMARTLEAD"
+                          ? prospectEmailStatuses
+                          : prospectStatuses
                       }
-                      await changeStatus(value);
-                    }}
-                  />
-                </Flex>
-              </Box>
+                      value={statusValue}
+                      onChange={async (value) => {
+                        if (!value) {
+                          return;
+                        }
+                        await changeStatus(value);
+                      }}
+                    />
+                  </Flex>
+                </Box>
 
-              <Divider />
-            </>
-          )}
+                <Divider />
+              </>
+            )}
 
           <div>
             <Divider />
@@ -642,7 +858,10 @@ export default function ProjectDetails(props: {
                 disableChevronRotation
                 chevron={
                   <Badge size="md" color={"blue"}>
-                    {labelizeConvoSubstatus(statusValue, data?.details?.bump_count)}
+                    {labelizeConvoSubstatus(
+                      statusValue,
+                      data?.details?.bump_count
+                    )}
                   </Badge>
                 }
                 defaultValue="customization"
@@ -696,7 +915,12 @@ export default function ProjectDetails(props: {
                       <SimpleGrid cols={2}>
                         <StatusBlockButton
                           title="Snooze"
-                          icon={<IconAlarm color={theme.colors.yellow[6]} size={24} />}
+                          icon={
+                            <IconAlarm
+                              color={theme.colors.yellow[6]}
+                              size={24}
+                            />
+                          }
                           onClick={async () => {
                             setOpenedSnoozeModal(true);
                           }}
@@ -704,12 +928,22 @@ export default function ProjectDetails(props: {
                         <Box>
                           <StatusBlockButton
                             title="Demo Set"
-                            icon={<IconCalendarEvent color={theme.colors.green[6]} size={24} />}
+                            icon={
+                              <IconCalendarEvent
+                                color={theme.colors.green[6]}
+                                size={24}
+                              />
+                            }
                             onClick={async () => {
                               setDemoSetType("DIRECT");
                               if (!prospect) return;
 
-                              await setDemoSetProspect(userToken, prospect.id, "DIRECT", handoffText);
+                              await setDemoSetProspect(
+                                userToken,
+                                prospect.id,
+                                "DIRECT",
+                                handoffText
+                              );
                               changeStatus("DEMO_SET", false);
                             }}
                           />
@@ -795,7 +1029,9 @@ export default function ProjectDetails(props: {
                               loading={loadingNotInterested}
                               variant="outlined"
                               className={classes.item}
-                              leftIcon={<IconX color={theme.colors.red[6]} size={24} />}
+                              leftIcon={
+                                <IconX color={theme.colors.red[6]} size={24} />
+                              }
                               onClick={() => {
                                 setOpenedNotInterestedPopover(true);
                               }}
@@ -815,43 +1051,100 @@ export default function ProjectDetails(props: {
                                 }}
                               >
                                 <Flex direction={"column"} gap={"sm"}>
-                                  <Radio value="No Need" label="No Need" size="xs" checked={notInterestedDisqualificationReason === "No Need"} />
-                                  <Radio value="Unconvinced" label="Unconvinced" size="xs" checked={notInterestedDisqualificationReason === "Unconvinced"} />
+                                  <Radio
+                                    value="No Need"
+                                    label="No Need"
+                                    size="xs"
+                                    checked={
+                                      notInterestedDisqualificationReason ===
+                                      "No Need"
+                                    }
+                                  />
+                                  <Radio
+                                    value="Unconvinced"
+                                    label="Unconvinced"
+                                    size="xs"
+                                    checked={
+                                      notInterestedDisqualificationReason ===
+                                      "Unconvinced"
+                                    }
+                                  />
                                   <Radio
                                     value="Timing not right"
                                     label="Timing not right"
                                     size="xs"
-                                    checked={notInterestedDisqualificationReason === "Timing not right"}
+                                    checked={
+                                      notInterestedDisqualificationReason ===
+                                      "Timing not right"
+                                    }
                                   />
-                                  <Radio value="Unresponsive" label="Unresponsive" size="xs" checked={notInterestedDisqualificationReason === "Unresponsive"} />
+                                  <Radio
+                                    value="Unresponsive"
+                                    label="Unresponsive"
+                                    size="xs"
+                                    checked={
+                                      notInterestedDisqualificationReason ===
+                                      "Unresponsive"
+                                    }
+                                  />
                                   <Radio
                                     value="Using a competitor"
                                     label="Using a competitor"
                                     size="xs"
-                                    checked={notInterestedDisqualificationReason === "Competitor"}
+                                    checked={
+                                      notInterestedDisqualificationReason ===
+                                      "Competitor"
+                                    }
                                   />
-                                  <Radio value="Unsubscribe" label="Unsubscribe" size="xs" checked={notInterestedDisqualificationReason === "Unsubscribe"} />
-                                  <Radio value="OTHER -" label="Other" size="xs" checked={notInterestedDisqualificationReason.includes("OTHER -")} />
+                                  <Radio
+                                    value="Unsubscribe"
+                                    label="Unsubscribe"
+                                    size="xs"
+                                    checked={
+                                      notInterestedDisqualificationReason ===
+                                      "Unsubscribe"
+                                    }
+                                  />
+                                  <Radio
+                                    value="OTHER -"
+                                    label="Other"
+                                    size="xs"
+                                    checked={notInterestedDisqualificationReason.includes(
+                                      "OTHER -"
+                                    )}
+                                  />
                                 </Flex>
                               </Radio.Group>
-                              {notInterestedDisqualificationReason?.includes("OTHER") && (
+                              {notInterestedDisqualificationReason?.includes(
+                                "OTHER"
+                              ) && (
                                 <TextInput
                                   placeholder="Enter reason here"
                                   radius={"md"}
                                   onChange={(event) => {
-                                    setNotInterestedDisqualificationReason("OTHER - " + event.currentTarget.value);
+                                    setNotInterestedDisqualificationReason(
+                                      "OTHER - " + event.currentTarget.value
+                                    );
                                   }}
                                 />
                               )}
 
                               <Button
-                                color={notInterestedDisqualificationReason ? "red" : "gray"}
+                                color={
+                                  notInterestedDisqualificationReason
+                                    ? "red"
+                                    : "gray"
+                                }
                                 leftIcon={<IconTrash size={24} />}
                                 radius={"md"}
                                 onClick={async () => {
                                   setLoadingNotInterested(true);
                                   setOpenedNotInterestedPopover(false);
-                                  await changeStatus("NOT_INTERESTED", true, notInterestedDisqualificationReason);
+                                  await changeStatus(
+                                    "NOT_INTERESTED",
+                                    true,
+                                    notInterestedDisqualificationReason
+                                  );
                                   setLoadingNotInterested(false);
                                 }}
                               >
@@ -876,7 +1169,12 @@ export default function ProjectDetails(props: {
                               loading={loadingNotQualified}
                               variant="outlined"
                               className={classes.item}
-                              leftIcon={<IconTrash color={theme.colors.red[6]} size={24} />}
+                              leftIcon={
+                                <IconTrash
+                                  color={theme.colors.red[6]}
+                                  size={24}
+                                />
+                              }
                               onClick={() => {
                                 setOpenedNotQualifiedPopover(true);
                               }}
@@ -896,32 +1194,65 @@ export default function ProjectDetails(props: {
                                 }}
                               >
                                 <Flex direction={"column"} gap={"sm"}>
-                                  <Radio value="Not a decision maker." label="Not a decision maker" size="xs" />
-                                  <Radio value="Poor account fit" label="Poor account fit" size="xs" />
-                                  <Radio value='Contact is "open to work"' label='Contact is "open to work"' size="xs" />
-                                  <Radio value="Competitor" label="Competitor" size="xs" />
-                                  <Radio value="OTHER -" label="Other" size="xs" checked />
+                                  <Radio
+                                    value="Not a decision maker."
+                                    label="Not a decision maker"
+                                    size="xs"
+                                  />
+                                  <Radio
+                                    value="Poor account fit"
+                                    label="Poor account fit"
+                                    size="xs"
+                                  />
+                                  <Radio
+                                    value='Contact is "open to work"'
+                                    label='Contact is "open to work"'
+                                    size="xs"
+                                  />
+                                  <Radio
+                                    value="Competitor"
+                                    label="Competitor"
+                                    size="xs"
+                                  />
+                                  <Radio
+                                    value="OTHER -"
+                                    label="Other"
+                                    size="xs"
+                                    checked
+                                  />
                                 </Flex>
                               </Radio.Group>
 
-                              {notQualifiedDisqualificationReason?.includes("OTHER") && (
+                              {notQualifiedDisqualificationReason?.includes(
+                                "OTHER"
+                              ) && (
                                 <TextInput
                                   placeholder="Enter reason here"
                                   radius={"md"}
                                   onChange={(event) => {
-                                    setNotQualifiedDisqualificationReason("OTHER - " + event.currentTarget.value);
+                                    setNotQualifiedDisqualificationReason(
+                                      "OTHER - " + event.currentTarget.value
+                                    );
                                   }}
                                 />
                               )}
 
                               <Button
-                                color={notQualifiedDisqualificationReason ? "red" : "gray"}
+                                color={
+                                  notQualifiedDisqualificationReason
+                                    ? "red"
+                                    : "gray"
+                                }
                                 leftIcon={<IconTrash size={24} />}
                                 radius={"md"}
                                 onClick={async () => {
                                   setLoadingNotQualified(true);
                                   setOpenedNotQualifiedPopover(false);
-                                  await changeStatus("NOT_QUALIFIED", true, notQualifiedDisqualificationReason);
+                                  await changeStatus(
+                                    "NOT_QUALIFIED",
+                                    true,
+                                    notQualifiedDisqualificationReason
+                                  );
                                   setLoadingNotQualified(false);
                                 }}
                               >
@@ -935,11 +1266,15 @@ export default function ProjectDetails(props: {
                       // </Flex>
                       <Stack spacing={10}>
                         <Box>
-                          <Text>{prospect?.meta_data?.demo_set?.description}</Text>
+                          <Text>
+                            {prospect?.meta_data?.demo_set?.description}
+                          </Text>
 
                           {(!demoFeedbacks || demoFeedbacks.length === 0) && (
                             <Box mb={10} mt={10}>
-                              <ProspectDemoDateSelector prospectId={openedProspectId} />
+                              <ProspectDemoDateSelector
+                                prospectId={openedProspectId}
+                              />
                             </Box>
                           )}
 
@@ -947,7 +1282,12 @@ export default function ProjectDetails(props: {
                             <ScrollArea h="250px">
                               {demoFeedbacks?.map((feedback, index) => (
                                 <div style={{ marginBottom: 10 }}>
-                                  <DemoFeedbackCard prospect={data.data} index={index + 1} demoFeedback={feedback} refreshDemoFeedback={refreshDemoFeedback} />
+                                  <DemoFeedbackCard
+                                    prospect={data.data}
+                                    index={index + 1}
+                                    demoFeedback={feedback}
+                                    refreshDemoFeedback={refreshDemoFeedback}
+                                  />
                                 </div>
                               ))}
                             </ScrollArea>
@@ -961,7 +1301,10 @@ export default function ProjectDetails(props: {
                               setDemosDrawerOpened(true);
                             }}
                           >
-                            {demoFeedbacks && demoFeedbacks.length > 0 ? "Add" : "Give"} Demo Feedback
+                            {demoFeedbacks && demoFeedbacks.length > 0
+                              ? "Add"
+                              : "Give"}{" "}
+                            Demo Feedback
                           </Button>
 
                           <DemoFeedbackDrawer
@@ -980,14 +1323,27 @@ export default function ProjectDetails(props: {
             <Divider mt={"sm"} />
 
             {showCRM && prospect?.full_name && (
-              <ProspectDetailsCRMSync prospect={prospect} openedProspectId={openedProspectId} crmSync={userData?.client_sync_crm} />
+              <ProspectDetailsCRMSync
+                prospect={prospect}
+                openedProspectId={openedProspectId}
+                crmSync={userData?.client_sync_crm}
+              />
             )}
 
             <div style={{ flexBasis: "55%" }}>
               <Divider />
-              <Tabs variant="subtle" defaultValue="history" radius={theme.radius.lg} m={10}>
+              <Tabs
+                variant="subtle"
+                defaultValue="history"
+                radius={theme.radius.lg}
+                m={10}
+              >
                 <Tabs.List>
-                  <Tabs.Tab value="history" icon={<IconWriting size="0.8rem" />} mb="0px">
+                  <Tabs.Tab
+                    value="history"
+                    icon={<IconWriting size="0.8rem" />}
+                    mb="0px"
+                  >
                     <Text fw="bold" mb="0px">
                       AI History
                     </Text>
@@ -997,19 +1353,42 @@ export default function ProjectDetails(props: {
                 </Tabs.Tab> */}
                 </Tabs.List>
 
-                <Tabs.Panel value="research" pt="xs" h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
-                  <ScrollArea h={"100%"}>{openedProspectId !== -1 && <ProspectDetailsResearchTabs prospectId={openedProspectId} />}</ScrollArea>
+                <Tabs.Panel
+                  value="research"
+                  pt="xs"
+                  h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}
+                >
+                  <ScrollArea h={"100%"}>
+                    {openedProspectId !== -1 && (
+                      <ProspectDetailsResearchTabs
+                        prospectId={openedProspectId}
+                      />
+                    )}
+                  </ScrollArea>
                 </Tabs.Panel>
 
-                <Tabs.Panel value="history" pt="xs" h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
+                <Tabs.Panel
+                  value="history"
+                  pt="xs"
+                  h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}
+                >
                   <ScrollArea h={"100%"}>
                     <Card withBorder p="0px">
-                      {openedProspectId !== -1 && <ProspectDetailsHistory prospectId={openedProspectId} forceRefresh={forcedHistoryRefresh} />}
+                      {openedProspectId !== -1 && (
+                        <ProspectDetailsHistory
+                          prospectId={openedProspectId}
+                          forceRefresh={forcedHistoryRefresh}
+                        />
+                      )}
                     </Card>
                   </ScrollArea>
                 </Tabs.Panel>
 
-                <Tabs.Panel value="notes" pt="xs" h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
+                <Tabs.Panel
+                  value="notes"
+                  pt="xs"
+                  h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}
+                >
                   <Textarea
                     ref={notesRef}
                     autosize
@@ -1021,7 +1400,11 @@ export default function ProjectDetails(props: {
                     }}
                   />
                   <Flex mt="md">
-                    <Button size="xs" onClick={triggerUpdateProspectNote} loading={noteLoading}>
+                    <Button
+                      size="xs"
+                      onClick={triggerUpdateProspectNote}
+                      loading={noteLoading}
+                    >
                       Save Note
                     </Button>
                   </Flex>
@@ -1030,7 +1413,11 @@ export default function ProjectDetails(props: {
             </div>
           </div>
         </Box>
-        <Modal opened={openedSnoozeModal} onClose={() => setOpenedSnoozeModal(false)} title="Snooze Prospect">
+        <Modal
+          opened={openedSnoozeModal}
+          onClose={() => setOpenedSnoozeModal(false)}
+          title="Snooze Prospect"
+        >
           <Center>
             <DatePicker
               minDate={new Date()}
@@ -1045,7 +1432,11 @@ export default function ProjectDetails(props: {
                   await displayNotification(
                     "snooze-prospect-email",
                     async () => {
-                      let result = await snoozeProspectEmail(userToken, openedProspectId, daysDiff);
+                      let result = await snoozeProspectEmail(
+                        userToken,
+                        openedProspectId,
+                        daysDiff
+                      );
                       return result;
                     },
                     {
@@ -1079,7 +1470,11 @@ export default function ProjectDetails(props: {
                 await displayNotification(
                   "snooze-prospect",
                   async () => {
-                    let result = await snoozeProspect(userToken, openedProspectId, daysDiff);
+                    let result = await snoozeProspect(
+                      userToken,
+                      openedProspectId,
+                      daysDiff
+                    );
                     return result;
                   },
                   {
@@ -1119,7 +1514,11 @@ export default function ProjectDetails(props: {
   );
 }
 
-function StatusBlockButton(props: { title: string; icon: ReactNode; onClick: () => void }) {
+function StatusBlockButton(props: {
+  title: string;
+  icon: ReactNode;
+  onClick: () => void;
+}) {
   const { classes, theme } = useStyles();
 
   return (

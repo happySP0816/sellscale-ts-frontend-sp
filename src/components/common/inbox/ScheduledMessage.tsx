@@ -66,6 +66,9 @@ export const ScheduledMessage = forwardRef(({ openedProspectId }: { openedProspe
   const fetchHiddenUntil = () => {
     getHiddenUntil(userToken, openedProspectId).then((res) => {
       if (!res.data?.hidden_until) return;
+      if (new Date(res.data.hidden_until) < new Date()) {
+        return;
+      }
       setHiddenUntil(new Date(res.data.hidden_until));
     });
   }

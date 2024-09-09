@@ -1,22 +1,8 @@
 import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
-import {
-  Avatar,
-  Button,
-  Flex,
-  Group,
-  Text,
-  TextInput,
-  Title,
-  createStyles,
-  Modal,
-  Space,
-  Accordion,
-  Table,
-  Checkbox,
-  Loader,
-} from "@mantine/core";
+import { Avatar, Button, Flex, Group, Text, TextInput, Title, createStyles, Modal, Space, Accordion, Table, Checkbox, Loader } from "@mantine/core";
+import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconBriefcase, IconSocial } from "@tabler/icons";
 import { proxyURL } from "@utils/general";
@@ -28,10 +14,7 @@ import { ProspectDetails } from "src";
 
 const useStyles = createStyles((theme) => ({
   icon: {
-    color:
-      theme.colorScheme === "dark"
-        ? theme.colors.dark[3]
-        : theme.colors.gray[5],
+    color: theme.colorScheme === "dark" ? theme.colors.dark[3] : theme.colors.gray[5],
   },
 
   name: {
@@ -80,10 +63,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
 
       props.afterUpload();
 
-      const prospectResponse = await getProspectByID(
-        userToken,
-        result.data.data.prospect_id
-      );
+      const prospectResponse = await getProspectByID(userToken, result.data.data.prospect_id);
       if (prospectResponse.status === "success") {
         setProspectDetails(prospectResponse.data satisfies ProspectDetails);
       }
@@ -94,9 +74,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
       message = JSON.parse(message);
       showNotification({
         title: "Error",
-        message:
-          message.message ||
-          "Could not upload. Double check profile URL and for duplicate entry.",
+        message: message.message || "Could not upload. Double check profile URL and for duplicate entry.",
         color: "red",
         autoClose: 3000,
       });
@@ -110,27 +88,23 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
   const handleGetDuplicate = async () => {
     setDuplicateLoading(true);
 
-    const response = await fetch(
-      `${API_URL}/prospect/get_duplicate_from_linkedin_link`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          linkedin_url: url,
-          archetype: currentProject?.id,
-        }),
-      }
-    );
+    const response = await fetch(`${API_URL}/prospect/get_duplicate_from_linkedin_link`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        linkedin_url: url,
+        archetype: currentProject?.id,
+      }),
+    });
 
     if (!response.ok) {
       showNotification({
         id: "prospect-duplicate-error",
         title: "Error while finding duplicate prospect",
-        message:
-          "Prospect may have already been added by you or someone else in your organization.",
+        message: "Prospect may have already been added by you or someone else in your organization.",
         color: "red",
       });
     }
@@ -138,8 +112,20 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
     const jsonResponse = await response.json();
 
     setDuplicateContacts(jsonResponse.duplicate);
+
+    openContextModal({
+      modal: "overrideProspectsModal",
+      title: <Title order={3}>Create Campaign</Title>,
+      innerProps: { data: jsonResponse.duplicate },
+      styles: {
+        content: {
+          minWidth: "1000px",
+        },
+      },
+    });
+
     setDuplicateLoading(false);
-    setDuplicateModalOpen(true);
+    // setDuplicateModalOpen(true);
   };
 
   const setOverrideAll = (override: boolean, same_archetype: boolean) => {
@@ -164,52 +150,34 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
     }
   };
 
-  const linkedin_public_id =
-    prospectDetails?.li.li_profile?.split("/in/")[1]?.split("/")[0] ?? "";
+  const linkedin_public_id = prospectDetails?.li.li_profile?.split("/in/")[1]?.split("/")[0] ?? "";
 
   return (
     <>
-      <Modal
-        opened={duplicateModalOpen}
-        onClose={() => setDuplicateModalOpen(false)}
-        title="Ready To Upload?"
-        size={"1100px"}
-      >
+      <Modal opened={duplicateModalOpen} onClose={() => setDuplicateModalOpen(false)} title="Ready To Upload?" size={"1100px"}>
         {duplicateContacts && duplicateContacts.length !== 0 && (
           <>
-            <Text>
-              We have found some prospects that are already added to your
-              prospect database.
+            <Text size={"sm"} fw={400} color="gray">
+              We have found some prospects that are already added to your prospect database.
             </Text>
-            <Text>
-              Please check the prospects that you want to overwrite and move to
-              your new segment/campaign.
+            <Text size={"sm"} fw={400} color="gray">
+              Please check the prospects that you want to overwrite and move to your new segment/ campaign.
             </Text>
-            <Text>We will also reset the prospect's status</Text>
-            <Space h={"xl"} />
+            {/* <Space h={"xl"} />
             <Text>Click "Yes, let's do it! 🚀" whenever you are ready.</Text>
-            <Space h={"xl"} />
+            <Space h={"xl"} /> */}
 
-            <Accordion
-              variant={"separated"}
-              defaultValue={"duplicate-different-archetypes"}
-            >
+            <Accordion variant={"separated"} defaultValue={"duplicate-different-archetypes"}>
               <Accordion.Item value={"duplicate-different-archetypes"}>
-                <Accordion.Control>
-                  Prospects from different campaigns
-                </Accordion.Control>
+                <Accordion.Control>Prospects from different campaigns</Accordion.Control>
                 <Accordion.Panel>
                   <Table>
                     <thead>
                       <tr>
                         <th>
                           <Checkbox
-                            onChange={(event) =>
-                              setOverrideAll(event.currentTarget.checked, false)
-                            }
-                            checked={duplicateContacts
-                              .filter((item) => !item.same_archetype)
-                              .every((item) => item.override)}
+                            onChange={(event) => setOverrideAll(event.currentTarget.checked, false)}
+                            checked={duplicateContacts.filter((item) => !item.same_archetype).every((item) => item.override)}
                           />
                         </th>
                         <th>Name</th>
@@ -236,8 +204,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
                                         if (item.row === prospect.row) {
                                           return {
                                             ...item,
-                                            override:
-                                              event.target.checked,
+                                            override: event.target.checked,
                                           };
                                         }
 
@@ -262,21 +229,15 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
                 </Accordion.Panel>
               </Accordion.Item>
               <Accordion.Item value={"duplicate-same-archetypes"}>
-                <Accordion.Control>
-                  Prospects from the current campaign
-                </Accordion.Control>
+                <Accordion.Control>Prospects from the current campaign</Accordion.Control>
                 <Accordion.Panel>
                   <Table>
                     <thead>
                       <tr>
                         <th>
                           <Checkbox
-                            onChange={(event) =>
-                              setOverrideAll(event.currentTarget.checked, true)
-                            }
-                            checked={duplicateContacts
-                              .filter((item) => item.same_archetype)
-                              .every((item) => item.override)}
+                            onChange={(event) => setOverrideAll(event.currentTarget.checked, true)}
+                            checked={duplicateContacts.filter((item) => item.same_archetype).every((item) => item.override)}
                           />
                         </th>
                         <th>Name</th>
@@ -303,8 +264,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
                                         if (item.row === prospect.row) {
                                           return {
                                             ...item,
-                                            override:
-                                              event.currentTarget.checked,
+                                            override: event.currentTarget.checked,
                                           };
                                         }
 
@@ -349,9 +309,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
           >
             Skip All
           </Button>
-          <Button onClick={() => triggerUploadProspectFromLinkedInURL()}>
-            {loading ? <Loader /> : "Upload! 🚀"}
-          </Button>
+          <Button onClick={() => triggerUploadProspectFromLinkedInURL()}>{loading ? <Loader /> : "Upload! 🚀"}</Button>
         </Flex>
       </Modal>
       <Flex w="100%" direction="column">
@@ -361,24 +319,13 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
           value={url}
           onChange={(event) => setURL(event.currentTarget.value)}
           withAsterisk
-          error={
-            url.length > 0 &&
-            !url.includes("linkedin.com/in/") &&
-            !url.includes("linkedin.com/sales/lead/")
-              ? "Please submit a valid LinkedIn URL"
-              : null
-          }
+          error={url.length > 0 && !url.includes("linkedin.com/in/") && !url.includes("linkedin.com/sales/lead/") ? "Please submit a valid LinkedIn URL" : null}
           disabled={loading}
         />
         <Flex justify="flex-end">
           <Button
             mt="md"
-            disabled={
-              !url ||
-              (url.length > 0 &&
-                !url.includes("linkedin.com/in/") &&
-                !url.includes("linkedin.com/sales/lead/"))
-            }
+            disabled={!url || (url.length > 0 && !url.includes("linkedin.com/in/") && !url.includes("linkedin.com/sales/lead/"))}
             color="teal"
             w="128px"
             onClick={handleGetDuplicate}
@@ -388,31 +335,21 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
           </Button>
         </Flex>
         <Flex justify={"flex-end"}>
-          {url.length > 0 &&
-            (url.includes("linkedin.com/in/") ||
-              url.includes("linkedin.com/sales/lead/")) && (
-              <Text fz="xs" mt="xs">
-                Note: This may take upwards of 1 minute.
-              </Text>
-            )}
+          {url.length > 0 && (url.includes("linkedin.com/in/") || url.includes("linkedin.com/sales/lead/")) && (
+            <Text fz="xs" mt="xs">
+              Note: This may take upwards of 1 minute.
+            </Text>
+          )}
         </Flex>
 
         {prospectDetails && (
           <Group noWrap spacing={10} align="flex-start" pt="xs">
-            <Avatar
-              src={proxyURL(prospectDetails.details.profile_pic)}
-              size={94}
-              radius="md"
-            />
+            <Avatar src={proxyURL(prospectDetails.details.profile_pic)} size={94} radius="md" />
             <div>
               <Title order={3}>{prospectDetails.details.full_name}</Title>
 
               <Group noWrap spacing={10} mt={3}>
-                <IconBriefcase
-                  stroke={1.5}
-                  size={16}
-                  className={classes.icon}
-                />
+                <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
                 <Text size="xs" color="dimmed">
                   {prospectDetails.details.title}
                 </Text>

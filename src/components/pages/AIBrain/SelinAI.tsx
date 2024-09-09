@@ -2659,7 +2659,16 @@ const SelixControlCenter = ({
           float: "left",
         }}
       >
-        <SellScaleAssistant refresh={refreshIcp} />
+        <SellScaleAssistant
+          refresh={refreshIcp}
+          onEditClicked={() => {
+            setShowICPModal(false);
+          }}
+          onEditClosed={() => {
+            setRefreshIcp(!refreshIcp);
+            setShowICPModal(false);
+          }}
+        />
       </Modal>
       <Flex
         px={"md"}

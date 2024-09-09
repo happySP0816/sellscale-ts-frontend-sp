@@ -57,10 +57,14 @@ export default function SellScaleAssistant({
   setHasNotGeneratedPrefilter,
   showChat = true,
   refresh = false,
+  onEditClicked = () => {},
+  onEditClosed = () => {},
 }: {
   setHasNotGeneratedPrefilter?: (value: boolean) => void;
   showChat?: boolean;
   refresh?: boolean;
+  onEditClicked?: () => void;
+  onEditClosed?: () => void;
 }) {
   useEffect(() => {
     const tourSeen = localStorage.getItem("filterTourSeen");
@@ -130,6 +134,8 @@ export default function SellScaleAssistant({
           segment={segment}
           showChat={showChat}
           refresh={refresh}
+          onEditClicked={onEditClicked}
+          onEditClosed={onEditClosed}
         />
       </Flex>
     </Box>
@@ -726,6 +732,7 @@ const SegmentAIGeneration = (props: any) => {
                                   onClose: () => {
                                     props.setSegment([]);
                                     fetchSavedQueries();
+                                    props.onEditClosed();
                                   },
                                   innerProps: { id: element.id },
                                   centered: true,
@@ -846,6 +853,7 @@ const SegmentAIGeneration = (props: any) => {
                               //     query: `I have an idea for the segment: ${element.makers}. This segment is about ${element.industry}. The value proposition is ${element.pain_point}.`
                               //   }),
                               // });
+                              props.onEditClicked();
 
                               openContextModal({
                                 modal: "prefilterEditModal",
@@ -863,6 +871,7 @@ const SegmentAIGeneration = (props: any) => {
                                 ),
                                 onClose: () => {
                                   props.setSegment([]);
+                                  props.onEditClosed();
                                   fetchSavedQueries();
                                 },
                                 innerProps: { id: element.id },

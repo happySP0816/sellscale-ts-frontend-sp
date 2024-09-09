@@ -1,7 +1,7 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import RichTextArea from "@common/library/RichTextArea";
 import { API_URL } from "@constants/data";
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 import {
   Button,
   Text,
@@ -21,6 +21,8 @@ import {
   MultiSelect,
   Checkbox,
   Loader,
+  Divider,
+  Avatar,
 } from "@mantine/core";
 import { closeAllModals, ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -28,10 +30,20 @@ import { IconAlignJustified, IconAlignLeft, IconAlignRight, IconCheck } from "@t
 import { useQuery } from "@tanstack/react-query";
 import { JSONContent } from "@tiptap/react";
 import { set } from "lodash";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef } from "react";
 import { useRecoilValue } from "recoil";
 import { ProspectShallow } from "src";
 import { isLinkedInURL } from "@utils/general";
+// interface ItemProps extends React.ComponentPropsWithoutRef<"div"> {
+//   value: string;
+//   label: string;
+// }
+
+interface ItemProps extends React.ComponentPropsWithoutRef<"div"> {
+  image: string;
+  label: string;
+  description: string;
+}
 
 export default function SingleEmailCampaignModal({
   context,
@@ -72,7 +84,7 @@ export default function SingleEmailCampaignModal({
   const isValidEmail = (email: string) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
-  }
+  };
 
   // const searchExistingProspects = debounce(async (query) => {
   //   if (query.trim().length === 0) return;
@@ -102,17 +114,14 @@ export default function SingleEmailCampaignModal({
   //     })));
   //     console.log('to email is ', toEmail);
 
-
   //     // Handle the data as needed
   //     console.log(data);
   //   } catch (error) {
   //     console.error("Error fetching existing prospects:", error);
   //   }
   // }, 300);
-  
 
   const onSendEmail = async () => {
-
     setCreatingCampaign(true);
 
     showNotification({
@@ -129,7 +138,7 @@ export default function SingleEmailCampaignModal({
       },
       body: JSON.stringify({
         from_email: emailDomains[0],
-        to_email: toEmail.map(email => email.trim()).map(Number),
+        to_email: toEmail.map((email) => email.trim()).map(Number),
         cc_email: ccEmail,
         bcc_email: bccEmail,
         cc_email_list: ccEmailList,
@@ -140,23 +149,18 @@ export default function SingleEmailCampaignModal({
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.found_emails){
+        if (data.found_emails) {
           showNotification({
             title: "Creating Email Campaign...",
             message: "Email Campaign has started and the email was found for the prospect.",
             color: "teal",
           });
-
-
         }
 
-        setCreatingCampaign(false); 
-
+        setCreatingCampaign(false);
 
         innerProps.fetchAllCampaigns();
       });
-
-
   };
   const getAvailableEmailRecipients = () => {
     fetch(`${API_URL}/prospect/email-recipients`, {
@@ -173,28 +177,150 @@ export default function SingleEmailCampaignModal({
       });
   };
 
-
-
   useEffect(() => {
     getAvailableEmailRecipients();
   }, []);
 
+  const SelectItem = forwardRef<HTMLDivElement, ItemProps>(({ image, label, description, ...others }: ItemProps, ref) => (
+    <div ref={ref} {...others}>
+      <Checkbox label={label} checked={others.selected} />
+    </div>
+  ));
+
+  const [change, setChange] = useState(false);
+  const [linkedinRequire, setLinkedinRequire] = useState(false);
+  const handleLinkedinRequired = () => {
+    setLinkedinRequire(true);
+    // linkedin URL Required
+    setLinkedinRequire(false);
+  };
+
   return (
-    <Paper p="lg" shadow="sm" radius="md" style={{ position: "relative", backgroundColor: theme.colors.gray[0] }}>
-      <Stack spacing="md">
+    <Paper style={{ position: "relative" }}>
+      <Divider />
+      <Flex align={"center"} gap={"xs"} mt={"sm"}>
+        <Text size={"sm"} color="gray" fw={500} w={50}>
+          From:
+        </Text>
         <MultiSelect
-          label={
-            <span style={{ color: emailDomains.length > 0 ? theme.colors.dark[9] : theme.colors.red[6] }}>
-              Email to Send From: *
-            </span>
+          itemComponent={SelectItem}
+          // value={emailDomains.length > 0 ? emailDomains : availableEmails?.[0] ? [availableEmails[0]] : []}
+          data={
+            availableEmails?.map((email, index) => ({
+              value: email,
+              label: email,
+              key: index,
+            })) || []
           }
-          value={emailDomains.length > 0 ? emailDomains : (availableEmails?.[0] ? [availableEmails[0]] : [])}
+          disableSelectedItemFiltering
+          w={"100%"}
+          nothingFound="Nobody here"
+          maxDropdownHeight={400}
+          icon={
+            !change && (
+              <Flex align={"center"} gap={4}>
+                <Avatar src={""} size={"xs"} radius={"xl"} />
+                <Text fw={500} size={"sm"}>
+                  SellScale CSM
+                </Text>
+                <Divider orientation="vertical" />
+                <Text size={"xs"} fw={400} color="gray">
+                  csm@sellscale.com
+                </Text>
+              </Flex>
+            )
+          }
+          onChange={(value) => {
+            console.log(value);
+            if (value.length > 0) setChange(true);
+            else setChange(false);
+          }}
+          styles={{
+            icon: {
+              width: "260px",
+              color: "black",
+            },
+          }}
+          size="xs"
+        />
+        {/* <MultiSelect
+          // label={<span style={{ color: emailDomains.length > 0 ? theme.colors.dark[9] : theme.colors.red[6] }}>Email to Send From: *</span>}
+          // value={emailDomains.length > 0 ? emailDomains : availableEmails?.[0] ? [availableEmails[0]] : []}
+          onChange={(values) => setEmailDomains(values)}
+          data={
+            availableEmails?.map((email, index) => ({
+              value: email,
+              label: email,
+              key: index,
+            })) || []
+          }
+          creatable
+          searchable
+          getCreateLabel={(query) => `+ Add ${query}`}
+          clearable
+          radius="md"
+          size="md"
+          mb="sm"
+          itemComponent={SelectItem}
+          filter={(value, selected, item) => {
+            return (
+              !selected &&
+              (item.label?.toLowerCase().includes(value.toLowerCase().trim()) || item.description?.toLowerCase().includes(value.toLowerCase().trim()))
+            );
+          }}
+        /> */}
+      </Flex>
+      <Flex align={"center"} gap={"xs"} mt={6}>
+        <Text size={"sm"} color="gray" fw={500} w={68}>
+          To:
+        </Text>
+        <TextInput
+          placeholder="Enter email address or Linkedin URL"
+          size="xs"
+          w={"100%"}
+          onChange={handleLinkedinRequired}
+          rightSection={linkedinRequire && <Loader color="gray" size="xs" />}
+        />
+        <Button variant="default" size="xs">
+          +CC
+        </Button>
+        <Button variant="default" size="xs">
+          +BCC
+        </Button>
+      </Flex>
+      <TextInput
+        mt={"sm"}
+        label={
+          <Text color="gray" fw={500} size={"sm"}>
+            SUBJECT:
+          </Text>
+        }
+      />
+      <Box mt={"md"}>
+        <Text color="gray" fw={500} size={"sm"}>
+          BODY:
+        </Text>
+        <RichTextArea
+          onChange={(value, rawValue) => {
+            messageDraftRichRaw.current = rawValue;
+            messageDraftEmail.current = value;
+          }}
+          value={messageDraftRichRaw.current}
+          height={200}
+        />
+      </Box>
+      {/* <Stack spacing="md">
+        <MultiSelect
+          label={<span style={{ color: emailDomains.length > 0 ? theme.colors.dark[9] : theme.colors.red[6] }}>Email to Send From: *</span>}
+          value={emailDomains.length > 0 ? emailDomains : availableEmails?.[0] ? [availableEmails[0]] : []}
           onChange={(values) => setEmailDomains(values.slice(-1))}
-          data={availableEmails?.map((email, index) => ({
-            value: email,
-            label: email,
-            key: index,
-          })) || []}
+          data={
+            availableEmails?.map((email, index) => ({
+              value: email,
+              label: email,
+              key: index,
+            })) || []
+          }
           creatable
           searchable
           getCreateLabel={(query) => `+ Add ${query}`}
@@ -248,8 +374,8 @@ export default function SingleEmailCampaignModal({
                       message: `Email not found for ${url}`,
                       color: "red",
                     });
-                    setOptions([])
-                    setToEmail([])
+                    setOptions([]);
+                    setToEmail([]);
                     return;
                   }
 
@@ -285,24 +411,16 @@ export default function SingleEmailCampaignModal({
             }
           }}
           getCreateLabel={(query) => `+ Add ${query}`}
-          shouldCreate={(query, data) => query.trim().length > 0 && !data.some(item => item.value === query.trim())}
+          shouldCreate={(query, data) => query.trim().length > 0 && !data.some((item) => item.value === query.trim())}
           clearable
           rightSection={isValidLinkedInUrl(toEmail[toEmail.length - 1]) && <Loader size="xs" />}
         />
-        {toEmail.length > 0 && <Group position="apart" mt="sm">
-          <Checkbox
-            label="CC"
-            checked={ccEmail !== ""}
-            onChange={(e) => setCcEmail(e.currentTarget.checked ? "cc@example.com" : "")}
-            size="md"
-          />
-          <Checkbox
-            label="BCC"
-            checked={bccEmail !== ""}
-            onChange={(e) => setBccEmail(e.currentTarget.checked ? "bcc@example.com" : "")}
-            size="md"
-          />
-        </Group>}
+        {toEmail.length > 0 && (
+          <Group position="apart" mt="sm">
+            <Checkbox label="CC" checked={ccEmail !== ""} onChange={(e) => setCcEmail(e.currentTarget.checked ? "cc@example.com" : "")} size="md" />
+            <Checkbox label="BCC" checked={bccEmail !== ""} onChange={(e) => setBccEmail(e.currentTarget.checked ? "bcc@example.com" : "")} size="md" />
+          </Group>
+        )}
         {ccEmail && (
           <MultiSelect
             label="CC Email List"
@@ -341,42 +459,16 @@ export default function SingleEmailCampaignModal({
             mb="sm"
           />
         )}
-        <TextInput
-          label="Subject"
-          value={subject}
-          onChange={(e) => setSubject(e.currentTarget.value)}
-          mb="sm"
-          radius="md"
-          size="md"
-        />
-        <RichTextArea
-          onChange={(value, rawValue) => {
-            messageDraftRichRaw.current = rawValue;
-            messageDraftEmail.current = value;
-          }}
-          value={messageDraftRichRaw.current}
-          height={200}
-        />
-        <Group position="right" mt="md">
-          <Button 
-            onClick={() => closeAllModals()}
-            variant="outline"
-            color="gray"
-            radius="md"
-            size="md"
-          >
-            Cancel
-          </Button>
-          <Button 
-            loading={creatingCampaign}
-            onClick={onSendEmail}
-            radius="md"
-            size="md"
-          >
-            Send
-          </Button>
-        </Group>
-      </Stack>
+        <TextInput label="Subject" value={subject} onChange={(e) => setSubject(e.currentTarget.value)} mb="sm" radius="md" size="md" />
+      </Stack> */}
+      <Group position="right" mt="md">
+        <Button onClick={() => closeAllModals()} variant="outline" color="gray" radius="md" size="md">
+          Cancel
+        </Button>
+        <Button loading={creatingCampaign} onClick={onSendEmail} radius="md" size="md">
+          Send
+        </Button>
+      </Group>
     </Paper>
   );
 }

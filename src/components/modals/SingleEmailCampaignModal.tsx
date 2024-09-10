@@ -184,7 +184,11 @@ export default function SingleEmailCampaignModal({
 
     const data = await response.json();
 
+    setLinkedinURL('');
+
     if (data.prospect) {
+       // set the picture to null 
+      if (data.prospect && !data.existing_prospect) data.prospect.profile_picture = null;
       setIscraperProspect(data.prospect);
     }
 
@@ -769,6 +773,7 @@ export default function SingleEmailCampaignModal({
         {toEmail.length > 0 && (
           <Flex align={"center"} gap={"xs"}>
             <Button
+              disabled
               variant="default"
               size="xs"
               onClick={() => setCcEmail((prev) => (prev ? null : "cc@example.com"))}
@@ -776,6 +781,7 @@ export default function SingleEmailCampaignModal({
               +CC
             </Button>
             <Button
+              disabled
               variant="default"
               size="xs"
               onClick={() => setBccEmail((prev) => (prev ? null : "bcc@example.com"))}

@@ -103,6 +103,45 @@ export default function SingleEmailCampaignModal({
   const [existingProspect, setExistingProspect] = useState<ProspectShallow | null>(null);
   const [linkedinURL, setLinkedinURL] = useState("");
 
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedFirstName, setEditedFirstName] = useState("");
+  const [editedLastName, setEditedLastName] = useState("");
+
+  const [isEditingCompany, setIsEditingCompany] = useState(false);
+  const [editedCompany, setEditedCompany] = useState("");
+
+  const handleCompanySave = () => {
+    if (iscraperProspect && editedCompany) {
+      setIscraperProspect({
+        ...iscraperProspect,
+        position_groups: [
+          {
+            ...iscraperProspect.position_groups[0],
+            profile_positions: [
+              {
+                ...iscraperProspect.position_groups[0].profile_positions[0],
+                company: editedCompany,
+              },
+            ],
+          },
+        ],
+      });
+    }
+    setIsEditingCompany(false);
+  }
+
+  const handleNameSave = () => {
+    if (iscraperProspect && editedFirstName && editedLastName) {
+      setIscraperProspect({
+        ...iscraperProspect,
+        first_name: editedFirstName,
+        last_name: editedLastName,
+      });
+    }
+    setIsEditingName(false);
+  };
+
+
   const [emailDomains, setEmailDomains] = useState<string[]>([]);
   const [subject, setSubject] = useState("");
   const [creatingCampaign, setCreatingCampaign] = useState(false);
@@ -131,7 +170,34 @@ export default function SingleEmailCampaignModal({
   
   const getProspectFromEmail = async (email: string) => {
     setGettingProspectFromEmail(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    console.log('test')
+    const response = await fetch(`${API_URL}/prospect/prospect_from_email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        email,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.prospect) {
+      setIscraperProspect(data.prospect);
+    }
+
+    if (data.existing_prospect){
+      setExistingProspect(data.existing_prospect as ProspectShallow);
+      console.log('setting existing prospect', data.existing_prospect
+      );
+    }
+
+    if (data.existing_archetype){
+      setExistingPersona(data.existing_archetype as Archetype);
+    }
+
     setGettingProspectFromEmail(false);
   };
 
@@ -158,6 +224,7 @@ export default function SingleEmailCampaignModal({
         }),
       });
 
+  
       const data = await response.json();
 
       if (!data.email) {
@@ -473,8 +540,53 @@ export default function SingleEmailCampaignModal({
         <Card shadow="lg" p="xl" mb="lg" mt="lg" style={{ backgroundColor: '#ffffff', border: '1px solid #e0e0e0', borderRadius: '10px' }}>
           <Flex direction="column" align="center" justify="center" gap="md">
             <Avatar src={iscraperProspect?.profile_picture} radius="xl" size="lg" mb="sm" />
-            <Title order={3} style={{ color: '#1a202c' }}>{iscraperProspect?.first_name + ' ' + iscraperProspect?.last_name} ✅</Title>
-            <Text size="md" color="dimmed">{iscraperProspect?.position_groups?.[0].profile_positions?.[0]?.company}</Text>
+            {isEditingName ? (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <TextInput
+                  value={editedFirstName}
+                  onChange={(e) => setEditedFirstName(e.target.value)}
+                  style={{ marginRight: '8px' }}
+                />
+                <TextInput
+                  value={editedLastName}
+                  onChange={(e) => setEditedLastName(e.target.value)}
+                  style={{ marginRight: '8px' }}
+                />
+                <Button onClick={handleNameSave} variant="subtle" compact>
+                  ✅
+                </Button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Title order={3} style={{ color: '#1a202c' }}>
+                  {iscraperProspect?.first_name + ' ' + iscraperProspect?.last_name}
+                </Title>
+                <Button onClick={() => setIsEditingName(true)} variant="subtle" compact>
+                  ✏️
+                </Button>
+              </div>
+            )}
+            {isEditingCompany ? (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <TextInput
+                  value={editedCompany}
+                  onChange={(e) => setEditedCompany(e.target.value)}
+                  style={{ marginRight: '8px' }}
+                />
+                <Button onClick={handleCompanySave} variant="subtle" compact>
+                  ✅
+                </Button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Text size="md" color="dimmed">
+                  {iscraperProspect?.position_groups?.[0].profile_positions?.[0]?.company}
+                </Text>
+                <Button onClick={() => { setEditedCompany(iscraperProspect?.position_groups?.[0].profile_positions?.[0]?.company || ""); setIsEditingCompany(true); }} variant="subtle" compact>
+                  ✏️
+                </Button>
+              </div>
+            )}
           </Flex>
           <Flex align="center" mt="md">
           </Flex>

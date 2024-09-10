@@ -1929,7 +1929,10 @@ const SegmentChat = (props: any) => {
               <Text align="right" size="xs" color="gray" mt="2px">
                 Last updated:{" "}
                 {props.memory?.memory_line_time_updated
-                  ? moment(props.memory?.memory_line_time_updated).fromNow()
+                  ? moment
+                      .utc(props.memory?.memory_line_time_updated)
+                      .local()
+                      .fromNow()
                   : "N/A"}
               </Text>
               <Flex

@@ -54,6 +54,7 @@ import {
   IconArrowRight,
   IconArrowsLeftRight,
   IconBrandLinkedin,
+  IconCheck,
   IconChevronDown,
   IconChevronUp,
   IconClock,
@@ -97,6 +98,8 @@ import { useQuery } from "@tanstack/react-query";
 import { CtaSection } from "@common/sequence/CtaSection";
 import { updateInitialBlocklist } from "@utils/requests/updatePersonaBlocklist";
 import Hook from "@pages/channels/components/Hook";
+import { postEmailTrackingSettings } from "@utils/requests/emailTrackingSettings";
+import { getFreshCurrentProject } from "@auth/core";
 
 interface SwitchStyle extends Partial<MantineStyleSystemProps> {
   label?: React.CSSProperties;
@@ -243,8 +246,16 @@ export default function CampaignTemplateEditModal({
 
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
-  const currentProject = useRecoilValue(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const campaignId = innerProps.campaignId;
+  const [openTrackingEnabled, setOpenTrackingEnabled] = useState(
+    !currentProject?.email_open_tracking_enabled
+  );
+  const [clickTrackingEnabled, setClickTrackingEnabled] = useState(
+    !currentProject?.email_link_tracking_enabled
+  );
   const addedTheMagic = emailSubjectLines.some(
     (subjectLine: SubjectLineTemplate) =>
       subjectLine.is_magic_subject_line === true
@@ -769,7 +780,15 @@ export default function CampaignTemplateEditModal({
                 >
                   AI Generate
                 </Button>
-                <Popover width={220} position="bottom" withArrow shadow="md">
+                <Popover
+                  width={220}
+                  position="bottom"
+                  withArrow
+                  shadow="md"
+                  onClose={() => {
+                    innerProps.refetchSequenceData(Number(currentProject?.id));
+                  }}
+                >
                   <Popover.Target>
                     <ActionIcon variant="outline" color="gray">
                       <IconAdjustments size={"1rem"} />
@@ -778,22 +797,108 @@ export default function CampaignTemplateEditModal({
                   <Popover.Dropdown>
                     <Stack spacing={"md"}>
                       <Text fw={500}>Advanced Settings</Text>
-                      <Switch
-                        w={"100%"}
-                        label="Open Tracking"
-                        labelPosition="left"
-                        styles={{
-                          label: {
-                            justifyContent: "space-between",
-                          },
-                        }}
-                      />
-                      <Divider />
-                      <Center>
-                        <Text color="gray" fw={500} size={"sm"} underline>
-                          Reset to default
-                        </Text>
-                      </Center>
+                      {sequenceType === "email" ? (
+                        <>
+                          <Switch
+                            w={"100%"}
+                            label="Open Tracking"
+                            labelPosition="left"
+                            checked={openTrackingEnabled}
+                            styles={{
+                              label: {
+                                justifyContent: "space-between",
+                              },
+                            }}
+                            onClick={() => {
+                              setOpenTrackingEnabled(!openTrackingEnabled);
+                              postEmailTrackingSettings(
+                                userToken,
+                                currentProject?.id || -1,
+                                !openTrackingEnabled,
+                                clickTrackingEnabled
+                              ).then(() => {
+                                showNotification({
+                                  title: "Success",
+                                  message: "Email tracking settings updated",
+                                  color: "green",
+                                });
+                              });
+                            }}
+                          />
+                          <Switch
+                            w={"100%"}
+                            label="Click Tracking"
+                            labelPosition="left"
+                            checked={clickTrackingEnabled}
+                            styles={{
+                              label: {
+                                justifyContent: "space-between",
+                              },
+                            }}
+                            onClick={() => {
+                              setClickTrackingEnabled(!clickTrackingEnabled);
+                              postEmailTrackingSettings(
+                                userToken,
+                                currentProject?.id || -1,
+                                openTrackingEnabled,
+                                !clickTrackingEnabled
+                              ).then(() => {
+                                showNotification({
+                                  title: "Success",
+                                  message: "Email tracking settings updated",
+                                  color: "green",
+                                });
+                              });
+                            }}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <Switch
+                            w={"100%"}
+                            label="Enable CTA Mode"
+                            labelPosition="left"
+                            checked={!currentProject?.template_mode}
+                            styles={{
+                              label: {
+                                justifyContent: "space-between",
+                              },
+                            }}
+                            onClick={() => {
+                              fetch(
+                                `${API_URL}/client/archetype/${currentProject?.id}/toggle_template_mode`,
+                                {
+                                  method: "PATCH",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${userToken}`,
+                                  },
+                                  body: JSON.stringify({
+                                    template_mode: !currentProject?.template_mode,
+                                  }),
+                                }
+                              ).then((res) => {
+                                getFreshCurrentProject(
+                                  userToken,
+                                  currentProject?.id as number
+                                ).then((project: any) => {
+                                  showNotification({
+                                    title: "Success",
+                                    message: `Template mode ${
+                                      project?.template_mode
+                                        ? "enabled"
+                                        : "disabled"
+                                    }`,
+                                    color: "green",
+                                    icon: <IconCheck size="1rem" />,
+                                  });
+                                  setCurrentProject(project);
+                                });
+                              });
+                            }}
+                          />
+                        </>
+                      )}
                     </Stack>
                   </Popover.Dropdown>
                 </Popover>

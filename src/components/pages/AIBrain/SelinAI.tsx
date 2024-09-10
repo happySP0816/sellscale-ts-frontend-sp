@@ -1762,6 +1762,15 @@ const SegmentChat = (props: any) => {
   const [uncollapsedCards, setUncollapsedCards] = useState<{
     [key: number]: boolean;
   }>({});
+  const [clientMemoryState, setClientMemoryState] = useState<any>(
+    props.memory?.memory_line
+  );
+  const [
+    clientMemoryStateUpdatedTime,
+    setClientMemoryStateUpdatedTime,
+  ] = useState<any>(props.memory?.memory_line_time_updated);
+  const [memoryStateChanged, setMemoryStateChanged] = useState(false);
+  const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
 
   const handleListClick = async (prompt: string) => {
     handleSubmit(undefined, prompt);
@@ -1816,6 +1825,48 @@ const SegmentChat = (props: any) => {
     }
   };
 
+  const updateMemoryLineAllSessions = async (newMemoryLine: string) => {
+    setMemoryLineUpdating(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/selix/update_memory_line_all_sessions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            new_memory_line: newMemoryLine,
+            session_id: sessionId,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showNotification({
+          title: "Memory Line Updated",
+          message: result.message,
+          color: "green",
+          icon: <IconCircleCheck />,
+        });
+      } else {
+        showNotification({
+          title: "Error Updating Memory Line",
+          message: result.error || "Failed to update memory line",
+          color: "red",
+          icon: <IconX />,
+        });
+      }
+    } catch (error) {
+      console.error("Error updating memory line:", error);
+    } finally {
+      setMemoryLineUpdating(false);
+    }
+  };
+
   const selixMemoryTitleTranslations: { [key: string]: string } = {
     campaigns: "Currently working on: ",
     needs_user_input: "Need your input: ",
@@ -1863,6 +1914,65 @@ const SegmentChat = (props: any) => {
               )}
             </Flex>
             <Card withBorder mah={600} p="md" sx={{ overflow: "auto" }}>
+              <Textarea
+                placeholder="Type your notes here..."
+                autosize
+                minRows={3}
+                defaultValue={props.memory?.memory_line}
+                onChange={(e) => {
+                  setClientMemoryState(e.target.value);
+                  setMemoryStateChanged(true);
+                }}
+                size="xs"
+                mb="0px"
+              />
+              <Text align="right" size="xs" color="gray" mt="2px">
+                Last updated:{" "}
+                {props.memory?.memory_line_time_updated
+                  ? moment(props.memory?.memory_line_time_updated).fromNow()
+                  : "N/A"}
+              </Text>
+              <Flex
+                justify="flex-end"
+                mt="xs"
+                style={{
+                  display:
+                    memoryStateChanged || memoryLineUpdating ? "flex" : "none",
+                }}
+              >
+                {memoryLineUpdating && (
+                  <Flex mr="md" mt="4px">
+                    <Loader size="sm"></Loader>
+                  </Flex>
+                )}
+                <Button
+                  size="xs"
+                  color="green"
+                  disabled={!memoryStateChanged || memoryLineUpdating}
+                  onClick={() => {
+                    updateMemoryLineAllSessions(clientMemoryState);
+                    setClientMemoryStateUpdatedTime(
+                      new Date().toLocaleString()
+                    );
+                    setMemoryStateChanged(false);
+                  }}
+                >
+                  ✓
+                </Button>
+                <Button
+                  size="xs"
+                  color="red"
+                  disabled={!memoryStateChanged || memoryLineUpdating}
+                  ml="xs"
+                  onClick={() => {
+                    setClientMemoryState(props.memory?.memory_line);
+                    setMemoryStateChanged(false);
+                  }}
+                >
+                  ✗
+                </Button>
+              </Flex>
+
               {props.memoryState &&
                 Object.keys(props.memoryState).map((x: string) => {
                   return (

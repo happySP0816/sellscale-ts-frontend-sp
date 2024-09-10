@@ -362,6 +362,7 @@ export default function SingleEmailCampaignModal({
           cc_email_list: ccEmailList,
           bcc_email_list: bccEmailList,
           subject: subject,
+          iscraper_prospect: iscraperProspect,
           body: messageDraftEmail.current,
           linkedin_url: linkedinURL,
           existing_prospect: existingProspect?.id

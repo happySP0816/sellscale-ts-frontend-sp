@@ -3487,18 +3487,19 @@ const PlannerComponent = ({
                       />
                     </Text>
                     {/* eventually delete this */}
-                    {currentThread?.memory.campaign_id && (
-                      <TaskRenderer
-                        // key={currentProject?.id}
-                        task={task}
-                        counter={counter}
-                        segment={segment}
-                        // messages={messages}
-                        threads={threads}
-                        currentSessionId={currentSessionId}
-                        handleStrategySubmit={handleStrategySubmit}
-                      />
-                    )}
+                    {currentThread?.memory.campaign_id &&
+                      openedTaskIndex === index && (
+                        <TaskRenderer
+                          // key={currentProject?.id}
+                          task={task}
+                          counter={counter}
+                          segment={segment}
+                          // messages={messages}
+                          threads={threads}
+                          currentSessionId={currentSessionId}
+                          handleStrategySubmit={handleStrategySubmit}
+                        />
+                      )}
                   </Collapse>
                 </Paper>
               );

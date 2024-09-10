@@ -2796,14 +2796,14 @@ const SelixControlCenter = ({
                     >
                       <Center style={{ gap: 10 }}>
                         <IconHammer size={"1rem"} />
-                        <span>Blueprint</span>
+                        <span>Task Plan</span>
                       </Center>
                     </div>
                   </Popover.Target>
                   <Popover.Dropdown sx={{ pointerEvents: "none" }}>
                     <Text size="sm">
-                      This section allows you to manage your project's
-                      blueprint.
+                      This section allows you to manage your project's task
+                      plan.
                     </Text>
                   </Popover.Dropdown>
                 </Popover>
@@ -2891,6 +2891,7 @@ const SelixControlCenter = ({
             threads={threads}
             tasks={tasks}
             currentSessionId={currentSessionId}
+            handleStrategySubmit={handleSubmit}
           />
         ) : aiType === "segment" ? (
           <Box maw="900px">
@@ -2973,7 +2974,7 @@ const SelixControlCenter = ({
           // <Paper withBorder bg={"#fffaea"} mt={"sm"} px={"sm"} py={"md"} style={{ borderColor: "#fdb93a" }}>
           //   <Flex align={"center"} gap={"xs"} justify={"space-between"}>
           //     <Text size={"sm"} color="orange" fw={600}>
-          //       Would you like to confirm the task lis tbefore getting started with Blueprint?
+          //       Would you like to confirm the task lis tbefore getting started with Task Plan?
           //     </Text>
           //     <Flex gap={4}>
           //       <Button variant="outline" color="orange" w={100} size="xs">
@@ -3155,12 +3156,14 @@ const PlannerComponent = ({
   currentSessionId,
   messagesLength,
   tasks,
+  handleStrategySubmit,
 }: {
   threads: ThreadType[];
   currentSessionId: Number | null;
   messagesLength: number;
   tasks: TaskType[];
   counter: Number;
+  handleStrategySubmit: () => void;
 }) => {
   const [opened, { toggle }] = useDisclosure(true);
   const taskContainerRef = useRef<HTMLDivElement>(null);
@@ -3484,14 +3487,7 @@ const PlannerComponent = ({
                       />
                     </Text>
                     {/* eventually delete this */}
-                    {currentThread?.memory.campaign_id &&
-                    index === tasks.length - 1 ? (
-                      <CampaignLandingV2
-                        showOnlyHeader
-                        showLaunchButton
-                        forcedCampaignId={currentThread?.memory.campaign_id}
-                      />
-                    ) : (
+                    {currentThread?.memory.campaign_id && (
                       <TaskRenderer
                         // key={currentProject?.id}
                         task={task}
@@ -3500,6 +3496,7 @@ const PlannerComponent = ({
                         // messages={messages}
                         threads={threads}
                         currentSessionId={currentSessionId}
+                        handleStrategySubmit={handleStrategySubmit}
                       />
                     )}
                   </Collapse>
@@ -3519,6 +3516,7 @@ const TaskRenderer = ({
   // messages,
   threads,
   currentSessionId,
+  handleStrategySubmit,
 }: {
   task: TaskType;
   counter: Number;
@@ -3526,6 +3524,7 @@ const TaskRenderer = ({
   threads: ThreadType[];
   currentSessionId: Number | null;
   segment?: TransformedSegment | undefined;
+  handleStrategySubmit: () => void;
 }) => {
   const [currentProject, setCurrentProject] = useRecoilState(
     currentProjectState
@@ -3584,6 +3583,7 @@ const TaskRenderer = ({
           // messages={messages}
           threads={threads}
           currentSessionId={currentSessionId}
+          handleSubmit={handleStrategySubmit}
         />
       );
     case "REVIEW_PROSPECTS":
@@ -3699,7 +3699,7 @@ const SelinStrategy = ({
     <Paper withBorder radius={"sm"}>
       <Flex bg={"#1E90FF"} p={"sm"}>
         <Text tt={"uppercase"} fw={600} color="white">
-          Blueprint:{" "}
+          Task Plan:{" "}
           <span className="text-gray-200">
             {strategy?.title.replace(/['"]/g, "")}
           </span>
@@ -3717,7 +3717,7 @@ const SelinStrategy = ({
             <Flex align={"center"} gap={"xs"}>
               <IconInfoCircle color="green" size={"1rem"} />
               <Text size={"sm"} color="#228B22" fw={600}>
-                This blueprint summarizes the angle for your campaign. Review
+                This Task Plan summarizes the angle for your campaign. Review
                 then press 'Save Draft'
               </Text>
             </Flex>

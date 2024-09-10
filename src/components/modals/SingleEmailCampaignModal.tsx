@@ -28,19 +28,25 @@ import {
   Modal,
   Table,
   Badge,
+  ScrollArea,
+  Tooltip,
+  createStyles,
+  rem,
+  ActionIcon,
 } from "@mantine/core";
 import { closeAllModals, ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconAlignJustified, IconAlignLeft, IconAlignRight, IconCheck, IconCircleCheck } from "@tabler/icons";
+import { IconAlignJustified, IconAlignLeft, IconAlignRight, IconBrandLinkedin, IconBriefcase, IconBuilding, IconBuildingStore, IconCheck, IconCircleCheck, IconExternalLink, IconHomeHeart, IconInfoCircle, IconLetterT, IconMail, IconMap2, IconPencil, IconPhone, IconUser } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { JSONContent } from "@tiptap/react";
 import { set } from "lodash";
 import { useState, useEffect, useRef, forwardRef } from "react";
 import { useRecoilValue } from "recoil";
 import { ProspectShallow, IScraperProspect, EmailStore, Archetype} from "src";
-import { isLinkedInURL } from "@utils/general";
+import { isLinkedInURL, nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import EmailStoreView from "@common/prospectDetails/EmailStoreView";
 import { icpFitToColor, icpFitToLabel } from "@common/pipeline/ICPFitAndReason";
+import { DataGrid } from "mantine-data-grid";
 // interface ItemProps extends React.ComponentPropsWithoutRef<"div"> {
 //   value: string;
 //   label: string;
@@ -94,6 +100,7 @@ export default function SingleEmailCampaignModal({
   const [ccEmailList, setCcEmailList] = useState<string[]>([]);
   const messageDraftRichRaw = useRef<JSONContent | string>("");
   const messageDraftEmail = useRef("");
+  const [couldNotFindEmail, setCouldNotFindEmail] = useState(false);
   const [gettingProspectFromEmail, setGettingProspectFromEmail] = useState(false);
   const popoverRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [emailStore, setEmailStore] = useState<EmailStore | null>(null);
@@ -102,45 +109,6 @@ export default function SingleEmailCampaignModal({
   const [popoverOpened, setPopoverOpened] = useState(false);
   const [existingProspect, setExistingProspect] = useState<ProspectShallow | null>(null);
   const [linkedinURL, setLinkedinURL] = useState("");
-
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [editedFirstName, setEditedFirstName] = useState("");
-  const [editedLastName, setEditedLastName] = useState("");
-
-  const [isEditingCompany, setIsEditingCompany] = useState(false);
-  const [editedCompany, setEditedCompany] = useState("");
-
-  const handleCompanySave = () => {
-    if (iscraperProspect && editedCompany) {
-      setIscraperProspect({
-        ...iscraperProspect,
-        position_groups: [
-          {
-            ...iscraperProspect.position_groups[0],
-            profile_positions: [
-              {
-                ...iscraperProspect.position_groups[0].profile_positions[0],
-                company: editedCompany,
-              },
-            ],
-          },
-        ],
-      });
-    }
-    setIsEditingCompany(false);
-  }
-
-  const handleNameSave = () => {
-    if (iscraperProspect && editedFirstName && editedLastName) {
-      setIscraperProspect({
-        ...iscraperProspect,
-        first_name: editedFirstName,
-        last_name: editedLastName,
-      });
-    }
-    setIsEditingName(false);
-  };
-
 
   const [emailDomains, setEmailDomains] = useState<string[]>([]);
   const [subject, setSubject] = useState("");
@@ -153,11 +121,6 @@ export default function SingleEmailCampaignModal({
   const [availableEmails, setAvailableEmails] = useState<string[]>([]);
   const [options, setOptions] = useState<SelectProps["data"]>([]);
 
-  const [prospectOptions, setProspectOptions] = useState<SelectProps["data"]>([]);
-
- 
-
-
   const isValidLinkedInUrl = (url: string) => {
     const linkedInRegex = /^(https?:\/\/)?(www\.)?linkedin\.com\/.*$/;
     return linkedInRegex.test(url);
@@ -169,41 +132,70 @@ export default function SingleEmailCampaignModal({
   };
   
   const getProspectFromEmail = async (email: string) => {
+    if (!isValidEmail(email)) {
+      return;
+    }
     setGettingProspectFromEmail(true);
     console.log('test')
-    const response = await fetch(`${API_URL}/prospect/prospect_from_email`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userToken}`,
-      },
-      body: JSON.stringify({
-        email,
-      }),
-    });
+    try {
+      const response = await fetch(`${API_URL}/prospect/prospect_from_email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          email,
+        }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    setLinkedinURL('');
+      setLinkedinURL('');
 
-    if (data.prospect) {
-       // set the picture to null 
-      if (data.prospect && !data.existing_prospect) data.prospect.profile_picture = null;
-      setIscraperProspect(data.prospect);
+      if (data?.message?.includes('No prospects found')) {
+
+        showNotification({
+          title: "Problem with Email",
+          message: "There was an issue using this email. No prospect was found or bad email address.",
+          color: "red",
+        });
+
+        setIscraperProspect(null);
+        setExistingProspect(null);
+        setExistingPersona(null);
+        setOptions([]);
+        setEmailStore(null);
+        setToEmail([]);
+        return;
+
+      }
+
+      if (data.prospect) {
+        // set the picture to null 
+        if (data.prospect && !data.existing_prospect) data.prospect.profile_picture = null;
+        setIscraperProspect(data.prospect);
+      }
+
+      if (data.existing_prospect){
+        setExistingProspect(data.existing_prospect as ProspectShallow);
+        console.log('setting existing prospect', data.existing_prospect);
+      }
+
+      if (data.existing_archetype){
+        setExistingPersona(data.existing_archetype as Archetype);
+      }
+    } catch (error) {
+      showNotification({
+        title: "Error",
+        message: "An error occurred while fetching the prospect from email.",
+        color: "red",
+      });
+    } finally {
+      setGettingProspectFromEmail(false);
     }
 
-    if (data.existing_prospect){
-      setExistingProspect(data.existing_prospect as ProspectShallow);
-      console.log('setting existing prospect', data.existing_prospect
-      );
-    }
-
-    if (data.existing_archetype){
-      setExistingPersona(data.existing_archetype as Archetype);
-    }
-
-    setGettingProspectFromEmail(false);
-  };
+  }
 
   const getEmailFromLinkedinURL = async (url: string) => {
     if (!url) {
@@ -237,6 +229,7 @@ export default function SingleEmailCampaignModal({
           message: `Email not found for ${url}`,
           color: "red",
         });
+        setCouldNotFindEmail(true);
         setLinkedinSearch("");
         setOptions([]);
         setEmailStore(null);
@@ -462,140 +455,162 @@ export default function SingleEmailCampaignModal({
               overflowY: 'auto', // Added to handle overflow
             }}
           >
-        
-            <Title order={2} style={{ marginBottom: '20px' }}>Override Prospect?</Title>
-            <Text size="md" style={{ marginBottom: '20px' }}>
-              This prospect may have already been contacted and is currently part of another campaign. Below is the existing persona and prospect information:
-            </Text>
-            <Divider style={{ marginBottom: '20px' }} />
-            <Title order={4} style={{ marginBottom: '10px' }}>Existing Campaign Information</Title>
-            <Table>
-              <tbody>
-                <tr>
-                  <td><strong>Name:</strong></td>
-                  <td>{existingPersona.archetype}</td>
-                </tr>
-                <tr>
-                  <td><strong>Contract Size:</strong></td>
-                  <td>{existingPersona.contract_size}</td>
-                </tr>
-              </tbody>
-            </Table>
-            <Divider style={{ margin: '20px 0' }} />
-            <Title order={4} style={{ marginBottom: '10px' }}>Existing Prospect Information</Title>
-            {existingProspect && (
-              <Table>
-                <tbody>
-                  <tr>
-                    <td><strong>Full Name:</strong></td>
-                    <td>{existingProspect.full_name}</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Company:</strong></td>
-                    <td>{existingProspect.company}</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Title:</strong></td>
-                    <td>{existingProspect.title}</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Email:</strong></td>
-                    <td>{existingProspect.email}</td>
-                  </tr>
-                  <tr>
-                    <td><strong>ICP Fit Score:</strong></td>
-                    <td>
-                      <Badge color={icpFitToColor(existingProspect.icp_fit_score)}>
-                        {icpFitToLabel(existingProspect.icp_fit_score)}
-                      </Badge>
-                    </td>
-                  </tr>
-                  {existingProspect.icp_fit_reason && <tr>
-                    <td><strong>ICP Fit Reason:</strong></td>
-                    <td>{existingProspect.icp_fit_reason}</td>
-                  </tr>}
-                </tbody>
-              </Table>
-            )}
-            <Divider style={{ margin: '20px 0' }} />
-            <div style={{ position: 'sticky', bottom: '-30px', backgroundColor: 'white', padding: '20px 0', display: 'flex', justifyContent: 'space-between' }}>
-              <Button onClick={() => {
-                setExistingPersona(null);
-                setOptions([])
-                setEmailStore(null);
-                setIscraperProspect(null);
-                setExistingPersona(null);
-                setExistingProspect(null);
-                setToEmail([]);
-                setCcEmail(null);
-                setBccEmail(null);
-              }} variant="outline" style={{ borderColor: 'gray', color: 'gray' }}>
-                Cancel
-              </Button>
-              <Button onClick={() => {setExistingPersona(null)}} style={{ backgroundColor: 'red', color: 'white' }}>
-                Confirm
-              </Button>
-            </div>
+            <Stack spacing={"sm"}>
+              <Text fw={400} color="black" size={"sm"}>
+                Ready to Upload?{" "}
+                <br></br>
+                <span className="font-semibold text-black">
+                  We have found some prospects that are already added to your prospect database.
+                  Please check the prospects that you want to overwrite and move to your new segment/campaign.<br></br>
+                  We will also reset the prospect's status.
+                </span>
+              </Text>
+              {/* <Divider style={{ marginBottom: '20px' }} /> */}
+              {/* <Title order={4} style={{ marginBottom: '10px' }}>Existing Campaign Information</Title>
+              <DataGrid
+                data={[existingPersona]}
+                withBorder
+                withColumnBorders
+                columns={[
+                  {
+                    accessorKey: "archetype",
+                    header: () => (
+                      <Flex align={"center"} gap={"3px"}>
+                        <IconLetterT color="gray" size={"0.9rem"} />
+                        <Text color="gray">Name</Text>
+                      </Flex>
+                    ),
+                    cell: (cell) => (
+                      <Text fw={500}>{cell.getValue()}</Text>
+                    ),
+                  },
+                ]}
+              /> */}
+              <Divider style={{ margin: '20px 0' }} />
+              <Title order={4} style={{ marginBottom: '10px' }}>Prospects from different campaigns</Title>
+              {existingProspect && (
+                <DataGrid
+                  data={[existingProspect]}
+                  withBorder
+                  withColumnBorders
+                  columns={[
+                    {
+                      accessorKey: "full_name",
+                      header: () => (
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconUser color="gray" size={"0.9rem"} />
+                          <Text color="gray">Name</Text>
+                        </Flex>
+                      ),
+                      cell: (cell: any) => (
+                        <Text fw={500}>{cell.getValue()}</Text>
+                      ),
+                    },
+                    {
+                      accessorKey: "company",
+                      header: () => (
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconBuilding color="gray" size={"0.9rem"} />
+                          <Text color="gray">Company</Text>
+                        </Flex>
+                      ),
+                      cell: (cell: any) => (
+                        <Text fw={500}>{cell.getValue()}</Text>
+                      ),
+                    },
+                    {
+                      accessorKey: "title",
+                      header: () => (
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Title</Text>
+                        </Flex>
+                      ),
+                      cell: (cell: any) => (
+                        <Text fw={500}>{cell.getValue()}</Text>
+                      ),
+                    },
+                    {
+                      accessorKey: "email",
+                      header: () => (
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Email</Text>
+                        </Flex>
+                      ),
+                      cell: (cell: any) => (
+                        <Text fw={500}>{cell.getValue()}</Text>
+                      ),
+                    },
+                    {
+                      accessorKey: "icp_fit_score",
+                      header: () => (
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconInfoCircle color="gray" size={"0.9rem"} />
+                          <Text color="gray">ICP Fit Score</Text>
+                        </Flex>
+                      ),
+                      cell: (cell: any) => (
+                        <Badge color={icpFitToColor(cell.getValue())}>
+                          {icpFitToLabel(cell.getValue())}
+                        </Badge>
+                      ),
+                    },
+                    {
+                      accessorKey: "icp_fit_reason",
+                      header: () => (
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconInfoCircle color="gray" size={"0.9rem"} />
+                          <Text color="gray">ICP Fit Reason</Text>
+                        </Flex>
+                      ),
+                      cell: (cell: any) => (
+                        <Text fw={500}>{cell.getValue()}</Text>
+                      ),
+                    },
+                  ]}
+                />
+              )}
+              <Divider style={{ margin: '20px 0' }} />
+              <Paper
+                mt={"xs"}
+                withBorder
+                p={"xs"}
+                style={{ borderColor: "orange", backgroundColor: "#FEF0C769" }}
+              >
+                <Flex align={"center"} gap={5}>
+                  <IconInfoCircle color="orange" />
+                  <Text size={"sm"} fw={500} color="orange">
+                    {"Overwriting the prospect will also reset the prospect's status."}
+                  </Text>
+                </Flex>
+              </Paper>
+              <Flex gap={"lg"} mt={"lg"}>
+                <Button onClick={() => {
+                  setExistingPersona(null);
+                  setOptions([]);
+                  setEmailStore(null);
+                  setIscraperProspect(null);
+                  setExistingPersona(null);
+                  setExistingProspect(null);
+                  setToEmail([]);
+                  setCcEmail(null);
+                  setBccEmail(null);
+                }} fullWidth variant="outline" color="gray">
+                  Cancel
+                </Button>
+                <Button onClick={() => {setExistingPersona(null)}} fullWidth>
+                  Confirm
+                </Button>
+              </Flex>
+            </Stack>
           </Paper>
         </div>
       )}
 
       <Divider />
       {iscraperProspect?.position_groups?.[0].profile_positions?.[0]?.title && (
-        <Card shadow="lg" p="xl" mb="lg" mt="lg" style={{ backgroundColor: '#ffffff', border: '1px solid #e0e0e0', borderRadius: '10px' }}>
-          <Flex direction="column" align="center" justify="center" gap="md">
-            <Avatar src={iscraperProspect?.profile_picture} radius="xl" size="lg" mb="sm" />
-            {isEditingName ? (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <TextInput
-                  value={editedFirstName}
-                  onChange={(e) => setEditedFirstName(e.target.value)}
-                  style={{ marginRight: '8px' }}
-                />
-                <TextInput
-                  value={editedLastName}
-                  onChange={(e) => setEditedLastName(e.target.value)}
-                  style={{ marginRight: '8px' }}
-                />
-                <Button onClick={handleNameSave} variant="subtle" compact>
-                  ✅
-                </Button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Title order={3} style={{ color: '#1a202c' }}>
-                  {iscraperProspect?.first_name + ' ' + iscraperProspect?.last_name}
-                </Title>
-                <Button onClick={() => setIsEditingName(true)} variant="subtle" compact>
-                  ✏️
-                </Button>
-              </div>
-            )}
-            {isEditingCompany ? (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <TextInput
-                  value={editedCompany}
-                  onChange={(e) => setEditedCompany(e.target.value)}
-                  style={{ marginRight: '8px' }}
-                />
-                <Button onClick={handleCompanySave} variant="subtle" compact>
-                  ✅
-                </Button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Text size="md" color="dimmed">
-                  {iscraperProspect?.position_groups?.[0].profile_positions?.[0]?.company}
-                </Text>
-                <Button onClick={() => { setEditedCompany(iscraperProspect?.position_groups?.[0].profile_positions?.[0]?.company || ""); setIsEditingCompany(true); }} variant="subtle" compact>
-                  ✏️
-                </Button>
-              </div>
-            )}
-          </Flex>
-          <Flex align="center" mt="md">
-          </Flex>
-        </Card>
+        <ProspectDetailsCard prospect={iscraperProspect} setProspect={setIscraperProspect} />
       )}
       <Flex align={"center"} gap={"xs"} mt={"sm"}>
         <Text size={"sm"} color="gray" fw={500} w={50}>
@@ -811,6 +826,11 @@ export default function SingleEmailCampaignModal({
           <Text size="xs" color="gray" mt="xs" style={{ textAlign: 'center' }}>
             Enter a LinkedIn URL to automatically find and add the associated email address.
           </Text>
+          {couldNotFindEmail && (
+            <Text size="xs" color="red" mt="xs" style={{ textAlign: 'center' }}>
+              Unable to find a strong email. Please enter email directly.
+            </Text>
+          )}
         </>
       )}
       {ccEmail && (
@@ -1041,5 +1061,169 @@ export default function SingleEmailCampaignModal({
         </Button>
       </Group>
     </Paper>
+  );
+}
+const ProspectDetailsCard = ({ prospect, setProspect }: { prospect: IScraperProspect, setProspect: React.Dispatch<React.SetStateAction<IScraperProspect | null>> }) => {
+  const theme = useMantineTheme();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableProspect, setEditableProspect] = useState(prospect);
+
+  const useStyles = createStyles((theme) => ({
+    icon: {
+      color: theme.colors.gray[6],
+    },
+    item: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
+      borderRadius: theme.radius.md,
+      height: 40,
+      gap: rem(4),
+      width: "100%",
+      backgroundColor: theme.white,
+      border: `solid 1px ${theme.colors.gray[4]}`,
+      transition: "box-shadow 150ms ease, transform 100ms ease",
+      "&:hover": {
+        boxShadow: `${theme.shadows.md} !important`,
+        transform: "scale(1.05)",
+      },
+    },
+  }));
+
+  const { classes } = useStyles();
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      setProspect(editableProspect);
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleChange = (field: string, value: any) => {
+    setEditableProspect((prev) => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <Flex
+      gap={0}
+      wrap="nowrap"
+      direction="column"
+      bg={"white"}
+      sx={{ borderLeft: "0.0625rem solid #dee2e6", borderRight: "0.0625rem solid #dee2e6" }}
+    >
+      <Stack spacing={0} mt={"md"} px={"md"}>
+        <Flex align={"start"} gap={"md"}>
+          <Flex direction={"column"} align={"center"} maw={"8rem"}>
+            <Avatar
+              h={"6rem"}
+              w={"6rem"}
+              sx={{ backgroundColor: theme.colors.gray[0] }}
+              color={valueToColor(theme, prospect?.first_name + ' ' + prospect?.last_name)}
+            >
+              {nameToInitials(prospect?.first_name + ' ' + prospect?.last_name)}
+            </Avatar>
+          </Flex>
+          <Box maw={"70%"} w={"100%"}>
+            <Flex align={"center"} gap={"sm"}>
+              {isEditing ? (
+                <TextInput
+                  value={editableProspect.first_name + ' ' + editableProspect.last_name}
+                  onChange={(e) => {
+                    const [firstName, lastName] = e.currentTarget.value.split(' ');
+                    handleChange('first_name', firstName);
+                    handleChange('last_name', lastName);
+                  }}
+                />
+              ) : (
+                <Text size={"lg"} fw={700}>
+                  {((prospect?.first_name + ' ' + prospect?.last_name)?.length || 0) > 16 ? (
+                    <Tooltip label={prospect?.first_name + ' ' + prospect?.last_name}>
+                      <span>
+                        {(prospect?.first_name + ' ' + prospect?.last_name).substring(0, 16) + "..."}
+                      </span>
+                    </Tooltip>
+                  ) : (
+                    prospect?.first_name + ' ' + prospect?.last_name
+                  )}
+                </Text>
+              )}
+              <ActionIcon onClick={handleEditToggle}>
+                {isEditing ? <IconCheck color="green" /> : <IconPencil color="gray" />}
+              </ActionIcon>
+            </Flex>
+            {prospect.position_groups?.[0]?.profile_positions?.[0]?.title && (
+              <Group noWrap spacing={10} mt={3}>
+                <IconBriefcase stroke={1.5} size={"1.1rem"} className={classes.icon} />
+                {isEditing ? (
+                  <TextInput
+                    value={editableProspect.position_groups?.[0]?.profile_positions?.[0]?.title}
+                    onChange={(e) => handleChange('position_groups', [{ ...editableProspect.position_groups[0], profile_positions: [{ ...editableProspect.position_groups[0].profile_positions[0], title: e.currentTarget.value }] }])}
+                    size="xs"
+                  />
+                ) : (
+                  <Text size="xs">{prospect.position_groups?.[0]?.profile_positions?.[0]?.title}</Text>
+                )}
+              </Group>
+            )}
+            {prospect.position_groups?.[0]?.company?.name && prospect.position_groups?.[0]?.company?.url && (
+              <Group noWrap spacing={10} mt={3}>
+                <IconBuildingStore stroke={1.5} size={18} className={classes.icon} />
+                {isEditing ? (
+                  <TextInput
+                    value={editableProspect.position_groups?.[0]?.company?.name}
+                    onChange={(e) => handleChange('position_groups', [{ ...editableProspect.position_groups[0], company: { ...editableProspect.position_groups[0].company, name: e.currentTarget.value } }])}
+                    size="xs"
+                  />
+                ) : (
+                  <Text
+                    size="xs"
+                    component="a"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={prospect.position_groups?.[0]?.company?.url}
+                  >
+                    {prospect.position_groups?.[0]?.company?.name}
+                    <IconExternalLink size="0.7rem" color={theme.colors.blue[6]} style={{ marginLeft: "0.25rem" }} />
+                  </Text>
+                )}
+              </Group>
+            )}
+            {prospect.location?.default && (
+              <Group noWrap spacing={10} mt={3}>
+                <IconMap2 stroke={1.5} size={18} className={classes.icon} />
+                {isEditing ? (
+                  <TextInput
+                    value={editableProspect.location.default}
+                    onChange={(e) => handleChange('location', { ...editableProspect.location, default: e.currentTarget.value })}
+                    size="xs"
+                  />
+                ) : (
+                  <Text size="xs">{prospect.location.default}</Text>
+                )}
+              </Group>
+            )}
+            {prospect?.contact_info?.email && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconMail stroke={1.5} size={18} className={classes.icon} />
+                {isEditing ? (
+                  <TextInput
+                    value={editableProspect.contact_info.email}
+                    onChange={(e) => handleChange('contact_info', { ...editableProspect.contact_info, email: e.currentTarget.value })}
+                    size="xs"
+                  />
+                ) : (
+                  <Text size="xs" component="a" href={`mailto:${prospect?.contact_info?.email}`}>
+                    {prospect?.contact_info?.email}{" "}
+                    <IconExternalLink size="0.7rem" color={theme.colors.blue[6]} />
+                  </Text>
+                )}
+              </Group>
+            )}
+          </Box>
+        </Flex>
+      </Stack>
+      <Divider mt={"sm"} />
+    </Flex>
   );
 }

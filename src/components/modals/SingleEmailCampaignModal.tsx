@@ -306,9 +306,9 @@ export default function SingleEmailCampaignModal({
           color: "teal",
         });
       }
-      // closeAllModals();
-      // innerProps.setCurrentTab('email')
-      // innerProps.fetchAllCampaigns();
+      closeAllModals();
+      innerProps.setCurrentTab('email')
+      innerProps.fetchAllCampaigns();
     } catch (error) {
       showNotification({
         title: "Error",

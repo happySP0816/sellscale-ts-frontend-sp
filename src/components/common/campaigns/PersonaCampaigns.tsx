@@ -187,6 +187,14 @@ export default function PersonaCampaigns() {
 
   const [search, setSearch] = useState<string>("");
 
+  const [currentTab, setCurrentTab] = useState<string>(
+    "overview"
+  );
+
+  const handleTabChange = (value: string) => {
+    setCurrentTab(value);
+  };
+
   let filteredProjects = personas.filter((personas) =>
     personas.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -462,6 +470,7 @@ export default function PersonaCampaigns() {
                       modal: "singleEmailCampaignModal",
                       title: <Title order={3}>Single Email Campaign</Title>,
                       innerProps: {
+                        setCurrentTab: setCurrentTab,
                         fetchAllCampaigns: fetchCampaignPersonas,
                       },
                     });
@@ -480,7 +489,7 @@ export default function PersonaCampaigns() {
   return (
     <PageFrame>
       <Stack>
-        <Tabs keepMounted={false} defaultValue="overview">
+        <Tabs onTabChange={(value) => setCurrentTab(value as string)} value={currentTab} keepMounted={false}>
           <Tabs.List mb="md">
             <Tabs.Tab
               value="overview"

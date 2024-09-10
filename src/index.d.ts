@@ -250,6 +250,187 @@ export interface ICPFitReasonV2 {
   }
 }
 
+export interface IScraperProspect {
+  awards: any[];
+  background_image: string;
+  birth_date: any;
+  certifications: {
+    authority: string;
+    company: {
+      id: any;
+      logo: string;
+      name: string;
+      url: any;
+    };
+    date: {
+      end: {
+        day: any;
+        month: any;
+        year: any;
+      };
+      start: {
+        day: any;
+        month: number;
+        year: number;
+      };
+    };
+    display_source: string;
+    license_number: string;
+    name: string;
+    url: string;
+  }[];
+  contact_info: {
+    email: any;
+    phone_numbers: any[];
+    twitter: any;
+    websites: {
+      type: string;
+      url: string;
+    }[];
+  };
+  courses: any[];
+  education: {
+    date: {
+      end: {
+        day: any;
+        month: any;
+        year: any;
+      };
+      start: {
+        day: any;
+        month: any;
+        year: any;
+      };
+    };
+    degree_name: any;
+    description: any;
+    field_of_study: string;
+    grade: any;
+    school: {
+      logo: string;
+      name: string;
+      url: string;
+    };
+  }[];
+  entity_urn: string;
+  first_name: string;
+  industry: string;
+  influencer: boolean;
+  languages: {
+    primary_locale: {
+      country: string;
+      language: string;
+    };
+    profile_languages: any[];
+    supported_locales: {
+      country: string;
+      language: string;
+    }[];
+  };
+  last_name: string;
+  location: {
+    city: any;
+    country: any;
+    default: string;
+    short: string;
+    state: any;
+  };
+  network_info: {
+    connections_count: number;
+    followable: boolean;
+    followers_count: number;
+  };
+  object_urn: number;
+  open_to_work: boolean;
+  organizations: any[];
+  patents: any[];
+  position_groups: {
+    company: {
+      employees: {
+        end: any;
+        start: any;
+      };
+      id: any;
+      logo: any;
+      name: string;
+      url: any;
+    };
+    date: {
+      end: {
+        day: any;
+        month: any;
+        year: any;
+      };
+      start: {
+        day: any;
+        month: number;
+        year: number;
+      };
+    };
+    profile_positions: {
+      company: string;
+      date: {
+        end: {
+          day: any;
+          month: any;
+          year: any;
+        };
+        start: {
+          day: any;
+          month: number;
+          year: number;
+        };
+      };
+      description: string;
+      employment_type: any;
+      location: string;
+      title: string;
+    }[];
+  }[];
+  premium: boolean;
+  profile_id: string;
+  profile_picture: string;
+  profile_type: string;
+  projects: any[];
+  publications: any[];
+  related_profiles: {
+    background_image: any;
+    first_name: string;
+    last_name: string;
+    profile_id: string;
+    profile_picture: string;
+    sub_title: string;
+  }[];
+  skills: string[];
+  sub_title: string;
+  summary: string;
+  test_scores: any[];
+  treasury_media: any[];
+  volunteer_experiences: {
+    cause: string | null;
+    company: {
+      id: any;
+      logo: string | null;
+      name: string;
+      url: string | null;
+    };
+    date: {
+      end: {
+        day: any;
+        month: any;
+        year: any;
+      };
+      start: {
+        day: any;
+        month: any;
+        year: any;
+      };
+    };
+    description: string | null;
+    role: string;
+  }[];
+}
+
 export interface ProspectShallow {
   id: number;
   full_name: string;

@@ -459,6 +459,7 @@ export default function SelinAI() {
         body: JSON.stringify({
           // device_id: deviceIDRef.current,
           session_id: sessionIDRef.current,
+          device_id: deviceIDRef.current,
           file: file.base64,
           file_name: file.name,
           description: prompt,

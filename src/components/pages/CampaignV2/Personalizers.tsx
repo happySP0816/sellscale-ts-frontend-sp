@@ -450,7 +450,7 @@ export default function Personalizers(props: any) {
                     );
                   }
                 )}
-              {icp_scoring_ruleset_typed.company_ai_filters &&
+              {icp_scoring_ruleset_typed && icp_scoring_ruleset_typed.company_ai_filters &&
                 Array.isArray(icp_scoring_ruleset_typed.company_ai_filters) &&
                 icp_scoring_ruleset_typed.company_ai_filters.map(
                   (filter, index) => {

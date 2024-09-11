@@ -129,6 +129,7 @@ import SellScaleAssistant from "./SellScaleAssistant";
 import Personalizers from "@pages/CampaignV2/Personalizers";
 import ContactAccountFilterModal from "@modals/ContactAccountFilterModal";
 import SequencesV2 from "@pages/CampaignV2/SequencesV2";
+import { set } from "lodash";
 import { setSmartleadCampaign } from "@utils/requests/setSmartleadCampaign";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
@@ -1847,6 +1848,7 @@ const SegmentChat = (props: any) => {
   ] = useState<any>(props.memory?.memory_line_time_updated);
   const [memoryStateChanged, setMemoryStateChanged] = useState(false);
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
+  const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
 
   const handleListClick = async (prompt: string) => {
     handleSubmit(undefined, prompt);
@@ -1960,6 +1962,49 @@ const SegmentChat = (props: any) => {
     }
   };
 
+  const generateNewDraftMemoryLine = async () => {
+    setGeneratingNewMemoryLine(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/selix/generate_new_draft_memory_line`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+      const memory_line = result.memory_line;
+
+      setClientMemoryState(memory_line);
+      setMemoryStateChanged(true);
+      setClientMemoryStateUpdatedTime(new Date().toLocaleString());
+
+      if (response.ok) {
+        showNotification({
+          title: "New Draft Memory Line Generated",
+          message: "Save the new memory line to all sessions",
+          color: "blue",
+          icon: <IconCircleCheck />,
+        });
+      } else {
+        showNotification({
+          title: "Error Generating New Draft Memory Line",
+          message: result.error || "Failed to generate new draft memory line",
+          color: "red",
+          icon: <IconX />,
+        });
+      }
+    } catch (error) {
+      console.error("Error generating new draft memory line:", error);
+    } finally {
+      setGeneratingNewMemoryLine(false);
+    }
+  };
+
   const selixMemoryTitleTranslations: { [key: string]: string } = {
     campaigns: "Currently working on: ",
     sessions: "Currently working on: ",
@@ -2011,11 +2056,12 @@ const SegmentChat = (props: any) => {
               <Text size="sm" color="gray" fw="500">
                 Currently working on:
               </Text>
+
               <Textarea
                 placeholder="Type your notes here..."
                 autosize
                 minRows={3}
-                defaultValue={props.memory?.memory_line}
+                value={clientMemoryState}
                 onChange={(e) => {
                   setClientMemoryState(e.target.value);
                   setMemoryStateChanged(true);
@@ -2023,7 +2069,8 @@ const SegmentChat = (props: any) => {
                 size="xs"
                 mb="0px"
               />
-              <Text align="right" size="xs" color="gray" mt="2px">
+
+              <Text align="right" size="12px" color="gray" mt="2px" ml="auto">
                 Last updated:{" "}
                 {props.memory?.memory_line_time_updated
                   ? moment
@@ -2032,45 +2079,80 @@ const SegmentChat = (props: any) => {
                       .fromNow()
                   : "N/A"}
               </Text>
-              <Flex
-                justify="flex-end"
-                mt="xs"
-                style={{
-                  display:
-                    memoryStateChanged || memoryLineUpdating ? "flex" : "none",
-                }}
-              >
-                {memoryLineUpdating && (
-                  <Flex mr="md" mt="4px">
-                    <Loader size="sm"></Loader>
-                  </Flex>
-                )}
-                <Button
-                  size="xs"
-                  color="green"
-                  disabled={!memoryStateChanged || memoryLineUpdating}
-                  onClick={() => {
-                    updateMemoryLineAllSessions(clientMemoryState);
-                    setClientMemoryStateUpdatedTime(
-                      new Date().toLocaleString()
-                    );
-                    setMemoryStateChanged(false);
+              <Flex mt="4px" mb="md">
+                <Tooltip label="Rewind to previous version" withArrow>
+                  <Button
+                    color="gray"
+                    size="xs"
+                    opacity={!props.memory?.old_memory_line ? 0.5 : 1}
+                    disabled={!props.memory?.old_memory_line}
+                    onClick={() => {
+                      setClientMemoryState(props.memory?.old_memory_line);
+                      setClientMemoryStateUpdatedTime(
+                        props.memory?.old_memory_line_time_updated
+                      );
+                      setMemoryStateChanged(true);
+                    }}
+                  >
+                    ⏮
+                  </Button>
+                </Tooltip>
+                <Tooltip label="Generate a new memory line" withArrow>
+                  <Button
+                    color="yellow"
+                    size="xs"
+                    ml="4px"
+                    loading={generatingNewMemoryLine}
+                    onClick={() => generateNewDraftMemoryLine()}
+                  >
+                    ♺
+                  </Button>
+                </Tooltip>
+                <Flex
+                  ml="auto"
+                  justify="flex-end"
+                  style={{
+                    display:
+                      memoryStateChanged || memoryLineUpdating
+                        ? "flex"
+                        : "none",
                   }}
                 >
-                  ✓
-                </Button>
-                <Button
-                  size="xs"
-                  color="red"
-                  disabled={!memoryStateChanged || memoryLineUpdating}
-                  ml="xs"
-                  onClick={() => {
-                    setClientMemoryState(props.memory?.memory_line);
-                    setMemoryStateChanged(false);
-                  }}
-                >
-                  ✗
-                </Button>
+                  {memoryLineUpdating && (
+                    <Flex mr="md" mt="4px">
+                      <Loader size="sm"></Loader>
+                    </Flex>
+                  )}
+                  <Button
+                    size="xs"
+                    color="green"
+                    disabled={!memoryStateChanged || memoryLineUpdating}
+                    onClick={() => {
+                      updateMemoryLineAllSessions(clientMemoryState);
+                      setClientMemoryStateUpdatedTime(
+                        new Date().toLocaleString()
+                      );
+                      setMemoryStateChanged(false);
+                    }}
+                  >
+                    ✓
+                  </Button>
+                  <Button
+                    size="xs"
+                    color="red"
+                    disabled={!memoryStateChanged || memoryLineUpdating}
+                    ml="xs"
+                    onClick={() => {
+                      setClientMemoryState(props.memory?.memory_line);
+                      setClientMemoryStateUpdatedTime(
+                        props.memory?.memory_line_time_updated
+                      );
+                      setMemoryStateChanged(false);
+                    }}
+                  >
+                    ✗
+                  </Button>
+                </Flex>
               </Flex>
 
               {props.memoryState &&

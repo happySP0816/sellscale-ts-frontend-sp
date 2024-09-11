@@ -166,7 +166,7 @@ export default function Personalizers(props: any) {
   }, []);
 
   return (
-    <Paper data-tour="personalizers" withBorder>
+    <Paper data-tour="personalizers" withBorder mb={"36px"}>
       <Flex
         align={"center"}
         justify={"space-between"}
@@ -526,41 +526,41 @@ export default function Personalizers(props: any) {
                   }
                 )}
             </Flex>
-            <Flex
-              align={"center"}
-              w={"100%"}
-              justify={"space-between"}
-              p={"md"}
-              style={{ borderTop: "1px solid #ECEEF1" }}
-            >
-              <Flex
-                w={"100%"}
-                align={"center"}
-                justify={"space-between"}
-                style={{ border: "1px solid #ced4da" }}
-              >
-                <Text
-                  w={"100%"}
-                  align="center"
-                  color="gray"
-                  size={"sm"}
-                  fw={500}
-                >
-                  {props.personalizers.length}{" "}
-                  {props.personalizers.length === 1
-                    ? "Personalizer"
-                    : "Personalizers"}
-                </Text>
-                <Divider orientation="vertical" />
-                <ActionIcon h={"100%"} mx={3}>
-                  <IconChevronLeft size={"1.2rem"} />
-                </ActionIcon>
-                <Divider orientation="vertical" />
-                <ActionIcon h={"100%"} mx={3}>
-                  <IconChevronRight size={"1.2rem"} />
-                </ActionIcon>
-              </Flex>
-            </Flex>
+            {/* <Flex */}
+            {/*   align={"center"} */}
+            {/*   w={"100%"} */}
+            {/*   justify={"space-between"} */}
+            {/*   p={"md"} */}
+            {/*   style={{ borderTop: "1px solid #ECEEF1" }} */}
+            {/* > */}
+            {/*   <Flex */}
+            {/*     w={"100%"} */}
+            {/*     align={"center"} */}
+            {/*     justify={"space-between"} */}
+            {/*     style={{ border: "1px solid #ced4da" }} */}
+            {/*   > */}
+            {/*     <Text */}
+            {/*       w={"100%"} */}
+            {/*       align="center" */}
+            {/*       color="gray" */}
+            {/*       size={"sm"} */}
+            {/*       fw={500} */}
+            {/*     > */}
+            {/*       {props.personalizers.length}{" "} */}
+            {/*       {props.personalizers.length === 1 */}
+            {/*         ? "Personalizer" */}
+            {/*         : "Personalizers"} */}
+            {/*     </Text> */}
+            {/*     <Divider orientation="vertical" /> */}
+            {/*     <ActionIcon h={"100%"} mx={3}> */}
+            {/*       <IconChevronLeft size={"1.2rem"} /> */}
+            {/*     </ActionIcon> */}
+            {/*     <Divider orientation="vertical" /> */}
+            {/*     <ActionIcon h={"100%"} mx={3}> */}
+            {/*       <IconChevronRight size={"1.2rem"} /> */}
+            {/*     </ActionIcon> */}
+            {/*   </Flex> */}
+            {/* </Flex> */}
           </Flex>
         ) : (
           <Flex

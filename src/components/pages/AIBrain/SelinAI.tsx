@@ -39,6 +39,8 @@ import {
   Table,
 } from "@mantine/core";
 import {
+  IconArrowsMaximize,
+  IconArrowsMinimize,
   IconBrowser,
   IconBulb,
   IconCheck,
@@ -1661,7 +1663,9 @@ export default function SelinAI() {
         </div>
         {currentSessionId && (
           <Flex mt={"md"} gap={"xl"}>
-            <LoadingOverlay visible={loadingNewChat} />
+            {window.location.hostname !== "localhost" && (
+              <LoadingOverlay visible={loadingNewChat} />
+            )}
             <SegmentChat
               setAttachedFile={setAttachedFile}
               attachedFile={attachedFile}
@@ -1738,7 +1742,10 @@ const SegmentChat = (props: any) => {
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [showLoader, setShowLoader] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   // const [recording, setRecording] = useState(false);
+
+  const [normalInputMode, setNormalInputMode] = useState(true);
 
   const lastPromptRef = useRef<string>("");
 
@@ -1852,6 +1859,23 @@ const SegmentChat = (props: any) => {
       [index]: !prev[index],
     }));
   };
+
+  useEffect(() => {
+    if (prompt === ''){
+      //reset the text area height so the placeholder shows nicely
+      textareaRef.current!.style.height = 'auto';
+      setNormalInputMode(true);
+      if (textareaRef.current) {
+        textareaRef.current.style.height = '500px';
+      }
+    }
+    else if (normalInputMode && prompt.length > 120) {
+      setNormalInputMode(false);
+      if (textareaRef.current) {
+        textareaRef.current.style.height = '200px';
+      }
+    }
+  }, [prompt.length]);
 
   useEffect(() => {
     handleSubmit();
@@ -2212,12 +2236,17 @@ const SegmentChat = (props: any) => {
         </HoverCard>
       </Flex>
       <Divider bg="gray" />
-      <ScrollArea
-        h={"53vh"}
-        viewportRef={viewport}
-        scrollHideDelay={4000}
-        style={{ overflow: "hidden" }}
-      >
+      <div style={{ position: "relative", height: "48vh" }}>
+        <ScrollArea
+          h={"53vh"}
+          viewportRef={viewport}
+          scrollHideDelay={4000}
+          style={{ 
+            overflow: "hidden",
+            // transform: !normalInputMode ? "translateY(-250px)" : "none",
+            transition: "transform 0.3s ease",
+          }}
+        >
         {messages.length > 1 ? (
           <Flex
             direction={"column"}
@@ -2603,6 +2632,7 @@ const SegmentChat = (props: any) => {
           </>
         )}
       </ScrollArea>
+      </div>
       <div style={{ position: "relative" }}>
         <div
           style={{
@@ -2654,6 +2684,11 @@ const SegmentChat = (props: any) => {
           className="bg-[#f7f8fa]"
           my={"lg"}
           mx={"md"}
+          style={{
+            height: normalInputMode ? "200px" : "500px",
+            marginTop: normalInputMode ? "50px" : "-240px",
+            transition: "margin-top 0.3s ease"
+          }}
         >
           <style>
             {`
@@ -2676,13 +2711,14 @@ const SegmentChat = (props: any) => {
           `}
           </style>
           <Textarea
+            ref={textareaRef}
             value={prompt}
             placeholder="Chat with AI..."
             onKeyDown={handleKeyDown}
             onChange={(e) => {
               setPrompt(e.target.value);
               const textarea = e.target;
-              textarea.scrollTop = textarea.scrollHeight;
+              textarea.style.height = normalInputMode ? "200px" : "500px";
             }}
             variant="unstyled"
             inputContainer={(children) => (
@@ -2692,7 +2728,7 @@ const SegmentChat = (props: any) => {
             )}
             maxRows={10}
             style={{
-              minHeight: "80px",
+              height: normalInputMode ? "70%" : "87%",
               resize: "none",
               overflow: "hidden",
               cursor: "default",
@@ -2725,6 +2761,21 @@ const SegmentChat = (props: any) => {
           </style>
           <Flex justify={"space-between"} mt={"sm"} align={"center"}>
             <Flex gap={"sm"}>
+              <ActionIcon
+                variant="outline"
+                color="gray"
+                radius={"xl"}
+                size={"sm"}
+                onClick={() => {
+                  textareaRef.current?.focus();
+                  if (textareaRef.current) {
+                    textareaRef.current.style.height = !normalInputMode ? "200px" : "500px";
+                  }
+                 setNormalInputMode(!normalInputMode);
+                }}
+              >
+                {normalInputMode ? <IconArrowsMaximize size={"1rem"} /> : <IconArrowsMinimize size={"1rem"} />}
+              </ActionIcon>
               {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
                 <IconPlus size={"1rem"} />
               </ActionIcon> */}

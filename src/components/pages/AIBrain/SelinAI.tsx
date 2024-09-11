@@ -1917,6 +1917,9 @@ const SegmentChat = (props: any) => {
               )}
             </Flex>
             <Card withBorder mah={600} p="md" sx={{ overflow: "auto" }}>
+              <Text size="sm" color="gray" fw="500">
+                Currently working on:
+              </Text>
               <Textarea
                 placeholder="Type your notes here..."
                 autosize
@@ -1983,53 +1986,16 @@ const SegmentChat = (props: any) => {
                 Object.keys(props.memoryState).map((x: string) => {
                   return (
                     <Box mb="md">
-                      <Text size="sm" color="gray" fw="500">
-                        {selixMemoryTitleTranslations[x]}
-                      </Text>
+                      {x !== "campaigns" && x !== "sessions" && (
+                        <Text size="sm" color="gray" fw="500">
+                          {selixMemoryTitleTranslations[x]}
+                        </Text>
+                      )}
 
                       {Array.isArray(props.memoryState[x]) &&
                         props.memoryState[x].map((y: any) => (
                           <>
-                            <Box
-                              ml="4px"
-                              sx={{
-                                border: `${
-                                  y["highlighted"] ? "2" : "1"
-                                }px solid`,
-                                borderColor: y["highlighted"] ? "pink" : "gray",
-                                borderRadius: "8px",
-                                position: "relative",
-                                display: "inline-block",
-                                cursor: "pointer",
-                                fontSize: "10px",
-                                padding: "2px",
-                                marginBottom: "4px",
-                                marginRight: "4px",
-                                paddingLeft: "8px",
-                                paddingRight: "8px",
-                                paddingTop: "2px",
-                                paddingBottom: "2px",
-                              }}
-                              onMouseEnter={(e) => {
-                                const target: any = e.currentTarget;
-                                if (x === "campaigns" || x === "sessions") {
-                                  return;
-                                }
-                                target.querySelector(
-                                  ".hover-icons"
-                                )!.style.display = "flex";
-                              }}
-                              onMouseLeave={(e) => {
-                                const target: any = e.currentTarget;
-                                if (x === "campaigns" || x === "sessions") {
-                                  return;
-                                }
-                                target.querySelector(
-                                  ".hover-icons"
-                                )!.style.display = "none";
-                              }}
-                              id={`memory-${y.memory}`}
-                            >
+                            <Box id={`memory-${y.memory}`}>
                               <HoverCard
                                 width={500}
                                 shadow="md"
@@ -2038,10 +2004,60 @@ const SegmentChat = (props: any) => {
                               >
                                 <HoverCard.Target>
                                   <Flex>
-                                    <Text p="0" m="0" size="xs" color="black">
-                                      {y["title"].substring(0, 45) +
-                                        (y["title"].length > 45 ? "..." : "")}
-                                    </Text>
+                                    <Box
+                                      ml="4px"
+                                      sx={{
+                                        // border: `${
+                                        //   y["highlighted"] ? "2" : "1"
+                                        // }px solid`,
+                                        // borderColor: y["highlighted"]
+                                        //   ? "pink"
+                                        //   : "gray",
+                                        border: "1px solid",
+                                        borderColor: "gray",
+                                        borderRadius: "8px",
+                                        position: "relative",
+                                        display: "inline-block",
+                                        cursor: "pointer",
+                                        fontSize: "10px",
+                                        padding: "2px",
+                                        marginBottom: "4px",
+                                        marginRight: "4px",
+                                        paddingLeft: "8px",
+                                        paddingRight: "8px",
+                                        paddingTop: "2px",
+                                        paddingBottom: "2px",
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        const target: any = e.currentTarget;
+                                        if (
+                                          x === "campaigns" ||
+                                          x === "sessions"
+                                        ) {
+                                          return;
+                                        }
+                                        target.querySelector(
+                                          ".hover-icons"
+                                        )!.style.display = "flex";
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        const target: any = e.currentTarget;
+                                        if (
+                                          x === "campaigns" ||
+                                          x === "sessions"
+                                        ) {
+                                          return;
+                                        }
+                                        target.querySelector(
+                                          ".hover-icons"
+                                        )!.style.display = "none";
+                                      }}
+                                    >
+                                      <Text p="0" m="0" size="xs" color="black">
+                                        {y["title"].substring(0, 36) +
+                                          (y["title"].length > 36 ? "..." : "")}
+                                      </Text>
+                                    </Box>
                                     <Box ml="4px" pt="2px">
                                       <IconCloud size="0.9rem" color="gray" />
                                     </Box>

@@ -283,6 +283,8 @@ export default function CampaignLandingV2(props: PropsType) {
   //sequence variable
   const [sequences, setSequences] = useState<any[]>([]);
 
+
+
   const simulateVoice = async (sequenceText: string) => {
     setValue("");
     setLoadingVoiceSimulation(true);

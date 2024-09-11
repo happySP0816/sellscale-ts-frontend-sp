@@ -145,8 +145,8 @@ export default function CampaignTemplateEditModal({
   updateConnectionType: any;
   checkCanToggleLinkedin: any;
 }>) {
-  const linkedinSequenceData = useRecoilValue(linkedinSequenceState);
-  const emailSequenceData = useRecoilValue(emailSequenceState);
+  const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(linkedinSequenceState);
+  const [emailSequenceData, setEmailSequenceData] = useRecoilState(emailSequenceState);
   const [emailSubjectLines, setEmailSubjectLines] = useRecoilState(
     emailSubjectLinesState
   );
@@ -1093,8 +1093,19 @@ export default function CampaignTemplateEditModal({
                         <Paper withBorder radius={"sm"} p={1} px={4}>
                           <Flex align={"center"} gap={4}>
                             <IconClock color="orange" size={"1rem"} />
-                            <Text fw={500} size={"sm"}>
-                              {2} <span className="text-gray-500">days</span>
+                            <Text fw={500} size={"sm"} style={{ minWidth: "50px", textAlign: "left" }}>
+                              {sequenceType === "email" 
+                                ? emailSequenceData[index]?.[0]?.sequence_delay_days || 0 
+                                : linkedinSequenceData[index]?.[0]?.bump_delay_days || 0}{" "}
+                              <span className="text-gray-500">
+                                {sequenceType === "email" 
+                                  ? emailSequenceData[index]?.[0]?.sequence_delay_days === 1 
+                                    ? "day" 
+                                    : "days"
+                                  : linkedinSequenceData[index]?.[0]?.bump_delay_days === 1 
+                                    ? "day" 
+                                    : "days"}
+                              </span>
                             </Text>
                           </Flex>
                         </Paper>

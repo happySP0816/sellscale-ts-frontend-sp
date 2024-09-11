@@ -1074,7 +1074,7 @@ export default function CampaignLandingV2(props: PropsType) {
                     </Modal>
                     {!showOnlyHeader && (
                       <Button
-                        disabled={!window.location.href.includes("ishan")}
+                        disabled={false}
                         size="sm"
                         color="blue"
                         onClick={() => setOpenGenerationCenter(true)}

@@ -3231,7 +3231,7 @@ const SelixControlCenter = ({
                   </Popover.Target>
                   <Popover.Dropdown sx={{ pointerEvents: "none" }}>
                     <Text size="sm">
-                      View your files attacheed to the chat.
+                      View your files attached to the chat.
                     </Text>
                   </Popover.Dropdown>
                 </Popover>

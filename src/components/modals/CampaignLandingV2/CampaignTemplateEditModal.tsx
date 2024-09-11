@@ -1646,19 +1646,20 @@ export default function CampaignTemplateEditModal({
               {sequenceType === "email" && currentStepNum === "subjectLines" && (
                 <ScrollArea
                   viewportRef={viewport}
-                  h={350}
+                  h="90%"
                   px="sm"
                   style={{ position: "relative" }}
                 >
                   {emailSubjectLines
-                    .sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))
-                    .map((subjectLine: SubjectLineTemplate) => {
+                    ?.slice()
+                    ?.sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))
+                    ?.map((subjectLine: SubjectLineTemplate) => {
                       return (
                         <SubjectLineItem
                           subjectLine={subjectLine}
                           refetch={async () =>
-                            await innerProps.refetchSequenceData(
-                              innerProps.campaignId
+                            await innerProps?.refetchSequenceData(
+                              innerProps?.campaignId
                             )
                           }
                         />

@@ -1576,11 +1576,11 @@ export const SubjectLineItem: React.FC<{
         message: "Successfully updated email subject line",
         color: "green",
       });
-
+      setLoading(false);
       await refetch();
     }
 
-    setLoading(false);
+    
     return;
   };
 
@@ -1598,7 +1598,11 @@ export const SubjectLineItem: React.FC<{
       setLoading(false);
       return;
     } else {
-      subjectLine.active = !subjectLine.active;
+      setEmailSubjectLines(
+        emailSubjectLines.map((item) =>
+          item.id === subjectLine.id ? { ...item, active: !item.active } : item
+        )
+      )
       showNotification({
         title: "Success",
         message: `Successfully ${subjectLine.active ? "deactivated" : "activated"} email subject line`,

@@ -1650,18 +1650,20 @@ export default function CampaignTemplateEditModal({
                   px="sm"
                   style={{ position: "relative" }}
                 >
-                  {emailSubjectLines.map((subjectLine: SubjectLineTemplate) => {
-                    return (
-                      <SubjectLineItem
-                        subjectLine={subjectLine}
-                        refetch={async () =>
-                          await innerProps.refetchSequenceData(
-                            innerProps.campaignId
-                          )
-                        }
-                      />
-                    );
-                  })}
+                  {emailSubjectLines
+                    .sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))
+                    .map((subjectLine: SubjectLineTemplate) => {
+                      return (
+                        <SubjectLineItem
+                          subjectLine={subjectLine}
+                          refetch={async () =>
+                            await innerProps.refetchSequenceData(
+                              innerProps.campaignId
+                            )
+                          }
+                        />
+                      );
+                    })}
                   <CreateEmailSubjectLineModal
                     modalOpened={emailSubjectLineModalOpened}
                     openModal={() => console.log("Open Modal")}

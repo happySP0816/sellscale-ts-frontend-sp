@@ -47,6 +47,7 @@ import {
   IconChevronUp,
   IconCircleCheck,
   IconClock,
+  IconCloud,
   IconEar,
   IconEye,
   IconEyeOff,
@@ -64,6 +65,7 @@ import {
   IconPuzzle,
   IconSend,
   IconSettings,
+  IconTooltip,
   IconTrash,
   IconTriangleInverted,
   IconX,
@@ -1869,6 +1871,7 @@ const SegmentChat = (props: any) => {
 
   const selixMemoryTitleTranslations: { [key: string]: string } = {
     campaigns: "Currently working on: ",
+    sessions: "Currently working on: ",
     needs_user_input: "Need your input: ",
     needs_ai_input: "Other to-do's: ",
   };
@@ -2009,7 +2012,7 @@ const SegmentChat = (props: any) => {
                               }}
                               onMouseEnter={(e) => {
                                 const target: any = e.currentTarget;
-                                if (x === "campaigns") {
+                                if (x === "campaigns" || x === "sessions") {
                                   return;
                                 }
                                 target.querySelector(
@@ -2018,7 +2021,7 @@ const SegmentChat = (props: any) => {
                               }}
                               onMouseLeave={(e) => {
                                 const target: any = e.currentTarget;
-                                if (x === "campaigns") {
+                                if (x === "campaigns" || x === "sessions") {
                                   return;
                                 }
                                 target.querySelector(
@@ -2027,21 +2030,38 @@ const SegmentChat = (props: any) => {
                               }}
                               id={`memory-${y.memory}`}
                             >
-                              <HoverCard width={500} shadow="md" withinPortal>
+                              <HoverCard
+                                width={500}
+                                shadow="md"
+                                withinPortal
+                                position="right"
+                              >
                                 <HoverCard.Target>
-                                  <Text p="0" m="0" size="xs" color="black">
-                                    {y["title"].substring(0, 45) +
-                                      (y["title"].length > 45 ? "..." : "")}
-                                  </Text>
+                                  <Flex>
+                                    <Text p="0" m="0" size="xs" color="black">
+                                      {y["title"].substring(0, 45) +
+                                        (y["title"].length > 45 ? "..." : "")}
+                                    </Text>
+                                    <Box ml="4px" pt="2px">
+                                      <IconCloud size="0.9rem" color="gray" />
+                                    </Box>
+                                  </Flex>
                                 </HoverCard.Target>
                                 <HoverCard.Dropdown maw={500}>
-                                  <Text size="sm" color="black" fw={600}>
+                                  {/* <Text size="sm" color="black" fw={600}>
                                     {y["title"]}
-                                  </Text>
-                                  <Text size="xs" color="gray" fw={400}>
-                                    {y["memory"]}
-                                  </Text>
-                                  {y["highlighted"] && (
+                                  </Text> */}
+                                  <Text
+                                    size="xs"
+                                    color="black"
+                                    fw={400}
+                                    dangerouslySetInnerHTML={{
+                                      __html:
+                                        y["memory"] &&
+                                        y["memory"].replaceAll("\n", "<br>"),
+                                    }}
+                                  />
+                                  {/* {y["highlighted"] && (
                                     <Badge
                                       size="xs"
                                       color="pink"
@@ -2049,7 +2069,7 @@ const SegmentChat = (props: any) => {
                                     >
                                       💡 This is a prioritized memory
                                     </Badge>
-                                  )}
+                                  )} */}
                                 </HoverCard.Dropdown>
                               </HoverCard>
                               <Flex

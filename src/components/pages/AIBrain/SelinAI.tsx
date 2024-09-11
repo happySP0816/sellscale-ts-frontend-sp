@@ -3517,8 +3517,8 @@ const PlannerComponent = ({
                 [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
                 [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "orange",
                 [SelixSessionTaskStatus.COMPLETE]: "green",
-                [SelixSessionTaskStatus.CANCELLED]: "red",
-                [SelixSessionTaskStatus.BLOCKED]: "gray",
+                [SelixSessionTaskStatus.CANCELLED]: "gray",
+                [SelixSessionTaskStatus.BLOCKED]: "red",
               };
 
               const humanReadableStatus = {
@@ -3528,7 +3528,7 @@ const PlannerComponent = ({
                   "In Progress",
                 [SelixSessionTaskStatus.COMPLETE]: "Complete",
                 [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
-                [SelixSessionTaskStatus.BLOCKED]: "Blocked",
+                [SelixSessionTaskStatus.BLOCKED]: "⚠️ Blocked",
               };
 
               return (

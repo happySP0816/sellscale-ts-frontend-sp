@@ -651,7 +651,7 @@ export const ArchetypeFilters = function ({
                 ) ||
                   icp_scoring_ruleset_typed.company_personalizers?.includes(
                     item.key
-                  )) && (
+                 )) && (
                   <Badge size={"xs"} color={"green"}>
                     Personalizer
                   </Badge>

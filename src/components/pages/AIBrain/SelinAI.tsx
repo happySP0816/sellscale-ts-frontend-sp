@@ -36,6 +36,7 @@ import {
   Group,
   Tooltip,
   HoverCard,
+  Table,
 } from "@mantine/core";
 import {
   IconBrowser,
@@ -104,6 +105,8 @@ import DeepGram from "@common/DeepGram";
 
 interface CustomCursorWrapperProps {
   children: React.ReactNode;
+  setPrompt: Dispatch<SetStateAction<string>>;
+  setAttachedFile: (file: File) => void;
   handleSubmit: (file: {
     name: string;
     base64: string;
@@ -124,9 +127,10 @@ import SellScaleAssistant from "./SellScaleAssistant";
 import Personalizers from "@pages/CampaignV2/Personalizers";
 import ContactAccountFilterModal from "@modals/ContactAccountFilterModal";
 import SequencesV2 from "@pages/CampaignV2/SequencesV2";
+import { setSmartleadCampaign } from "@utils/requests/setSmartleadCampaign";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
-  ({ children, handleSubmit }, ref) => {
+  ({ children, handleSubmit, setAttachedFile, setPrompt }, ref) => {
     const [isDragging, setIsDragging] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [file, setFile] = useState<File | null>(null);
@@ -136,8 +140,19 @@ const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
       event.preventDefault();
       const files = event.dataTransfer?.files;
       if (files && files.length > 0) {
+        setAttachedFile(files[0]);
         setFile(files[0]);
-        setIsModalOpen(true);
+
+        setPrompt('File Description: ')
+
+        showNotification({
+          title: "File dropped",
+          message: `File: ${files[0].name} has been attached`,
+          color: "blue",
+          icon: <IconCircleCheck />,
+        });
+
+        // setIsModalOpen(true);
       }
       setIsDragging(false);
     };
@@ -154,7 +169,6 @@ const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
     const handleConfirm = () => {
       console.log("File confirmed:", file);
       setIsModalOpen(false);
-      setFile(null);
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result?.toString().split(",")[1] || "";
@@ -172,8 +186,11 @@ const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
     useImperativeHandle(ref, () => ({
       handleDrop: (file: File) => {
         setFile(file);
-        setIsModalOpen(true);
+        setAttachedFile(file);
+        setPrompt('File Description: ')
+        // setIsModalOpen(true);
       },
+      handleConfirm,
     }));
 
     useEffect(() => {
@@ -343,7 +360,7 @@ export default function SelinAI() {
   const [recording, setRecording] = useState(false);
   const prevPromptLengthRef = useRef<number>(0);
   const prevSlideUpTime = useRef<number>(0);
-  const dropzoneRef = useRef<{ handleDrop: (file: File) => void } | null>(null);
+  const dropzoneRef = useRef<{ handleDrop: (file: File) => void; handleConfirm: () => void } | null>(null);
 
   const freeUser = isFreeUser();
 
@@ -390,9 +407,49 @@ export default function SelinAI() {
   ) => {
     let messagToSend = forcePrompt || prompt;
 
+    if (prompt === 'File Description: '){
+
+      showNotification({
+        title: "File upload failed",
+        message: "Please enter a file description",
+        color: "red",
+        icon: <IconCircleCheck />,
+      });
+      return;
+
+    }
+
     setRecording(false);
     //custom handle submit function to handle file uploads
+
+    if (attachedFile){
+      console.log("attached file is", attachedFile);
+      dropzoneRef.current?.handleConfirm();
+      setAttachedFile(null);
+      return;
+    }
+
     if (file) {
+      console.log('submitting file', file);
+
+      setMessages(
+        (chatContent: MessageType[]) => [
+          ...chatContent,
+          {
+            created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
+            message: prompt,
+            role: "user",
+            type: "message",
+          },
+        ],
+      )
+
+      setPrompt("")
+      promptRef.current = "";
+      promptLengthRef.current = 0;
+      setSuggestion("");
+      prevPromptLengthRef.current = 0;
+
       const response = await fetch(`${API_URL}/selix/upload_file`, {
         method: "POST",
         headers: {
@@ -404,7 +461,7 @@ export default function SelinAI() {
           session_id: sessionIDRef.current,
           file: file.base64,
           file_name: file.name,
-          description: file.description,
+          description: prompt,
         }),
       });
 
@@ -415,6 +472,7 @@ export default function SelinAI() {
           color: "red",
           icon: <IconCircleCheck />,
         });
+        return;
       }
 
       if (response.status === 429) {
@@ -425,6 +483,7 @@ export default function SelinAI() {
           color: "red",
           icon: <IconCircleCheck />,
         });
+        return;
       }
 
       return;
@@ -1109,6 +1168,8 @@ export default function SelinAI() {
 
   const [openedChat, setOpened] = useState(false);
 
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+
   const containerRef = useRef<HTMLDivElement>(null);
   let isDown = false;
   let startX: number;
@@ -1159,7 +1220,7 @@ export default function SelinAI() {
   const [newButtonHover, setNewButtonHover] = useState(false);
 
   return (
-    <DropzoneWrapper ref={dropzoneRef} handleSubmit={handleSubmit}>
+    <DropzoneWrapper setPrompt={setPrompt} setAttachedFile={setAttachedFile} ref={dropzoneRef} handleSubmit={handleSubmit}>
       <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
         <div>
           <div
@@ -1601,6 +1662,8 @@ export default function SelinAI() {
           <Flex mt={"md"} gap={"xl"}>
             <LoadingOverlay visible={loadingNewChat} />
             <SegmentChat
+              setAttachedFile={setAttachedFile}
+              attachedFile={attachedFile}
               deviceIDRef={deviceIDRef}
               dropzoneRef={dropzoneRef}
               suggestedFirstMessage={suggestedFirstMessage}
@@ -1633,6 +1696,7 @@ export default function SelinAI() {
               // setChatContent={setChatContent}
             />
             <SelixControlCenter
+              attachedFile={attachedFile}
               counter={counter}
               recording={recording}
               tasks={tasks}
@@ -1653,6 +1717,8 @@ export default function SelinAI() {
 }
 
 const SegmentChat = (props: any) => {
+  const attachedFile = props.attachedFile;
+  const setAttachedFile = props.setAttachedFile;
   const suggestedFirstMessage: string[] = props.suggestedFirstMessage;
   const handleSubmit = props.handleSubmit;
   const dropzoneRef = props.dropzoneRef;
@@ -2661,7 +2727,7 @@ const SegmentChat = (props: any) => {
               {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
                 <IconPlus size={"1rem"} />
               </ActionIcon> */}
-              <ActionIcon
+             {!attachedFile ? <ActionIcon
                 ml={"xl"}
                 variant="outline"
                 color="gray"
@@ -2684,7 +2750,43 @@ const SegmentChat = (props: any) => {
                   {"Add File"}
                   <IconPlus size={"1rem"} />
                 </Button>
-              </ActionIcon>
+              </ActionIcon> : (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "6px 10px",
+                    borderRadius: "6px",
+                    backgroundColor: "#e9ecef",
+                    color: "#495057",
+                    fontSize: "0.875rem",
+                    whiteSpace: "nowrap",
+                    border: "2px solid #adb5bd",
+                    boxShadow: "0 0 5px rgba(0, 0, 0, 0.1)",
+                  }}
+                >
+                  <IconFile size={"1rem"} style={{ marginRight: "8px", color: "#6c757d" }} />
+                  <Text fw={500} size={"xs"} style={{ marginRight: "8px" }}>
+                    {attachedFile.name.length > 30 ? attachedFile.name.substring(0, 30) + "..." : attachedFile.name}
+                  </Text>
+                  <ActionIcon
+                    variant="outline"
+                    color="gray"
+                    radius={"xl"}
+                    size={"xs"}
+                    onClick={() => setAttachedFile(null)}
+                    sx={{
+                      transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                      "&:hover": {
+                        transform: "scale(1.1)",
+                        boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
+                      },
+                    }}
+                  >
+                    <IconX size={"1rem"} />
+                  </ActionIcon>
+                </div>
+              )}
             </Flex>
             <Flex>
               <DeepGram
@@ -2736,6 +2838,7 @@ const SegmentChat = (props: any) => {
 };
 
 const SelixControlCenter = ({
+  attachedFile,
   setAIType,
   aiType,
   tasks,
@@ -2749,6 +2852,7 @@ const SelixControlCenter = ({
   currentSessionId,
 }: {
   setAIType: React.Dispatch<React.SetStateAction<string>>;
+  attachedFile: File | null;
   aiType: string;
   tasks: any;
   recording: boolean;
@@ -2765,7 +2869,7 @@ const SelixControlCenter = ({
     (thread) => thread.id === currentSessionId
   )?.memory;
   const [popoverOpenedArray, setPopoverOpenedArray] = useState<boolean[]>(
-    [1, 1, 1]?.map(() => false)
+    [1, 1, 1, 1]?.map(() => false)
   );
   const userToken = useRecoilValue(userTokenState);
 
@@ -2959,6 +3063,47 @@ const SelixControlCenter = ({
               ),
             },
             {
+              value: "FILES",
+              label: (
+                <Popover
+                  position="bottom"
+                  withinPortal
+                  withArrow
+                  shadow="md"
+                  width={200}
+                  offset={10}
+                  onClose={handlePopoverClose}
+                  keepMounted
+                  transitionProps={{ duration: 150, transition: "fade" }}
+                  middlewares={{ shift: true, flip: true }}
+                  arrowSize={10}
+                  arrowOffset={5}
+                  arrowRadius={2}
+                  arrowPosition="center"
+                  zIndex={1000}
+                  radius="md"
+                  opened={popoverOpenedArray[4]}
+                >
+                  <Popover.Target>
+                    <div
+                      onMouseEnter={() => handlePopoverOpen(4)}
+                      onMouseLeave={handlePopoverClose}
+                    >
+                      <Center style={{ gap: 10 }}>
+                        <IconFile size={"1rem"} />
+                        <span>Files</span>
+                      </Center>
+                    </div>
+                  </Popover.Target>
+                  <Popover.Dropdown sx={{ pointerEvents: "none" }}>
+                    <Text size="sm">
+                      View your files attacheed to the chat.
+                    </Text>
+                  </Popover.Dropdown>
+                </Popover>
+              ),
+            },
+            {
               value: "BROWSER",
               label: (
                 <Popover
@@ -3089,7 +3234,15 @@ const SelixControlCenter = ({
           </Center>
         ) : aiType === "ICP" ? (
           <SellScaleAssistant showChat={false} refresh={refreshIcp} />
-        ) : (
+        ) : aiType === "FILES" ? (
+
+          <FilesComponent
+            attachedFile={attachedFile}
+            currentSessionId={currentSessionId}
+          />
+        )  :
+
+        (
           <Center style={{ height: "100%" }}>
             <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
               No Tasks Created. Please create one via the chat.
@@ -3784,6 +3937,103 @@ const TaskRenderer = ({
       );
   }
 };
+
+const FilesComponent = ({ currentSessionId, attachedFile }: { currentSessionId: Number | null, attachedFile: File | null }) => {
+  
+  const [files, setFiles] = useState<
+    { name: string; description: string; uploadDate: string; base64: string }[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const userToken = useRecoilValue(userTokenState);
+
+  const fetchFiles = async () => {
+    if (currentSessionId) {
+      try {
+        const response = await fetch(`${API_URL}/selix/get_files_in_session`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({ session_id: currentSessionId }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const formattedFiles = data.map((file: any) => ({
+            name: file.file_name,
+            description: file.description,
+            uploadDate: new Date(file.created_at).toLocaleDateString(),
+            base64: file.file, // file.file is the base64 of the file
+          }));
+          setFiles(formattedFiles);
+        } else {
+          console.error("Failed to fetch files");
+        }
+      } catch (error) {
+        console.error("Error fetching files:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchFiles();
+  }, [currentSessionId]);
+
+  useEffect(() => {
+    if (attachedFile === null) {
+      const timer = setTimeout(() => {
+        fetchFiles();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [attachedFile]);
+
+
+  if (loading) {
+    return (
+      <Flex justify="center" align="center" style={{ height: "100%" }}>
+        <Loader />
+      </Flex>
+    );
+  }
+
+  return (
+    <Table>
+      <thead>
+        <tr>
+          <th>File Name</th>
+          <th>Description</th>
+          <th>Upload Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {files.map((file, index) => (
+          <tr key={index}>
+            <td>{file.name}</td>
+            <td>{file.description}</td>
+            <td>{file.uploadDate}</td>
+            <td>
+              <Button
+                component="a"
+                href={`data:application/octet-stream;base64,${file.base64}`}
+                download={file.name}
+                variant="outline"
+                color="blue"
+              >
+                Download
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+};
+
 
 const SelinStrategy = ({
   messages,

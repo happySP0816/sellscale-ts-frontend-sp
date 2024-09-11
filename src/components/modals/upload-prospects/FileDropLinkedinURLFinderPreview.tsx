@@ -66,7 +66,8 @@ export interface DuplicateProspects {
   segment_title: string; // "Testing transfer personalizer"
   status: string; // "PROSPECTED"
   title: string; // "Talent Acquisition Recruiter"
-  twitter_url?: string; // null
+  twitter_url?: string; // null,
+  same_archetype?: boolean;
 }
 
 function findBestPreviewRows(fileJSON: any[], previewAmount: number) {

@@ -18,6 +18,9 @@ import {
   Space,
   Modal,
   Accordion,
+  Popover,
+  Input,
+  TextInput,
 } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import { useDisclosure } from "@mantine/hooks";
@@ -38,16 +41,6 @@ import { MaxHeap } from "@datastructures-js/heap";
 
 const MAX_FILE_SIZE_MB = 2;
 const PREVIEW_FIRST_N_ROWS = 5;
-const PROSPECT_DB_COLUMNS = [
-  "company",
-  "full_name",
-  "first_name",
-  "last_name",
-  "title",
-  "override",
-  "linkedin_url",
-  "email",
-];
 
 export interface DuplicateProspects {
   archetype: string; // "Early Startup Founders Template"
@@ -86,14 +79,17 @@ function findBestPreviewRows(fileJSON: any[], previewAmount: number) {
   return bestRows;
 }
 
-function getDefaultColumnMappings(fileJSON: any[]) {
+function getDefaultColumnMappings(
+  fileJSON: any[],
+  prospectDBColumns: string[]
+) {
   const map = new Map<string, string>();
   if (fileJSON.length === 0) return map;
   Object.keys(findBestPreviewRows(fileJSON, 1)[0] || {})
     .filter((key) => key !== "id")
     .forEach((key) => {
       const convertedKey = convertColumn(key);
-      const defaultValue = PROSPECT_DB_COLUMNS.includes(convertedKey)
+      const defaultValue = prospectDBColumns.includes(convertedKey)
         ? convertedKey
         : "none";
       map.set(key.trim(), defaultValue);
@@ -105,7 +101,8 @@ function getDefaultColumnMappings(fileJSON: any[]) {
 function determineColumns(
   columnMappings: Map<string, string>,
   setColumnMappings: React.Dispatch<React.SetStateAction<Map<string, string>>>,
-  fileJSON: any[]
+  fileJSON: any[],
+  prospectDBColumns: string[]
 ) {
   if (fileJSON.length === 0) return [];
   return Object.keys(findBestPreviewRows(fileJSON, 1)[0] || {})
@@ -120,7 +117,7 @@ function determineColumns(
               value={columnMappings.get(key.trim())}
               data={[
                 { label: "-", value: "none", group: "Skipped" },
-                ...PROSPECT_DB_COLUMNS.map((column) => {
+                ...prospectDBColumns.map((column) => {
                   return {
                     label: _.startCase(column.replace("_", " ")).replace(
                       "Url",
@@ -191,18 +188,36 @@ export default function FileDropLinkedinURLFinderPreview(
     new Map()
   );
 
-  const [duplicateProspects, setDuplicateProspects] = useState<DuplicateProspects[] | null>(
-    null
-  );
+  const [duplicateProspects, setDuplicateProspects] = useState<
+    DuplicateProspects[] | null
+  >(null);
+
+  const [prospectDBColumns, setProspectDBColumns] = useState<string[]>([
+    "company",
+    "full_name",
+    "first_name",
+    "last_name",
+    "title",
+    "override",
+    "linkedin_url",
+    "email",
+  ]);
+
+  const [customDataColumnName, setCustomDataColumnName] = useState<
+    string | undefined
+  >();
 
   const [preUploading, setPreUploading] = useState(false);
   const queryCache = new QueryCache();
 
   const [loading, setLoading] = useState(true);
 
+  const [openCreateColumnPopover, setOpenCreateColumnPopover] =
+    useState<boolean>(false);
+
   useEffect(() => {
     if (fileJSON) {
-      setColumnMappings(getDefaultColumnMappings(fileJSON));
+      setColumnMappings(getDefaultColumnMappings(fileJSON, prospectDBColumns));
     }
   }, [fileJSON]);
 
@@ -211,7 +226,6 @@ export default function FileDropLinkedinURLFinderPreview(
       getDupProspects();
     }
   }, [fileJSON, columnMappings]);
-
 
   const setOverrideAll = (override: boolean, same_archetype: boolean) => {
     if (duplicateProspects) {
@@ -252,7 +266,7 @@ export default function FileDropLinkedinURLFinderPreview(
           // Only include columns that are mapped to a prospect db column
           Object.keys(row)
             .filter((key) =>
-              PROSPECT_DB_COLUMNS.includes(
+              prospectDBColumns.includes(
                 columnMappings.get(key.trim()) as string
               )
             )
@@ -309,9 +323,6 @@ export default function FileDropLinkedinURLFinderPreview(
       );
     }
     */
-
-    console.log("has Scrape Target: ", hasScrapeTarget);
-    console.log("failure reason: ", failureReasons);
 
     if (!hasScrapeTarget) {
       if (
@@ -373,9 +384,7 @@ export default function FileDropLinkedinURLFinderPreview(
         // Only include columns that are mapped to a prospect db column
         Object.keys(row)
           .filter((key) =>
-            PROSPECT_DB_COLUMNS.includes(
-              columnMappings.get(key.trim()) as string
-            )
+            prospectDBColumns.includes(columnMappings.get(key.trim()) as string)
           )
           .forEach((key) => {
             // Use the mapped prospect db column intead of the original column name
@@ -763,9 +772,59 @@ export default function FileDropLinkedinURLFinderPreview(
       {fileJSON && (
         <Stack spacing={0} mah={500}>
           <FlexSeparate>
-            <Text fw={500} size="sm" pl={2}>
-              Please map your file's columns to our system
-            </Text>
+            <Flex align={"center"} gap={"4px"}>
+              <Text fw={500} size="sm" pl={2}>
+                Please map your file's columns to our system
+              </Text>
+              <Popover
+                opened={openCreateColumnPopover}
+                onChange={setOpenCreateColumnPopover}
+              >
+                <Popover.Target>
+                  <Button
+                    size={"xs"}
+                    variant={"outline"}
+                    onClick={() =>
+                      setOpenCreateColumnPopover(!openCreateColumnPopover)
+                    }
+                  >
+                    Add Custom Data Column
+                  </Button>
+                </Popover.Target>
+                <Popover.Dropdown>
+                  <Flex direction={"column"} gap={"4px"}>
+                    <TextInput
+                      value={customDataColumnName}
+                      onChange={(event) =>
+                        setCustomDataColumnName(event.currentTarget.value)
+                      }
+                      label={"Custom Data Name"}
+                      description={
+                        "Enter a name or a short description of what the custom data is about"
+                      }
+                      withAsterisk
+                      placeholder={"custom data name or short description"}
+                    />
+                    <Button
+                      disabled={!customDataColumnName}
+                      onClick={() => {
+                        const column_name = customDataColumnName?.split(" ").join("_") + "_customdata_"
+
+                        setProspectDBColumns((prevState) => [
+                          ...prevState,
+                          column_name,
+                        ]);
+                        setCustomDataColumnName(undefined);
+                        setOpenCreateColumnPopover(false);
+                      }}
+                      style={{ maxWidth: "fit-content" }}
+                    >
+                      Add Column
+                    </Button>
+                  </Flex>
+                </Popover.Dropdown>
+              </Popover>
+            </Flex>
             <ActionIcon
               color="red"
               size="sm"
@@ -784,7 +843,8 @@ export default function FileDropLinkedinURLFinderPreview(
             columns={determineColumns(
               columnMappings,
               setColumnMappings,
-              fileJSON
+              fileJSON,
+              prospectDBColumns
             )}
             records={findBestPreviewRows(fileJSON, PREVIEW_FIRST_N_ROWS)}
           />

@@ -104,6 +104,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         },
         body: {
           backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[0],
+          backgroundImage: localStorage.getItem('backgroundImage') ? `url(data:image/png;base64,${localStorage.getItem('backgroundImage')})` : 'none',
           backgroundSize: "cover",
         },
       })}

@@ -139,6 +139,50 @@ const AccountSettings: React.FC = () => {
             <Button w={'fit-content'} onClick={handleSave} disabled={edit}>
               Save Account Info
             </Button>
+            <Button
+              w={'fit-content'}
+              onClick={() => {
+                const backgroundUploadElement = document.getElementById('background-upload');
+                if (backgroundUploadElement) {
+                  backgroundUploadElement.click();
+                }
+              }}
+            >
+              Set App Background
+            </Button>
+            {localStorage.getItem('backgroundImage') && (
+              <Button
+                w={'fit-content'}
+                onClick={() => {
+                  localStorage.removeItem('backgroundImage');
+                  window.location.reload();
+                }}
+                color='red'
+                variant='outline'
+              >
+                Clear App Background
+              </Button>
+            )}
+            <input
+              type="file"
+              id="background-upload"
+              style={{ display: 'none' }}
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    const base64String = reader.result?.toString().split(',')[1];
+                    if (base64String) {
+                      localStorage.setItem('backgroundImage', base64String);
+                      window.location.reload();
+                    }
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
             {!edit && (
               <Button
                 onClick={() => {

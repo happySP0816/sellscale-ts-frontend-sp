@@ -951,13 +951,13 @@ export default function SelinAI() {
     thread_id: string;
   }) => {
     if (roomIDref.current === data.thread_id) {
-      showNotification({
-        key: "session_updated",
-        title: "Session updated",
-        message: `Session: ${data.session.session_name} has been updated`,
-        color: "green",
-        icon: <IconCircleCheck />,
-      });
+      // showNotification({
+      //   key: "session_updated",
+      //   title: "Session updated",
+      //   message: `Session: ${data.session.session_name} has been updated`,
+      //   color: "green",
+      //   icon: <IconCircleCheck />,
+      // });
 
       // just update the local state
       setThreads((prevThreads) =>
@@ -4028,7 +4028,7 @@ const TaskRenderer = ({
     case "REVIEW_PROSPECTS":
       return <ArchetypeFilters hideFeature={true} />;
     case "ONE_SHOT_GENERATOR":
-      return <UploadProspectsModal context={{ modals: [], openModal: () => '', openConfirmModal: () => '', openContextModal: () => '', closeModal: () => '', closeContextModal: () => '', closeAll: () => ''}} id={''} innerProps={{ mode: 'CREATE-ONLY', strategy_id: currentThread?.memory?.strategy_id}} />;
+      return <UploadProspectsModal context={{ modals: [], openModal: () => '', openConfirmModal: () => '', openContextModal: () => '', closeModal: () => '', closeContextModal: () => '', closeAll: () => ''}} id={''} innerProps={{ mode: 'CREATE-ONLY', strategy_id: currentThread?.memory?.strategy_id, selixSessionId: currentSessionId }} />;
     case "REVIEW_COMPANIES":
       if (!segment) {
         return (

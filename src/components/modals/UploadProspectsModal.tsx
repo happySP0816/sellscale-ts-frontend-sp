@@ -34,6 +34,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconChevronUp,
+  IconCircleCheck,
   IconEye,
   IconInfoCircle,
   IconMailOpened,
@@ -46,7 +47,8 @@ import {
 } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { campaignContactsState, emailSequenceState, linkedinSequenceState, userTokenState } from "@atoms/userAtoms";
+import { userDataState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import {Archetype, DefaultVoices, MsgResponse} from "src";
 import { API_URL } from "@constants/data";
@@ -58,10 +60,11 @@ import { useStrategiesApi } from "@pages/Strategy/StrategyApi";
 import { showNotification } from "@mantine/notifications";
 import { set } from "lodash";
 
-export default function UploadProspectsModal({ context, id, innerProps }: ContextModalProps<{ mode: "CREATE-ONLY"; strategy_id?: number | undefined }>) {
+export default function UploadProspectsModal({ context, id, innerProps }: ContextModalProps<{ mode: "CREATE-ONLY"; strategy_id?: number | undefined; selixSessionId?: Number | null }>) {
   const theme = useMantineTheme();
   const userData = useRecoilValue(userDataState);
   const [personas, setPersonas] = useState<{ value: string; label: string; group: string | undefined }[]>([]);
+  const [hasSequences, setHasSequences] = useState<boolean>(false); //used for the selix widget
   const defaultPersonas = useRef<{ value: string; label: string; group: string | undefined }[]>([]);
   const [createdPersona, setCreatedPersona] = useState("");
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
@@ -142,7 +145,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
     formerWorkAlum: false,
     feedbackBased: false,
   });
-  const [emailSequenceState, setEmailSequenceState] = useState({
+  const [emailSequenceStateRaw, setEmailSequenceState] = useState({
     howItWorks: false,
     varyIntroMessages: false,
     breakupMessage: false,
@@ -163,9 +166,31 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
         setDefaultVoicesOptions(data)
       }
     }
+    //show success box if strategy has generated sequences already
+    if (innerProps.selixSessionId) {
+      checkIfStrategyConnectedHasCampaignWithSequences(innerProps?.selixSessionId);
+    }
     handleStrategy();
     getVoices();
   }, [])
+
+  const checkIfStrategyConnectedHasCampaignWithSequences = async (selixSessionId: Number) => {
+    if (selixSessionId === -1) return false;
+
+    const response = await fetch(`${API_URL}/selix/${selixSessionId}/has_campaign_with_sequences`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 200) {
+      setHasSequences(true);
+    } else {
+      setHasSequences(false);
+    }
+  }
 
   const [loadingPersonaBuyReasonGeneration, setLoadingPersonaBuyReasonGeneration] = useState(false);
   const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
@@ -396,6 +421,50 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
     }
   }, [defaultPersonas.current]);
 
+
+  if (hasSequences) {
+    return (
+      <Paper
+        p="md"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
+          position: 'relative',
+        }}
+      >
+        <Box
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: `1px solid ${theme.colors.gray[4]}`,
+            borderRadius: theme.radius.md,
+            padding: theme.spacing.md,
+            backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[0],
+          }}
+        >
+          <IconCircleCheck size={24} color={theme.colors.green[6]} />
+          <Text ml="sm" size="md" weight={500}>
+            Sequences generated successfully!
+          </Text>
+        </Box>
+        <Button
+          style={{
+            position: 'absolute',
+            bottom: theme.spacing.md,
+            right: theme.spacing.md,
+          }}
+          onClick={() => setHasSequences(false)}
+        >
+          Regenerate
+        </Button>
+      </Paper>
+    );
+  }
+
   return (
     <Paper
       p={0}
@@ -616,26 +685,26 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                               <Checkbox 
                                 size="xs" 
                                 label="How it works" 
-                                checked={emailSequenceState.howItWorks}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceState, howItWorks: e.currentTarget.checked })}
+                                checked={emailSequenceStateRaw.howItWorks}
+                                onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, howItWorks: e.currentTarget.checked })}
                               />
                               <Checkbox 
                                 size="xs" 
                                 label="Vary intro messages" 
-                                checked={emailSequenceState.varyIntroMessages}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceState, varyIntroMessages: e.currentTarget.checked })}
+                                checked={emailSequenceStateRaw.varyIntroMessages}
+                                onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, varyIntroMessages: e.currentTarget.checked })}
                               />
                               <Checkbox 
                                 size="xs" 
                                 label="Breakup message" 
-                                checked={emailSequenceState.breakupMessage}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceState, breakupMessage: e.currentTarget.checked })}
+                                checked={emailSequenceStateRaw.breakupMessage}
+                                onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, breakupMessage: e.currentTarget.checked })}
                               />
                               <Checkbox 
                                 size="xs" 
                                 label="Unique offer" 
-                                checked={emailSequenceState.uniqueOffer}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceState, uniqueOffer: e.currentTarget.checked })}
+                                checked={emailSequenceStateRaw.uniqueOffer}
+                                onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, uniqueOffer: e.currentTarget.checked })}
                               />
                             </SimpleGrid>
                           </Box>
@@ -929,7 +998,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
               numVariance,
               liPainPoint,
               liSequenceState,
-              emailSequenceState,
+              emailSequenceState: emailSequenceStateRaw,
             },
             }}
           />

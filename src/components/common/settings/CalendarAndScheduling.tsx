@@ -187,11 +187,11 @@ export default function CalendarAndScheduling() {
           withRowSelection
           columns={[
             {
-              accessorKey: "prospect_name",
+              accessorKey: "name",
               header: () => (
                 <Flex align={"center"} gap={"3px"}>
                   <IconLetterT color="gray" size={"0.9rem"} />
-                  <Text color="gray">Prospect Name</Text>
+                  <Text color="gray">Name</Text>
                 </Flex>
               ),
               maxSize: 250,
@@ -233,7 +233,7 @@ export default function CalendarAndScheduling() {
               accessorKey: "calendar",
               header: () => (
                 <Flex align={"center"} gap={"3px"}>
-                  <IconExternalLink color="gray" size={"0.9rem"} />
+                  <IconLink color="gray" size={"0.9rem"} />
                   <Text color="gray">Calendar Link</Text>
                 </Flex>
               ),

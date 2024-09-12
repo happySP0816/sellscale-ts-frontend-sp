@@ -953,6 +953,7 @@ export default function SelinAI() {
   }) => {
     if (roomIDref.current === data.thread_id) {
       showNotification({
+        key: "session_updated",
         title: "Session updated",
         message: `Session: ${data.session.session_name} has been updated`,
         color: "green",

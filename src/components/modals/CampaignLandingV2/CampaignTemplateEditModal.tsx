@@ -39,6 +39,7 @@ import {
   ThemeIcon,
   Loader,
   Group,
+  Input,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -100,6 +101,8 @@ import { updateInitialBlocklist } from "@utils/requests/updatePersonaBlocklist";
 import Hook from "@pages/channels/components/Hook";
 import { postEmailTrackingSettings } from "@utils/requests/emailTrackingSettings";
 import { getFreshCurrentProject } from "@auth/core";
+import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
+import { patchSequenceStep } from "@utils/requests/emailSequencing";
 
 interface SwitchStyle extends Partial<MantineStyleSystemProps> {
   label?: React.CSSProperties;
@@ -150,6 +153,10 @@ export default function CampaignTemplateEditModal({
   const [emailSubjectLines, setEmailSubjectLines] = useRecoilState(
     emailSubjectLinesState
   );
+  const [isEditingBumpDelayDays, setIsEditingBumpDelayDays] = useState<number | null>(null);
+  const [newBumpDelayDays, setNewBumpDelayDays] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [templateType, setTemplateType] = useState("template" || "generate");
   const [sequenceType, setSequenceType]: any = useState<string>(
     innerProps.sequenceType || "email"
@@ -1093,20 +1100,121 @@ export default function CampaignTemplateEditModal({
                         <Paper withBorder radius={"sm"} p={1} px={4}>
                           <Flex align={"center"} gap={4}>
                             <IconClock color="orange" size={"1rem"} />
-                            <Text fw={500} size={"sm"} style={{ minWidth: "50px", textAlign: "left" }}>
+                            {sequenceType === "email" ? (
+                              isEditingBumpDelayDays === index ? (
+                                <Input
+                                  ref={inputRef}
+                                  style={{ width: '40px' }}
+                                  type="number"
+                                  fw={500}
+                                  size={"sm"}
+                                  value={newBumpDelayDays}
+                                  onChange={(e) => setNewBumpDelayDays(parseInt(e.target.value, 10))}
+                                  onBlur={async () => {
+                                    if (!isNaN(newBumpDelayDays)) {
+                                      for (let i = 0; i < emailSequenceData[index].length; i++) {
+                                        patchSequenceStep(
+                                          userToken,
+                                          emailSequenceData[index][i].id || -1, 
+                                          emailSequenceData[index][i].overall_status || '',
+                                          emailSequenceData[index][i].title || '',
+                                          emailSequenceData[index][i].description,
+                                          emailSequenceData[index][i].bumped_count,
+                                          false,
+                                          newBumpDelayDays,
+                                          ['']
+                                        );
+                                      }
+                                      setEmailSequenceData((prevData) => {
+                                        const newData = [...prevData];
+                                        newData[index] = newData[index].map((item) => ({
+                                          ...item,
+                                          sequence_delay_days: newBumpDelayDays,
+                                        }));
+                                        return newData;
+                                      });
+                                      setIsEditingBumpDelayDays(null);
+                                    }
+                                  }}
+                                />
+                              ) : (
+                                <Text
+                                  fw={500}
+                                  size={"sm"}
+                                  onClick={() => {
+                                    setIsEditingBumpDelayDays(index);
+                                  }}
+                                
+                                >
+                                  {emailSequenceData[index]?.[0]?.sequence_delay_days || 0}
+                                </Text>
+                              )
+                            ) : (
+                              isEditingBumpDelayDays === index ? (
+                                <Input
+                                  ref={inputRef}
+                                  style={{ width: '40px' }}
+                                  type="number"
+                                  fw={500}
+                                  size={"sm"}
+                                  value={newBumpDelayDays}
+                                  onChange={(e) => setNewBumpDelayDays(parseInt(e.target.value, 10))}
+                                  onBlur={async () => {
+                                    if (!isNaN(newBumpDelayDays)) {
+                                      for (let i = 0; i < linkedinSequenceData[index].length; i++) {
+                                        patchBumpFramework(
+                                          userToken,
+                                          linkedinSequenceData[index][i].bump_framework_id,
+                                          linkedinSequenceData[index][i].overall_status || '',
+                                          linkedinSequenceData[index][i].title || '',
+                                          linkedinSequenceData[index][i].description,
+                                          '',
+                                          linkedinSequenceData[index][i].bumped_count,
+                                          newBumpDelayDays,
+                                          linkedinSequenceData[index][i].active,
+                                          false,
+                                          [''],
+                                          '',
+                                          '',
+                                          '',
+                                          '',
+                                          index + 1,
+                                        );
+                                      }
+                                      setLinkedinSequenceData((prevData) => {
+                                        const newData = [...prevData];
+                                        newData[index] = newData[index].map((item) => ({
+                                          ...item,
+                                          bump_delay_days: newBumpDelayDays,
+                                        }));
+                                        return newData;
+                                      });
+                                      setIsEditingBumpDelayDays(null);
+                                    }
+                                  }}
+                                />
+                              ) : (
+                                <Text
+                                  fw={500}
+                                  size={"sm"}
+                                  onClick={() => {
+                                    setIsEditingBumpDelayDays(index);
+                                  }}
+                                
+                                >
+                                  {linkedinSequenceData[index]?.[0]?.bump_delay_days || 0}
+                                </Text>
+                              )
+                            )}
+                            <span className="text-gray-500">
                               {sequenceType === "email" 
-                                ? emailSequenceData[index]?.[0]?.sequence_delay_days || 0 
-                                : linkedinSequenceData[index]?.[0]?.bump_delay_days || 0}{" "}
-                              <span className="text-gray-500">
-                                {sequenceType === "email" 
-                                  ? emailSequenceData[index]?.[0]?.sequence_delay_days === 1 
-                                    ? "day" 
-                                    : "days"
-                                  : linkedinSequenceData[index]?.[0]?.bump_delay_days === 1 
-                                    ? "day" 
-                                    : "days"}
-                              </span>
-                            </Text>
+                                ? emailSequenceData[index]?.[0]?.sequence_delay_days === 1 
+                                  ? "day" 
+                                  : "days"
+                                : linkedinSequenceData[index]?.[0]?.bump_delay_days === 1 
+                                  ? "day" 
+                                  : "days"}
+                            </span>
                           </Flex>
                         </Paper>
                       </Flex>

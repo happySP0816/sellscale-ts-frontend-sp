@@ -48,6 +48,7 @@ export interface linkedinSequence {
   assets: any[];
   bump_framework_id: number;
   bumped_count: number;
+  overall_status?: string;
   description: string;
   bump_delay_days?: number;
   title?: string;
@@ -58,6 +59,7 @@ export type linkedinSequencesDataType = Array<Array<linkedinSequence>>;
 interface emailSequence {
   active: boolean;
   assets: any[];
+  title?: string;
   id?: number;
   bump_framework_id: number;
   bumped_count: number;

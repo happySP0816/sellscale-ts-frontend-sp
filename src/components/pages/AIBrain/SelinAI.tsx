@@ -128,6 +128,7 @@ import { ArchetypeFilters } from "@pages/CampaignV2/ArchetypeFilterModal";
 import SellScaleAssistant from "./SellScaleAssistant";
 import Personalizers from "@pages/CampaignV2/Personalizers";
 import ContactAccountFilterModal from "@modals/ContactAccountFilterModal";
+import UploadProspectsModal from "@modals/UploadProspectsModal";
 import SequencesV2 from "@pages/CampaignV2/SequencesV2";
 import { set } from "lodash";
 import { setSmartleadCampaign } from "@utils/requests/setSmartleadCampaign";
@@ -4025,6 +4026,8 @@ const TaskRenderer = ({
       );
     case "REVIEW_PROSPECTS":
       return <ArchetypeFilters hideFeature={true} />;
+    case "ONE_SHOT_GENERATOR":
+      return <UploadProspectsModal context={{ modals: [], openModal: () => '', openConfirmModal: () => '', openContextModal: () => '', closeModal: () => '', closeContextModal: () => '', closeAll: () => ''}} id={''} innerProps={{ mode: 'CREATE-ONLY', strategy_id: currentThread?.memory?.strategy_id}} />;
     case "REVIEW_COMPANIES":
       if (!segment) {
         return (

@@ -58,7 +58,7 @@ import { useStrategiesApi } from "@pages/Strategy/StrategyApi";
 import { showNotification } from "@mantine/notifications";
 import { set } from "lodash";
 
-export default function UploadProspectsModal({ context, id, innerProps }: ContextModalProps<{ mode: "ADD-ONLY" | "ADD-CREATE" | "CREATE-ONLY" }>) {
+export default function UploadProspectsModal({ context, id, innerProps }: ContextModalProps<{ mode: "CREATE-ONLY"; strategy_id?: number | undefined }>) {
   const theme = useMantineTheme();
   const userData = useRecoilValue(userDataState);
   const [personas, setPersonas] = useState<{ value: string; label: string; group: string | undefined }[]>([]);
@@ -66,6 +66,7 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
   const [createdPersona, setCreatedPersona] = useState("");
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
   const [loadingStrategy, setLoadingStrategy] = useState(false);
+  const [handlingStrategy, setHandlingStrategy] = useState(false);
 
   const [ctas, setCTAs] = useState<{ id: number; cta: string }[]>([]);
 
@@ -303,11 +304,28 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
       setWithData(data.withData || '');
       setLiAssetIngestor(data.liAssetIngestor || '');
       setEmailAssetIngestor(data.emailAssetIngestor || '');
-      setEmailSequenceOpened(true);
-      setWriteEmailSequenceDraft(true);
-      setWriteLISequenceDraft(true);
-      setLiSequenceOpened(true);
-    } else {
+
+      // HACK CITY - this is a hack to determine if we should show generated email or LI sequences
+
+      if (strategy.description.toLowerCase().includes("email")) {
+        setWriteEmailSequenceDraft(true);
+        setEmailSequenceOpened(true);
+      }
+      if (strategy.description.toLowerCase().includes("linkedin")) {
+        setWriteLISequenceDraft(true);
+        setLiSequenceOpened(true);
+      }
+      else if (
+        !strategy.description.toLowerCase().includes("email") &&
+        !strategy.description.toLowerCase().includes("linkedin")
+      ) {
+        setWriteEmailSequenceDraft(true);
+        setEmailSequenceOpened(true);
+        setWriteLISequenceDraft(true);
+        setLiSequenceOpened(true);
+      }
+    } 
+    else {
       console.error("Failed to generate from strategy");
     }
 
@@ -323,8 +341,16 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
   const { getAllStrategies, patchUpdateStrategy } = useStrategiesApi(userToken);
 
   const handleStrategy = async () => {
+    setHandlingStrategy(true);
     const response = await getAllStrategies();
     setStrategyOptions(response);
+
+    if (innerProps.strategy_id){
+      await fillInFromStrategy(response.find((strategy: Strategy) => strategy.id === innerProps.strategy_id));
+    }
+
+    setHandlingStrategy(false);
+
   };
 
   // const [strategies, setStrategies] = useState([
@@ -378,7 +404,8 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
         backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
       }}
     >
-      <SegmentedControl
+      <LoadingOverlay visible={handlingStrategy}/>
+      {!window.location.href.includes('selix') && <SegmentedControl
         size="sm"
         w={"100%"}
         value={tab}
@@ -414,7 +441,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
             ),
           },
         ]}
-      />
+      />}
       {tab === "scratch" ? (
         <Stack spacing="xs" mt={"md"}>
           {/* <Text color="gray" size={"sm"}>
@@ -880,7 +907,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
               contractSize: personaContractSize,
               templateMode: templateMode === "template",
               connectedStrategyId: connectedStrategy ? connectedStrategy.id : undefined,
-              override_archetype_id: window.location.href.includes('/campaign_v2') ? currentProject?.id : undefined,
+              override_archetype_id: (window.location.href.includes('/campaign_v2') || window.location.href.includes('selix')) ? currentProject?.id : undefined,
               purpose,
               autoGenerationPayload : {
               findSampleProspects,

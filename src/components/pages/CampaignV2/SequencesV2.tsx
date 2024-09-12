@@ -4367,7 +4367,7 @@ export function ProspectSelect2(props: {
         size={600}
         loading={loadingProspects}
         activeItemId={selectedProspect?.id}
-        items={props.prospects?.map((prospect) => {
+        items={(Array.isArray(props.prospects) ? props.prospects.map((prospect) => {
           return {
             id: prospect.id,
             name: prospect.full_name,
@@ -4390,7 +4390,7 @@ export function ProspectSelect2(props: {
               props.onChange(prospect);
             },
           };
-        }) || []}
+        }) : [])}
         header={{
           content: (
             <TextInput

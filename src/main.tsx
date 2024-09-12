@@ -88,6 +88,7 @@ import SelixOnboarding from "@pages/AIBrain/SelixOnboarding";
 import DeepGram from "@common/DeepGram";
 import { isFreeUser } from "@auth/core";
 import GenerateAndSend from "@pages/GenerateAndSend";
+import TrainVoice from "@pages/CampaignV2/TrainVoice";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -596,6 +597,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/selix_onboarding",
         element: <SelixOnboarding />,
+      },
+      {
+        path: "/train_voice",
+        element: <TrainVoice />,
       },
       // {
       //   path: "/generate",

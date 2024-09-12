@@ -747,6 +747,7 @@ export default function SequencesV2(props: any) {
                     selectedProspect={selectedProspect?.id}
                     isSequenceV2={true}
                     onChange={prospectOnChangeHandler}
+                    prospects={campaignContacts}
                   />
                   <ActionIcon
                     disabled={
@@ -4268,6 +4269,7 @@ export function ProspectSelect2(props: {
   onFinishLoading?: (prospects: ProspectShallow[]) => void;
   selectedProspect?: number;
   isSequenceV2?: boolean;
+  prospects?: ProspectShallow[];
 }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
@@ -4365,7 +4367,7 @@ export function ProspectSelect2(props: {
         size={600}
         loading={loadingProspects}
         activeItemId={selectedProspect?.id}
-        items={prospects.map((prospect) => {
+        items={props.prospects.map((prospect) => {
           return {
             id: prospect.id,
             name: prospect.full_name,

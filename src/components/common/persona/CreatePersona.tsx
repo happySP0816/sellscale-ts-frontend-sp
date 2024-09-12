@@ -142,7 +142,7 @@ export default function CreatePersona(props: PropsType) {
     // }, 3000);
 
     //short circuit to enter the user into the campaign shell.
-    if (result.data) {
+    if (result.data && !window.location.href.includes('selix')) {
       window.location.href = `/campaign_v2/${result.data as number}`;
       return result.data as number;
     }
@@ -177,7 +177,7 @@ export default function CreatePersona(props: PropsType) {
           loading={creatingPersona}
           fullWidth
         >
-          {window.location.href.includes('/campaign_v2') ? 'Generate Sequences' : 'Create Campaign'}
+          {window.location.href.includes('/campaign_v2') || window.location.href.includes('selix') ? 'Generate Sequences' : 'Create Campaign'}
         </Button>
       </Flex>
     </Card>

@@ -63,6 +63,7 @@ import { InboxesManagementPage } from "@common/settings/InboxesManagementPage";
 import WebTrafficRouting from "@common/settings/Traffic/WebTrafficRouting";
 import posthog from "posthog-js";
 import PreFilterV2 from "@common/settings/PreFiltersV2/PrefiltersV2";
+import Advanced from "./Advanced";
 
 export default function SettingsPage() {
   setPageTitle("Settings");
@@ -298,6 +299,9 @@ export default function SettingsPage() {
           <Tabs.Tab value="account" icon={<IconHexagonalPrism size="0.8rem" />}>
             Account Settings
           </Tabs.Tab>
+          <Tabs.Tab value="advanced" icon={<IconHexagonalPrism size="0.8rem" />}>
+            Advanced
+          </Tabs.Tab>
           {userData.role === "ADMIN" && (
             <Tabs.Tab
               value="organization"
@@ -310,6 +314,10 @@ export default function SettingsPage() {
 
         <Tabs.Panel value="account" pl="xs">
           <AccountSettings />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="advanced" pl="xs">
+          <Advanced />
         </Tabs.Panel>
 
         <Tabs.Panel value="organization" pl="xs">

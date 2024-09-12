@@ -1226,7 +1226,7 @@ export default function SelinAI() {
 
   return (
     <DropzoneWrapper setPrompt={setPrompt} setAttachedFile={setAttachedFile} ref={dropzoneRef} handleSubmit={handleSubmit}>
-      <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm">
+      <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm" style={{ backgroundColor: "transparent" }}>
         <div>
           <div
             style={{

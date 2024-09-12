@@ -37,6 +37,7 @@ import {
   Tooltip,
   HoverCard,
   Table,
+  Input,
 } from "@mantine/core";
 import {
   IconArrowsMaximize,
@@ -108,6 +109,7 @@ import DeepGram from "@common/DeepGram";
 interface CustomCursorWrapperProps {
   children: React.ReactNode;
   setPrompt: Dispatch<SetStateAction<string>>;
+  prompt: string;
   setAttachedFile: (file: File) => void;
   handleSubmit: (file: {
     name: string;
@@ -134,7 +136,7 @@ import { set } from "lodash";
 import { setSmartleadCampaign } from "@utils/requests/setSmartleadCampaign";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
-  ({ children, handleSubmit, setAttachedFile, setPrompt }, ref) => {
+  ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
     const [isDragging, setIsDragging] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [file, setFile] = useState<File | null>(null);
@@ -146,8 +148,6 @@ const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
       if (files && files.length > 0) {
         setAttachedFile(files[0]);
         setFile(files[0]);
-
-        setPrompt("File Description: ");
 
         showNotification({
           title: "File dropped",
@@ -191,7 +191,6 @@ const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
       handleDrop: (file: File) => {
         setFile(file);
         setAttachedFile(file);
-        setPrompt("File Description: ");
         // setIsModalOpen(true);
       },
       handleConfirm,
@@ -414,15 +413,17 @@ export default function SelinAI() {
   ) => {
     let messagToSend = forcePrompt || prompt;
 
-    if (prompt === "File Description: ") {
-      showNotification({
-        title: "File upload failed",
-        message: "Please enter a file description",
-        color: "red",
-        icon: <IconCircleCheck />,
-      });
-      return;
-    }
+    // if (prompt === 'File Description: '){
+
+    //   showNotification({
+    //     title: "File upload failed",
+    //     message: "Please enter a file description",
+    //     color: "red",
+    //     icon: <IconCircleCheck />,
+    //   });
+    //   return;
+
+    // }
 
     setRecording(false);
     //custom handle submit function to handle file uploads
@@ -951,13 +952,13 @@ export default function SelinAI() {
     thread_id: string;
   }) => {
     if (roomIDref.current === data.thread_id) {
-      showNotification({
-        key: "session_updated",
-        title: "Session updated",
-        message: `Session: ${data.session.session_name} has been updated`,
-        color: "green",
-        icon: <IconCircleCheck />,
-      });
+      // showNotification({
+      //   key: "session_updated",
+      //   title: "Session updated",
+      //   message: `Session: ${data.session.session_name} has been updated`,
+      //   color: "green",
+      //   icon: <IconCircleCheck />,
+      // });
 
       // just update the local state
       setThreads((prevThreads) =>
@@ -1225,20 +1226,8 @@ export default function SelinAI() {
   const [newButtonHover, setNewButtonHover] = useState(false);
 
   return (
-    <DropzoneWrapper
-      setPrompt={setPrompt}
-      setAttachedFile={setAttachedFile}
-      ref={dropzoneRef}
-      handleSubmit={handleSubmit}
-    >
-      <Card
-        p="lg"
-        maw={"100%"}
-        ml="auto"
-        mr="auto"
-        mt="sm"
-        style={{ backgroundColor: "transparent" }}
-      >
+    <DropzoneWrapper setPrompt={setPrompt} prompt={prompt} setAttachedFile={setAttachedFile} ref={dropzoneRef} handleSubmit={handleSubmit}>
+      <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm" style={{ backgroundColor: "transparent" }}>
         <div>
           <div
             style={{
@@ -1881,24 +1870,22 @@ const SegmentChat = (props: any) => {
   };
 
   useEffect(() => {
-    setMemoryState(props.memoryState);
-  }, [props.memoryState]);
+    if (prompt === '' ){
 
-  useEffect(() => {
-    if (prompt === "") {
       //reset the text area height so the placeholder shows nicely
-      textareaRef.current!.style.height = "auto";
+      console.log('setting to auto');
       setNormalInputMode(true);
       if (textareaRef.current) {
-        textareaRef.current.style.height = "500px";
-      }
-    } else if (normalInputMode && prompt.length > 120) {
-      setNormalInputMode(false);
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "200px";
+        textareaRef.current!.style.height = 'auto';
       }
     }
-  }, [prompt.length]);
+    else if (normalInputMode && (prompt.length > 120 || promptRef.current.length > 120)) {
+      setNormalInputMode(false);
+      if (textareaRef.current) {
+        textareaRef.current.style.height = '500px';
+      }
+    }
+  }, [prompt.length, promptRef.current.length]);
 
   useEffect(() => {
     handleSubmit();
@@ -2954,7 +2941,7 @@ const SegmentChat = (props: any) => {
             onChange={(e) => {
               setPrompt(e.target.value);
               const textarea = e.target;
-              textarea.style.height = normalInputMode ? "200px" : "500px";
+              textarea.style.height = normalInputMode ? "500px" : "500px";
             }}
             variant="unstyled"
             inputContainer={(children) => (
@@ -3005,9 +2992,7 @@ const SegmentChat = (props: any) => {
                 onClick={() => {
                   textareaRef.current?.focus();
                   if (textareaRef.current) {
-                    textareaRef.current.style.height = !normalInputMode
-                      ? "200px"
-                      : "500px";
+                    textareaRef.current.style.height = 'auto'
                   }
                   setNormalInputMode(!normalInputMode);
                 }}
@@ -3097,12 +3082,12 @@ const SegmentChat = (props: any) => {
                   setPrompt((prevPrompt: string) => {
                     const newPrompt = prevPrompt + text;
                     promptRef.current = newPrompt;
-                    setTimeout(() => {
-                      const textarea = document.querySelector("textarea");
-                      if (textarea) {
-                        textarea.scrollTop = textarea.scrollHeight;
-                      }
-                    }, 0);
+                    // setTimeout(() => {
+                    //   const textarea = document.querySelector("textarea");
+                    //   if (textarea) {
+                    //     textarea.scrollTop = textarea.scrollHeight;
+                    //   }
+                    // }, 0);
                     return newPrompt;
                   });
                 }}
@@ -4188,24 +4173,7 @@ const TaskRenderer = ({
     case "REVIEW_PROSPECTS":
       return <ArchetypeFilters hideFeature={true} />;
     case "ONE_SHOT_GENERATOR":
-      return (
-        <UploadProspectsModal
-          context={{
-            modals: [],
-            openModal: () => "",
-            openConfirmModal: () => "",
-            openContextModal: () => "",
-            closeModal: () => "",
-            closeContextModal: () => "",
-            closeAll: () => "",
-          }}
-          id={""}
-          innerProps={{
-            mode: "CREATE-ONLY",
-            strategy_id: currentThread?.memory?.strategy_id,
-          }}
-        />
-      );
+      return <UploadProspectsModal context={{ modals: [], openModal: () => '', openConfirmModal: () => '', openContextModal: () => '', closeModal: () => '', closeContextModal: () => '', closeAll: () => ''}} id={''} innerProps={{ mode: 'CREATE-ONLY', strategy_id: currentThread?.memory?.strategy_id, selixSessionId: currentSessionId }} />;
     case "REVIEW_COMPANIES":
       if (!segment) {
         return (
@@ -4265,6 +4233,41 @@ const FilesComponent = ({
   >([]);
   const [loading, setLoading] = useState(true);
   const userToken = useRecoilValue(userTokenState);
+  const [editingTextIndex, setEditingTextIndex] = useState<number | null>(null);
+  const handleDescriptionChange = (index: number, value: string) => {
+    const newFiles = [...files];
+    newFiles[index].description = value;
+    setFiles(newFiles);
+  }
+  const saveDescription = async (index: number) => {
+  if (files[index].description.trim() === '') {
+    console.error("Description cannot be empty");
+    return;
+  }
+    const file = files[index];
+    try {
+      const response = fetch(`${API_URL}/selix/update_file_description`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          session_id: currentSessionId,
+          file_name: file.name,
+          description: file.description,
+        }),
+      });
+
+      if (!response) {
+        console.error("Failed to update file description");
+      }
+    } catch (error) {
+      console.error("Error updating file description:", error);
+    } finally {
+      setEditingTextIndex(null);
+    }
+  }
 
   const fetchFiles = async () => {
     if (currentSessionId) {
@@ -4333,7 +4336,36 @@ const FilesComponent = ({
         {files.map((file, index) => (
           <tr key={index}>
             <td>{file.name}</td>
-            <td>{file.description}</td>
+            <td>
+              {editingTextIndex === index ? (
+                <Textarea
+                  w={'100%'}
+                  value={file.description}
+                  onChange={(e) => handleDescriptionChange(index, e.target.value)}
+                  onBlur={() => saveDescription(index)}
+                  autoFocus
+                />
+              ) : (
+                <Text onClick={() => setEditingTextIndex(index)}>
+                  {file.description.length > 70 ? (
+                    <HoverCard width={300} shadow="md">
+                      <HoverCard.Target>
+                        <Text>
+                          {file.description.substring(0, 70) + "..."}
+                        </Text>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown>
+                        <Text size="sm" style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}>
+                          {file.description}
+                        </Text>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  ) : (
+                    file.description
+                  )}
+                </Text>
+              )}
+            </td>
             <td>{file.uploadDate}</td>
             <td>
               <Button

@@ -147,7 +147,7 @@ const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
         setAttachedFile(files[0]);
         setFile(files[0]);
 
-        setPrompt('File Description: ')
+        setPrompt("File Description: ");
 
         showNotification({
           title: "File dropped",
@@ -191,7 +191,7 @@ const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
       handleDrop: (file: File) => {
         setFile(file);
         setAttachedFile(file);
-        setPrompt('File Description: ')
+        setPrompt("File Description: ");
         // setIsModalOpen(true);
       },
       handleConfirm,
@@ -364,7 +364,10 @@ export default function SelinAI() {
   const [recording, setRecording] = useState(false);
   const prevPromptLengthRef = useRef<number>(0);
   const prevSlideUpTime = useRef<number>(0);
-  const dropzoneRef = useRef<{ handleDrop: (file: File) => void; handleConfirm: () => void } | null>(null);
+  const dropzoneRef = useRef<{
+    handleDrop: (file: File) => void;
+    handleConfirm: () => void;
+  } | null>(null);
 
   const freeUser = isFreeUser();
 
@@ -411,8 +414,7 @@ export default function SelinAI() {
   ) => {
     let messagToSend = forcePrompt || prompt;
 
-    if (prompt === 'File Description: '){
-
+    if (prompt === "File Description: ") {
       showNotification({
         title: "File upload failed",
         message: "Please enter a file description",
@@ -420,13 +422,12 @@ export default function SelinAI() {
         icon: <IconCircleCheck />,
       });
       return;
-
     }
 
     setRecording(false);
     //custom handle submit function to handle file uploads
 
-    if (attachedFile){
+    if (attachedFile) {
       console.log("attached file is", attachedFile);
       dropzoneRef.current?.handleConfirm();
       setAttachedFile(null);
@@ -434,21 +435,19 @@ export default function SelinAI() {
     }
 
     if (file) {
-      console.log('submitting file', file);
+      console.log("submitting file", file);
 
-      setMessages(
-        (chatContent: MessageType[]) => [
-          ...chatContent,
-          {
-            created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
-            message: prompt,
-            role: "user",
-            type: "message",
-          },
-        ],
-      )
+      setMessages((chatContent: MessageType[]) => [
+        ...chatContent,
+        {
+          created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
+          message: prompt,
+          role: "user",
+          type: "message",
+        },
+      ]);
 
-      setPrompt("")
+      setPrompt("");
       promptRef.current = "";
       promptLengthRef.current = 0;
       setSuggestion("");
@@ -1226,8 +1225,20 @@ export default function SelinAI() {
   const [newButtonHover, setNewButtonHover] = useState(false);
 
   return (
-    <DropzoneWrapper setPrompt={setPrompt} setAttachedFile={setAttachedFile} ref={dropzoneRef} handleSubmit={handleSubmit}>
-      <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm" style={{ backgroundColor: "transparent" }}>
+    <DropzoneWrapper
+      setPrompt={setPrompt}
+      setAttachedFile={setAttachedFile}
+      ref={dropzoneRef}
+      handleSubmit={handleSubmit}
+    >
+      <Card
+        p="lg"
+        maw={"100%"}
+        ml="auto"
+        mr="auto"
+        mt="sm"
+        style={{ backgroundColor: "transparent" }}
+      >
         <div>
           <div
             style={{
@@ -1746,6 +1757,9 @@ const SegmentChat = (props: any) => {
   const userToken = useRecoilValue(userTokenState);
   const [showLoader, setShowLoader] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [showAddMemoryInput, setShowAddMemoryInput] = useState(false);
+  const [showMemoryForKey, setShowMemoryForKey] = useState("");
+  const [newMemoryTitle, setNewMemoryTitle] = useState("");
   // const [recording, setRecording] = useState(false);
 
   const [normalInputMode, setNormalInputMode] = useState(true);
@@ -1852,6 +1866,8 @@ const SegmentChat = (props: any) => {
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
 
+  const [memoryState, setMemoryState] = useState<any>(props.memoryState);
+
   const handleListClick = async (prompt: string) => {
     handleSubmit(undefined, prompt);
     setShouldSubmit(true);
@@ -1865,18 +1881,21 @@ const SegmentChat = (props: any) => {
   };
 
   useEffect(() => {
-    if (prompt === ''){
+    setMemoryState(props.memoryState);
+  }, [props.memoryState]);
+
+  useEffect(() => {
+    if (prompt === "") {
       //reset the text area height so the placeholder shows nicely
-      textareaRef.current!.style.height = 'auto';
+      textareaRef.current!.style.height = "auto";
       setNormalInputMode(true);
       if (textareaRef.current) {
-        textareaRef.current.style.height = '500px';
+        textareaRef.current.style.height = "500px";
       }
-    }
-    else if (normalInputMode && prompt.length > 120) {
+    } else if (normalInputMode && prompt.length > 120) {
       setNormalInputMode(false);
       if (textareaRef.current) {
-        textareaRef.current.style.height = '200px';
+        textareaRef.current.style.height = "200px";
       }
     }
   }, [prompt.length]);
@@ -2004,6 +2023,48 @@ const SegmentChat = (props: any) => {
       console.error("Error generating new draft memory line:", error);
     } finally {
       setGeneratingNewMemoryLine(false);
+    }
+  };
+
+  const addMemory = async (
+    memoryTitle: string,
+    memoryContent: string,
+    requiresUserInput: boolean = false
+  ) => {
+    try {
+      const response = await fetch(`${API_URL}/selix/add_memory`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          selix_session_id: sessionId,
+          memory_title: memoryTitle,
+          memory_content: memoryContent,
+          requires_user_input: requiresUserInput,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showNotification({
+          title: "Memory Added",
+          message: "Memory added successfully",
+          color: "green",
+          icon: <IconCircleCheck />,
+        });
+      } else {
+        showNotification({
+          title: "Error Adding Memory",
+          message: result.message || "Failed to add memory",
+          color: "red",
+          icon: <IconX />,
+        });
+      }
+    } catch (error) {
+      console.error("Error adding memory:", error);
     }
   };
 
@@ -2157,18 +2218,21 @@ const SegmentChat = (props: any) => {
                 </Flex>
               </Flex>
 
-              {props.memoryState &&
-                Object.keys(props.memoryState).map((x: string) => {
+              {memoryState &&
+                Object.keys(memoryState).map((x: string) => {
                   return (
                     <Box mb="md">
+                      {x !== "campaigns" && x !== "sessions" && (
+                        <Divider mb="md" />
+                      )}
                       {x !== "campaigns" && x !== "sessions" && (
                         <Text size="sm" color="gray" fw="500">
                           {selixMemoryTitleTranslations[x]}
                         </Text>
                       )}
 
-                      {Array.isArray(props.memoryState[x]) &&
-                        props.memoryState[x].map((y: any) => (
+                      {Array.isArray(memoryState[x]) &&
+                        memoryState[x].map((y: any) => (
                           <>
                             <Box id={`memory-${y.memory}`}>
                               <HoverCard
@@ -2232,6 +2296,64 @@ const SegmentChat = (props: any) => {
                                         {y["title"].substring(0, 36) +
                                           (y["title"].length > 36 ? "..." : "")}
                                       </Text>
+                                      <Flex
+                                        className="hover-icons"
+                                        sx={{
+                                          display: "none",
+                                          position: "absolute",
+                                          top: "4px",
+                                          right: "4px",
+                                          gap: "4px",
+                                          backgroundColor: "white",
+                                        }}
+                                      >
+                                        <Tooltip
+                                          label="Mark as Cancelled"
+                                          withArrow
+                                        >
+                                          <ActionIcon
+                                            size="xs"
+                                            color="red"
+                                            onClick={() => {
+                                              changeMemoryStatus(
+                                                y.id,
+                                                "CANCELLED"
+                                              );
+                                              // const target = document.getElementById(
+                                              //   `memory-${y.memory}`
+                                              // );
+                                              // if (target) {
+                                              //   target.style.display = "none";
+                                              // }
+                                            }}
+                                          >
+                                            <IconX size={12} />
+                                          </ActionIcon>
+                                        </Tooltip>
+                                        <Tooltip
+                                          label="Mark as Complete"
+                                          withArrow
+                                        >
+                                          <ActionIcon
+                                            size="xs"
+                                            color="green"
+                                            onClick={() => {
+                                              changeMemoryStatus(
+                                                y.id,
+                                                "COMPLETE"
+                                              );
+                                              // const target = document.getElementById(
+                                              //   `memory-${y.memory}`
+                                              // );
+                                              // if (target) {
+                                              //   target.style.display = "none";
+                                              // }
+                                            }}
+                                          >
+                                            <IconCheck size={12} />
+                                          </ActionIcon>
+                                        </Tooltip>
+                                      </Flex>
                                     </Box>
                                     <Box ml="4px" pt="2px">
                                       <IconCloud size="0.9rem" color="gray" />
@@ -2263,55 +2385,85 @@ const SegmentChat = (props: any) => {
                                   )} */}
                                 </HoverCard.Dropdown>
                               </HoverCard>
-                              <Flex
-                                className="hover-icons"
-                                sx={{
-                                  display: "none",
-                                  position: "absolute",
-                                  top: "4px",
-                                  right: "4px",
-                                  gap: "4px",
-                                  backgroundColor: "white",
-                                }}
-                              >
-                                <Tooltip label="Mark as Cancelled" withArrow>
-                                  <ActionIcon
-                                    size="xs"
-                                    color="red"
-                                    onClick={() => {
-                                      changeMemoryStatus(y.id, "CANCELLED");
-                                      const target = document.getElementById(
-                                        `memory-${y.memory}`
-                                      );
-                                      if (target) {
-                                        target.style.display = "none";
-                                      }
-                                    }}
-                                  >
-                                    <IconX size={12} />
-                                  </ActionIcon>
-                                </Tooltip>
-                                <Tooltip label="Mark as Complete" withArrow>
-                                  <ActionIcon
-                                    size="xs"
-                                    color="green"
-                                    onClick={() => {
-                                      changeMemoryStatus(y.id, "COMPLETE");
-                                      const target = document.getElementById(
-                                        `memory-${y.memory}`
-                                      );
-                                      if (target) {
-                                        target.style.display = "none";
-                                      }
-                                    }}
-                                  >
-                                    <IconCheck size={12} />
-                                  </ActionIcon>
-                                </Tooltip>
-                              </Flex>
                             </Box>
                           </>
                         ))}
+
+                      <Box mt="sm">
+                        {(x == "needs_user_input" || x == "needs_ai_input") && (
+                          <>
+                            {!showAddMemoryInput && (
+                              <Button
+                                variant="outline"
+                                ml="auto"
+                                size="xs"
+                                color="gray"
+                                onClick={() => {
+                                  if (showAddMemoryInput) {
+                                    setShowAddMemoryInput(false);
+                                    setShowMemoryForKey("");
+                                  } else {
+                                    setShowAddMemoryInput(true);
+                                    setShowMemoryForKey(x);
+                                  }
+                                }}
+                              >
+                                +
+                              </Button>
+                            )}
+                            {showAddMemoryInput && showMemoryForKey === x && (
+                              <Flex mt="xs" align="center">
+                                <TextInput
+                                  placeholder="Enter memory title"
+                                  value={newMemoryTitle}
+                                  onChange={(event) =>
+                                    setNewMemoryTitle(event.currentTarget.value)
+                                  }
+                                  onKeyDown={(event) => {
+                                    if (event.key === "Enter") {
+                                      addMemory(
+                                        newMemoryTitle,
+                                        newMemoryTitle,
+                                        x == "needs_user_input" ? true : false
+                                      );
+                                      setNewMemoryTitle("");
+                                      setShowAddMemoryInput(false);
+                                    }
+                                  }}
+                                  width="100%"
+                                  mr="xs"
+                                />
+                                <Button
+                                  size="xs"
+                                  color="green"
+                                  onClick={() => {
+                                    addMemory(
+                                      newMemoryTitle,
+                                      newMemoryTitle,
+                                      x == "needs_user_input" ? true : false
+                                    );
+                                    setNewMemoryTitle("");
+                                    setShowAddMemoryInput(false);
+                                  }}
+                                >
+                                  Add
+                                </Button>
+                                <Button
+                                  size="xs"
+                                  color="red"
+                                  onClick={() => {
+                                    setNewMemoryTitle("");
+                                    setShowAddMemoryInput(false);
+                                  }}
+                                  ml="xs"
+                                >
+                                  Cancel
+                                </Button>
+                              </Flex>
+                            )}
+                          </>
+                        )}
+                      </Box>
                     </Box>
                   );
                 })}
@@ -2325,180 +2477,13 @@ const SegmentChat = (props: any) => {
           h={"53vh"}
           viewportRef={viewport}
           scrollHideDelay={4000}
-          style={{ 
+          style={{
             overflow: "hidden",
             // transform: !normalInputMode ? "translateY(-250px)" : "none",
             transition: "transform 0.3s ease",
           }}
         >
-        {messages.length > 1 ? (
-          <Flex
-            direction={"column"}
-            gap={"sm"}
-            p={"md"}
-            h={"100%"}
-            className=" overflow-auto"
-          >
-            {messages.map((message: MessageType, index: number) => {
-              return (
-                <>
-                  {message.type === "message" ? (
-                    <Flex
-                      direction={"column"}
-                      maw={"85%"}
-                      gap={4}
-                      key={index}
-                      ml={message.role === "user" ? "auto" : "0"}
-                      style={{
-                        backgroundColor:
-                          message.role === "user" ? "#f7ffff" : "#fafafa",
-                        borderRadius: "10px",
-                        border: "1px solid #e7ebef",
-                        padding: "10px",
-                      }}
-                    >
-                      <Flex gap={4} align={"center"}>
-                        <Avatar
-                          src={
-                            message.role === "user" ? userData.img_url : Logo
-                          }
-                          size={"xs"}
-                          radius={"xl"}
-                        />
-                        <Text fw={600} size={"xs"}>
-                          {message.role !== "assistant"
-                            ? userData.sdr_name
-                            : "Selix AI"}
-                        </Text>
-                        {message.role !== "user" &&
-                          message.message !== "loading" &&
-                          index === messages.length - 1 && (
-                            <Flex align="center" gap="xs">
-                              {showLoader && (
-                                <Loader
-                                  variant="bars"
-                                  color="grape"
-                                  size="xs"
-                                  ml={10}
-                                />
-                              )}
-                            </Flex>
-                          )}
-                      </Flex>
-                      <Flex
-                        className=" rounded-lg rounded-br-none"
-                        px={"sm"}
-                        py={7}
-                      >
-                        <Text size={"xs"} fw={500}>
-                          {message.role === "user" ? (
-                            message.message
-                              .split(" ")
-                              .map(
-                                (x) =>
-                                  x.substring(0, 40) +
-                                  (x.length > 40 ? "..." : "")
-                              )
-                              .join(" ")
-                          ) : message.message === "loading" ? (
-                            <Flex align="center" gap="xs">
-                              <Loader color="black" variant="dots" />
-                            </Flex>
-                          ) : (
-                            <Text>
-                              {message.message
-                                .split(" ")
-                                .map(
-                                  (x) =>
-                                    x.substring(0, 40) +
-                                    (x.length > 40 ? "..." : "")
-                                )
-                                .join(" ")
-                                .split("\n")
-                                .map((line, index) => (
-                                  <Fragment key={index}>
-                                    {line}
-                                    <br />
-                                  </Fragment>
-                                ))}
-                            </Text>
-                          )}
-                        </Text>
-                      </Flex>
-                      <Text
-                        color="gray"
-                        size={"xs"}
-                        ml={message.role === "user" ? "auto" : "0"}
-                      >
-                        <Text
-                          color="gray"
-                          size="xs"
-                          ml={message.role === "user" ? "auto" : "0"}
-                        >
-                          {moment(message.created_time).format(
-                            "MMMM D, h:mm A"
-                          )}
-                        </Text>
-                      </Text>
-                    </Flex>
-                  ) : (
-                    <Card
-                      key={index}
-                      className="border border-[#E25DEE] border-solid rounded-md"
-                      shadow="sm"
-                      withBorder
-                      radius="md"
-                      style={{ marginLeft: 0 }}
-                    >
-                      <Card.Section>
-                        <Flex
-                          justify="space-between"
-                          align="center"
-                          className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
-                          onClick={() => toggleCardCollapse(index)}
-                        >
-                          {!messages[index + 1] && (
-                            <Loader size="sm" color="white" />
-                          )}
-
-                          <Text fw={600} size="xs">
-                            ✨ {message.action_title}
-                          </Text>
-                          {!uncollapsedCards[index] ? (
-                            <IconChevronDown
-                              size={16}
-                              className="transition-transform"
-                            />
-                          ) : (
-                            <IconChevronUp
-                              size={16}
-                              className="transition-transform"
-                            />
-                          )}
-                        </Flex>
-                      </Card.Section>
-                      {uncollapsedCards[index] && (
-                        <Text size="xs" fw={400} color="gray" mt="xs">
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html:
-                                message.action_description?.replaceAll(
-                                  "\n",
-                                  "<br/><br/>"
-                                ) || "",
-                            }}
-                          />
-                        </Text>
-                      )}
-                    </Card>
-                  )}
-                </>
-              );
-            })}
-            {/* {loading && <Loader color="blue" type="dots" />} */}
-          </Flex>
-        ) : (
-          <>
+          {messages.length > 1 ? (
             <Flex
               direction={"column"}
               gap={"sm"}
@@ -2512,35 +2497,202 @@ const SegmentChat = (props: any) => {
                     {message.type === "message" ? (
                       <Flex
                         direction={"column"}
-                        w={"50%"}
+                        maw={"85%"}
                         gap={4}
                         key={index}
-                        align="center"
-                        justify="center"
-                        mx="auto"
+                        ml={message.role === "user" ? "auto" : "0"}
+                        style={{
+                          backgroundColor:
+                            message.role === "user" ? "#f7ffff" : "#fafafa",
+                          borderRadius: "10px",
+                          border: "1px solid #e7ebef",
+                          padding: "10px",
+                        }}
                       >
-                        <Flex
-                          data-tour="selix-tour"
-                          direction="column"
-                          align="center"
-                          justify="center"
-                          bg="#f0f4ff"
-                          w="200%"
-                          p="md"
-                          mb="md"
-                          style={{
-                            border: "1px solid #d0d7ff",
-                            borderRadius: "8px",
-                          }}
-                        >
-                          <Text fw={600} size="md" color="#1e3a8a">
-                            Speak into the microphone 🎙
+                        <Flex gap={4} align={"center"}>
+                          <Avatar
+                            src={
+                              message.role === "user" ? userData.img_url : Logo
+                            }
+                            size={"xs"}
+                            radius={"xl"}
+                          />
+                          <Text fw={600} size={"xs"}>
+                            {message.role !== "assistant"
+                              ? userData.sdr_name
+                              : "Selix AI"}
                           </Text>
-                          <Text fw={600} size="md" color="gray">
-                            Typing is less effective.
+                          {message.role !== "user" &&
+                            message.message !== "loading" &&
+                            index === messages.length - 1 && (
+                              <Flex align="center" gap="xs">
+                                {showLoader && (
+                                  <Loader
+                                    variant="bars"
+                                    color="grape"
+                                    size="xs"
+                                    ml={10}
+                                  />
+                                )}
+                              </Flex>
+                            )}
+                        </Flex>
+                        <Flex
+                          className=" rounded-lg rounded-br-none"
+                          px={"sm"}
+                          py={7}
+                        >
+                          <Text size={"xs"} fw={500}>
+                            {message.role === "user" ? (
+                              message.message
+                                .split(" ")
+                                .map(
+                                  (x) =>
+                                    x.substring(0, 40) +
+                                    (x.length > 40 ? "..." : "")
+                                )
+                                .join(" ")
+                            ) : message.message === "loading" ? (
+                              <Flex align="center" gap="xs">
+                                <Loader color="black" variant="dots" />
+                              </Flex>
+                            ) : (
+                              <Text>
+                                {message.message
+                                  .split(" ")
+                                  .map(
+                                    (x) =>
+                                      x.substring(0, 40) +
+                                      (x.length > 40 ? "..." : "")
+                                  )
+                                  .join(" ")
+                                  .split("\n")
+                                  .map((line, index) => (
+                                    <Fragment key={index}>
+                                      {line}
+                                      <br />
+                                    </Fragment>
+                                  ))}
+                              </Text>
+                            )}
                           </Text>
                         </Flex>
-                        {/* <Flex gap={4} align={"center"}>
+                        <Text
+                          color="gray"
+                          size={"xs"}
+                          ml={message.role === "user" ? "auto" : "0"}
+                        >
+                          <Text
+                            color="gray"
+                            size="xs"
+                            ml={message.role === "user" ? "auto" : "0"}
+                          >
+                            {moment(message.created_time).format(
+                              "MMMM D, h:mm A"
+                            )}
+                          </Text>
+                        </Text>
+                      </Flex>
+                    ) : (
+                      <Card
+                        key={index}
+                        className="border border-[#E25DEE] border-solid rounded-md"
+                        shadow="sm"
+                        withBorder
+                        radius="md"
+                        style={{ marginLeft: 0 }}
+                      >
+                        <Card.Section>
+                          <Flex
+                            justify="space-between"
+                            align="center"
+                            className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
+                            onClick={() => toggleCardCollapse(index)}
+                          >
+                            {!messages[index + 1] && (
+                              <Loader size="sm" color="white" />
+                            )}
+
+                            <Text fw={600} size="xs">
+                              ✨ {message.action_title}
+                            </Text>
+                            {!uncollapsedCards[index] ? (
+                              <IconChevronDown
+                                size={16}
+                                className="transition-transform"
+                              />
+                            ) : (
+                              <IconChevronUp
+                                size={16}
+                                className="transition-transform"
+                              />
+                            )}
+                          </Flex>
+                        </Card.Section>
+                        {uncollapsedCards[index] && (
+                          <Text size="xs" fw={400} color="gray" mt="xs">
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html:
+                                  message.action_description?.replaceAll(
+                                    "\n",
+                                    "<br/><br/>"
+                                  ) || "",
+                              }}
+                            />
+                          </Text>
+                        )}
+                      </Card>
+                    )}
+                  </>
+                );
+              })}
+              {/* {loading && <Loader color="blue" type="dots" />} */}
+            </Flex>
+          ) : (
+            <>
+              <Flex
+                direction={"column"}
+                gap={"sm"}
+                p={"md"}
+                h={"100%"}
+                className=" overflow-auto"
+              >
+                {messages.map((message: MessageType, index: number) => {
+                  return (
+                    <>
+                      {message.type === "message" ? (
+                        <Flex
+                          direction={"column"}
+                          w={"50%"}
+                          gap={4}
+                          key={index}
+                          align="center"
+                          justify="center"
+                          mx="auto"
+                        >
+                          <Flex
+                            data-tour="selix-tour"
+                            direction="column"
+                            align="center"
+                            justify="center"
+                            bg="#f0f4ff"
+                            w="200%"
+                            p="md"
+                            mb="md"
+                            style={{
+                              border: "1px solid #d0d7ff",
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <Text fw={600} size="md" color="#1e3a8a">
+                              Speak into the microphone 🎙
+                            </Text>
+                            <Text fw={600} size="md" color="gray">
+                              Typing is less effective.
+                            </Text>
+                          </Flex>
+                          {/* <Flex gap={4} align={"center"}>
                           <Avatar
                             src={
                               message.role === "user" ? userData.img_url : Logo
@@ -2565,7 +2717,7 @@ const SegmentChat = (props: any) => {
                               </Flex>
                             )}
                         </Flex> */}
-                        {/* <Flex
+                          {/* <Flex
                           className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none"
                           px={"sm"}
                           py={7}
@@ -2591,7 +2743,7 @@ const SegmentChat = (props: any) => {
                             )}
                           </Text>
                         </Flex> */}
-                        {/* <Text
+                          {/* <Text
                           color="gray"
                           size={"xs"}
                           ml={message.role === "user" ? "auto" : "0"}
@@ -2600,82 +2752,82 @@ const SegmentChat = (props: any) => {
                             "MMMM D, h:mm A"
                           )}
                         </Text> */}
-                      </Flex>
-                    ) : (
-                      <Card
-                        key={index}
-                        className="border border-[#E25DEE] border-solid rounded-md"
-                        shadow="sm"
-                        withBorder
-                        radius="md"
-                        style={{ marginLeft: 0 }}
-                      >
-                        <Card.Section>
-                          <Flex
-                            justify="space-between"
-                            align="center"
-                            className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
-                            onClick={() => toggleCardCollapse(index)}
-                          >
-                            <Text fw={600} size="xs">
-                              ✨ Executing: {message.action_title}
+                        </Flex>
+                      ) : (
+                        <Card
+                          key={index}
+                          className="border border-[#E25DEE] border-solid rounded-md"
+                          shadow="sm"
+                          withBorder
+                          radius="md"
+                          style={{ marginLeft: 0 }}
+                        >
+                          <Card.Section>
+                            <Flex
+                              justify="space-between"
+                              align="center"
+                              className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
+                              onClick={() => toggleCardCollapse(index)}
+                            >
+                              <Text fw={600} size="xs">
+                                ✨ Executing: {message.action_title}
+                              </Text>
+                              {uncollapsedCards[index] ? (
+                                <IconChevronDown
+                                  size={16}
+                                  className="transition-transform"
+                                />
+                              ) : (
+                                <IconChevronUp
+                                  size={16}
+                                  className="transition-transform"
+                                />
+                              )}
+                            </Flex>
+                          </Card.Section>
+                          {!uncollapsedCards[index] && (
+                            <Text size="xs" fw={400} color="gray" mt="xs">
+                              <div
+                                dangerouslySetInnerHTML={{
+                                  __html:
+                                    message.action_description?.replaceAll(
+                                      "\n",
+                                      "<br/><br/>"
+                                    ) || "",
+                                }}
+                              />
                             </Text>
-                            {uncollapsedCards[index] ? (
-                              <IconChevronDown
-                                size={16}
-                                className="transition-transform"
-                              />
-                            ) : (
-                              <IconChevronUp
-                                size={16}
-                                className="transition-transform"
-                              />
-                            )}
-                          </Flex>
-                        </Card.Section>
-                        {!uncollapsedCards[index] && (
-                          <Text size="xs" fw={400} color="gray" mt="xs">
-                            <div
-                              dangerouslySetInnerHTML={{
-                                __html:
-                                  message.action_description?.replaceAll(
-                                    "\n",
-                                    "<br/><br/>"
-                                  ) || "",
-                              }}
-                            />
-                          </Text>
-                        )}
-                      </Card>
-                    )}
-                  </>
-                );
-              })}
-            </Flex>
-            <div className="absolute bottom-0 right-0 flex flex-col w-4/5 gap-1 pr-4">
-              {suggestedFirstMessage.map((message, index) => (
-                <Paper
-                  key={index}
-                  withBorder
-                  p={"xs"}
-                  radius={"md"}
-                  className="hover:border-[#49494] cursor-pointer"
-                >
-                  <Flex
-                    align={"center"}
-                    gap={"xs"}
-                    onClick={() => handleListClick(message)}
+                          )}
+                        </Card>
+                      )}
+                    </>
+                  );
+                })}
+              </Flex>
+              <div className="absolute bottom-0 right-0 flex flex-col w-4/5 gap-1 pr-4">
+                {suggestedFirstMessage.map((message, index) => (
+                  <Paper
+                    key={index}
+                    withBorder
+                    p={"xs"}
+                    radius={"md"}
+                    className="hover:border-[#49494] cursor-pointer"
                   >
-                    <ThemeIcon color="grape" size={"xl"} variant="light">
-                      <IconUserShare size={"1.4rem"} />
-                    </ThemeIcon>
-                    <Text color="#E25DEE" fw={500} size={"sm"}>
-                      {message}
-                    </Text>
-                  </Flex>
-                </Paper>
-              ))}
-              {/* <Paper className="hover:border-[#49494] cursor-pointer" withBorder p={"xs"} radius={"md"} >
+                    <Flex
+                      align={"center"}
+                      gap={"xs"}
+                      onClick={() => handleListClick(message)}
+                    >
+                      <ThemeIcon color="grape" size={"xl"} variant="light">
+                        <IconUserShare size={"1.4rem"} />
+                      </ThemeIcon>
+                      <Text color="#E25DEE" fw={500} size={"sm"}>
+                        {message}
+                      </Text>
+                    </Flex>
+                  </Paper>
+                ))}
+                {/* <Paper className="hover:border-[#49494] cursor-pointer" withBorder p={"xs"} radius={"md"} >
                 <Flex
                   align={"center"}
                   gap={"xs"}
@@ -2712,10 +2864,10 @@ const SegmentChat = (props: any) => {
                   </Text>
                 </Flex>
               </Paper> */}
-            </div>
-          </>
-        )}
-      </ScrollArea>
+              </div>
+            </>
+          )}
+        </ScrollArea>
       </div>
       <div style={{ position: "relative" }}>
         <div
@@ -2771,7 +2923,7 @@ const SegmentChat = (props: any) => {
           style={{
             height: normalInputMode ? "200px" : "500px",
             marginTop: normalInputMode ? "50px" : "-240px",
-            transition: "margin-top 0.3s ease"
+            transition: "margin-top 0.3s ease",
           }}
         >
           <style>
@@ -2853,40 +3005,48 @@ const SegmentChat = (props: any) => {
                 onClick={() => {
                   textareaRef.current?.focus();
                   if (textareaRef.current) {
-                    textareaRef.current.style.height = !normalInputMode ? "200px" : "500px";
+                    textareaRef.current.style.height = !normalInputMode
+                      ? "200px"
+                      : "500px";
                   }
-                 setNormalInputMode(!normalInputMode);
+                  setNormalInputMode(!normalInputMode);
                 }}
               >
-                {normalInputMode ? <IconArrowsMaximize size={"1rem"} /> : <IconArrowsMinimize size={"1rem"} />}
+                {normalInputMode ? (
+                  <IconArrowsMaximize size={"1rem"} />
+                ) : (
+                  <IconArrowsMinimize size={"1rem"} />
+                )}
               </ActionIcon>
               {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
                 <IconPlus size={"1rem"} />
               </ActionIcon> */}
-             {!attachedFile ? <ActionIcon
-                ml={"xl"}
-                variant="outline"
-                color="gray"
-                radius={"xl"}
-                size={"sm"}
-                onClick={() => {
-                  const fileInput = document.createElement("input");
-                  fileInput.type = "file";
-                  fileInput.onchange = (e) => {
-                    const file = (e.target as HTMLInputElement).files?.[0];
-                    if (file) {
-                      console.log("File selected:", file.name);
-                      dropzoneRef.current?.handleDrop(file);
-                    }
-                  };
-                  fileInput.click();
-                }}
-              >
-                <Button ml="xl" color="grape" size="xs">
-                  {"Add File"}
-                  <IconPlus size={"1rem"} />
-                </Button>
-              </ActionIcon> : (
+              {!attachedFile ? (
+                <ActionIcon
+                  ml={"xl"}
+                  variant="outline"
+                  color="gray"
+                  radius={"xl"}
+                  size={"sm"}
+                  onClick={() => {
+                    const fileInput = document.createElement("input");
+                    fileInput.type = "file";
+                    fileInput.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) {
+                        console.log("File selected:", file.name);
+                        dropzoneRef.current?.handleDrop(file);
+                      }
+                    };
+                    fileInput.click();
+                  }}
+                >
+                  <Button ml="xl" color="grape" size="xs">
+                    {"Add File"}
+                    <IconPlus size={"1rem"} />
+                  </Button>
+                </ActionIcon>
+              ) : (
                 <div
                   style={{
                     display: "flex",
@@ -2901,9 +3061,14 @@ const SegmentChat = (props: any) => {
                     boxShadow: "0 0 5px rgba(0, 0, 0, 0.1)",
                   }}
                 >
-                  <IconFile size={"1rem"} style={{ marginRight: "8px", color: "#6c757d" }} />
+                  <IconFile
+                    size={"1rem"}
+                    style={{ marginRight: "8px", color: "#6c757d" }}
+                  />
                   <Text fw={500} size={"xs"} style={{ marginRight: "8px" }}>
-                    {attachedFile.name.length > 30 ? attachedFile.name.substring(0, 30) + "..." : attachedFile.name}
+                    {attachedFile.name.length > 30
+                      ? attachedFile.name.substring(0, 30) + "..."
+                      : attachedFile.name}
                   </Text>
                   <ActionIcon
                     variant="outline"
@@ -3232,9 +3397,7 @@ const SelixControlCenter = ({
                     </div>
                   </Popover.Target>
                   <Popover.Dropdown sx={{ pointerEvents: "none" }}>
-                    <Text size="sm">
-                      View your files attached to the chat.
-                    </Text>
+                    <Text size="sm">View your files attached to the chat.</Text>
                   </Popover.Dropdown>
                 </Popover>
               ),
@@ -3291,7 +3454,7 @@ const SelixControlCenter = ({
                 <div
                   onMouseEnter={() => handlePopoverOpen(3)}
                   onMouseLeave={handlePopoverClose}
-                  onClick={() => setShowICPModal(true)}
+                  // onClick={() => setShowICPModal(true)}
                 >
                   <Center style={{ gap: 10 }}>
                     <IconFlask size={"1rem"} />
@@ -3371,14 +3534,11 @@ const SelixControlCenter = ({
         ) : aiType === "ICP" ? (
           <SellScaleAssistant showChat={false} refresh={refreshIcp} />
         ) : aiType === "FILES" ? (
-
           <FilesComponent
             attachedFile={attachedFile}
             currentSessionId={currentSessionId}
           />
-        )  :
-
-        (
+        ) : (
           <Center style={{ height: "100%" }}>
             <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
               No Tasks Created. Please create one via the chat.
@@ -4028,7 +4188,24 @@ const TaskRenderer = ({
     case "REVIEW_PROSPECTS":
       return <ArchetypeFilters hideFeature={true} />;
     case "ONE_SHOT_GENERATOR":
-      return <UploadProspectsModal context={{ modals: [], openModal: () => '', openConfirmModal: () => '', openContextModal: () => '', closeModal: () => '', closeContextModal: () => '', closeAll: () => ''}} id={''} innerProps={{ mode: 'CREATE-ONLY', strategy_id: currentThread?.memory?.strategy_id}} />;
+      return (
+        <UploadProspectsModal
+          context={{
+            modals: [],
+            openModal: () => "",
+            openConfirmModal: () => "",
+            openContextModal: () => "",
+            closeModal: () => "",
+            closeContextModal: () => "",
+            closeAll: () => "",
+          }}
+          id={""}
+          innerProps={{
+            mode: "CREATE-ONLY",
+            strategy_id: currentThread?.memory?.strategy_id,
+          }}
+        />
+      );
     case "REVIEW_COMPANIES":
       if (!segment) {
         return (
@@ -4076,8 +4253,13 @@ const TaskRenderer = ({
   }
 };
 
-const FilesComponent = ({ currentSessionId, attachedFile }: { currentSessionId: Number | null, attachedFile: File | null }) => {
-  
+const FilesComponent = ({
+  currentSessionId,
+  attachedFile,
+}: {
+  currentSessionId: Number | null;
+  attachedFile: File | null;
+}) => {
   const [files, setFiles] = useState<
     { name: string; description: string; uploadDate: string; base64: string }[]
   >([]);
@@ -4129,7 +4311,6 @@ const FilesComponent = ({ currentSessionId, attachedFile }: { currentSessionId: 
     }
   }, [attachedFile]);
 
-
   if (loading) {
     return (
       <Flex justify="center" align="center" style={{ height: "100%" }}>
@@ -4171,7 +4352,6 @@ const FilesComponent = ({ currentSessionId, attachedFile }: { currentSessionId: 
     </Table>
   );
 };
-
 
 const SelinStrategy = ({
   messages,

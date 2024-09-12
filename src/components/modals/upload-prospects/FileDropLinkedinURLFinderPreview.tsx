@@ -21,6 +21,7 @@ import {
   Popover,
   Input,
   TextInput,
+  Textarea,
 } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import { useDisclosure } from "@mantine/hooks";
@@ -804,6 +805,19 @@ export default function FileDropLinkedinURLFinderPreview(
                       }
                       withAsterisk
                       placeholder={"custom data name or short description"}
+                    />
+                  <Textarea
+                      value={customDataColumnName}
+                      onChange={(event) =>
+                        setCustomDataColumnName(event.currentTarget.value)
+                      }
+                      label={"Relevancy"}
+                      description={
+                        "Enter a sentence or two about how the data is relevant for generating messages."
+                      }
+                      withAsterisk
+                      placeholder={"Coming soon!"}
+                      disabled
                     />
                     <Button
                       disabled={!customDataColumnName}

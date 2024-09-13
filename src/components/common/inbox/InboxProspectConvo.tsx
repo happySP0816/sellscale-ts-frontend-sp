@@ -73,7 +73,7 @@ import { readLiMessages } from "@utils/requests/readMessages";
 import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
 import { getAutoBumpMessage } from "@utils/requests/autoBumpMessage";
-import _ from "lodash";
+import _, { set } from "lodash";
 import InboxProspectConvoSendBox from "./InboxProspectConvoSendBox";
 import InboxProspectConvoBumpFramework from "./InboxProspectConvoBumpFramework";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
@@ -283,6 +283,7 @@ export default function InboxProspectConvo(props: Props) {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const openedProspectId = useRecoilValue(openedProspectIdState);
+  const [forceRefreshingConvo, setForceRefreshingConvo] = useState(false);
 
   const [hasGeneratedMessage, setHasGeneratedMessage] = useState(false);
   const [openedConvoBox, setOpenedConvoBox] = useState<any>(
@@ -1024,6 +1025,7 @@ export default function InboxProspectConvo(props: Props) {
                   LinkedIn <Badge>{currentConvoLiMessages?.length}</Badge>
                   <ActionIcon
                     onClick={async (e) => {
+                      setForceRefreshingConvo(true);
                       e.stopPropagation();
                       try {
                         const response = await fetch(`${API_URL}/voyager/force_refresh_linkedin_messages`, {
@@ -1043,10 +1045,12 @@ export default function InboxProspectConvo(props: Props) {
                         }
                       } catch (error) {
                         console.error('There was a problem with the fetch operation:', error);
+                      } finally{
+                        setForceRefreshingConvo(false);
                       }
                     }}
                   >
-                    <IconRefresh size="0.8rem" />
+                    {!forceRefreshingConvo ? <IconRefresh size="0.8rem" /> : <Loader/>}
                   </ActionIcon>
                 </Flex>
               </Tabs.Tab>

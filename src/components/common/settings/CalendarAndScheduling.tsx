@@ -25,7 +25,9 @@ import {
   IconCircleCheck,
   IconCopy,
   IconEdit,
+  IconExternalLink,
   IconInfoCircle,
+  IconLetterT,
   IconLink,
   IconPencil,
   IconPlus,
@@ -45,6 +47,7 @@ import {
   IconInfoTriangle,
   IconPointFilled,
 } from "@tabler/icons-react";
+import { DataGrid } from "mantine-data-grid";
 
 const urlRegex: RegExp = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[a-z0-9\-]+(?:\.[a-z]{2,})+(?:\/[\w\-\.\?\=\&]*)*$/i;
 
@@ -161,15 +164,15 @@ export default function CalendarAndScheduling() {
   const [team, setTeam] = useState([
     {
       avatar: "",
-      fullname: "Samantha Roger",
+      fullname: "John Smith",
       job: "Marketing Manager",
-      calendar_link: "calendly.com/samantha-roger",
+      calendar_link: "calendly.com/john-smith",
     },
     {
       avatar: "",
-      fullname: "Johnny Smith",
+      fullname: "Sarah Doe",
       job: "Marketing Manager",
-      calendar_link: "calendly.com/johnny-smith",
+      calendar_link: "calendly.com/sarah-doe",
     },
   ]);
 
@@ -186,7 +189,96 @@ export default function CalendarAndScheduling() {
           </Box>
           <Button leftIcon={<IconPlus size={"0.9rem"} />}>Add New</Button>
         </Flex>
-        <Stack spacing={"sm"} mt={"sm"}>
+        <DataGrid
+          data={team}
+          mt={"sm"}
+          withBorder
+          withColumnBorders
+          withRowSelection
+          columns={[
+            {
+              accessorKey: "name",
+              header: () => (
+                <Flex align={"center"} gap={"3px"}>
+                  <IconLetterT color="gray" size={"0.9rem"} />
+                  <Text color="gray">Name</Text>
+                </Flex>
+              ),
+              maxSize: 250,
+              minSize: 250,
+              cell: (cell) => {
+                const { avatar, fullname }: any = cell.row.original;
+
+                return (
+                  <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
+                    <Avatar src={avatar} size={"md"} radius={"xl"} />
+                    <Text fw={500}>{fullname}</Text>
+                  </Flex>
+                );
+              },
+            },
+            {
+              accessorKey: "title",
+              maxSize: 250,
+              minSize: 250,
+              header: () => (
+                <Flex align={"center"} gap={"3px"}>
+                  <IconLetterT color="gray" size={"0.9rem"} />
+                  <Text color="gray">Title</Text>
+                </Flex>
+              ),
+
+              enableResizing: true,
+              cell: (cell) => {
+                const { job } = cell.row.original;
+
+                return (
+                  <Flex align={"center"} gap={"xs"} w={"100%"} h={"100%"}>
+                    <Text fw={500}>{job}</Text>
+                  </Flex>
+                );
+              },
+            },
+            {
+              accessorKey: "calendar",
+              header: () => (
+                <Flex align={"center"} gap={"3px"}>
+                  <IconLink color="gray" size={"0.9rem"} />
+                  <Text color="gray">Calendar Link</Text>
+                </Flex>
+              ),
+              cell: (cell) => {
+                const { calendar_link } = cell.row.original;
+
+                return (
+                  <Flex
+                    gap={"xs"}
+                    w={"100%"}
+                    h={"100%"}
+                    align={"center"}
+                    justify={"space-between"}
+                  >
+                    <Flex align={"center"} justify={"space-between"} w={"100%"}>
+                      <Text fw={500} lineClamp={2} maw={200}>
+                        {calendar_link}
+                      </Text>
+                      <ActionIcon>
+                        <IconEdit size={"1rem"} />
+                      </ActionIcon>
+                    </Flex>
+                  </Flex>
+                );
+              },
+            },
+          ]}
+          styles={{
+            dataCellContent: {
+              marginBlock: "auto",
+              width: "100%",
+            },
+          }}
+        />
+        {/* <Stack spacing={"sm"} mt={"sm"}>
           {team.map((item, index) => {
             return (
               <Box key={index}>
@@ -202,18 +294,14 @@ export default function CalendarAndScheduling() {
                   </Box>
                 </Flex>
                 <Flex gap={"sm"} my={"xs"} align={"end"}>
-                  <TextInput
-                    label="CALENDAR_LINK:"
-                    placeholder={item.calendar_link}
-                    w={"100%"}
-                  />
+                  <TextInput label="CALENDAR_LINK:" placeholder={item.calendar_link} w={"100%"} />
                   <Button leftIcon={<IconEdit size={"0.9rem"} />}>Edit</Button>
                 </Flex>
                 {index < team.length - 1 && <Divider mt={"md"} />}
               </Box>
             );
           })}
-        </Stack>
+        </Stack> */}
       </Card>
       <Card mt="md" padding="lg" radius="md" withBorder>
         <LoadingOverlay visible={isLoading} />

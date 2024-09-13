@@ -1940,6 +1940,8 @@ const SegmentChat = (props: any) => {
       }
     } catch (error) {
       console.error("Error changing memory status:", error);
+    } finally {
+      getMemoryState(sessionId);
     }
   };
 

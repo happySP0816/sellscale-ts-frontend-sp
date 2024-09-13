@@ -1226,8 +1226,21 @@ export default function SelinAI() {
   const [newButtonHover, setNewButtonHover] = useState(false);
 
   return (
-    <DropzoneWrapper setPrompt={setPrompt} prompt={prompt} setAttachedFile={setAttachedFile} ref={dropzoneRef} handleSubmit={handleSubmit}>
-      <Card p="lg" maw={"100%"} ml="auto" mr="auto" mt="sm" style={{ backgroundColor: "transparent" }}>
+    <DropzoneWrapper
+      setPrompt={setPrompt}
+      prompt={prompt}
+      setAttachedFile={setAttachedFile}
+      ref={dropzoneRef}
+      handleSubmit={handleSubmit}
+    >
+      <Card
+        p="lg"
+        maw={"100%"}
+        ml="auto"
+        mr="auto"
+        mt="sm"
+        style={{ backgroundColor: "transparent" }}
+      >
         <div>
           <div
             style={{
@@ -1854,6 +1867,7 @@ const SegmentChat = (props: any) => {
   const [memoryStateChanged, setMemoryStateChanged] = useState(false);
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
+  const [fetchingMemoryState, setFetchingMemoryState] = useState(false);
 
   const [memoryState, setMemoryState] = useState<any>(props.memoryState);
 
@@ -1870,19 +1884,20 @@ const SegmentChat = (props: any) => {
   };
 
   useEffect(() => {
-    if (prompt === '' ){
-
+    if (prompt === "") {
       //reset the text area height so the placeholder shows nicely
-      console.log('setting to auto');
+      console.log("setting to auto");
       setNormalInputMode(true);
       if (textareaRef.current) {
-        textareaRef.current!.style.height = 'auto';
+        textareaRef.current!.style.height = "auto";
       }
-    }
-    else if (normalInputMode && (prompt.length > 120 || promptRef.current.length > 120)) {
+    } else if (
+      normalInputMode &&
+      (prompt.length > 120 || promptRef.current.length > 120)
+    ) {
       setNormalInputMode(false);
       if (textareaRef.current) {
-        textareaRef.current.style.height = '500px';
+        textareaRef.current.style.height = "500px";
       }
     }
   }, [prompt.length, promptRef.current.length]);
@@ -2013,6 +2028,41 @@ const SegmentChat = (props: any) => {
     }
   };
 
+  const getMemoryState = async (sessionId: number) => {
+    setFetchingMemoryState(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/selix/get_memory_state?session_id=${sessionId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMemoryState(result.memory_state);
+      } else {
+        showNotification({
+          title: "Error Fetching Memory State",
+          message: result.message || "Failed to fetch memory state",
+          color: "red",
+          icon: <IconX />,
+        });
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching memory state:", error);
+      return null;
+    } finally {
+      setFetchingMemoryState(false);
+    }
+  };
+
   const addMemory = async (
     memoryTitle: string,
     memoryContent: string,
@@ -2052,6 +2102,8 @@ const SegmentChat = (props: any) => {
       }
     } catch (error) {
       console.error("Error adding memory:", error);
+    } finally {
+      getMemoryState(sessionId);
     }
   };
 
@@ -2089,6 +2141,7 @@ const SegmentChat = (props: any) => {
           </HoverCard.Target>
           <HoverCard.Dropdown>
             <Flex justify="space-between" align="center" mb="xs">
+              <LoadingOverlay visible={fetchingMemoryState} />
               <Title order={5}>🧠 Selix Memory</Title>
 
               {props.memory?.session_mode && (
@@ -2206,7 +2259,13 @@ const SegmentChat = (props: any) => {
               </Flex>
 
               {memoryState &&
-                Object.keys(memoryState).map((x: string) => {
+                [
+                  "campaigns",
+                  "sessions",
+                  ...Object.keys(memoryState).filter(
+                    (x) => x !== "campaigns" && x !== "sessions"
+                  ),
+                ].map((x: string) => {
                   return (
                     <Box mb="md">
                       {x !== "campaigns" && x !== "sessions" && (
@@ -2992,7 +3051,7 @@ const SegmentChat = (props: any) => {
                 onClick={() => {
                   textareaRef.current?.focus();
                   if (textareaRef.current) {
-                    textareaRef.current.style.height = 'auto'
+                    textareaRef.current.style.height = "auto";
                   }
                   setNormalInputMode(!normalInputMode);
                 }}
@@ -4173,7 +4232,25 @@ const TaskRenderer = ({
     case "REVIEW_PROSPECTS":
       return <ArchetypeFilters hideFeature={true} />;
     case "ONE_SHOT_GENERATOR":
-      return <UploadProspectsModal context={{ modals: [], openModal: () => '', openConfirmModal: () => '', openContextModal: () => '', closeModal: () => '', closeContextModal: () => '', closeAll: () => ''}} id={''} innerProps={{ mode: 'CREATE-ONLY', strategy_id: currentThread?.memory?.strategy_id, selixSessionId: currentSessionId }} />;
+      return (
+        <UploadProspectsModal
+          context={{
+            modals: [],
+            openModal: () => "",
+            openConfirmModal: () => "",
+            openContextModal: () => "",
+            closeModal: () => "",
+            closeContextModal: () => "",
+            closeAll: () => "",
+          }}
+          id={""}
+          innerProps={{
+            mode: "CREATE-ONLY",
+            strategy_id: currentThread?.memory?.strategy_id,
+            selixSessionId: currentSessionId,
+          }}
+        />
+      );
     case "REVIEW_COMPANIES":
       if (!segment) {
         return (
@@ -4238,12 +4315,12 @@ const FilesComponent = ({
     const newFiles = [...files];
     newFiles[index].description = value;
     setFiles(newFiles);
-  }
+  };
   const saveDescription = async (index: number) => {
-  if (files[index].description.trim() === '') {
-    console.error("Description cannot be empty");
-    return;
-  }
+    if (files[index].description.trim() === "") {
+      console.error("Description cannot be empty");
+      return;
+    }
     const file = files[index];
     try {
       const response = fetch(`${API_URL}/selix/update_file_description`, {
@@ -4267,7 +4344,7 @@ const FilesComponent = ({
     } finally {
       setEditingTextIndex(null);
     }
-  }
+  };
 
   const fetchFiles = async () => {
     if (currentSessionId) {
@@ -4339,9 +4416,11 @@ const FilesComponent = ({
             <td>
               {editingTextIndex === index ? (
                 <Textarea
-                  w={'100%'}
+                  w={"100%"}
                   value={file.description}
-                  onChange={(e) => handleDescriptionChange(index, e.target.value)}
+                  onChange={(e) =>
+                    handleDescriptionChange(index, e.target.value)
+                  }
                   onBlur={() => saveDescription(index)}
                   autoFocus
                 />
@@ -4350,12 +4429,16 @@ const FilesComponent = ({
                   {file.description.length > 70 ? (
                     <HoverCard width={300} shadow="md">
                       <HoverCard.Target>
-                        <Text>
-                          {file.description.substring(0, 70) + "..."}
-                        </Text>
+                        <Text>{file.description.substring(0, 70) + "..."}</Text>
                       </HoverCard.Target>
                       <HoverCard.Dropdown>
-                        <Text size="sm" style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}>
+                        <Text
+                          size="sm"
+                          style={{
+                            wordWrap: "break-word",
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
                           {file.description}
                         </Text>
                       </HoverCard.Dropdown>

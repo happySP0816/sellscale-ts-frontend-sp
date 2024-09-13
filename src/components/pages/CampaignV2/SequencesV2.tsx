@@ -52,9 +52,11 @@ import {
   IconChevronDown,
   IconChevronUp,
   IconCpu,
+  IconEdit,
   IconInfoCircle,
   IconMail,
   IconMailOpened,
+  IconMicrophone,
   IconPencil,
   IconPlus,
   IconRefresh,
@@ -105,7 +107,7 @@ import {
   updateLiTemplate,
 } from "@utils/requests/linkedinTemplates";
 import _ from "lodash";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDebouncedState, useDisclosure } from "@mantine/hooks";
 import {
   prospectDrawerIdState,
@@ -151,6 +153,7 @@ import Personalizers from "./Personalizers";
 import { socket } from "../../App";
 import { diffWords } from "diff";
 import { getFreshCurrentProject } from "@auth/core";
+import { navigateToPage } from "@utils/documentChange";
 
 interface Templates {
   active: boolean;
@@ -178,8 +181,9 @@ export default function SequencesV2(props: any) {
   const params = useParams();
   const userToken = useRecoilValue(userTokenState);
 
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const theme = useMantineTheme();
   const [campaignContacts, setCampaignContacts] = useRecoilState(
     campaignContactsState
@@ -192,8 +196,10 @@ export default function SequencesV2(props: any) {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   // Prospects
-  const [selectedProspect, setSelectedProspect] =
-    useState<ProspectShallow | null>(null);
+  const [
+    selectedProspect,
+    setSelectedProspect,
+  ] = useState<ProspectShallow | null>(null);
   const [selectedProspectIndex, setSelectedProspectIndex] = useState(0);
 
   // Sequences
@@ -203,8 +209,10 @@ export default function SequencesV2(props: any) {
     setEmailSequenceGenerationInProgress,
   ] = useState(false);
 
-  const [linkedinInitialMessageViewing, setLinkedinInitialMessageViewing] =
-    useState<any>(0);
+  const [
+    linkedinInitialMessageViewing,
+    setLinkedinInitialMessageViewing,
+  ] = useState<any>(0);
 
   const [
     linkedinSequenceGenerationInProgress,
@@ -225,8 +233,9 @@ export default function SequencesV2(props: any) {
   const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(
     linkedinSequenceState
   );
-  const [emailSequenceData, setEmailSequenceData] =
-    useRecoilState(emailSequenceState);
+  const [emailSequenceData, setEmailSequenceData] = useRecoilState(
+    emailSequenceState
+  );
 
   const [createTemplateBuilder, setCreateTemplateBuilder] = useState(false);
 
@@ -484,8 +493,9 @@ export default function SequencesV2(props: any) {
 
         const handleSequences = (sequences: any[], type: string) => {
           const groupedSequences = groupSequencesByBumpedCount(sequences);
-          const orderedGroupedSequences =
-            orderGroupedSequences(groupedSequences);
+          const orderedGroupedSequences = orderGroupedSequences(
+            groupedSequences
+          );
           setSequences(orderedGroupedSequences);
           // setType(type);
           if (type === "linkedin") {
@@ -551,6 +561,9 @@ export default function SequencesV2(props: any) {
   };
 
   // We also want to move voice related stuff into this Sequence Widget
+
+  const navigate = useNavigate();
+  const [opened, { open, close }] = useDisclosure(false);
 
   return (
     <Card
@@ -882,6 +895,82 @@ export default function SequencesV2(props: any) {
               </>
             )}
           </Flex>
+          <Paper p={"sm"} withBorder mt={"xs"}>
+            <Flex align={"center"} gap={"sm"}>
+              <IconCpu size={"1rem"} color="purple" />
+              <Text size={"sm"} fw={500}>
+                Message DNA (BETA ⚠️)
+              </Text>
+            </Flex>
+            <Flex align={"center"} justify={"space-between"}>
+              <Flex gap={"sm"}>
+                <Badge color="grape" size="md">
+                  Personalizers: {2}
+                </Badge>
+                <Badge size="md">CTA Used: {"How does [[info...]]"}</Badge>
+              </Flex>
+              <Button
+                leftIcon={<IconPencil size={"1rem"} />}
+                size="xs"
+                onClick={() => {
+                  // navigateToPage(navigate, `/train_voice`);
+                  open();
+                }}
+              >
+                Train your Voice
+              </Button>
+            </Flex>
+            <Modal
+              opened={opened}
+              size="lg"
+              centered
+              onClose={close}
+              withCloseButton={false}
+              styles={{
+                body: {
+                  height: "600px",
+                },
+              }}
+            >
+              <Flex align={"center"} w={"100%"} justify={"space_between"}>
+                <Flex align={"center"} gap={"sm"} w={"100%"}>
+                  <IconMicrophone size={"1rem"} color="#228be6" />
+                  <Text fw={500}>Select voice</Text>
+                </Flex>
+                <Flex gap={"md"} align={"center"}>
+                  <Button
+                    leftIcon={<IconPlus size={"1rem"} />}
+                    onClick={() => navigateToPage(navigate, `/train_voice`)}
+                  >
+                    New Voice
+                  </Button>
+                  <ActionIcon
+                    radius={"xl"}
+                    size={"lg"}
+                    variant="outline"
+                    color="gray"
+                    onClick={close}
+                  >
+                    <IconX size={"1.2rem"} />
+                  </ActionIcon>
+                </Flex>
+              </Flex>
+              <Paper withBorder radius={"sm"} p={"sm"} mt={"sm"}>
+                <Flex align={"center"} justify={"space-between"}>
+                  <Flex align={"center"}>
+                    <Text size={"sm"} fw={500}>
+                      {"Hunter's Voice"}{" "}
+                      <span className="text-gray-400"> {"Sep 6, 2024"}</span>
+                    </Text>
+                    <ActionIcon color="blue">
+                      <IconEdit size={"1rem"} />
+                    </ActionIcon>
+                  </Flex>
+                  <Switch label="In use" />
+                </Flex>
+              </Paper>
+            </Modal>
+          </Paper>
         </Card>
       )}
     </Card>
@@ -946,8 +1035,10 @@ function EmailSequencingV2(props: {
       templates: [],
     },
   } as EmailSequenceStepBuckets);
-  const [sequenceBucketsState, setSequenceBucketsState] =
-    useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
+  const [
+    sequenceBucketsState,
+    setSequenceBucketsState,
+  ] = useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
 
   const triggerGetEmailSequenceSteps = async () => {
     setLoading(true);
@@ -1354,8 +1445,10 @@ function EmailPreviewHeaderV2(props: {
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { prospectId, currentTab, template, subjectLine }]: any =
-        queryKey;
+      const [
+        _key,
+        { prospectId, currentTab, template, subjectLine },
+      ]: any = queryKey;
 
       if (!props.subjectLine?.id || !props.template?.step.id) {
         return null;
@@ -1889,31 +1982,33 @@ function EmailPreviewHeaderV2(props: {
                       onChange={async (value) => {
                         try {
                           setLoadingBankData(true);
-                          const [updateVoiceResponse, fewShotResponse] =
-                            await Promise.all([
-                              fetch(API_URL + `/ml/voices`, {
-                                method: "PUT",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `Bearer ${userToken}`,
-                                },
-                                body: JSON.stringify({
-                                  voice_id: value === "null" ? null : value,
-                                  archetype_id: currentProject.id,
-                                }),
+                          const [
+                            updateVoiceResponse,
+                            fewShotResponse,
+                          ] = await Promise.all([
+                            fetch(API_URL + `/ml/voices`, {
+                              method: "PUT",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${userToken}`,
+                              },
+                              body: JSON.stringify({
+                                voice_id: value === "null" ? null : value,
+                                archetype_id: currentProject.id,
                               }),
-                              fetch(API_URL + `/ml/few-shot`, {
-                                method: "POST",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `Bearer ${userToken}`,
-                                },
-                                body: JSON.stringify({
-                                  voice_id: value === "null" ? null : value,
-                                  client_archetype_id: currentProject.id,
-                                }),
+                            }),
+                            fetch(API_URL + `/ml/few-shot`, {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${userToken}`,
+                              },
+                              body: JSON.stringify({
+                                voice_id: value === "null" ? null : value,
+                                client_archetype_id: currentProject.id,
                               }),
-                            ]);
+                            }),
+                          ]);
 
                           setLoadingBankData(false);
 
@@ -2819,8 +2914,10 @@ function TemplateSectionV2(props: {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
-  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] =
-    useState<string>();
+  const [
+    humanFeedbackForTemplate,
+    setHumanFeedbackForTemplate,
+  ] = useState<string>();
 
   const [templateActivesShow, setTemplateActivesShow] = useState([true]);
   useEffect(() => {
@@ -3458,8 +3555,10 @@ const LinkedinIntroEditSectionCTA = function (props: {
   triggerProjectRefresh: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<string | null>("personalization");
-  const [personalizationItemsCount, setPersonalizationItemsCount] =
-    useState<number>();
+  const [
+    personalizationItemsCount,
+    setPersonalizationItemsCount,
+  ] = useState<number>();
   const [ctasItemsCount, setCtasItemsCount] = useState<number>();
 
   // get research points for selected prospect
@@ -4367,30 +4466,34 @@ export function ProspectSelect2(props: {
         size={600}
         loading={loadingProspects}
         activeItemId={selectedProspect?.id}
-        items={(Array.isArray(props.prospects) ? props.prospects.map((prospect) => {
-          return {
-            id: prospect.id,
-            name: prospect.full_name,
-            leftSection: (
-              <Box px={8}>
-                <ICPFitPillOnly icp_fit_score={prospect.icp_fit_score} />
-              </Box>
-            ),
-            content: (
-              <Box>
-                <Text>{prospect.full_name}</Text>
-                <Text fz="xs" truncate>
-                  {prospect.title} @ {prospect.company}
-                </Text>
-              </Box>
-            ),
-            rightSection: undefined,
-            onClick: () => {
-              setSelectedProspect(prospect);
-              props.onChange(prospect);
-            },
-          };
-        }) : [])}
+        items={
+          Array.isArray(props.prospects)
+            ? props.prospects.map((prospect) => {
+                return {
+                  id: prospect.id,
+                  name: prospect.full_name,
+                  leftSection: (
+                    <Box px={8}>
+                      <ICPFitPillOnly icp_fit_score={prospect.icp_fit_score} />
+                    </Box>
+                  ),
+                  content: (
+                    <Box>
+                      <Text>{prospect.full_name}</Text>
+                      <Text fz="xs" truncate>
+                        {prospect.title} @ {prospect.company}
+                      </Text>
+                    </Box>
+                  ),
+                  rightSection: undefined,
+                  onClick: () => {
+                    setSelectedProspect(prospect);
+                    props.onChange(prospect);
+                  },
+                };
+              })
+            : []
+        }
         header={{
           content: (
             <TextInput

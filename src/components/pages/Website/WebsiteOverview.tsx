@@ -47,6 +47,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import moment from "moment";
 import { deterministicMantineColor } from "@utils/requests/utils";
 import { showNotification } from "@mantine/notifications";
+import { API_URL } from "@constants/data";
 
 type DeanonymizationType = {
   avatar: string;
@@ -386,6 +387,11 @@ export default function WebsiteOverview(props: any) {
                 <Text color="gray">Bucket</Text>
               </Flex>
             </th>
+            <th>
+              <Flex align={"center"} gap={"3px"}>
+                <Text color="gray">Actions</Text>
+              </Flex>
+            </th>
            
           </tr>
         </thead>
@@ -482,6 +488,40 @@ export default function WebsiteOverview(props: any) {
                     </Badge>
                   </Box>
                 </Flex>
+              </td>
+              <td>
+                {prospect.icp_routing_id && <Button color="green"
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(`${API_URL}/track/send_bucket_notification`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Bearer ${userToken}`,
+                        },
+                        body: JSON.stringify({ prospect: prospect }),
+                      });
+
+                      if (response.ok) {
+                        showNotification({
+                          title: 'Notification Sent',
+                          message: 'Bucket notification has been sent successfully.',
+                          color: 'teal',
+                        });
+                      } else {
+                        throw new Error('Failed to send notification');
+                      }
+                    } catch (error) {
+                      showNotification({
+                        title: 'Error',
+                        message: 'An error occurred while sending the notification.',
+                        color: 'red',
+                      });
+                    }
+                  }}
+                >
+                  Send Notification
+                </Button>}
               </td>
             </tr>
           ))}

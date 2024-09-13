@@ -15,12 +15,7 @@ import {
 } from "@mantine/core";
 
 import Layout from "./nav/Layout";
-import {
-  Outlet,
-  useLocation,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Outlet, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { ModalsProvider, openContextModal } from "@mantine/modals";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { navConfettiState, navLoadingState } from "@atoms/navAtoms";
@@ -60,19 +55,12 @@ import PatchEmailSubjectLineModal from "@modals/PatchEmailSubjectLineModal";
 import { CreateBumpFrameworkContextModal } from "@modals/CreateBumpFrameworkModal";
 import { CloneBumpFrameworkContextModal } from "@modals/CloneBumpFrameworkModal";
 import { currentProjectState } from "@atoms/personaAtoms";
-import {
-  getFreshCurrentProject,
-  getCurrentPersonaId,
-  isLoggedIn,
-} from "@auth/core";
+import { getFreshCurrentProject, getCurrentPersonaId, isLoggedIn } from "@auth/core";
 import { removeQueryParam } from "@utils/documentChange";
 import { getPersonasOverview } from "@utils/requests/getPersonas";
 import { PersonaOverview } from "src";
 import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
-import {
-  prospectDrawerIdState,
-  prospectDrawerOpenState,
-} from "@atoms/prospectAtoms";
+import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import { useDisclosure, useViewportSize } from "@mantine/hooks";
 import Confetti from "react-confetti";
 import LiTemplateModal from "@modals/LiTemplateModal";
@@ -131,6 +119,8 @@ import StrategyDeleteModal from "@modals/AIBrain/StrategyDeleteModal";
 import CampaignFilterModal from "@modals/CampaignFilterModal";
 import AccountContactFiltersModal from "@modals/AccountContactFiltersModal";
 import OverrideProspectsModal from "@modals/OverrideProspectsModal";
+import SingleEmailCampaignBetaModal from "@modals/SingleEmailCampaignBetaModal";
+import EmailSentSuccessModal from "@modals/EmailSentSuccessModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -147,17 +137,9 @@ export default function App() {
   // Site light or dark mode
   const isSystemDarkMode = false; // window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   const savedSiteTheme = localStorage.getItem("site-theme");
-  const currentColorScheme: ColorScheme =
-    savedSiteTheme != null
-      ? savedSiteTheme === "dark"
-        ? "dark"
-        : "light"
-      : isSystemDarkMode
-      ? "dark"
-      : "light";
+  const currentColorScheme: ColorScheme = savedSiteTheme != null ? (savedSiteTheme === "dark" ? "dark" : "light") : isSystemDarkMode ? "dark" : "light";
 
-  const [colorScheme, setColorScheme] =
-    useState<ColorScheme>(currentColorScheme);
+  const [colorScheme, setColorScheme] = useState<ColorScheme>(currentColorScheme);
   const toggleColorScheme = (value?: ColorScheme) => {
     let nextColorScheme = value || (colorScheme === "dark" ? "light" : "dark");
     setColorScheme(nextColorScheme);
@@ -182,10 +164,7 @@ export default function App() {
   /*Autocomplete */
 
   const handleInputWithSuggestion = (event: Event) => {
-    if (
-      userData?.client_name !== "SellScale" &&
-      userData?.client_name !== "DailyDropout.fyi"
-    ) {
+    if (userData?.client_name !== "SellScale" && userData?.client_name !== "DailyDropout.fyi") {
       return;
     }
     //do not run the autocomplete if we're on the login page:
@@ -207,10 +186,7 @@ export default function App() {
     let previousValue: string;
 
     //tiptap prose mirror (rich text editor) needs to be handled differently
-    if (
-      target.classList.contains("tiptap") &&
-      target.classList.contains("ProseMirror")
-    ) {
+    if (target.classList.contains("tiptap") && target.classList.contains("ProseMirror")) {
       currentValue = target.innerText;
       previousValue = previousValueRef.current;
       previousValueRef.current = currentValue;
@@ -229,15 +205,9 @@ export default function App() {
       return;
     }
 
-    const cursorAtEnd =
-      target instanceof HTMLTextAreaElement
-        ? target.selectionStart === currentValue.length
-        : true;
+    const cursorAtEnd = target instanceof HTMLTextAreaElement ? target.selectionStart === currentValue.length : true;
     const endsWithNewline = currentValue.endsWith("\n");
-    const cursorBeforeNewline =
-      target instanceof HTMLTextAreaElement
-        ? currentValue[target.selectionStart] === "\n"
-        : false;
+    const cursorBeforeNewline = target instanceof HTMLTextAreaElement ? currentValue[target.selectionStart] === "\n" : false;
 
     if (!cursorAtEnd && !endsWithNewline && !cursorBeforeNewline) {
       // Do not trigger autocomplete if not at the end, doesn't end with a newline, or not before a newline
@@ -290,16 +260,10 @@ export default function App() {
         if (target instanceof HTMLTextAreaElement) {
           const start = target.selectionStart;
           const end = target.selectionEnd;
-          target.value =
-            target.value.substring(0, start) +
-            data.response +
-            target.value.substring(end);
+          target.value = target.value.substring(0, start) + data.response + target.value.substring(end);
           target.selectionStart = start;
           target.selectionEnd = start + data.response.length;
-        } else if (
-          target.classList.contains("tiptap") &&
-          target.classList.contains("ProseMirror")
-        ) {
+        } else if (target.classList.contains("tiptap") && target.classList.contains("ProseMirror")) {
           const range = document.createRange();
           const selection = window.getSelection();
           range.selectNodeContents(target);
@@ -315,19 +279,14 @@ export default function App() {
             range.collapse(false);
             selection?.removeAllRanges();
             selection?.addRange(range);
-            selection
-              ?.getRangeAt(0)
-              .insertNode(document.createTextNode(data.response));
+            selection?.getRangeAt(0).insertNode(document.createTextNode(data.response));
             selection?.collapseToEnd();
           }
 
           // Highlight the inserted text
           const getTextNodesUnder = (node: Node) => {
             const textNodes = [];
-            const walker = document.createTreeWalker(
-              node,
-              NodeFilter.SHOW_TEXT
-            );
+            const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
             let n;
             while ((n = walker.nextNode())) {
               textNodes.push(n);
@@ -336,9 +295,7 @@ export default function App() {
           };
 
           const textNodes = getTextNodesUnder(target);
-          const textContent = textNodes
-            .map((node) => node.textContent)
-            .join("");
+          const textContent = textNodes.map((node) => node.textContent).join("");
           const textLength = textContent.length;
 
           if (textLength === 0) {
@@ -397,16 +354,9 @@ export default function App() {
       if (target instanceof HTMLTextAreaElement) {
         const start = target.selectionStart;
         const end = target.selectionEnd;
-        target.value =
-          target.value.substring(0, start) +
-          suggestionInputRef.current +
-          target.value.substring(end);
-        target.selectionStart = target.selectionEnd =
-          start + suggestionInputRef.current.length;
-      } else if (
-        target.classList.contains("tiptap") &&
-        target.classList.contains("ProseMirror")
-      ) {
+        target.value = target.value.substring(0, start) + suggestionInputRef.current + target.value.substring(end);
+        target.selectionStart = target.selectionEnd = start + suggestionInputRef.current.length;
+      } else if (target.classList.contains("tiptap") && target.classList.contains("ProseMirror")) {
         const selection = window.getSelection();
         if (selection?.rangeCount) {
           const range = selection.getRangeAt(0);
@@ -466,15 +416,8 @@ export default function App() {
   /* Quick Prompt */
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const modalElement = document.querySelector(
-        ".mantine-Paper-root.mantine-Modal-content"
-      );
-      if (
-        acceptRef.current === true &&
-        modalElement &&
-        event.key === "Enter" &&
-        !event.shiftKey
-      ) {
+      const modalElement = document.querySelector(".mantine-Paper-root.mantine-Modal-content");
+      if (acceptRef.current === true && modalElement && event.key === "Enter" && !event.shiftKey) {
         handleAccept();
       }
       if (event.metaKey && event.key === "'") {
@@ -483,23 +426,15 @@ export default function App() {
           activeElement &&
           (activeElement.tagName === "TEXTAREA" ||
             (activeElement.tagName === "DIV" &&
-              (activeElement.getAttribute("role") === "textbox" ||
-                activeElement.getAttribute("contenteditable") === "true")) ||
-            (activeElement.tagName === "INPUT" &&
-              (activeElement as HTMLInputElement).type === "text") ||
-            (activeElement.classList.contains("mantine-Textarea-input") &&
-              activeElement.tagName === "TEXTAREA") ||
-            (activeElement.classList.contains("mantine-Input-input") &&
-              activeElement.tagName === "TEXTAREA") ||
-            (activeElement.classList.contains("tiptap") &&
-              activeElement.classList.contains("ProseMirror")))
+              (activeElement.getAttribute("role") === "textbox" || activeElement.getAttribute("contenteditable") === "true")) ||
+            (activeElement.tagName === "INPUT" && (activeElement as HTMLInputElement).type === "text") ||
+            (activeElement.classList.contains("mantine-Textarea-input") && activeElement.tagName === "TEXTAREA") ||
+            (activeElement.classList.contains("mantine-Input-input") && activeElement.tagName === "TEXTAREA") ||
+            (activeElement.classList.contains("tiptap") && activeElement.classList.contains("ProseMirror")))
         ) {
           previousFocusedElementRef.current = activeElement;
         }
-        if (
-          previousFocusedElementRef.current &&
-          document.contains(previousFocusedElementRef.current)
-        ) {
+        if (previousFocusedElementRef.current && document.contains(previousFocusedElementRef.current)) {
           open();
         }
       } else if (event.metaKey && event.key === "Enter") {
@@ -527,11 +462,7 @@ export default function App() {
       const keyItem = keyData.find((item) => item.keyboard === keyIndex);
       if (keyItem) {
         setLoading(true);
-        typeUserInput(
-          previousFocusedElementRef.current,
-          keyItem.prompt,
-          getContextualInformation()
-        );
+        typeUserInput(previousFocusedElementRef.current, keyItem.prompt, getContextualInformation());
       }
     }
 
@@ -540,11 +471,7 @@ export default function App() {
       e.preventDefault();
       const contextInfo = getContextualInformation();
       console.log(previousFocusedElementRef.current);
-      typeUserInput(
-        previousFocusedElementRef.current,
-        e.target.value,
-        contextInfo
-      );
+      typeUserInput(previousFocusedElementRef.current, e.target.value, contextInfo);
     }
   };
 
@@ -557,9 +484,7 @@ export default function App() {
       setTimeout(() => {
         (previousFocusedElementRef.current as HTMLTextAreaElement).value += " ";
         setTimeout(() => {
-          (previousFocusedElementRef.current as HTMLTextAreaElement).value = (
-            previousFocusedElementRef.current as HTMLTextAreaElement
-          ).value.trim();
+          (previousFocusedElementRef.current as HTMLTextAreaElement).value = (previousFocusedElementRef.current as HTMLTextAreaElement).value.trim();
         }, 20);
       }, 20);
     }
@@ -571,11 +496,7 @@ export default function App() {
   ////
 
   // const typeUserInput = (element: HTMLElement | null, userInput: string, popover: HTMLDivElement, contextInfo: any) => {
-  const typeUserInput = (
-    element: HTMLElement | null,
-    userInput: string,
-    contextInfo: any
-  ) => {
+  const typeUserInput = (element: HTMLElement | null, userInput: string, contextInfo: any) => {
     if (!element) return;
     let index = 0;
 
@@ -593,19 +514,14 @@ export default function App() {
         const interval = setInterval(() => {
           if (index < res.response.length) {
             const char = res.response.charAt(index);
-            if (
-              element.classList.contains("tiptap") &&
-              element.classList.contains("ProseMirror")
-            ) {
+            if (element.classList.contains("tiptap") && element.classList.contains("ProseMirror")) {
               element.style.color = "green";
-              element.innerText =
-                element.innerText + (index === 0 && char === " " ? "" : char);
+              element.innerText = element.innerText + (index === 0 && char === " " ? "" : char);
             } else {
               const textarea = element as HTMLTextAreaElement;
               const value = textarea.value || "";
               const start = textarea.selectionStart;
-              textarea.value =
-                value.slice(0, start) + char + value.slice(start);
+              textarea.value = value.slice(0, start) + char + value.slice(start);
               textarea.selectionStart = textarea.selectionEnd = start + 1;
 
               // Reset React16 internal value tracker
@@ -636,28 +552,22 @@ export default function App() {
     let context = "";
     // if (window.location.href.includes("/inbox")) {
     context = "Here is the conversation, I reached out first: \n";
-    const messageElements = document.querySelectorAll(
-      'div[style="font-size: 0.875rem;"], div.line-clamp-4'
-    );
+    const messageElements = document.querySelectorAll('div[style="font-size: 0.875rem;"], div.line-clamp-4');
     let lineClampCount = 0;
     let fontSizeCount = 0;
 
     messageElements.forEach((messageElement) => {
       if (messageElement.classList.contains("line-clamp-4")) {
         lineClampCount++;
-      } else if (
-        messageElement.getAttribute("style") === "font-size: 0.875rem;"
-      ) {
+      } else if (messageElement.getAttribute("style") === "font-size: 0.875rem;") {
         fontSizeCount++;
       }
     });
 
     if (lineClampCount > fontSizeCount) {
-      context +=
-        "These are emails, please try to follow my tone as close as possible, do not use markdown. use newlines for formatting. \n";
+      context += "These are emails, please try to follow my tone as close as possible, do not use markdown. use newlines for formatting. \n";
     } else if (fontSizeCount > lineClampCount) {
-      context +=
-        "These are LinkedIn messages, so please be more casual, or try to follow my tone as close as possible.: \n";
+      context += "These are LinkedIn messages, so please be more casual, or try to follow my tone as close as possible.: \n";
     }
 
     messageElements.forEach((messageElement) => {
@@ -727,17 +637,12 @@ export default function App() {
 
   const { height, width } = useViewportSize();
 
-  const [drawerProspectId, setDrawerProspectId] = useRecoilState(
-    prospectDrawerIdState
-  );
-  const [drawerOpened, setDrawerOpened] = useRecoilState(
-    prospectDrawerOpenState
-  );
+  const [drawerProspectId, setDrawerProspectId] = useRecoilState(prospectDrawerIdState);
+  const [drawerOpened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
 
   // Select the last used project
   const userToken = useRecoilValue(userTokenState);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   useEffect(() => {
     posthog.setPersonPropertiesForFlags({ distinct_id: userData?.id }, false);
@@ -762,9 +667,7 @@ export default function App() {
       }
 
       // If there is a persona query param, set the current project to that
-      const persona_id = searchParams.get("campaign_id")
-        ? searchParams.get("campaign_id")
-        : params2.campaign_id;
+      const persona_id = searchParams.get("campaign_id") ? searchParams.get("campaign_id") : params2.campaign_id;
       if (persona_id) {
         // Set to query param persona
         const project = await getFreshCurrentProject(userToken, +persona_id);
@@ -774,18 +677,12 @@ export default function App() {
         // Set to last used persona
         const currentPersonaId = getCurrentPersonaId();
         if (!currentProject && currentPersonaId) {
-          const project = await getFreshCurrentProject(
-            userToken,
-            +currentPersonaId
-          );
+          const project = await getFreshCurrentProject(userToken, +currentPersonaId);
           setCurrentProject(project);
         } else if (!currentPersonaId) {
           // Set to first persona
           const response = await getPersonasOverview(userToken);
-          const result =
-            response.status === "success"
-              ? (response.data as PersonaOverview[])
-              : [];
+          const result = response.status === "success" ? (response.data as PersonaOverview[]) : [];
           if (result.length > 0) {
             setCurrentProject(result[0]);
           }
@@ -800,70 +697,57 @@ export default function App() {
     {
       title: "Linkedin CTA",
       keyboard: 1,
-      prompt:
-        "Please write a compelling call-to-action for LinkedIn. Do not use any placeholders.",
+      prompt: "Please write a compelling call-to-action for LinkedIn. Do not use any placeholders.",
     },
     {
       title: "Linkedin Initial Message",
       keyboard: 2,
-      prompt:
-        "Please draft an engaging initial message for LinkedIn. Do not use any placeholders.",
+      prompt: "Please draft an engaging initial message for LinkedIn. Do not use any placeholders.",
     },
     {
       title: "Linkedin Follow Up",
       keyboard: 3,
-      prompt:
-        "Please create a follow-up message for LinkedIn. Do not use any placeholders.",
+      prompt: "Please create a follow-up message for LinkedIn. Do not use any placeholders.",
     },
     {
       title: "Linkedin Break Up",
       keyboard: 4,
-      prompt:
-        "Please write a break-up message for LinkedIn. Do not use any placeholders.",
+      prompt: "Please write a break-up message for LinkedIn. Do not use any placeholders.",
     },
     {
       title: "Linkedin Subject",
       keyboard: 5,
-      prompt:
-        "Please provide a subject line for a LinkedIn message.  Do not use any placeholders.",
+      prompt: "Please provide a subject line for a LinkedIn message.  Do not use any placeholders.",
     },
     {
       title: "Email Initial Message",
       keyboard: 6,
-      prompt:
-        "Please draft an initial email message. Do not use any placeholders.",
+      prompt: "Please draft an initial email message. Do not use any placeholders.",
     },
     {
       title: "Email Follow Up",
       keyboard: 7,
-      prompt:
-        "Please create a follow-up email message. Do not use any placeholders.",
+      prompt: "Please create a follow-up email message. Do not use any placeholders.",
     },
     {
       title: "Email Break Up",
       keyboard: 8,
-      prompt:
-        "Please write a break-up email message. Do not use any placeholders.",
+      prompt: "Please write a break-up email message. Do not use any placeholders.",
     },
     {
       title: "Email Linkedin",
       keyboard: 9,
-      prompt:
-        "Please draft an email response that references LinkedIn. Do not use any placeholders.",
+      prompt: "Please draft an email response that references LinkedIn. Do not use any placeholders.",
     },
     {
       title: "Email Email",
       keyboard: 0,
-      prompt:
-        "Please draft an email message response given the context. Do not use any placeholders.",
+      prompt: "Please draft an email message response given the context. Do not use any placeholders.",
     },
   ]);
 
   return (
-    <ColorSchemeProvider
-      colorScheme={colorScheme}
-      toggleColorScheme={toggleColorScheme}
-    >
+    <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider
         theme={{
           colorScheme: colorScheme,
@@ -876,8 +760,7 @@ export default function App() {
             },
           },
           fontFamily: "Poppins, sans-serif",
-          fontFamilyMonospace:
-            "source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace",
+          fontFamilyMonospace: "source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace",
         }}
         withGlobalStyles
         withNormalizeCSS
@@ -960,6 +843,8 @@ export default function App() {
               campaignFilter: CampaignFilterModal,
               accountcontactFilterModal: AccountContactFiltersModal,
               overrideProspectsModal: OverrideProspectsModal,
+              singleEmailCampaignBetaModal: SingleEmailCampaignBetaModal,
+              emailsentsuccessModal: EmailSentSuccessModal,
             }}
             modalProps={{
               closeOnClickOutside: false,
@@ -1002,12 +887,7 @@ export default function App() {
               },
             }}
           >
-            <SellScaleAssistModal
-              isLoading={isLoading}
-              handleKeyDown={onKeyDown}
-              isAccpet={acceptRef.current}
-              handleAccept={handleAccept}
-            />
+            <SellScaleAssistModal isLoading={isLoading} handleKeyDown={onKeyDown} isAccpet={acceptRef.current} handleAccept={handleAccept} />
           </Modal>
         </SpotlightWrapper>
       </MantineProvider>

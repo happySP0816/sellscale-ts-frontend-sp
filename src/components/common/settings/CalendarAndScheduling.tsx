@@ -40,7 +40,13 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
 import { API_URL } from "@constants/data";
-import { IconCalendarShare, IconCircleCheckFilled, IconInfoHexagon, IconInfoTriangle, IconPointFilled } from "@tabler/icons-react";
+import {
+  IconCalendarShare,
+  IconCircleCheckFilled,
+  IconInfoHexagon,
+  IconInfoTriangle,
+  IconPointFilled,
+} from "@tabler/icons-react";
 import { DataGrid } from "mantine-data-grid";
 
 const urlRegex: RegExp = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[a-z0-9\-]+(?:\.[a-z]{2,})+(?:\/[\w\-\.\?\=\&]*)*$/i;
@@ -59,7 +65,9 @@ export default function CalendarAndScheduling() {
 
   const [timeZone, setTimeZone] = useState<string>(userData.timezone);
 
-  const [schedulingLink, setSchedulingLink] = useState<string>(userData.scheduling_link || "");
+  const [schedulingLink, setSchedulingLink] = useState<string>(
+    userData.scheduling_link || ""
+  );
 
   useEffect(() => {
     if (timeZone && timeZone !== userData.timezone) {
@@ -145,7 +153,8 @@ export default function CalendarAndScheduling() {
     } else {
       showNotification({
         title: "Error",
-        message: "Could not update scheduling link, please try again or contact support",
+        message:
+          "Could not update scheduling link, please try again or contact support",
         color: "red",
         autoClose: 3000,
       });
@@ -155,15 +164,15 @@ export default function CalendarAndScheduling() {
   const [team, setTeam] = useState([
     {
       avatar: "",
-      fullname: "Samantha Roger",
+      fullname: "John Smith",
       job: "Marketing Manager",
-      calendar_link: "calendly.com/samantha-roger",
+      calendar_link: "calendly.com/john-smith",
     },
     {
       avatar: "",
-      fullname: "Johnny Smith",
+      fullname: "Sarah Doe",
       job: "Marketing Manager",
-      calendar_link: "calendly.com/johnny-smith",
+      calendar_link: "calendly.com/sarah-doe",
     },
   ]);
 
@@ -174,7 +183,8 @@ export default function CalendarAndScheduling() {
           <Box>
             <Title order={3}>Teamwide Calendar Integration</Title>
             <Text mt="sm" fz="sm">
-              Add your team's calendars to refernece when scheduling, or have the AI pull a certain rep's time
+              Add your team's calendars to refernece when scheduling, or have
+              the AI pull a certain rep's time
             </Text>
           </Box>
           <Button leftIcon={<IconPlus size={"0.9rem"} />}>Add New</Button>
@@ -241,7 +251,13 @@ export default function CalendarAndScheduling() {
                 const { calendar_link } = cell.row.original;
 
                 return (
-                  <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"} justify={"space-between"}>
+                  <Flex
+                    gap={"xs"}
+                    w={"100%"}
+                    h={"100%"}
+                    align={"center"}
+                    justify={"space-between"}
+                  >
                     <Flex align={"center"} justify={"space-between"} w={"100%"}>
                       <Text fw={500} lineClamp={2} maw={200}>
                         {calendar_link}
@@ -296,8 +312,10 @@ export default function CalendarAndScheduling() {
           {updated && <IconCircleCheck color="green" size={"1.2rem"} />}
         </Flex>
         <Text mt="sm" fz="sm">
-          Whenever SellScale AI detects a high propensity prospect who is interested in scheduling a time with you, the AI will use this link to book on your
-          calendar. Needs to be a valid URL (Calendly, Chron, Hubspot, etc).
+          Whenever SellScale AI detects a high propensity prospect who is
+          interested in scheduling a time with you, the AI will use this link to
+          book on your calendar. Needs to be a valid URL (Calendly, Chron,
+          Hubspot, etc).
         </Text>
         <Divider mt={"sm"} />
         <Flex align={"end"} gap={"sm"} justify={"space-between"} w={"100%"}>
@@ -320,7 +338,10 @@ export default function CalendarAndScheduling() {
               // withAsterisk
             />
           </Input.Wrapper>
-          <Button leftIcon={<IconPencil size={"0.9rem"} />} onClick={() => setIsEditing(true)}>
+          <Button
+            leftIcon={<IconPencil size={"0.9rem"} />}
+            onClick={() => setIsEditing(true)}
+          >
             Edit
           </Button>
         </Flex>
@@ -345,7 +366,11 @@ export default function CalendarAndScheduling() {
             >
               Cancel
             </Button>
-            <Button variant="light" color="green" onClick={triggerPatchSchedulingLink}>
+            <Button
+              variant="light"
+              color="green"
+              onClick={triggerPatchSchedulingLink}
+            >
               Save
             </Button>
           </Flex>
@@ -354,7 +379,11 @@ export default function CalendarAndScheduling() {
           <Text color="gray" tt={"uppercase"}>
             example message
           </Text>
-          <Flex style={{ border: "1px solid #dee2e6", borderRadius: "8px" }} align={"center"} justify={"center"}>
+          <Flex
+            style={{ border: "1px solid #dee2e6", borderRadius: "8px" }}
+            align={"center"}
+            justify={"center"}
+          >
             <Box pos="relative">
               <LoadingOverlay
                 visible={!userData.scheduling_link}
@@ -372,17 +401,27 @@ export default function CalendarAndScheduling() {
                     w={"fit-content"}
                     fw={500}
                   >
-                    <Text size={"xs"}>Integrate Calendar to schedule meetings using SellScale AI.</Text>
+                    <Text size={"xs"}>
+                      Integrate Calendar to schedule meetings using SellScale
+                      AI.
+                    </Text>
                   </Notification>
                 }
               />
               <Flex p={"sm"} gap={"sm"}>
                 <Avatar src={userData.img_url} radius={"xl"} size={"lg"} />
                 <Flex direction={"column"} gap={"sm"}>
-                  <Text fw={"700"} size={"sm"} style={{ display: "flex", gap: 5, alignItems: "center" }}>
+                  <Text
+                    fw={"700"}
+                    size={"sm"}
+                    style={{ display: "flex", gap: 5, alignItems: "center" }}
+                  >
                     {userData.sdr_name}
                     <Text color="gray" fw={500}>
-                      <IconPointFilled size={"0.5rem"} style={{ marginRight: "5" }} />
+                      <IconPointFilled
+                        size={"0.5rem"}
+                        style={{ marginRight: "5" }}
+                      />
                       {"5:04 PM"}
                     </Text>
                   </Text>
@@ -394,9 +433,18 @@ export default function CalendarAndScheduling() {
                       "Hope you're doing great! Just wanted to quickly check in and see if you might have a few minutes to chat about some cool stuff we're working on."
                     }
                   </Text>
-                  <Text size={"sm"} style={{ display: "flex", gap: 5 }} color="gray" fw={500}>
+                  <Text
+                    size={"sm"}
+                    style={{ display: "flex", gap: 5 }}
+                    color="gray"
+                    fw={500}
+                  >
                     You can pick a time that works for your here:{" "}
-                    <Anchor href={userData.scheduling_link} target="_blank" fw={500}>
+                    <Anchor
+                      href={userData.scheduling_link}
+                      target="_blank"
+                      fw={500}
+                    >
                       {userData.scheduling_link}
                     </Anchor>
                   </Text>
@@ -444,7 +492,8 @@ export default function CalendarAndScheduling() {
           Time Zone
         </Text>
         <Text mt="sm" fz="sm">
-          This time zone should be set to the time zone for the majority of your prospects.
+          This time zone should be set to the time zone for the majority of your
+          prospects.
         </Text>
         <Select
           mt="md"

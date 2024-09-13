@@ -147,7 +147,7 @@ export default function CreatePersona(props: PropsType) {
       return result.data as number;
     }
 
-    window.location.reload();
+    // window.location.reload();
 
     setCurrentProject(result.data);
 

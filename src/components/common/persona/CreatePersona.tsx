@@ -147,7 +147,10 @@ export default function CreatePersona(props: PropsType) {
       return result.data as number;
     }
 
-    // window.location.reload();
+    //do not reload the page if we are in selix
+    if (window.location.href.includes('selix')){
+    window.location.reload();
+    }
 
     setCurrentProject(result.data);
 

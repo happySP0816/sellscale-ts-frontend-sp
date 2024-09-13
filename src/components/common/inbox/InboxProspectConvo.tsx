@@ -96,6 +96,7 @@ import {
   IconArrowLeft,
   IconChevronDown,
   IconChevronUp,
+  IconRefresh,
   IconRobot,
 } from "@tabler/icons";
 import { getBumpFrameworksSequence } from "@utils/requests/getBumpFrameworksSequence";
@@ -105,6 +106,7 @@ import { useNavigate } from "react-router-dom";
 import { openContextModal } from "@mantine/modals";
 import { sendAskAE } from "@utils/requests/askAE";
 import { getEmailReplyFrameworks } from "@utils/requests/emailReplies";
+import { API_URL } from "@constants/data";
 
 export function ProspectConvoMessage(props: {
   id: number;
@@ -1018,7 +1020,35 @@ export default function InboxProspectConvo(props: Props) {
                 value="LINKEDIN"
                 icon={<IconBrandLinkedin size="0.8rem" />}
               >
-                LinkedIn <Badge>{currentConvoLiMessages?.length}</Badge>
+                <Flex align="center" gap="xs">
+                  LinkedIn <Badge>{currentConvoLiMessages?.length}</Badge>
+                  <ActionIcon
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      try {
+                        const response = await fetch(`${API_URL}/voyager/force_refresh_linkedin_messages`, {
+                          method: 'POST',
+                          headers: {
+                            Authorization: `Bearer ${userToken}`,
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({ prospectId: openedProspectId }),
+                        });
+                        if (response.status === 200) {
+                          const data = await response.json();
+                          console.log('LinkedIn messages refreshed:', data);
+                          window.location.href = `/prospects/${openedProspectId}`;
+                        } else {
+                          throw new Error('Network response was not ok');
+                        }
+                      } catch (error) {
+                        console.error('There was a problem with the fetch operation:', error);
+                      }
+                    }}
+                  >
+                    <IconRefresh size="0.8rem" />
+                  </ActionIcon>
+                </Flex>
               </Tabs.Tab>
             )}
             {/* {hasEmail(prospect) && !hasSmartleadEmail(prospect) && (

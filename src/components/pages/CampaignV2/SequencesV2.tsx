@@ -2154,7 +2154,7 @@ function EmailPreviewHeaderV2(props: {
                           dangerouslySetInnerHTML={{
                             __html: DOMPurify.sanitize(
                               typeof data?.body === "string"
-                                ? data.body.replace(/\n\s*\n/g, "\n")
+                                ? `<span style="font-size: 0.705rem; display: block; margin-bottom: 0.1rem;">${data.body.replace(/\n\s*\n/g, "\n")}</span>`
                                 : ""
                             ),
                           }}
@@ -2166,7 +2166,7 @@ function EmailPreviewHeaderV2(props: {
                             border: "1px solid #ced4da",
                             borderRadius: "4px",
                             padding: "8px",
-                            minHeight: "100px",
+                            minHeight: "auto",
                             marginBottom: "16px",
                             whiteSpace: "pre-wrap",
                           }}

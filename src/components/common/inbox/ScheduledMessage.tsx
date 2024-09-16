@@ -99,7 +99,7 @@ export const ScheduledMessage = forwardRef(({ openedProspectId }: { openedProspe
             <IconCalendarTime size={'1rem'} color='white' style={{ marginTop: '-1px' }} />
             <Text color='white'>
               {hiddenUntil 
-                ? `Outbound scheduled to resume ${moment(hiddenUntil).format('MMM DD, YYYY')}` 
+                ? `Outbound scheduled to resume ${moment(hiddenUntil).utc().format('MMMM DD')}` 
                 : `${scheduledMessages.length} Scheduled ${scheduledMessages.length > 1 ? 'Messages' : 'Message'}`}
             </Text>
           </Flex>

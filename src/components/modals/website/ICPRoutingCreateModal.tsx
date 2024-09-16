@@ -438,7 +438,7 @@ export default function ICPRoutingCreateModal({
                         color="blue"
                         style={{ padding: 0 }}
                       >
-                        <IconPencil size={16} />
+                        {rule.value && <IconPencil size={16} />}
                       </Button>
                     )
                   }

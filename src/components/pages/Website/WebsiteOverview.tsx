@@ -336,17 +336,18 @@ export default function WebsiteOverview(props: any) {
       </Paper>
       <Paper mt={"md"} p={"lg"} withBorder>
       <Flex justify={"space-between"} align={"center"}>
-        <Text size={"md"} fw={600}>
-          Bucketed Contacts
-        </Text>
-        <Select
-          w={200}
-          label="Filter by bucket"
-          defaultValue={"all"}
-          onChange={(v: any) => setFilteredWebVisits(v === "all" ? webVisits : webVisits.filter((contact) => contact.icp_routing_id === v))}
-          data={[{ label: "All Buckets", value: "all" }, ...buckets.map((bucket) => ({ label: bucket.title, value: bucket.id }))]}
-        />
-      
+        <Flex align={"center"} gap={"md"}>
+          <Text size={"md"} fw={600}>
+            Bucketed Contacts
+          </Text>
+          <Select
+            w={200}
+            label="Filter by bucket"
+            defaultValue={"all"}
+            onChange={(v: any) => setFilteredWebVisits(v === "all" ? webVisits : webVisits.filter((contact) => contact.icp_routing_id === v))}
+            data={[{ label: "All Buckets", value: "all" }, ...buckets.map((bucket) => ({ label: bucket.title, value: bucket.id }))]}
+          />
+        </Flex>
       </Flex>
     <ScrollArea style={{ height: "40vh" }}>
       <Table mt={"md"} withBorder withColumnBorders style={{ height: "400px", overflowY: "auto" }}>

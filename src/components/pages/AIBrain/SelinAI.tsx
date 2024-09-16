@@ -2363,8 +2363,9 @@ const SegmentChat = (props: any) => {
                                             size="xs"
                                             color="red"
                                             onClick={() => {
+                                              const id = y.id;
                                               changeMemoryStatus(
-                                                y.id,
+                                                id,
                                                 "CANCELLED"
                                               );
                                               // const target = document.getElementById(
@@ -2386,8 +2387,9 @@ const SegmentChat = (props: any) => {
                                             size="xs"
                                             color="green"
                                             onClick={() => {
+                                              const id = y.id;
                                               changeMemoryStatus(
-                                                y.id,
+                                                id,
                                                 "COMPLETE"
                                               );
                                               // const target = document.getElementById(
@@ -2403,9 +2405,12 @@ const SegmentChat = (props: any) => {
                                         </Tooltip>
                                       </Flex>
                                     </Box>
-                                    <Box ml="4px" pt="2px">
-                                      <IconCloud size="0.9rem" color="gray" />
-                                    </Box>
+                                    {(x === "campaigns" ||
+                                      x === "sessions") && (
+                                      <Box ml="4px" pt="2px">
+                                        <IconCloud size="0.9rem" color="gray" />
+                                      </Box>
+                                    )}
                                   </Flex>
                                 </HoverCard.Target>
                                 <HoverCard.Dropdown maw={500}>

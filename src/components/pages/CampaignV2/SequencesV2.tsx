@@ -1218,6 +1218,8 @@ const NewUIEmailSequencingV2 = function (props: {
 function EmailPreviewHeaderV2(props: {
   currentTab: string;
   template?: EmailSequenceStep;
+  subjectLineText: string | null;
+  setSubjectLineText: React.Dispatch<React.SetStateAction<string | null>>;
   subjectLine?: SubjectLineTemplate;
   prospectId: number;
   stepNumber: number;
@@ -1225,6 +1227,8 @@ function EmailPreviewHeaderV2(props: {
   setTriggerGenerate: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const userToken = useRecoilValue(userTokenState);
+  const subjectLineText = props.subjectLineText;
+  const setSubjectLineText = props.setSubjectLineText;
   const currentProject = useRecoilValue(currentProjectState);
   const userData = useRecoilValue(userDataState);
   const [selectedVoice, setSelectedVoice] = useState<string | null>("");
@@ -1297,6 +1301,12 @@ function EmailPreviewHeaderV2(props: {
       socket.off("subject-stream", handleData);
     };
   }, []);
+
+  useEffect(() => {
+
+    setSubjectLineText(null);
+
+  }, [props.prospectId]);
 
   useEffect(() => {
     const fetchVoices = async () => {
@@ -1516,7 +1526,13 @@ function EmailPreviewHeaderV2(props: {
           subjectLine
         );
       } else {
-        return await generateFollowUpEmail(prospectId, currentTab, template);
+        const previousSubjectLine = data?.subject_line;
+        console.log("Previous subject line", previousSubjectLine);
+        const followUpEmail = await generateFollowUpEmail(prospectId, currentTab, template);
+        if (followUpEmail.subject_line === null && previousSubjectLine !== null) {
+          followUpEmail.subject_line = previousSubjectLine;
+        }
+        return followUpEmail;
       }
     },
     refetchOnWindowFocus: false,
@@ -1550,6 +1566,7 @@ function EmailPreviewHeaderV2(props: {
       if (response.status === "success") {
         const email_body = response.data.email_body;
         const subject_line = response.data.subject_line;
+        setSubjectLineText(subject_line.completion as string); 
         if (!email_body || !subject_line) {
           showNotification({
             title: "Error",
@@ -2081,10 +2098,10 @@ function EmailPreviewHeaderV2(props: {
                 <Flex align={"center"} gap={4}>
                   <IconMail size={"0.9rem"} color="#228be6" />
                   <Text fw={500} color="gray" size={"xs"}>
-                    Example Message #1:
+                    Subject:
                   </Text>
                   <Text fw={500} size={"xs"}>
-                    {data?.subject_line? data?.subject_line : props?.template?.step?.title}
+                    {subjectLineText || ''}
                   </Text>
                 </Flex>
               </Flex>
@@ -2292,7 +2309,8 @@ function NewDetailEmailSequencingV2(props: {
   // Active Template States
   const [activeTemplate, setTemplate] = useState<EmailSequenceStep>();
   const [activeTemplateIndex, setActiveTemplateIndex] = useState<number>(0);
-  const [activeSubjectLine, setSubjectLine] = useState<SubjectLineTemplate>();
+  const [subjectLineText, setSubjectLineText] = useState<string | null>("");
+  const [activeSubjectLine, setActiveSubjectLine] = useState<SubjectLineTemplate>();
   const [activeTab, setActiveTab] = useState<string>("body");
   const handleTabChange = (value: TabsValue) => {
     const newTab = value as string;
@@ -2320,8 +2338,8 @@ function NewDetailEmailSequencingV2(props: {
     if (props.templates.length > 0) {
       setTemplate(props.templates[0]);
     }
-    if (props.subjectLines.length > 0 && !activeSubjectLine) {
-      setSubjectLine(props.subjectLines[0]);
+    if (props.subjectLines.length > 0 && !activeSubjectLine && props.subjectLines[0]) {
+      setActiveSubjectLine(props.subjectLines[0]);
     }
   }, [props]);
 
@@ -2792,7 +2810,7 @@ function NewDetailEmailSequencingV2(props: {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setSubjectLine(subjectLine);
+                      setActiveSubjectLine(subjectLine);
                     }}
                   >
                     Regen Example
@@ -2814,6 +2832,8 @@ function NewDetailEmailSequencingV2(props: {
     <Stack style={{ width: "100%" }}>
         {!props.isEditing && (
           <EmailPreviewHeaderV2
+            subjectLineText={subjectLineText}
+            setSubjectLineText={setSubjectLineText}
             currentTab={props.currentTab}
             template={activeTemplate}
             subjectLine={activeSubjectLine}

@@ -134,6 +134,7 @@ import UploadProspectsModal from "@modals/UploadProspectsModal";
 import SequencesV2 from "@pages/CampaignV2/SequencesV2";
 import { set } from "lodash";
 import { setSmartleadCampaign } from "@utils/requests/setSmartleadCampaign";
+import SelixMemoryLogs from "./SelinMemoryLogs";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
@@ -2158,9 +2159,12 @@ const SegmentChat = (props: any) => {
               )}
             </Flex>
             <Card withBorder mah={600} p="md" sx={{ overflow: "auto" }}>
-              <Text size="sm" color="gray" fw="500">
-                Currently working on:
-              </Text>
+              <Flex>
+                <Text size="sm" color="gray" fw="500">
+                  Currently working on:
+                </Text>
+                <SelixMemoryLogs onRevert={() => {}}></SelixMemoryLogs>
+              </Flex>
 
               <Textarea
                 placeholder="Type your notes here..."

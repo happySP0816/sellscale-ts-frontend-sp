@@ -2813,7 +2813,6 @@ function NewDetailEmailSequencingV2(props: {
 
   return (
     <Stack style={{ width: "100%" }}>
-      <ScrollArea h={300}>
         {!props.isEditing && (
           <EmailPreviewHeaderV2
             currentTab={props.currentTab}
@@ -2899,7 +2898,6 @@ function NewDetailEmailSequencingV2(props: {
           ) : (
             <>{getEmailBodySection()}</>
           ))}
-      </ScrollArea>
     </Stack>
   );
 }

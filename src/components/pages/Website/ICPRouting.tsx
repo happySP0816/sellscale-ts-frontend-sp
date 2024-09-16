@@ -40,17 +40,22 @@ import {
   IconPencil,
   IconPlus,
   IconRefresh,
+  IconSettings,
   IconToggleRight,
   IconTrash,
 } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
 import { on } from "events";
+import { set } from "lodash";
 import { DataGrid } from "mantine-data-grid";
 import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 
 export default function ICPRouting() {
   const userToken = useRecoilValue(userTokenState);
+  const [openWebhookModal, setOpenWebhookModal] = useState(false);
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState("");
+  const [loadingSetWebhook, setLoadingSetWebhook] = useState(false);
   const theme = useMantineTheme();
   const [loading, setLoading] = useState(false);
   const [acPageSize, setAcPageSize] = useState("25");
@@ -212,6 +217,72 @@ export default function ICPRouting() {
 
   return (
     <div style={{ overflowY: "hidden" }}>
+      <Modal opened={openWebhookModal} onClose={() => setOpenWebhookModal(false)} size="lg">
+
+        <Paper style={{ padding: "md" }}>
+          <Box mb="md">
+            <Title order={4}>Webhook Settings</Title>
+            <Text size="sm" color="gray">
+              Configure your Slack webhook to receive alerts when a visitor is bucketed.
+            </Text>
+          </Box>
+          <TextInput
+            label="Slack Webhook URL"
+            placeholder="https://hooks.slack.com/services/..."
+            autoComplete="off"
+            value={slackWebhookUrl}
+            onChange={(event) => setSlackWebhookUrl(event.currentTarget.value)}
+          />
+          <Button
+            disabled={!slackWebhookUrl || !slackWebhookUrl.startsWith("https://hooks.slack.com/services/")}
+            color="grape"
+            loading={loadingSetWebhook}
+            fullWidth
+            mt="md"
+            onClick={async () => {
+              try {
+                setLoadingSetWebhook(true);
+                const response = await fetch(`${API_URL}/track/set_icp_webook_url`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${userToken}`,
+                  },
+                  body: JSON.stringify({ webhook_url: slackWebhookUrl }),
+                });
+
+                if (!response.ok) {
+                  throw new Error("Failed to set webhook URL");
+                }
+
+                const data = await response.json();
+                setSlackWebhookUrl(data.webhook_url);
+                showNotification({
+                  title: "Success",
+                  message: "Webhook URL saved successfully",
+                  color: "green",
+                  icon: <IconCheck />,
+                });
+              } catch (error) {
+                console.error("Error setting webhook URL:", error);
+                showNotification({
+                  title: "Error",
+                  message: "Failed to save webhook URL",
+                  color: "red",
+                  icon: <IconCircleX />,
+                });
+              } finally {
+                setLoadingSetWebhook(false);
+                setOpenWebhookModal(false);
+              }
+            }}
+          >
+            Save
+          </Button>
+
+          </Paper>
+
+        </Modal>
       {showTextBucketModal && (
         <Modal opened={showTextBucketModal} onClose={() => {setShowTextBucketModal(false); setSimulationData(null); setShowResults(false)}} size="lg">
           <Paper style={{ padding: "md" }}>
@@ -383,6 +454,24 @@ export default function ICPRouting() {
             <th>
               <Flex align={"center"} gap={"3px"}>
                 <Text color="gray">Slack Alerts</Text>
+                <ActionIcon
+                  size={16}
+                  color="gray"
+                  onClick={async () => {
+                    const response = await fetch(`${API_URL}/track/get_icp_webhook_url`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${userToken}`,
+                      },
+                    });
+                    const data = await response.json();
+                    setSlackWebhookUrl(data.webhook_url);
+                    setOpenWebhookModal(true);
+                  }}
+                >
+                  <IconSettings size={16} />
+                </ActionIcon>
               </Flex>
             </th>
             <th>

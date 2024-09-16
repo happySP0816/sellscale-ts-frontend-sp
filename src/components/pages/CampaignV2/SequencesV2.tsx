@@ -2154,9 +2154,7 @@ function EmailPreviewHeaderV2(props: {
                           dangerouslySetInnerHTML={{
                             __html: DOMPurify.sanitize(
                               typeof data?.body === "string"
-                                ? data.body
-                                    .replace(/(<br\s*\/?>\s*){2,}/g, "<br />")
-                                    .replace(/\n\s*\n/g, "\n")
+                                ? data.body.replace(/\n\s*\n/g, "\n")
                                 : ""
                             ),
                           }}

@@ -408,38 +408,40 @@ export default function ICPRoutingCreateModal({
                       }}
                     >
                       <Text>{label}</Text>
-                      {value !== "create_new" && (
-                        <Button
-                          onClick={(e) => { e.stopPropagation(); 
-                            openContextModal({
-                              modal: "prefilterEditModal",
-                              title: (
-                                <Title order={3} className="flex items-center gap-2">
-                                  <IconFilter size={"1.5rem"} color="#228be6" /> Edit Pre-Filter
-                                </Title>
-                              ),
-                              innerProps: {isIcpFilter: true, id: value},
-                              centered: true,
-                              styles: {
-                                content: {
-                                  minWidth: "80%",
-                                },
-                              },
-                            });
-                            }
-                          }
-                          variant="subtle"
-                          color="blue"
-                          style={{ padding: 0, marginLeft: 'auto' }}
-                        >
-                          <IconPencil size={16} />
-                        </Button>
-                      )}
                     </Flex>
                   )}
                   data={icpQueries.map((item: { id: string; custom_name: string }) => ({ value: item.id, label: item.custom_name })).concat({ value: "create_new", label: "+ Create New" })}
                   placeholder="Select value"
-                  style={{ width: "150px" }}
+                  style={{ width: "70%" }}
+                  rightSection={
+                    rule.value !== "create_new" && (
+                      <Button
+                        onClick={(e) => { e.stopPropagation(); 
+                          openContextModal({
+                            modal: "prefilterEditModal",
+                            title: (
+                              <Title order={3} className="flex items-center gap-2">
+                                <IconFilter size={"1.5rem"} color="#228be6" /> Edit Pre-Filter
+                              </Title>
+                            ),
+                            innerProps: {isIcpFilter: true, id: rule.value},
+                            centered: true,
+                            styles: {
+                              content: {
+                                minWidth: "80%",
+                              },
+                            },
+                          });
+                          }
+                        }
+                        variant="subtle"
+                        color="blue"
+                        style={{ padding: 0 }}
+                      >
+                        {rule.value && <IconPencil size={16} />}
+                      </Button>
+                    )
+                  }
                 />
               ) : (
                 <TextInput

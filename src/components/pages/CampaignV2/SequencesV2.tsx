@@ -2084,7 +2084,7 @@ function EmailPreviewHeaderV2(props: {
                     Example Message #1:
                   </Text>
                   <Text fw={500} size={"xs"}>
-                    {props?.template?.step?.title}
+                    {data?.subject_line? data?.subject_line : props?.template?.step?.title}
                   </Text>
                 </Flex>
               </Flex>
@@ -2103,7 +2103,7 @@ function EmailPreviewHeaderV2(props: {
                 >
                   <div className="px-5">
                     <Text color="gray.6" fw={500} size="sm" mr="xs"></Text>
-                    {!isFetching && (
+                    {/* {!isFetching && (
                       <Text mt="xs" mb="xs" color="gray.8" fw={700} size="sm">
                         <div
                           dangerouslySetInnerHTML={{
@@ -2113,7 +2113,7 @@ function EmailPreviewHeaderV2(props: {
                           }}
                         />
                       </Text>
-                    )}
+                    )} */}
                     {state && (
                       <Flex
                         align={"center"}
@@ -2154,7 +2154,7 @@ function EmailPreviewHeaderV2(props: {
                           dangerouslySetInnerHTML={{
                             __html: DOMPurify.sanitize(
                               typeof data?.body === "string"
-                                ? `<span style="font-size: 0.705rem; display: block; margin-bottom: 0.1rem;">${data.body.replace(/\n\s*\n/g, "\n")}</span>`
+                                ? `<span style="font-size: 0.905rem; display: block; margin-bottom: 0.1rem;">${data.body.replace(/\n\s*\n/g, "\n")}</span>`
                                 : ""
                             ),
                           }}
@@ -2163,7 +2163,6 @@ function EmailPreviewHeaderV2(props: {
                             setCanSave(true);
                           }}
                           style={{
-                            border: "1px solid #ced4da",
                             borderRadius: "4px",
                             padding: "8px",
                             minHeight: "auto",

@@ -1779,7 +1779,7 @@ export default function CampaignTemplateEditModal({
               {sequenceType === "email" && currentStepNum === "subjectLines" && (
                 <ScrollArea
                   viewportRef={viewport}
-                  h="90%"
+                  h="100%"
                   px="sm"
                   style={{ position: "relative" }}
                 >

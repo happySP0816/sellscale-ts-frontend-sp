@@ -1090,7 +1090,9 @@ export default function CampaignTemplateEditModal({
                           </Flex>
                         )}
                       </Paper>
-                      <Flex align={"center"} gap={"sm"}>
+                      { (sequenceType === "email"
+                              ? emailSequenceData[index]?.length || 0
+                              : linkedinSequenceData[index]?.length || 0 > 0) && <Flex align={"center"} gap={"sm"}>
                         <Divider
                           orientation="vertical"
                           h={40}
@@ -1142,6 +1144,17 @@ export default function CampaignTemplateEditModal({
                                   fw={500}
                                   size={"sm"}
                                   onClick={() => {
+
+                                    if (currentProject?.email_active) {
+                                      showNotification({
+                                        title: "Error",
+                                        message: "Cannot update bump delay days for an already active email campaign",
+                                        color: "red",
+                                      });
+                                      return;
+                                    }
+
+                                    setNewBumpDelayDays(emailSequenceData[index]?.[0]?.sequence_delay_days || 0);
                                     setIsEditingBumpDelayDays(index);
                                   }}
                                 
@@ -1198,6 +1211,7 @@ export default function CampaignTemplateEditModal({
                                   fw={500}
                                   size={"sm"}
                                   onClick={() => {
+                                    setNewBumpDelayDays(linkedinSequenceData[index]?.[0]?.bump_delay_days || 0);
                                     setIsEditingBumpDelayDays(index);
                                   }}
                                 
@@ -1217,7 +1231,7 @@ export default function CampaignTemplateEditModal({
                             </span>
                           </Flex>
                         </Paper>
-                      </Flex>
+                      </Flex>}
                     </>
                   );
                 })}

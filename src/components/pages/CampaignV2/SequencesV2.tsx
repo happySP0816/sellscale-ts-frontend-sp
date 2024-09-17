@@ -64,7 +64,7 @@ import {
   IconTrash,
   IconX,
 } from "@tabler/icons";
-import { useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   BumpFramework,
@@ -154,6 +154,7 @@ import { socket } from "../../App";
 import { diffWords } from "diff";
 import { getFreshCurrentProject } from "@auth/core";
 import { navigateToPage } from "@utils/documentChange";
+import { CampaignPersona } from "@common/campaigns/PersonaCampaigns";
 
 interface Templates {
   active: boolean;
@@ -177,7 +178,6 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
     statsData,
     checkCanToggleLinkedin,
     updateConnectionType,
-    showComponent
   } = props;
   const params = useParams();
   const userToken = useRecoilValue(userTokenState);
@@ -248,10 +248,6 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
 
     setCurrentProject(project);
   };
-
-  useImperativeHandle(ref, () => ({
-    refetchSequenceData
-  }));
 
   const [triggerGenerate, setTriggerGenerate] = useState(0);
 
@@ -560,13 +556,6 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
 
   // We also want to move voice related stuff into this Sequence Widget
 
-  const navigate = useNavigate();
-  const [opened, { open, close }] = useDisclosure(false);
-
-  if (showComponent === false) {
-    return null;
-  }
-        
   return (
     <Card
       shadow={"sm"}
@@ -1006,7 +995,7 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
       )}
     </Card>
   );
-});
+}
 
 function EmailSequencingV2(props: {
   subjectLines: SubjectLineTemplate[];
@@ -1193,6 +1182,7 @@ function EmailSequencingV2(props: {
       campaignContacts={props.campaignContacts}
       onRegenerate={props.onRegenerate}
       prospectOnChangeHandler={props.prospectOnChangeHandler}
+      currentProject={props.currentProject ?? undefined}
     />
   );
 }
@@ -1219,6 +1209,7 @@ const NewUIEmailSequencingV2 = function (props: {
   campaignContacts?: ProspectShallow[];
   onRegenerate: () => void;
   prospectOnChangeHandler: (prospect: ProspectShallow | undefined) => void;
+  currentProject?: PersonaOverview;
 }) {
   const [selectedTemplates, setSelectedTemplates] = React.useState<
     EmailSequenceStep[]
@@ -1264,6 +1255,7 @@ const NewUIEmailSequencingV2 = function (props: {
       campaignContacts={props.campaignContacts}
       onRegenerate={props.onRegenerate}
       prospectOnChangeHandler={props.prospectOnChangeHandler}
+      currentProject={props.currentProject ?? undefined}
     />
   );
 };
@@ -1600,7 +1592,7 @@ function EmailPreviewHeaderV2(props: {
     template: EmailSequenceStep,
     subjectLine: SubjectLineTemplate
   ) => {
-    if (!prospectId || prospectId === -1 || currentTab !== "PROSPECTED") {
+    if (!prospectId || currentTab !== "PROSPECTED") {
       return {
         subject_line: null,
         subject_spam: null,
@@ -2360,6 +2352,7 @@ function NewDetailEmailSequencingV2(props: {
   campaignContacts?: ProspectShallow[];
   onRegenerate: () => void;
   prospectOnChangeHandler: (prospect: ProspectShallow | undefined) => void;
+  currentProject?: PersonaOverview;
 }) {
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);

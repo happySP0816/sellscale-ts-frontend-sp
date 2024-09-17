@@ -110,8 +110,10 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
 
   // New System for one shot campaign generator
   const [selectedVoice, setSelectedVoice] = useState<string | null>(null);
-  const [numSteps, setNumSteps] = useState(1);
-  const [numVariance, setNumVariance] = useState(1);
+  const [numStepsEmail, setNumStepsEmail] = useState(1);
+  const [numStepsLinkedin, setNumStepsLinkedin] = useState(1);
+  const [numVarianceEmail, setNumVarianceEmail] = useState(1);
+  const [numVarianceLinkedin, setNumVarianceLinkedin] = useState(1);
   const [liAssetIngestor, setLiAssetIngestor] = useState("");
 
   const [emailAssetIngestor, setEmailAssetIngestor] = useState("");
@@ -314,8 +316,10 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
     if (response.status === 200) {
       const data: StrategyResponseData = await response.json();
       setFindSampleProspects(true);
-      setNumSteps(3);
-      setNumVariance(3);
+      setNumStepsEmail(3);
+      setNumStepsLinkedin(3);
+      setNumVarianceEmail(3);
+      setNumVarianceLinkedin(3);
       setCreatedPersona(data.createdPersona || '');
       setFitReason(data.fitReason || '');
       setICPMatchingPrompt(data.icpMatchingPrompt || '');
@@ -627,8 +631,8 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                           placeholder="# Steps"
                           label="# Steps"
                           withAsterisk
-                          onChange={(e) => setNumSteps(+e)}
-                          value={numSteps}
+                          onChange={(e) => setNumStepsEmail(+e)}
+                          value={numStepsEmail}
                           width={'30%'}
                         />
                         <NumberInput
@@ -636,8 +640,8 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                           placeholder="# Variants Per Step"
                           label="# Variants Per Step"
                           withAsterisk
-                          onChange={(e) => setNumVariance(+e)}
-                          value={numVariance}
+                          onChange={(e) => setNumVarianceEmail(+e)}
+                          value={numVarianceEmail}
                           width={'30%'}
                         />
                         <TextInput
@@ -747,8 +751,8 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                           placeholder="# Steps"
                           label="# Steps"
                           withAsterisk
-                          onChange={(e) => setNumSteps(+e)}
-                          value={numSteps}
+                          onChange={(e) => setNumStepsLinkedin(+e)}
+                          value={numStepsLinkedin}
                           width={'30%'}
                         />
                         <NumberInput
@@ -756,8 +760,8 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                           placeholder="# Variance Per Step"
                           label="# Variance Per Step"
                           withAsterisk
-                          onChange={(e) => setNumVariance(+e)}
-                          value={numVariance}
+                          onChange={(e) => setNumVarianceLinkedin(+e)}
+                          value={numVarianceLinkedin}
                           width={'30%'}
                         />
                         <TextInput
@@ -994,8 +998,10 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
               emailAssetIngestor,
               withData,
               selectedVoice: selectedVoice ? +selectedVoice : undefined,
-              numSteps,
-              numVariance,
+              numStepsEmail,
+              numStepsLinkedin,
+              numVarianceEmail,
+              numVarianceLinkedin,
               liPainPoint,
               liSequenceState,
               emailSequenceState: emailSequenceStateRaw,

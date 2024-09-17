@@ -2163,7 +2163,12 @@ const SegmentChat = (props: any) => {
                 <Text size="sm" color="gray" fw="500">
                   Currently working on:
                 </Text>
-                <SelixMemoryLogs onRevert={() => {}}></SelixMemoryLogs>
+                <SelixMemoryLogs
+                  onRevert={(oldLog: string) => {
+                    setClientMemoryState(oldLog);
+                    setMemoryStateChanged(true);
+                  }}
+                ></SelixMemoryLogs>
               </Flex>
 
               <Textarea

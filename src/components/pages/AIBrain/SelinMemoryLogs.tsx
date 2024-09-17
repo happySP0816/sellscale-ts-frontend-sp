@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Drawer,
   Button,
@@ -22,6 +22,9 @@ import {
 } from "@tabler/icons-react";
 import { IconBolt, IconEye } from "@tabler/icons";
 import moment from "moment";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
 
 interface MemoryLog {
   created_date: string;
@@ -35,7 +38,7 @@ interface MemoryLog {
 }
 
 interface MemoryLogsProps {
-  onRevert: (log: MemoryLog) => void;
+  onRevert: (log: string) => void;
 }
 const mockLogs: MemoryLog[] = [
   {
@@ -114,14 +117,44 @@ const mockLogs: MemoryLog[] = [
 ];
 
 const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
-  const logs = mockLogs.sort(
-    (a, b) =>
-      new Date(b.created_date).getTime() - new Date(a.created_date).getTime()
-  );
+  const [logs, setLogs] = useState<MemoryLog[]>([]);
   const [opened, setOpened] = useState(false);
-  const [selectedLog, setSelectedLog] = useState<MemoryLog | null>(
-    logs.length > 0 ? logs[0] : null
+  const [selectedLog, setSelectedLog]: any = useState<MemoryLog | null>(
+    logs.find((log) => log.tag === "MEMORY_METADATA_SAVED") || null
   );
+  const userToken = useRecoilValue(userTokenState);
+
+  const fetchSelixLogs = async () => {
+    try {
+      const response = await fetch(`${API_URL}/selix/get_selix_logs`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          ContentType: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch logs");
+      }
+
+      const result = await response.json();
+      setLogs(result.logs);
+      setSelectedLog(
+        result.logs.find(
+          (log: MemoryLog) => log.tag === "MEMORY_METADATA_SAVED"
+        ) || null
+      );
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+    } finally {
+      console.log("Logs fetched successfully");
+    }
+  };
+
+  useEffect(() => {
+    fetchSelixLogs();
+  }, [userToken]);
 
   return (
     <>
@@ -275,7 +308,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                     variant="outline"
                     size="xs"
                     mt="lg"
-                    onClick={() => onRevert(selectedLog)}
+                    onClick={() => {
+                      onRevert(selectedLog.description);
+                      setOpened(false);
+                    }}
                   >
                     Revert to this Memory
                   </Button>

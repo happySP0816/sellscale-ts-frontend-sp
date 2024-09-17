@@ -1858,7 +1858,7 @@ const SegmentChat = (props: any) => {
   const [uncollapsedCards, setUncollapsedCards] = useState<{
     [key: number]: boolean;
   }>({});
-  const [clientMemoryState, setClientMemoryState] = useState<any>(
+  const [clientMemoryState, setClientMemoryState] = useState<string | undefined>(
     props.memory?.memory_line
   );
   const [
@@ -1950,7 +1950,10 @@ const SegmentChat = (props: any) => {
     }
   };
 
-  const updateMemoryLineAllSessions = async (newMemoryLine: string) => {
+  const updateMemoryLineAllSessions = async (newMemoryLine: string | undefined) => {
+    if (!newMemoryLine) {
+      return;
+    }
     setMemoryLineUpdating(true);
     try {
       const response = await fetch(
@@ -2129,9 +2132,9 @@ const SegmentChat = (props: any) => {
   const sessions = memoryState?.sessions;
 
   for (const session of sessions) {
-    if (formattedMemoryLine.includes(session.title)) {
+    if (formattedMemoryLine?.includes(session.title)) {
       let titleToReplace = session.title;
-      if (formattedMemoryLine.includes("@" + session.title)) {
+      if (formattedMemoryLine?.includes("@" + session.title)) {
         titleToReplace = "@" + session.title;
       }
       formattedMemoryLine = formattedMemoryLine.replace(
@@ -2263,7 +2266,7 @@ const SegmentChat = (props: any) => {
                       dangerouslySetInnerHTML={{
                         __html: (
                           formattedMemoryLine || "Click to add notes..."
-                        ).replace(/\n/g, "<br>"),
+                        )?.replace(/\n/g, "<br>"),
                       }}
                     />
                   </HoverCard.Target>

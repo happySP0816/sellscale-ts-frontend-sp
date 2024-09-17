@@ -131,7 +131,7 @@ import SellScaleAssistant from "./SellScaleAssistant";
 import Personalizers from "@pages/CampaignV2/Personalizers";
 import ContactAccountFilterModal from "@modals/ContactAccountFilterModal";
 import UploadProspectsModal from "@modals/UploadProspectsModal";
-import SequencesV2 from "@pages/CampaignV2/SequencesV2";
+import {SequencesV2} from "@pages/CampaignV2/SequencesV2";
 import { set } from "lodash";
 import { setSmartleadCampaign } from "@utils/requests/setSmartleadCampaign";
 import SelixMemoryLogs from "./SelinMemoryLogs";
@@ -4183,6 +4183,7 @@ const TaskRenderer = ({
   const [currentProject, setCurrentProject] = useRecoilState(
     currentProjectState
   );
+  const sequencesV2Ref = useRef(null);
   const [lastLoadedProjectId, setLastLoadedProjectId] = useState<number>(-1);
   const [sequences, setSequences] = useState<any[]>([]);
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>(
@@ -4283,13 +4284,9 @@ const TaskRenderer = ({
     case "VIEW_SEQUENCE":
       return (
         <SequencesV2
-          // key={currentProject?.id} // Adding key to force re-render when currentProject?.id changes
+          ref={sequencesV2Ref}
+          showComponent={true}
           forcedCampaignId={currentProject?.id}
-          // setSequences={setSequences}
-          // setEmailSubjectLines={setEmailSubjectLines}
-          // emailSubjectLines={emailSubjectLines}
-          // setLinkedinInitialMessages={setLinkedinInitialMessages}
-          // linkedinInitialMessages={linkedinInitialMessages}
         />
       );
     default:

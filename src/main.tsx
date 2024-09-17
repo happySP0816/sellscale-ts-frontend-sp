@@ -89,6 +89,8 @@ import DeepGram from "@common/DeepGram";
 import { isFreeUser } from "@auth/core";
 import GenerateAndSend from "@pages/GenerateAndSend";
 import TrainVoice from "@pages/CampaignV2/TrainVoice";
+import SuggestedIdeas from "@pages/SuggestedIdeas/SuggestedIdeas";
+import SelixSuggestionEmail from "@pages/SelixSuggestionEmail";
 
 const options = {
   api_host: "https://us.i.posthog.com",
@@ -601,6 +603,14 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/train_voice",
         element: <TrainVoice />,
+      },
+      {
+        path: "/suggested",
+        element: <SuggestedIdeas />,
+      },
+      {
+        path: "/selixsuggestionemail",
+        element: <SelixSuggestionEmail />,
       },
       // {
       //   path: "/generate",

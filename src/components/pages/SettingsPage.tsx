@@ -1,15 +1,5 @@
 import PageFrame from "@common/PageFrame";
-import {
-  Box,
-  Container,
-  Divider,
-  Flex,
-  Group,
-  LoadingOverlay,
-  Tabs,
-  rem,
-  Title,
-} from "@mantine/core";
+import { Box, Container, Divider, Flex, Group, LoadingOverlay, Tabs, rem, Title } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { useEffect, useState } from "react";
@@ -37,13 +27,7 @@ import NylasConnectedCard from "@common/settings/NylasConnectedCard";
 import { useLoaderData, useNavigate, useSearchParams } from "react-router-dom";
 import exchangeNylasClientID from "@utils/requests/exchangeNylasAuthCode";
 import CalendarAndScheduling from "@common/settings/CalendarAndScheduling";
-import {
-  IconAdjustmentsFilled,
-  IconBrain,
-  IconHexagonalPrism,
-  IconMessage2Bolt,
-  IconTrashFilled,
-} from "@tabler/icons-react";
+import { IconAdjustmentsFilled, IconBrain, IconHexagonalPrism, IconMessage2Bolt, IconSparkles, IconTrashFilled } from "@tabler/icons-react";
 import DoNotContactList from "@common/settings/DoNotContactList";
 import SellScaleBrain from "@common/settings/SellScaleBrain";
 import SettingPreferences from "@common/settings/SettingPreferences";
@@ -64,6 +48,7 @@ import WebTrafficRouting from "@common/settings/Traffic/WebTrafficRouting";
 import posthog from "posthog-js";
 import PreFilterV2 from "@common/settings/PreFiltersV2/PrefiltersV2";
 import Advanced from "./Advanced";
+import SelixIntelligence from "./SelixIntelligence/SelixIntelligence";
 
 export default function SettingsPage() {
   setPageTitle("Settings");
@@ -176,16 +161,7 @@ export default function SettingsPage() {
         })}
       >
         <Tabs.List h={"fit-content"}>
-          <Title
-            color={
-              ["brain", "messages", "filters"].includes(currentTab)
-                ? "blue"
-                : "gray"
-            }
-            order={5}
-            mt="lg"
-            mb="xs"
-          >
+          <Title color={["brain", "messages", "filters"].includes(currentTab) ? "blue" : "gray"} order={5} mt="lg" mb="xs">
             SETUP
           </Title>
           <Tabs.Tab value="brain" icon={<IconBrain size="0.8rem" />}>
@@ -207,10 +183,7 @@ export default function SettingsPage() {
           <Tabs.Tab value="filters" icon={<IconTrashFilled size="0.8rem" />}>
             Do Not Contact Filters
           </Tabs.Tab>
-          <Tabs.Tab
-            value="contactRecycling"
-            icon={<IconRefresh size="0.8rem" />}
-          >
+          <Tabs.Tab value="contactRecycling" icon={<IconRefresh size="0.8rem" />}>
             Contact Recycling
           </Tabs.Tab>
           <Tabs.Tab
@@ -246,18 +219,12 @@ export default function SettingsPage() {
           </Tabs.Tab> */}
 
           <Divider />
-          <Title
-            color={
-              ["linkedin", "email", "slack", "scheduling"].includes(currentTab)
-                ? "blue"
-                : "gray"
-            }
-            order={5}
-            mt="lg"
-            mb="xs"
-          >
+          <Title color={["linkedin", "email", "slack", "scheduling"].includes(currentTab) ? "blue" : "gray"} order={5} mt="lg" mb="xs">
             INTEGRATIONS
           </Title>
+          <Tabs.Tab value="selix" icon={<IconSparkles size="0.8rem" />}>
+            Selix Intelligence
+          </Tabs.Tab>
           <Tabs.Tab value="linkedin" icon={<IconBrandLinkedin size="0.8rem" />}>
             LinkedIn Connection
           </Tabs.Tab>
@@ -284,12 +251,7 @@ export default function SettingsPage() {
 
           <Divider />
 
-          <Title
-            color={["account"].includes(currentTab) ? "blue" : "gray"}
-            order={5}
-            mt="lg"
-            mb="xs"
-          >
+          <Title color={["account"].includes(currentTab) ? "blue" : "gray"} order={5} mt="lg" mb="xs">
             ACCOUNT
           </Title>
 
@@ -303,14 +265,15 @@ export default function SettingsPage() {
             Advanced
           </Tabs.Tab>
           {userData.role === "ADMIN" && (
-            <Tabs.Tab
-              value="organization"
-              icon={<IconAffiliate size="0.8rem" />}
-            >
+            <Tabs.Tab value="organization" icon={<IconAffiliate size="0.8rem" />}>
               Organization
             </Tabs.Tab>
           )}
         </Tabs.List>
+
+        <Tabs.Panel value="selix" pl="xs">
+          <SelixIntelligence />
+        </Tabs.Panel>
 
         <Tabs.Panel value="account" pl="xs">
           <AccountSettings />
@@ -325,9 +288,7 @@ export default function SettingsPage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="linkedin" pl="xs" w="60%">
-          <LinkedInConnectedCard
-            connected={userData ? userData.li_voyager_connected : false}
-          />
+          <LinkedInConnectedCard connected={userData ? userData.li_voyager_connected : false} />
         </Tabs.Panel>
 
         <Tabs.Panel value="traffic" pl="xs" w="60%">
@@ -335,9 +296,7 @@ export default function SettingsPage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="email" pl="xs">
-          <NylasConnectedCard
-            connected={userData ? userData.nylas_connected : false}
-          />
+          <NylasConnectedCard connected={userData ? userData.nylas_connected : false} />
         </Tabs.Panel>
 
         <Tabs.Panel value="scheduling" pl="xs">
@@ -349,28 +308,19 @@ export default function SettingsPage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="doNotContact" pl="xs">
-          <Group noWrap>
-            {currentTab === "doNotContact" && <DoNotContactFiltersPage />}
-          </Group>
+          <Group noWrap>{currentTab === "doNotContact" && <DoNotContactFiltersPage />}</Group>
         </Tabs.Panel>
         <Tabs.Panel value="contactRecycling" pl="xs">
-          <Group noWrap>
-            {currentTab === "contactRecycling" && <ContactRecycling />}
-          </Group>
+          <Group noWrap>{currentTab === "contactRecycling" && <ContactRecycling />}</Group>
         </Tabs.Panel>
         <Tabs.Panel value="inboxes" pl="xs">
-          <Group noWrap>
-            {currentTab === "inboxes" && <InboxesManagementPage />}
-          </Group>
+          <Group noWrap>{currentTab === "inboxes" && <InboxesManagementPage />}</Group>
         </Tabs.Panel>
 
         <Tabs.Panel value="pre-filters" pl="xs">
           <Group noWrap>
             <iframe
-              src={
-                "https://sellscale.retool.com/embedded/public/80a08f60-8b0d-4ff8-a90a-c22cdcd3a4be#authToken=" +
-                userToken
-              }
+              src={"https://sellscale.retool.com/embedded/public/80a08f60-8b0d-4ff8-a90a-c22cdcd3a4be#authToken=" + userToken}
               width={"100%"}
               height={window.innerHeight}
               frameBorder={0}

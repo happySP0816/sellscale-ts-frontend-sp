@@ -120,7 +120,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
   const [logs, setLogs] = useState<MemoryLog[]>([]);
   const [opened, setOpened] = useState(false);
   const [selectedLog, setSelectedLog]: any = useState<MemoryLog | null>(
-    logs.find((log) => log.tag === "MEMORY_METADATA_SAVED") || null
+    logs.reverse().find((log) => log.tag === "MEMORY_METADATA_SAVED") || null
   );
   const userToken = useRecoilValue(userTokenState);
 
@@ -141,9 +141,9 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
       const result = await response.json();
       setLogs(result.logs);
       setSelectedLog(
-        result.logs.find(
-          (log: MemoryLog) => log.tag === "MEMORY_METADATA_SAVED"
-        ) || null
+        result.logs
+          .reverse()
+          .find((log: MemoryLog) => log.tag === "MEMORY_METADATA_SAVED") || null
       );
     } catch (error) {
       console.error("Error fetching logs:", error);
@@ -154,7 +154,12 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
 
   useEffect(() => {
     fetchSelixLogs();
-  }, [userToken]);
+  }, []);
+
+  const reversedLogsByLogDate = logs.sort(
+    (a: MemoryLog, b: MemoryLog) =>
+      new Date(b.created_date).getTime() - new Date(a.created_date).getTime()
+  );
 
   return (
     <>
@@ -178,10 +183,23 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
         position="right"
         size="xl"
       >
-        <Title order={3}>Memory Logs</Title>
-        <Text style={{ marginBottom: "1rem" }}>
-          View a history of all memory saves and task completions.
-        </Text>
+        <Flex>
+          <Box>
+            <Title order={3}>Memory Logs</Title>
+            <Text style={{ marginBottom: "1rem" }}>
+              View a history of all memory saves and task completions.
+            </Text>
+          </Box>
+          <Button
+            onClick={() => fetchSelixLogs()}
+            size="xs"
+            color="gray"
+            ml="auto"
+            variant="outline"
+          >
+            Refresh
+          </Button>
+        </Flex>
         <Divider mt="md" mb="lg" />
         <Flex>
           <Box w="30%" pr="md" style={{ borderRight: "1px solid #e0e0e0" }}>
@@ -189,7 +207,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
               Memory Bank
             </Text>
             <Timeline bulletSize={24}>
-              {logs.map((log, index) => (
+              {reversedLogsByLogDate.map((log, index) => (
                 <Timeline.Item
                   key={index}
                   title={log.title}

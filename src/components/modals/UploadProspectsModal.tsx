@@ -22,6 +22,7 @@ import {
   Accordion,
   NumberInput,
   Checkbox,
+  Table,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useEffect, useRef, useState } from "react";
@@ -682,35 +683,72 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                         />
                         <Collapse in={emailSequenceOpened}>
                           <Box>
-                            <Text size="sm" fw={500}>
-                              Include Templates
-                            </Text>
-                            <SimpleGrid mb="sm" cols={2} mt="xs">
-                              <Checkbox 
-                                size="xs" 
-                                label="How it works" 
-                                checked={emailSequenceStateRaw.howItWorks}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, howItWorks: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="Vary intro messages" 
-                                checked={emailSequenceStateRaw.varyIntroMessages}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, varyIntroMessages: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="Breakup message" 
-                                checked={emailSequenceStateRaw.breakupMessage}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, breakupMessage: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="Unique offer" 
-                                checked={emailSequenceStateRaw.uniqueOffer}
-                                onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, uniqueOffer: e.currentTarget.checked })}
-                              />
-                            </SimpleGrid>
+                            <Table>
+                              <thead>
+                                <tr>
+                                  <th>Beginning</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>
+                                    <Checkbox 
+                                      size="xs" 
+                                      label="Vary intro messages" 
+                                      checked={emailSequenceStateRaw.varyIntroMessages}
+                                      onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, varyIntroMessages: e.currentTarget.checked })}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </Table>
+                            <Table>
+                              <thead>
+                                <tr>
+                                  <th>Middle</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>
+                                    <Checkbox 
+                                      size="xs" 
+                                      label="Unique offer" 
+                                      checked={emailSequenceStateRaw.uniqueOffer}
+                                      onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, uniqueOffer: e.currentTarget.checked })}
+                                    />
+                                  </td>
+                                
+                                  <td>
+                                    <Checkbox 
+                                      size="xs" 
+                                      label="How it works" 
+                                      checked={emailSequenceStateRaw.howItWorks}
+                                      onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, howItWorks: e.currentTarget.checked })}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </Table>
+                            <Table>
+                              <thead>
+                                <tr>
+                                  <th>End</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>
+                                    <Checkbox 
+                                      size="xs" 
+                                      label="Breakup message" 
+                                      checked={emailSequenceStateRaw.breakupMessage}
+                                      onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, breakupMessage: e.currentTarget.checked })}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </Table>
                           </Box>
                         </Collapse>
                       </Stack>
@@ -864,32 +902,93 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                             <Text size="sm" fw={500}>
                               Include Templates
                             </Text>
-                            <SimpleGrid mb="sm" cols={2} mt="xs">
-                              <Checkbox 
-                                size="xs" 
-                                label="How it works" 
-                                checked={liSequenceState.howItWorks}
-                                onChange={(e) => setLiSequenceState({ ...liSequenceState, howItWorks: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="Vary intro messages" 
-                                checked={liSequenceState.varyIntroMessages}
-                                onChange={(e) => setLiSequenceState({ ...liSequenceState, varyIntroMessages: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="Breakup message" 
-                                checked={liSequenceState.breakupMessage}
-                                onChange={(e) => setLiSequenceState({ ...liSequenceState, breakupMessage: e.currentTarget.checked })}
-                              />
-                              <Checkbox 
-                                size="xs" 
-                                label="Unique offer" 
-                                checked={liSequenceState.uniqueOffer}
-                                onChange={(e) => setLiSequenceState({ ...liSequenceState, uniqueOffer: e.currentTarget.checked })}
-                              />
-                            </SimpleGrid>
+                            <Box>
+                              <Table>
+                                <thead>
+                                  <tr>
+                                    <th>Beginning</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td>
+                                      <Checkbox
+                                        size="xs"
+                                        label="How it works"
+                                        checked={liSequenceState.howItWorks}
+                                        onChange={(e) =>
+                                          setLiSequenceState({
+                                            ...liSequenceState,
+                                            howItWorks: e.currentTarget.checked,
+                                          })
+                                        }
+                                      />
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </Table>
+                              <Table>
+                                <thead>
+                                  <tr>
+                                    <th>Middle</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td>
+                                      <Checkbox
+                                        size="xs"
+                                        label="Vary intro messages"
+                                        checked={liSequenceState.varyIntroMessages}
+                                        onChange={(e) =>
+                                          setLiSequenceState({
+                                            ...liSequenceState,
+                                            varyIntroMessages: e.currentTarget.checked,
+                                          })
+                                        }
+                                      />
+                                    </td>
+                                    <td>
+                                      <Checkbox
+                                        size="xs"
+                                        label="Unique offer"
+                                        checked={liSequenceState.uniqueOffer}
+                                        onChange={(e) =>
+                                          setLiSequenceState({
+                                            ...liSequenceState,
+                                            uniqueOffer: e.currentTarget.checked,
+                                          })
+                                        }
+                                      />
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </Table>
+                              <Table>
+                                <thead>
+                                  <tr>
+                                    <th>End</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td>
+                                      <Checkbox
+                                        size="xs"
+                                        label="Breakup message"
+                                        checked={liSequenceState.breakupMessage}
+                                        onChange={(e) =>
+                                          setLiSequenceState({
+                                            ...liSequenceState,
+                                            breakupMessage: e.currentTarget.checked,
+                                          })
+                                        }
+                                      />
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </Table>
+                            </Box>
                           </Box>
                         </Collapse>
                       </Stack>

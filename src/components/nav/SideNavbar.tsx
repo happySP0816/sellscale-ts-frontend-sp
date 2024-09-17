@@ -23,6 +23,7 @@ import {
   IconMap,
   IconBooks,
   IconSearch,
+  IconSparkles,
 } from "@tabler/icons-react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
@@ -301,6 +302,14 @@ export default function SideNavbar(props: {}) {
               icon={<IconWorld size="1.0rem" />}
               label="Website"
               tabKey={["website"]}
+            />
+          )}
+
+          {location.href.includes("suggested") && !freeUser && (
+            <SideNavbarItem
+              icon={<IconSparkles size="1.0rem" />}
+              label="Suggested"
+              tabKey={["suggested"]}
             />
           )}
 

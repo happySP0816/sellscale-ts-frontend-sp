@@ -64,7 +64,7 @@ import {
   IconTrash,
   IconX,
 } from "@tabler/icons";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   BumpFramework,
@@ -170,13 +170,14 @@ interface Templates {
   title: string;
 }
 
-export default function SequencesV2(props: any) {
+export const SequencesV2 = React.forwardRef((props: any, ref) => {
   const {
     checkCanToggleEmail,
     togglePersonaChannel,
     statsData,
     checkCanToggleLinkedin,
     updateConnectionType,
+    showComponent
   } = props;
   const params = useParams();
   const userToken = useRecoilValue(userTokenState);
@@ -247,6 +248,10 @@ export default function SequencesV2(props: any) {
 
     setCurrentProject(project);
   };
+
+  useImperativeHandle(ref, () => ({
+    refetchSequenceData
+  }));
 
   const [triggerGenerate, setTriggerGenerate] = useState(0);
 
@@ -555,6 +560,13 @@ export default function SequencesV2(props: any) {
 
   // We also want to move voice related stuff into this Sequence Widget
 
+  const navigate = useNavigate();
+  const [opened, { open, close }] = useDisclosure(false);
+
+  if (showComponent === false) {
+    return null;
+  }
+        
   return (
     <Card
       shadow={"sm"}
@@ -994,7 +1006,7 @@ export default function SequencesV2(props: any) {
       )}
     </Card>
   );
-}
+});
 
 function EmailSequencingV2(props: {
   subjectLines: SubjectLineTemplate[];
@@ -1588,7 +1600,7 @@ function EmailPreviewHeaderV2(props: {
     template: EmailSequenceStep,
     subjectLine: SubjectLineTemplate
   ) => {
-    if (!prospectId || currentTab !== "PROSPECTED") {
+    if (!prospectId || prospectId === -1 || currentTab !== "PROSPECTED") {
       return {
         subject_line: null,
         subject_spam: null,

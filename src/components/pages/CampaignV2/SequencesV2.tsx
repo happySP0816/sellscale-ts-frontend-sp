@@ -183,6 +183,8 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
   const params = useParams();
   const userToken = useRecoilValue(userTokenState);
 
+  const showComponent = props.showComponent;
+
   const [currentProject, setCurrentProject] =
     useRecoilState(currentProjectState);
   const theme = useMantineTheme();
@@ -556,6 +558,10 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
       // await getIntroMessage(selectedProspect.id, true, selectedTemplateId);
     }
   };
+
+  if (showComponent === false) {
+    return <></>;
+  }
 
   // We also want to move voice related stuff into this Sequence Widget
 

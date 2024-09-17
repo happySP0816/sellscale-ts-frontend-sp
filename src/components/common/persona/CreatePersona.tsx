@@ -56,9 +56,11 @@ type PropsType = {
       liCtaGenerator?: boolean;
       ctaTarget?: string;
       selectedVoice?: number;
-      numSteps: number,
+      numStepsEmail: number,
+      numStepsLinkedin: number,
       withData: string,
-      numVariance: number,
+      numVarianceEmail: number,
+      numVarianceLinkedin: number,
       liPainPoint?: string;
       liSequenceState?: {
         howItWorks: boolean;
@@ -130,6 +132,8 @@ export default function CreatePersona(props: PropsType) {
       console.error("Failed to create persona & CTAs", e);
       setCreatingPersona(false);
       return;
+    } finally {
+      setCreatingPersona(false);
     }
     if (result.status === "error") {
       console.error("Failed to create persona & CTAs");

@@ -426,17 +426,18 @@ export default function CampaignTemplateEditModal({
           >
             <Group noWrap spacing={"sm"} w={"100%"}>
               <Switch
-                onChange={() => {
-                  if (!innerProps?.checkCanToggleEmail(true)) {
-                    return;
-                  }
-                  innerProps?.togglePersonaChannel(
-                    id,
-                    "email",
-                    userToken,
-                    !innerProps?.statsData?.email_active
-                  );
-                }}
+              disabled  // disabled for now
+                // onChange={() => {
+                //   if (!innerProps?.checkCanToggleEmail(true)) {
+                //     return;
+                //   }
+                //   innerProps?.togglePersonaChannel(
+                //     id,
+                //     "email",
+                //     userToken,
+                //     !innerProps?.statsData?.email_active
+                //   );
+                // }}
                 checked={innerProps?.statsData?.email_active}
                 labelPosition="left"
                 label={
@@ -514,20 +515,21 @@ export default function CampaignTemplateEditModal({
                 />
               </>
               <Switch
-                onChange={() => {
-                  if (!innerProps?.checkCanToggleLinkedin(true)) {
-                    return;
-                  }
-                  innerProps?.togglePersonaChannel(
-                    id,
-                    "linkedin",
-                    userToken,
-                    !innerProps?.statsData?.linkedin_active
-                  );
-                  console.log(
-                    `LinkedIn channel for persona ${id} has been toggled.`
-                  );
-                }}
+                disabled
+                // onChange={() => {
+                //   if (!innerProps?.checkCanToggleLinkedin(true)) {
+                //     return;
+                //   }
+                //   innerProps?.togglePersonaChannel(
+                //     id,
+                //     "linkedin",
+                //     userToken,
+                //     !innerProps?.statsData?.linkedin_active
+                //   );
+                //   console.log(
+                //     `LinkedIn channel for persona ${id} has been toggled.`
+                //   );
+                // }}
                 checked={innerProps?.statsData?.linkedin_active}
                 labelPosition="left"
                 label={
@@ -1091,8 +1093,8 @@ export default function CampaignTemplateEditModal({
                         )}
                       </Paper>
                       { (sequenceType === "email"
-                              ? emailSequenceData[index]?.length || 0
-                              : linkedinSequenceData[index]?.length || 0 > 0) && <Flex align={"center"} gap={"sm"}>
+                              ? emailSequenceData[index]?.length > 0
+                              : linkedinSequenceData[index]?.length > 0) && <Flex align={"center"} gap={"sm"}>
                         <Divider
                           orientation="vertical"
                           h={40}

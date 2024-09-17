@@ -67,7 +67,7 @@ import OutreachSlider from "../../CampaignShell/OutreachSlider";
 import Personalizers from "./Personalizers";
 import Sequences from "./Sequences";
 import { set } from "lodash";
-import SequencesV2 from "./SequencesV2";
+import {SequencesV2} from "./SequencesV2";
 import {GenerationCenter} from "./GenerationCenter";
 import GenerateAndSend from "@pages/GenerateAndSend";
 // import ToneAdjuster from "./ToneAdjuster";

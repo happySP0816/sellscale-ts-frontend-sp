@@ -2889,6 +2889,8 @@ function NewDetailEmailSequencingV2(props: {
     );
   }
 
+  const [showEditVariants, setShowEditVariants] = useState<boolean>(false);
+
   return (
     <Stack style={{ width: "100%" }}>
       <Flex align={"center"} justify={"space-between"} pos={"relative"}>
@@ -2952,7 +2954,9 @@ function NewDetailEmailSequencingV2(props: {
         >
           <IconArrowLeft size={16} />
         </ActionIcon>
-        <Badge variant={"outline"} radius={"sm"}>
+        <Badge variant={"outline"} radius={"sm"} onClick={() => {
+          setShowEditVariants(prevState => !prevState);
+        }}>
           {`Variant #${activeTemplateIndex + 1}: ${
             props.templates[activeTemplateIndex]?.step.title ?? ""
           }`}
@@ -2965,7 +2969,7 @@ function NewDetailEmailSequencingV2(props: {
           <IconArrowRight size={16} />
         </ActionIcon>
       </Flex>
-      {props.isEditing &&
+      {(props.isEditing || showEditVariants) &&
         (props.currentTab === "PROSPECTED" ? (
           <Tabs
             onTabChange={handleTabChange}

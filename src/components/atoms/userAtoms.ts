@@ -1,4 +1,4 @@
-import { emailSequencesDataType, linkedinSequencesDataType } from "@pages/CampaignV2/Sequences";
+import { emailSequencesDataType, LinkedinInitialMessageDataType, linkedinSequencesDataType } from "@pages/CampaignV2/Sequences";
 import { atom } from "recoil";
 import { ClientSDR, ProspectShallow, SubjectLineTemplate } from "src";
 import { Contact } from "src/components/pages/CampaignV2/ContactsInfiniteScroll";
@@ -33,6 +33,11 @@ const linkedinSequenceState = atom({
   default: (JSON.parse(localStorage.getItem("linkedin-sequence") ?? "{}") || {}) as linkedinSequencesDataType,
 });
 
+const linkedinInitialMessageState = atom({
+  key: "linkedin-initial-message",
+  default: (JSON.parse(localStorage.getItem("linkedin-initial-message") ?? "{}") || {}) as LinkedinInitialMessageDataType[],
+});
+
 const emailSequenceState = atom({
   key: "email-sequence",
   default: (JSON.parse(localStorage.getItem("email-sequence") ?? "{}") || {}) as emailSequencesDataType,
@@ -43,4 +48,4 @@ const adminDataState = atom({
   default: (JSON.parse(localStorage.getItem("admin-data") ?? "{}") || {}) as ClientSDR | null,
 });
 
-export { userTokenState, userDataState, adminDataState, campaignContactsState, linkedinSequenceState, emailSequenceState, emailSubjectLinesState, queryTriggerState };
+export { userTokenState, userDataState, adminDataState, campaignContactsState, linkedinSequenceState, emailSequenceState, emailSubjectLinesState, queryTriggerState, linkedinInitialMessageState };

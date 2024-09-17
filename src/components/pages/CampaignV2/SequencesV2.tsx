@@ -995,7 +995,7 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
       )}
     </Card>
   );
-}
+});
 
 function EmailSequencingV2(props: {
   subjectLines: SubjectLineTemplate[];

@@ -1,4 +1,16 @@
-import { Avatar, Badge, Box, Button, Divider, Flex, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import {
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Paper,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { IconBrandLinkedin } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
 import { useState } from "react";
@@ -8,18 +20,19 @@ export default function SuggestedIdeas() {
     {
       status: "Alumni Outreach",
       title: "McKinsey R&I Outreach",
-      content: "Contact Research & Intelligence alumni working at F500 companies who used to work at McKnsey before.",
+      content:
+        "Contact Research & Intelligence alumni working at F500 companies who used to work at McKnsey before.",
       open: 33,
       lead_count: 50,
       conv: 2,
       profile_to_use: [
         {
           avatar: "",
-          name: "Leon Mishkis",
+          name: "John Doe",
         },
         {
           avatar: "",
-          name: "Emily Ross",
+          name: "John Doe",
         },
       ],
       linkedin: true,
@@ -27,7 +40,8 @@ export default function SuggestedIdeas() {
     {
       status: "conference outreach",
       title: "TechCon Networking",
-      content: "Engage with professionals who attended TechCon this year and are currently working in top tech companies.",
+      content:
+        "Engage with professionals who attended TechCon this year and are currently working in top tech companies.",
       open: 40,
       lead_count: 75,
       conv: 5,
@@ -46,7 +60,8 @@ export default function SuggestedIdeas() {
     {
       status: "webinar attendee follow-up",
       title: "AI & ML Webinar Outreach",
-      content: "Reach out to attendees of the recent AI & ML webinar who showed high engagement during the event.",
+      content:
+        "Reach out to attendees of the recent AI & ML webinar who showed high engagement during the event.",
       open: 45,
       lead_count: 60,
       conv: 4,
@@ -65,7 +80,8 @@ export default function SuggestedIdeas() {
     {
       status: "Competitor Employee Engagement",
       title: "Competitor Alumni Outreach",
-      content: "Contact employees who have recently left competitor companies and now work in mid-sized firms, targeting roles relevant to your offerings.",
+      content:
+        "Contact employees who have recently left competitor companies and now work in mid-sized firms, targeting roles relevant to your offerings.",
       open: 37,
       lead_count: 80,
       conv: 2,
@@ -86,16 +102,23 @@ export default function SuggestedIdeas() {
     <Paper px={60} py={"xl"}>
       <Stack spacing={"md"}>
         <Box>
-          <Title order={3}>Suggested Ideas</Title>
+          <Title order={3}>Suggested Ideas (Beta)</Title>
           <Text size={"sm"} fw={500} color="gray" mt={"xs"}>
-            Selix auto-surface unique campaign ideas. Lorem ipsum dolor sit amet, consetetur adipiscing elit.
+            Selix auto-surface unique campaign ideas. Lorem ipsum dolor sit
+            amet, consetetur adipiscing elit.
           </Text>
           <Divider mt={"sm"} />
         </Box>
         <SimpleGrid cols={3} spacing={"md"}>
           {data.map((item, index) => {
             return (
-              <Paper withBorder radius={"sm"} p={"sm"} key={index} bg={"#fcfcfd"}>
+              <Paper
+                withBorder
+                radius={"sm"}
+                p={"sm"}
+                key={index}
+                bg={"#fcfcfd"}
+              >
                 <Stack spacing={"sm"}>
                   <Badge radius={"sm"} w={"fit-content"} color="green">
                     {item.status}
@@ -104,7 +127,10 @@ export default function SuggestedIdeas() {
                     {item.title}
                   </Text>
                   <Text size={"xs"} color="gray" fw={500} lineClamp={3}>
-                    {item.content} <span className="text-[#228be6] font-semibold">View more</span>
+                    {item.content}{" "}
+                    <span className="text-[#228be6] font-semibold">
+                      View more
+                    </span>
                   </Text>
                   <Paper withBorder p={"sm"} radius={"sm"} my={4}>
                     <Flex align={"center"} justify={"space-between"}>
@@ -142,16 +168,22 @@ export default function SuggestedIdeas() {
                         Profile to use:
                       </Text>
                       <Flex align={"center"} gap={"xs"}>
-                        {item.profile_to_use?.map((profileItem, profileIndex) => {
-                          return (
-                            <Flex align={"center"} key={profileIndex}>
-                              <Avatar size={"sm"} radius={"xl"} src={profileItem.avatar} />
-                              <Text size={"sm"} fw={500}>
-                                {profileItem.name}
-                              </Text>
-                            </Flex>
-                          );
-                        })}
+                        {item.profile_to_use?.map(
+                          (profileItem, profileIndex) => {
+                            return (
+                              <Flex align={"center"} key={profileIndex}>
+                                <Avatar
+                                  size={"sm"}
+                                  radius={"xl"}
+                                  src={profileItem.avatar}
+                                />
+                                <Text size={"sm"} fw={500}>
+                                  {profileItem.name}
+                                </Text>
+                              </Flex>
+                            );
+                          }
+                        )}
                       </Flex>
                     </Box>
                     <Box>
@@ -166,7 +198,10 @@ export default function SuggestedIdeas() {
                       </Flex>
                     </Box>
                   </Flex>
-                  <Button leftIcon={<IconSparkles color="white" />} color="grape">
+                  <Button
+                    leftIcon={<IconSparkles color="white" />}
+                    color="grape"
+                  >
                     Request via Selix
                   </Button>
                 </Stack>

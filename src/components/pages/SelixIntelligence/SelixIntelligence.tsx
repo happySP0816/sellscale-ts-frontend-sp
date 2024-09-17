@@ -1,5 +1,16 @@
 import CustomSelect from "@common/persona/ICPFilter/CustomSelect";
-import { Avatar, Box, Checkbox, Divider, Flex, Paper, Stack, Switch, Text, Title } from "@mantine/core";
+import {
+  Avatar,
+  Box,
+  Checkbox,
+  Divider,
+  Flex,
+  Paper,
+  Stack,
+  Switch,
+  Text,
+  Title,
+} from "@mantine/core";
 import { IconBuilding, IconLetterT, IconMapPin } from "@tabler/icons";
 import { IconUniverse } from "@tabler/icons-react";
 import { DataGrid } from "mantine-data-grid";
@@ -10,7 +21,7 @@ export default function SelixIntelligence() {
     {
       status: true,
       avatar: "",
-      name: "Leon Mishkis",
+      name: "John Doe",
       job: "Marketing Head",
       company: "Alpha Tech",
       university: "University of Penn",
@@ -19,7 +30,7 @@ export default function SelixIntelligence() {
     {
       status: true,
       avatar: "",
-      name: "Luise Mohan",
+      name: "John Doe",
       job: "Director",
       company: "Botanica",
       university: "Stanford University",
@@ -28,7 +39,7 @@ export default function SelixIntelligence() {
     {
       status: true,
       avatar: "",
-      name: "SAscha S.",
+      name: "John Doe",
       job: "Co-Founder",
       company: "Zetta Group",
       university: "Harward",
@@ -37,7 +48,7 @@ export default function SelixIntelligence() {
     {
       status: true,
       avatar: "",
-      name: "Jimmy N.",
+      name: "John Doe",
       job: "Sales Head",
       company: "Beta Force",
       university: "University of Penn",
@@ -46,7 +57,7 @@ export default function SelixIntelligence() {
     {
       status: true,
       avatar: "",
-      name: "Patiwat P.",
+      name: "John Doe",
       job: "Managing Head",
       company: "Wishhh",
       university: "University of Penn",
@@ -54,7 +65,11 @@ export default function SelixIntelligence() {
     },
   ]);
 
-  const [newEvents, setNewEvents] = useState(["New Publication", "R&D Budget", "Hired new insights leader"]);
+  const [newEvents, setNewEvents] = useState([
+    "New Publication",
+    "R&D Budget",
+    "Hired new insights leader",
+  ]);
 
   return (
     <Paper p={"md"} radius={"sm"} withBorder bg={"#fcfcfd"}>
@@ -66,7 +81,8 @@ export default function SelixIntelligence() {
             </Title>
           </Flex>
           <Text size={"xs"} color="gray">
-            Connect data sources to Selix to make smart and proactive outreach recommendations
+            Connect data sources to Selix to make smart and proactive outreach
+            recommendations
           </Text>
         </Box>
         <Paper withBorder radius={"sm"} p={"sm"}>
@@ -77,7 +93,8 @@ export default function SelixIntelligence() {
             <Switch defaultChecked />
           </Flex>
           <Text size={"xs"} color="gray">
-            Get recommendations based on champions, new account closed, and new opportunities.
+            Get recommendations based on champions, new account closed, and new
+            opportunities.
           </Text>
         </Paper>
         <Paper withBorder radius={"sm"} p={"sm"}>
@@ -88,16 +105,27 @@ export default function SelixIntelligence() {
             <Switch defaultChecked />
           </Flex>
           <Text size={"xs"} color="gray">
-            Based on upcoming, external events. like conference or travels, determine new campaign ideas.
+            Based on upcoming, external events. like conference or travels,
+            determine new campaign ideas.
           </Text>
           <Stack spacing={"xs"} mt={"sm"}>
             {calendarsData.map((item, index) => {
               return (
-                <Paper withBorder p={"xs"} radius={"sm"} key={index} bg={"#fcfcfd"}>
+                <Paper
+                  withBorder
+                  p={"xs"}
+                  radius={"sm"}
+                  key={index}
+                  bg={"#fcfcfd"}
+                >
                   <Flex gap={"sm"} align={"center"}>
                     <Checkbox defaultChecked={item.status} />
                     <Avatar radius={"xl"} size={"sm"} src={item.avatar} />
-                    <Text size={"sm"} fw={500} color={item.status ? "" : "green"}>
+                    <Text
+                      size={"sm"}
+                      fw={500}
+                      color={item.status ? "" : "green"}
+                    >
                       {item.name}
                     </Text>
                     <Divider orientation="vertical" />
@@ -118,7 +146,8 @@ export default function SelixIntelligence() {
             <Switch defaultChecked />
           </Flex>
           <Text size={"xs"} color="gray" mb={"sm"}>
-            Scour the news, daily. for net new events to generate new and timely campaign ideas
+            Scour the news, daily. for net new events to generate new and timely
+            campaign ideas
           </Text>
           <CustomSelect
             maxWidth="100%"
@@ -139,7 +168,8 @@ export default function SelixIntelligence() {
             <Switch defaultChecked />
           </Flex>
           <Text size={"xs"} color="gray">
-            Searches the web for upcoming conferences related to the ICPs that you target
+            Searches the web for upcoming conferences related to the ICPs that
+            you target
           </Text>
         </Paper>
         <Paper withBorder radius={"sm"} p={"sm"}>
@@ -150,7 +180,8 @@ export default function SelixIntelligence() {
             <Switch defaultChecked />
           </Flex>
           <Text size={"xs"} color="gray">
-            Based on your team's alumni network and location and past work history, finds relevant contacts to reach out to.
+            Based on your team's alumni network and location and past work
+            history, finds relevant contacts to reach out to.
           </Text>
           <DataGrid
             data={calendarsData}

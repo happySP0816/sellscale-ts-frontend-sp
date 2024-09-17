@@ -2131,16 +2131,18 @@ const SegmentChat = (props: any) => {
   let formattedMemoryLine = clientMemoryState;
   const sessions = memoryState?.sessions;
 
-  for (const session of sessions) {
-    if (formattedMemoryLine?.includes(session.title)) {
-      let titleToReplace = session.title;
-      if (formattedMemoryLine?.includes("@" + session.title)) {
-        titleToReplace = "@" + session.title;
+  if (sessions && Array.isArray(sessions)) {
+    for (const session of sessions) {
+      if (formattedMemoryLine?.includes(session.title)) {
+        let titleToReplace = session.title;
+        if (formattedMemoryLine?.includes("@" + session.title)) {
+          titleToReplace = "@" + session.title;
+        }
+        formattedMemoryLine = formattedMemoryLine.replace(
+          titleToReplace,
+          `<span style="color: #333; cursor: pointer; border: 1px solid gray; padding: 1px 4px; background-color: white; border-radius: 4px;" data-title="${titleToReplace}">${titleToReplace}</span>`
+        );
       }
-      formattedMemoryLine = formattedMemoryLine.replace(
-        titleToReplace,
-        `<span style="color: #333; cursor: pointer; border: 1px solid gray; padding: 1px 4px; background-color: white; border-radius: 4px;" data-title="${titleToReplace}">${titleToReplace}</span>`
-      );
     }
   }
 

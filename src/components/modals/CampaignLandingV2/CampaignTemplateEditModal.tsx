@@ -963,12 +963,14 @@ export default function CampaignTemplateEditModal({
                           ? "Initial Messages"
                           : "CTAs and Personalizers"}
                       </Text>
-                    <Text color="gray" size={"sm"}>
-                      {linkedinInitialMessageData?.length ?? 0}{" "}
-                      {linkedinInitialMessageData?.length === 1
-                        ? "Message"
-                        : "Messages"}
-                    </Text>
+                    {currentProject?.template_mode && (
+                      <Text color="gray" size={"sm"}>
+                        {linkedinInitialMessageData?.length ?? 0}{" "}
+                        {linkedinInitialMessageData?.length === 1
+                          ? "Message"
+                          : "Messages"}
+                      </Text>
+                    )}
                     </Flex>
                   </Paper>
                   <Divider

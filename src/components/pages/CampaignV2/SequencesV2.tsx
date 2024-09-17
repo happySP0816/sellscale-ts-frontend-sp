@@ -3,6 +3,7 @@ import {
   campaignContactsState,
   emailSequenceState,
   emailSubjectLinesState,
+  linkedinInitialMessageState,
   linkedinSequenceState,
   userDataState,
   userTokenState,
@@ -246,6 +247,8 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
     {}
   );
 
+  const [linkedinInitialMessageData, setLinkedinInitialMessageData] = useRecoilState(linkedinInitialMessageState);
+
   const triggerProjectRefresh = async function () {
     const project = await getFreshCurrentProject(
       userToken,
@@ -469,7 +472,7 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
         setLinkedinSequenceGenerationInProgress(
           sequencesData.li_seq_generation_in_progress
         );
-
+        setLinkedinInitialMessageData(sequencesData.initial_message_templates);
         setEmailSubjectLines(sequencesData.email_subject_lines);
         setLinkedinInitialMessageViewing(
           sequencesData.initial_message_templates?.[0]?.title

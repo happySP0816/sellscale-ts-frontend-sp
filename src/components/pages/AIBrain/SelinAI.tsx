@@ -131,7 +131,7 @@ import SellScaleAssistant from "./SellScaleAssistant";
 import Personalizers from "@pages/CampaignV2/Personalizers";
 import ContactAccountFilterModal from "@modals/ContactAccountFilterModal";
 import UploadProspectsModal from "@modals/UploadProspectsModal";
-import {SequencesV2} from "@pages/CampaignV2/SequencesV2";
+import { SequencesV2 } from "@pages/CampaignV2/SequencesV2";
 import { set } from "lodash";
 import { setSmartleadCampaign } from "@utils/requests/setSmartleadCampaign";
 import SelixMemoryLogs from "./SelinMemoryLogs";
@@ -1869,8 +1869,12 @@ const SegmentChat = (props: any) => {
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
   const [fetchingMemoryState, setFetchingMemoryState] = useState(false);
+  const [memoryLineEditMode, setMemoryLineEditMode] = useState(false);
 
   const [memoryState, setMemoryState] = useState<any>(props.memoryState);
+  const [memoryLineHoverData, setMemoryLineHoverData]: any = useState<
+    string | null
+  >();
 
   const handleListClick = async (prompt: string) => {
     handleSubmit(undefined, prompt);
@@ -2117,6 +2121,62 @@ const SegmentChat = (props: any) => {
     needs_ai_input: "Other to-do's: ",
   };
 
+  useEffect(() => {
+    setMemoryLineEditMode(false);
+  }, []);
+
+  let formattedMemoryLine = clientMemoryState;
+  const sessions = memoryState?.sessions;
+
+  for (const session of sessions) {
+    if (formattedMemoryLine.includes(session.title)) {
+      let titleToReplace = session.title;
+      if (formattedMemoryLine.includes("@" + session.title)) {
+        titleToReplace = "@" + session.title;
+      }
+      formattedMemoryLine = formattedMemoryLine.replace(
+        titleToReplace,
+        `<span style="color: #333; cursor: pointer; border: 1px solid gray; padding: 1px 4px; background-color: white; border-radius: 4px;" data-title="${titleToReplace}">${titleToReplace}</span>`
+      );
+    }
+  }
+
+  const hoverHandler = (session: any) => {
+    setMemoryLineHoverData(session.memory);
+  };
+
+  useEffect(() => {
+    const handleSpanHover = (event: any) => {
+      if (event.target && event.target.dataset.title) {
+        const session = sessions.find(
+          (s: any) =>
+            s.title === event.target.dataset.title ||
+            "@" + s.title === event.target.dataset.title
+        );
+        if (session) {
+          hoverHandler(session);
+        }
+      }
+    };
+
+    const handleSpanMouseLeave = (event: any) => {
+      if (event.target && event.target.dataset.title) {
+        setMemoryLineHoverData(null);
+      }
+    };
+
+    document.addEventListener("mouseover", handleSpanHover);
+    document.addEventListener("mouseout", handleSpanMouseLeave);
+
+    return () => {
+      document.removeEventListener("mouseover", handleSpanHover);
+      document.removeEventListener("mouseout", handleSpanMouseLeave);
+    };
+  }, [sessions]);
+
+  console.log("Formatted memory state:", formattedMemoryLine);
+  console.log("Sessions:", sessions);
+
   return (
     <Paper withBorder shadow="sm" radius={"md"} w={"35%"} h={"100%"}>
       <Flex
@@ -2129,7 +2189,7 @@ const SegmentChat = (props: any) => {
       >
         <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
         <Text fw={600}>Chat with Selix</Text>
-        <HoverCard width={400} shadow="md">
+        <HoverCard width={360} shadow="md" position="left">
           <HoverCard.Target>
             <Text
               ml={"auto"}
@@ -2158,7 +2218,7 @@ const SegmentChat = (props: any) => {
                 </Tooltip>
               )}
             </Flex>
-            <Card withBorder mah={600} p="md" sx={{ overflow: "auto" }}>
+            <Card withBorder mah={700} p="md" sx={{ overflow: "auto" }}>
               <Flex>
                 <Text size="sm" color="gray" fw="500">
                   Currently working on:
@@ -2171,18 +2231,53 @@ const SegmentChat = (props: any) => {
                 ></SelixMemoryLogs>
               </Flex>
 
-              <Textarea
-                placeholder="Type your notes here..."
-                autosize
-                minRows={3}
-                value={clientMemoryState}
-                onChange={(e) => {
-                  setClientMemoryState(e.target.value);
-                  setMemoryStateChanged(true);
-                }}
-                size="xs"
-                mb="0px"
-              />
+              {memoryLineEditMode ? (
+                <Textarea
+                  placeholder="Type your notes here..."
+                  autosize
+                  minRows={3}
+                  value={clientMemoryState}
+                  onChange={(e) => {
+                    setClientMemoryState(e.target.value);
+                    setMemoryStateChanged(true);
+                  }}
+                  size="xs"
+                  mb="0px"
+                />
+              ) : (
+                <HoverCard
+                  position="right"
+                  width={200}
+                  shadow="md"
+                  withinPortal
+                >
+                  <HoverCard.Target>
+                    <Text
+                      size="xs"
+                      p="xs"
+                      onClick={() => {
+                        setMemoryLineEditMode(true);
+                        setMemoryStateChanged(true);
+                      }}
+                      sx={{ cursor: "pointer" }}
+                      dangerouslySetInnerHTML={{
+                        __html: (
+                          formattedMemoryLine || "Click to add notes..."
+                        ).replace(/\n/g, "<br>"),
+                      }}
+                    />
+                  </HoverCard.Target>
+                  <HoverCard.Dropdown
+                    miw={memoryLineHoverData ? 500 : 0}
+                    display={memoryLineHoverData ? "block" : "none"}
+                  >
+                    <Text
+                      size="xs"
+                      dangerouslySetInnerHTML={{ __html: memoryLineHoverData }}
+                    />
+                  </HoverCard.Dropdown>
+                </HoverCard>
+              )}
 
               <Text align="right" size="12px" color="gray" mt="2px" ml="auto">
                 Last updated:{" "}
@@ -2247,6 +2342,7 @@ const SegmentChat = (props: any) => {
                         new Date().toLocaleString()
                       );
                       setMemoryStateChanged(false);
+                      setMemoryLineEditMode(false);
                     }}
                   >
                     ✓
@@ -2262,6 +2358,7 @@ const SegmentChat = (props: any) => {
                         props.memory?.memory_line_time_updated
                       );
                       setMemoryStateChanged(false);
+                      setMemoryLineEditMode(false);
                     }}
                   >
                     ✗
@@ -2289,167 +2386,151 @@ const SegmentChat = (props: any) => {
                       )}
 
                       {Array.isArray(memoryState[x]) &&
-                        memoryState[x].map((y: any) => (
-                          <>
-                            <Box id={`memory-${y.memory}`}>
-                              <HoverCard
-                                width={500}
-                                shadow="md"
-                                withinPortal
-                                position="right"
-                              >
-                                <HoverCard.Target>
-                                  <Flex>
-                                    <Box
-                                      ml="4px"
-                                      sx={{
-                                        // border: `${
-                                        //   y["highlighted"] ? "2" : "1"
-                                        // }px solid`,
-                                        // borderColor: y["highlighted"]
-                                        //   ? "pink"
-                                        //   : "gray",
-                                        border: "1px solid",
-                                        borderColor: "gray",
-                                        borderRadius: "8px",
-                                        position: "relative",
-                                        display: "inline-block",
-                                        cursor: "pointer",
-                                        fontSize: "10px",
-                                        padding: "2px",
-                                        marginBottom: "4px",
-                                        marginRight: "4px",
-                                        paddingLeft: "8px",
-                                        paddingRight: "8px",
-                                        paddingTop: "2px",
-                                        paddingBottom: "2px",
-                                      }}
-                                      onMouseEnter={(e) => {
-                                        const target: any = e.currentTarget;
-                                        if (
-                                          x === "campaigns" ||
-                                          x === "sessions"
-                                        ) {
-                                          return;
-                                        }
-                                        target.querySelector(
-                                          ".hover-icons"
-                                        )!.style.display = "flex";
-                                      }}
-                                      onMouseLeave={(e) => {
-                                        const target: any = e.currentTarget;
-                                        if (
-                                          x === "campaigns" ||
-                                          x === "sessions"
-                                        ) {
-                                          return;
-                                        }
-                                        target.querySelector(
-                                          ".hover-icons"
-                                        )!.style.display = "none";
-                                      }}
-                                    >
-                                      <Text p="0" m="0" size="xs" color="black">
-                                        {y["title"].substring(0, 36) +
-                                          (y["title"].length > 36 ? "..." : "")}
-                                      </Text>
-                                      <Flex
-                                        className="hover-icons"
+                        memoryState[x]
+                          .filter(
+                            (y: any) => !clientMemoryState?.includes(y.title)
+                          )
+                          .map((y: any) => (
+                            <>
+                              <Box id={`memory-${y.memory}`}>
+                                <HoverCard
+                                  width={500}
+                                  shadow="md"
+                                  withinPortal
+                                  position="right"
+                                >
+                                  <HoverCard.Target>
+                                    <Flex>
+                                      <Box
+                                        ml="4px"
                                         sx={{
-                                          display: "none",
-                                          position: "absolute",
-                                          top: "4px",
-                                          right: "4px",
-                                          gap: "4px",
-                                          backgroundColor: "white",
+                                          border: "1px solid",
+                                          borderColor: "gray",
+                                          borderRadius: "8px",
+                                          position: "relative",
+                                          display: "inline-block",
+                                          cursor: "pointer",
+                                          fontSize: "10px",
+                                          padding: "2px",
+                                          marginBottom: "4px",
+                                          marginRight: "4px",
+                                          paddingLeft: "8px",
+                                          paddingRight: "8px",
+                                          paddingTop: "2px",
+                                          paddingBottom: "2px",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          const target: any = e.currentTarget;
+                                          if (
+                                            x === "campaigns" ||
+                                            x === "sessions"
+                                          ) {
+                                            return;
+                                          }
+                                          target.querySelector(
+                                            ".hover-icons"
+                                          )!.style.display = "flex";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          const target: any = e.currentTarget;
+                                          if (
+                                            x === "campaigns" ||
+                                            x === "sessions"
+                                          ) {
+                                            return;
+                                          }
+                                          target.querySelector(
+                                            ".hover-icons"
+                                          )!.style.display = "none";
                                         }}
                                       >
-                                        <Tooltip
-                                          label="Mark as Cancelled"
-                                          withArrow
+                                        <Text
+                                          p="0"
+                                          m="0"
+                                          size="xs"
+                                          color="black"
                                         >
-                                          <ActionIcon
-                                            size="xs"
-                                            color="red"
-                                            onClick={() => {
-                                              const id = y.id;
-                                              changeMemoryStatus(
-                                                id,
-                                                "CANCELLED"
-                                              );
-                                              // const target = document.getElementById(
-                                              //   `memory-${y.memory}`
-                                              // );
-                                              // if (target) {
-                                              //   target.style.display = "none";
-                                              // }
-                                            }}
-                                          >
-                                            <IconX size={12} />
-                                          </ActionIcon>
-                                        </Tooltip>
-                                        <Tooltip
-                                          label="Mark as Complete"
-                                          withArrow
+                                          {y["title"].substring(0, 36) +
+                                            (y["title"].length > 36
+                                              ? "..."
+                                              : "")}
+                                        </Text>
+                                        <Flex
+                                          className="hover-icons"
+                                          sx={{
+                                            display: "none",
+                                            position: "absolute",
+                                            top: "4px",
+                                            right: "4px",
+                                            gap: "4px",
+                                            backgroundColor: "white",
+                                          }}
                                         >
-                                          <ActionIcon
-                                            size="xs"
-                                            color="green"
-                                            onClick={() => {
-                                              const id = y.id;
-                                              changeMemoryStatus(
-                                                id,
-                                                "COMPLETE"
-                                              );
-                                              // const target = document.getElementById(
-                                              //   `memory-${y.memory}`
-                                              // );
-                                              // if (target) {
-                                              //   target.style.display = "none";
-                                              // }
-                                            }}
+                                          <Tooltip
+                                            label="Mark as Cancelled"
+                                            withArrow
                                           >
-                                            <IconCheck size={12} />
-                                          </ActionIcon>
-                                        </Tooltip>
-                                      </Flex>
-                                    </Box>
-                                    {(x === "campaigns" ||
-                                      x === "sessions") && (
-                                      <Box ml="4px" pt="2px">
-                                        <IconCloud size="0.9rem" color="gray" />
+                                            <ActionIcon
+                                              size="xs"
+                                              color="red"
+                                              onClick={() => {
+                                                const id = y.id;
+                                                changeMemoryStatus(
+                                                  id,
+                                                  "CANCELLED"
+                                                );
+                                              }}
+                                            >
+                                              <IconX size={12} />
+                                            </ActionIcon>
+                                          </Tooltip>
+                                          <Tooltip
+                                            label="Mark as Complete"
+                                            withArrow
+                                          >
+                                            <ActionIcon
+                                              size="xs"
+                                              color="green"
+                                              onClick={() => {
+                                                const id = y.id;
+                                                changeMemoryStatus(
+                                                  id,
+                                                  "COMPLETE"
+                                                );
+                                              }}
+                                            >
+                                              <IconCheck size={12} />
+                                            </ActionIcon>
+                                          </Tooltip>
+                                        </Flex>
                                       </Box>
-                                    )}
-                                  </Flex>
-                                </HoverCard.Target>
-                                <HoverCard.Dropdown maw={500}>
-                                  {/* <Text size="sm" color="black" fw={600}>
-                                    {y["title"]}
-                                  </Text> */}
-                                  <Text
-                                    size="xs"
-                                    color="black"
-                                    fw={400}
-                                    dangerouslySetInnerHTML={{
-                                      __html:
-                                        y["memory"] &&
-                                        y["memory"].replaceAll("\n", "<br>"),
-                                    }}
-                                  />
-                                  {/* {y["highlighted"] && (
-                                    <Badge
+                                      {(x === "campaigns" ||
+                                        x === "sessions") && (
+                                        <Box ml="4px" pt="2px">
+                                          <IconCloud
+                                            size="0.9rem"
+                                            color="gray"
+                                          />
+                                        </Box>
+                                      )}
+                                    </Flex>
+                                  </HoverCard.Target>
+                                  <HoverCard.Dropdown maw={500}>
+                                    <Text
                                       size="xs"
-                                      color="pink"
-                                      variant="filled"
-                                    >
-                                      💡 This is a prioritized memory
-                                    </Badge>
-                                  )} */}
-                                </HoverCard.Dropdown>
-                              </HoverCard>
-                            </Box>
-                          </>
-                        ))}
+                                      color="black"
+                                      fw={400}
+                                      dangerouslySetInnerHTML={{
+                                        __html:
+                                          y["memory"] &&
+                                          y["memory"].replaceAll("\n", "<br>"),
+                                      }}
+                                    />
+                                  </HoverCard.Dropdown>
+                                </HoverCard>
+                              </Box>
+                            </>
+                          ))}
 
                       <Box mt="sm">
                         {(x == "needs_user_input" || x == "needs_ai_input") && (

@@ -168,7 +168,7 @@ export default function CampaignTemplateEditModal({
   );
   const [generatingSubjectLines, setGeneratingSubjectLines] = useState(false);
   const [currentStepNum, setCurrentStepNum] = useState(
-    innerProps.currentStepNum || 1 || null
+    (innerProps.currentStepNum || innerProps.currentStepNum === 0) ? innerProps.currentStepNum : 1
   );
   const [generateSequence, setGenerateSequence] = useState(false);
   const [openid, setOpenId] = useState<number>(0);
@@ -244,7 +244,7 @@ export default function CampaignTemplateEditModal({
     });
   };
 
-  const [activeTab, setActiveTab] = useState<string | null>("personalization");
+  const [activeTab, setActiveTab] = useState<string | null>("ctas");
   const [
     personalizationItemsCount,
     setPersonalizationItemsCount,
@@ -1415,7 +1415,7 @@ export default function CampaignTemplateEditModal({
                         variant="pills"
                         keepMounted={true}
                         radius="md"
-                        defaultValue="none"
+                        defaultValue="ctas"
                         allowTabDeactivation
                       >
                         <Tabs.List>

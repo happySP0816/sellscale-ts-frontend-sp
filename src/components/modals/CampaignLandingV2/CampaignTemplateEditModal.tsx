@@ -965,10 +965,10 @@ export default function CampaignTemplateEditModal({
                       </Text>
                     {currentProject?.template_mode && (
                       <Text color="gray" size={"sm"}>
-                        {linkedinInitialMessageData?.length ?? 0}{" "}
-                        {linkedinInitialMessageData?.length === 1
-                          ? "Message"
-                          : "Messages"}
+                        {linkedinInitialMessageData?.filter(message => message.active).length ?? 0}{" "}
+                        {linkedinInitialMessageData?.filter(message => message.active).length === 1
+                          ? "Active"
+                          : "Active"}
                       </Text>
                     )}
                     </Flex>
@@ -1417,8 +1417,9 @@ export default function CampaignTemplateEditModal({
                 <>
                 <ScrollArea viewportRef={viewport} h={200}>
                   {linkedinInitialMessageData.length > 0 && currentProject?.template_mode &&  
-                    linkedinInitialMessageData.map(
-                      (messageData: LinkedinInitialMessageDataType, index: number) => (
+                    [...linkedinInitialMessageData]
+                      .sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))
+                      .map((messageData: LinkedinInitialMessageDataType, index: number) => (
                         <Box p={"xs"} h={"100%"}>
                         <SequenceVariant
                           asset={messageData}
@@ -1754,11 +1755,18 @@ export default function CampaignTemplateEditModal({
                   <ScrollArea viewportRef={viewport} h={"100%"}>
                     <Flex p={"lg"} h={"100%"} direction={"column"}>
                       {/* existing assets */}
-                      {(sequenceType === "email"
-                        ? emailSequenceData[currentStepNum - 1]
-                        : linkedinSequenceData[currentStepNum - 1]
-                      )?.map((existingAsset: any, index2: number) => {
-                        return (
+                      {Array.isArray(
+                        sequenceType === "email"
+                          ? emailSequenceData[currentStepNum - 1] // Check if it's an array
+                          : linkedinSequenceData[currentStepNum - 1] // Check if it's an array
+                      ) &&
+                        (sequenceType === "email"
+                          ? [...emailSequenceData[currentStepNum - 1]] // Create shallow copy
+                          : [...linkedinSequenceData[currentStepNum - 1]] || []
+                        )
+                          ?.sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))
+                          .map((existingAsset: any, index2: number) => {
+                            return (
                           <SequenceVariant
                             asset={existingAsset}
                             assetType={sequenceType}

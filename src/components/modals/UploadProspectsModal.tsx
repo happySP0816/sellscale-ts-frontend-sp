@@ -941,38 +941,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                                 <tbody>
                                   <tr>
                                     <td>
-                                      <HoverCard width={280} shadow="md">
-                                        <HoverCard.Target>
-                                          <Checkbox
-                                            size="xs"
-                                            label="How it works"
-                                            checked={liSequenceState.howItWorks}
-                                            onChange={(e) =>
-                                              setLiSequenceState({
-                                                ...liSequenceState,
-                                                howItWorks: e.currentTarget.checked,
-                                              })
-                                            }
-                                          />
-                                        </HoverCard.Target>
-                                        <HoverCard.Dropdown>
-                                          <Text size="sm">One of the messages will be a description on how it works. This is nice because it gives the prospect a better understanding of what you do.</Text>
-                                        </HoverCard.Dropdown>
-                                      </HoverCard>
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </Table>
-                              <Table>
-                                <thead>
-                                  <tr>
-                                    <th>Middle</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <tr>
-                                    <td>
-                                      <HoverCard width={280} shadow="md">
+                                    <HoverCard width={280} shadow="md">
                                         <HoverCard.Target>
                                           <Checkbox
                                             size="xs"
@@ -988,6 +957,38 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                                         </HoverCard.Target>
                                         <HoverCard.Dropdown>
                                           <Text size="sm">The first message will contain various creative angles.</Text>
+                                        </HoverCard.Dropdown>
+                                      </HoverCard>
+                                      
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </Table>
+                              <Table>
+                                <thead>
+                                  <tr>
+                                    <th>Middle</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td>
+                                    <HoverCard width={280} shadow="md">
+                                        <HoverCard.Target>
+                                          <Checkbox
+                                            size="xs"
+                                            label="How it works"
+                                            checked={liSequenceState.howItWorks}
+                                            onChange={(e) =>
+                                              setLiSequenceState({
+                                                ...liSequenceState,
+                                                howItWorks: e.currentTarget.checked,
+                                              })
+                                            }
+                                          />
+                                        </HoverCard.Target>
+                                        <HoverCard.Dropdown>
+                                          <Text size="sm">One of the messages will be a description on how it works. This is nice because it gives the prospect a better understanding of what you do.</Text>
                                         </HoverCard.Dropdown>
                                       </HoverCard>
                                     </td>

@@ -409,6 +409,14 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                 <Text size="sm" color="gray" mb="md">
                   {moment(selectedLog.created_date).fromNow()}
                 </Text>
+                <Text
+                  size="10px"
+                  mb="4px"
+                  color="gray"
+                  dangerouslySetInnerHTML={{
+                    __html: selectedLog.metadata.replaceAll("\n", "<br />"),
+                  }}
+                />
                 <Textarea
                   value={selectedLog.description}
                   readOnly

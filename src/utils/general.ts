@@ -299,7 +299,7 @@ export function getBrowserExtensionURL(isFirefox: boolean) {
   if (isFirefox) {
     return 'https://addons.mozilla.org/en-US/firefox/addon/sellscale-browser-extension/';
   } else {
-    return 'https://chrome.google.com/webstore/detail/sellscale-browser-extensi/hicchmdfaadkadnmmkdjmcilgaplfeoa/';
+    return 'https://chromewebstore.google.com/detail/sellscale-browser-extensi/hicchmdfaadkadnmmkdjmcilgaplfeoa';
   }
 }
 

@@ -1415,7 +1415,7 @@ export default function CampaignTemplateEditModal({
             <Box>
               {currentStepNum === 0 && sequenceType === "linkedin" && (
                 <>
-                <ScrollArea viewportRef={viewport} h={350}>
+                <ScrollArea viewportRef={viewport} h={200}>
                   {linkedinInitialMessageData.length > 0 && currentProject?.template_mode &&  
                     linkedinInitialMessageData.map(
                       (messageData: LinkedinInitialMessageDataType, index: number) => (
@@ -1652,7 +1652,7 @@ export default function CampaignTemplateEditModal({
                 </ScrollArea>
                 {currentProject?.template_mode &&  <Flex direction="column" p="lg" gap="md">
                   <Textarea
-                    placeholder="Enter initial LinkedIn message"
+                    placeholder="Prefer to create your own initial message? Add it here"
                     value={linkedinInitialMessageEntry}
                     onChange={(event) =>
                       setLinkedinInitialMessageEntry(event.currentTarget.value)
@@ -1660,16 +1660,25 @@ export default function CampaignTemplateEditModal({
                     autosize
                     minRows={3}
                   />
-                  <Button
-                    onClick={() => {
-                      if (linkedinInitialMessageEntry) {
-                        setLinkedinInitialMessageStagingData((prevData: any[]) => [...prevData, linkedinInitialMessageEntry])
-                        setLinkedinInitialMessageEntry("");
-                      }
-                    }}
-                  >
-                    Queue to add
-                  </Button>
+                  <Flex justify="flex-end">
+                    <Button
+                      rightIcon={<IconArrowRight size={"0.8rem"} />}
+                      onClick={() => {
+                        if (linkedinInitialMessageEntry) {
+                          setLinkedinInitialMessageStagingData((prevData: any[]) => [...prevData, linkedinInitialMessageEntry])
+                          setLinkedinInitialMessageEntry("");
+                          setTimeout(() => {
+                            viewport.current?.scrollTo({
+                              top: viewport.current?.scrollHeight,
+                              behavior: "smooth",
+                            });
+                          }, 20);
+                        }
+                      }}
+                    >
+                      Add Message
+                    </Button>
+                  </Flex>
                 </Flex>}
                 </>
               )}

@@ -1104,15 +1104,15 @@ export default function CampaignTemplateEditModal({
                           </ThemeIcon>
                           <Text size={"xs"} fw={600}>
                             {sequenceType === "email"
-                              ? emailSequenceData[index]?.length || 0
-                              : linkedinSequenceData[index]?.length || 0}{" "}
+                              ? emailSequenceData[index]?.filter(template => template.active).length || 0
+                              : linkedinSequenceData[index]?.filter(template => template.active).length || 0}{" "}
                             {sequenceType === "email"
-                              ? (emailSequenceData[index]?.length || 0) > 1
-                                ? "Templates"
-                                : "Template"
-                              : (linkedinSequenceData[index]?.length || 0) > 1
-                                ? "Templates"
-                                : "Template"}
+                              ? (emailSequenceData[index]?.filter(template => template.active).length || 0) > 1
+                                ? "Templates Active"
+                                : "Template Active"
+                              : (linkedinSequenceData[index]?.filter(template => template.active).length || 0) > 1
+                                ? "Templates Active"
+                                : "Template Active"}
                           </Text>
                         </Flex>
                         {stagingData[sequenceType] && (

@@ -51,10 +51,18 @@ export const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void; outline
   const userToken = useRecoilValue(userTokenState);
   const [ctaActiveStatusesToShow, setCtaActiveStatusesToShow] = useState<boolean[]>([true]);
 
+  let archetypeId = window.location.pathname.split('/').pop();
+  if (!isNaN(Number(archetypeId))) {
+    console.log(`Archetype ID: ${archetypeId}`);
+  } else {
+    archetypeId = undefined;
+    console.error('Invalid Archetype ID');
+  }
+
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-cta-data-${currentProject?.id}`],
     queryFn: async ({ queryKey }) => {
-      const response = await fetch(`${API_URL}/client/archetype/${currentProject?.id}/get_ctas`, {
+      const response = await fetch(`${API_URL}/client/archetype/${archetypeId || currentProject?.id}/get_ctas`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${userToken}`,

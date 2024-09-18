@@ -23,6 +23,7 @@ import {
   NumberInput,
   Checkbox,
   Table,
+  HoverCard,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useEffect, useRef, useState } from "react";
@@ -692,12 +693,19 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                               <tbody>
                                 <tr>
                                   <td>
-                                    <Checkbox 
-                                      size="xs" 
-                                      label="Vary intro messages" 
-                                      checked={emailSequenceStateRaw.varyIntroMessages}
-                                      onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, varyIntroMessages: e.currentTarget.checked })}
-                                    />
+                                    <HoverCard width={280} shadow="md">
+                                      <HoverCard.Target>
+                                        <Checkbox 
+                                          size="xs" 
+                                          label="Vary intro messages" 
+                                          checked={emailSequenceStateRaw.varyIntroMessages}
+                                          onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, varyIntroMessages: e.currentTarget.checked })}
+                                        />
+                                      </HoverCard.Target>
+                                      <HoverCard.Dropdown>
+                                        <Text size="sm">The first message will contain various creative angles.</Text>
+                                      </HoverCard.Dropdown>
+                                    </HoverCard>
                                   </td>
                                 </tr>
                               </tbody>
@@ -711,21 +719,35 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                               <tbody>
                                 <tr>
                                   <td>
-                                    <Checkbox 
-                                      size="xs" 
-                                      label="Unique offer" 
-                                      checked={emailSequenceStateRaw.uniqueOffer}
-                                      onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, uniqueOffer: e.currentTarget.checked })}
-                                    />
+                                    <HoverCard width={280} shadow="md">
+                                      <HoverCard.Target>
+                                        <Checkbox 
+                                          size="xs" 
+                                          label="Unique offer" 
+                                          checked={emailSequenceStateRaw.uniqueOffer}
+                                          onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, uniqueOffer: e.currentTarget.checked })}
+                                        />
+                                      </HoverCard.Target>
+                                      <HoverCard.Dropdown>
+                                        <Text size="sm">One of the message variants will contain a unique offer relevant to your business.</Text>
+                                      </HoverCard.Dropdown>
+                                    </HoverCard>
                                   </td>
                                 
                                   <td>
-                                    <Checkbox 
-                                      size="xs" 
-                                      label="How it works" 
-                                      checked={emailSequenceStateRaw.howItWorks}
-                                      onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, howItWorks: e.currentTarget.checked })}
-                                    />
+                                    <HoverCard width={280} shadow="md">
+                                      <HoverCard.Target>
+                                        <Checkbox 
+                                          size="xs" 
+                                          label="How it works" 
+                                          checked={emailSequenceStateRaw.howItWorks}
+                                          onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, howItWorks: e.currentTarget.checked })}
+                                        />
+                                      </HoverCard.Target>
+                                      <HoverCard.Dropdown>
+                                        <Text size="sm">One of the messages will be a description on how it works. This is nice because it gives the prospect a better understanding of what you do.</Text>
+                                      </HoverCard.Dropdown>
+                                    </HoverCard>
                                   </td>
                                 </tr>
                               </tbody>
@@ -739,12 +761,19 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                               <tbody>
                                 <tr>
                                   <td>
-                                    <Checkbox 
-                                      size="xs" 
-                                      label="Breakup message" 
-                                      checked={emailSequenceStateRaw.breakupMessage}
-                                      onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, breakupMessage: e.currentTarget.checked })}
-                                    />
+                                    <HoverCard width={280} shadow="md">
+                                      <HoverCard.Target>
+                                        <Checkbox 
+                                          size="xs" 
+                                          label="Breakup message" 
+                                          checked={emailSequenceStateRaw.breakupMessage}
+                                          onChange={(e) => setEmailSequenceState({ ...emailSequenceStateRaw, breakupMessage: e.currentTarget.checked })}
+                                        />
+                                      </HoverCard.Target>
+                                      <HoverCard.Dropdown>
+                                        <Text size="sm">One of the variants in the last step will be a "breakup" message.</Text>
+                                      </HoverCard.Dropdown>
+                                    </HoverCard>
                                   </td>
                                 </tr>
                               </tbody>
@@ -912,17 +941,24 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                                 <tbody>
                                   <tr>
                                     <td>
-                                      <Checkbox
-                                        size="xs"
-                                        label="How it works"
-                                        checked={liSequenceState.howItWorks}
-                                        onChange={(e) =>
-                                          setLiSequenceState({
-                                            ...liSequenceState,
-                                            howItWorks: e.currentTarget.checked,
-                                          })
-                                        }
-                                      />
+                                      <HoverCard width={280} shadow="md">
+                                        <HoverCard.Target>
+                                          <Checkbox
+                                            size="xs"
+                                            label="How it works"
+                                            checked={liSequenceState.howItWorks}
+                                            onChange={(e) =>
+                                              setLiSequenceState({
+                                                ...liSequenceState,
+                                                howItWorks: e.currentTarget.checked,
+                                              })
+                                            }
+                                          />
+                                        </HoverCard.Target>
+                                        <HoverCard.Dropdown>
+                                          <Text size="sm">One of the messages will be a description on how it works. This is nice because it gives the prospect a better understanding of what you do.</Text>
+                                        </HoverCard.Dropdown>
+                                      </HoverCard>
                                     </td>
                                   </tr>
                                 </tbody>
@@ -936,30 +972,44 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                                 <tbody>
                                   <tr>
                                     <td>
-                                      <Checkbox
-                                        size="xs"
-                                        label="Vary intro messages"
-                                        checked={liSequenceState.varyIntroMessages}
-                                        onChange={(e) =>
-                                          setLiSequenceState({
-                                            ...liSequenceState,
-                                            varyIntroMessages: e.currentTarget.checked,
-                                          })
-                                        }
-                                      />
+                                      <HoverCard width={280} shadow="md">
+                                        <HoverCard.Target>
+                                          <Checkbox
+                                            size="xs"
+                                            label="Vary intro messages"
+                                            checked={liSequenceState.varyIntroMessages}
+                                            onChange={(e) =>
+                                              setLiSequenceState({
+                                                ...liSequenceState,
+                                                varyIntroMessages: e.currentTarget.checked,
+                                              })
+                                            }
+                                          />
+                                        </HoverCard.Target>
+                                        <HoverCard.Dropdown>
+                                          <Text size="sm">The first message will contain various creative angles.</Text>
+                                        </HoverCard.Dropdown>
+                                      </HoverCard>
                                     </td>
                                     <td>
-                                      <Checkbox
-                                        size="xs"
-                                        label="Unique offer"
-                                        checked={liSequenceState.uniqueOffer}
-                                        onChange={(e) =>
-                                          setLiSequenceState({
-                                            ...liSequenceState,
-                                            uniqueOffer: e.currentTarget.checked,
-                                          })
-                                        }
-                                      />
+                                      <HoverCard width={280} shadow="md">
+                                        <HoverCard.Target>
+                                          <Checkbox
+                                            size="xs"
+                                            label="Unique offer"
+                                            checked={liSequenceState.uniqueOffer}
+                                            onChange={(e) =>
+                                              setLiSequenceState({
+                                                ...liSequenceState,
+                                                uniqueOffer: e.currentTarget.checked,
+                                              })
+                                            }
+                                          />
+                                        </HoverCard.Target>
+                                        <HoverCard.Dropdown>
+                                          <Text size="sm">One of the message variants will contain a unique offer relevant to your business.</Text>
+                                        </HoverCard.Dropdown>
+                                      </HoverCard>
                                     </td>
                                   </tr>
                                 </tbody>
@@ -973,17 +1023,24 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                                 <tbody>
                                   <tr>
                                     <td>
-                                      <Checkbox
-                                        size="xs"
-                                        label="Breakup message"
-                                        checked={liSequenceState.breakupMessage}
-                                        onChange={(e) =>
-                                          setLiSequenceState({
-                                            ...liSequenceState,
-                                            breakupMessage: e.currentTarget.checked,
-                                          })
-                                        }
-                                      />
+                                      <HoverCard width={280} shadow="md">
+                                        <HoverCard.Target>
+                                          <Checkbox
+                                            size="xs"
+                                            label="Breakup message"
+                                            checked={liSequenceState.breakupMessage}
+                                            onChange={(e) =>
+                                              setLiSequenceState({
+                                                ...liSequenceState,
+                                                breakupMessage: e.currentTarget.checked,
+                                              })
+                                            }
+                                          />
+                                        </HoverCard.Target>
+                                        <HoverCard.Dropdown>
+                                          <Text size="sm">One of the variants in the last step will be a "breakup" message.</Text>
+                                        </HoverCard.Dropdown>
+                                      </HoverCard>
                                     </td>
                                   </tr>
                                 </tbody>

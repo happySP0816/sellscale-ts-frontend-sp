@@ -960,8 +960,8 @@ export default function CampaignTemplateEditModal({
                           )}
                         </ThemeIcon>
                         {currentProject?.template_mode
-                          ? "Initial Messages"
-                          : "CTAs and Personalizers"}
+                          ? "Connection Request"
+                          : "Connection Request"}
                       </Text>
                     {currentProject?.template_mode && (
                       <Text color="gray" size={"sm"}>

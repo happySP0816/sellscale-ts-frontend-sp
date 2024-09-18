@@ -1075,7 +1075,7 @@ export default function CampaignTemplateEditModal({
                                 />
                               )}
                             </ThemeIcon>
-                            Step {index + 1}
+                            Follow-up {index + 1}
                           </Text>
                           {index === Number(steps) - 1 && (
                             <ActionIcon
@@ -1106,7 +1106,13 @@ export default function CampaignTemplateEditModal({
                             {sequenceType === "email"
                               ? emailSequenceData[index]?.length || 0
                               : linkedinSequenceData[index]?.length || 0}{" "}
-                            Templates Active
+                            {sequenceType === "email"
+                              ? (emailSequenceData[index]?.length || 0) > 1
+                                ? "Templates"
+                                : "Template"
+                              : (linkedinSequenceData[index]?.length || 0) > 1
+                                ? "Templates"
+                                : "Template"}
                           </Text>
                         </Flex>
                         {stagingData[sequenceType] && (

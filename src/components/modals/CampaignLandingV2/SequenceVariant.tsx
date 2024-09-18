@@ -29,10 +29,11 @@ import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
 import {
   patchSequenceStep,
+  postSequenceStepActivate,
   postSequenceStepDeactivate,
 } from "@utils/requests/emailSequencing";
 import { showNotification } from "@mantine/notifications";
-import { postBumpDeactivate } from "@utils/requests/postBumpDeactivate";
+import { postBumpActivate, postBumpDeactivate } from "@utils/requests/postBumpDeactivate";
 import RichTextArea from "@common/library/RichTextArea";
 import { JSONContent } from "@tiptap/react";
 import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
@@ -190,10 +191,17 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
                   onClick={async () => {
                     let result;
                     if (assetType === "email") {
+                      if (asset.active) {
                       result = await postSequenceStepDeactivate(
                         userToken,
                         assetId
                       );
+                    } else {
+                      result = await postSequenceStepActivate(
+                        userToken,
+                        assetId
+                      );
+                    }
                     } else if (assetType === "linkedin") {
 
                       if (asset.id && !asset.bump_framework_id) { //this is the case for linkedin templates
@@ -213,23 +221,33 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
                         return
                       }
 
-                      result = await postBumpDeactivate(
-                        userToken,
-                        asset.bump_framework_id
-                      );
+                        if (asset.active) {
+
+                        result = await postBumpDeactivate(
+                          userToken,
+                          asset.bump_framework_id
+                        );
+                      } else {
+
+                        result = await postBumpActivate(
+                          userToken,
+                          asset.bump_framework_id
+                        );
+
+                      }
                     }
 
                     if (result && result.status === "success") {
                       showNotification({
                         title: "Success",
-                        message: "Sequence Step deactivated successfully",
+                        message: "Sequence Step modified successfully",
                         color: theme.colors.green[7],
                       });
                       refetch();
                     } else {
                       showNotification({
                         title: "Error",
-                        message: "Failed to deactivate sequence step",
+                        message: "Failed to modify sequence step",
                         color: theme.colors.red[7],
                       });
                     }

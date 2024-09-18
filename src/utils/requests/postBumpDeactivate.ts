@@ -27,3 +27,28 @@ export async function postBumpDeactivate(userToken: string, bumpFrameworkID: num
   return await processResponse(response);
 
 }
+
+/**
+ * Activates a bump
+ * @param userToken 
+ * @param bumpFrameworkID
+ * @returns - MsgResponse
+ */
+export async function postBumpActivate(userToken: string, bumpFrameworkID: number): Promise<MsgResponse> {
+
+  const response = await fetch(
+    `${API_URL}/bump_framework/bump/activate`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        bump_framework_id: bumpFrameworkID,
+      })
+    }
+  );
+  return await processResponse(response);
+
+}

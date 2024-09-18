@@ -210,7 +210,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
         mb="4px"
         leftIcon={<IconHistory size={16} />}
       >
-        Memory Logs
+        Event Logs
       </Button>
 
       <Drawer

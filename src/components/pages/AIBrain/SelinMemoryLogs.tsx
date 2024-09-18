@@ -24,7 +24,18 @@ import {
   IconX,
   IconSunElectricity,
 } from "@tabler/icons-react";
-import { IconBolt, IconEye } from "@tabler/icons";
+import {
+  IconBolt,
+  IconBrandSlack,
+  IconClick,
+  IconClipboard,
+  IconEye,
+  IconMailForward,
+  IconMessage,
+  IconPencil,
+  IconRecordMail,
+  IconRobot,
+} from "@tabler/icons";
 import moment from "moment";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -123,6 +134,69 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
       new Date(b.created_date).getTime() - new Date(a.created_date).getTime()
   );
 
+  const tagToIconAndColorMap: Record<
+    string,
+    { icon: any; color: string; sub: string; explanation?: string }
+  > = {
+    MEMORY_METADATA_SAVED: {
+      icon: <IconCheck size={16} />,
+      color: "green",
+      sub: "saved data",
+      explanation: "This log represents a memory save event.",
+    },
+    SELIX_TASK_COMPLETE: {
+      icon: <IconRobot size={16} />,
+      color: "blue",
+      sub: "ai task",
+      explanation: "This log represents an AI task completion event.",
+    },
+    SELLSCALE_ACTION_COMPLETE: {
+      icon: <IconSunElectricity size={16} />,
+      color: "blue",
+      sub: "ai action",
+      explanation: "This log represents an AI action completion event.",
+    },
+    SUPPORT_THREAD_SLACK: {
+      icon: <IconBrandSlack size={16} />,
+      color: "grape",
+      sub: "slack thread",
+      explanation: "When a user sends a message on Slack, a log is created.",
+    },
+    SUPPORT_THREAD_EMAIL: {
+      icon: <IconRecordMail size={16} />,
+      color: "grape",
+      sub: "email thread",
+      explanation:
+        "When a user sends an email to selix@sellscale.com, a log is created.",
+    },
+    SUPPORT_THREAD_EMAIL_FORWARDED_BY_OPERATOR: {
+      icon: <IconMailForward size={16} />,
+      color: "grape",
+      sub: "email frwd. by ops",
+      explanation:
+        "When a SellScale operator forwards an email to selix@sellscale.com",
+    },
+    USER_INTERACTION: {
+      icon: <IconMessage size={16} />,
+      color: "grape",
+      sub: "misc. interaction",
+      explanation:
+        "This log represents a miscellaneous user interaction event.",
+    },
+    MEETING_TRANSCRIPT: {
+      icon: <IconClipboard size={16} />,
+      color: "grape",
+      sub: "meeting transcript",
+      explanation: "This log represents a meeting transcript event.",
+    },
+    MANUAL: {
+      icon: <IconPencil size={16} />,
+      color: "grape",
+      sub: "manual entry",
+      explanation: "This log represents a manual entry event",
+    },
+  };
+
   return (
     <>
       <Button
@@ -147,7 +221,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
       >
         <Flex>
           <Box>
-            <Title order={3}>Memory Logs</Title>
+            <Title order={3}>Event Logs</Title>
             <Text style={{ marginBottom: "1rem" }}>
               View a history of all memory saves and task completions.
             </Text>
@@ -166,57 +240,61 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
         <Flex>
           <Box w="40%" pr="md" style={{ borderRight: "1px solid #e0e0e0" }}>
             <Text fw={600} mb="md">
-              Memory Bank
+              Event Timeline
             </Text>
-            <Timeline bulletSize={24}>
-              {reversedLogsByLogDate.map((log, index) => (
-                <Timeline.Item
-                  key={index}
-                  title={log.title}
-                  onClick={() => setSelectedLog(log)}
-                  sx={{
-                    cursor:
-                      log.tag === "MEMORY_METADATA_SAVED"
-                        ? "pointer"
-                        : "default",
-                  }}
-                  bullet={
-                    log === selectedLog ? (
-                      <ThemeIcon
-                        size={22}
-                        variant="gradient"
-                        gradient={{ from: "yellow", to: "yellow" }}
-                        radius="xl"
+            <Card withBorder mah="56vh" mb="md" sx={{ overflowY: "auto" }}>
+              <Timeline bulletSize={24}>
+                {reversedLogsByLogDate.map((log, index) => {
+                  return (
+                    <Timeline.Item
+                      key={index}
+                      onClick={() => setSelectedLog(log)}
+                      sx={{
+                        cursor:
+                          log.tag === "MEMORY_METADATA_SAVED"
+                            ? "pointer"
+                            : "default",
+                      }}
+                      bullet={
+                        <Tooltip
+                          label={tagToIconAndColorMap[log.tag]?.explanation}
+                        >
+                          <ThemeIcon
+                            size={22}
+                            variant="filled"
+                            color={
+                              log === selectedLog
+                                ? "yellow"
+                                : tagToIconAndColorMap[log.tag]?.color || "gray"
+                            }
+                            radius="xl"
+                          >
+                            {log === selectedLog ? (
+                              <IconEye size="0.8rem" />
+                            ) : (
+                              tagToIconAndColorMap[log.tag]?.icon || (
+                                <IconBolt size="0.8rem" />
+                              )
+                            )}
+                          </ThemeIcon>
+                        </Tooltip>
+                      }
+                    >
+                      <Text
+                        fw={log.tag === "MEMORY_METADATA_SAVED" ? 600 : 400}
+                        size={log.tag === "MEMORY_METADATA_SAVED" ? "sm" : "xs"}
                       >
-                        <IconEye size="0.8rem" />
-                      </ThemeIcon>
-                    ) : log.tag === "MEMORY_METADATA_SAVED" ? (
-                      <ThemeIcon
-                        size={22}
-                        variant="gradient"
-                        gradient={{ from: "lime", to: "cyan" }}
-                        radius="xl"
-                      >
-                        <IconCheck size="0.8rem" />
-                      </ThemeIcon>
-                    ) : (
-                      <ThemeIcon
-                        size={22}
-                        variant="gradient"
-                        gradient={{ from: "gray", to: "gray" }}
-                        radius="xl"
-                      >
-                        <IconBolt size="0.8rem" />
-                      </ThemeIcon>
-                    )
-                  }
-                >
-                  <Text c="dimmed" size="sm">
-                    {moment(log.created_date).fromNow()}
-                  </Text>
-                </Timeline.Item>
-              ))}
-            </Timeline>
+                        {log.title}
+                      </Text>
+                      <Text c="dimmed" size="xs">
+                        {moment(log.created_date).fromNow()} |{" "}
+                        {tagToIconAndColorMap[log.tag]?.sub}
+                      </Text>
+                    </Timeline.Item>
+                  );
+                })}
+              </Timeline>
+            </Card>
             <Button
               onClick={() => setCreateLogOpened(true)}
               size="xs"
@@ -259,7 +337,11 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                       },
                       {
                         value: "SUPPORT_THREAD_EMAIL",
-                        label: "📧 Support Thread Email",
+                        label: "📧 Direct Email from User",
+                      },
+                      {
+                        value: "SUPPORT_THREAD_EMAIL_FORWARDED_BY_OPERATOR",
+                        label: "📧 Email Frwd. by Ops",
                       },
                       {
                         value: "USER_INTERACTION",

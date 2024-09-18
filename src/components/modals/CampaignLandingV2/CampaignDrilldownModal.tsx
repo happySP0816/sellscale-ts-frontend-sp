@@ -137,7 +137,10 @@ export default function CampaignDrilldownModal({
     } else if (value === "open") {
       return campaignList?.filter(
         (item: any) =>
-          item.to_status === "ACCEPTED" || item.to_status === "EMAIL_OPENED"
+          item.to_status === "ACCEPTED" ||
+          item.to_status === "EMAIL_OPENED" ||
+          item.to_status == "ACTIVE_CONVO" ||
+          item.to_status == "EMAIL_REPLIED"
       );
     } else if (value === "reply") {
       return campaignList?.filter(
@@ -420,9 +423,24 @@ export default function CampaignDrilldownModal({
                   <Box px={15} py={12} w={"100%"}>
                     <Flex justify={"space-between"}>
                       <Text color="#817e7e" fw={600}>
-                        {item?.last_message_from_prospect?.includes("no response yet.") ? "Last Message From You:" : "Last Message From Prospect:"}
+                        {item?.last_message_from_prospect?.includes(
+                          "no response yet."
+                        )
+                          ? "Last Message From You:"
+                          : "Last Message From Prospect:"}
                       </Text>
-                      <Text color="#817e7e">{new Date(item.last_message_timestamp).toLocaleString([], { hour: '2-digit', minute: '2-digit', year: 'numeric', month: '2-digit', day: '2-digit' })}</Text>
+                      <Text color="#817e7e">
+                        {new Date(item.last_message_timestamp).toLocaleString(
+                          [],
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          }
+                        )}
+                      </Text>
                     </Flex>
                     <Box
                       bg={
@@ -443,8 +461,12 @@ export default function CampaignDrilldownModal({
                       }}
                     >
                       <Text fw={500}>
-                        {item?.last_message_from_prospect?.includes("no response yet.") 
-                          ? item?.last_message_from_prospect.split("no response yet.###")[1] 
+                        {item?.last_message_from_prospect?.includes(
+                          "no response yet."
+                        )
+                          ? item?.last_message_from_prospect.split(
+                              "no response yet.###"
+                            )[1]
                           : item?.last_message_from_prospect}
                       </Text>
                     </Box>

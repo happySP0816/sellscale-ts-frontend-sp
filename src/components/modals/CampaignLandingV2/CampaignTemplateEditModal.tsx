@@ -1415,7 +1415,7 @@ export default function CampaignTemplateEditModal({
                       (messageData: LinkedinInitialMessageDataType, index: number) => (
                         <Box p={"xs"} h={"100%"}>
                         <SequenceVariant
-                          asset={{ message: messageData.message }}
+                          asset={messageData}
                           assetType={"linkedin"}
                           refetch={() =>
                             innerProps.refetchSequenceData(

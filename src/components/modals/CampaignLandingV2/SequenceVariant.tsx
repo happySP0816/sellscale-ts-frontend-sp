@@ -37,6 +37,7 @@ import RichTextArea from "@common/library/RichTextArea";
 import { JSONContent } from "@tiptap/react";
 import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
 import { API_URL } from "@constants/data";
+import { updateLiTemplate } from "@utils/requests/linkedinTemplates";
 
 interface SequenceVariantProps {
   asset: any;
@@ -194,6 +195,24 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
                         assetId
                       );
                     } else if (assetType === "linkedin") {
+
+                      if (asset.id && !asset.bump_framework_id) { //this is the case for linkedin templates
+                        updateLiTemplate(
+                          userToken,
+                          currentProject?.id || -1,
+                          asset.id,
+                          asset.title,
+                          bodyRef.current || "",
+                          !asset.active,
+                          asset.times_used,
+                          asset.times_accepted,
+                          asset.research_points,
+                          asset.additional_instructions
+                        )
+                        refetch();
+                        return
+                      }
+
                       result = await postBumpDeactivate(
                         userToken,
                         asset.bump_framework_id

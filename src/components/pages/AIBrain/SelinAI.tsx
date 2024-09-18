@@ -3243,12 +3243,12 @@ const SegmentChat = (props: any) => {
                   setPrompt((prevPrompt: string) => {
                     const newPrompt = prevPrompt + text;
                     promptRef.current = newPrompt;
-                    // setTimeout(() => {
-                    //   const textarea = document.querySelector("textarea");
-                    //   if (textarea) {
-                    //     textarea.scrollTop = textarea.scrollHeight;
-                    //   }
-                    // }, 0);
+                    setTimeout(() => {
+                      const textarea = document.querySelector("textarea");
+                      if (textarea) {
+                        textarea.scrollTop = textarea.scrollHeight;
+                      }
+                    }, 0);
                     return newPrompt;
                   });
                 }}

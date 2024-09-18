@@ -12,6 +12,10 @@ import {
   Title,
   Divider,
   Card,
+  TextInput,
+  Select,
+  Badge,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconHistory,
@@ -25,6 +29,7 @@ import moment from "moment";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
+import { deterministicMantineColor } from "@utils/requests/utils";
 
 interface MemoryLog {
   created_date: string;
@@ -40,81 +45,6 @@ interface MemoryLog {
 interface MemoryLogsProps {
   onRevert: (log: string) => void;
 }
-const mockLogs: MemoryLog[] = [
-  {
-    created_date: "2023-10-01 10:00:00",
-    tag: "MEMORY_METADATA_SAVED",
-    title: "Memory Save 1",
-    description:
-      "Initial memory save. This log marks the first instance of memory being saved in the system. It includes metadata and example data for future reference.",
-    client_sdr_id: "sdr_001",
-    client_id: "client_001",
-    json_data: '{"data": "example"}',
-    session_id: "session_001",
-  },
-  {
-    created_date: "2023-10-02 12:00:00",
-    tag: "SELIX_TASK_COMPLETE",
-    title: "Task Complete 1",
-    description:
-      "Completed task 1. This log indicates the successful completion of the first task assigned to the system, showcasing its ability to handle tasks efficiently.",
-    client_sdr_id: "sdr_001",
-    client_id: "client_001",
-    session_id: "session_001",
-  },
-  {
-    created_date: "2023-10-03 14:00:00",
-    tag: "SELIX_TASK_COMPLETE",
-    title: "Task Complete 2",
-    description:
-      "Completed task 2. This log records the completion of the second task, further demonstrating the system's task management capabilities.",
-    client_sdr_id: "sdr_001",
-    client_id: "client_001",
-    session_id: "session_001",
-  },
-  {
-    created_date: "2023-10-04 16:00:00",
-    tag: "MEMORY_METADATA_SAVED",
-    title: "Memory Save 2",
-    description:
-      "Second memory save. This log captures the second instance of memory being saved, providing additional metadata and example data for continuity.",
-    client_sdr_id: "sdr_001",
-    client_id: "client_001",
-    json_data: '{"data": "example"}',
-    session_id: "session_001",
-  },
-  {
-    created_date: "2023-10-05 18:00:00",
-    tag: "SELIX_TASK_COMPLETE",
-    title: "Task Complete 3",
-    description:
-      "Completed task 3. This log marks the completion of the third task, highlighting the system's ongoing task execution and completion.",
-    client_sdr_id: "sdr_001",
-    client_id: "client_001",
-    session_id: "session_001",
-  },
-  {
-    created_date: "2023-10-06 20:00:00",
-    tag: "SELIX_TASK_COMPLETE",
-    title: "Task Complete 4",
-    description:
-      "Completed task 4. This log documents the fourth task completion, reinforcing the system's consistent performance in task management.",
-    client_sdr_id: "sdr_001",
-    client_id: "client_001",
-    session_id: "session_001",
-  },
-  {
-    created_date: "2023-10-07 22:00:00",
-    tag: "MEMORY_METADATA_SAVED",
-    title: "Memory Save 3",
-    description:
-      "Third memory save. This log represents the third memory save event, ensuring that the system's memory state is preserved with relevant metadata and example data.",
-    client_sdr_id: "sdr_001",
-    client_id: "client_001",
-    json_data: '{"data": "example"}',
-    session_id: "session_001",
-  },
-];
 
 const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
   const [logs, setLogs] = useState<MemoryLog[]>([]);
@@ -122,6 +52,14 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
   const [selectedLog, setSelectedLog]: any = useState<MemoryLog | null>(
     logs.reverse().find((log) => log.tag === "MEMORY_METADATA_SAVED") || null
   );
+  const [createLogOpened, setCreateLogOpened] = useState(false);
+  const [newLog, setNewLog] = useState({
+    tag: "",
+    title: "",
+    description: "",
+    json_data: "",
+    session_id: "",
+  });
   const userToken = useRecoilValue(userTokenState);
 
   const fetchSelixLogs = async () => {
@@ -149,6 +87,30 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
       console.error("Error fetching logs:", error);
     } finally {
       console.log("Logs fetched successfully");
+    }
+  };
+
+  const createSelixLog = async () => {
+    try {
+      const response = await fetch(`${API_URL}/selix/create_selix_log`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newLog),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create log");
+      }
+
+      const result = await response.json();
+      console.log("Log created successfully:", result);
+      fetchSelixLogs(); // Refresh logs after creation
+      setCreateLogOpened(false); // Close the create log form
+    } catch (error) {
+      console.error("Error creating log:", error);
     }
   };
 
@@ -202,7 +164,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
         </Flex>
         <Divider mt="md" mb="lg" />
         <Flex>
-          <Box w="30%" pr="md" style={{ borderRight: "1px solid #e0e0e0" }}>
+          <Box w="40%" pr="md" style={{ borderRight: "1px solid #e0e0e0" }}>
             <Text fw={600} mb="md">
               Memory Bank
             </Text>
@@ -211,9 +173,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                 <Timeline.Item
                   key={index}
                   title={log.title}
-                  onClick={() =>
-                    log.tag === "MEMORY_METADATA_SAVED" && setSelectedLog(log)
-                  }
+                  onClick={() => setSelectedLog(log)}
                   sx={{
                     cursor:
                       log.tag === "MEMORY_METADATA_SAVED"
@@ -257,13 +217,113 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                 </Timeline.Item>
               ))}
             </Timeline>
+            <Button
+              onClick={() => setCreateLogOpened(true)}
+              size="xs"
+              color="blue"
+              mt="md"
+              variant="outline"
+            >
+              Create New Log
+            </Button>
+            {createLogOpened && (
+              <Card withBorder mt="md">
+                <Box mt="md">
+                  <TextInput
+                    label="Title"
+                    value={newLog.title}
+                    onChange={(e) =>
+                      setNewLog({ ...newLog, title: e.currentTarget.value })
+                    }
+                    mb="sm"
+                  />
+                  <Select
+                    label="Tag"
+                    value={newLog.tag}
+                    onChange={(value: any) =>
+                      setNewLog({ ...newLog, tag: value })
+                    }
+                    withinPortal
+                    data={[
+                      {
+                        value: "SELIX_TASK_COMPLETE",
+                        label: "✅ Selix Task Complete",
+                      },
+                      {
+                        value: "SELLSCALE_ACTION_COMPLETE",
+                        label: "📈 Selix Action Complete",
+                      },
+                      {
+                        value: "SUPPORT_THREAD_SLACK",
+                        label: "💬 Support Thread Slack",
+                      },
+                      {
+                        value: "SUPPORT_THREAD_EMAIL",
+                        label: "📧 Support Thread Email",
+                      },
+                      {
+                        value: "USER_INTERACTION",
+                        label: "👤 User Interaction",
+                      },
+                      {
+                        value: "MEETING_TRANSCRIPT",
+                        label: "📜 Meeting Transcript",
+                      },
+                      {
+                        value: "MANUAL",
+                        label: "✍️ Manual",
+                      },
+                    ]}
+                    mb="sm"
+                  />
+                  <Textarea
+                    label="Description"
+                    value={newLog.description}
+                    onChange={(e) =>
+                      setNewLog({
+                        ...newLog,
+                        description: e.currentTarget.value,
+                      })
+                    }
+                    autosize
+                    minRows={3}
+                    mb="sm"
+                  />
+                  <Button
+                    onClick={createSelixLog}
+                    size="xs"
+                    color="green"
+                    variant="outline"
+                    disabled={
+                      !newLog.title || !newLog.tag || !newLog.description
+                    }
+                  >
+                    Submit
+                  </Button>
+                </Box>
+              </Card>
+            )}
           </Box>
           <Box w="70%" pl="md">
             {selectedLog ? (
               <>
-                <Text fw={600} mb="4px" size="lg">
-                  {selectedLog.title}
-                </Text>
+                <Box display="flex" mb="4px">
+                  <Tooltip label={selectedLog.title}>
+                    <Text fw={600} size="lg" style={{ maxWidth: "70%" }}>
+                      {selectedLog.title.length > 50
+                        ? selectedLog.title.substring(0, 26) + "..."
+                        : selectedLog.title}
+                    </Text>
+                  </Tooltip>
+                  <Badge
+                    color={deterministicMantineColor(selectedLog.tag)}
+                    variant="filled"
+                    size="sm"
+                    ml="auto"
+                  >
+                    {selectedLog.tag.replace(/_/g, " ")}
+                  </Badge>
+                </Box>
                 <Text size="sm" color="gray" mb="md">
                   {moment(selectedLog.created_date).fromNow()}
                 </Text>
@@ -274,66 +334,86 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                   minRows={10}
                   mb="md"
                 />
-                <Text fw={600} mb="sm">
-                  Completed since last log:
-                </Text>
-
-                {logs
-                  .filter(
-                    (log) =>
-                      new Date(log.created_date) <
-                        new Date(selectedLog.created_date) &&
-                      log.tag !== "MEMORY_METADATA_SAVED" &&
-                      new Date(log.created_date) >
-                        new Date(
-                          logs
-                            .filter(
-                              (l) =>
-                                l.tag === "MEMORY_METADATA_SAVED" &&
-                                new Date(l.created_date) <
-                                  new Date(selectedLog.created_date)
-                            )
-                            .sort(
-                              (a, b) =>
-                                new Date(b.created_date).getTime() -
-                                new Date(a.created_date).getTime()
-                            )[0]?.created_date || 0
+                {selectedLog.tag === "MEMORY_METADATA_SAVED" && (
+                  <>
+                    <Text fw={600} mb="2px">
+                      Updated via:
+                    </Text>
+                    <Text mb="md">
+                      {selectedLog.json_data
+                        ? JSON.parse(selectedLog.json_data).updated_from
+                        : "No update information available"}
+                    </Text>
+                    <Text fw={600} mb="2px">
+                      Completed since last log:
+                    </Text>
+                    <Box mb="md">
+                      {logs
+                        .filter(
+                          (log) =>
+                            new Date(log.created_date) <
+                              new Date(selectedLog.created_date) &&
+                            log.tag !== "MEMORY_METADATA_SAVED" &&
+                            new Date(log.created_date) >
+                              new Date(
+                                logs
+                                  .filter(
+                                    (l) =>
+                                      l.tag === "MEMORY_METADATA_SAVED" &&
+                                      new Date(l.created_date) <
+                                        new Date(selectedLog.created_date)
+                                  )
+                                  .sort(
+                                    (a, b) =>
+                                      new Date(b.created_date).getTime() -
+                                      new Date(a.created_date).getTime()
+                                  )[0]?.created_date || 0
+                              )
                         )
-                  )
-                  .map((log, index) => (
-                    <Card withBorder shadow="sm" radius="md" p="sm" mb="sm">
-                      <Text size="sm" color="black" fw={600}>
-                        ⚡️ {log.title}
-                      </Text>
-                      <Text size="xs" color="gray">
-                        {log.description}
-                      </Text>
-                      <Text
+                        .map((log, index) => (
+                          <Card
+                            withBorder
+                            shadow="sm"
+                            radius="md"
+                            p="sm"
+                            mb="sm"
+                            key={index}
+                          >
+                            <Text size="sm" color="black" fw={600}>
+                              ⚡️ {log.title}
+                            </Text>
+                            <Text size="xs" color="gray">
+                              {log.description}
+                            </Text>
+                            <Text
+                              size="xs"
+                              color="gray"
+                              align="left"
+                              mt="xs"
+                              style={{ fontSize: "10px" }}
+                            >
+                              Completed: {moment(log.created_date).fromNow()}
+                            </Text>
+                          </Card>
+                        ))}
+                    </Box>
+                    <Box w="100%">
+                      <Button
+                        leftIcon={<IconHistory size={16} />}
+                        color="red"
+                        variant="outline"
                         size="xs"
-                        color="gray"
-                        align="left"
-                        mt="xs"
-                        style={{ fontSize: "10px" }}
+                        mt="lg"
+                        onClick={() => {
+                          onRevert(selectedLog.description);
+                          setOpened(false);
+                        }}
                       >
-                        Completed: {moment(log.created_date).fromNow()}
-                      </Text>
-                    </Card>
-                  ))}
-                <Box w="100%">
-                  <Button
-                    leftIcon={<IconHistory size={16} />}
-                    color="red"
-                    variant="outline"
-                    size="xs"
-                    mt="lg"
-                    onClick={() => {
-                      onRevert(selectedLog.description);
-                      setOpened(false);
-                    }}
-                  >
-                    Revert to this Memory
-                  </Button>
-                </Box>
+                        Revert to this Memory
+                      </Button>
+                    </Box>
+                  </>
+                )}
               </>
             ) : (
               <Text>Select a log to view details</Text>

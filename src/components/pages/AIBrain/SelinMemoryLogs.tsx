@@ -16,6 +16,8 @@ import {
   Select,
   Badge,
   Tooltip,
+  Loader,
+  HoverCard,
 } from "@mantine/core";
 import {
   IconHistory,
@@ -43,6 +45,7 @@ import { API_URL } from "@constants/data";
 import { deterministicMantineColor } from "@utils/requests/utils";
 
 interface MemoryLog {
+  id: number;
   created_date: string;
   tag: string;
   title: string;
@@ -51,6 +54,8 @@ interface MemoryLog {
   client_id: string;
   json_data?: string;
   session_id?: string;
+  processing_status?: string;
+  processing_status_description?: string;
 }
 
 interface MemoryLogsProps {
@@ -71,10 +76,12 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
     json_data: "",
     session_id: "",
   });
+  const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
 
-  const fetchSelixLogs = async () => {
+  const fetchSelixLogs = async (selixLogId: number | null = null) => {
     try {
+      setLoading(true);
       const response = await fetch(`${API_URL}/selix/get_selix_logs`, {
         method: "GET",
         headers: {
@@ -89,20 +96,29 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
 
       const result = await response.json();
       setLogs(result.logs);
-      setSelectedLog(
-        result.logs
-          .reverse()
-          .find((log: MemoryLog) => log.tag === "MEMORY_METADATA_SAVED") || null
-      );
+      if (selixLogId) {
+        setSelectedLog(
+          result.logs.find((log: MemoryLog) => log.id === selixLogId) || null
+        );
+      } else {
+        setSelectedLog(
+          result.logs
+            .reverse()
+            .find((log: MemoryLog) => log.tag === "MEMORY_METADATA_SAVED") ||
+            null
+        );
+      }
     } catch (error) {
       console.error("Error fetching logs:", error);
     } finally {
+      setLoading(false);
       console.log("Logs fetched successfully");
     }
   };
 
   const createSelixLog = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`${API_URL}/selix/create_selix_log`, {
         method: "POST",
         headers: {
@@ -122,6 +138,37 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
       setCreateLogOpened(false); // Close the create log form
     } catch (error) {
       console.error("Error creating log:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProcessingType = async (selixLogId: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `${API_URL}/selix/log/update_processing_type`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ selix_log_id: selixLogId }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update processing type");
+      }
+
+      const result = await response.json();
+      console.log("Processing type updated successfully:", result);
+      fetchSelixLogs(selixLogId); // Refresh logs after update
+    } catch (error) {
+      console.error("Error updating processing type:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -424,6 +471,42 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                   minRows={10}
                   mb="md"
                 />
+                {selectedLog.processing_status ? (
+                  <HoverCard width={400} shadow="md">
+                    <HoverCard.Target>
+                      <Badge
+                        color={deterministicMantineColor(
+                          selectedLog.processing_status
+                        )}
+                        variant="filled"
+                        size="lg"
+                        mb="md"
+                      >
+                        {selectedLog.processing_status.replace(/_/g, " ")}
+                      </Badge>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown>
+                      <Text
+                        size="sm"
+                        dangerouslySetInnerHTML={{
+                          __html: selectedLog.processing_status_description
+                            .replaceAll("**", "")
+                            .replaceAll("\n", "<br />"),
+                        }}
+                      />
+                    </HoverCard.Dropdown>
+                  </HoverCard>
+                ) : selectedLog.tag != "MEMORY_METADATA_SAVED" ? (
+                  <Button
+                    onClick={() => updateProcessingType(selectedLog.id)}
+                    size="xs"
+                    color="blue"
+                    variant="outline"
+                    mb="md"
+                  >
+                    {loading ? <Loader size="xs" /> : "Update Processing Type"}
+                  </Button>
+                ) : null}
                 {selectedLog.tag === "MEMORY_METADATA_SAVED" && (
                   <>
                     <Text fw={600} mb="2px">

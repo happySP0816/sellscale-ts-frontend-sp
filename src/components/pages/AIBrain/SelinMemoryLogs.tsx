@@ -240,8 +240,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
   }, []);
 
   const reversedLogsByLogDate = logs.sort(
-    (a: MemoryLog, b: MemoryLog) =>
-      new Date(b.created_date).getTime() - new Date(a.created_date).getTime()
+    (a: MemoryLog, b: MemoryLog) => a.id - b.id
   );
 
   const tagToIconAndColorMap: Record<
@@ -520,25 +519,73 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
             {selectedLog ? (
               <>
                 <Box display="flex" mb="4px">
-                  <Tooltip label={selectedLog.title}>
-                    <Text fw={600} size="lg" style={{ maxWidth: "70%" }}>
-                      {selectedLog.title.length > 50
-                        ? selectedLog.title.substring(0, 26) + "..."
-                        : selectedLog.title}
-                    </Text>
-                  </Tooltip>
+                  <Box w="60%">
+                    <Box>
+                      <Tooltip label={selectedLog.title}>
+                        <Text fw={600} size="lg" style={{ maxWidth: "70%" }}>
+                          {selectedLog.title.length > 50
+                            ? selectedLog.title.substring(0, 26) + "..."
+                            : selectedLog.title}
+                        </Text>
+                      </Tooltip>
+
+                      <Text size="sm" color="gray" mb="md">
+                        {moment(selectedLog.created_date).fromNow()}
+                      </Text>
+                    </Box>
+                    {selectedLog.processing_status ? (
+                      <HoverCard width={400} shadow="md">
+                        <HoverCard.Target>
+                          <Badge
+                            color={deterministicMantineColor(
+                              selectedLog.processing_status
+                            )}
+                            variant="filled"
+                            size="lg"
+                            mb="md"
+                          >
+                            {selectedLog.processing_status.replace(/_/g, " ")}
+                          </Badge>
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown>
+                          <Text
+                            size="sm"
+                            dangerouslySetInnerHTML={{
+                              __html: selectedLog.processing_status_description
+                                .replaceAll("**", "")
+                                .replaceAll("\n", "<br />"),
+                            }}
+                          />
+                        </HoverCard.Dropdown>
+                      </HoverCard>
+                    ) : selectedLog.tag != "MEMORY_METADATA_SAVED" ? (
+                      <Button
+                        onClick={() => updateProcessingType(selectedLog.id)}
+                        size="xs"
+                        color="blue"
+                        variant="outline"
+                        mb="md"
+                      >
+                        {loading ? (
+                          <Loader size="xs" />
+                        ) : (
+                          "Update Processing Type"
+                        )}
+                      </Button>
+                    ) : (
+                      <Box></Box>
+                    )}
+                  </Box>
                   <Badge
                     color={deterministicMantineColor(selectedLog.tag)}
                     variant="filled"
                     size="sm"
                     ml="auto"
                   >
-                    {selectedLog.tag.replace(/_/g, " ")}
+                    {tagToIconAndColorMap[selectedLog.tag]?.sub ||
+                      selectedLog.tag}
                   </Badge>
                 </Box>
-                <Text size="sm" color="gray" mb="md">
-                  {moment(selectedLog.created_date).fromNow()}
-                </Text>
                 <Text
                   size="10px"
                   mb="4px"
@@ -551,6 +598,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                   value={editedDescription}
                   autosize
                   minRows={10}
+                  maxRows={25}
                   mb="md"
                   onChange={(e) => {
                     setEditedDescription(e.currentTarget.value);
@@ -558,47 +606,6 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                   }}
                 />
                 <Flex>
-                  {selectedLog.processing_status ? (
-                    <HoverCard width={400} shadow="md">
-                      <HoverCard.Target>
-                        <Badge
-                          color={deterministicMantineColor(
-                            selectedLog.processing_status
-                          )}
-                          variant="filled"
-                          size="lg"
-                          mb="md"
-                        >
-                          {selectedLog.processing_status.replace(/_/g, " ")}
-                        </Badge>
-                      </HoverCard.Target>
-                      <HoverCard.Dropdown>
-                        <Text
-                          size="sm"
-                          dangerouslySetInnerHTML={{
-                            __html: selectedLog.processing_status_description
-                              .replaceAll("**", "")
-                              .replaceAll("\n", "<br />"),
-                          }}
-                        />
-                      </HoverCard.Dropdown>
-                    </HoverCard>
-                  ) : selectedLog.tag != "MEMORY_METADATA_SAVED" ? (
-                    <Button
-                      onClick={() => updateProcessingType(selectedLog.id)}
-                      size="xs"
-                      color="blue"
-                      variant="outline"
-                      mb="md"
-                    >
-                      {loading ? (
-                        <Loader size="xs" />
-                      ) : (
-                        "Update Processing Type"
-                      )}
-                    </Button>
-                  ) : null}
-
                   {isEditing && (
                     <Button
                       onClick={() =>

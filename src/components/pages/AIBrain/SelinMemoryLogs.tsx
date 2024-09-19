@@ -240,7 +240,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
   }, []);
 
   const reversedLogsByLogDate = logs.sort(
-    (a: MemoryLog, b: MemoryLog) => a.id - b.id
+    (a: MemoryLog, b: MemoryLog) => -(a.id - b.id)
   );
 
   const tagToIconAndColorMap: Record<
@@ -519,7 +519,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
             {selectedLog ? (
               <>
                 <Box display="flex" mb="4px">
-                  <Box w="60%">
+                  <Box w="70%">
                     <Box>
                       <Tooltip label={selectedLog.title}>
                         <Text fw={600} size="lg" style={{ maxWidth: "70%" }}>
@@ -576,15 +576,24 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                       <Box></Box>
                     )}
                   </Box>
-                  <Badge
-                    color={deterministicMantineColor(selectedLog.tag)}
-                    variant="filled"
-                    size="sm"
-                    ml="auto"
-                  >
-                    {tagToIconAndColorMap[selectedLog.tag]?.sub ||
-                      selectedLog.tag}
-                  </Badge>
+                  <Box w="30%">
+                    <Badge
+                      color={deterministicMantineColor(selectedLog.tag)}
+                      variant="filled"
+                      size="sm"
+                      ml="auto"
+                    >
+                      {tagToIconAndColorMap[selectedLog.tag]?.sub ||
+                        selectedLog.tag}
+                    </Badge>
+                    <Text size="10px" color="gray">
+                      {selectedLog.json_data &&
+                      JSON.parse(selectedLog.json_data)?.email_source
+                        ? "Sent by: " +
+                          JSON.parse(selectedLog.json_data)?.email_source
+                        : ""}
+                    </Text>
+                  </Box>
                 </Box>
                 <Text
                   size="10px"

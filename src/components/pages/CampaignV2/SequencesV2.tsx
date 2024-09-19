@@ -88,7 +88,7 @@ import {
   fetchCampaignSequences,
   fetchCampaignStats,
 } from "@utils/requests/campaignOverview";
-import { IconSparkles } from "@tabler/icons-react";
+import { IconFolderOpen, IconSparkles } from "@tabler/icons-react";
 import {
   createLiConvoSim,
   generateInitialMessageForLiConvoSim,
@@ -3179,7 +3179,7 @@ function TemplateSectionV2(props: {
 
                       {template.research_points &&
                         template.research_points.length > 0 && (
-                          <HoverCard width={280} shadow="md">
+                          <HoverCard withinPortal width={280} shadow="md">
                             <HoverCard.Target>
                               <Badge
                                 leftSection={
@@ -3223,7 +3223,7 @@ function TemplateSectionV2(props: {
                           </HoverCard>
                         )}
                       {template.additional_instructions && (
-                        <HoverCard width={280} shadow="md">
+                        <HoverCard withinPortal width={280} shadow="md">
                           <HoverCard.Target>
                             <Badge
                               leftSection={<IconBulb size="0.8rem" />}
@@ -3455,7 +3455,21 @@ const LinkedinSequenceSectionV2 = function (props: {
   onRegenerate: () => void;
   prospectOnChangeHandler: (prospect: ProspectShallow | undefined) => void;
 }) {
-  const [currentSequenceIndex, setCurrentSequenceIndex] = useState(0);
+
+  //set to the first active: true sequence.
+  const [currentSequenceIndex, setCurrentSequenceIndex] = useState(() => {
+    const firstActiveIndex = props.sequence.findIndex(seq => seq.active);
+    return firstActiveIndex !== -1 ? firstActiveIndex : 0;
+  });
+
+
+// Updates 'currentSequenceIndex' to the first active sequence when 'sequence' changes.
+useEffect(() => {
+  const firstActiveIndex = props.sequence.findIndex(seq => seq.active);
+  if (firstActiveIndex !== -1 && !props.sequence[currentSequenceIndex].active) {
+    setCurrentSequenceIndex(firstActiveIndex);
+  }
+}, [props.sequence]);
 
   const [showEditVariants, setShowEditVariants] = useState<boolean>(false);
 
@@ -3564,7 +3578,6 @@ const LinkedinSequenceSectionV2 = function (props: {
           position: "relative",
           marginTop: "8px",
         }}
-        h={300}
       >
         <LoadingOverlay visible={linkedinSequenceMessageGenerationInProgress} />
 
@@ -3578,8 +3591,13 @@ const LinkedinSequenceSectionV2 = function (props: {
       </Box>
       <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>
         <ActionIcon
-          disabled={currentSequenceIndex === 0}
-          onClick={() => setCurrentSequenceIndex((prevValue) => prevValue - 1)}
+          disabled={currentSequenceIndex === 0 || !props.sequence.slice(0, currentSequenceIndex).some(seq => seq.active)}
+          onClick={() => {
+            const prevActiveIndex = props.sequence.slice(0, currentSequenceIndex).map((seq, index) => ({ seq, index })).reverse().find(({ seq }) => seq.active)?.index;
+            if (prevActiveIndex !== undefined) {
+              setCurrentSequenceIndex(prevActiveIndex);
+            }
+          }}
           radius={"xl"}
         >
           <IconArrowLeft size={16} />
@@ -3588,14 +3606,20 @@ const LinkedinSequenceSectionV2 = function (props: {
           variant={"outline"}
           radius={"sm"}
           onClick={() => setShowEditVariants((prevState) => !prevState)}
+          sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
         >
           {`Variant #${currentSequenceIndex + 1}: ${
             props.sequence[currentSequenceIndex]?.title ?? ""
           }`}
         </Badge>
         <ActionIcon
-          disabled={currentSequenceIndex === props.sequence.length - 1}
-          onClick={() => setCurrentSequenceIndex((prevValue) => prevValue + 1)}
+          disabled={currentSequenceIndex === props.sequence.length - 1 || !props.sequence.some((seq, index) => index > currentSequenceIndex && seq.active)}
+          onClick={() => {
+            const nextActiveIndex = props.sequence.findIndex((seq, index) => index > currentSequenceIndex && seq.active);
+            if (nextActiveIndex !== -1) {
+              setCurrentSequenceIndex(nextActiveIndex);
+            }
+          }}
           radius={"xl"}
         >
           <IconArrowRight size={16} />
@@ -3859,7 +3883,7 @@ const LinkedinBumpEditSection = function (props: {
                 View Replies
               </Button>
             </Flex>
-            <Box mr={40} w="100%">
+            <Box mr={20} w="100%">
               <Flex>
                 <Text
                   size="sm"
@@ -3873,7 +3897,7 @@ const LinkedinBumpEditSection = function (props: {
                 </Text>
                 {/* Hovercard for transformers */}
 
-                <HoverCard width={280} shadow="md">
+                <HoverCard withinPortal width={280} shadow="md">
                   <HoverCard.Target>
                     <Badge
                       leftSection={
@@ -4351,7 +4375,6 @@ const LinkedinIntroSectionV2 = function (props: {
           position: "relative",
           marginTop: "8px",
         }}
-        h={300}
       >
         <LoadingOverlay
           visible={linkedinInitialMessageGenerationInProgress}
@@ -4365,7 +4388,7 @@ const LinkedinIntroSectionV2 = function (props: {
       {linkedinInitialMessages.meta_data &&
         !props.currentProject?.template_mode && (
           <Group pt="xs" noWrap>
-            <HoverCard width={280} shadow="md" position={"bottom"}>
+            <HoverCard width={280} shadow="md" position={"bottom"} withinPortal>
               <HoverCard.Target>
                 <Badge
                   color="blue"
@@ -4389,7 +4412,7 @@ const LinkedinIntroSectionV2 = function (props: {
                 <Text size="sm">{linkedinInitialMessages.meta_data.cta}</Text>
               </HoverCard.Dropdown>
             </HoverCard>
-            <HoverCard width={280} shadow="md" position="bottom">
+            <HoverCard withinPortal width={280} shadow="md" position="bottom">
               <HoverCard.Target>
                 <Badge
                   variant={"outline"}

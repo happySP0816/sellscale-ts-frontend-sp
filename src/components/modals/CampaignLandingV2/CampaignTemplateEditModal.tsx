@@ -1415,7 +1415,7 @@ export default function CampaignTemplateEditModal({
             <Box>
               {currentStepNum === 0 && sequenceType === "linkedin" && (
                 <>
-                <ScrollArea viewportRef={viewport} h={200}>
+                <ScrollArea viewportRef={viewport}>
                   {linkedinInitialMessageData.length > 0 && currentProject?.template_mode &&  
                     [...linkedinInitialMessageData]
                       .sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))

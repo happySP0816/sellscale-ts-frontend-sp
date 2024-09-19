@@ -171,6 +171,7 @@ const ClientSpending: React.FC<{ isInternal?: boolean, selectedClient?: number }
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
                 pointHoverBorderColor: 'rgba(75, 192, 192, 1)',
+                tension: 0.4,
             },
             {
                 label: 'Domains',
@@ -181,6 +182,7 @@ const ClientSpending: React.FC<{ isInternal?: boolean, selectedClient?: number }
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
                 pointHoverBorderColor: 'rgba(255, 206, 86, 1)',
+                tension: 0.4,
             },
             {
                 label: 'Email Outbound',
@@ -191,6 +193,7 @@ const ClientSpending: React.FC<{ isInternal?: boolean, selectedClient?: number }
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
                 pointHoverBorderColor: 'rgba(153, 102, 255, 1)',
+                tension: 0.4,
             },
             {
                 label: 'LinkedIn Outbound',
@@ -201,6 +204,7 @@ const ClientSpending: React.FC<{ isInternal?: boolean, selectedClient?: number }
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
                 pointHoverBorderColor: 'rgba(54, 162, 235, 1)',
+                tension: 0.4,
             },
             {
                 label: 'Linkedin Connections',
@@ -211,6 +215,7 @@ const ClientSpending: React.FC<{ isInternal?: boolean, selectedClient?: number }
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
                 pointHoverBorderColor: 'rgba(255, 159, 64, 1)',
+                tension: 0.4,
             },
             {
                 label: 'Website Deanonymizations',
@@ -221,6 +226,7 @@ const ClientSpending: React.FC<{ isInternal?: boolean, selectedClient?: number }
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
                 pointHoverBorderColor: 'rgba(255, 99, 132, 1)',
+                tension: 0.4,
             },
         ] : [],
     };

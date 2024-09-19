@@ -312,7 +312,36 @@ const ClientSpending: React.FC<{ isInternal?: boolean, selectedClient?: number }
                                 </Text>
                             </Flex>
                             <Text fw={600} mr={"sm"}>
-                                ${projectedSpending.toFixed(2)}
+                                ${clientSpending 
+                                    ? calculateTotalSpending({
+                                        ...clientSpending,
+                                        apollo: {
+                                            [Object.keys(clientSpending.apollo).pop()!]: 
+                                            Object.values(clientSpending.apollo).pop()!
+                                        },
+                                        domains: {
+                                            [Object.keys(clientSpending.domains).pop()!]: 
+                                            Object.values(clientSpending.domains).pop()!
+                                        },
+                                        email_outbound: {
+                                            [Object.keys(clientSpending.email_outbound).pop()!]: 
+                                            Object.values(clientSpending.email_outbound).pop()!
+                                        },
+                                        linkedin_outbound: {
+                                            [Object.keys(clientSpending.linkedin_outbound).pop()!]: 
+                                            Object.values(clientSpending.linkedin_outbound).pop()!
+                                        },
+                                        phantombuster: {
+                                            [Object.keys(clientSpending.phantombuster).pop()!]: 
+                                            Object.values(clientSpending.phantombuster).pop()!
+                                        },
+                                        deanon: {
+                                            [Object.keys(clientSpending.deanon).pop()!]: 
+                                            Object.values(clientSpending.deanon).pop()!
+                                        }
+                                    }).toFixed(2) 
+                                    : '0.00'
+                                }
                             </Text>
                         </Paper>
                     </Flex>

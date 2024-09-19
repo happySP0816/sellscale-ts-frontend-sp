@@ -18,6 +18,7 @@ import {
   Tooltip,
   Loader,
   HoverCard,
+  LoadingOverlay,
 } from "@mantine/core";
 import {
   IconHistory,
@@ -25,6 +26,7 @@ import {
   IconCheck,
   IconX,
   IconSunElectricity,
+  IconTrash,
 } from "@tabler/icons-react";
 import {
   IconBolt,
@@ -77,11 +79,15 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
     session_id: "",
   });
   const [loading, setLoading] = useState(false);
+  const [loadingSelixLogs, setLoadingSelixLogs] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedDescription, setEditedDescription] = useState("");
   const userToken = useRecoilValue(userTokenState);
 
   const fetchSelixLogs = async (selixLogId: number | null = null) => {
     try {
       setLoading(true);
+      setLoadingSelixLogs(true);
       const response = await fetch(`${API_URL}/selix/get_selix_logs`, {
         method: "GET",
         headers: {
@@ -112,6 +118,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
       console.error("Error fetching logs:", error);
     } finally {
       setLoading(false);
+      setLoadingSelixLogs(false);
       console.log("Logs fetched successfully");
     }
   };
@@ -167,6 +174,62 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
       fetchSelixLogs(selixLogId); // Refresh logs after update
     } catch (error) {
       console.error("Error updating processing type:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteSelixLog = async (logId: number) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/selix/delete_log`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ log_id: logId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete log");
+      }
+
+      const result = await response.json();
+      console.log("Log deleted successfully:", result);
+      fetchSelixLogs(); // Refresh logs after deletion
+    } catch (error) {
+      console.error("Error deleting log:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const editSelixLog = async (logId: number, newDescription: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/selix/edit_log`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          log_id: logId,
+          new_description: newDescription,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to edit log");
+      }
+
+      const result = await response.json();
+      console.log("Log edited successfully:", result);
+      fetchSelixLogs(logId); // Refresh logs after edit
+      setIsEditing(false); // Exit editing mode
+    } catch (error) {
+      console.error("Error editing log:", error);
     } finally {
       setLoading(false);
     }
@@ -290,12 +353,17 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
               Event Timeline
             </Text>
             <Card withBorder mah="56vh" mb="md" sx={{ overflowY: "auto" }}>
+              <LoadingOverlay visible={loading || loadingSelixLogs} />
               <Timeline bulletSize={24}>
                 {reversedLogsByLogDate.map((log, index) => {
                   return (
                     <Timeline.Item
                       key={index}
-                      onClick={() => setSelectedLog(log)}
+                      onClick={() => {
+                        setSelectedLog(log);
+                        setEditedDescription(log.description);
+                        setIsEditing(false);
+                      }}
                       sx={{
                         cursor:
                           log.tag === "MEMORY_METADATA_SAVED"
@@ -327,16 +395,33 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                         </Tooltip>
                       }
                     >
-                      <Text
-                        fw={log.tag === "MEMORY_METADATA_SAVED" ? 600 : 400}
-                        size={log.tag === "MEMORY_METADATA_SAVED" ? "sm" : "xs"}
-                      >
-                        {log.title}
-                      </Text>
-                      <Text c="dimmed" size="xs">
-                        {moment(log.created_date).fromNow()} |{" "}
-                        {tagToIconAndColorMap[log.tag]?.sub}
-                      </Text>
+                      <Flex align="center" justify="space-between">
+                        <Box>
+                          <Text
+                            fw={log.tag === "MEMORY_METADATA_SAVED" ? 600 : 400}
+                            size={
+                              log.tag === "MEMORY_METADATA_SAVED" ? "sm" : "xs"
+                            }
+                          >
+                            {log.title}
+                          </Text>
+                          <Text c="dimmed" size="xs">
+                            {moment(log.created_date).fromNow()} |{" "}
+                            {tagToIconAndColorMap[log.tag]?.sub}
+                          </Text>
+                        </Box>
+                        <Button
+                          variant="subtle"
+                          color="red"
+                          size="xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteSelixLog(log.id);
+                          }}
+                        >
+                          <IconTrash size={16} />
+                        </Button>
+                      </Flex>
                     </Timeline.Item>
                   );
                 })}
@@ -354,14 +439,14 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
             {createLogOpened && (
               <Card withBorder mt="md">
                 <Box mt="md">
-                  <TextInput
+                  {/* <TextInput
                     label="Title"
                     value={newLog.title}
                     onChange={(e) =>
                       setNewLog({ ...newLog, title: e.currentTarget.value })
                     }
                     mb="sm"
-                  />
+                  /> */}
                   <Select
                     label="Tag"
                     value={newLog.tag}
@@ -423,9 +508,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                     size="xs"
                     color="green"
                     variant="outline"
-                    disabled={
-                      !newLog.title || !newLog.tag || !newLog.description
-                    }
+                    disabled={!newLog.tag || !newLog.description}
                   >
                     Submit
                   </Button>
@@ -465,48 +548,72 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                   }}
                 />
                 <Textarea
-                  value={selectedLog.description}
-                  readOnly
+                  value={editedDescription}
                   autosize
                   minRows={10}
                   mb="md"
+                  onChange={(e) => {
+                    setEditedDescription(e.currentTarget.value);
+                    setIsEditing(true);
+                  }}
                 />
-                {selectedLog.processing_status ? (
-                  <HoverCard width={400} shadow="md">
-                    <HoverCard.Target>
-                      <Badge
-                        color={deterministicMantineColor(
-                          selectedLog.processing_status
-                        )}
-                        variant="filled"
-                        size="lg"
-                        mb="md"
-                      >
-                        {selectedLog.processing_status.replace(/_/g, " ")}
-                      </Badge>
-                    </HoverCard.Target>
-                    <HoverCard.Dropdown>
-                      <Text
-                        size="sm"
-                        dangerouslySetInnerHTML={{
-                          __html: selectedLog.processing_status_description
-                            .replaceAll("**", "")
-                            .replaceAll("\n", "<br />"),
-                        }}
-                      />
-                    </HoverCard.Dropdown>
-                  </HoverCard>
-                ) : selectedLog.tag != "MEMORY_METADATA_SAVED" ? (
-                  <Button
-                    onClick={() => updateProcessingType(selectedLog.id)}
-                    size="xs"
-                    color="blue"
-                    variant="outline"
-                    mb="md"
-                  >
-                    {loading ? <Loader size="xs" /> : "Update Processing Type"}
-                  </Button>
-                ) : null}
+                <Flex>
+                  {selectedLog.processing_status ? (
+                    <HoverCard width={400} shadow="md">
+                      <HoverCard.Target>
+                        <Badge
+                          color={deterministicMantineColor(
+                            selectedLog.processing_status
+                          )}
+                          variant="filled"
+                          size="lg"
+                          mb="md"
+                        >
+                          {selectedLog.processing_status.replace(/_/g, " ")}
+                        </Badge>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown>
+                        <Text
+                          size="sm"
+                          dangerouslySetInnerHTML={{
+                            __html: selectedLog.processing_status_description
+                              .replaceAll("**", "")
+                              .replaceAll("\n", "<br />"),
+                          }}
+                        />
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  ) : selectedLog.tag != "MEMORY_METADATA_SAVED" ? (
+                    <Button
+                      onClick={() => updateProcessingType(selectedLog.id)}
+                      size="xs"
+                      color="blue"
+                      variant="outline"
+                      mb="md"
+                    >
+                      {loading ? (
+                        <Loader size="xs" />
+                      ) : (
+                        "Update Processing Type"
+                      )}
+                    </Button>
+                  ) : null}
+
+                  {isEditing && (
+                    <Button
+                      onClick={() =>
+                        editSelixLog(selectedLog.id, editedDescription)
+                      }
+                      size="xs"
+                      color="green"
+                      variant="outline"
+                      mb="md"
+                      ml="auto"
+                    >
+                      {loading ? <Loader size="xs" /> : "Save"}
+                    </Button>
+                  )}
+                </Flex>
                 {selectedLog.tag === "MEMORY_METADATA_SAVED" && (
                   <>
                     <Text fw={600} mb="2px">

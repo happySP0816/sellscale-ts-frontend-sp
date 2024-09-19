@@ -1560,9 +1560,10 @@ export default function SelinAI() {
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       setThreads((prevThreads) =>
-                                        prevThreads.filter(
-                                          (prevThread) =>
-                                            prevThread.id !== thread.id
+                                        prevThreads.map((prevThread) =>
+                                          prevThread.id === thread.id
+                                            ? { ...prevThread, status: "CANCELLED" }
+                                            : prevThread
                                         )
                                       );
                                       fetch(`${API_URL}/selix/delete_session`, {
@@ -1602,7 +1603,7 @@ export default function SelinAI() {
                                         });
                                     }}
                                   >
-                                    <IconTrash size={"1rem"} />
+                                    {thread.status !== 'CANCELLED' && <IconTrash size={"1rem"} />}
                                   </ActionIcon>
                                 </>
                               )}

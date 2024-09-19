@@ -161,6 +161,7 @@ export function LineChart() {
         borderWidth: 1,
         pointHoverRadius: 5,
         pointHoverBackgroundColor: theme.colors.green[6],
+        tension: 0.4,
       },
       {
         label: "Total Positive Replies",
@@ -170,6 +171,7 @@ export function LineChart() {
         borderWidth: 1,
         pointHoverRadius: 5,
         pointHoverBackgroundColor: theme.colors.grape[6],
+        tension: 0.4,
       },
       {
         label: "Total Replies",
@@ -179,6 +181,7 @@ export function LineChart() {
         borderWidth: 1,
         pointHoverRadius: 5,
         pointHoverBackgroundColor: theme.colors.blue[6],
+        tension: 0.4,
       },
       {
         label: "Total Acceptances",
@@ -188,6 +191,7 @@ export function LineChart() {
         borderWidth: 1,
         pointHoverRadius: 5,
         pointHoverBackgroundColor: theme.colors.red[6],
+        tension: 0.4,
       },
       {
         label: "Total Outbound Volume",
@@ -197,6 +201,7 @@ export function LineChart() {
         borderWidth: 1,
         pointHoverRadius: 5,
         pointHoverBackgroundColor: theme.colors.yellow[6],
+        tension: 0.4,
       },
     ],
   };

@@ -209,7 +209,7 @@ export function ProspectConvoMessage(props: {
               <Group position="apart">
                 <Group spacing={10}>
                   <Title order={6}>{props.name}</Title>
-                  {props.aiGenerated && (
+                  {props.aiGenerated ? (
                     <AiMetaDataBadge
                       location={{ position: "relative" }}
                       bumpFrameworkId={props.bumpFrameworkId || 0}
@@ -235,6 +235,12 @@ export function ProspectConvoMessage(props: {
                       }
                       cta={props.cta || ""}
                     />
+                  ): (
+                    <>
+                    {props.is_me ? <Badge>
+                      {'Sent from linkedin.com'}
+                    </Badge>: (<></>)}
+                    </>
                   )}
                 </Group>
                 <Tooltip label={props.timestamp} openDelay={500}>

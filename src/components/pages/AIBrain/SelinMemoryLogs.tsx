@@ -143,7 +143,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
     }
   };
 
-  const updateProcessingType = async (selixLogId: string) => {
+  const updateProcessingType = async (selixLogId: number) => {
     try {
       setLoading(true);
       const response = await fetch(

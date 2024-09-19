@@ -40,6 +40,7 @@ import {
   Input,
 } from "@mantine/core";
 import {
+  IconArchive,
   IconArrowsMaximize,
   IconArrowsMinimize,
   IconBrowser,
@@ -1603,7 +1604,7 @@ export default function SelinAI() {
                                         });
                                     }}
                                   >
-                                    {thread.status !== 'CANCELLED' && <IconTrash size={"1rem"} />}
+                                    {thread.status !== 'CANCELLED' && <IconArchive size={"1rem"} />}
                                   </ActionIcon>
                                 </>
                               )}

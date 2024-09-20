@@ -88,7 +88,6 @@ import SelixOnboarding from "@pages/AIBrain/SelixOnboarding";
 import DeepGram from "@common/DeepGram";
 import { isFreeUser } from "@auth/core";
 import GenerateAndSend from "@pages/GenerateAndSend";
-import TrainVoice from "@pages/CampaignV2/TrainVoice";
 import SuggestedIdeas from "@pages/SuggestedIdeas/SuggestedIdeas";
 import SelixSuggestionEmail from "@pages/SelixSuggestionEmail";
 
@@ -599,10 +598,6 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/selix_onboarding",
         element: <SelixOnboarding />,
-      },
-      {
-        path: "/train_voice",
-        element: <TrainVoice />,
       },
       {
         path: "/suggested",

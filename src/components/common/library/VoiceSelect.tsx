@@ -59,7 +59,7 @@ interface VoiceName {
   editingName: boolean,
 }
 
-interface Voices {
+export interface Voices {
   id: number,
   name: string,
   full_name: string,
@@ -67,6 +67,7 @@ interface Voices {
   always_enable: boolean,
   icp_fit: number,
   active: boolean,
+  voice_builder_onboarding_id: number,
 }
 
 export default function VoiceSelect(props: {
@@ -355,7 +356,6 @@ export default function VoiceSelect(props: {
                               ml="2px"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                console.log('clicking');
                                 setEditingName(voice.id, true);
                               }}
                             >

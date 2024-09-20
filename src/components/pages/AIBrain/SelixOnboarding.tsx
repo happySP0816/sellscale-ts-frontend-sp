@@ -123,7 +123,7 @@ export default function SelixOnboarding() {
     if (info) {
       setTagLine(info.client?.tagline || "");
       setDescription(info.client?.description || "");
-      
+
       setUserData(info);
       // setSdrActive(info.active);
     }
@@ -339,7 +339,7 @@ export default function SelixOnboarding() {
             }
             labelPosition="center"
           />
-          <ThemeIcon
+          {/* <ThemeIcon
             color={step >= 2 ? "blue" : "gray"}
             radius={"xl"}
             size={"xl"}
@@ -357,14 +357,14 @@ export default function SelixOnboarding() {
               />
             }
             labelPosition="center"
-          />
+          /> */}
 
           <ThemeIcon
-            color={step >= 3 ? "blue" : "gray"}
+            color={step >= 2 ? "blue" : "gray"}
             radius={"xl"}
             size={"xl"}
           >
-            3
+            2
           </ThemeIcon>
         </Flex>
         <Flex align={"center"} justify={"space-between"} w={"80%"} mt={"md"}>
@@ -375,18 +375,18 @@ export default function SelixOnboarding() {
           >
             Review Company Information
           </Text>
-          <Text
+          {/* <Text
             size={"xs"}
             fw={step >= 2 ? 600 : 500}
             color={step >= 2 ? "" : "gray"}
             mr={70}
           >
             Identify Core Customers
-          </Text>
+          </Text> */}
           <Text
             size={"xs"}
-            fw={step >= 3 ? 600 : 500}
-            color={step >= 3 ? "" : "gray"}
+            fw={step >= 2 ? 600 : 500}
+            color={step >= 2 ? "" : "gray"}
             mr={30}
           >
             Final Review
@@ -408,7 +408,7 @@ export default function SelixOnboarding() {
               setDescription={setDescription}
             />
           )}
-          {step === 2 && (
+          {step === -1 && (
             <Flex direction="column" align="center" w="100%" p="lg">
               <Text size="lg" fw={600} align="center" mb="md">
                 Does this accurately represent your ideal customer profile?
@@ -426,7 +426,7 @@ export default function SelixOnboarding() {
               />
             </Flex>
           )}
-          {step === 3 && (
+          {step === 2 && (
             <FinalReview
               tagline={tagline}
               description={description}
@@ -445,9 +445,9 @@ export default function SelixOnboarding() {
             </Button>
             <Button
               // disabled={step === 2 && hasNotGeneratedPreFilter}
-              leftIcon={step >= 3 && <IconRocket size={"1rem"} />}
+              leftIcon={step >= 2 && <IconRocket size={"1rem"} />}
               onClick={() => {
-                if (step === 3) {
+                if (step === 2) {
                   update_prefilter_description(
                     prefilterIDref.current,
                     prefilter?.segment_description
@@ -474,30 +474,29 @@ export default function SelixOnboarding() {
                     .catch((error) => {
                       console.error("Error updating client data:", error);
                     });
-                    console.log('user data update payload: ', {
-                      ...userData,
-                      client: {
-                        ...userData.client,
-                        tagline: tagline,
-                        description: description,
-                      },
-                    }
-                    )
-                    setUserData({
-                      ...userData,
-                      client: {
-                        ...userData.client,
-                        tagline: tagline,
-                        description: description,
-                      },
-                    });
+                  console.log("user data update payload: ", {
+                    ...userData,
+                    client: {
+                      ...userData.client,
+                      tagline: tagline,
+                      description: description,
+                    },
+                  });
+                  setUserData({
+                    ...userData,
+                    client: {
+                      ...userData.client,
+                      tagline: tagline,
+                      description: description,
+                    },
+                  });
                   navigate("/selix");
                 }
-                if (step < 3) setStep(step + 1);
+                if (step < 2) setStep(step + 1);
               }}
               w={200}
             >
-              {step >= 3 ? "Launch" : "Next"}
+              {step >= 2 ? "Launch" : "Next"}
             </Button>
           </Flex>
         </Paper>
@@ -580,7 +579,7 @@ const FinalReview = ({
               {description}
             </Text>
           </Flex>
-          <Flex align={"start"} gap={"sm"}>
+          {/* <Flex align={"start"} gap={"sm"}>
             <Box>
               <Text w={170} size={"sm"} color="gray" fw={500}>
                 Customer description:
@@ -589,7 +588,7 @@ const FinalReview = ({
             <Text size={"sm"} fw={600} style={{ whiteSpace: "pre-line" }}>
               {preFilter}
             </Text>
-          </Flex>
+          </Flex> */}
         </Stack>
       </Paper>
     </Stack>

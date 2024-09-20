@@ -55,6 +55,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   emailSequenceState,
   emailSubjectLinesState,
+  linkedinInitialMessageState,
   linkedinSequenceState,
   userDataState,
   userTokenState,
@@ -256,6 +257,7 @@ export default function CampaignLandingV2(props: PropsType) {
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>(
     []
   );
+  const linkedinInitialMessageData = useRecoilValue(linkedinInitialMessageState);
 
   const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<
     SubjectLineTemplate[]
@@ -362,7 +364,7 @@ export default function CampaignLandingV2(props: PropsType) {
       });
       return false;
     }
-    if (linkedinInitialMessages.length === 0 && statsData?.template_mode) {
+    if (linkedinInitialMessageData.length === 0 && statsData?.template_mode) {
       showNotification({
         color: "red",
         title: "LinkedIn Channel",

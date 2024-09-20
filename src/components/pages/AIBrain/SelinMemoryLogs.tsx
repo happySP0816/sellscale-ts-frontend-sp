@@ -19,6 +19,7 @@ import {
   Loader,
   HoverCard,
   LoadingOverlay,
+  ActionIcon,
 } from "@mantine/core";
 import {
   IconHistory,
@@ -38,6 +39,7 @@ import {
   IconMessage,
   IconPencil,
   IconRecordMail,
+  IconRefresh,
   IconRobot,
 } from "@tabler/icons";
 import moment from "moment";
@@ -400,15 +402,15 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
               View a history of all memory saves and task completions.
             </Text>
           </Box>
-          <Button
+          <ActionIcon
             onClick={() => fetchSelixLogs()}
-            size="xs"
+            size="lg"
             color="gray"
             ml="auto"
-            variant="outline"
+            variant="subtle"
           >
-            Refresh
-          </Button>
+            <IconRefresh size={16} />
+          </ActionIcon>
         </Flex>
         <Divider mt="md" mb="lg" />
         <Flex>

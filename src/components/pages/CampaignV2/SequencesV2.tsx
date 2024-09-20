@@ -898,6 +898,7 @@ const VoiceModal = function (props: {
   currentProject?: PersonaOverview;
   userToken: string;
   numCtas: number;
+  numProspects: number;
 }) {
   const [defaultVoicesOptions, setDefaultVoicesOptions] = useState<
     DefaultVoices[]
@@ -1166,6 +1167,7 @@ const VoiceModal = function (props: {
             userToken={props.userToken}
             voices={voices}
             currentProject={props.currentProject}
+            numProspects={props.numProspects}
           />
         ) : (
           <>
@@ -1193,7 +1195,11 @@ const VoiceModal = function (props: {
               </Flex>
             </Flex>
 
-            <Flex direction={"column"} gap={"8px"} style={{maxHeight: "1000px"}}>
+            <Flex
+              direction={"column"}
+              gap={"8px"}
+              style={{ maxHeight: "1000px" }}
+            >
               <Text fw={600} mt={"8px"}>
                 Use your own generated voices
               </Text>
@@ -1331,13 +1337,17 @@ const VoiceModal = function (props: {
                 placeholder={"Select the voice to generate the campaign"}
               />
               {selectedDefaultVoice && (
-                <Button
-                  onClick={async () =>
-                    await addDefaultVoice(+selectedDefaultVoice)
-                  }
-                >
-                  {loading ? <Loader /> : "Save Voice"}
-                </Button>
+                <Flex direction={"column"} align={"center"} gap={"8px"}>
+                  <Text fw={600}>Description:</Text>
+                  <Text fw={300}>{defaultVoicesOptions.find(i => i.id === +selectedDefaultVoice)?.description}</Text>
+                  <Button
+                    onClick={async () =>
+                      await addDefaultVoice(+selectedDefaultVoice)
+                    }
+                  >
+                    {loading ? <Loader /> : "Save Voice"}
+                  </Button>
+                </Flex>
               )}
             </Flex>
           </>
@@ -2673,16 +2683,6 @@ const EmailPreviewHeaderV2 = function (props: {
                           </List>
                         </Box>
                       </Flex>
-                      {!currentProject?.template_mode && (
-                        <VoiceModal
-                          opened={opened}
-                          close={close}
-                          currentProject={currentProject}
-                          userToken={userToken}
-                          open={open}
-                          numCtas={0}
-                        />
-                      )}
                     </Flex>
                   )}
                 </div>
@@ -4797,6 +4797,7 @@ const LinkedinIntroSectionV2 = function (props: {
         <LoadingOverlay
           visible={linkedinInitialMessageGenerationInProgress}
           zIndex={2}
+          style={{minHeight: "300px"}}
         />
         {linkedinInitialMessages.message && (
           <LiExampleInvitation message={linkedinInitialMessages.message} />
@@ -4928,6 +4929,7 @@ const LinkedinIntroSectionV2 = function (props: {
               userToken={props.userToken}
               open={open}
               numCtas={ctasItemsCount ?? 0}
+              numProspects={props.campaignContacts?.length ?? 0}
             />
           )}
         </Group>

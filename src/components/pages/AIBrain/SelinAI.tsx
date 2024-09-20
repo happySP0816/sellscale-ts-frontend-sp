@@ -1563,7 +1563,10 @@ export default function SelinAI() {
                                       setThreads((prevThreads) =>
                                         prevThreads.map((prevThread) =>
                                           prevThread.id === thread.id
-                                            ? { ...prevThread, status: "CANCELLED" }
+                                            ? {
+                                                ...prevThread,
+                                                status: "CANCELLED",
+                                              }
                                             : prevThread
                                         )
                                       );
@@ -1604,7 +1607,9 @@ export default function SelinAI() {
                                         });
                                     }}
                                   >
-                                    {thread.status !== 'CANCELLED' && <IconArchive size={"1rem"} />}
+                                    {thread.status !== "CANCELLED" && (
+                                      <IconArchive size={"1rem"} />
+                                    )}
                                   </ActionIcon>
                                 </>
                               )}
@@ -1860,9 +1865,9 @@ const SegmentChat = (props: any) => {
   const [uncollapsedCards, setUncollapsedCards] = useState<{
     [key: number]: boolean;
   }>({});
-  const [clientMemoryState, setClientMemoryState] = useState<string | undefined>(
-    props.memory?.memory_line
-  );
+  const [clientMemoryState, setClientMemoryState] = useState<
+    string | undefined
+  >(props.memory?.memory_line);
   const [
     clientMemoryStateUpdatedTime,
     setClientMemoryStateUpdatedTime,
@@ -1872,11 +1877,11 @@ const SegmentChat = (props: any) => {
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
   const [fetchingMemoryState, setFetchingMemoryState] = useState(false);
   const [memoryLineEditMode, setMemoryLineEditMode] = useState(false);
-
   const [memoryState, setMemoryState] = useState<any>(props.memoryState);
   const [memoryLineHoverData, setMemoryLineHoverData]: any = useState<
     string | null
   >();
+  const [memoryPopupOpen, setMemoryPopupOpen] = useState(false);
 
   const handleListClick = async (prompt: string) => {
     handleSubmit(undefined, prompt);
@@ -1952,7 +1957,9 @@ const SegmentChat = (props: any) => {
     }
   };
 
-  const updateMemoryLineAllSessions = async (newMemoryLine: string | undefined) => {
+  const updateMemoryLineAllSessions = async (
+    newMemoryLine: string | undefined
+  ) => {
     if (!newMemoryLine) {
       return;
     }
@@ -2196,20 +2203,29 @@ const SegmentChat = (props: any) => {
       >
         <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
         <Text fw={600}>Chat with Selix</Text>
-        <HoverCard width={360} shadow="md" position="left">
-          <HoverCard.Target>
+        <Popover
+          width={360}
+          shadow="md"
+          position="left"
+          withinPortal
+          opened={memoryPopupOpen}
+          onClose={() => setMemoryPopupOpen(false)}
+          closeOnClickOutside={false}
+        >
+          <Popover.Target>
             <Text
               ml={"auto"}
               size={"xs"}
               color="gray"
               sx={{ pointer: "cursor" }}
+              onClick={() => setMemoryPopupOpen((prev) => !prev)}
             >
               <Badge color="pink" variant="outline">
                 🧠
               </Badge>
             </Text>
-          </HoverCard.Target>
-          <HoverCard.Dropdown>
+          </Popover.Target>
+          <Popover.Dropdown>
             <Flex justify="space-between" align="center" mb="xs">
               <LoadingOverlay visible={fetchingMemoryState} />
               <Title order={5}>🧠 Selix Memory</Title>
@@ -2224,6 +2240,16 @@ const SegmentChat = (props: any) => {
                   </Badge>
                 </Tooltip>
               )}
+
+              <Button
+                variant="subtle"
+                color="red"
+                size="xs"
+                onClick={() => setMemoryPopupOpen(false)}
+                ml="auto"
+              >
+                x
+              </Button>
             </Flex>
             <Card withBorder mah={700} p="md" sx={{ overflow: "auto" }}>
               <Flex>
@@ -2618,8 +2644,8 @@ const SegmentChat = (props: any) => {
                   );
                 })}
             </Card>
-          </HoverCard.Dropdown>
-        </HoverCard>
+          </Popover.Dropdown>
+        </Popover>
       </Flex>
       <Divider bg="gray" />
       <div style={{ position: "relative", height: "48vh" }}>

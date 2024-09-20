@@ -45,6 +45,8 @@ import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import { deterministicMantineColor } from "@utils/requests/utils";
+import { showNotification } from "@mantine/notifications";
+import { socket } from "../../../components/App";
 
 interface MemoryLog {
   id: number;
@@ -83,6 +85,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedDescription, setEditedDescription] = useState("");
   const userToken = useRecoilValue(userTokenState);
+  const [roomId, setRoomId] = useState("");
 
   const fetchSelixLogs = async (selixLogId: number | null = null) => {
     try {
@@ -235,6 +238,67 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleData = (incomingData: any) => {
+      console.log("Incoming data:", incomingData);
+      if (incomingData.room_id === roomId) {
+        fetchSelixLogs();
+      }
+    };
+
+    socket.on("reload-memory-events", handleData);
+
+    return () => {
+      socket.off("reload-memory-events", handleData);
+    };
+  }, [roomId]);
+
+  useEffect(() => {
+    const connectSessionsToRooms = async () => {
+      try {
+        const roomId = Array.from(
+          { length: 16 },
+          () => Math.random().toString(36)[2]
+        ).join("");
+        setRoomId(roomId);
+
+        socket.emit("join-room", {
+          payload: { room_id: roomId },
+        });
+
+        const response = await fetch(
+          `${API_URL}/selix/connect_sessions_to_rooms`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ room_id: roomId }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to connect sessions to rooms");
+        }
+
+        const result = await response.json();
+        console.log("Sessions connected to rooms successfully:", result);
+        showNotification({
+          title: "Success",
+          message: "Sessions connected to rooms successfully",
+          color: "green",
+        });
+      } catch (error) {
+        console.error("Error connecting sessions to rooms:", error);
+      }
+    };
+
+    if (userToken) {
+      connectSessionsToRooms();
+    }
+  }, [userToken]);
 
   useEffect(() => {
     fetchSelixLogs();

@@ -68,7 +68,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
   const [logs, setLogs] = useState<MemoryLog[]>([]);
   const [opened, setOpened] = useState(false);
   const [selectedLog, setSelectedLog]: any = useState<MemoryLog | null>(
-    logs.reverse().find((log) => log.tag === "MEMORY_METADATA_SAVED") || null
+    logs.reverse().find((log) => true) || null
   );
   const [createLogOpened, setCreateLogOpened] = useState(false);
   const [newLog, setNewLog] = useState({
@@ -108,10 +108,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
         );
       } else {
         setSelectedLog(
-          result.logs
-            .reverse()
-            .find((log: MemoryLog) => log.tag === "MEMORY_METADATA_SAVED") ||
-            null
+          result.logs.reverse().find((log: MemoryLog) => true) || null
         );
       }
     } catch (error) {
@@ -122,6 +119,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
       console.log("Logs fetched successfully");
     }
   };
+
+  useEffect(() => {
+    setEditedDescription(selectedLog?.description || "");
+  }, [selectedLog]);
 
   const createSelixLog = async () => {
     try {
@@ -368,6 +369,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                           log.tag === "MEMORY_METADATA_SAVED"
                             ? "pointer"
                             : "default",
+                        backgroundColor:
+                          log === selectedLog ? "#fcfcfc" : undefined,
+                        border:
+                          log === selectedLog ? "1px solid #e0e0e0" : undefined,
                       }}
                       bullet={
                         <Tooltip
@@ -383,12 +388,8 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                             }
                             radius="xl"
                           >
-                            {log === selectedLog ? (
-                              <IconEye size="0.8rem" />
-                            ) : (
-                              tagToIconAndColorMap[log.tag]?.icon || (
-                                <IconBolt size="0.8rem" />
-                              )
+                            {tagToIconAndColorMap[log.tag]?.icon || (
+                              <IconBolt size="0.8rem" />
                             )}
                           </ThemeIcon>
                         </Tooltip>

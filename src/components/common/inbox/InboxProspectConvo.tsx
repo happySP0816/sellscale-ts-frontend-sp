@@ -209,7 +209,7 @@ export function ProspectConvoMessage(props: {
               <Group position="apart">
                 <Group spacing={10}>
                   <Title order={6}>{props.name}</Title>
-                  {props.aiGenerated ? (
+                  {props.aiGenerated || props.isSending? (
                     <AiMetaDataBadge
                       location={{ position: "relative" }}
                       bumpFrameworkId={props.bumpFrameworkId || 0}

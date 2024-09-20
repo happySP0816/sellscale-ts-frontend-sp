@@ -123,7 +123,7 @@ export default function TrainVoice(props: {
   userToken: string;
   currentProject?: PersonaOverview;
   voices: Voices[];
-  numProspects: number
+  numProspects: number;
 }) {
   const [voiceBuilderOnboardingId, setVoiceBuilderOnboardingId] = useState<
     number | null
@@ -400,6 +400,8 @@ export default function TrainVoice(props: {
           setEditViewMode("edit_voice");
         }
 
+        setVoiceName(responseJson.data.name);
+
         return responseJson.data;
       }
 
@@ -440,6 +442,7 @@ export default function TrainVoice(props: {
           completion_5: stackRankedConfigurationData?.completion_5,
           completion_6: stackRankedConfigurationData?.completion_6,
           completion_7: stackRankedConfigurationData?.completion_7,
+          name: voiceName,
         }),
       }
     )
@@ -846,7 +849,8 @@ export default function TrainVoice(props: {
                   );
                 })}
               </Paper>
-              {voiceBuilderDetails.messages.length < Math.min(7, props.numProspects) && (
+              {voiceBuilderDetails.messages.length <
+                Math.min(7, props.numProspects) && (
                 <Button
                   p={"xs"}
                   onClick={async () => {
@@ -1135,7 +1139,16 @@ export default function TrainVoice(props: {
           >
             <LoadingOverlay visible={isFetching} />
             <Flex align={"center"} gap={"8px"}>
-              <Title order={4}>Edit Voice Samples</Title>
+              <Title order={4}>Edit Voice Samples: </Title>
+              <TextInput
+                radius="xs"
+                placeholder="Voice Name"
+                value={voiceName}
+                onChange={(event) => {
+                  setStackRankedConfigurationDataChanged(true);
+                  setVoiceName(event.currentTarget.value);
+                }}
+              />
               {voiceBuilderDetails && (
                 <Switch
                   onLabel={"Edit Samples"}

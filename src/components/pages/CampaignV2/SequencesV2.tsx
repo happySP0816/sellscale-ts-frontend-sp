@@ -1206,53 +1206,62 @@ const VoiceModal = function (props: {
               <ScrollArea style={{ position: "relative" }} h={"400px"}>
                 <LoadingOverlay visible={loading} />
                 {voices &&
-                  voices.map((voice) => {
-                    return (
-                      <Paper
-                        withBorder
-                        radius={"sm"}
-                        p={"sm"}
-                        mt={"sm"}
-                        style={{ position: "relative" }}
-                        key={voice.id}
-                      >
-                        <Flex align={"center"} justify={"space-between"}>
-                          <Flex align={"center"}>
-                            <Text size={"sm"} fw={500}>
-                              {voice.name}{" "}
-                              <span className="text-gray-400">
-                                {" "}
-                                {voice.created_at.slice(
-                                  0,
-                                  voice.created_at.length - 13
-                                )}
-                              </span>
-                            </Text>
-                            <ActionIcon
-                              color="blue"
-                              onClick={() => {
-                                setSelectedVoice(voice.id);
-                                setVoiceBuilderOnboardingId(null);
-                                setEditMode(true);
-                              }}
-                            >
-                              <IconEdit size={"1rem"} />
-                            </ActionIcon>
+                  voices
+                    .sort((a, b) => {
+                      if (a.active && !b.active) {
+                        return  -1;
+                      } else if (!a.active && b.active) {
+                        return 1;
+                      }
+                      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                    })
+                    .map((voice) => {
+                      return (
+                        <Paper
+                          withBorder
+                          radius={"sm"}
+                          p={"sm"}
+                          mt={"sm"}
+                          style={{ position: "relative" }}
+                          key={voice.id}
+                        >
+                          <Flex align={"center"} justify={"space-between"}>
+                            <Flex align={"center"}>
+                              <Text size={"sm"} fw={500}>
+                                {voice.name}{" "}
+                                <span className="text-gray-400">
+                                  {" "}
+                                  {voice.created_at.slice(
+                                    0,
+                                    voice.created_at.length - 13
+                                  )}
+                                </span>
+                              </Text>
+                              <ActionIcon
+                                color="blue"
+                                onClick={() => {
+                                  setSelectedVoice(voice.id);
+                                  setVoiceBuilderOnboardingId(null);
+                                  setEditMode(true);
+                                }}
+                              >
+                                <IconEdit size={"1rem"} />
+                              </ActionIcon>
+                            </Flex>
+                            <Switch
+                              checked={voice.active}
+                              label={"active"}
+                              onClick={(event) =>
+                                toggleActive(
+                                  voice.id,
+                                  event.currentTarget.checked
+                                )
+                              }
+                            />
                           </Flex>
-                          <Switch
-                            checked={voice.active}
-                            label={"active"}
-                            onClick={(event) =>
-                              toggleActive(
-                                voice.id,
-                                event.currentTarget.checked
-                              )
-                            }
-                          />
-                        </Flex>
-                      </Paper>
-                    );
-                  })}
+                        </Paper>
+                      );
+                    })}
 
                 {onboardings.filter(
                   (onboarding) => onboarding.ready || onboarding.ready === false
@@ -1339,11 +1348,18 @@ const VoiceModal = function (props: {
               {selectedDefaultVoice && (
                 <Flex direction={"column"} align={"center"} gap={"8px"}>
                   <Text fw={600}>Description:</Text>
-                  <Text fw={300}>{defaultVoicesOptions.find(i => i.id === +selectedDefaultVoice)?.description}</Text>
-                  <Button
-                    onClick={async () =>
-                      await addDefaultVoice(+selectedDefaultVoice)
+                  <Text fw={300}>
+                    {
+                      defaultVoicesOptions.find(
+                        (i) => i.id === +selectedDefaultVoice
+                      )?.description
                     }
+                  </Text>
+                  <Button
+                    onClick={async () => {
+                      await addDefaultVoice(+selectedDefaultVoice);
+                      setSelelectedDefaultVoice(null);
+                    }}
                   >
                     {loading ? <Loader /> : "Save Voice"}
                   </Button>
@@ -4797,7 +4813,7 @@ const LinkedinIntroSectionV2 = function (props: {
         <LoadingOverlay
           visible={linkedinInitialMessageGenerationInProgress}
           zIndex={2}
-          style={{minHeight: "300px"}}
+          style={{ minHeight: "300px" }}
         />
         {linkedinInitialMessages.message && (
           <LiExampleInvitation message={linkedinInitialMessages.message} />

@@ -1033,16 +1033,6 @@ const VoiceModal = function (props: {
 
     await updateActive(voiceId, active);
 
-    if (active) {
-      await Promise.all(
-        voices
-          .filter((v) => v.id !== voiceId)
-          .map((v) => {
-            return updateActive(v.id, false);
-          })
-      );
-    }
-
     refetch();
   };
 
@@ -1078,7 +1068,7 @@ const VoiceModal = function (props: {
       });
     }
   };
-  
+
   const createVoiceOnboarding = async function () {
     if (!props.currentProject) return;
 
@@ -1203,11 +1193,11 @@ const VoiceModal = function (props: {
               </Flex>
             </Flex>
 
-            <Flex direction={"column"} gap={"8px"}>
+            <Flex direction={"column"} gap={"8px"} style={{maxHeight: "1000px"}}>
               <Text fw={600} mt={"8px"}>
                 Use your own generated voices
               </Text>
-              <ScrollArea mah={"300px"} style={{ position: "relative" }}>
+              <ScrollArea style={{ position: "relative" }} h={"400px"}>
                 <LoadingOverlay visible={loading} />
                 {voices &&
                   voices.map((voice) => {
@@ -2683,6 +2673,16 @@ const EmailPreviewHeaderV2 = function (props: {
                           </List>
                         </Box>
                       </Flex>
+                      {!currentProject?.template_mode && (
+                        <VoiceModal
+                          opened={opened}
+                          close={close}
+                          currentProject={currentProject}
+                          userToken={userToken}
+                          open={open}
+                          numCtas={0}
+                        />
+                      )}
                     </Flex>
                   )}
                 </div>
@@ -3810,21 +3810,22 @@ const LinkedinSequenceSectionV2 = function (props: {
   onRegenerate: () => void;
   prospectOnChangeHandler: (prospect: ProspectShallow | undefined) => void;
 }) {
-
   //set to the first active: true sequence.
   const [currentSequenceIndex, setCurrentSequenceIndex] = useState(() => {
-    const firstActiveIndex = props.sequence.findIndex(seq => seq.active);
+    const firstActiveIndex = props.sequence.findIndex((seq) => seq.active);
     return firstActiveIndex !== -1 ? firstActiveIndex : 0;
   });
 
-
-// Updates 'currentSequenceIndex' to the first active sequence when 'sequence' changes.
-useEffect(() => {
-  const firstActiveIndex = props.sequence.findIndex(seq => seq.active);
-  if (firstActiveIndex !== -1 && !props.sequence[currentSequenceIndex].active) {
-    setCurrentSequenceIndex(firstActiveIndex);
-  }
-}, [props.sequence]);
+  // Updates 'currentSequenceIndex' to the first active sequence when 'sequence' changes.
+  useEffect(() => {
+    const firstActiveIndex = props.sequence.findIndex((seq) => seq.active);
+    if (
+      firstActiveIndex !== -1 &&
+      !props.sequence[currentSequenceIndex].active
+    ) {
+      setCurrentSequenceIndex(firstActiveIndex);
+    }
+  }, [props.sequence]);
 
   const [showEditVariants, setShowEditVariants] = useState<boolean>(false);
 
@@ -3946,9 +3947,18 @@ useEffect(() => {
       </Box>
       <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>
         <ActionIcon
-          disabled={currentSequenceIndex === 0 || !props.sequence.slice(0, currentSequenceIndex).some(seq => seq.active)}
+          disabled={
+            currentSequenceIndex === 0 ||
+            !props.sequence
+              .slice(0, currentSequenceIndex)
+              .some((seq) => seq.active)
+          }
           onClick={() => {
-            const prevActiveIndex = props.sequence.slice(0, currentSequenceIndex).map((seq, index) => ({ seq, index })).reverse().find(({ seq }) => seq.active)?.index;
+            const prevActiveIndex = props.sequence
+              .slice(0, currentSequenceIndex)
+              .map((seq, index) => ({ seq, index }))
+              .reverse()
+              .find(({ seq }) => seq.active)?.index;
             if (prevActiveIndex !== undefined) {
               setCurrentSequenceIndex(prevActiveIndex);
             }
@@ -3961,16 +3971,23 @@ useEffect(() => {
           variant={"outline"}
           radius={"sm"}
           onClick={() => setShowEditVariants((prevState) => !prevState)}
-          sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+          sx={{ cursor: "pointer", display: "flex", alignItems: "center" }}
         >
           {`Variant #${currentSequenceIndex + 1}: ${
             props.sequence[currentSequenceIndex]?.title ?? ""
           }`}
         </Badge>
         <ActionIcon
-          disabled={currentSequenceIndex === props.sequence.length - 1 || !props.sequence.some((seq, index) => index > currentSequenceIndex && seq.active)}
+          disabled={
+            currentSequenceIndex === props.sequence.length - 1 ||
+            !props.sequence.some(
+              (seq, index) => index > currentSequenceIndex && seq.active
+            )
+          }
           onClick={() => {
-            const nextActiveIndex = props.sequence.findIndex((seq, index) => index > currentSequenceIndex && seq.active);
+            const nextActiveIndex = props.sequence.findIndex(
+              (seq, index) => index > currentSequenceIndex && seq.active
+            );
             if (nextActiveIndex !== -1) {
               setCurrentSequenceIndex(nextActiveIndex);
             }
@@ -4786,126 +4803,135 @@ const LinkedinIntroSectionV2 = function (props: {
         )}
       </Box>
 
-      {linkedinInitialMessages.meta_data &&
-        !props.currentProject?.template_mode && (
-          <Group pt="xs" noWrap>
-            <HoverCard width={280} shadow="md" position={"bottom"} withinPortal>
-              <HoverCard.Target>
-                <Badge
-                  color="blue"
-                  styles={{ root: { textTransform: "initial" } }}
-                  variant={"outline"}
-                  radius={"sm"}
-                  w={"250px"}
-                  onClick={() => {
-                    toggleShowCTA();
-                  }}
-                >
-                  CTA Used:{" "}
-                  <Text fw={500} span>
-                    {_.truncate(linkedinInitialMessages.meta_data.cta, {
-                      length: 45,
-                    })}
-                  </Text>
-                </Badge>
-              </HoverCard.Target>
-              <HoverCard.Dropdown>
-                <Text size="sm">{linkedinInitialMessages.meta_data.cta}</Text>
-              </HoverCard.Dropdown>
-            </HoverCard>
-            <HoverCard withinPortal width={280} shadow="md" position="bottom">
-              <HoverCard.Target>
-                <Badge
-                  variant={"outline"}
-                  radius={"sm"}
-                  color="green"
-                  onClick={() => {
-                    toggleShowPersonalization();
-                  }}
-                  styles={{ root: { textTransform: "initial" } }}
-                >
-                  Personalizations:{" "}
-                  <Text fw={500} span>
-                    {linkedinInitialMessages.meta_data?.notes?.length}
-                  </Text>
-                </Badge>
-              </HoverCard.Target>
-              <HoverCard.Dropdown>
-                {linkedinInitialMessages.meta_data?.combined ? (
-                  <List>
-                    {linkedinInitialMessages.meta_data?.combined.map(
-                      (combined_data: any, index: number) => {
-                        return (
-                          <List.Item key={index}>
-                            <Flex direction={"column"}>
-                              <Text fz="sm" fw={"bold"}>
-                                {_.startCase(
-                                  combined_data.research_point_type
-                                    .toLowerCase()
-                                    .replaceAll("_", " ")
-                                    .replace("aicomp", "")
-                                    .replace("aiind", "")
-                                )}
-                              </Text>
-                              <Text fz="sm">{combined_data.value}</Text>
-                            </Flex>
-                          </List.Item>
-                        );
-                      }
-                    )}
-                  </List>
-                ) : (
-                  <List>
-                    {linkedinInitialMessages.meta_data?.notes?.map(
-                      (note: any, index: number) => {
-                        const researchPointId =
-                          linkedinInitialMessages.meta_data?.research_points[
-                            index
-                          ];
+      {!props.currentProject?.template_mode && (
+        <Group pt="xs" noWrap>
+          {linkedinInitialMessages.meta_data && (
+            <>
+              <HoverCard
+                width={280}
+                shadow="md"
+                position={"bottom"}
+                withinPortal
+              >
+                <HoverCard.Target>
+                  <Badge
+                    color="blue"
+                    styles={{ root: { textTransform: "initial" } }}
+                    variant={"outline"}
+                    radius={"sm"}
+                    w={"250px"}
+                    onClick={() => {
+                      toggleShowCTA();
+                    }}
+                  >
+                    CTA Used:{" "}
+                    <Text fw={500} span>
+                      {_.truncate(linkedinInitialMessages.meta_data.cta, {
+                        length: 45,
+                      })}
+                    </Text>
+                  </Badge>
+                </HoverCard.Target>
+                <HoverCard.Dropdown>
+                  <Text size="sm">{linkedinInitialMessages.meta_data.cta}</Text>
+                </HoverCard.Dropdown>
+              </HoverCard>
 
-                        const researchPointType = researchPointTypes?.find(
-                          (item) => item.id === researchPointId
-                        );
-
-                        return (
-                          <List.Item key={index}>
-                            <Flex direction="column">
-                              {researchPointType && (
+              <HoverCard withinPortal width={280} shadow="md" position="bottom">
+                <HoverCard.Target>
+                  <Badge
+                    variant={"outline"}
+                    radius={"sm"}
+                    color="green"
+                    onClick={() => {
+                      toggleShowPersonalization();
+                    }}
+                    styles={{ root: { textTransform: "initial" } }}
+                  >
+                    Personalizations:{" "}
+                    <Text fw={500} span>
+                      {linkedinInitialMessages.meta_data?.notes?.length}
+                    </Text>
+                  </Badge>
+                </HoverCard.Target>
+                <HoverCard.Dropdown>
+                  {linkedinInitialMessages.meta_data?.combined ? (
+                    <List>
+                      {linkedinInitialMessages.meta_data?.combined.map(
+                        (combined_data: any, index: number) => {
+                          return (
+                            <List.Item key={index}>
+                              <Flex direction={"column"}>
                                 <Text fz="sm" fw={"bold"}>
                                   {_.startCase(
-                                    researchPointType.name
+                                    combined_data.research_point_type
                                       .toLowerCase()
                                       .replaceAll("_", " ")
                                       .replace("aicomp", "")
                                       .replace("aiind", "")
                                   )}
                                 </Text>
-                              )}
-                              <Text fz="sm">
-                                {linkedinInitialMessages.meta_data?.notes}
-                              </Text>
-                              <Text fz="sm">{note}</Text>
-                            </Flex>
-                          </List.Item>
-                        );
-                      }
-                    )}
-                  </List>
-                )}
-              </HoverCard.Dropdown>
-            </HoverCard>
-            {!props.currentProject?.template_mode && (
-              <VoiceModal
-                opened={opened}
-                close={close}
-                currentProject={props.currentProject}
-                userToken={props.userToken}
-                open={open}
-                numCtas={ctasItemsCount ?? 0}
-              />
-            )}
-          </Group>
-        )}
+                                <Text fz="sm">{combined_data.value}</Text>
+                              </Flex>
+                            </List.Item>
+                          );
+                        }
+                      )}
+                    </List>
+                  ) : (
+                    <List>
+                      {linkedinInitialMessages.meta_data?.notes?.map(
+                        (note: any, index: number) => {
+                          const researchPointId =
+                            linkedinInitialMessages.meta_data?.research_points[
+                              index
+                            ];
+
+                          const researchPointType = researchPointTypes?.find(
+                            (item) => item.id === researchPointId
+                          );
+
+                          return (
+                            <List.Item key={index}>
+                              <Flex direction="column">
+                                {researchPointType && (
+                                  <Text fz="sm" fw={"bold"}>
+                                    {_.startCase(
+                                      researchPointType.name
+                                        .toLowerCase()
+                                        .replaceAll("_", " ")
+                                        .replace("aicomp", "")
+                                        .replace("aiind", "")
+                                    )}
+                                  </Text>
+                                )}
+                                <Text fz="sm">
+                                  {linkedinInitialMessages.meta_data?.notes}
+                                </Text>
+                                <Text fz="sm">{note}</Text>
+                              </Flex>
+                            </List.Item>
+                          );
+                        }
+                      )}
+                    </List>
+                  )}
+                </HoverCard.Dropdown>
+              </HoverCard>
+            </>
+          )}
+          {!props.currentProject?.template_mode && (
+            <VoiceModal
+              opened={opened}
+              close={close}
+              currentProject={props.currentProject}
+              userToken={props.userToken}
+              open={open}
+              numCtas={ctasItemsCount ?? 0}
+            />
+          )}
+        </Group>
+      )}
 
       {linkedinInitialMessages.meta_data &&
         props.currentProject?.template_mode &&

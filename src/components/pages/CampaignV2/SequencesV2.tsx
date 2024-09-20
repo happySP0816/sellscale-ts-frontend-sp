@@ -69,6 +69,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   BumpFramework,
+  CTA,
+  DefaultVoices,
   EmailSequenceStep,
   EmailTemplate,
   PersonaOverview,
@@ -118,7 +120,7 @@ import ModalSelector from "@common/library/ModalSelector";
 import { ICPFitPillOnly } from "@common/pipeline/ICPFitAndReason";
 import { generateBumpLiMessage } from "@utils/requests/generateBumpLiMessage";
 import { linkedinSequence } from "./Sequences";
-import VoiceSelect from "@common/library/VoiceSelect";
+import VoiceSelect, { Voices } from "@common/library/VoiceSelect";
 import { updateInitialBlocklist } from "@utils/requests/updatePersonaBlocklist";
 import { CtaSection } from "@common/sequence/CtaSection";
 import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
@@ -154,8 +156,12 @@ import Personalizers from "./Personalizers";
 import { socket } from "../../App";
 import { diffWords } from "diff";
 import { getFreshCurrentProject } from "@auth/core";
-import { navigateToPage } from "@utils/documentChange";
-import { CampaignPersona } from "@common/campaigns/PersonaCampaigns";
+import TrainVoice from "./TrainVoice";
+import {
+  createVoiceBuilderOnboarding,
+  generateSamples,
+} from "@utils/requests/voiceBuilder";
+import { STARTING_INSTRUCTIONS } from "@modals/VoiceBuilderModal";
 
 interface Templates {
   active: boolean;
@@ -243,7 +249,8 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
     {}
   );
 
-  const [linkedinInitialMessageData, setLinkedinInitialMessageData] = useRecoilState(linkedinInitialMessageState);
+  const [linkedinInitialMessageData, setLinkedinInitialMessageData] =
+    useRecoilState(linkedinInitialMessageState);
 
   const triggerProjectRefresh = async function () {
     const project = await getFreshCurrentProject(
@@ -648,7 +655,7 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
                     statsData: statsData,
                     checkCanToggleLinkedin: checkCanToggleLinkedin,
                     updateConnectionType: updateConnectionType,
-                    currentStepNum: 0
+                    currentStepNum: 0,
                   },
                   centered: true,
                   styles: {
@@ -735,57 +742,9 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
           </Flex>
         </Flex>
       ) : (
-        <Card
-          padding={"none"}
-          radius={"md"}
-          mt={"12px"}
-        >
-          {/* {!isEditing && ( */}
-          {/*   <Card.Section withBorder px={"xs"} py={"xs"} mb={"16px"}> */}
-          {/*     <Flex align={"center"} justify={"space-between"} pos={"relative"}> */}
-          {/*       <Flex align={"center"} justify={"space-between"} gap={"4px"}> */}
-          {/*         <ActionIcon */}
-          {/*           disabled={selectedProspectIndex === 0} */}
-          {/*           onClick={() => */}
-          {/*             setSelectedProspectIndex((prevValue) => prevValue - 1) */}
-          {/*           } */}
-          {/*           radius={"xl"} */}
-          {/*         > */}
-          {/*           <IconArrowLeft size={16} /> */}
-          {/*         </ActionIcon> */}
-          {/*         <ProspectSelect2 */}
-          {/*           personaId={currentProject?.id ?? -1} */}
-          {/*           selectedProspect={selectedProspect?.id} */}
-          {/*           isSequenceV2={true} */}
-          {/*           onChange={prospectOnChangeHandler} */}
-          {/*           prospects={campaignContacts} */}
-          {/*         /> */}
-          {/*         <ActionIcon */}
-          {/*           disabled={ */}
-          {/*             campaignContacts && */}
-          {/*             selectedProspectIndex === campaignContacts.length - 1 */}
-          {/*           } */}
-          {/*           onClick={() => */}
-          {/*             setSelectedProspectIndex((prevValue) => prevValue + 1) */}
-          {/*           } */}
-          {/*           radius={"xl"} */}
-          {/*         > */}
-          {/*           <IconArrowRight size={16} /> */}
-          {/*         </ActionIcon> */}
-          {/*       </Flex> */}
-          {/*       <Button */}
-          {/*         size="xs" */}
-          {/*         color={"grape"} */}
-          {/*         onClick={() => onRegenerate()} */}
-          {/*         leftIcon={<IconSparkles />} */}
-          {/*       > */}
-          {/*         Regenerate */}
-          {/*       </Button> */}
-          {/*     </Flex> */}
-          {/*   </Card.Section> */}
-          {/* )} */}
+        <Card padding={"none"} radius={"md"} mt={"12px"}>
           <Flex gap={"8px"} my={"auto"} pos={"relative"}>
-            <LoadingOverlay visible={loadingSequences} zIndex={5}/>
+            <LoadingOverlay visible={loadingSequences} zIndex={5} />
             {/* This will have a steps side bar and the main one. The main one will render either LinkedinCTA, LinkedinTemplate, EmailTemplate */}
             <Card
               p="xs"
@@ -924,87 +883,479 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
               </>
             )}
           </Flex>
-          {/* <Paper p={"sm"} withBorder mt={"xs"}> */}
-          {/*   <Flex align={"center"} gap={"sm"}> */}
-          {/*     <IconCpu size={"1rem"} color="purple" /> */}
-          {/*     <Text size={"sm"} fw={500}> */}
-          {/*       Message DNA (BETA ⚠️) */}
-          {/*     </Text> */}
-          {/*   </Flex> */}
-          {/*   <Flex align={"center"} justify={"space-between"}> */}
-          {/*     <Flex gap={"sm"}> */}
-          {/*       <Badge color="grape" size="md"> */}
-          {/*         Personalizers: {2} */}
-          {/*       </Badge> */}
-          {/*       <Badge size="md">CTA Used: {"How does [[info...]]"}</Badge> */}
-          {/*     </Flex> */}
-          {/*     <Button */}
-          {/*       leftIcon={<IconPencil size={"1rem"} />} */}
-          {/*       size="xs" */}
-          {/*       onClick={() => { */}
-          {/*         // navigateToPage(navigate, `/train_voice`); */}
-          {/*         open(); */}
-          {/*       }} */}
-          {/*     > */}
-          {/*       Train your Voice */}
-          {/*     </Button> */}
-          {/*   </Flex> */}
-          {/*   <Modal */}
-          {/*     opened={opened} */}
-          {/*     size="lg" */}
-          {/*     centered */}
-          {/*     onClose={close} */}
-          {/*     withCloseButton={false} */}
-          {/*     styles={{ */}
-          {/*       body: { */}
-          {/*         height: "600px", */}
-          {/*       }, */}
-          {/*     }} */}
-          {/*   > */}
-          {/*     <Flex align={"center"} w={"100%"} justify={"space_between"}> */}
-          {/*       <Flex align={"center"} gap={"sm"} w={"100%"}> */}
-          {/*         <IconMicrophone size={"1rem"} color="#228be6" /> */}
-          {/*         <Text fw={500}>Select voice</Text> */}
-          {/*       </Flex> */}
-          {/*       <Flex gap={"md"} align={"center"}> */}
-          {/*         <Button */}
-          {/*           leftIcon={<IconPlus size={"1rem"} />} */}
-          {/*           onClick={() => navigateToPage(navigate, `/train_voice`)} */}
-          {/*         > */}
-          {/*           New Voice */}
-          {/*         </Button> */}
-          {/*         <ActionIcon */}
-          {/*           radius={"xl"} */}
-          {/*           size={"lg"} */}
-          {/*           variant="outline" */}
-          {/*           color="gray" */}
-          {/*           onClick={close} */}
-          {/*         > */}
-          {/*           <IconX size={"1.2rem"} /> */}
-          {/*         </ActionIcon> */}
-          {/*       </Flex> */}
-          {/*     </Flex> */}
-          {/*     <Paper withBorder radius={"sm"} p={"sm"} mt={"sm"}> */}
-          {/*       <Flex align={"center"} justify={"space-between"}> */}
-          {/*         <Flex align={"center"}> */}
-          {/*           <Text size={"sm"} fw={500}> */}
-          {/*             {"Hunter's Voice"}{" "} */}
-          {/*             <span className="text-gray-400"> {"Sep 6, 2024"}</span> */}
-          {/*           </Text> */}
-          {/*           <ActionIcon color="blue"> */}
-          {/*             <IconEdit size={"1rem"} /> */}
-          {/*           </ActionIcon> */}
-          {/*         </Flex> */}
-          {/*         <Switch label="In use" /> */}
-          {/*       </Flex> */}
-          {/*     </Paper> */}
-          {/*   </Modal> */}
-          {/* </Paper> */}
         </Card>
       )}
     </Card>
   );
 });
+
+type VoiceBuildingStage = "IDLE" | "BUILDING" | "COMPLETED";
+
+const VoiceModal = function (props: {
+  opened: boolean;
+  open: () => void;
+  close: () => void;
+  currentProject?: PersonaOverview;
+  userToken: string;
+  numCtas: number;
+}) {
+  const [defaultVoicesOptions, setDefaultVoicesOptions] = useState<
+    DefaultVoices[]
+  >([]);
+  const [editMode, setEditMode] = useState<boolean>(false);
+
+  const [selectedDefaultVoice, setSelelectedDefaultVoice] = useState<
+    string | null
+  >(null);
+
+  const [voiceBuilderOnboardingId, setVoiceBuilderOnboardingId] = useState<
+    number | null
+  >(null);
+
+  const [voiceBuildingStage, setVoiceBuildingStage] =
+    useState<VoiceBuildingStage>("IDLE");
+
+  const [selectedVoice, setSelectedVoice] = useState<number | null>(null);
+
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (voiceBuilderOnboardingId) {
+      socket.on(`voice_builder_${voiceBuilderOnboardingId}`, (data) => {
+        console.log("registering socket");
+        onBoardingRefetch();
+      });
+    }
+
+    return () => {
+      socket.off(`voice_builder_`);
+      socket.off(`voice_builder_${voiceBuilderOnboardingId}`);
+    };
+  }, [voiceBuilderOnboardingId]);
+
+  useEffect(() => {
+    const getVoices = async () => {
+      const res = await fetch(`${API_URL}/internal_voices`);
+
+      if (res.status === 200) {
+        const data = await res.json();
+        setDefaultVoicesOptions(data);
+      }
+    };
+
+    getVoices();
+  }, []);
+
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: [`query-voices`, props.currentProject?.id],
+    queryFn: async () => {
+      const response = await fetch(
+        `${API_URL}/message_generation/stack_ranked_configurations` +
+          (props.currentProject?.id
+            ? `?archetype_id=${props.currentProject?.id}`
+            : ``),
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${props.userToken}`,
+          },
+        }
+      );
+      if (response.status === 401) {
+        return [];
+      }
+      const res = await response.json();
+      const voices = (res?.data.sort(
+        (a: any, b: any) => b.priority - a.priority
+      ) ?? []) as any[];
+
+      setLoading(false);
+
+      return voices as Voices[];
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const {
+    data: onBoardingData,
+    isFetching: onBoardingIsFetching,
+    refetch: onBoardingRefetch,
+  } = useQuery({
+    queryKey: [`query-onboardings`, props.currentProject?.id],
+    queryFn: async () => {
+      const response = await fetch(
+        `${API_URL}/voice_builder/onboardings${
+          props.currentProject?.id
+            ? `?client_archetype_id=${props.currentProject?.id}`
+            : ``
+        }`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${props.userToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const responseJson = await response.json();
+
+        return responseJson.data;
+      }
+
+      return [];
+    },
+  });
+
+  const voices: Voices[] = data ?? [];
+
+  const onboardings: any[] = onBoardingData ?? [];
+
+  const updateActive = async (voiceId: number, active: boolean) => {
+    return await fetch(
+      `${API_URL}/message_generation/stack_ranked_configuration_tool/set_active`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${props.userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          configuration_id: voiceId,
+          set_active: active,
+        }),
+      }
+    );
+  };
+
+  const toggleActive = async function (voiceId: number, active: boolean) {
+    setLoading(true);
+
+    await updateActive(voiceId, active);
+
+    if (active) {
+      await Promise.all(
+        voices
+          .filter((v) => v.id !== voiceId)
+          .map((v) => {
+            return updateActive(v.id, false);
+          })
+      );
+    }
+
+    refetch();
+  };
+
+  const addDefaultVoice = async function (defaultVoiceId: number) {
+    setLoading(true);
+
+    const response = await fetch(`${API_URL}/voice_builder/add_default_voice`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${props.userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        default_voice_id: defaultVoiceId,
+        archetype_id: props.currentProject?.id ?? -1,
+      }),
+    });
+
+    if (response.ok) {
+      refetch();
+
+      showNotification({
+        title: "Successfully created voice from default voices",
+        message:
+          "We have successfully created your voice from the default list of voices.",
+        color: "green",
+      });
+    } else {
+      showNotification({
+        title: "Failed to create voice from default voices",
+        message: "There was a problem creating a voice",
+        color: "red",
+      });
+    }
+  };
+  
+  const createVoiceOnboarding = async function () {
+    if (!props.currentProject) return;
+
+    setLoading(true);
+
+    const response = await createVoiceBuilderOnboarding(
+      props.userToken,
+      "LINKEDIN",
+      `${STARTING_INSTRUCTIONS}`,
+      props.currentProject.id
+    );
+
+    if (response.status === "success") {
+      setVoiceBuilderOnboardingId(response.data.id);
+      setSelectedVoice(null);
+      setVoiceBuildingStage("BUILDING");
+
+      setEditMode(true);
+      setLoading(false);
+
+      generateMessageSamples(response.data.id);
+    } else {
+      showNotification({
+        title: "Failed to create voice onboarding",
+        message:
+          "We have failed to start the voice onboarding process. Try again later.",
+        color: "red",
+      });
+    }
+
+    onBoardingRefetch();
+  };
+
+  const generateMessageSamples = async function (voiceId: number) {
+    const messageResponse = await generateSamples(props.userToken, voiceId, 7);
+
+    if (messageResponse.status === "success") {
+      showNotification({
+        title: "Started Samples creation for voices",
+        message:
+          "We have begin initiating the samples generation process. Please do not leave the page",
+        color: "blue",
+      });
+
+      setLoading(false);
+    } else {
+      showNotification({
+        title: "Failed to generate samples for Onboarding",
+        message:
+          "We have failed to generate samples for Onboarding. Try again later.",
+        color: "red",
+      });
+    }
+  };
+
+  return (
+    <>
+      <Button
+        leftIcon={
+          voices.length === 0 || !voices.find((item) => item.active) ? (
+            <IconMicrophone size={"1rem"} />
+          ) : (
+            <IconPencil size={"1rem"} />
+          )
+        }
+        size="xs"
+        onClick={() => {
+          // navigateToPage(navigate, `/train_voice`);
+          props.open();
+        }}
+        disabled={props.numCtas === 0}
+      >
+        {props.numCtas === 0
+          ? "Create CTAs to generate voices"
+          : voices.find((item) => item.active)?.name ?? "Train your Voice"}
+      </Button>
+
+      <Modal
+        opened={props.opened}
+        size={editMode ? "2000px" : "lg"}
+        centered
+        onClose={props.close}
+        withCloseButton={false}
+        styles={{
+          body: {
+            height: "1000px",
+          },
+        }}
+      >
+        {editMode ? (
+          <TrainVoice
+            close={() => setEditMode(false)}
+            selectedVoice={selectedVoice ?? undefined}
+            voiceBuilderOnboardingId={voiceBuilderOnboardingId ?? undefined}
+            userToken={props.userToken}
+            voices={voices}
+            currentProject={props.currentProject}
+          />
+        ) : (
+          <>
+            <Flex align={"center"} w={"100%"} justify={"space_between"}>
+              <Flex align={"center"} gap={"sm"} w={"100%"}>
+                <IconMicrophone size={"1rem"} color="#228be6" />
+                <Text fw={500}>Select voice</Text>
+              </Flex>
+              <Flex gap={"md"} align={"center"}>
+                <Button
+                  leftIcon={<IconPlus size={"1rem"} />}
+                  onClick={async () => await createVoiceOnboarding()}
+                >
+                  {loading ? <Loader size={"xs"} /> : "New Voice"}
+                </Button>
+                <ActionIcon
+                  radius={"xl"}
+                  size={"lg"}
+                  variant="outline"
+                  color="gray"
+                  onClick={props.close}
+                >
+                  <IconX size={"1.2rem"} />
+                </ActionIcon>
+              </Flex>
+            </Flex>
+
+            <Flex direction={"column"} gap={"8px"}>
+              <Text fw={600} mt={"8px"}>
+                Use your own generated voices
+              </Text>
+              <ScrollArea mah={"300px"} style={{ position: "relative" }}>
+                <LoadingOverlay visible={loading} />
+                {voices &&
+                  voices.map((voice) => {
+                    return (
+                      <Paper
+                        withBorder
+                        radius={"sm"}
+                        p={"sm"}
+                        mt={"sm"}
+                        style={{ position: "relative" }}
+                        key={voice.id}
+                      >
+                        <Flex align={"center"} justify={"space-between"}>
+                          <Flex align={"center"}>
+                            <Text size={"sm"} fw={500}>
+                              {voice.name}{" "}
+                              <span className="text-gray-400">
+                                {" "}
+                                {voice.created_at.slice(
+                                  0,
+                                  voice.created_at.length - 13
+                                )}
+                              </span>
+                            </Text>
+                            <ActionIcon
+                              color="blue"
+                              onClick={() => {
+                                setSelectedVoice(voice.id);
+                                setVoiceBuilderOnboardingId(null);
+                                setEditMode(true);
+                              }}
+                            >
+                              <IconEdit size={"1rem"} />
+                            </ActionIcon>
+                          </Flex>
+                          <Switch
+                            checked={voice.active}
+                            label={"active"}
+                            onClick={(event) =>
+                              toggleActive(
+                                voice.id,
+                                event.currentTarget.checked
+                              )
+                            }
+                          />
+                        </Flex>
+                      </Paper>
+                    );
+                  })}
+
+                {onboardings.filter(
+                  (onboarding) => onboarding.ready || onboarding.ready === false
+                ).length > 0 && (
+                  <Text fw={500} mt={"8px"}>
+                    Current Voice Onboarding
+                  </Text>
+                )}
+
+                {onboardings &&
+                  onboardings
+                    .filter(
+                      (onboarding) =>
+                        onboarding.ready || onboarding.ready === false
+                    )
+                    .map((onboarding) => {
+                      return (
+                        <Paper
+                          withBorder
+                          radius={"sm"}
+                          p={"sm"}
+                          mt={"sm"}
+                          style={{ position: "relative" }}
+                          key={onboarding.id}
+                        >
+                          <Flex align={"center"} justify={"space-between"}>
+                            <Flex align={"center"}>
+                              <Text size={"sm"} fw={500}>
+                                {"Onboarding: "}{" "}
+                                <span className="text-gray-400">
+                                  {" "}
+                                  {onboarding.created_at.slice(
+                                    0,
+                                    onboarding.created_at.length - 13
+                                  )}
+                                </span>
+                              </Text>
+                              <ActionIcon
+                                color="blue"
+                                onClick={() => {
+                                  setVoiceBuilderOnboardingId(onboarding.id);
+                                  setEditMode(true);
+                                }}
+                              >
+                                <IconEdit size={"1rem"} />
+                              </ActionIcon>
+                            </Flex>
+                            {onboarding.ready ? (
+                              <Badge
+                                variant="outline"
+                                size="md"
+                                color={"green"}
+                              >
+                                Message samples generated
+                              </Badge>
+                            ) : (
+                              <Badge
+                                variant="outline"
+                                size="md"
+                                color={"orange"}
+                              >
+                                Message Samples Generating
+                              </Badge>
+                            )}
+                          </Flex>
+                        </Paper>
+                      );
+                    })}
+              </ScrollArea>
+              <Divider mt={"24px"} mb={"8px"} />
+              <Text fw={600}>Use one of SellScale's Pre-configured voices</Text>
+              <Select
+                data={defaultVoicesOptions.map((item) => {
+                  return {
+                    value: "" + item.id,
+                    label: item.title,
+                  };
+                })}
+                onChange={(value) => setSelelectedDefaultVoice(value)}
+                value={selectedDefaultVoice}
+                label={"Select Voices"}
+                placeholder={"Select the voice to generate the campaign"}
+              />
+              {selectedDefaultVoice && (
+                <Button
+                  onClick={async () =>
+                    await addDefaultVoice(+selectedDefaultVoice)
+                  }
+                >
+                  {loading ? <Loader /> : "Save Voice"}
+                </Button>
+              )}
+            </Flex>
+          </>
+        )}
+      </Modal>
+    </>
+  );
+};
 
 function EmailSequencingV2(props: {
   subjectLines: SubjectLineTemplate[];
@@ -1269,7 +1620,7 @@ const NewUIEmailSequencingV2 = function (props: {
   );
 };
 
-function EmailPreviewHeaderV2(props: {
+const EmailPreviewHeaderV2 = function (props: {
   currentTab: string;
   template?: EmailSequenceStep;
   subjectLineText: string | null;
@@ -2342,9 +2693,9 @@ function EmailPreviewHeaderV2(props: {
       </Box>
     </Stack>
   );
-}
+};
 
-function NewDetailEmailSequencingV2(props: {
+const NewDetailEmailSequencingV2 = function (props: {
   currentTab: string;
   templates: EmailSequenceStep[];
   subjectLines: SubjectLineTemplate[];
@@ -2963,9 +3314,13 @@ function NewDetailEmailSequencingV2(props: {
         >
           <IconArrowLeft size={16} />
         </ActionIcon>
-        <Badge variant={"outline"} radius={"sm"} onClick={() => {
-          setShowEditVariants(prevState => !prevState);
-        }}>
+        <Badge
+          variant={"outline"}
+          radius={"sm"}
+          onClick={() => {
+            setShowEditVariants((prevState) => !prevState);
+          }}
+        >
           {`Variant #${activeTemplateIndex + 1}: ${
             props.templates[activeTemplateIndex]?.step.title ?? ""
           }`}
@@ -3031,9 +3386,9 @@ function NewDetailEmailSequencingV2(props: {
         ))}
     </Stack>
   );
-}
+};
 
-function TemplateSectionV2(props: {
+const TemplateSectionV2 = function (props: {
   onFoundTemplate: (templateId: number) => void;
 }) {
   const theme = useMantineTheme();
@@ -3437,7 +3792,7 @@ function TemplateSectionV2(props: {
       </Flex>
     </Flex>
   );
-}
+};
 
 const LinkedinSequenceSectionV2 = function (props: {
   triggerGenerate: number;
@@ -4290,6 +4645,50 @@ const LinkedinIntroSectionV2 = function (props: {
     }
   };
 
+  const { data } = useQuery({
+    queryKey: [`query-cta-data-${props.currentProject?.id}`],
+    queryFn: async ({ queryKey }) => {
+      const response = await fetch(
+        `${API_URL}/client/archetype/${props.currentProject?.id}/get_ctas`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${props.userToken}`,
+          },
+        }
+      );
+
+      const res = await response.json();
+      if (!res || !res.ctas) {
+        return [];
+      }
+
+      let pageData = (res.ctas as CTA[]).map((cta) => {
+        return {
+          ...cta,
+          percentage: cta.performance?.total_count
+            ? Math.round(
+                (cta.performance?.num_converted / cta.performance?.num_sent) *
+                  100
+              )
+            : 0,
+          total_responded: cta.performance?.num_converted,
+          total_count: cta.performance?.num_sent,
+        };
+      });
+
+      setCtasItemsCount(pageData ? pageData.length : 0);
+
+      if (!pageData) {
+        return [];
+      } else {
+        return _.sortBy(pageData, ["active", "percentage", "id"]).reverse();
+      }
+    },
+    refetchOnWindowFocus: false,
+    enabled: !!props.currentProject,
+  });
+
   useEffect(() => {
     if (props.prospectId && props.triggerGenerate === 0) {
       getIntroMessage(
@@ -4299,6 +4698,8 @@ const LinkedinIntroSectionV2 = function (props: {
       );
     }
   }, [props.prospectId, props.triggerGenerate, props.selectedTemplateId]);
+
+  const [opened, { open, close }] = useDisclosure(false);
 
   return (
     <Card withBorder sx={{ maxWidth: "91.5%", minWidth: "91.5%" }}>
@@ -4471,11 +4872,13 @@ const LinkedinIntroSectionV2 = function (props: {
               </HoverCard.Dropdown>
             </HoverCard>
             {!props.currentProject?.template_mode && (
-              <VoiceSelect
-                personaId={props.currentProject?.id || -1}
-                onChange={(voice) => {}}
-                onFinishLoading={(voices) => {}}
-                autoSelect
+              <VoiceModal
+                opened={opened}
+                close={close}
+                currentProject={props.currentProject}
+                userToken={props.userToken}
+                open={open}
+                numCtas={ctasItemsCount ?? 0}
               />
             )}
           </Group>

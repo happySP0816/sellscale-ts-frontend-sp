@@ -36,7 +36,7 @@ import {
 import { IconChartBubble } from '@tabler/icons-react';
 import { AiMetaDataBadge } from '@common/persona/LinkedInConversationEntry';
 
-function metaDataFromPrompt(prompt: string) {
+export function metaDataFromPrompt(prompt: string) {
   let s = prompt.split('>notes: ')[1].replace('<>response:', '');
   let s_parts = s.split(/\\n/gm);
 

@@ -123,6 +123,7 @@ export default function TrainVoice(props: {
   userToken: string;
   currentProject?: PersonaOverview;
   voices: Voices[];
+  numProspects: number
 }) {
   const [voiceBuilderOnboardingId, setVoiceBuilderOnboardingId] = useState<
     number | null
@@ -368,18 +369,18 @@ export default function TrainVoice(props: {
     enabled: !!props.currentProject,
   });
 
+  const srmgc_id = props.selectedVoice
+    ? props.selectedVoice
+    : voiceBuilderDetails?.voice_onboarding_info
+        .stack_ranked_message_generation_configuration_id;
+
   const {
     data: stackRankedGenerationData,
     refetch: refetchStackRankedGeneration,
     isFetching: stackRankedIsFetching,
   } = useQuery({
-    queryKey: [`query-get-stack-ranked-${props.selectedVoice}`],
+    queryKey: [`query-get-stack-ranked-${srmgc_id}`],
     queryFn: async () => {
-      const srmgc_id = props.selectedVoice
-        ? props.selectedVoice
-        : voiceBuilderDetails?.voice_onboarding_info
-            .stack_ranked_message_generation_configuration_id;
-
       const response = await fetch(
         `${API_URL}/message_generation/stack_ranked_configurations/${srmgc_id}`,
         {
@@ -455,9 +456,8 @@ export default function TrainVoice(props: {
           color: "green",
           autoClose: 5000,
         });
-      
+
         refetch();
-        refetchStackRankedGeneration();
       });
   };
 
@@ -656,6 +656,9 @@ export default function TrainVoice(props: {
       client.invalidateQueries({
         queryKey: [`query-voices`, props.currentProject?.id],
       });
+      client.invalidateQueries({
+        queryKey: [`query-onboardings`, props.currentProject?.id],
+      });
     } else {
       showNotification({
         title: "Failed to save configuration.",
@@ -843,7 +846,7 @@ export default function TrainVoice(props: {
                   );
                 })}
               </Paper>
-              {voiceBuilderDetails.messages.length < 7 && (
+              {voiceBuilderDetails.messages.length < Math.min(7, props.numProspects) && (
                 <Button
                   p={"xs"}
                   onClick={async () => {

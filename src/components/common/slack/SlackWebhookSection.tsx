@@ -12,6 +12,7 @@ import {
   Box,
   Image,
   Divider,
+  Badge,
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { getSDR } from "@utils/requests/getClientSDR";
@@ -23,7 +24,10 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import SlackLogo from "@assets/images/slack-logo.png";
 import { CustomizeSlackNotifications } from "./SlackNotifications";
 
-export default function SlackbotSection(props: { setActiveTab: (value: string) => void, setPageLoading: (value: boolean) => void }) {
+export default function SlackbotSection(props: {
+  setActiveTab: (value: string) => void;
+  setPageLoading: (value: boolean) => void;
+}) {
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
   const [loading, setLoading] = useState<boolean>(false);
@@ -34,8 +38,11 @@ export default function SlackbotSection(props: { setActiveTab: (value: string) =
     props.setPageLoading(true); // Trigger loading overlay
     syncLocalStorage(userToken, setUserData).then(() => {
       setWebhook(userData.client.pipeline_notifications_webhook_url);
-      if (userData.client.pipeline_notifications_webhook_url && !userData.client.slack_bot_connected) {
-        props.setActiveTab('advanced_setup');
+      if (
+        userData.client.pipeline_notifications_webhook_url &&
+        !userData.client.slack_bot_connected
+      ) {
+        props.setActiveTab("advanced_setup");
       }
       props.setPageLoading(false); // Remove loading overlay
     });
@@ -98,6 +105,18 @@ export default function SlackbotSection(props: { setActiveTab: (value: string) =
               <Text fw={600}>Use Custom Webhook</Text>
             </Flex>
           </Flex>
+          <Box>
+            <Text size="sm">Connected to: </Text>
+            {userData.client.channel_name ? (
+              <Badge variant="filled" color="teal" size="lg">
+                #{userData.client.channel_name}
+              </Badge>
+            ) : (
+              <Badge variant="outline" color="gray" size="lg">
+                No Channel
+              </Badge>
+            )}
+          </Box>
           <Button
             disabled={
               webhook === userData.client.pipeline_notifications_webhook_url

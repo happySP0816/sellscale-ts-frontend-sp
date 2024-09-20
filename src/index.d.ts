@@ -102,6 +102,8 @@ export interface Client {
   tagline: string;
   tone_attributes: string;
   value_prop_key_points: string;
+  channel_name: string;
+  channel_id: string;
 }
 
 export interface ClientSDR {
@@ -242,12 +244,12 @@ export interface Prospect {
 
 export interface ICPFitReasonV2 {
   [key: string]: {
-    answer: string,
-    reasoning: string,
-    source: string,
-    last_run?: string,
-    question?: string,
-  }
+    answer: string;
+    reasoning: string;
+    source: string;
+    last_run?: string;
+    question?: string;
+  };
 }
 
 export interface IScraperProspect {
@@ -543,9 +545,9 @@ export interface ProspectDetails {
   referrals: { id: number; full_name: string }[];
   referred: { id: number; full_name: string }[];
   phone: {
-    phone_number?: string,
-    reveal_phone_number: boolean,
-  }
+    phone_number?: string;
+    reveal_phone_number: boolean;
+  };
 }
 
 export interface DemoFeedback {
@@ -590,15 +592,13 @@ export interface CTA {
   auto_mark_as_scheduling_on_acceptance: boolean;
 }
 
-
 export interface DefaultVoices {
-  id: number,
-  count_ctas: number,
-  count_bumps: number,
-  title: string,
-  description: string,
+  id: number;
+  count_ctas: number;
+  count_bumps: number;
+  title: string;
+  description: string;
 }
-
 
 export interface Archetype {
   active: boolean;

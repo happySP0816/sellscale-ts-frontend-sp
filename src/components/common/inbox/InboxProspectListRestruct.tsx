@@ -263,16 +263,16 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
                 })}
               >
                 <Tabs.List grow>
-                  {/* <Tabs.Tab value="manual">
-                  <Indicator size={6} disabled={props.buckets.manual_bucket.length === 0}>
-                    <Tooltip label="Messages you're responsible for." withinPortal position="right">
-                      <Group spacing={5} noWrap>
-                        <IconMoodSmile size="1rem" />
-                        {mainTab === "manual_bucket" && <Text>Human Inbox</Text>}
-                      </Group>
-                    </Tooltip>
-                  </Indicator>
-                </Tabs.Tab> */}
+                  <Tabs.Tab value="manual">
+                    <Indicator size={6} disabled={props.buckets.manual_bucket.length === 0}>
+                      <Tooltip label="Messages you're responsible for." withinPortal position="right">
+                        <Group spacing={5} noWrap>
+                          <IconMoodSmile size="1rem" />
+                          {mainTab === "manual_bucket" && <Text>Human Inbox</Text>}
+                        </Group>
+                      </Tooltip>
+                    </Indicator>
+                  </Tabs.Tab>
                   <Tabs.Tab value="ai">
                     <Indicator size={6} disabled={props.buckets.ai_bucket.length === 0}>
                       <Group spacing={5} noWrap>
@@ -587,33 +587,35 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
               </Text>
             )}
           </ScrollArea>
-          <div className="px-5 absolute bottom-0 bg-white w-full">
-            <Button
-              fullWidth
-              size="md"
-              color="orange"
-              leftIcon={<IconInbox size={"1rem"} />}
-              onClick={() => {
-                openContextModal({
-                  modal: "clearinboxmodal",
-                  title: (
-                    <Title order={3} className="flex items-center gap-2">
-                      <IconBriefcase size={"1.5rem"} color="#228be6" className="mt-[-2px]" /> Clear Inbox
-                    </Title>
-                  ),
-                  innerProps: {},
-                  centered: true,
-                  styles: {
-                    content: {
-                      minWidth: "1000px",
+          {inboxTab === "ai" && (
+            <div className="px-5 absolute bottom-0 bg-white w-full">
+              <Button
+                fullWidth
+                size="md"
+                color="orange"
+                leftIcon={<IconInbox size={"1rem"} />}
+                onClick={() => {
+                  openContextModal({
+                    modal: "clearinboxmodal",
+                    title: (
+                      <Title order={3} className="flex items-center gap-2">
+                        <IconBriefcase size={"1.5rem"} color="#228be6" className="mt-[-2px]" /> Clear Inbox
+                      </Title>
+                    ),
+                    innerProps: {},
+                    centered: true,
+                    styles: {
+                      content: {
+                        minWidth: "1000px",
+                      },
                     },
-                  },
-                });
-              }}
-            >
-              Clear Inbox with AI
-            </Button>
-          </div>
+                  });
+                }}
+              >
+                Clear Inbox with AI
+              </Button>
+            </div>
+          )}
         </div>
       </Drawer>
 

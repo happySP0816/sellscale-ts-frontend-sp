@@ -28,7 +28,7 @@ import {
 } from "@mantine/core";
 import { ContextModalProps, closeAllModals, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconArrowRight, IconFilter, IconMinus, IconPencil, IconPlus } from "@tabler/icons";
+import { IconArrowRight, IconCheck, IconFilter, IconMinus, IconPencil, IconPlus } from "@tabler/icons";
 import e from "cors";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -78,6 +78,7 @@ export default function ICPRoutingCreateModal({
   const [includedTitles, setIncludedTitles] = useState<string[]>([]);
   const [includedLocations, setIncludedLocations] = useState<string[]>([]);
   const [icpQueries, setIcpQueries] = useState<[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [includedCompanySizes, setIncludedCompanySizes] = useState<string[]>(
     []
   );
@@ -87,6 +88,71 @@ export default function ICPRoutingCreateModal({
   const [rules, setRules] = useState<{ segment: string; condition: string; value: string; }[]>([]);
 
   const [segmentOptions, setSegmentOptions] = useState<Segment[]>([]);
+
+  const createSegment = async (segmentName?: string) => {
+    return fetch(`${API_URL}/segment/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_title: segmentName,
+        // is_market_map: isMarketMapSegment,
+        filters: {},
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data;
+      });
+  };
+
+  const doStuff = async (query: string, icp_route_id: number) => {
+    setFetchingSegments(true);
+      const newSegment = await createSegment(query);
+      updateIcpRoute(icp_route_id || -1, {
+        segment_id: newSegment.id,
+      });
+      await fetchSegments();
+      await fetchData();
+      setFetchingSegments(false);
+      setSegment(newSegment.id.toString());
+      return { value: newSegment.id.toString(), label: newSegment.segment_title };
+
+    }
+
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const icpRoutes = await getAllIcpRoutes();
+        const formattedData = icpRoutes.map((route: UpdateIcpRouteData) => ({
+          icpRouteTitle: route.title,
+          description: route.description,
+          id: route.id,
+          count: route.count,
+          ai_mode: route.ai_mode,
+          segment_id: route.segment_id,
+          rules: route.rules,
+          routeTo: route.segment_id ? `${route.segment_title} ✅` : "no segment connected",
+          send_slack: route.send_slack,
+          status: route.active,
+          icpRouteId: route.id,
+        }));
+        console.log('data', formattedData);
+        setData(formattedData);
+      } catch (error) {
+        console.error("Error fetching ICP routes:", error);
+      }
+      setLoading(false);
+    };
+
+  const fetchSegments = async () => {
+    setFetchingSegments(true);
+    const segments = await getSegments();
+    setSegmentOptions(segments);
+    setFetchingSegments(false);
+  };
 
   const fetchIcpQueries = async () => {
     const url = new URL(`${API_URL}/apollo/get_all_icp_queries`);
@@ -254,24 +320,50 @@ export default function ICPRoutingCreateModal({
         value={title}
         onChange={(event) => setTitle(event.currentTarget.value)}
       />
-      <Select
+      <Text mt ='sm'>{'Target Segment'}</Text>
+      {!fetchingSegments ? <Select
+        style={{ minWidth: "300px", transition: "all 0.3s ease-in-out" }}
         withinPortal
         mt={"sm"}
-        data={
-          segmentOptions
-            ? segmentOptions.map((segment) => ({
-              value: segment.id + "",
-              label: segment.segment_title,
-            }))
-            : []
-        }
+        data={segmentOptions.map((segment) => ({
+          value: segment.id.toString(),
+          label: segment.segment_title,
+        }))}
+        label={segment ? null : <Text color="red">No Segment Attached</Text>}
         placeholder="Select Segment"
-        label={
-          "Target Segment" + (fetchingSegments ? " (loading)" : "") + ":"
-        }
-        value={segment}
-        onChange={(value) => setSegment(value)}
-      />
+        value={segment?.toString() || ""}
+        creatable
+        searchable
+        getCreateLabel={(query) => `+ Create ${query}`}
+        onCreate={(query) => {
+          doStuff(query, innerProps.icpRouteId);
+          return null
+        }}
+        onChange={(value) => {
+          console.log('value changed', value);
+          updateIcpRoute(innerProps.icpRouteId || -1, {
+            segment_id: value ? parseInt(value) : undefined,
+          });
+
+          setSegment(value);
+          showNotification({
+            title: "Success",
+            message: "Segment attached successfully",
+            color: "green",
+            icon: <IconCheck />,
+          });
+          // unfocus the select
+          setTimeout(() => {
+            (document.activeElement as HTMLElement)?.blur();
+          }, 0);
+        }}
+        onDropdownOpen={() => {
+          console.log('Dropdown opened');
+        }}
+        onDropdownClose={() => {
+          console.log('Dropdown closed');
+        }}
+      /> : <Loader size="sm" variant="dots"></Loader>}
       <Checkbox
         mt={"md"}
         mb="md"

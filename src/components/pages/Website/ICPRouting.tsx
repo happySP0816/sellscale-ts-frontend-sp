@@ -24,6 +24,7 @@ import {
   Popover,
   Modal,
   TextInput,
+  Loader,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -46,7 +47,7 @@ import {
 } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
 import { on } from "events";
-import { set } from "lodash";
+import { create, min, set } from "lodash";
 import { DataGrid } from "mantine-data-grid";
 import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -60,8 +61,69 @@ export default function ICPRouting() {
   const [loading, setLoading] = useState(false);
   const [acPageSize, setAcPageSize] = useState("25");
   const [showTextBucketModal, setShowTextBucketModal] = useState(false);
+  const [segmentOptions, setSegmentOptions] = useState<Segment[]>([]);
   const [linkedInUrl, setLinkedInUrl] = useState("");
+  const [fetchingSegments, setFetchingSegments] = useState(false);
   const [visitedPage, setVisitedPage] = useState("");
+
+  type Segment = {
+    num_results: number;
+    attached_segments: any[];
+    client_archetype: {
+      archetype: string;
+      emoji: string;
+    };
+    client_sdr: {
+      client_id: number;
+      id: number;
+    };
+    filters: {
+      excluded_bio_keywords: string[];
+      excluded_company_keywords: string[];
+      excluded_education_keywords: string[];
+      // Add other filter fields as necessary
+    };
+    id: number;
+    num_contacted: number;
+    num_prospected: number;
+    parent_segment_id: number | null;
+    saved_apollo_query_id: number;
+    segment_title: string;
+    unique_companies: number;
+  };
+
+  const doStuff = async (query: string, row: any) => {
+    setFetchingSegments(true);
+        const newSegment = await createSegment(query);
+        updateIcpRoute(row.icpRouteId || -1, {
+          segment_id: newSegment.id,
+        });
+        await fetchSegments();
+        await fetchData();
+        setFetchingSegments(false);
+        return { value: newSegment.id.toString(), label: newSegment.segment_title };
+
+      }
+
+  const createSegment = async (segmentName?: string) => {
+    return fetch(`${API_URL}/segment/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        segment_title: segmentName,
+        // is_market_map: isMarketMapSegment,
+        filters: {},
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data;
+      });
+  };
+
   type IcpRoute = {
     active: boolean;
     ai_mode: boolean;
@@ -114,6 +176,7 @@ export default function ICPRouting() {
     updateIcpRoute,
     getAllIcpRoutes,
     getWebVisits,
+    getSegments
   } = useTrackApi(userToken);
 
   const fetchData = async () => {
@@ -126,6 +189,7 @@ export default function ICPRouting() {
         id: route.id,
         count: route.count,
         ai_mode: route.ai_mode,
+        segment_id: route.segment_id,
         rules: route.rules,
         routeTo: route.segment_id ? `${route.segment_title} ✅` : "no segment connected",
         send_slack: route.send_slack,
@@ -192,11 +256,22 @@ export default function ICPRouting() {
     setLoading(false);
   }
 
+  const fetchSegments = async () => {
+    setFetchingSegments(true);
+    const segments = await getSegments();
+    setSegmentOptions(segments);
+    setFetchingSegments(false);
+  };
+
 
   useEffect(() => {
     fetchData();
     fetchWebVisits();
+    fetchSegments();
+
+    // fetchIcpQueries();
   }, [userToken]);
+
 
   const [data, setData]: [IcpRouteData[], any] = useState([]);
   type WebVisit = {
@@ -474,7 +549,7 @@ export default function ICPRouting() {
                 </ActionIcon>
               </Flex>
             </th>
-            <th>
+            <th style={{ minWidth: "300px" }}>
               <Flex align={"center"} gap={"3px"}>
                 <Text color="gray">Target Segment</Text>
               </Flex>
@@ -587,22 +662,100 @@ export default function ICPRouting() {
               </td>
               <td>
                 <Flex align={"center"} justify={"center"} gap={"xs"} py={"lg"} w={"100%"} h={"100%"}>
-                  <Flex justify={"center"} w={"100%"} align={"center"} gap={"md"}>
-                    <Badge
-                      mr="md"
-                      ml="md"
-                      sx={{
-                        backgroundColor: row.routeTo?.includes("no segment") ? "#d3d3d3" : "#90ee90",
-                        color: row.routeTo?.includes("no segment") ? "#ffffff" : "#006400",
-                        padding: "10px 12px",
-                        whiteSpace: 'pre-wrap',
-                        borderRadius: '8px',
-                        fontWeight: 'bold'
-                      }}
-                    >
-                      {row.routeTo?.replace(/###/g, "\n") || "No Route"}
-                    </Badge>
-                  </Flex>
+                {!fetchingSegments ? (
+                  <Select
+                    style={{ minWidth: "500px", transition: "all 0.3s ease-in-out" }}
+                    withinPortal
+                    mt={"sm"}
+                    rightSection={
+                      row.segment_id ? (
+                        <Button
+                          loading={loading}
+                          style={{ marginRight: "50px" }}
+                          size="xs"
+                          onClick={async () => {
+                            console.log('Backfill button clicked');
+                            try {
+                              setLoading(true);
+                              const response = await fetch(`${API_URL}/track/backfill_prospects`, {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `Bearer ${userToken}`,
+                                },
+                                body: JSON.stringify({ icp_route_id: row.icpRouteId, segment_id: row.segment_id }),
+                              });
+
+                              if (!response.ok) {
+                                throw new Error("Failed to backfill prospects");
+                              }
+
+                              const data = await response.json();
+                              showNotification({
+                                title: "Success",
+                                message: "Prospects backfilled successfully",
+                                color: "green",
+                                icon: <IconCheck />,
+                              });
+                            } catch (error) {
+                              console.error("Error backfilling prospects:", error);
+                              showNotification({
+                                title: "Error",
+                                message: "Failed to backfill prospects",
+                                color: "red",
+                                icon: <IconCircleX />,
+                              });
+                            } finally {
+                              setLoading(false);
+                            }
+                            // Add your backfill logic here
+                          }}
+                        >
+                          Backfill
+                        </Button>
+                      ) : null
+                    }
+                    data={segmentOptions.map((segment) => ({
+                      value: segment.id.toString(),
+                      label: segment.segment_title,
+                    }))}
+                    label={row.segment_id ? null : <Text color="red">No Segment Attached</Text>}
+                    placeholder="Select Segment"
+                    value={row.segment_id?.toString() || ""}
+                    creatable
+                    searchable
+                    getCreateLabel={(query) => `+ Create ${query}`}
+                    onCreate={(query) => {
+                      doStuff(query, row);
+                      return null
+                    }}
+                    onChange={(value) => {
+                      console.log('value changed', value);
+                      updateIcpRoute(row.icpRouteId || -1, {
+                        segment_id: value ? parseInt(value) : undefined,
+                      });
+                      row.segment_id = value ? parseInt(value) : undefined;
+                      showNotification({
+                        title: "Success",
+                        message: "Segment attached successfully",
+                        color: "green",
+                        icon: <IconCheck />,
+                      });
+                      // unfocus the select
+                      setTimeout(() => {
+                        (document.activeElement as HTMLElement)?.blur();
+                      }, 0);
+                    }}
+                    onDropdownOpen={() => {
+                      console.log('Dropdown opened');
+                    }}
+                    onDropdownClose={() => {
+                      console.log('Dropdown closed');
+                    }}
+                  />
+                ) : (
+                  <Loader size="sm" />
+                )}
                 </Flex>
               </td>
               <td>

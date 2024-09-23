@@ -33,10 +33,11 @@ import {
   createStyles,
   rem,
   ActionIcon,
+  SegmentedControl,
 } from "@mantine/core";
 import { closeAllModals, ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconAlignJustified, IconAlignLeft, IconAlignRight, IconBrandLinkedin, IconBriefcase, IconBuilding, IconBuildingStore, IconCheck, IconCircleCheck, IconExternalLink, IconHomeHeart, IconInfoCircle, IconLetterT, IconMail, IconMap2, IconPencil, IconPhone, IconUser } from "@tabler/icons";
+import { IconAlignJustified, IconAlignLeft, IconAlignRight, IconBrandLinkedin, IconBriefcase, IconBuilding, IconBuildingStore, IconCheck, IconCircleCheck, IconExternalLink, IconHomeHeart, IconInfoCircle, IconLetterT, IconMail, IconMailOpened, IconMap2, IconPencil, IconPhone, IconUser } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { JSONContent } from "@tiptap/react";
 import { set } from "lodash";
@@ -93,6 +94,8 @@ export default function SingleEmailCampaignModal({
   const userToken = useRecoilValue(userTokenState);
 
   const [loading, setLoading] = useState(false);
+  const userData = useRecoilValue(userDataState);
+  const [campaignType, setCampaignType] = useState("email");
   const [fromEmail, setFromEmail] = useState("SellScale CSM <csm@sellscale.com>");
   const [toEmail, setToEmail] = useState<string[]>([]);
   const [ccEmail, setCcEmail] = useState<string | null>(null);
@@ -198,13 +201,13 @@ export default function SingleEmailCampaignModal({
   }
 
   const getEmailFromLinkedinURL = async (url: string) => {
+    setGettingProspectFromEmail(true);
     if (!url) {
       return;
     }
-
     showNotification({
-      title: "Getting Email...",
-      message: `Getting email for ${url}`,
+      title: campaignType === 'linkedin' ? "Getting LinkedIn..." : "Getting Email...",
+      message: campaignType === 'linkedin' ? `Getting LinkedIn for ${url}` : `Getting email for ${url}`,
       color: "teal",
     });
 
@@ -216,6 +219,7 @@ export default function SingleEmailCampaignModal({
           Authorization: `Bearer ${userToken}`,
         },
         body: JSON.stringify({
+          campaign_type: campaignType,
           linkedin_url: url,
         }),
       });
@@ -223,7 +227,7 @@ export default function SingleEmailCampaignModal({
   
       const data = await response.json();
 
-      if (!data.email) {
+      if (!data.email && campaignType === 'email') {
         showNotification({
           title: "Email Not Found",
           message: `Email not found for ${url}`,
@@ -285,14 +289,19 @@ export default function SingleEmailCampaignModal({
         setEmailStore(emailStore);
       }
 
-      setOptions([newOption]);
-      setToEmail([newOption.value]);
+      if (campaignType === 'email') {
+        setOptions([newOption]);
+        setToEmail([newOption.value]);
+      }
+      
     } catch (error) {
       showNotification({
         title: "Error",
         message: `An error occurred while fetching email for ${url}`,
         color: "red",
       });
+    } finally {
+      setGettingProspectFromEmail(false);
     }
   };
 
@@ -358,7 +367,8 @@ export default function SingleEmailCampaignModal({
           iscraper_prospect: iscraperProspect,
           body: messageDraftEmail.current,
           linkedin_url: linkedinURL,
-          existing_prospect: existingProspect?.id
+          existing_prospect: existingProspect?.id,
+          campaign_type: campaignType,
         }),
       });
 
@@ -371,9 +381,10 @@ export default function SingleEmailCampaignModal({
           color: "teal",
         });
       }
-      closeAllModals();
-      innerProps.setCurrentTab('email')
+      if (campaignType === 'email') innerProps.setCurrentTab('email')
+      if (campaignType === 'linkedin')
       innerProps.fetchAllCampaigns();
+      closeAllModals();
     } catch (error) {
       showNotification({
         title: "Error",
@@ -609,6 +620,42 @@ export default function SingleEmailCampaignModal({
       )}
 
       <Divider />
+      <Flex justify="center" mt="sm">
+  <SegmentedControl
+    value={campaignType}
+    onChange={(value: any) => {
+      setCampaignType(value);
+    }}
+    data={[
+      {
+        value: "email",
+        label: (
+          <Center style={{ gap: 4 }}>
+            <IconMailOpened
+              size={"1.2rem"}
+              fill="orange"
+              color="white"
+            />
+            <Text fw={500}>Email</Text>
+          </Center>
+        ),
+      },
+      {
+        value: "linkedin",
+        label: (
+          <Center style={{ gap: 4 }}>
+            <IconBrandLinkedin
+              size={"1.4rem"}
+              fill="#3B85EF"
+              color="white"
+            />
+            <Text fw={500}>LinkedIn</Text>
+          </Center>
+        ),
+      },
+    ]}
+  />
+</Flex>
       {iscraperProspect?.position_groups?.[0].profile_positions?.[0]?.title && (
         <ProspectDetailsCard prospect={iscraperProspect} setProspect={setIscraperProspect} />
       )}
@@ -616,7 +663,7 @@ export default function SingleEmailCampaignModal({
         <Text size={"sm"} color="gray" fw={500} w={50}>
           From:
         </Text>
-        <MultiSelect
+        {campaignType === 'email' ? <MultiSelect
           itemComponent={SelectItem}
           value={emailDomains.length > 0 ? emailDomains : availableEmails?.[0] ? [availableEmails[0]] : []}
           data={
@@ -656,13 +703,26 @@ export default function SingleEmailCampaignModal({
             },
           }}
           size="xs"
-        />
+        /> : (<>
+
+          <Flex align={"center"} gap={"xs"}>
+            <Card shadow="sm" padding="xs" radius="md" withBorder style={{ backgroundColor: '#f0f4f8', border: '1px solid #d1d9e0' }}>
+            <Flex align="center" gap="xs">
+              <Avatar src={userData.img_url} radius={"xl"} size={"sm"} />
+              <Text fw={700} color="black" size="md">{userData.sdr_name}</Text>
+            </Flex>
+            </Card>
+          </Flex>
+        </>
+        )}
+
       </Flex>
       <Flex align={"center"} gap={"xs"} mt={6}>
         <Text size={"sm"} color="gray" fw={500} miw={45}>
           To:
         </Text>
         <MultiSelect
+          mt="sm"
           w={"100%"}
           creatable
           searchable
@@ -741,7 +801,7 @@ export default function SingleEmailCampaignModal({
             };
           })}
           value={toEmail}
-          placeholder="Enter email address or Linkedin URL"
+          placeholder={campaignType === 'linkedin' ? "Enter Linkedin URL" : "Enter email address or Linkedin URL"}
           size="xs"
           onChange={(values) => {
             if (values.length === 0) {
@@ -784,9 +844,9 @@ export default function SingleEmailCampaignModal({
           getCreateLabel={(query) => `+ Add ${query}`}
           shouldCreate={(query, data) => query.trim().length > 0 && !data.some((item) => item.value === query.trim())}
           clearable
-          rightSection={isValidLinkedInUrl(toEmail[toEmail.length - 1]) && <Loader size="xs" />}
+          rightSection={(isValidLinkedInUrl(toEmail[toEmail.length - 1]) && campaignType === 'email') || gettingProspectFromEmail && <Loader size="xs" />}
         />
-        {toEmail.length > 0 && (
+        {toEmail.length > 0 && campaignType === 'email' && (
           <Flex align={"center"} gap={"xs"}>
             <Button
               disabled
@@ -809,7 +869,7 @@ export default function SingleEmailCampaignModal({
       </Flex>
       { toEmail.length === 0  && (
         <>
-          <Flex mt="sm" w="100%" align="center" justify="center" gap="xs">
+          {campaignType === 'email' && <Flex mt="sm" w="100%" align="center" justify="center" gap="xs">
             <TextInput
               placeholder="Magic LinkedIn to Email Finder"
               style={{ width: '50%', borderColor: '#ced4da', backgroundColor: '#f8f9fa' }}
@@ -822,10 +882,10 @@ export default function SingleEmailCampaignModal({
                 Search
               </Button>
             )}
-          </Flex>
-          <Text size="xs" color="gray" mt="xs" style={{ textAlign: 'center' }}>
+          </Flex>}
+          {campaignType === 'email' && <Text size="xs" color="gray" mt="xs" style={{ textAlign: 'center' }}>
             Enter a LinkedIn URL to automatically find and add the associated email address.
-          </Text>
+          </Text>}
           {couldNotFindEmail && (
             <Text size="xs" color="red" mt="xs" style={{ textAlign: 'center' }}>
               Unable to find a strong email. Please enter email directly.
@@ -877,17 +937,31 @@ export default function SingleEmailCampaignModal({
           mb="sm"
         />
       )}
-      <TextInput
+      <Textarea
         value={subject}
-        onChange={(e) => setSubject(e.currentTarget.value)}
+        onChange={(e) => {
+          const newValue = e.currentTarget.value;
+          if (campaignType === 'linkedin' && newValue.length > 300) {
+            return;
+          }
+          setSubject(newValue);
+        }}
         mt={"xs"}
         label={
           <Text color="gray" fw={500} size={"xs"}>
-            SUBJECT:
+            {campaignType === 'linkedin' ? 'INVITATION NOTE:' : 'SUBJECT:'}
           </Text>
         }
+        autosize
+        minRows={campaignType === 'email' ? 1 : 3}
+        maxRows={10}
       />
-      <Box mt={"md"}>
+            {campaignType === 'linkedin' && (
+        <Text size="xs" color={subject.length > 300 ? 'red' : 'gray'} mt="xs" style={{ textAlign: 'right' }}>
+          {subject.length}/300
+        </Text>
+      )}
+      {campaignType === 'email' && <Box mt={"md"}>
         <Text color="gray" fw={500} size={"sm"}>
           BODY:
         </Text>
@@ -899,7 +973,7 @@ export default function SingleEmailCampaignModal({
           value={messageDraftRichRaw.current}
           height={200}
         />
-      </Box>
+      </Box>}
       {/* <Stack spacing="md">
         <MultiSelect
           label={<span style={{ color: emailDomains.length > 0 ? theme.colors.dark[9] : theme.colors.red[6] }}>Email to Send From: *</span>}
@@ -1056,7 +1130,7 @@ export default function SingleEmailCampaignModal({
         <Button onClick={() => closeAllModals()} variant="outline" color="gray" radius="md" size="md">
           Cancel
         </Button>
-        <Button loading={creatingCampaign} onClick={onSendEmail} radius="md" size="md">
+        <Button disabled={gettingProspectFromEmail || options.length === 0} loading={creatingCampaign} onClick={onSendEmail} radius="md" size="md">
           Send
         </Button>
       </Group>

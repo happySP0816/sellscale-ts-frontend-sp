@@ -65,7 +65,7 @@ import {
   IconTrash,
   IconX,
 } from "@tabler/icons";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   BumpFramework,
@@ -177,6 +177,8 @@ interface Templates {
   times_used: number;
   title: string;
 }
+
+export const IntroContext = createContext({});
 
 export const SequencesV2 = React.forwardRef((props: any, ref) => {
   const {
@@ -572,6 +574,7 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
 
   // We also want to move voice related stuff into this Sequence Widget
 
+
   return (
     <Card
       shadow={"sm"}
@@ -816,24 +819,43 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
             ) : (
               <>
                 {stepNumber === 0 && viewTab === "linkedin" && (
-                  <LinkedinIntroSectionV2
-                    prospectId={selectedProspect ? selectedProspect.id : -1}
-                    userToken={userToken}
-                    templates={templates ? templates : []}
-                    currentProject={currentProject ?? undefined}
-                    setSelectedTemplateId={setSelectedTemplateId}
-                    selectedTemplateId={selectedTemplateId}
-                    triggerGenerate={triggerGenerate}
-                    setTriggerGenerate={setTriggerGenerate}
-                    setLinkedinInitialMessages={setLinkedinInitialMessages}
-                    triggerProjectRefresh={triggerProjectRefresh}
-                    selectedProspectIndex={selectedProspectIndex}
-                    setSelectedProspectIndex={setSelectedProspectIndex}
-                    selectedProspect={selectedProspect ?? undefined}
-                    campaignContacts={campaignContacts}
-                    onRegenerate={onRegenerate}
-                    prospectOnChangeHandler={prospectOnChangeHandler}
-                  />
+                  <IntroContext.Provider value={{
+                      prospectId: selectedProspect ? selectedProspect.id : -1,
+                      userToken: userToken,
+                      templates: templates ? templates : [],
+                      currentProject: currentProject ?? undefined,
+                      setSelectedTemplateId: setSelectedTemplateId,
+                      selectedTemplateId: selectedTemplateId,
+                      triggerGenerate: triggerGenerate,
+                      setTriggerGenerate: setTriggerGenerate,
+                      setLinkedinInitialMessages: setLinkedinInitialMessages,
+                      triggerProjectRefresh: triggerProjectRefresh,
+                      selectedProspectIndex: selectedProspectIndex,
+                      setSelectedProspectIndex: setSelectedProspectIndex,
+                      selectedProspect: selectedProspect ?? undefined,
+                      campaignContacts: campaignContacts,
+                      onRegenerate: onRegenerate,
+                      prospectOnChangeHandler: prospectOnChangeHandler,
+                  }}>
+                    <LinkedinIntroSectionV2
+                      prospectId={selectedProspect ? selectedProspect.id : -1}
+                      userToken={userToken}
+                      templates={templates ? templates : []}
+                      currentProject={currentProject ?? undefined}
+                      setSelectedTemplateId={setSelectedTemplateId}
+                      selectedTemplateId={selectedTemplateId}
+                      triggerGenerate={triggerGenerate}
+                      setTriggerGenerate={setTriggerGenerate}
+                      setLinkedinInitialMessages={setLinkedinInitialMessages}
+                      triggerProjectRefresh={triggerProjectRefresh}
+                      selectedProspectIndex={selectedProspectIndex}
+                      setSelectedProspectIndex={setSelectedProspectIndex}
+                      selectedProspect={selectedProspect ?? undefined}
+                      campaignContacts={campaignContacts}
+                      onRegenerate={onRegenerate}
+                      prospectOnChangeHandler={prospectOnChangeHandler}
+                    />
+                  </IntroContext.Provider>
                 )}
                 {stepNumber !== 0 && viewTab === "linkedin" && (
                   <LinkedinSequenceSectionV2
@@ -1155,7 +1177,7 @@ const VoiceModal = function (props: {
         withCloseButton={false}
         styles={{
           body: {
-            height: "1000px",
+            height: "800px",
           },
         }}
       >
@@ -1203,17 +1225,21 @@ const VoiceModal = function (props: {
               <Text fw={600} mt={"8px"}>
                 Use your own generated voices
               </Text>
-              <ScrollArea style={{ position: "relative" }} h={"400px"}>
+              <ScrollArea style={{ position: "relative" }} h={"300px"}>
                 <LoadingOverlay visible={loading} />
                 {voices &&
                   voices
+                    .filter((v) => !v.is_internal)
                     .sort((a, b) => {
                       if (a.active && !b.active) {
-                        return  -1;
+                        return -1;
                       } else if (!a.active && b.active) {
                         return 1;
                       }
-                      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                      return (
+                        new Date(b.created_at).getTime() -
+                        new Date(a.created_at).getTime()
+                      );
                     })
                     .map((voice) => {
                       return (
@@ -1365,6 +1391,60 @@ const VoiceModal = function (props: {
                   </Button>
                 </Flex>
               )}
+              <ScrollArea style={{ position: "relative" }} h={"300px"}>
+                <LoadingOverlay visible={loading} />
+                {voices &&
+                  voices
+                    .filter((v) => v.is_internal)
+                    .sort((a, b) => {
+                      if (a.active && !b.active) {
+                        return -1;
+                      } else if (!a.active && b.active) {
+                        return 1;
+                      }
+                      return (
+                        new Date(b.created_at).getTime() -
+                        new Date(a.created_at).getTime()
+                      );
+                    })
+                    .map((voice) => {
+                      return (
+                        <Paper
+                          withBorder
+                          radius={"sm"}
+                          p={"sm"}
+                          mt={"sm"}
+                          style={{ position: "relative" }}
+                          key={voice.id}
+                        >
+                          <Flex align={"center"} justify={"space-between"}>
+                            <Flex align={"center"}>
+                              <Text size={"sm"} fw={500}>
+                                {voice.name}{" "}
+                                <span className="text-gray-400">
+                                  {" "}
+                                  {voice.created_at.slice(
+                                    0,
+                                    voice.created_at.length - 13
+                                  )}
+                                </span>
+                              </Text>
+                            </Flex>
+                            <Switch
+                              checked={voice.active}
+                              label={"active"}
+                              onClick={(event) =>
+                                toggleActive(
+                                  voice.id,
+                                  event.currentTarget.checked
+                                )
+                              }
+                            />
+                          </Flex>
+                        </Paper>
+                      );
+                    })}
+              </ScrollArea>
             </Flex>
           </>
         )}
@@ -4523,7 +4603,7 @@ const LinkedinBumpEditSection = function (props: {
   );
 };
 
-const LinkedinIntroSectionV2 = function (props: {
+export const LinkedinIntroSectionV2 = function (props: {
   prospectId: number;
   userToken: string;
   templates?: Templates[];
@@ -4540,6 +4620,7 @@ const LinkedinIntroSectionV2 = function (props: {
   campaignContacts?: ProspectShallow[];
   onRegenerate: () => void;
   prospectOnChangeHandler: (prospect: ProspectShallow | undefined) => void;
+  selectedVoice?: number;
 }) {
   const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any>(
     {}
@@ -4659,7 +4740,8 @@ const LinkedinIntroSectionV2 = function (props: {
       const initMsgResponse = await generateInitialMessageForLiConvoSim(
         props.userToken,
         createResponse.data,
-        selectedTemplateId
+        selectedTemplateId,
+        props.selectedVoice
       );
       if (initMsgResponse.status !== "success") {
         setLinkedinInitialMessageGenerationInProgress(false);
@@ -4808,150 +4890,159 @@ const LinkedinIntroSectionV2 = function (props: {
           maxWidth: "100%",
           position: "relative",
           marginTop: "8px",
+          minHeight: "200px"
         }}
       >
         <LoadingOverlay
           visible={linkedinInitialMessageGenerationInProgress}
           zIndex={2}
-          style={{ minHeight: "300px" }}
+          style={{ minHeight: "200px" }}
         />
         {linkedinInitialMessages.message && (
           <LiExampleInvitation message={linkedinInitialMessages.message} />
         )}
       </Box>
 
-      {!props.currentProject?.template_mode && (
-        <Group pt="xs" noWrap>
-          {linkedinInitialMessages.meta_data && (
-            <>
-              <HoverCard
-                width={280}
-                shadow="md"
-                position={"bottom"}
-                withinPortal
-              >
-                <HoverCard.Target>
-                  <Badge
-                    color="blue"
-                    styles={{ root: { textTransform: "initial" } }}
-                    variant={"outline"}
-                    radius={"sm"}
-                    w={"250px"}
-                    onClick={() => {
-                      toggleShowCTA();
-                    }}
-                  >
-                    CTA Used:{" "}
-                    <Text fw={500} span>
-                      {_.truncate(linkedinInitialMessages.meta_data.cta, {
-                        length: 45,
-                      })}
+      {!props.currentProject?.template_mode &&
+        !props.selectedVoice && (
+          <Group pt="xs" noWrap>
+            {linkedinInitialMessages.meta_data && (
+              <>
+                <HoverCard
+                  width={280}
+                  shadow="md"
+                  position={"bottom"}
+                  withinPortal
+                >
+                  <HoverCard.Target>
+                    <Badge
+                      color="blue"
+                      styles={{ root: { textTransform: "initial" } }}
+                      variant={"outline"}
+                      radius={"sm"}
+                      w={"250px"}
+                      onClick={() => {
+                        toggleShowCTA();
+                      }}
+                    >
+                      CTA Used:{" "}
+                      <Text fw={500} span>
+                        {_.truncate(linkedinInitialMessages.meta_data.cta, {
+                          length: 45,
+                        })}
+                      </Text>
+                    </Badge>
+                  </HoverCard.Target>
+                  <HoverCard.Dropdown>
+                    <Text size="sm">
+                      {linkedinInitialMessages.meta_data.cta}
                     </Text>
-                  </Badge>
-                </HoverCard.Target>
-                <HoverCard.Dropdown>
-                  <Text size="sm">{linkedinInitialMessages.meta_data.cta}</Text>
-                </HoverCard.Dropdown>
-              </HoverCard>
+                  </HoverCard.Dropdown>
+                </HoverCard>
 
-              <HoverCard withinPortal width={280} shadow="md" position="bottom">
-                <HoverCard.Target>
-                  <Badge
-                    variant={"outline"}
-                    radius={"sm"}
-                    color="green"
-                    onClick={() => {
-                      toggleShowPersonalization();
-                    }}
-                    styles={{ root: { textTransform: "initial" } }}
-                  >
-                    Personalizations:{" "}
-                    <Text fw={500} span>
-                      {linkedinInitialMessages.meta_data?.notes?.length}
-                    </Text>
-                  </Badge>
-                </HoverCard.Target>
-                <HoverCard.Dropdown>
-                  {linkedinInitialMessages.meta_data?.combined ? (
-                    <List>
-                      {linkedinInitialMessages.meta_data?.combined.map(
-                        (combined_data: any, index: number) => {
-                          return (
-                            <List.Item key={index}>
-                              <Flex direction={"column"}>
-                                <Text fz="sm" fw={"bold"}>
-                                  {_.startCase(
-                                    combined_data.research_point_type
-                                      .toLowerCase()
-                                      .replaceAll("_", " ")
-                                      .replace("aicomp", "")
-                                      .replace("aiind", "")
-                                  )}
-                                </Text>
-                                <Text fz="sm">{combined_data.value}</Text>
-                              </Flex>
-                            </List.Item>
-                          );
-                        }
-                      )}
-                    </List>
-                  ) : (
-                    <List>
-                      {linkedinInitialMessages.meta_data?.notes?.map(
-                        (note: any, index: number) => {
-                          const researchPointId =
-                            linkedinInitialMessages.meta_data?.research_points[
-                              index
-                            ];
-
-                          const researchPointType = researchPointTypes?.find(
-                            (item) => item.id === researchPointId
-                          );
-
-                          return (
-                            <List.Item key={index}>
-                              <Flex direction="column">
-                                {researchPointType && (
+                <HoverCard
+                  withinPortal
+                  width={280}
+                  shadow="md"
+                  position="bottom"
+                >
+                  <HoverCard.Target>
+                    <Badge
+                      variant={"outline"}
+                      radius={"sm"}
+                      color="green"
+                      onClick={() => {
+                        toggleShowPersonalization();
+                      }}
+                      styles={{ root: { textTransform: "initial" } }}
+                    >
+                      Personalizations:{" "}
+                      <Text fw={500} span>
+                        {linkedinInitialMessages.meta_data?.notes?.length}
+                      </Text>
+                    </Badge>
+                  </HoverCard.Target>
+                  <HoverCard.Dropdown>
+                    {linkedinInitialMessages.meta_data?.combined ? (
+                      <List>
+                        {linkedinInitialMessages.meta_data?.combined.map(
+                          (combined_data: any, index: number) => {
+                            return (
+                              <List.Item key={index}>
+                                <Flex direction={"column"}>
                                   <Text fz="sm" fw={"bold"}>
                                     {_.startCase(
-                                      researchPointType.name
+                                      combined_data.research_point_type
                                         .toLowerCase()
                                         .replaceAll("_", " ")
                                         .replace("aicomp", "")
                                         .replace("aiind", "")
                                     )}
                                   </Text>
-                                )}
-                                <Text fz="sm">
-                                  {linkedinInitialMessages.meta_data?.notes}
-                                </Text>
-                                <Text fz="sm">{note}</Text>
-                              </Flex>
-                            </List.Item>
-                          );
-                        }
-                      )}
-                    </List>
-                  )}
-                </HoverCard.Dropdown>
-              </HoverCard>
-            </>
-          )}
-          {!props.currentProject?.template_mode && (
-            <VoiceModal
-              opened={opened}
-              close={close}
-              currentProject={props.currentProject}
-              userToken={props.userToken}
-              open={open}
-              numCtas={ctasItemsCount ?? 0}
-              numProspects={props.campaignContacts?.length ?? 0}
-            />
-          )}
-        </Group>
-      )}
+                                  <Text fz="sm">{combined_data.value}</Text>
+                                </Flex>
+                              </List.Item>
+                            );
+                          }
+                        )}
+                      </List>
+                    ) : (
+                      <List>
+                        {linkedinInitialMessages.meta_data?.notes?.map(
+                          (note: any, index: number) => {
+                            const researchPointId =
+                              linkedinInitialMessages.meta_data
+                                ?.research_points[index];
 
-      {linkedinInitialMessages.meta_data &&
+                            const researchPointType = researchPointTypes?.find(
+                              (item) => item.id === researchPointId
+                            );
+
+                            return (
+                              <List.Item key={index}>
+                                <Flex direction="column">
+                                  {researchPointType && (
+                                    <Text fz="sm" fw={"bold"}>
+                                      {_.startCase(
+                                        researchPointType.name
+                                          .toLowerCase()
+                                          .replaceAll("_", " ")
+                                          .replace("aicomp", "")
+                                          .replace("aiind", "")
+                                      )}
+                                    </Text>
+                                  )}
+                                  <Text fz="sm">
+                                    {linkedinInitialMessages.meta_data?.notes}
+                                  </Text>
+                                  <Text fz="sm">{note}</Text>
+                                </Flex>
+                              </List.Item>
+                            );
+                          }
+                        )}
+                      </List>
+                    )}
+                  </HoverCard.Dropdown>
+                </HoverCard>
+              </>
+            )}
+            {!props.currentProject?.template_mode && (
+              <VoiceModal
+                opened={opened}
+                close={close}
+                currentProject={props.currentProject}
+                userToken={props.userToken}
+                open={open}
+                numCtas={ctasItemsCount ?? 0}
+                numProspects={props.campaignContacts?.length ?? 0}
+              />
+            )}
+          </Group>
+        )}
+
+      {!props.selectedVoice &&
+        linkedinInitialMessages.meta_data &&
         props.currentProject?.template_mode &&
         props.templates && (
           <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>

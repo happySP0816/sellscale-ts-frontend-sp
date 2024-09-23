@@ -28,6 +28,8 @@ import {
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
+import ContactAccountFilterModal from "@modals/ContactAccountFilterModal";
+import { TransformedSegment } from "@pages/SegmentV3/SegmentV3";
 import {
   IconBell,
   IconBrandLinkedin,
@@ -36,6 +38,7 @@ import {
   IconChevronRight,
   IconCircleCheck,
   IconCircleX,
+  IconEye,
   IconFilter,
   IconLetterT,
   IconPencil,
@@ -59,6 +62,9 @@ export default function ICPRouting() {
   const [loadingSetWebhook, setLoadingSetWebhook] = useState(false);
   const theme = useMantineTheme();
   const [loading, setLoading] = useState(false);
+  const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
+  const [segmentData, setSegmentData] = useState<TransformedSegment[]>([]);
+  const [selectedSegmentId, setSelectedSegmentId] = useState(-1);
   const [acPageSize, setAcPageSize] = useState("25");
   const [showTextBucketModal, setShowTextBucketModal] = useState(false);
   const [segmentOptions, setSegmentOptions] = useState<Segment[]>([]);
@@ -90,6 +96,92 @@ export default function ICPRouting() {
     saved_apollo_query_id: number;
     segment_title: string;
     unique_companies: number;
+  };
+
+  const getAllSegments = async (showLoader: boolean, tagFilter?: Number) => {
+    function transformData(segments: any[]) {
+      return segments.map((segment, index) => {
+        // Assume progress, campaign, contacts, filters, assets are derived somehow
+        return {
+          id: segment.id,
+          person_name: segment.segment_title,
+          segment_title: segment.segment_title,
+          progress: Math.floor(Math.random() * 100), // Fake random progress
+          campaign: Math.floor(Math.random() * 100), // Fake random campaign ID or null
+          contacts: Math.floor(Math.random() * 2000000), // Fake random contacts number
+          filters: Object.keys(segment.filters).length, // Count of filter types
+          assets: Math.floor(Math.random() * 100), // Fake random asset count or null
+          sub_segments: [], // This needs to be populated based on more complex logic or additional data
+          client_archetype: segment.client_archetype,
+          client_sdr: segment.client_sdr,
+          num_prospected: segment.num_prospected,
+          num_contacted: segment.num_contacted,
+          apollo_query: segment.apollo_query,
+          segment_tags: segment.attached_segments,
+          autoscrape_enabled: segment.autoscrape_enabled,
+          current_scrape_page: segment.current_scrape_page,
+        };
+      });
+    }
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(
+      `${API_URL}/segment/all?include_all_in_client=true` +
+        (tagFilter !== -1
+          ? `&tag_filter=${tagFilter}`
+          : ""),
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        const segments = data.segments;
+        const totalProspected = segments.reduce(
+          (acc: number, segment: any) => acc + (segment.num_prospected || 0),
+          0
+        );
+        const totalUniqueCompanies = segments.reduce(
+          (acc: number, segment: any) => acc + (segment.unique_companies || 0),
+          0
+        );
+        const totalContacted = segments.reduce(
+          (acc: number, segment: any) => acc + (segment.num_contacted || 0),
+          0
+        );
+        const totalProspectsInPreFilters = segments.reduce(
+          (acc: number, segment: any) =>
+            acc + (segment.apollo_query?.num_results || 0),
+          0
+        );
+        const parentSegments = segments.filter(
+          (segment: any) => !segment.parent_segment_id
+        );
+        let parentSegmentsTransformed = transformData(parentSegments);
+
+        const parentSegmentsTransformedWithSubSegments: any = parentSegmentsTransformed?.map(
+          (segment) => {
+            const subSegments = segments.filter(
+              (subSegment: any) => subSegment.parent_segment_id === segment.id
+            );
+            return {
+              ...segment,
+              sub_segments: transformData(subSegments),
+            };
+          }
+        );
+
+        setSegmentData(parentSegmentsTransformedWithSubSegments);
+      })
+      .finally(() => {
+        console.log("Stopping");
+        setLoading(false);
+      });
   };
 
   const doStuff = async (query: string, row: any) => {
@@ -268,6 +360,7 @@ export default function ICPRouting() {
     fetchData();
     fetchWebVisits();
     fetchSegments();
+    getAllSegments(false);
 
     // fetchIcpQueries();
   }, [userToken]);
@@ -358,6 +451,13 @@ export default function ICPRouting() {
           </Paper>
 
         </Modal>
+
+        <ContactAccountFilterModal
+        showContactAccountFilterModal={showViewProspectsModal}
+        setShowContactAccountFilterModal={setShowViewProspectsModal}
+        segment={segmentData.find((item) => item.id === selectedSegmentId)}
+        isModal={true}
+      />
       {showTextBucketModal && (
         <Modal opened={showTextBucketModal} onClose={() => {setShowTextBucketModal(false); setSimulationData(null); setShowResults(false)}} size="lg">
           <Paper style={{ padding: "md" }}>
@@ -669,9 +769,20 @@ export default function ICPRouting() {
                     mt={"sm"}
                     rightSection={
                       row.segment_id ? (
+                        <>
+                        <ActionIcon
+                          onClick={() => {
+                            setShowViewProspectsModal(true);
+                            console.log('View prospects button clicked', row.segment_id);
+                            setSelectedSegmentId(row.segment_id || -1);
+                          }}
+                        >
+                          <IconEye color='lightblue' size={16} />
+                        </ActionIcon>
                         <Button
+                          color='orange'
                           loading={loading}
-                          style={{ marginRight: "50px" }}
+                          style={{ marginRight: "150px" }}
                           size="xs"
                           onClick={async () => {
                             console.log('Backfill button clicked');
@@ -693,7 +804,7 @@ export default function ICPRouting() {
                               const data = await response.json();
                               showNotification({
                                 title: "Success",
-                                message: "Prospects backfilled successfully",
+                                message: `Prospects moved into segment '${row.routeTo}' successfully. Total count: ${row.count}`,
                                 color: "green",
                                 icon: <IconCheck />,
                               });
@@ -711,8 +822,9 @@ export default function ICPRouting() {
                             // Add your backfill logic here
                           }}
                         >
-                          Backfill
+                          Sync ({row.count}) with segment
                         </Button>
+                        </>
                       ) : null
                     }
                     data={segmentOptions.map((segment) => ({

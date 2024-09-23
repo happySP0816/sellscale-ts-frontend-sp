@@ -76,6 +76,7 @@ import {
   IconLoader,
   IconMail,
   IconMailbox,
+  IconMailOpened,
   IconMan,
   IconPhoto,
   IconPlaystationCircle,
@@ -184,6 +185,8 @@ export default function PersonaCampaigns() {
 
   const [projects, setProjects] = useState<PersonaOverview[]>([]);
   const [personas, setPersonas] = useState<CampaignPersona[]>([]);
+
+  const [singleEmailViewTab, setSingleEmailViewTab] = useState<string>("email");
 
   const [search, setSearch] = useState<string>("");
 
@@ -466,7 +469,8 @@ export default function PersonaCampaigns() {
                   onClick={() => {
                     openContextModal({
                       modal: "singleEmailCampaignModal",
-                      title: <Title order={3}>Single Email Campaign</Title>,
+                      title: <Title order={3}>One-off message
+                      </Title>,
                       innerProps: {
                         setCurrentTab: setCurrentTab,
                         fetchAllCampaigns: fetchCampaignPersonas,
@@ -474,7 +478,7 @@ export default function PersonaCampaigns() {
                     });
                   }}
                 >
-                  Single Email Campaign
+                  One-off Message Campaign
                 </Menu.Item>
                 <Menu.Item
                   icon={<IconMail size="1rem" />}

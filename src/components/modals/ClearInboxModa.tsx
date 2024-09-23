@@ -1,4 +1,5 @@
 import { ActionIcon, Avatar, Badge, Box, Button, Divider, Flex, Paper, ScrollArea, SegmentedControl, Stack, Tabs, Text, Textarea } from "@mantine/core";
+import { closeAllModals, openContextModal } from "@mantine/modals";
 import { IconArrowLeft, IconArrowRight, IconArrowsUp, IconBrandLinkedin, IconBriefcase, IconDoorExit, IconMail, IconSend, IconTrash } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
 import { useState } from "react";
@@ -126,9 +127,24 @@ export default function ClearInboxModal() {
       setInboxData(updatedInboxData);
       if (selectedNum < inboxData.length - 1) setSelectedNum((item) => item + 1);
     }
+    if (inboxData.length === inboxData.filter((item) => item.status).length)
+      openContextModal({
+        modal: "clearinboxsuccessmodal",
+        title: <></>,
+        innerProps: {},
+        centered: true,
+        withCloseButton: false,
+        size: "sm",
+        styles: {
+          content: {
+            maxWidth: "200px",
+          },
+        },
+      });
+    setTimeout(() => {
+      closeAllModals();
+    }, 2000);
   };
-
-  console.log("=-========", selectedNum);
 
   return (
     <Paper>

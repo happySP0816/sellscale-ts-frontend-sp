@@ -2024,6 +2024,7 @@ const SegmentChat = (props: any) => {
       setClientMemoryState(memory_line);
       setMemoryStateChanged(true);
       setClientMemoryStateUpdatedTime(new Date().toLocaleString());
+      getMemoryState(sessionId);
 
       if (response.ok) {
         showNotification({

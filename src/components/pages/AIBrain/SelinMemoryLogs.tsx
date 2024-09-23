@@ -600,48 +600,76 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                         {moment(selectedLog.created_date).fromNow()}
                       </Text>
                     </Box>
-                    {selectedLog.processing_status ? (
-                      <HoverCard width={400} shadow="md">
-                        <HoverCard.Target>
+                    <Flex>
+                      {selectedLog.session_name && (
+                        <Box>
+                          <Text size="10px" color="gray">
+                            Connected session:
+                          </Text>
                           <Badge
                             color={deterministicMantineColor(
-                              selectedLog.processing_status
+                              selectedLog.session_name
                             )}
                             variant="filled"
-                            size="lg"
+                            size="md"
                             mb="md"
+                            mr="sm"
                           >
-                            {selectedLog.processing_status.replace(/_/g, " ")}
+                            {selectedLog.session_name}
                           </Badge>
-                        </HoverCard.Target>
-                        <HoverCard.Dropdown>
-                          <Text
-                            size="sm"
-                            dangerouslySetInnerHTML={{
-                              __html: selectedLog.processing_status_description
-                                .replaceAll("**", "")
-                                .replaceAll("\n", "<br />"),
-                            }}
-                          />
-                        </HoverCard.Dropdown>
-                      </HoverCard>
-                    ) : selectedLog.tag != "MEMORY_METADATA_SAVED" ? (
-                      <Button
-                        onClick={() => updateProcessingType(selectedLog.id)}
-                        size="xs"
-                        color="blue"
-                        variant="outline"
-                        mb="md"
-                      >
-                        {loading ? (
-                          <Loader size="xs" />
-                        ) : (
-                          "Update Processing Type"
-                        )}
-                      </Button>
-                    ) : (
-                      <Box></Box>
-                    )}
+                        </Box>
+                      )}
+                      {selectedLog.processing_status ? (
+                        <HoverCard width={400} shadow="md">
+                          <HoverCard.Target>
+                            <Box>
+                              <Text size="10px" color="gray">
+                                Processing status:
+                              </Text>
+                              <Badge
+                                color={deterministicMantineColor(
+                                  selectedLog.processing_status
+                                )}
+                                variant="filled"
+                                size="md"
+                                mb="md"
+                              >
+                                {selectedLog.processing_status.replace(
+                                  /_/g,
+                                  " "
+                                )}
+                              </Badge>
+                            </Box>
+                          </HoverCard.Target>
+                          <HoverCard.Dropdown>
+                            <Text
+                              size="sm"
+                              dangerouslySetInnerHTML={{
+                                __html: selectedLog.processing_status_description
+                                  .replaceAll("**", "")
+                                  .replaceAll("\n", "<br />"),
+                              }}
+                            />
+                          </HoverCard.Dropdown>
+                        </HoverCard>
+                      ) : selectedLog.tag != "MEMORY_METADATA_SAVED" ? (
+                        <Button
+                          onClick={() => updateProcessingType(selectedLog.id)}
+                          size="xs"
+                          color="blue"
+                          variant="outline"
+                          mb="md"
+                        >
+                          {loading ? (
+                            <Loader size="xs" />
+                          ) : (
+                            "Update Processing Type"
+                          )}
+                        </Button>
+                      ) : (
+                        <Box></Box>
+                      )}
+                    </Flex>
                   </Box>
                   <Box w="30%">
                     <Badge

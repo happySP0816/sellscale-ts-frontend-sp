@@ -42,7 +42,8 @@ export async function getLiConvoSim(
 export async function generateInitialMessageForLiConvoSim(
   userToken: string,
   simulation_id: number,
-  template_id?: number | undefined
+  template_id?: number | undefined,
+  voice_id?: number | undefined,
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/simulation/li_convo/generate_initial_message`, {
     method: "POST",
@@ -53,6 +54,7 @@ export async function generateInitialMessageForLiConvoSim(
     body: JSON.stringify({
       simulation_id: simulation_id,
       template_id: template_id,
+      voice_id: voice_id
     }),
   });
   return await processResponse(response);

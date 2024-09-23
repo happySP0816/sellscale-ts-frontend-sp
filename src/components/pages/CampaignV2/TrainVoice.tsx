@@ -60,11 +60,12 @@ import {
   getVoiceBuilderDetails,
 } from "@utils/requests/voiceBuilder";
 import _ from "lodash";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { FaLinkedin } from "react-icons/fa6";
 import { CTA, PersonaOverview, Prospect, ResearchPointType } from "src";
 import { socket } from "../../App";
 import { deleteSample } from "@utils/requests/voiceBuilder";
+import { IntroContext, LinkedinIntroSectionV2 } from "./SequencesV2";
 
 interface VoiceBuilderMessages {
   id: number;
@@ -125,6 +126,8 @@ export default function TrainVoice(props: {
   voices: Voices[];
   numProspects: number;
 }) {
+  const contextProps: any = useContext(IntroContext);
+
   const [voiceBuilderOnboardingId, setVoiceBuilderOnboardingId] = useState<
     number | null
   >(null);
@@ -147,6 +150,8 @@ export default function TrainVoice(props: {
   const [useNewCTAs, setUseNewCTAs] = useState<Map<number, number | null>>(
     new Map()
   );
+
+  const [messageEditMode, setMessageEditMode] = useState<boolean>(false);
 
   const [useNewResearchPointTypes, setUseNewResearchPointTypes] = useState<
     Map<number, number[]>
@@ -706,12 +711,7 @@ export default function TrainVoice(props: {
             <Flex gap={"sm"} justify={"space-between"}>
               <Flex align={"center"} gap={"8px"}>
                 <IconMicrophone size={"1rem"} color="white" />
-                <TextInput
-                  radius="xs"
-                  placeholder="Voice Name"
-                  value={voiceName}
-                  onChange={(event) => setVoiceName(event.currentTarget.value)}
-                />
+
                 {voiceBuilderDetails.voice_onboarding_info.ready ? (
                   <Badge variant="filled" size="md" color={"green"}>
                     Message samples generated
@@ -737,36 +737,43 @@ export default function TrainVoice(props: {
                   />
                 )}
               </Flex>
-
-              {voiceBuilderDetails.voice_onboarding_info.ready &&
-                voiceBuilderDetails.messages.every(
-                  (item) => item.is_approved
-                ) && (
-                  <Button
-                    color={"green"}
-                    onClick={async () => {
-                      await onSaveConfiguration();
-                    }}
-                    disabled={saveLoading}
-                  >
-                    {saveLoading ? <Loader size={"xs"} /> : "Create Voice!"}
-                  </Button>
-                )}
-              {voiceBuilderDetails.voice_onboarding_info
-                .stack_ranked_message_generation_configuration_id &&
-                voiceBuilderDetails.messages.every(
-                  (item) => item.is_approved
-                ) && (
-                  <Button
-                    color={"green"}
-                    onClick={async () => {
-                      await onSaveConfiguration();
-                    }}
-                    disabled={saveLoading}
-                  >
-                    {saveLoading ? <Loader size={"xs"} /> : "Save Voice!"}
-                  </Button>
-                )}
+              <Flex align={"center"} gap={"8px"}>
+                <TextInput
+                  radius="xs"
+                  placeholder="Voice Name"
+                  value={voiceName}
+                  onChange={(event) => setVoiceName(event.currentTarget.value)}
+                />
+                {voiceBuilderDetails.voice_onboarding_info.ready &&
+                  voiceBuilderDetails.messages.every(
+                    (item) => item.is_approved
+                  ) && (
+                    <Button
+                      color={"green"}
+                      onClick={async () => {
+                        await onSaveConfiguration();
+                      }}
+                      disabled={saveLoading}
+                    >
+                      {saveLoading ? <Loader size={"xs"} /> : "Create Voice!"}
+                    </Button>
+                  )}
+                {voiceBuilderDetails.voice_onboarding_info
+                  .stack_ranked_message_generation_configuration_id &&
+                  voiceBuilderDetails.messages.every(
+                    (item) => item.is_approved
+                  ) && (
+                    <Button
+                      color={"green"}
+                      onClick={async () => {
+                        await onSaveConfiguration();
+                      }}
+                      disabled={saveLoading}
+                    >
+                      {saveLoading ? <Loader size={"xs"} /> : "Save Voice!"}
+                    </Button>
+                  )}
+              </Flex>
             </Flex>
           </Paper>
           <Flex mt={"md"} gap={"sm"}>
@@ -925,42 +932,61 @@ export default function TrainVoice(props: {
                             background: "#F1F3F5",
                           },
                         }}
+                        disabled={!messageEditMode}
                       />
                     </Flex>
-                    <Flex align={"center"} mt={"md"} justify={"space-between"}>
-                      <Button
-                        variant="outline"
-                        color="red"
-                        w={200}
-                        onClick={async () => {
-                          await onDeleteSample(selectedMessage.id);
-                        }}
-                        disabled={deleteLoading}
+                    {messageEditMode ? (
+                      <Flex
+                        align={"center"}
+                        mt={"md"}
+                        justify={"space-between"}
                       >
-                        {!deleteLoading && "Delete"}
-                        {deleteLoading && <Loader size={"xs"} />}
-                      </Button>
-                      <Button
-                        w={200}
-                        onClick={() => {
-                          setVoiceBuilderDetails((prevState) => {
-                            const newMessages = prevState!.messages.map(
-                              (item) => {
-                                if (item.id === selectedMessage!.id) {
-                                  return selectedMessage;
-                                } else {
-                                  return item;
+                        <Button
+                          variant="outline"
+                          color="red"
+                          w={200}
+                          onClick={async () => {
+                            await onDeleteSample(selectedMessage.id);
+                          }}
+                          disabled={deleteLoading}
+                        >
+                          {!deleteLoading && "Delete"}
+                          {deleteLoading && <Loader size={"xs"} />}
+                        </Button>
+                        <Button
+                          w={200}
+                          onClick={() => {
+                            setVoiceBuilderDetails((prevState) => {
+                              const newMessages = prevState!.messages.map(
+                                (item) => {
+                                  if (item.id === selectedMessage!.id) {
+                                    return selectedMessage;
+                                  } else {
+                                    return item;
+                                  }
                                 }
-                              }
-                            );
+                              );
 
-                            return { ...prevState!, messages: newMessages };
-                          });
-                        }}
-                      >
-                        Save
-                      </Button>
-                    </Flex>
+                              return { ...prevState!, messages: newMessages };
+                            });
+                            setMessageEditMode(false);
+                          }}
+                        >
+                          Save
+                        </Button>
+                      </Flex>
+                    ) : (
+                      <Flex align={"center"} direction={"column"} mt={"8px"}>
+                        <Button
+                          w={200}
+                          onClick={() => {
+                            setMessageEditMode(true);
+                          }}
+                        >
+                          Edit Mode
+                        </Button>
+                      </Flex>
+                    )}
                   </Paper>
                   <Flex align={"center"} gap={"sm"} w={"100%"} mt={"md"}>
                     <Button
@@ -1161,6 +1187,22 @@ export default function TrainVoice(props: {
                   color={"green"}
                 />
               )}
+              {true && ( // !stackRankedConfigurationData?.name?.includes('Baseline')
+                <Box pt="sm" sx={{ flexDirection: "row", display: "flex" }}>
+                  <Button
+                    color="green"
+                    ml="auto"
+                    disabled={!stackRankedConfigurationDataChanged}
+                    onClick={() => {
+                      setStackRankedConfigurationDataChanged(false);
+                      saveStackRankedConfigurationData();
+                    }}
+                    loading={savingPrompt}
+                  >
+                    Save Configuration
+                  </Button>
+                </Box>
+              )}
             </Flex>
 
             <Text mt="xs">
@@ -1168,22 +1210,31 @@ export default function TrainVoice(props: {
               generated in this voice.
             </Text>
 
-            {true && ( // !stackRankedConfigurationData?.name?.includes('Baseline')
-              <Box pt="sm" sx={{ flexDirection: "row", display: "flex" }}>
-                <Button
-                  color="green"
-                  ml="auto"
-                  disabled={!stackRankedConfigurationDataChanged}
-                  onClick={() => {
-                    setStackRankedConfigurationDataChanged(false);
-                    saveStackRankedConfigurationData();
-                  }}
-                  loading={savingPrompt}
-                >
-                  Save Configuration
-                </Button>
-              </Box>
-            )}
+            <LinkedinIntroSectionV2
+              prospectId={
+                contextProps.selectedProspect
+                  ? contextProps.selectedProspect.id
+                  : -1
+              }
+              userToken={props.userToken}
+              templates={contextProps.templates ? contextProps.templates : []}
+              currentProject={contextProps.currentProject ?? undefined}
+              setSelectedTemplateId={contextProps.setSelectedTemplateId}
+              selectedTemplateId={contextProps.selectedTemplateId}
+              triggerGenerate={contextProps.triggerGenerate}
+              setTriggerGenerate={contextProps.setTriggerGenerate}
+              setLinkedinInitialMessages={
+                contextProps.setLinkedinInitialMessages
+              }
+              triggerProjectRefresh={contextProps.triggerProjectRefresh}
+              selectedProspectIndex={contextProps.selectedProspectIndex}
+              setSelectedProspectIndex={contextProps.setSelectedProspectIndex}
+              selectedProspect={contextProps.selectedProspect ?? undefined}
+              campaignContacts={contextProps.campaignContacts}
+              onRegenerate={contextProps.onRegenerate}
+              prospectOnChangeHandler={contextProps.prospectOnChangeHandler}
+              selectedVoice={props.selectedVoice}
+            />
 
             <Divider mt="md" mb="md" />
             <Tabs value={editViewMode}>
@@ -1331,7 +1382,6 @@ export default function TrainVoice(props: {
                             defaultValue={
                               stackRankedConfigurationData[completionKey]
                             }
-                            disabled={!!voiceBuilderDetails}
                             onChange={(e) => {
                               setStackRankedConfigurationDataChanged(true);
 

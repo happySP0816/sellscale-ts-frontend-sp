@@ -68,6 +68,7 @@ export interface Voices {
   icp_fit: number,
   active: boolean,
   voice_builder_onboarding_id: number,
+  is_internal?: boolean,
 }
 
 export default function VoiceSelect(props: {

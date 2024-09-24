@@ -42,6 +42,7 @@ import {
   Modal,
   Textarea,
   Skeleton,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconArrowLeft,
@@ -90,7 +91,11 @@ import {
   fetchCampaignSequences,
   fetchCampaignStats,
 } from "@utils/requests/campaignOverview";
-import { IconFolderOpen, IconSparkles } from "@tabler/icons-react";
+import {
+  IconFolderOpen,
+  IconInfoSmall,
+  IconSparkles,
+} from "@tabler/icons-react";
 import {
   createLiConvoSim,
   generateInitialMessageForLiConvoSim,
@@ -159,6 +164,7 @@ import { getFreshCurrentProject } from "@auth/core";
 import TrainVoice from "./TrainVoice";
 import {
   createVoiceBuilderOnboarding,
+  deleteVoiceOnboardings,
   generateSamples,
 } from "@utils/requests/voiceBuilder";
 import { STARTING_INSTRUCTIONS } from "@modals/VoiceBuilderModal";
@@ -574,7 +580,6 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
 
   // We also want to move voice related stuff into this Sequence Widget
 
-
   return (
     <Card
       shadow={"sm"}
@@ -819,7 +824,8 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
             ) : (
               <>
                 {stepNumber === 0 && viewTab === "linkedin" && (
-                  <IntroContext.Provider value={{
+                  <IntroContext.Provider
+                    value={{
                       prospectId: selectedProspect ? selectedProspect.id : -1,
                       userToken: userToken,
                       templates: templates ? templates : [],
@@ -836,7 +842,8 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
                       campaignContacts: campaignContacts,
                       onRegenerate: onRegenerate,
                       prospectOnChangeHandler: prospectOnChangeHandler,
-                  }}>
+                    }}
+                  >
                     <LinkedinIntroSectionV2
                       prospectId={selectedProspect ? selectedProspect.id : -1}
                       userToken={userToken}
@@ -927,10 +934,6 @@ const VoiceModal = function (props: {
   >([]);
   const [editMode, setEditMode] = useState<boolean>(false);
 
-  const [selectedDefaultVoice, setSelelectedDefaultVoice] = useState<
-    string | null
-  >(null);
-
   const [voiceBuilderOnboardingId, setVoiceBuilderOnboardingId] = useState<
     number | null
   >(null);
@@ -941,6 +944,8 @@ const VoiceModal = function (props: {
   const [selectedVoice, setSelectedVoice] = useState<number | null>(null);
 
   const [loading, setLoading] = useState<boolean>(false);
+
+  const [defaultVoiceSearch, setDefaultVoiceSearch] = useState<string>("");
 
   useEffect(() => {
     if (voiceBuilderOnboardingId) {
@@ -1125,6 +1130,41 @@ const VoiceModal = function (props: {
     onBoardingRefetch();
   };
 
+  const onDeleteVoiceOnboarding = async function (
+    voice_builder_onboarding_id: number
+  ) {
+    if (!props.currentProject) return;
+
+    setLoading(true);
+
+    const response = await deleteVoiceOnboardings(
+      props.userToken,
+      voice_builder_onboarding_id
+    );
+
+    if (response.status === "success") {
+      setLoading(false);
+
+      setSelectedVoice(null);
+
+      showNotification({
+        title: "Deleted voice onboarding",
+        message:
+          "We have successfully deleted the in progress voice onboarding!",
+        color: "green",
+      });
+    } else {
+      showNotification({
+        title: "Failed to delete voice onboarding",
+        message:
+          "We have failed to delete the in progress voice onboarding. Try again later.",
+        color: "red",
+      });
+    }
+
+    onBoardingRefetch();
+  };
+
   const generateMessageSamples = async function (voiceId: number) {
     const messageResponse = await generateSamples(props.userToken, voiceId, 7);
 
@@ -1216,12 +1256,79 @@ const VoiceModal = function (props: {
                 </ActionIcon>
               </Flex>
             </Flex>
-
             <Flex
               direction={"column"}
               gap={"8px"}
               style={{ maxHeight: "1000px" }}
             >
+              {onboardings &&
+                onboardings.filter(
+                  (onboarding) => onboarding.ready || onboarding.ready === false
+                ).length > 0 && (
+                  <ScrollArea
+                    style={{
+                      border: "2px solid orange",
+                      borderRadius: "10px",
+                      position: "relative",
+                    }}
+                    p={"4px"}
+                    h={"300px"}
+                  >
+                    <LoadingOverlay visible={loading} />
+                    <Text fw={500} mt={"8px"}>
+                      Voice Session In Progress
+                    </Text>
+                    {onboardings
+                      .filter(
+                        (onboarding) =>
+                          onboarding.ready || onboarding.ready === false
+                      )
+                      .map((onboarding) => {
+                        return (
+                          <Paper
+                            withBorder
+                            radius={"sm"}
+                            p={"sm"}
+                            mt={"sm"}
+                            style={{ position: "relative" }}
+                            key={onboarding.id}
+                          >
+                            <Flex align={"center"} justify={"space-between"}>
+                              <Flex align={"center"}>
+                                <Text size={"sm"} fw={500}>
+                                  {"Onboarding: "}{" "}
+                                  <span className="text-gray-400">
+                                    {" "}
+                                    {onboarding.created_at.slice(
+                                      0,
+                                      onboarding.created_at.length - 13
+                                    )}
+                                  </span>
+                                </Text>
+                                <ActionIcon
+                                  color="blue"
+                                  onClick={() => {
+                                    setVoiceBuilderOnboardingId(onboarding.id);
+                                    setEditMode(true);
+                                  }}
+                                >
+                                  <IconEdit size={"1rem"} />
+                                </ActionIcon>
+                              </Flex>
+                              <ActionIcon
+                                color="red"
+                                onClick={async () => {
+                                  await onDeleteVoiceOnboarding(onboarding.id);
+                                }}
+                              >
+                                <IconTrash />
+                              </ActionIcon>
+                            </Flex>
+                          </Paper>
+                        );
+                      })}
+                  </ScrollArea>
+                )}
               <Text fw={600} mt={"8px"}>
                 Use your own generated voices
               </Text>
@@ -1288,126 +1395,32 @@ const VoiceModal = function (props: {
                         </Paper>
                       );
                     })}
-
-                {onboardings.filter(
-                  (onboarding) => onboarding.ready || onboarding.ready === false
-                ).length > 0 && (
-                  <Text fw={500} mt={"8px"}>
-                    Current Voice Onboarding
-                  </Text>
-                )}
-
-                {onboardings &&
-                  onboardings
-                    .filter(
-                      (onboarding) =>
-                        onboarding.ready || onboarding.ready === false
-                    )
-                    .map((onboarding) => {
-                      return (
-                        <Paper
-                          withBorder
-                          radius={"sm"}
-                          p={"sm"}
-                          mt={"sm"}
-                          style={{ position: "relative" }}
-                          key={onboarding.id}
-                        >
-                          <Flex align={"center"} justify={"space-between"}>
-                            <Flex align={"center"}>
-                              <Text size={"sm"} fw={500}>
-                                {"Onboarding: "}{" "}
-                                <span className="text-gray-400">
-                                  {" "}
-                                  {onboarding.created_at.slice(
-                                    0,
-                                    onboarding.created_at.length - 13
-                                  )}
-                                </span>
-                              </Text>
-                              <ActionIcon
-                                color="blue"
-                                onClick={() => {
-                                  setVoiceBuilderOnboardingId(onboarding.id);
-                                  setEditMode(true);
-                                }}
-                              >
-                                <IconEdit size={"1rem"} />
-                              </ActionIcon>
-                            </Flex>
-                            {onboarding.ready ? (
-                              <Badge
-                                variant="outline"
-                                size="md"
-                                color={"green"}
-                              >
-                                Message samples generated
-                              </Badge>
-                            ) : (
-                              <Badge
-                                variant="outline"
-                                size="md"
-                                color={"orange"}
-                              >
-                                Message Samples Generating
-                              </Badge>
-                            )}
-                          </Flex>
-                        </Paper>
-                      );
-                    })}
               </ScrollArea>
               <Divider mt={"24px"} mb={"8px"} />
-              <Text fw={600}>Use one of SellScale's Pre-configured voices</Text>
-              <Select
-                data={defaultVoicesOptions.map((item) => {
-                  return {
-                    value: "" + item.id,
-                    label: item.title,
-                  };
-                })}
-                onChange={(value) => setSelelectedDefaultVoice(value)}
-                value={selectedDefaultVoice}
-                label={"Select Voices"}
-                placeholder={"Select the voice to generate the campaign"}
+              <Text fw={600}>SellScale Voice Library</Text>
+              <TextInput
+                placeholder="Enter to Search for Default Voices"
+                value={defaultVoiceSearch}
+                onChange={(event) =>
+                  setDefaultVoiceSearch(event.currentTarget.value)
+                }
               />
-              {selectedDefaultVoice && (
-                <Flex direction={"column"} align={"center"} gap={"8px"}>
-                  <Text fw={600}>Description:</Text>
-                  <Text fw={300}>
-                    {
-                      defaultVoicesOptions.find(
-                        (i) => i.id === +selectedDefaultVoice
-                      )?.description
-                    }
-                  </Text>
-                  <Button
-                    onClick={async () => {
-                      await addDefaultVoice(+selectedDefaultVoice);
-                      setSelelectedDefaultVoice(null);
-                    }}
-                  >
-                    {loading ? <Loader /> : "Save Voice"}
-                  </Button>
-                </Flex>
-              )}
               <ScrollArea style={{ position: "relative" }} h={"300px"}>
                 <LoadingOverlay visible={loading} />
-                {voices &&
-                  voices
-                    .filter((v) => v.is_internal)
-                    .sort((a, b) => {
-                      if (a.active && !b.active) {
-                        return -1;
-                      } else if (!a.active && b.active) {
-                        return 1;
-                      }
-                      return (
-                        new Date(b.created_at).getTime() -
-                        new Date(a.created_at).getTime()
-                      );
-                    })
-                    .map((voice) => {
+                {defaultVoicesOptions
+                  .filter((voice) => voice.title.includes(defaultVoiceSearch))
+                  .map((default_voice: any) => {
+                    const existing_voice = voices
+                      ? voices.find(
+                          (v) =>
+                            v.is_internal &&
+                            v.name
+                              .toLowerCase()
+                              .includes(default_voice.title?.toLowerCase())
+                        )
+                      : null;
+
+                    if (existing_voice) {
                       return (
                         <Paper
                           withBorder
@@ -1415,27 +1428,29 @@ const VoiceModal = function (props: {
                           p={"sm"}
                           mt={"sm"}
                           style={{ position: "relative" }}
-                          key={voice.id}
+                          key={existing_voice.id}
                         >
-                          <Flex align={"center"} justify={"space-between"}>
+                          <Flex
+                            align={"center"}
+                            justify={"space-between"}
+                            gap={"sm"}
+                          >
                             <Flex align={"center"}>
                               <Text size={"sm"} fw={500}>
-                                {voice.name}{" "}
-                                <span className="text-gray-400">
-                                  {" "}
-                                  {voice.created_at.slice(
-                                    0,
-                                    voice.created_at.length - 13
-                                  )}
-                                </span>
+                                {existing_voice.name}
                               </Text>
+                              <Tooltip label={default_voice.description}>
+                                <ActionIcon>
+                                  <IconInfoCircle size={"0.9rem"} />
+                                </ActionIcon>
+                              </Tooltip>
                             </Flex>
                             <Switch
-                              checked={voice.active}
+                              checked={existing_voice.active}
                               label={"active"}
                               onClick={(event) =>
                                 toggleActive(
-                                  voice.id,
+                                  existing_voice.id,
                                   event.currentTarget.checked
                                 )
                               }
@@ -1443,7 +1458,43 @@ const VoiceModal = function (props: {
                           </Flex>
                         </Paper>
                       );
-                    })}
+                    } else {
+                      return (
+                        <Paper
+                          withBorder
+                          radius={"sm"}
+                          p={"sm"}
+                          mt={"sm"}
+                          style={{ position: "relative" }}
+                          key={default_voice.id}
+                        >
+                          <Flex
+                            align={"center"}
+                            justify={"space-between"}
+                            gap={"sm"}
+                          >
+                            <Flex align={"center"}>
+                              <Text size={"sm"} fw={500}>
+                                {default_voice.title}
+                              </Text>
+                              <Tooltip label={default_voice.description}>
+                                <ActionIcon>
+                                  <IconInfoCircle size={"0.9rem"} />
+                                </ActionIcon>
+                              </Tooltip>
+                            </Flex>
+                            <Switch
+                              checked={false}
+                              label={"active"}
+                              onClick={async (event) => {
+                                await addDefaultVoice(+default_voice.id);
+                              }}
+                            />
+                          </Flex>
+                        </Paper>
+                      );
+                    }
+                  })}
               </ScrollArea>
             </Flex>
           </>
@@ -4687,7 +4738,7 @@ export const LinkedinIntroSectionV2 = function (props: {
   }, [templateIndex]);
 
   const { data: researchPointTypes } = useQuery({
-    queryKey: [`query-get-research-point-types`],
+    queryKey: [`query-get-research-point-types`, props.currentProject?.id],
     queryFn: async () => {
       const response = await getResearchPointTypes(
         props.userToken,
@@ -4890,7 +4941,7 @@ export const LinkedinIntroSectionV2 = function (props: {
           maxWidth: "100%",
           position: "relative",
           marginTop: "8px",
-          minHeight: "200px"
+          minHeight: "200px",
         }}
       >
         <LoadingOverlay
@@ -4903,143 +4954,136 @@ export const LinkedinIntroSectionV2 = function (props: {
         )}
       </Box>
 
-      {!props.currentProject?.template_mode &&
-        !props.selectedVoice && (
-          <Group pt="xs" noWrap>
-            {linkedinInitialMessages.meta_data && (
-              <>
-                <HoverCard
-                  width={280}
-                  shadow="md"
-                  position={"bottom"}
-                  withinPortal
-                >
-                  <HoverCard.Target>
-                    <Badge
-                      color="blue"
-                      styles={{ root: { textTransform: "initial" } }}
-                      variant={"outline"}
-                      radius={"sm"}
-                      w={"250px"}
-                      onClick={() => {
-                        toggleShowCTA();
-                      }}
-                    >
-                      CTA Used:{" "}
-                      <Text fw={500} span>
-                        {_.truncate(linkedinInitialMessages.meta_data.cta, {
-                          length: 45,
-                        })}
-                      </Text>
-                    </Badge>
-                  </HoverCard.Target>
-                  <HoverCard.Dropdown>
-                    <Text size="sm">
-                      {linkedinInitialMessages.meta_data.cta}
+      {!props.currentProject?.template_mode && !props.selectedVoice && (
+        <Group pt="xs" noWrap>
+          {linkedinInitialMessages.meta_data && (
+            <>
+              <HoverCard
+                width={280}
+                shadow="md"
+                position={"bottom"}
+                withinPortal
+              >
+                <HoverCard.Target>
+                  <Badge
+                    color="blue"
+                    styles={{ root: { textTransform: "initial" } }}
+                    variant={"outline"}
+                    radius={"sm"}
+                    w={"250px"}
+                    onClick={() => {
+                      toggleShowCTA();
+                    }}
+                  >
+                    CTA Used:{" "}
+                    <Text fw={500} span>
+                      {_.truncate(linkedinInitialMessages.meta_data.cta, {
+                        length: 45,
+                      })}
                     </Text>
-                  </HoverCard.Dropdown>
-                </HoverCard>
+                  </Badge>
+                </HoverCard.Target>
+                <HoverCard.Dropdown>
+                  <Text size="sm">{linkedinInitialMessages.meta_data.cta}</Text>
+                </HoverCard.Dropdown>
+              </HoverCard>
 
-                <HoverCard
-                  withinPortal
-                  width={280}
-                  shadow="md"
-                  position="bottom"
-                >
-                  <HoverCard.Target>
-                    <Badge
-                      variant={"outline"}
-                      radius={"sm"}
-                      color="green"
-                      onClick={() => {
-                        toggleShowPersonalization();
-                      }}
-                      styles={{ root: { textTransform: "initial" } }}
-                    >
-                      Personalizations:{" "}
-                      <Text fw={500} span>
-                        {linkedinInitialMessages.meta_data?.notes?.length}
-                      </Text>
-                    </Badge>
-                  </HoverCard.Target>
-                  <HoverCard.Dropdown>
-                    {linkedinInitialMessages.meta_data?.combined ? (
-                      <List>
-                        {linkedinInitialMessages.meta_data?.combined.map(
-                          (combined_data: any, index: number) => {
-                            return (
-                              <List.Item key={index}>
-                                <Flex direction={"column"}>
+              <HoverCard withinPortal width={280} shadow="md" position="bottom">
+                <HoverCard.Target>
+                  <Badge
+                    variant={"outline"}
+                    radius={"sm"}
+                    color="green"
+                    onClick={() => {
+                      toggleShowPersonalization();
+                    }}
+                    styles={{ root: { textTransform: "initial" } }}
+                  >
+                    Personalizations:{" "}
+                    <Text fw={500} span>
+                      {linkedinInitialMessages.meta_data?.notes?.length}
+                    </Text>
+                  </Badge>
+                </HoverCard.Target>
+                <HoverCard.Dropdown>
+                  {linkedinInitialMessages.meta_data?.combined ? (
+                    <List>
+                      {linkedinInitialMessages.meta_data?.combined.map(
+                        (combined_data: any, index: number) => {
+                          return (
+                            <List.Item key={index}>
+                              <Flex direction={"column"}>
+                                <Text fz="sm" fw={"bold"}>
+                                  {_.startCase(
+                                    combined_data.research_point_type
+                                      .toLowerCase()
+                                      .replaceAll("_", " ")
+                                      .replace("aicomp", "")
+                                      .replace("aiind", "")
+                                  )}
+                                </Text>
+                                <Text fz="sm">{combined_data.value}</Text>
+                              </Flex>
+                            </List.Item>
+                          );
+                        }
+                      )}
+                    </List>
+                  ) : (
+                    <List>
+                      {linkedinInitialMessages.meta_data?.notes?.map(
+                        (note: any, index: number) => {
+                          const researchPointId =
+                            linkedinInitialMessages.meta_data?.research_points[
+                              index
+                            ];
+
+                          const researchPointType = researchPointTypes?.find(
+                            (item) => item.id === researchPointId
+                          );
+
+                          return (
+                            <List.Item key={index}>
+                              <Flex direction="column">
+                                {researchPointType && (
                                   <Text fz="sm" fw={"bold"}>
                                     {_.startCase(
-                                      combined_data.research_point_type
+                                      researchPointType.name
                                         .toLowerCase()
                                         .replaceAll("_", " ")
                                         .replace("aicomp", "")
                                         .replace("aiind", "")
                                     )}
                                   </Text>
-                                  <Text fz="sm">{combined_data.value}</Text>
-                                </Flex>
-                              </List.Item>
-                            );
-                          }
-                        )}
-                      </List>
-                    ) : (
-                      <List>
-                        {linkedinInitialMessages.meta_data?.notes?.map(
-                          (note: any, index: number) => {
-                            const researchPointId =
-                              linkedinInitialMessages.meta_data
-                                ?.research_points[index];
-
-                            const researchPointType = researchPointTypes?.find(
-                              (item) => item.id === researchPointId
-                            );
-
-                            return (
-                              <List.Item key={index}>
-                                <Flex direction="column">
-                                  {researchPointType && (
-                                    <Text fz="sm" fw={"bold"}>
-                                      {_.startCase(
-                                        researchPointType.name
-                                          .toLowerCase()
-                                          .replaceAll("_", " ")
-                                          .replace("aicomp", "")
-                                          .replace("aiind", "")
-                                      )}
-                                    </Text>
-                                  )}
-                                  <Text fz="sm">
-                                    {linkedinInitialMessages.meta_data?.notes}
-                                  </Text>
-                                  <Text fz="sm">{note}</Text>
-                                </Flex>
-                              </List.Item>
-                            );
-                          }
-                        )}
-                      </List>
-                    )}
-                  </HoverCard.Dropdown>
-                </HoverCard>
-              </>
-            )}
-            {!props.currentProject?.template_mode && (
-              <VoiceModal
-                opened={opened}
-                close={close}
-                currentProject={props.currentProject}
-                userToken={props.userToken}
-                open={open}
-                numCtas={ctasItemsCount ?? 0}
-                numProspects={props.campaignContacts?.length ?? 0}
-              />
-            )}
-          </Group>
-        )}
+                                )}
+                                <Text fz="sm">
+                                  {linkedinInitialMessages.meta_data?.notes}
+                                </Text>
+                                <Text fz="sm">{note}</Text>
+                              </Flex>
+                            </List.Item>
+                          );
+                        }
+                      )}
+                    </List>
+                  )}
+                </HoverCard.Dropdown>
+              </HoverCard>
+            </>
+          )}
+          {!props.currentProject?.template_mode && (
+            <VoiceModal
+              opened={opened}
+              close={close}
+              currentProject={props.currentProject}
+              userToken={props.userToken}
+              open={open}
+              numCtas={ctasItemsCount ?? 0}
+              numProspects={props.campaignContacts?.length ?? 0}
+            />
+          )}
+        </Group>
+      )}
 
       {!props.selectedVoice &&
         linkedinInitialMessages.meta_data &&

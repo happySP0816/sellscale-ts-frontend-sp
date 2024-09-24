@@ -403,6 +403,11 @@ const CampaignFilters = function ({
           "Successfully scored the Campaign Prospects with the ICP ruleset. AI Filters will take a while to show up.",
         color: "blue",
       });
+
+      await queryClient.invalidateQueries([
+        `query-get-research-point-types`,
+        archetype_id,
+      ]);
     } else {
       setScoreLoading(false);
       showNotification({
@@ -437,11 +442,15 @@ const CampaignFilters = function ({
           marginRight: "4px",
         }}
       >
-        <Flex style={{maxWidth: "300px", minWidth: "300px"}} gap={"4px"} align={"center"}>
+        <Flex
+          style={{ maxWidth: "300px", minWidth: "300px" }}
+          gap={"4px"}
+          align={"center"}
+        >
           <Button
             color={"red"}
             size={"md"}
-            style={{width: "65%"}}
+            style={{ width: "65%" }}
             onClick={() => scoreCampaignFilters()}
             disabled={scoreLoading}
           >
@@ -466,7 +475,7 @@ const CampaignFilters = function ({
         {isScoring && isScoring > 0 ? (
           <Progress
             color={"grape"}
-            value={(isScoring - programmaticUpdates.size) / isScoring * 100}
+            value={((isScoring - programmaticUpdates.size) / isScoring) * 100}
             label={"testing"}
           />
         ) : (
@@ -541,7 +550,11 @@ const CampaignFilters = function ({
                       }
                     />
                     <Button
-                      disabled={!individual_ai_title || !individual_ai_prompt || !individual_ai_prompt.includes("[[prospect]]")}
+                      disabled={
+                        !individual_ai_title ||
+                        !individual_ai_prompt ||
+                        !individual_ai_prompt.includes("[[prospect]]")
+                      }
                       onClick={() => {
                         const key =
                           "aiind_" +
@@ -630,7 +643,11 @@ const CampaignFilters = function ({
                       }
                     />
                     <Button
-                      disabled={!company_ai_title || !company_ai_prompt || !company_ai_prompt.includes("[[company]]")}
+                      disabled={
+                        !company_ai_title ||
+                        !company_ai_prompt ||
+                        !company_ai_prompt.includes("[[company]]")
+                      }
                       onClick={() => {
                         const key =
                           "aicomp_" +

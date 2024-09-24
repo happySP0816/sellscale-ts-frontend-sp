@@ -772,9 +772,12 @@ export default function ICPRouting() {
                         <>
                         <ActionIcon
                           onClick={() => {
-                            setShowViewProspectsModal(true);
-                            console.log('View prospects button clicked', row.segment_id);
                             setSelectedSegmentId(row.segment_id || -1);
+                            setTimeout(() => {
+                              setShowViewProspectsModal(true);
+                            }, 500);
+                            console.log('View prospects button clicked', row.segment_id);
+                            
                           }}
                         >
                           <IconEye color='lightblue' size={16} />
@@ -818,6 +821,7 @@ export default function ICPRouting() {
                               });
                             } finally {
                               setLoading(false);
+                              getAllSegments(false);
                             }
                             // Add your backfill logic here
                           }}
@@ -838,6 +842,7 @@ export default function ICPRouting() {
                     searchable
                     getCreateLabel={(query) => `+ Create ${query}`}
                     onCreate={(query) => {
+                      getAllSegments(false)
                       doStuff(query, row);
                       return null
                     }}
@@ -857,6 +862,7 @@ export default function ICPRouting() {
                       setTimeout(() => {
                         (document.activeElement as HTMLElement)?.blur();
                       }, 0);
+                      getAllSegments(false);
                     }}
                     onDropdownOpen={() => {
                       console.log('Dropdown opened');

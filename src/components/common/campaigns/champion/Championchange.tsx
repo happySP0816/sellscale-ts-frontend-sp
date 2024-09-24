@@ -108,6 +108,7 @@ export default function ChampionChange() {
           origin_company_url: d.old_company_logo,
           origin_company: d.last_company_name,
           new_company_url: d.new_company_logo,
+          linkedin_url: d.linkedin_url,
           new_company: d.new_company_name,
           type: d.change_detected ? "Job Changed" : "",
           avatar: d.linkedin_url,
@@ -175,6 +176,7 @@ export default function ChampionChange() {
     const csvData = championData.map((d: any) => ({
       first_name: d.prospect_name.split(' ')[0],
       last_name: d.prospect_name.split(' ')[1],
+      linkedin_url: d.linkedin_url,
       old_company: d.origin_company,
       new_company: d.new_company,
       date_of_change: moment(d.change_date).format("MMMM DD, YYYY"),
@@ -184,6 +186,7 @@ export default function ChampionChange() {
     const csvHeaders = [
       { label: "First Name", key: "first_name" },
       { label: "Last Name", key: "last_name" },
+      { label: "Linkedin URL", key: "linkedin_url" },
       { label: "Old Company", key: "old_company" },
       { label: "New Company", key: "new_company" },
       { label: "Date of Change", key: "date_of_change" },

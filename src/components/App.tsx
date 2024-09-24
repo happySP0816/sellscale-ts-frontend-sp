@@ -121,7 +121,6 @@ import AccountContactFiltersModal from "@modals/AccountContactFiltersModal";
 import OverrideProspectsModal from "@modals/OverrideProspectsModal";
 import SingleEmailCampaignBetaModal from "@modals/SingleEmailCampaignBetaModal";
 import EmailSentSuccessModal from "@modals/EmailSentSuccessModal";
-import ClearInboxModal from "@modals/ClearInboxModa";
 import ClearInboxSuccessModal from "@modals/ClearInboxSuccessModal";
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
@@ -847,7 +846,6 @@ export default function App() {
               overrideProspectsModal: OverrideProspectsModal,
               singleEmailCampaignBetaModal: SingleEmailCampaignBetaModal,
               emailsentsuccessModal: EmailSentSuccessModal,
-              clearinboxmodal: ClearInboxModal,
               clearinboxsuccessmodal: ClearInboxSuccessModal,
             }}
             modalProps={{

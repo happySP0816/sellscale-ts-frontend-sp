@@ -14,6 +14,7 @@ import {
   Loader,
   LoadingOverlay,
   Menu,
+  Modal,
   Popover,
   ScrollArea,
   Select,
@@ -58,6 +59,29 @@ import { openContextModal } from "@mantine/modals";
 import { adminDataState, userDataState, userTokenState } from "@atoms/userAtoms";
 import { impersonateSDR } from "@auth/core";
 import { ClientSDR } from "src";
+import ClearInboxModal from "@modals/ClearInboxModal";
+
+export interface InboxClearingData {
+  cleared: boolean;
+  email: {
+    message: string;
+    sender: string;
+    time_sent: string;
+  }[];
+  linkedin: {
+    message: string;
+    sender: string;
+    time_sent: string;
+  }[];
+  prospect_info: {
+    avatar: string;
+    id: number;
+    company: string;
+    name: string;
+    status: string;
+    title: string;
+  };
+}
 
 export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const theme = useMantineTheme();
@@ -66,6 +90,9 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   const [userToken, setUserToken] = useRecoilState(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
+
+  const [inboxClearingData, setInboxClearingData] = useState<InboxClearingData[]>([]);
+  const [showClearInboxModal, setShowClearInboxModal] = useState(false);
 
   const [searchFilter, setSearchFilter] = useState("");
   const [mainTab, setMainTab] = useRecoilState(mainTabState);
@@ -160,10 +187,45 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
     };
 
     fetchAIinboxPerformance();
+    fetchAIConversations();
   }, []);
+
+  const fetchAIConversations = (limit = 10, offset = 0) => {
+    fetch(`${API_URL}/sight_inbox/conversations?limit=${10000}&offset=${offset}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle the response data
+        console.log(data.data);
+        setInboxClearingData(data.data);
+      // Set 'cleared' to false for every prospect in the data
+      const updatedData = data.data.map((prospect: any)  => ({
+        ...prospect,
+        cleared: false,
+      }));
+      setInboxClearingData(updatedData);
+      })
+      .catch((error) => {
+        console.error("Error fetching AI conversations:", error);
+      });
+  };
 
   return (
     <>
+    <Modal
+      withCloseButton={false}
+      opened={showClearInboxModal}
+      onClose={() => { setShowClearInboxModal(false); setOpenedList(true); }}
+      size="xxl"
+      styles={{ content: { width: '70%', maxWidth: '1200px', height: '700px' } }} // Set width to 70% with a max-width of 1200px
+    >
+      <ClearInboxModal inboxClearingData={inboxClearingData} setInboxClearingData={setInboxClearingData} />
+    </Modal>
       <Drawer
         opened={openedList}
         onClose={() => setOpenedList(false)}
@@ -591,25 +653,13 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
             <div className="px-5 absolute bottom-0 bg-white w-full">
               <Button
                 fullWidth
+                disabled={inboxClearingData.length === 0}
                 size="md"
                 color="orange"
                 leftIcon={<IconInbox size={"1rem"} />}
                 onClick={() => {
-                  openContextModal({
-                    modal: "clearinboxmodal",
-                    title: (
-                      <Title order={3} className="flex items-center gap-2">
-                        <IconBriefcase size={"1.5rem"} color="#228be6" className="mt-[-2px]" /> Clear Inbox
-                      </Title>
-                    ),
-                    innerProps: {},
-                    centered: true,
-                    styles: {
-                      content: {
-                        minWidth: "1000px",
-                      },
-                    },
-                  });
+                  setShowClearInboxModal(true);
+                  setOpenedList(false);
                 }}
               >
                 Clear Inbox with AI

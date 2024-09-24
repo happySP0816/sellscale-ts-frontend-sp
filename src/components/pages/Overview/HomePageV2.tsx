@@ -151,7 +151,11 @@ export function LineChart() {
   }
 
   const chartData = {
-    labels: demosLabels, // Assuming all labels are the same after filtering weekends
+    labels: demosLabels.map((dateString: string) => {
+      const date = new Date(dateString);
+      date.setDate(date.getDate() + 1);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }),
     datasets: [
       {
         label: "Total Demos",

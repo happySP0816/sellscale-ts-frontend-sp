@@ -1576,7 +1576,7 @@ export default function ProjectDetails(props: {
   );
 }
 
-function StatusBlockButton(props: {
+export function StatusBlockButton(props: {
   title: string;
   icon: ReactNode;
   onClick: () => void;

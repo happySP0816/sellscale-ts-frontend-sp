@@ -41,6 +41,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconChevronUp,
+  IconCircleX,
   IconCopy,
   IconDisc,
   IconDotsVertical,
@@ -120,6 +121,8 @@ export default function SegmentV3(props: PropsType) {
   const [totalContacted, setTotalContacted] = useState(0);
   const [totalUniqueCompanies, setTotalUniqueCompanies] = useState(0);
   const [totalInFilters, setTotalInFilters] = useState(0);
+  const [archetypeToDisconnect, setArchetypeToDisconnect] = useState<any>(null);
+  const [segmentToDisconnect, setSegmentToDisconnect] = useState<Number>(-1);
   const [showAllSegments, setShowAllSegments] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -584,7 +587,8 @@ export default function SegmentV3(props: PropsType) {
         }
       >
         <Text size={"sm"} fw={400} align="center" mb={"sm"}>
-          This segment is connected to <span className="font-semibold">Marketing Leaders</span> campaign. Select the campaign you want to connect with instead.
+          {/* ok actually it means archetype to connect */}
+          Please select the campaign this segment should be routed to.
         </Text>
         <PersonaSelect
           onChange={(v: any) => {
@@ -701,7 +705,7 @@ export default function SegmentV3(props: PropsType) {
         }
       >
         <Text size={"sm"} fw={400} align="center" mb={"sm"}>
-          This segment is connected to <span className="font-semibold">Marketing Leaders</span> campaign. Are you sure you want to disconnect it from the
+          This segment is connected to <span className="font-semibold">{archetypeToDisconnect?.archetype || ''}</span> campaign. Are you sure you want to disconnect it from the
           campaign?
         </Text>
         <Flex align={"center"} gap={"sm"} mt={"lg"}>
@@ -711,8 +715,39 @@ export default function SegmentV3(props: PropsType) {
           <Button
             fullWidth
             color="red"
-            onClick={() => {
-              alert("clicked disconnect function!");
+            onClick={async () => {
+              try {
+                const response = await fetch(`${API_URL}/segment/remove_segment_from_campaign`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${userToken}`,
+                  },
+                  body: JSON.stringify({ segment_id: segmentToDisconnect }),
+                });
+
+                if (!response.ok) {
+                  throw new Error("Failed to disconnect segment from campaign");
+                }
+
+                const data = await response;
+                showNotification({
+                  title: "Success",
+                  message: "Segment disconnected from campaign successfully",
+                  color: "green",
+                  icon: <IconCheck />,
+                });
+                setDisconnectCampaignModal(false);
+                getAllSegments(true);
+              } catch (error) {
+                console.error("Error disconnecting segment from campaign:", error);
+                showNotification({
+                  title: "Error",
+                  message: "Failed to disconnect segment from campaign",
+                  color: "red",
+                  icon: <IconCircleX />,
+                });
+              }
             }}
           >
             Disconnect
@@ -1644,7 +1679,7 @@ export default function SegmentV3(props: PropsType) {
                               : "Connect to Campaign"}
                           </Button>
                           {item.client_archetype?.archetype && (
-                            <ActionIcon color="red" variant="filled" size={"lg"} onClick={() => setDisconnectCampaignModal(true)}>
+                            <ActionIcon color="red" variant="filled" size={"lg"} onClick={() => {setArchetypeToDisconnect(item?.client_archetype); setSegmentToDisconnect(item.id); setDisconnectCampaignModal(true)}}>
                               <IconButterfly size={"1rem"} />
                             </ActionIcon>
                           )}

@@ -36,6 +36,7 @@ import { metaDataFromPrompt } from "@modals/VoiceEditorModal";
 import {
   IconAlertCircle,
   IconArrowLeft,
+  IconBrandLinkedin,
   IconBuilding,
   IconChartBubble,
   IconChartTreemap,
@@ -66,6 +67,7 @@ import { CTA, PersonaOverview, Prospect, ResearchPointType } from "src";
 import { socket } from "../../App";
 import { deleteSample } from "@utils/requests/voiceBuilder";
 import { IntroContext, LinkedinIntroSectionV2 } from "./SequencesV2";
+import { s } from "@fullcalendar/core/internal-common";
 
 interface VoiceBuilderMessages {
   id: number;
@@ -292,9 +294,11 @@ export default function TrainVoice(props: {
         voice_onboarding_info: response.data.voice_builder_onboarding_info,
       } as VoiceBuilderDetails);
 
-      if (messageDetails.length > 0) {
-        setSelectedMessage(messageDetails[0]);
-        setSelectedProspectId(messageDetails[0].prospect?.id ?? null);
+      if (messageDetails.length > 0 && !selectedMessage) {
+        const index =
+          messageDetails.findIndex((item) => !item.is_approved) ?? 0;
+        setSelectedMessage(messageDetails[index]);
+        setSelectedProspectId(messageDetails[index].prospect?.id ?? null);
       }
 
       return {
@@ -634,8 +638,14 @@ export default function TrainVoice(props: {
     setDeleteLoading(false);
   };
 
-  const onSaveConfiguration = async function () {
-    setSaveLoading(true);
+  const onSaveConfiguration = async function (
+    newVoiceDetails?: VoiceBuilderDetails,
+    optimistic: boolean = false
+  ) {
+    if (!optimistic) {
+      setSaveLoading(true);
+    }
+
     const response = await fetch(
       `${API_URL}/voice_builder/save_configuration`,
       {
@@ -645,7 +655,9 @@ export default function TrainVoice(props: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          voice_builder_details: voiceBuilderDetails,
+          voice_builder_details: newVoiceDetails
+            ? newVoiceDetails
+            : voiceBuilderDetails,
           name: voiceName,
         }),
       }
@@ -783,78 +795,112 @@ export default function TrainVoice(props: {
                   <Text fw={500}>Example Prospects</Text>
                 </Flex>
                 <Divider />
-                {voiceBuilderDetails.messages.map((item) => {
-                  let readable_score = "";
-                  let color = "gray";
-                  switch (item.prospect?.icp_fit_score) {
-                    case -1:
-                      color = "gray";
-                      readable_score = "Not Scored";
-                      break;
-                    case 0:
-                      color = "red";
-                      readable_score = "Very Low";
-                      break;
-                    case 1:
-                      color = "orange";
-                      readable_score = "Low";
-                      break;
-                    case 2:
-                      color = "yellow";
-                      readable_score = "Medium";
-                      break;
-                    case 3:
-                      color = "blue";
-                      readable_score = "High";
-                      break;
-                    case 4:
-                      color = "green";
-                      readable_score = "Very High";
-                      break;
-                    default:
-                      readable_score = "Unknown";
-                      break;
-                  }
+                {voiceBuilderDetails.messages
+                  .sort((a, b) => {
+                    if (
+                      b.prospect?.icp_fit_score &&
+                      !a.prospect?.icp_fit_score
+                    ) {
+                      return -1;
+                    } else if (
+                      !b.prospect?.icp_fit_score &&
+                      a.prospect?.icp_fit_score
+                    ) {
+                      return 1;
+                    } else if (
+                      !b.prospect?.icp_fit_score &&
+                      !a.prospect?.icp_fit_score
+                    ) {
+                      return 0;
+                    }
 
-                  return (
-                    <>
-                      <Flex
-                        align={"center"}
-                        gap={"sm"}
-                        key={item.id}
-                        p={"xs"}
-                        onClick={() => {
-                          setSelectedProspectId(item.prospect?.id ?? null);
-                          setSelectedMessage(item);
-                        }}
-                        bg={
-                          selectedProspectId === item.prospect?.id
-                            ? "#F0F2FF"
-                            : ""
-                        }
-                      >
-                        <Avatar src={item.prospect?.img_url} radius={"xl"} />
-                        <Stack spacing={2}>
-                          <Flex align={"center"} gap={"sm"}>
-                            <Text fw={500} size={"sm"}>
-                              {item.prospect?.full_name}
-                            </Text>
-                            <Badge color={color}>{readable_score}</Badge>
-                            <Badge
-                              color={item.is_approved ? "green" : "red"}
-                              variant={"filled"}
+                    return (
+                      b.prospect!.icp_fit_score - a.prospect!.icp_fit_score
+                    );
+                  })
+                  .map((item) => {
+                    let readable_score = "";
+                    let color = "gray";
+                    switch (item.prospect?.icp_fit_score) {
+                      case -1:
+                        color = "gray";
+                        readable_score = "Not Scored";
+                        break;
+                      case 0:
+                        color = "red";
+                        readable_score = "Very Low";
+                        break;
+                      case 1:
+                        color = "orange";
+                        readable_score = "Low";
+                        break;
+                      case 2:
+                        color = "yellow";
+                        readable_score = "Medium";
+                        break;
+                      case 3:
+                        color = "blue";
+                        readable_score = "High";
+                        break;
+                      case 4:
+                        color = "green";
+                        readable_score = "Very High";
+                        break;
+                      default:
+                        readable_score = "Unknown";
+                        break;
+                    }
+
+                    return (
+                      <>
+                        <Flex
+                          align={"center"}
+                          gap={"sm"}
+                          key={item.id}
+                          p={"xs"}
+                          onClick={() => {
+                            setSelectedProspectId(item.prospect?.id ?? null);
+                            setSelectedMessage(item);
+                          }}
+                          bg={
+                            selectedProspectId === item.prospect?.id
+                              ? "#F0F2FF"
+                              : ""
+                          }
+                        >
+                          <Avatar src={item.prospect?.img_url} radius={"xl"} />
+                          <Stack spacing={2}>
+                            <Flex
+                              align={"center"}
+                              gap={"sm"}
+                              justify={"space-between"}
+                            >
+                              <Flex align={"center"} gap={"4px"}>
+                                <Text fw={500} size={"sm"}>
+                                  {item.prospect?.full_name}
+                                </Text>
+                                <Badge color={color}>{readable_score}</Badge>
+                              </Flex>
+                              <Badge
+                                color={item.is_approved ? "green" : "red"}
+                                variant={"filled"}
+                                size={"xs"}
+                              ></Badge>
+                            </Flex>
+                            <Text
+                              color="gray"
+                              lineClamp={1}
                               size={"xs"}
-                            ></Badge>
-                          </Flex>
-                          <Text color="gray" lineClamp={1} size={"xs"} fw={500}>
-                            {item.prospect?.title}, {item.prospect?.company}
-                          </Text>
-                        </Stack>
-                      </Flex>
-                      <Divider bg={"gray"} />
-                    </>
-                  );
-                })}
+                              fw={500}
+                            >
+                              {item.prospect?.title}, {item.prospect?.company}
+                            </Text>
+                          </Stack>
+                        </Flex>
+                        <Divider bg={"gray"} />
+                      </>
+                    );
+                  })}
               </Paper>
               {voiceBuilderDetails.messages.length <
                 Math.min(7, props.numProspects) && (
@@ -886,20 +932,31 @@ export default function TrainVoice(props: {
                       After you verify make sure to select the Verified button.
                     </Text>
                     <Divider my={"sm"} />
-                    <Flex align={"center"} gap={"sm"}>
-                      <Avatar
-                        src={selectedMessage?.prospect?.img_url}
-                        radius={"xl"}
-                      />
-                      <Stack spacing={2}>
-                        <Text fw={500} size={"sm"}>
-                          {selectedMessage?.prospect?.full_name}
-                        </Text>
-                        <Text color="gray" size={"xs"} fw={500}>
-                          {selectedMessage?.prospect?.title},{" "}
-                          {selectedMessage?.prospect?.company}
-                        </Text>
-                      </Stack>
+                    <Flex justify={"space-between"} align={"center"}>
+                      <Flex align={"center"} gap={"sm"}>
+                        <Avatar
+                          src={selectedMessage?.prospect?.img_url}
+                          radius={"xl"}
+                        />
+                        <Stack spacing={2}>
+                          <Text fw={500} size={"sm"}>
+                            {selectedMessage?.prospect?.full_name}
+                          </Text>
+                          <Text color="gray" size={"xs"} fw={500}>
+                            {selectedMessage?.prospect?.title},{" "}
+                            {selectedMessage?.prospect?.company}
+                          </Text>
+                        </Stack>
+                      </Flex>
+                      <ActionIcon
+                        color="red"
+                        onClick={async () => {
+                          await onDeleteSample(selectedMessage.id);
+                        }}
+                        disabled={deleteLoading}
+                      >
+                        <IconTrash />
+                      </ActionIcon>
                     </Flex>
                     <Flex direction={"column"} align={"end"}>
                       <Paper
@@ -920,7 +977,6 @@ export default function TrainVoice(props: {
                         w={"100%"}
                         autosize
                         minRows={7}
-                        maxLength={300}
                         value={selectedMessage.value}
                         onChange={(e) =>
                           setSelectedMessage((prevState) => {
@@ -929,7 +985,10 @@ export default function TrainVoice(props: {
                         }
                         styles={{
                           input: {
-                            background: "#F1F3F5",
+                            background:
+                              selectedMessage?.value.length > 300
+                                ? "#FFA3A5"
+                                : "#F1F3F5",
                           },
                         }}
                         disabled={!messageEditMode}
@@ -942,34 +1001,40 @@ export default function TrainVoice(props: {
                         justify={"space-between"}
                       >
                         <Button
-                          variant="outline"
-                          color="red"
-                          w={200}
-                          onClick={async () => {
-                            await onDeleteSample(selectedMessage.id);
-                          }}
-                          disabled={deleteLoading}
-                        >
-                          {!deleteLoading && "Delete"}
-                          {deleteLoading && <Loader size={"xs"} />}
-                        </Button>
-                        <Button
                           w={200}
                           onClick={() => {
-                            setVoiceBuilderDetails((prevState) => {
-                              const newMessages = prevState!.messages.map(
-                                (item) => {
-                                  if (item.id === selectedMessage!.id) {
-                                    return selectedMessage;
-                                  } else {
-                                    return item;
-                                  }
-                                }
-                              );
-
-                              return { ...prevState!, messages: newMessages };
-                            });
+                            setSelectedMessage(
+                              voiceBuilderDetails.messages.find(
+                                (i) => i.id === selectedMessage.id
+                              ) ?? null
+                            );
                             setMessageEditMode(false);
+                          }}
+                          variant={"outline"}
+                        >
+                          Cancel
+                        </Button>
+
+                        <Button
+                          w={200}
+                          onClick={async () => {
+                            const newMessages =
+                              voiceBuilderDetails!.messages.map((item) => {
+                                if (item.id === selectedMessage!.id) {
+                                  return { ...selectedMessage };
+                                } else {
+                                  return item;
+                                }
+                              });
+
+                            let newDetails = {
+                              ...voiceBuilderDetails,
+                              messages: newMessages,
+                            };
+                            setVoiceBuilderDetails(newDetails);
+                            setMessageEditMode(false);
+
+                            await onSaveConfiguration(newDetails, true);
                           }}
                         >
                           Save
@@ -983,7 +1048,7 @@ export default function TrainVoice(props: {
                             setMessageEditMode(true);
                           }}
                         >
-                          Edit Mode
+                          Edit
                         </Button>
                       </Flex>
                     )}
@@ -992,7 +1057,10 @@ export default function TrainVoice(props: {
                     <Button
                       color="red"
                       fullWidth
-                      onClick={() => {
+                      onClick={async () => {
+                        let newDetails: VoiceBuilderDetails =
+                          voiceBuilderDetails;
+
                         setVoiceBuilderDetails((prevState) => {
                           const newMessage = {
                             ...selectedMessage,
@@ -1009,8 +1077,12 @@ export default function TrainVoice(props: {
                             }
                           );
 
-                          return { ...prevState!, messages: newMessages };
+                          newDetails = { ...prevState!, messages: newMessages };
+
+                          return newDetails;
                         });
+
+                        await onSaveConfiguration(newDetails, true);
                       }}
                     >
                       Unapprove Message
@@ -1019,7 +1091,9 @@ export default function TrainVoice(props: {
                       color="green"
                       fullWidth
                       disabled={selectedMessage.value.length > 300}
-                      onClick={() => {
+                      onClick={async () => {
+                        let newDetails: VoiceBuilderDetails =
+                          voiceBuilderDetails;
                         setVoiceBuilderDetails((prevState) => {
                           const newMessage = {
                             ...selectedMessage,
@@ -1036,8 +1110,30 @@ export default function TrainVoice(props: {
                             }
                           );
 
-                          return { ...prevState!, messages: newMessages };
+                          newDetails = { ...prevState!, messages: newMessages };
+
+                          return newDetails;
                         });
+
+                        await onSaveConfiguration(newDetails, true);
+
+                        const currentIndex =
+                          voiceBuilderDetails.messages.findIndex(
+                            (item) => item.id === selectedMessage.id
+                          );
+
+                        if (
+                          currentIndex <
+                          voiceBuilderDetails.messages.length - 1
+                        ) {
+                          setSelectedMessage(
+                            voiceBuilderDetails.messages[currentIndex + 1]
+                          );
+                          setSelectedProspectId(
+                            voiceBuilderDetails.messages[currentIndex + 1]
+                              ?.prospect?.id ?? null
+                          );
+                        }
                       }}
                     >
                       Approve Message
@@ -1083,9 +1179,16 @@ export default function TrainVoice(props: {
                       </Flex>
                       <Flex align={"center"} gap={"sm"}>
                         <FaLinkedin size={"0.8rem"} color="gray" />
-                        <Text size={"xs"} color="gray" fw={500}>
-                          {selectedMessage.prospect?.linkedin_url}
-                        </Text>
+                        <Anchor
+                          href={
+                            "https://" + selectedMessage.prospect?.linkedin_url
+                          }
+                          target="_blank"
+                        >
+                          <Text size={"xs"} color="blue" fw={500}>
+                            {selectedMessage.prospect?.linkedin_url}
+                          </Text>
+                        </Anchor>
                       </Flex>
                     </Stack>
                   </Flex>
@@ -1660,7 +1763,10 @@ const ResearchUsedComponent = (props: {
               tt={"initial"}
               className="absolute top-[-10px]"
             >
-              Used Points
+              Used Points (
+              {props.useNewResearchPointTypes.get(props.selectedMessage.id)
+                ?.length ?? 0}{" "}
+              / 2)
             </Badge>
             <Flex direction={"column"} gap={"xs"} mt={4}>
               {props.usedResearchPoints.map(
@@ -1765,37 +1871,84 @@ const ResearchUsedComponent = (props: {
                       p={"xs"}
                       className="rounded-sm"
                     >
-                      <Checkbox
-                        size={"xs"}
-                        disabled={
-                          !props.useNewResearchPointTypes
+                      {!props.useNewResearchPointTypes
+                        .get(props.selectedMessage.id)
+                        ?.includes(item.id) &&
+                      props.useNewResearchPointTypes.get(
+                        props.selectedMessage.id
+                      )?.length === 2 ? (
+                        <Tooltip
+                          label={
+                            "Please unselect one current research point to select a new one"
+                          }
+                        >
+                          <Box>
+                            <Checkbox
+                              size={"xs"}
+                              disabled={
+                                !props.useNewResearchPointTypes
+                                  .get(props.selectedMessage.id)
+                                  ?.includes(item.id) &&
+                                props.useNewResearchPointTypes.get(
+                                  props.selectedMessage.id
+                                )?.length === 2
+                              }
+                              checked={props.useNewResearchPointTypes
+                                .get(props.selectedMessage.id)
+                                ?.includes(item.id)}
+                              onChange={(event) => {
+                                const newMap = new Map(
+                                  props.useNewResearchPointTypes
+                                );
+
+                                const previousValue =
+                                  newMap.get(props.selectedMessage.id) ?? [];
+
+                                newMap.set(
+                                  props.selectedMessage.id,
+                                  event.currentTarget.checked
+                                    ? [...previousValue, item.id]
+                                    : previousValue.filter((i) => i !== item.id)
+                                );
+                                props.setUseNewResearchPointTypes(newMap);
+                                props.setCtaOrResearchPointTypeChanged(true);
+                              }}
+                            />
+                          </Box>
+                        </Tooltip>
+                      ) : (
+                        <Checkbox
+                          size={"xs"}
+                          disabled={
+                            !props.useNewResearchPointTypes
+                              .get(props.selectedMessage.id)
+                              ?.includes(item.id) &&
+                            props.useNewResearchPointTypes.get(
+                              props.selectedMessage.id
+                            )?.length === 2
+                          }
+                          checked={props.useNewResearchPointTypes
                             .get(props.selectedMessage.id)
-                            ?.includes(item.id) &&
-                          props.useNewResearchPointTypes.get(
-                            props.selectedMessage.id
-                          )?.length === 2
-                        }
-                        checked={props.useNewResearchPointTypes
-                          .get(props.selectedMessage.id)
-                          ?.includes(item.id)}
-                        onChange={(event) => {
-                          const newMap = new Map(
-                            props.useNewResearchPointTypes
-                          );
+                            ?.includes(item.id)}
+                          onChange={(event) => {
+                            const newMap = new Map(
+                              props.useNewResearchPointTypes
+                            );
 
-                          const previousValue =
-                            newMap.get(props.selectedMessage.id) ?? [];
+                            const previousValue =
+                              newMap.get(props.selectedMessage.id) ?? [];
 
-                          newMap.set(
-                            props.selectedMessage.id,
-                            event.currentTarget.checked
-                              ? [...previousValue, item.id]
-                              : previousValue.filter((i) => i !== item.id)
-                          );
-                          props.setUseNewResearchPointTypes(newMap);
-                          props.setCtaOrResearchPointTypeChanged(true);
-                        }}
-                      />
+                            newMap.set(
+                              props.selectedMessage.id,
+                              event.currentTarget.checked
+                                ? [...previousValue, item.id]
+                                : previousValue.filter((i) => i !== item.id)
+                            );
+                            props.setUseNewResearchPointTypes(newMap);
+                            props.setCtaOrResearchPointTypeChanged(true);
+                          }}
+                        />
+                      )}
                       <Stack spacing={2} mt={-2}>
                         <Text size={"sm"} fw={500}>
                           {item.research_point_type

@@ -164,7 +164,6 @@ import { getFreshCurrentProject } from "@auth/core";
 import TrainVoice from "./TrainVoice";
 import {
   createVoiceBuilderOnboarding,
-  deleteVoiceOnboarddings,
   deleteVoiceOnboardings,
   generateSamples,
 } from "@utils/requests/voiceBuilder";

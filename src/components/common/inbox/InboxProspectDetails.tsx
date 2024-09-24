@@ -86,6 +86,7 @@ import {
   IconEdit,
   IconHomeHeart,
   IconMail,
+  IconRefresh,
   IconSeeding,
   IconUser,
   IconX,
@@ -150,6 +151,9 @@ export default function ProjectDetails(props: {
   const notesRef = useRef<HTMLTextAreaElement | null>(null);
   const [noteLoading, setNoteLoading] = useState(false);
   const [forcedHistoryRefresh, setForcedHistoryRefresh] = useState(false);
+  const [refetchingConversationInbox, setRefetchingConversationInbox] =
+    useState(false);
+
 
   const [openedSnoozeModal, setOpenedSnoozeModal] = useState(false);
 
@@ -530,7 +534,7 @@ export default function ProjectDetails(props: {
                   checked={deactivateAiEngagementStatus}
                   size="xs"
                   labelPosition="left"
-                  label="AI Enabled"
+                  label="AI On"
                   onChange={(event) => {
                     setDeactivateAiEngagementStatus(
                       event.currentTarget.checked
@@ -587,16 +591,74 @@ export default function ProjectDetails(props: {
                     data?.details.full_name
                   )}
                 </Text>
-                <Divider orientation="vertical" mt={5} h={"16px"} />
-                <Text fw={600} fz={"xs"} color="gray.6">
-                  ICP Score
-                </Text>
-                <ICPFitPill
+                {!refetchingConversationInbox ? <ActionIcon
+                  onClick={async () => {
+                    setRefetchingConversationInbox(true);
+                    try {
+
+                      showNotification(
+                        {
+                          title: "Refreshing Conversation Inbox",
+                          message: "This may take a few seconds.",
+                          color: "blue",
+                        }
+                      )
+
+                      const response = await fetch(`${API_URL}/client/archetype/refresh_conversation_inbox`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${userToken}`,
+                        },
+                        body: JSON.stringify({ prospect_id: openedProspectId }),
+                      });
+                      const result = await response.json();
+                      if (result.status === "success") {
+                        showNotification({
+                          title: "Success",
+                          message: "Conversation inbox refreshed.",
+                          color: "green",
+                          autoClose: 3000,
+                        });
+                        window.location.reload();
+                      } else {
+                        showNotification({
+                          title: "Error",
+                          message: "Something went wrong. Please try again later.",
+                          color: "red",
+                          autoClose: 5000,
+                        });
+                      }
+                    } catch (error) {
+                      showNotification({
+                        title: "Error",
+                        message: "Something went wrong. Please try again later.",
+                        color: "red",
+                        autoClose: 5000,
+                      });
+                    } finally {
+                      setRefetchingConversationInbox(false);
+                    }
+                    
+                  }}
                   size="sm"
-                  icp_fit_score={data?.details.icp_fit_score || 0}
-                  icp_fit_reason={data?.details.icp_fit_reason || ""}
-                  archetype={data?.details.persona || ""}
-                />
+                  variant="light"
+                  color="blue"
+                >
+                  <IconRefresh size={16} />
+                </ActionIcon> : (<Loader size="sm" />)}
+                <Divider orientation="vertical" mt={5} h={"16px"} />
+                <Box>
+                  <Text fw={600} fz={"xs"} color="gray.6">
+                    ICP Score
+                  </Text>
+                  <ICPFitPill
+                    size="sm"
+                    icp_fit_score={data?.details.icp_fit_score || 0}
+                    icp_fit_reason={data?.details.icp_fit_reason || ""}
+                    archetype={data?.details.persona || ""}
+                  />
+                </Box>
               </Flex>
 
               {data?.details.title && (

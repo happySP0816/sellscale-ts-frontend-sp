@@ -673,6 +673,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                                       color={deterministicMantineColor(selectedLog.session_name)}
                                       variant="filled"
                                       style={{ width: '100%' }}
+                                      onClick={() => selectRef.current?.focus()}
                                     >
                                       {selectedLog.session_name}
                                     </Badge>

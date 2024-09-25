@@ -1381,16 +1381,18 @@ const VoiceModal = function (props: {
                                 <IconEdit size={"1rem"} />
                               </ActionIcon>
                             </Flex>
-                            <Switch
-                              checked={voice.active}
-                              label={"active"}
-                              onClick={(event) =>
-                                toggleActive(
-                                  voice.id,
-                                  event.currentTarget.checked
-                                )
-                              }
-                            />
+                            {!voice.always_enable && (
+                              <Switch
+                                checked={voice.active}
+                                label={"active"}
+                                onClick={(event) =>
+                                  toggleActive(
+                                    voice.id,
+                                    event.currentTarget.checked
+                                  )
+                                }
+                              />
+                            )}
                           </Flex>
                         </Paper>
                       );

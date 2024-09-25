@@ -1032,12 +1032,111 @@ export default function CampaignTemplateEditModal({
                   />
                 </>
               )}
-              {steps > 0  && 
+              {steps &&
                 Array.from({ length: Number(steps) }, (_, index) => {
                   const tabValue = (index + 1).toString();
                   return (
                     <>
-                    {(index !== 0 || sequenceType !== 'email') && <Paper withBorder radius={"sm"} mb = "sm" p={1} px={4}>
+                      <Paper
+                        withBorder
+                        radius={"sm"}
+                        p={6}
+                        px={10}
+                        onClick={() => {
+                          setCurrentStepNum(index + 1);
+                        }}
+                        bg={currentStepNum === index + 1 ? "#f9fbfe" : ""}
+                        style={{
+                          border:
+                            currentStepNum === index + 1
+                              ? "1px solid #228be6 "
+                              : "",
+                        }}
+                      >
+                        <Flex align={"center"} justify={"space-between"}>
+                          <Text
+                            color="gray"
+                            size={"sm"}
+                            className="flex items-center gap-2"
+                          >
+                            {" "}
+                            <ThemeIcon size={"sm"}>
+                              {sequenceType === "linkedin" ? (
+                                <IconBrandLinkedin
+                                  fill="white"
+                                  color="#228be6"
+                                  style={{ width: "90%", height: "90%" }}
+                                />
+                              ) : (
+                                <IconMail
+                                  fill="white"
+                                  color="#228be6"
+                                  style={{ width: "90%", height: "90%" }}
+                                />
+                              )}
+                            </ThemeIcon>
+                            Follow-up {index + 1}
+                          </Text>
+                          {index === Number(steps) - 1 && (
+                            <ActionIcon
+                              color="red"
+                              onClick={() =>
+                                setSteps((item) => (item = item - 1))
+                              }
+                            >
+                              <IconTrash size={"1rem"} />
+                            </ActionIcon>
+                          )}
+                        </Flex>
+                        <Flex gap={5} ml={30} mt={6} align={"center"}>
+                          <ThemeIcon
+                            size={14}
+                            variant="outline"
+                            color="green"
+                            radius={"xl"}
+                            mb={2}
+                          >
+                            <IconPoint
+                              fill="#40C057"
+                              color="#40C057"
+                              size={"3rem"}
+                            />
+                          </ThemeIcon>
+                          <Text size={"xs"} fw={600}>
+                            {sequenceType === "email"
+                              ? emailSequenceData[index]?.filter(template => template.active).length || 0
+                              : linkedinSequenceData[index]?.filter(template => template.active).length || 0}{" "}
+                            {sequenceType === "email"
+                              ? (emailSequenceData[index]?.filter(template => template.active).length || 0) > 1
+                                ? "Templates Active"
+                                : "Template Active"
+                              : (linkedinSequenceData[index]?.filter(template => template.active).length || 0) > 1
+                                ? "Templates Active"
+                                : "Template Active"}
+                          </Text>
+                        </Flex>
+                        {stagingData[sequenceType] && (
+                          <Flex gap={5} ml={30} mt={6} align={"center"}>
+                            <IconClock color="orange" size={"1rem"} />
+                            <Text size={"xs"} fw={600} color="gray">
+                              {stagingData[sequenceType]?.filter(
+                                (asset: any) => asset.step_num === index + 1
+                              ).length + " "}{" "}
+                              templates pending save
+                            </Text>
+                          </Flex>
+                        )}
+                      </Paper>
+                      { (sequenceType === "email"
+                              ? emailSequenceData[index]?.length > 0
+                              : linkedinSequenceData[index]?.length > 0) && <Flex align={"center"} gap={"sm"}>
+                        <Divider
+                          orientation="vertical"
+                          h={40}
+                          variant="dashed"
+                          ml={20}
+                        />
+                        <Paper withBorder radius={"sm"} p={1} px={4}>
                           <Flex align={"center"} gap={4}>
                             <IconClock color="orange" size={"1rem"} />
                             {sequenceType === "email" ? (
@@ -1168,113 +1267,7 @@ export default function CampaignTemplateEditModal({
                                   : "days"}
                             </span>
                           </Flex>
-                        </Paper>}
-                        <Divider
-                          orientation="vertical"
-                          h={40}
-                          variant="dashed"
-                          ml={20}
-                        />
-                      <Paper
-                        withBorder
-                        radius={"sm"}
-                        p={6}
-                        px={10}
-                        onClick={() => {
-                          setCurrentStepNum(index + 1);
-                        }}
-                        bg={currentStepNum === index + 1 ? "#f9fbfe" : ""}
-                        style={{
-                          border:
-                            currentStepNum === index + 1
-                              ? "1px solid #228be6 "
-                              : "",
-                        }}
-                      >
-                        <Flex align={"center"} justify={"space-between"}>
-                          <Text
-                            color="gray"
-                            size={"sm"}
-                            className="flex items-center gap-2"
-                          >
-                            {" "}
-                            <ThemeIcon size={"sm"}>
-                              {sequenceType === "linkedin" ? (
-                                <IconBrandLinkedin
-                                  fill="white"
-                                  color="#228be6"
-                                  style={{ width: "90%", height: "90%" }}
-                                />
-                              ) : (
-                                <IconMail
-                                  fill="white"
-                                  color="#228be6"
-                                  style={{ width: "90%", height: "90%" }}
-                                />
-                              )}
-                            </ThemeIcon>
-                            Follow-up {index + 1}
-                          </Text>
-                          {index === Number(steps) - 1 && (
-                            <ActionIcon
-                              color="red"
-                              onClick={() =>
-                                setSteps((item) => (item = item - 1))
-                              }
-                            >
-                              <IconTrash size={"1rem"} />
-                            </ActionIcon>
-                          )}
-                        </Flex>
-                        <Flex gap={5} ml={30} mt={6} align={"center"}>
-                          <ThemeIcon
-                            size={14}
-                            variant="outline"
-                            color="green"
-                            radius={"xl"}
-                            mb={2}
-                          >
-                            <IconPoint
-                              fill="#40C057"
-                              color="#40C057"
-                              size={"3rem"}
-                            />
-                          </ThemeIcon>
-                          <Text size={"xs"} fw={600}>
-                            {sequenceType === "email"
-                              ? emailSequenceData[index]?.filter(template => template.active).length || 0
-                              : linkedinSequenceData[index]?.filter(template => template.active).length || 0}{" "}
-                            {sequenceType === "email"
-                              ? (emailSequenceData[index]?.filter(template => template.active).length || 0) > 1
-                                ? "Templates Active"
-                                : "Template Active"
-                              : (linkedinSequenceData[index]?.filter(template => template.active).length || 0) > 1
-                                ? "Templates Active"
-                                : "Template Active"}
-                          </Text>
-                        </Flex>
-                        {stagingData[sequenceType] && (
-                          <Flex gap={5} ml={30} mt={6} align={"center"}>
-                            <IconClock color="orange" size={"1rem"} />
-                            <Text size={"xs"} fw={600} color="gray">
-                              {stagingData[sequenceType]?.filter(
-                                (asset: any) => asset.step_num === index + 1
-                              ).length + " "}{" "}
-                              templates pending save
-                            </Text>
-                          </Flex>
-                        )}
-                      </Paper>
-                      { (sequenceType === "email"
-                              ? emailSequenceData[index]?.length > 0
-                              : linkedinSequenceData[index]?.length > 0) && <Flex align={"center"} gap={"sm"}>
-                        <Divider
-                          orientation="vertical"
-                          h={40}
-                          variant="dashed"
-                          ml={20}
-                        />
-                        
+                        </Paper>
                       </Flex>}
                     </>
                   );
@@ -2148,12 +2141,12 @@ export default function CampaignTemplateEditModal({
                       addType,
                       [],
                       //since we have initial messages, we need to increment step num by 1 here. todo: inline adding messages for initial messages.
-                  
-                        stagingData[sequenceType]?.map((item: any) => ({
+                      sequenceType === "linkedin"
+                        ? stagingData[sequenceType]?.map((item: any) => ({
                             ...item,
                             step_num: item.step_num + 1,
                           }))
-                  
+                        : stagingData[sequenceType]
                     );
 
                     sessionStorage.removeItem("stagingData");

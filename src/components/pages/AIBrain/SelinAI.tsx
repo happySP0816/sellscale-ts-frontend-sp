@@ -94,6 +94,8 @@ import {
 import React, { forwardRef, useImperativeHandle } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { proxyURL } from "@utils/general";
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import RichTextArea from "@common/library/RichTextArea";
 
 import Logo from "../../../assets/images/logo.png";
 import { API_URL } from "@constants/data";
@@ -3931,9 +3933,6 @@ const SelixControlCenter = ({
 //     </Paper>
 //   );
 // };
-
-import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import RichTextArea from "@common/library/RichTextArea";
 
 const PlannerComponent = ({
   threads,

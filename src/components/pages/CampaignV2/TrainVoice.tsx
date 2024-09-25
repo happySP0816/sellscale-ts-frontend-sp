@@ -285,6 +285,9 @@ export default function TrainVoice(props: {
           });
       }
 
+      console.log(ctaMapping);
+      console.log(researchPointMapping)
+
       setUseNewCTAs(ctaMapping);
       setUseNewResearchPointTypes(researchPointMapping);
 
@@ -299,6 +302,10 @@ export default function TrainVoice(props: {
           messageDetails.findIndex((item) => !item.is_approved) ?? 0;
         setSelectedMessage(messageDetails[index]);
         setSelectedProspectId(messageDetails[index].prospect?.id ?? null);
+      } 
+
+      if (selectedMessage) {
+        setSelectedMessage(messageDetails.find(item => item.id === selectedMessage.id) ?? null);
       }
 
       return {
@@ -1405,37 +1412,37 @@ export default function TrainVoice(props: {
                         return null;
                       }
 
-                      const meta_data = metaDataFromPrompt(
-                        stackRankedConfigurationData[promptKey]
-                      );
+                      // const meta_data = metaDataFromPrompt(
+                      //   stackRankedConfigurationData[promptKey]
+                      // );
 
                       return (
                         <Box w="100%">
-                          <AiMetaDataBadge
-                            location={{
-                              position: "relative",
-                              top: 35,
-                              left: 70,
-                            }}
-                            bumpFrameworkId={0}
-                            bumpFrameworkTitle={""}
-                            bumpFrameworkDescription={""}
-                            bumpFrameworkLength={""}
-                            bumpNumberConverted={undefined}
-                            bumpNumberUsed={undefined}
-                            accountResearchPoints={meta_data.research || []}
-                            initialMessageId={-1}
-                            initialMessageCTAId={0}
-                            initialMessageCTAText={meta_data.cta || ""}
-                            initialMessageResearchPoints={
-                              meta_data.research || []
-                            }
-                            initialMessageStackRankedConfigID={undefined}
-                            initialMessageStackRankedConfigName={
-                              "Baseline Linkedin"
-                            }
-                            cta={meta_data.cta || ""}
-                          />
+                          {/* <AiMetaDataBadge */}
+                          {/*   location={{ */}
+                          {/*     position: "relative", */}
+                          {/*     top: 35, */}
+                          {/*     left: 70, */}
+                          {/*   }} */}
+                          {/*   bumpFrameworkId={0} */}
+                          {/*   bumpFrameworkTitle={""} */}
+                          {/*   bumpFrameworkDescription={""} */}
+                          {/*   bumpFrameworkLength={""} */}
+                          {/*   bumpNumberConverted={undefined} */}
+                          {/*   bumpNumberUsed={undefined} */}
+                          {/*   accountResearchPoints={meta_data.research || []} */}
+                          {/*   initialMessageId={-1} */}
+                          {/*   initialMessageCTAId={0} */}
+                          {/*   initialMessageCTAText={meta_data.cta || ""} */}
+                          {/*   initialMessageResearchPoints={ */}
+                          {/*     meta_data.research || [] */}
+                          {/*   } */}
+                          {/*   initialMessageStackRankedConfigID={undefined} */}
+                          {/*   initialMessageStackRankedConfigName={ */}
+                          {/*     "Baseline Linkedin" */}
+                          {/*   } */}
+                          {/*   cta={meta_data.cta || ""} */}
+                          {/* /> */}
                           <Tooltip label="Remove this sample from voice.">
                             <Button
                               size="xs"

@@ -105,6 +105,7 @@ import { getFreshCurrentProject } from "@auth/core";
 import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
 import { patchSequenceStep } from "@utils/requests/emailSequencing";
 import { LinkedinInitialMessageDataType } from "@pages/CampaignV2/Sequences";
+import { patchArchetypeDelayDays } from "@utils/requests/patchArchetypeDelayDays";
 
 interface SwitchStyle extends Partial<MantineStyleSystemProps> {
   label?: React.CSSProperties;
@@ -155,6 +156,8 @@ export default function CampaignTemplateEditModal({
   const [emailSubjectLines, setEmailSubjectLines] = useRecoilState(
     emailSubjectLinesState
   );
+  const [isEditingInitialMessageBumpDelayDays, setIsEditingInitialMessageBumpDelayDays] = useState<number | null>(null);
+  const [newInitialMessageBumpDelayDays, setNewInitialMessageBumpDelayDays] = useState(0);
   const [linkedinInitialMessageData, setLinkedinInitialMessageData] = useRecoilState(linkedinInitialMessageState);
   const [linkedinInitialMessageStagingData, setLinkedinInitialMessageStagingData] = useState<string[]>([]);
   const [linkedinInitialMessageEntry, setLinkedinInitialMessageEntry] = useState<string>('');
@@ -289,6 +292,10 @@ export default function CampaignTemplateEditModal({
     sessionStorage.setItem("stagingData", JSON.stringify(stagingData));
   }, [stagingData]);
   const [suggestionData, setSuggestionData] = useState<any>([]);
+
+  useEffect(() => {
+    console.log(currentProject);
+  }, [currentProject]);
 
   const handleToggle = (key: number) => {
     if (selectStep === key) {
@@ -427,11 +434,11 @@ export default function CampaignTemplateEditModal({
               // make background a grid of dots
               backgroundSize: "20px 20px",
             }}
-            // withBorder
+          // withBorder
           >
             <Group noWrap spacing={"sm"} w={"100%"}>
               <Switch
-              disabled  // disabled for now
+                disabled  // disabled for now
                 // onChange={() => {
                 //   if (!innerProps?.checkCanToggleEmail(true)) {
                 //     return;
@@ -898,11 +905,10 @@ export default function CampaignTemplateEditModal({
                                 ).then((project: any) => {
                                   showNotification({
                                     title: "Success",
-                                    message: `Template mode ${
-                                      project?.template_mode
-                                        ? "enabled"
-                                        : "disabled"
-                                    }`,
+                                    message: `Template mode ${project?.template_mode
+                                      ? "enabled"
+                                      : "disabled"
+                                      }`,
                                     color: "green",
                                     icon: <IconCheck size="1rem" />,
                                   });
@@ -963,22 +969,79 @@ export default function CampaignTemplateEditModal({
                           ? "Connection Request"
                           : "Connection Request"}
                       </Text>
-                    {currentProject?.template_mode && (
-                      <Text color="gray" size={"sm"}>
-                        {linkedinInitialMessageData?.filter(message => message.active).length ?? 0}{" "}
-                        {linkedinInitialMessageData?.filter(message => message.active).length === 1
-                          ? "Active"
-                          : "Active"}
-                      </Text>
-                    )}
+                      {currentProject?.template_mode && (
+                        <Text color="gray" size={"sm"}>
+                          {linkedinInitialMessageData?.filter(message => message.active).length ?? 0}{" "}
+                          {linkedinInitialMessageData?.filter(message => message.active).length === 1
+                            ? "Active"
+                            : "Active"}
+                        </Text>
+                      )}
                     </Flex>
                   </Paper>
                   <Divider
                     orientation="vertical"
-                    h={30}
+                    h={20}
                     variant="dashed"
                     ml={20}
                   />
+
+                  <Paper
+                    w={"40%"}
+                    withBorder
+                    radius={"sm"}
+                    p={6}
+                    px={10}
+                    onClick={() => {
+                      setIsEditingInitialMessageBumpDelayDays(0);
+                    }}
+                    bg={isEditingInitialMessageBumpDelayDays !== null ? "#f9fbfe" : ""}
+                    style={{
+                      border: isEditingInitialMessageBumpDelayDays !== null ? "1px solid #228be6 " : "",
+                    }}
+                  >
+                    <Flex align={"center"} justify={"space-between"}>
+                      <Text
+                        color="gray"
+                        size={"sm"}
+                        className="flex items-center gap-2"
+                      >
+                        <ThemeIcon size={"sm"}>
+                          <IconClock color="orange" size={"1rem"} />
+                        </ThemeIcon>
+                        {isEditingInitialMessageBumpDelayDays !== null ? (
+                          <Input
+                            ref={inputRef}
+                            style={{ width: '60px' }}
+                            type="number"
+                            fw={500}
+                            size={"sm"}
+                            value={newInitialMessageBumpDelayDays}
+                            onChange={(e) => setNewInitialMessageBumpDelayDays(parseInt(e.target.value, 10))}
+                            onBlur={async () => {
+                              if (!isNaN(newInitialMessageBumpDelayDays)) {
+                                await patchArchetypeDelayDays(userToken, currentProject?.id || -1, newInitialMessageBumpDelayDays);
+                                setIsEditingInitialMessageBumpDelayDays(null);
+                                setCurrentProject((prevProject) => prevProject ? { ...prevProject, first_message_delay_days: newInitialMessageBumpDelayDays } : null);
+                              }
+                            }}
+                            onFocus={(e) => e.target.select()}
+                          />
+                        ) : (
+                          <Text size={"sm"} fw={500} color="black">
+                            {currentProject?.first_message_delay_days || 0} {(currentProject?.first_message_delay_days || 0) === 1 ? "day" : "days"}
+                          </Text>
+                        )}
+                      </Text>
+                    </Flex>
+                  </Paper>
+                  <Divider
+                    orientation="vertical"
+                    h={20}
+                    variant="dashed"
+                    ml={20}
+                  />
+
                 </>
               )}
               {sequenceType === "email" && (
@@ -1026,7 +1089,7 @@ export default function CampaignTemplateEditModal({
                   </Paper>
                   <Divider
                     orientation="vertical"
-                    h={30}
+                    h={20}
                     variant="dashed"
                     ml={20}
                   />
@@ -1127,18 +1190,24 @@ export default function CampaignTemplateEditModal({
                           </Flex>
                         )}
                       </Paper>
-                      { (sequenceType === "email"
+                      {(sequenceType === "email"
+                        ? emailSequenceData[index]?.length > 0
+                        : linkedinSequenceData[index]?.length > 0) && <>
+                         
+                         { (sequenceType === "email"
                               ? emailSequenceData[index]?.length > 0
-                              : linkedinSequenceData[index]?.length > 0) && <Flex align={"center"} gap={"sm"}>
+                              : linkedinSequenceData[index]?.length > 0) && <>
                         <Divider
                           orientation="vertical"
-                          h={40}
+                          h={20}
                           variant="dashed"
                           ml={20}
                         />
-                        <Paper withBorder radius={"sm"} p={1} px={4}>
+                        <Paper withBorder w={'40%'} radius={"sm"} p={1} px={4}>
                           <Flex align={"center"} gap={4}>
-                            <IconClock color="orange" size={"1rem"} />
+                          <ThemeIcon size={"sm"}>
+                          <IconClock color="orange" size={"1rem"} />
+                        </ThemeIcon>
                             {sequenceType === "email" ? (
                               isEditingBumpDelayDays === index ? (
                                 <Input
@@ -1257,7 +1326,7 @@ export default function CampaignTemplateEditModal({
                                 </Text>
                               )
                             )}
-                            <span className="text-gray-500">
+                            <Text size="sm" fw={500}>
                               {sequenceType === "email" 
                                 ? emailSequenceData[index]?.[0]?.sequence_delay_days === 1 
                                   ? "day" 
@@ -1265,10 +1334,20 @@ export default function CampaignTemplateEditModal({
                                 : linkedinSequenceData[index]?.[0]?.bump_delay_days === 1 
                                   ? "day" 
                                   : "days"}
-                            </span>
+                            </Text>
                           </Flex>
                         </Paper>
-                      </Flex>}
+                      </>}
+        
+               
+              
+                          <Divider
+                            orientation="vertical"
+                            h={20}
+                            variant="dashed"
+                            ml={20}
+                          />
+                        </>}
                     </>
                   );
                 })}
@@ -1415,39 +1494,39 @@ export default function CampaignTemplateEditModal({
             <Box>
               {currentStepNum === 0 && sequenceType === "linkedin" && (
                 <>
-                <ScrollArea viewportRef={viewport}>
-                  {linkedinInitialMessageData.length > 0 && currentProject?.template_mode &&  
-                    [...linkedinInitialMessageData]
-                      .sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))
-                      .map((messageData: LinkedinInitialMessageDataType, index: number) => (
-                        <Box p={"xs"} h={"100%"}>
-                        <SequenceVariant
-                          asset={messageData}
-                          assetType={"linkedin"}
-                          refetch={() =>
-                            innerProps.refetchSequenceData(
-                              innerProps.campaignId
-                            )
-                          }
-                          sequenceType={sequenceType}
-                          angle={messageData.message}
-                          text={messageData.message}
-                          assetId={messageData.id}
-                          index={index}
-                          isSaved={true}
-                          selectStep={selectStep ?? 0}
-                          opened={opened}
-                          userImgUrl={userData.img_url}
-                          removeFromStagingData={removeFromStagingData}
-                          handleToggle={handleToggle}
-                          stagingData={stagingData}
-                          setStagingData={setStagingData}
-                          currentStepNum={currentStepNum}
-                        />
-                        </Box> 
-                      )
-                    )}
-                    {linkedinInitialMessageStagingData.length > 0 && currentProject?.template_mode &&   (
+                  <ScrollArea viewportRef={viewport}>
+                    {linkedinInitialMessageData.length > 0 && currentProject?.template_mode &&
+                      [...linkedinInitialMessageData]
+                        .sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))
+                        .map((messageData: LinkedinInitialMessageDataType, index: number) => (
+                          <Box p={"xs"} h={"100%"}>
+                            <SequenceVariant
+                              asset={messageData}
+                              assetType={"linkedin"}
+                              refetch={() =>
+                                innerProps.refetchSequenceData(
+                                  innerProps.campaignId
+                                )
+                              }
+                              sequenceType={sequenceType}
+                              angle={messageData.message}
+                              text={messageData.message}
+                              assetId={messageData.id}
+                              index={index}
+                              isSaved={true}
+                              selectStep={selectStep ?? 0}
+                              opened={opened}
+                              userImgUrl={userData.img_url}
+                              removeFromStagingData={removeFromStagingData}
+                              handleToggle={handleToggle}
+                              stagingData={stagingData}
+                              setStagingData={setStagingData}
+                              currentStepNum={currentStepNum}
+                            />
+                          </Box>
+                        )
+                        )}
+                    {linkedinInitialMessageStagingData.length > 0 && currentProject?.template_mode && (
                       <Flex justify="center" align="center">
                         <Divider
                           orientation="horizontal"
@@ -1466,9 +1545,9 @@ export default function CampaignTemplateEditModal({
                         />
                       </Flex>
                     )}
-                  <Flex p={"xs"} h={"100%"} direction={"column"}>
-                    {linkedinInitialMessageStagingData.length > 0
-                      ? linkedinInitialMessageStagingData.map(
+                    <Flex p={"xs"} h={"100%"} direction={"column"}>
+                      {linkedinInitialMessageStagingData.length > 0
+                        ? linkedinInitialMessageStagingData.map(
                           (message: string, index4: number) => (
                             <SequenceVariant
                               asset={{ message }}
@@ -1495,7 +1574,7 @@ export default function CampaignTemplateEditModal({
                             />
                           )
                         )
-                      : linkedinInitialMessageStagingData.map(
+                        : linkedinInitialMessageStagingData.map(
                           (message: string, index4: number) => (
                             <SequenceVariant
                               asset={{ message }}
@@ -1522,165 +1601,165 @@ export default function CampaignTemplateEditModal({
                             />
                           )
                         )}
-                    {!currentProject?.template_mode && (
-                      <Tabs
-                        value={activeTab}
-                        onTabChange={setActiveTab}
-                        variant="pills"
-                        keepMounted={true}
-                        radius="md"
-                        defaultValue="ctas"
-                        allowTabDeactivation
-                      >
-                        <Tabs.List>
-                          <Tabs.Tab
-                            // ref={refPersonSettingsBtn}
-                            value="personalization"
-                            color="teal.5"
-                            rightSection={
-                              <>
-                                {personalizationItemsCount ? (
-                                  <Badge
-                                    w={16}
-                                    h={16}
-                                    sx={{ pointerEvents: "none" }}
-                                    variant="filled"
-                                    size="xs"
-                                    p={0}
-                                    color="teal.6"
-                                  >
-                                    {personalizationItemsCount}
-                                  </Badge>
-                                ) : (
-                                  <></>
-                                )}
-                              </>
-                            }
-                            sx={(theme) => ({
-                              "&[data-active]": {
-                                backgroundColor:
-                                  theme.colors.teal[0] + "!important",
-                                borderRadius: theme.radius.md + "!important",
-                                color: theme.colors.teal[8] + "!important",
-                              },
-                              border:
-                                "solid 1px " +
-                                theme.colors.teal[5] +
-                                "!important",
-                            })}
-                          >
-                            Edit Personalization
-                          </Tabs.Tab>
-                          <Tabs.Tab
-                            // ref={refYourCTAsBtn}
-                            value="ctas"
-                            color="blue.4"
-                            rightSection={
-                              <>
-                                {ctasItemsCount ? (
-                                  <Badge
-                                    w={16}
-                                    h={16}
-                                    sx={{ pointerEvents: "none" }}
-                                    variant="filled"
-                                    size="xs"
-                                    p={0}
-                                    color="blue.5"
-                                  >
-                                    {ctasItemsCount}
-                                  </Badge>
-                                ) : (
-                                  <></>
-                                )}
-                              </>
-                            }
-                            sx={(theme) => ({
-                              "&[data-active]": {
-                                backgroundColor:
-                                  theme.colors.blue[0] + "!important",
-                                borderRadius: theme.radius.md + "!important",
-                                color: theme.colors.blue[8] + "!important",
-                              },
-                              border:
-                                "solid 1px " +
-                                theme.colors.blue[4] +
-                                "!important",
-                            })}
-                          >
-                            Edit CTAs
-                          </Tabs.Tab>
-                        </Tabs.List>
-
-                        <Tabs.Panel value="personalization">
-                          <ScrollArea h={300}>
-                            <PersonalizationSection
-                              researchPoints={researchPoints}
-                              blocklist={
-                                currentProject?.transformer_blocklist_initial ??
-                                []
+                      {!currentProject?.template_mode && (
+                        <Tabs
+                          value={activeTab}
+                          onTabChange={setActiveTab}
+                          variant="pills"
+                          keepMounted={true}
+                          radius="md"
+                          defaultValue="ctas"
+                          allowTabDeactivation
+                        >
+                          <Tabs.List>
+                            <Tabs.Tab
+                              // ref={refPersonSettingsBtn}
+                              value="personalization"
+                              color="teal.5"
+                              rightSection={
+                                <>
+                                  {personalizationItemsCount ? (
+                                    <Badge
+                                      w={16}
+                                      h={16}
+                                      sx={{ pointerEvents: "none" }}
+                                      variant="filled"
+                                      size="xs"
+                                      p={0}
+                                      color="teal.6"
+                                    >
+                                      {personalizationItemsCount}
+                                    </Badge>
+                                  ) : (
+                                    <></>
+                                  )}
+                                </>
                               }
-                              onItemsChange={async (items) => {
-                                setPersonalizationItemsCount(
-                                  items.filter((x: any) => x.checked).length
-                                );
+                              sx={(theme) => ({
+                                "&[data-active]": {
+                                  backgroundColor:
+                                    theme.colors.teal[0] + "!important",
+                                  borderRadius: theme.radius.md + "!important",
+                                  color: theme.colors.teal[8] + "!important",
+                                },
+                                border:
+                                  "solid 1px " +
+                                  theme.colors.teal[5] +
+                                  "!important",
+                              })}
+                            >
+                              Edit Personalization
+                            </Tabs.Tab>
+                            <Tabs.Tab
+                              // ref={refYourCTAsBtn}
+                              value="ctas"
+                              color="blue.4"
+                              rightSection={
+                                <>
+                                  {ctasItemsCount ? (
+                                    <Badge
+                                      w={16}
+                                      h={16}
+                                      sx={{ pointerEvents: "none" }}
+                                      variant="filled"
+                                      size="xs"
+                                      p={0}
+                                      color="blue.5"
+                                    >
+                                      {ctasItemsCount}
+                                    </Badge>
+                                  ) : (
+                                    <></>
+                                  )}
+                                </>
+                              }
+                              sx={(theme) => ({
+                                "&[data-active]": {
+                                  backgroundColor:
+                                    theme.colors.blue[0] + "!important",
+                                  borderRadius: theme.radius.md + "!important",
+                                  color: theme.colors.blue[8] + "!important",
+                                },
+                                border:
+                                  "solid 1px " +
+                                  theme.colors.blue[4] +
+                                  "!important",
+                              })}
+                            >
+                              Edit CTAs
+                            </Tabs.Tab>
+                          </Tabs.List>
 
-                                // Update transformer blocklist
-                                const result = await updateInitialBlocklist(
-                                  userToken,
-                                  currentProject?.id || -1,
-                                  items
-                                    .filter((x) => !x.checked)
-                                    .map((x) => x.id)
-                                );
-                              }}
-                            />
-                          </ScrollArea>
-                        </Tabs.Panel>
-                        <Tabs.Panel value="ctas">
-                          <ScrollArea h={300}>
-                            <CtaSection
-                              onCTAsLoaded={(data) => {
-                                setCtasItemsCount(
-                                  data.filter((x: any) => x.active).length
-                                );
-                              }}
-                            />
-                          </ScrollArea>
-                        </Tabs.Panel>
-                      </Tabs>
-                    )}
-                  </Flex>
-                </ScrollArea>
-                {currentProject?.template_mode &&  <Flex direction="column" p="lg" gap="md">
-                  <Textarea
-                    placeholder="Prefer to create your own initial message? Add it here"
-                    value={linkedinInitialMessageEntry}
-                    onChange={(event) =>
-                      setLinkedinInitialMessageEntry(event.currentTarget.value)
-                    }
-                    autosize
-                    minRows={3}
-                  />
-                  <Flex justify="flex-end">
-                    <Button
-                      rightIcon={<IconArrowRight size={"0.8rem"} />}
-                      onClick={() => {
-                        if (linkedinInitialMessageEntry) {
-                          setLinkedinInitialMessageStagingData((prevData: any[]) => [...prevData, linkedinInitialMessageEntry])
-                          setLinkedinInitialMessageEntry("");
-                          setTimeout(() => {
-                            viewport.current?.scrollTo({
-                              top: viewport.current?.scrollHeight,
-                              behavior: "smooth",
-                            });
-                          }, 20);
-                        }
-                      }}
-                    >
-                      Add Message
-                    </Button>
-                  </Flex>
-                </Flex>}
+                          <Tabs.Panel value="personalization">
+                            <ScrollArea h={300}>
+                              <PersonalizationSection
+                                researchPoints={researchPoints}
+                                blocklist={
+                                  currentProject?.transformer_blocklist_initial ??
+                                  []
+                                }
+                                onItemsChange={async (items) => {
+                                  setPersonalizationItemsCount(
+                                    items.filter((x: any) => x.checked).length
+                                  );
+
+                                  // Update transformer blocklist
+                                  const result = await updateInitialBlocklist(
+                                    userToken,
+                                    currentProject?.id || -1,
+                                    items
+                                      .filter((x) => !x.checked)
+                                      .map((x) => x.id)
+                                  );
+                                }}
+                              />
+                            </ScrollArea>
+                          </Tabs.Panel>
+                          <Tabs.Panel value="ctas">
+                            <ScrollArea h={300}>
+                              <CtaSection
+                                onCTAsLoaded={(data) => {
+                                  setCtasItemsCount(
+                                    data.filter((x: any) => x.active).length
+                                  );
+                                }}
+                              />
+                            </ScrollArea>
+                          </Tabs.Panel>
+                        </Tabs>
+                      )}
+                    </Flex>
+                  </ScrollArea>
+                  {currentProject?.template_mode && <Flex direction="column" p="lg" gap="md">
+                    <Textarea
+                      placeholder="Prefer to create your own initial message? Add it here"
+                      value={linkedinInitialMessageEntry}
+                      onChange={(event) =>
+                        setLinkedinInitialMessageEntry(event.currentTarget.value)
+                      }
+                      autosize
+                      minRows={3}
+                    />
+                    <Flex justify="flex-end">
+                      <Button
+                        rightIcon={<IconArrowRight size={"0.8rem"} />}
+                        onClick={() => {
+                          if (linkedinInitialMessageEntry) {
+                            setLinkedinInitialMessageStagingData((prevData: any[]) => [...prevData, linkedinInitialMessageEntry])
+                            setLinkedinInitialMessageEntry("");
+                            setTimeout(() => {
+                              viewport.current?.scrollTo({
+                                top: viewport.current?.scrollHeight,
+                                behavior: "smooth",
+                              });
+                            }, 20);
+                          }
+                        }}
+                      >
+                        Add Message
+                      </Button>
+                    </Flex>
+                  </Flex>}
                 </>
               )}
               {currentStepNum === steps + 1 && sequenceType === "email" && (
@@ -1767,53 +1846,53 @@ export default function CampaignTemplateEditModal({
                           ?.sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))
                           .map((existingAsset: any, index2: number) => {
                             return (
-                          <SequenceVariant
-                            asset={existingAsset}
-                            assetType={sequenceType}
-                            refetch={() =>
-                              innerProps.refetchSequenceData(
-                                innerProps.campaignId
-                              )
-                            }
-                            sequenceType={sequenceType}
-                            angle={existingAsset.title}
-                            text={existingAsset.description}
-                            assetId={existingAsset.id}
-                            isSaved={true}
-                            index={index2}
-                            selectStep={selectStep2 ?? 0}
-                            opened={opened2}
-                            userImgUrl={userData.img_url}
-                            removeFromStagingData={removeFromStagingData}
-                            handleToggle={handleToggle2}
-                            stagingData={stagingData}
-                            setStagingData={setStagingData}
-                          />
-                        );
-                      })}
+                              <SequenceVariant
+                                asset={existingAsset}
+                                assetType={sequenceType}
+                                refetch={() =>
+                                  innerProps.refetchSequenceData(
+                                    innerProps.campaignId
+                                  )
+                                }
+                                sequenceType={sequenceType}
+                                angle={existingAsset.title}
+                                text={existingAsset.description}
+                                assetId={existingAsset.id}
+                                isSaved={true}
+                                index={index2}
+                                selectStep={selectStep2 ?? 0}
+                                opened={opened2}
+                                userImgUrl={userData.img_url}
+                                removeFromStagingData={removeFromStagingData}
+                                handleToggle={handleToggle2}
+                                stagingData={stagingData}
+                                setStagingData={setStagingData}
+                              />
+                            );
+                          })}
                     </Flex>
                     {/* STAGING DATA DIVIDER */}
                     {stagingData[sequenceType]?.filter(
                       (asset: any) => asset.step_num === currentStepNum
                     ).length > 0 && (
-                      <Flex justify="center" align="center">
-                        <Divider
-                          orientation="horizontal"
-                          color="yellow"
-                          size={"2px"}
-                          style={{ margin: "0 25px", flex: 1 }}
-                        />
-                        <Badge variant="outline" color="yellow" tt={"initial"}>
-                          New
-                        </Badge>
-                        <Divider
-                          orientation="horizontal"
-                          color="yellow"
-                          size={"2px"}
-                          style={{ margin: "0 25px", flex: 1 }}
-                        />
-                      </Flex>
-                    )}
+                        <Flex justify="center" align="center">
+                          <Divider
+                            orientation="horizontal"
+                            color="yellow"
+                            size={"2px"}
+                            style={{ margin: "0 25px", flex: 1 }}
+                          />
+                          <Badge variant="outline" color="yellow" tt={"initial"}>
+                            New
+                          </Badge>
+                          <Divider
+                            orientation="horizontal"
+                            color="yellow"
+                            size={"2px"}
+                            style={{ margin: "0 25px", flex: 1 }}
+                          />
+                        </Flex>
+                      )}
                     {/* STAGING DATA */}
                     <Flex p={"lg"} h={"100%"} direction={"column"}>
                       <>
@@ -1908,7 +1987,7 @@ export default function CampaignTemplateEditModal({
                                 opened={true}
                                 userImgUrl={userData.img_url}
                                 removeFromStagingData={removeFromStagingData}
-                                handleToggle={() => {}}
+                                handleToggle={() => { }}
                                 showAll={true}
                                 stagingData={stagingData}
                                 setStagingData={setStagingData}
@@ -2002,7 +2081,7 @@ export default function CampaignTemplateEditModal({
                           style={{
                             background:
                               !currentProject?.ai_researcher_id ||
-                              !currentProject.is_ai_research_personalization_enabled
+                                !currentProject.is_ai_research_personalization_enabled
                                 ? "grey"
                                 : "linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))",
                             color: "white",
@@ -2141,12 +2220,10 @@ export default function CampaignTemplateEditModal({
                       addType,
                       [],
                       //since we have initial messages, we need to increment step num by 1 here. todo: inline adding messages for initial messages.
-                      sequenceType === "linkedin"
-                        ? stagingData[sequenceType]?.map((item: any) => ({
-                            ...item,
-                            step_num: item.step_num + 1,
-                          }))
-                        : stagingData[sequenceType]
+                      stagingData[sequenceType]?.map((item: any) => ({
+                        ...item,
+                        step_num: item.step_num + 1,
+                      }))
                     );
 
                     sessionStorage.removeItem("stagingData");

@@ -51,6 +51,7 @@ Follow instructions to generate a short intro message:
 - Tie in the sentences together to make sure it's cohesive
 - Smoothly embed the call-to-action into the end of message.
 - Include a friendly greeting in the beginning.
+- Make sure to Capitalize company names.
 
 You are to generate a message with a similar voice and tone as the below message samples. Each samples will have some meta data that 
 you will find useful:

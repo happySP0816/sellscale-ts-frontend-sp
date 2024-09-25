@@ -1384,7 +1384,7 @@ const VoiceModal = function (props: {
                             {!voice.always_enable && (
                               <Switch
                                 checked={voice.active}
-                                label={"active"}
+                                label={voice.active ? "active" : "inactive"}
                                 onClick={(event) =>
                                   toggleActive(
                                     voice.id,
@@ -1449,7 +1449,7 @@ const VoiceModal = function (props: {
                             </Flex>
                             <Switch
                               checked={existing_voice.active}
-                              label={"active"}
+                              label={existing_voice.active ? "active" : "inactive" }
                               onClick={(event) =>
                                 toggleActive(
                                   existing_voice.id,
@@ -1487,7 +1487,7 @@ const VoiceModal = function (props: {
                             </Flex>
                             <Switch
                               checked={false}
-                              label={"active"}
+                              label={"inactive"}
                               onClick={async (event) => {
                                 await addDefaultVoice(+default_voice.id);
                               }}

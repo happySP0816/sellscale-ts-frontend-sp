@@ -1700,6 +1700,7 @@ export default function SelinAI() {
             <SegmentChat
               setAttachedFile={setAttachedFile}
               attachedFile={attachedFile}
+              threads={threads}
               deviceIDRef={deviceIDRef}
               dropzoneRef={dropzoneRef}
               suggestedFirstMessage={suggestedFirstMessage}
@@ -2266,6 +2267,7 @@ const SegmentChat = (props: any) => {
                   Currently working on:
                 </Text>
                 <SelixMemoryLogs
+                  threads={props.threads}
                   onRevert={(oldLog: string) => {
                     setClientMemoryState(oldLog);
                     setMemoryStateChanged(true);

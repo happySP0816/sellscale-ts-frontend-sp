@@ -26,6 +26,7 @@ import {
   Paper,
   ActionIcon,
   Progress,
+  Select,
 } from "@mantine/core";
 import React, { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -34,7 +35,7 @@ import { API_URL } from "@constants/data";
 import { useQueryClient } from "@tanstack/react-query";
 import { showNotification } from "@mantine/notifications";
 import { IconSparkles } from "@tabler/icons-react";
-import { IconChevronLeft, IconTrash, IconUser, IconUsers } from "@tabler/icons";
+import { IconChevronLeft, IconFilter, IconTrash, IconUser, IconUsers } from "@tabler/icons";
 
 interface CampaignFiltersProps {
   prospects: Prospect[];
@@ -76,6 +77,11 @@ const CampaignFilters = function ({
       setIsScoring(0);
     }
   }, [programmaticUpdates]);
+
+  useEffect(() => {
+    fetchSavedQueries();
+  }
+  , [userToken]);
 
   const [
     included_individual_title_keywords,
@@ -245,6 +251,8 @@ const CampaignFilters = function ({
   );
 
   const [individual_ai_title, setIndividualAITitle] = useState<string>("");
+  const [prefilters, setPrefilters] = useState<any[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [individual_ai_prompt, setIndividualAIPrompt] = useState<string>("");
   const [individual_ai_dealbreaker, setIndividualAIDealbreaker] =
     useState<boolean>(false);
@@ -323,6 +331,194 @@ const CampaignFilters = function ({
   const companyOptions = [...new Set(prospects.map((x) => x.company))].filter(
     (x) => x
   );
+
+  const fetchSavedQueries = async () => {
+    try {
+      const response = await fetch(`${API_URL}/apollo/get_all_saved_queries`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      if (data.status === "success") {
+        const formattedPrefilters = data.data.map((query: any) => ({
+          title: query.custom_name,
+          id: query.id,
+          prospects: query.num_results,
+          status: true, // Assuming all fetched queries are active by default
+        }));
+        setPrefilters(formattedPrefilters);
+      } else {
+        console.error("Failed to fetch saved queries:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching saved queries:", error);
+    }
+  };
+
+  const mergeSavedQueries = async (saved_query_id: number) => {
+    setScoreLoading(true);
+    if (saved_query_id !== undefined) {
+      try {
+        const response = await fetch(
+          `${API_URL}/apollo/get_saved_query/${saved_query_id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${userToken}`,
+            },
+          }
+        );
+        const data = await response.json();
+        if (data.status === "success") {
+          const queryDetails = data.data;
+
+          const updateState = (setter: { (value: React.SetStateAction<string[]>): void; (value: React.SetStateAction<string[]>): void; (value: React.SetStateAction<string[]>): void; (value: React.SetStateAction<string[]>): void; (value: React.SetStateAction<string[]>): void; (value: React.SetStateAction<string[]>): void; (arg0: (prevState: any) => any[]): void; }, value: any) => {
+            setter((prevState) => Array.from(new Set([...prevState, ...value])));
+          };
+
+          updateState(setIncludedIndividualTitleKeywords, queryDetails.data.person_titles || []);
+          updateState(setIncludedIndividualSeniorityKeywords, queryDetails.data.person_seniorities || []);
+          updateState(setExcludedIndividualTitleKeywords, queryDetails.data.person_not_titles || []);
+
+          const industryBreadcrumbs = queryDetails.results.breadcrumbs.filter(
+            (breadcrumb: any) => breadcrumb.label === "Industry"
+          );
+          if (industryBreadcrumbs.length > 0) {
+            const industryNames = industryBreadcrumbs.map(
+              (breadcrumb: any) => breadcrumb.display_name
+            );
+            const industryIds = industryBreadcrumbs.reduce(
+              (acc: any, breadcrumb: any) => {
+                acc[breadcrumb.display_name] = breadcrumb.value;
+                return acc;
+              },
+              {}
+            );
+
+            updateState(setIncludedCompanyIndustriesKeywords, industryNames);
+            // updateState(setIndustryOptions, industryNames);
+          //   setIndustryOptionsWithIds((prevOptions: any) => ({
+          //     ...prevOptions,
+          //     ...industryIds,
+          //   }));
+          // } else {
+            updateState(setIncludedCompanyIndustriesKeywords, queryDetails.data.organization_industry_tag_ids || []);
+          }
+
+          // setRevenue((prev) => ({
+          //   min: queryDetails.data.revenue_range?.min
+          //     ? String(queryDetails.data.revenue_range.min)
+          //     : prev.min,
+          //   max: queryDetails.data.revenue_range?.max
+          //     ? String(queryDetails.data.revenue_range.max)
+          //     : prev.max,
+          // }));
+
+          // setCompanyName((prev) => queryDetails.data.q_person_title || prev);
+          setIncludedCompanyNameKeywords((prev) => queryDetails.data.q_organization_keyword_tags || prev);
+
+          const companyBreadcrumbs = queryDetails.results.breadcrumbs.filter(
+            (breadcrumb: any) => breadcrumb.label === "Companies"
+          );
+          // if (companyBreadcrumbs.length > 0) {
+          //   const companyNames = companyBreadcrumbs.map(
+          //     (breadcrumb: any) => breadcrumb.value
+          //   );
+          //   const companyOptions = companyBreadcrumbs.map(
+          //     (breadcrumb: any) => ({
+          //       label: breadcrumb.display_name,
+          //       value: breadcrumb.value,
+          //       logo_url: breadcrumb.logo_url || "",
+          //     })
+          //   );
+
+          //   updateState(setSelectedCompanies, companyNames);
+          //   updateState(setCompanyOptions, companyOptions);
+          // } else {
+          //   updateState(setSelectedCompanies, queryDetails.data.organization_ids || []);
+          // }
+
+          updateState(setIncludedIndividualLocationsKeywords, queryDetails.data.person_locations || []);
+          // setExperience((prev) => queryDetails.data.person_seniorities || prev);
+          // updateState(setFundraise, queryDetails.data.organization_latest_funding_stage_cd || []);
+          // setCompanyDomain((prev) => queryDetails.data.q_organization_search_list_id || prev);
+          // setAiPrompt((prev) => prev); // Assuming no change needed
+          // updateState(setSelectedNumEmployees, queryDetails.data.organization_num_employees_ranges || []);
+
+          const technologyBreadcrumbs = queryDetails.results.breadcrumbs.filter(
+            (breadcrumb: any) => breadcrumb.label === "Use at least one of"
+          );
+          if (technologyBreadcrumbs.length > 0) {
+            const technologyNames = technologyBreadcrumbs.map(
+              (breadcrumb: any) => breadcrumb.display_name
+            );
+            const technologyUids = technologyBreadcrumbs.reduce(
+              (acc: any, breadcrumb: any) => {
+                acc[breadcrumb.display_name] = breadcrumb.value;
+                return acc;
+              },
+              {}
+            );
+
+            // updateState(setTechnology, technologyNames);
+            // updateState(setTechnologyOptions, technologyNames);
+            // setTechnologyOptionsWithUids((prevOptions: any) => ({
+            //   ...prevOptions,
+            //   ...technologyUids,
+            // }));
+          } else {
+            // updateState(setTechnology, queryDetails.data.currently_using_any_of_technology_uids || []);
+          }
+
+          // updateState(setEventTypes, queryDetails.data.event_categories || []);
+          // setDays((prev) =>
+          //   queryDetails.data.published_at_date_range
+          //     ? parseInt(
+          //         queryDetails.data.published_at_date_range.min.replace(
+          //           "_days_ago",
+          //           ""
+          //         ),
+          //         10
+          //       )
+          //     : prev
+          // );
+          // setRecentNews((prev) => queryDetails.data.q_organization_keyword_tags || prev);
+          // setDepartmentMinCount(
+          //   (prev) =>
+          //     queryDetails.data.organization_department_or_subdepartment_counts
+          //       ?.min || prev
+          // );
+          // setDepartmentMaxCount(
+          //   (prev) =>
+          //     queryDetails.data.organization_department_or_subdepartment_counts
+          //       ?.max || prev
+          // );
+
+          // setTotalFound((prev) => prev + (queryDetails.results.pagination.total_entries > 100 ? queryDetails.results.pagination.total_entries : queryDetails.results.people.length) || 0);
+          // setProspects([]);
+        } else {
+          console.error("Failed to fetch saved query:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching saved query:", error);
+      }
+    }
+    setScoreLoading(false);
+  };
+
+  const handleApply = async () => {
+    if (!selectedFilter) return;
+    // innerProps.id = Number(selectedFilter);
+    // setShowApplyButton(false);
+    // setCurrentSavedQueryId(
+    //   prefilters.find((prefilter) => prefilter.id === Number(selectedFilter))
+    //     ?.id
+    // );
+  };
 
   const scoreCampaignFilters = async () => {
     setScoreLoading(true);
@@ -963,7 +1159,22 @@ const CampaignFilters = function ({
               <Accordion.Control
                 icon={<IconUser fill={"black"} size={"1.3rem"} />}
               >
-                Individual
+                Individual <Badge ml="sm" color="gray">
+                  {included_individual_title_keywords.length +
+                    excluded_individual_title_keywords.length +
+                    included_individual_seniority_keywords.length +
+                    excluded_individual_seniority_keywords.length +
+                    included_individual_industry_keywords.length +
+                    excluded_individual_industry_keywords.length +
+                    included_individual_skills_keywords.length +
+                    excluded_individual_skills_keywords.length +
+                    included_individual_locations_keywords.length +
+                    excluded_individual_locations_keywords.length +
+                    included_individual_generalized_keywords.length +
+                    included_individual_education_keywords.length +
+                    excluded_individual_education_keywords.length +
+                    excluded_individual_generalized_keywords.length}
+                </Badge>
               </Accordion.Control>
               <Accordion.Panel>
                 <Flex direction={"column"} gap={"4px"}>
@@ -1334,6 +1545,19 @@ const CampaignFilters = function ({
                 icon={<IconUsers fill={"black"} size={"1.3rem"} />}
               >
                 Company
+                <Badge ml="sm" color="gray">
+                  {
+                    included_company_name_keywords.length +
+                    excluded_company_name_keywords.length +
+                    included_company_locations_keywords.length +
+                    excluded_company_locations_keywords.length +
+                    included_company_industries_keywords.length +
+                    excluded_company_industries_keywords.length +
+                    included_company_generalized_keywords.length+
+                    excluded_company_generalized_keywords.length
+                  }
+                </Badge>
+
               </Accordion.Control>
               <Accordion.Panel>
                 <Flex direction={"column"} gap={"4px"}>
@@ -1597,6 +1821,51 @@ const CampaignFilters = function ({
                 </Flex>
               </Accordion.Panel>
             </Accordion.Item>
+            <Accordion.Item value="saved_icp_filter">
+          <Accordion.Control
+            icon={<IconFilter fill={"black"} size={"1.3rem"} />}
+          >
+            Apply saved ICP filter
+          </Accordion.Control>
+          <Accordion.Panel>
+            <Flex direction={"column"} gap={"4px"} w="500px">
+              <Select
+              w="100%"
+              label="Saved filters"
+              placeholder="Pick one"
+              data={prefilters.map((prefilter) => ({
+                value: prefilter.id,
+                label: prefilter.title,
+              }))}
+              value={selectedFilter}
+              onChange={(value) => {
+                setSelectedFilter(value);
+                const handleApply = async (value: any) => {
+                  mergeSavedQueries(Number(value));
+                  // if (!value) return;
+                  // innerProps.id = Number(value);
+                  // setShowApplyButton(false);
+                  // setCurrentSavedQueryId(prefilters.find((prefilter) => prefilter.id === Number(value))?.id);
+                };
+                handleApply(value);
+                // setShowApplyButton(true);
+              }}
+              rightSection={
+                false && (
+                  <Button
+                    onClick={handleApply}
+                    size="xs"
+                    style={{ marginLeft: "-60px" }}
+                  >
+                    Apply
+                  </Button>
+                )
+              }
+              style={{ width: "50%" }}
+            />
+            </Flex>
+          </Accordion.Panel>
+        </Accordion.Item>
           </Accordion>
         </ScrollArea>
       </Box>

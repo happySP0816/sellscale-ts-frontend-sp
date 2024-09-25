@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Drawer,
   Button,
@@ -32,6 +32,7 @@ import {
 import {
   IconBolt,
   IconBrandSlack,
+  IconCircleCheck,
   IconClick,
   IconClipboard,
   IconEye,
@@ -49,6 +50,7 @@ import { API_URL } from "@constants/data";
 import { deterministicMantineColor } from "@utils/requests/utils";
 import { showNotification } from "@mantine/notifications";
 import { socket } from "../../../components/App";
+import { ThreadType } from "./SelinAI";
 
 interface MemoryLog {
   id: number;
@@ -66,9 +68,10 @@ interface MemoryLog {
 
 interface MemoryLogsProps {
   onRevert: (log: string) => void;
+  threads: ThreadType[];
 }
 
-const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
+const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
   const [logs, setLogs] = useState<MemoryLog[]>([]);
   const [opened, setOpened] = useState(false);
   const [selectedLog, setSelectedLog]: any = useState<MemoryLog | null>(
@@ -83,11 +86,42 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
     session_id: "",
   });
   const [loading, setLoading] = useState(false);
+  const selectRef = useRef<HTMLInputElement>(null);
   const [loadingSelixLogs, setLoadingSelixLogs] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDescription, setEditedDescription] = useState("");
+  const [editingConnectedSession, setEditingConnectedSession] = useState(false);
   const userToken = useRecoilValue(userTokenState);
   const [roomId, setRoomId] = useState("");
+
+  const updateMemoryLogSessionId = async (selixLogId: number, sessionId: number | undefined) => {
+    if (!sessionId) {
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/selix/log/update_session_id`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ selix_log_id: selixLogId, session_id: sessionId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update session id");
+      }
+
+      const result = await response.json();
+      console.log("Session id updated successfully:", result);
+      fetchSelixLogs(selixLogId); // Refresh logs after update
+    } catch (error) {
+      console.error("Error updating session id:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const fetchSelixLogs = async (selixLogId: number | null = null) => {
     try {
@@ -603,20 +637,103 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                     <Flex>
                       {selectedLog.session_name && (
                         <Box>
-                          <Text size="10px" color="gray">
-                            Connected session:
-                          </Text>
-                          <Badge
-                            color={deterministicMantineColor(
-                              selectedLog.session_name
-                            )}
-                            variant="filled"
-                            size="md"
-                            mb="md"
-                            mr="sm"
-                          >
-                            {selectedLog.session_name}
-                          </Badge>
+                          <Flex align="center">
+                            <Text size="10px" color="gray">
+                              Connected session:
+                            </Text>
+                            {/* <ActionIcon onClick={() => setEditingConnectedSession(true)}>
+                              <IconPencil size={12} color="gray" style={{ marginLeft: '4px' }} />
+                            </ActionIcon> */}
+                          </Flex>
+                          {editingConnectedSession ? (
+                            <Flex align="center" style={{ width: "200px" }}>
+                              <Select
+                                ref={selectRef}
+                                data={threads.map((thread) => ({
+                                  value: thread.session_name,
+                                  label: thread.session_name,
+                                }))}
+                                value={null}
+                                onChange={(value) => {
+                                  setSelectedLog({
+                                    ...selectedLog,
+                                    session_name: value,
+                                  });
+                                  updateMemoryLogSessionId(selectedLog.id, threads.find(thread => thread.session_name === value)?.id);
+                                  setEditingConnectedSession(false);
+                                }}
+                                size="md"
+                                mb="md"
+                                mr="sm"
+                                style={{ width: "100%" }}
+                                rightSectionWidth={'100%'}
+                                rightSection={
+                                  selectedLog.session_name && (
+                                    <Badge
+                                      color={deterministicMantineColor(selectedLog.session_name)}
+                                      variant="filled"
+                                      style={{ width: '100%' }}
+                                    >
+                                      {selectedLog.session_name}
+                                    </Badge>
+                                  )
+                                }
+                                itemComponent={({ value, label, ...others }) => {
+                                  const { onMouseDown, onMouseEnter, role, tabIndex } = others;
+                                  return (
+                                    <Badge
+                                      color={deterministicMantineColor(value)}
+                                      variant="filled"
+                                      size="sm"
+                                      mr="sm"
+                                      mb="sm"
+                                      style={{ width: '170px' }}
+                                      onMouseDown={onMouseDown}
+                                      onMouseEnter={(event) => {
+                                        onMouseEnter(event);
+                                        event.currentTarget.style.cursor = 'pointer';
+                                      }}
+                                      role={role}
+                                      tabIndex={tabIndex}
+                                    >
+                                      {label}
+                                    </Badge>
+                                  );
+                                }}
+                                searchable
+                                clearable
+                                onDropdownOpen={() => selectRef.current?.focus()}
+                              />
+                              {/* <ActionIcon
+                                onClick={() => {
+                                  setEditingConnectedSession(false);
+                                  updateMemoryLogSessionId(selectedLog.id, threads.find(thread => thread.session_name === selectedLog.session_name)?.id);
+                                }}
+                              >
+                                <IconCircleCheck size={16} color="green" />
+                              </ActionIcon> */}
+                            </Flex>
+                          ) : (
+                            <Badge
+                              color={deterministicMantineColor(
+                                selectedLog.session_name
+                              )}
+                              variant="filled"
+                              size="md"
+                              mb="md"
+                              mr="sm"
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => {
+                                setEditingConnectedSession(true);
+                                setTimeout(() => {
+                                  selectRef.current?.focus();
+                                  selectRef.current?.click();
+                                }, 0);
+                              }}
+                            >
+                              {selectedLog.session_name}
+                            </Badge>
+                          )}
                         </Box>
                       )}
                       {selectedLog.processing_status ? (
@@ -657,6 +774,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert }) => {
                           onClick={() => updateProcessingType(selectedLog.id)}
                           size="xs"
                           color="blue"
+                          ml="lg"
                           variant="outline"
                           mb="md"
                         >

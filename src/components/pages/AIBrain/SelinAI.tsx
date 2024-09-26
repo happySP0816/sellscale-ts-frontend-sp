@@ -4501,6 +4501,7 @@ const PlannerComponent = ({
                                 <Text p={"xs"} mt={"sm"} size="xs">
                                   {editingTask === index ? (
                                     <RichTextArea
+                                    overrideSticky={true}
                                     onChange={(value, rawValue) => {
                                       taskDraftDescriptionRaw.current = rawValue;
                                       taskDraftDescription.current = value;

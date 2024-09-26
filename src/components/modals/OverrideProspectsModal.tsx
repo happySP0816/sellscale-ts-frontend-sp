@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Flex,
+  Loader,
   Paper,
   Stack,
   Switch,
@@ -22,12 +23,18 @@ import {
   IconUser,
 } from "@tabler/icons";
 import { DataGrid } from "mantine-data-grid";
+import { useState } from "react";
 
 export default function OverrideProspectsModal({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ data: any }>) {
+}: ContextModalProps<{
+  data: any;
+  uploadProspect: () => Promise<void>;
+}>) {
+  const [loading, setLoading] = useState<boolean>(false);
+
   return (
     <Stack spacing={"sm"}>
       <Text fw={400} color="gray" size={"sm"}>
@@ -302,10 +309,25 @@ export default function OverrideProspectsModal({
         </Flex>
       </Paper>
       <Flex gap={"lg"} mt={"lg"}>
-        <Button fullWidth variant="outline" color="gray">
+        <Button
+          fullWidth
+          onClick={() => context.closeModal(id)}
+          variant="outline"
+          color="gray"
+        >
           Nevermind
         </Button>
-        <Button fullWidth>Go Ahead</Button>
+        <Button
+          fullWidth
+          onClick={async () => {
+            setLoading(true);
+            await innerProps.uploadProspect();
+            setLoading(false);
+            context.closeModal(id);
+          }}
+        >
+          {loading ? <Loader /> : "Go Ahead"}
+        </Button>
       </Flex>
     </Stack>
   );

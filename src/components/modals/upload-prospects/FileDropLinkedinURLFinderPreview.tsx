@@ -22,11 +22,25 @@ import {
   Input,
   TextInput,
   Textarea,
+  Avatar,
+  Badge,
+  Anchor,
 } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import { useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
-import { IconUpload, IconX, IconTrashX } from "@tabler/icons";
+import {
+  IconUpload,
+  IconX,
+  IconTrashX,
+  IconLetterT,
+  IconBuilding,
+  IconUser,
+  IconClock,
+  IconTargetArrow,
+  IconLoader,
+  IconToggleRight,
+} from "@tabler/icons";
 import { convertFileToJSON } from "@utils/fileProcessing";
 import createPersona from "@utils/requests/createPersona";
 import uploadProspects, {
@@ -34,11 +48,15 @@ import uploadProspects, {
 } from "@utils/requests/uploadProspects";
 import _ from "lodash";
 import { DataTable } from "mantine-datatable";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { QueryCache } from "@tanstack/react-query";
 import { MaxHeap } from "@datastructures-js/heap";
+import { DataGrid } from "mantine-data-grid";
+import { a } from "react-spring";
+import { FilterVariant } from "@modals/ContactAccountFilterModal";
+import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 
 const MAX_FILE_SIZE_MB = 2;
 const PREVIEW_FIRST_N_ROWS = 5;
@@ -447,6 +465,423 @@ export default function FileDropLinkedinURLFinderPreview(
 
   const [opened, { open, close }] = useDisclosure(false);
 
+  const generatedDuplicateColumns = useMemo(() => {
+    const headers = [
+      { label: "Full Name", id: "full_name" },
+      { label: "Company", id: "company" },
+      { label: "Title", id: "title" },
+      { label: "SDR", id: "sdr" },
+      { label: "Segment", id: "segment" },
+      { label: "Campaign", id: "archetype" },
+      { label: "Status", id: "status" },
+      { label: "Linkedin URL", id: "linkedin_url" },
+      {
+        label: "Previous Campaign: Linkedin",
+        id: "previous_outreach_linkedin",
+      },
+      { label: "Previous Campaign: Email", id: "previous_outreach_email" },
+    ];
+
+    return headers.map((item: any) => {
+      return {
+        header: item.label,
+        accessorKey: item.id,
+        size: 250,
+        enableColumnFilter: item.id === "status",
+        filterVariant: "select" as FilterVariant,
+        filterFn: (row: any, id: any, filterValue: string) => {
+          let value = row.getValue(id);
+
+          return value === filterValue;
+        },
+        mantineFilterSelectProps: {
+          data:
+            item.id === "status"
+              ? [
+                  "PROSPECTED",
+                  "SENT_OUTREACH",
+                  "ACCEPTED",
+                  "BUMPED",
+                  "ACTIVE_CONVO",
+                  "DEMO",
+                  "REMOVED",
+                  "NURTURE",
+                ]
+              : [],
+        },
+        mantineTableBodyCellProps: {
+          sx: {
+            border: `1px black`,
+          },
+        },
+        Header: () => {
+          return (
+            <Flex align={"center"} gap={"3px"}>
+              <Text color="gray">{item.label}</Text>
+            </Flex>
+          );
+        },
+        Cell: ({ cell }: { cell: any }) => {
+          const columnId = cell.column.id;
+          const rowData = cell.row.original;
+
+          switch (columnId) {
+            case "full_name":
+              return (
+                <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
+                  <Avatar src={"/"} size={"md"} radius={"xl"} />
+                  <Text fw={500}>{rowData.full_name}</Text>
+                </Flex>
+              );
+
+            case "company":
+              return (
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  <Text fw={500}>{rowData.company}</Text>
+                </Flex>
+              );
+
+            case "title":
+              return (
+                <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
+                  <Text fw={500} lineClamp={2} maw={200}>
+                    {rowData.title}
+                  </Text>
+                </Flex>
+              );
+
+            case "sdr":
+              return (
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  <Text fw={500}>{rowData.sdr}</Text>
+                </Flex>
+              );
+
+            case "segment":
+              return (
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  <Text fw={500}>
+                    {rowData.segment_title ? rowData.segment_title : "None"}
+                  </Text>
+                </Flex>
+              );
+
+            case "archetype":
+              return (
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  <Text fw={500}>{rowData.archetype}</Text>
+                </Flex>
+              );
+
+            case "status":
+              return (
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  <Badge>{rowData.status}</Badge>
+                </Flex>
+              );
+
+            case "linkedin_url":
+              return (
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  <Anchor
+                    href={`https://${rowData.linkedin_url}`}
+                    target="_blank"
+                  >
+                    <Text>{rowData.linkedin_url}</Text>
+                  </Anchor>
+                </Flex>
+              );
+
+            case "previous_outreach_linkedin":
+              return (
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  {rowData.previous_outreach_linkedin ? (
+                    <Badge color={"green"} variant={"outline"}>
+                      True
+                    </Badge>
+                  ) : (
+                    <Badge color={"red"} variant={"outline"}>
+                      False
+                    </Badge>
+                  )}
+                </Flex>
+              );
+
+            case "previous_outreach_email":
+              return (
+                <Flex
+                  align={"center"}
+                  gap={"xs"}
+                  py={"sm"}
+                  w={"100%"}
+                  h={"100%"}
+                >
+                  {rowData.previous_outreach_email ? (
+                    <Badge color={"green"} variant={"outline"}>
+                      True
+                    </Badge>
+                  ) : (
+                    <Badge color={"red"} variant={"outline"}>
+                      False
+                    </Badge>
+                  )}
+                </Flex>
+              );
+
+            default:
+              return null;
+          }
+        },
+      };
+    });
+  }, []);
+
+  const sameArchetype = useMemo(() => {
+    return duplicateProspects?.filter((item) => item.same_archetype) ?? [];
+  }, [duplicateProspects]);
+
+  const sameArchetypeTable = useMantineReactTable({
+    columns: generatedDuplicateColumns,
+    data: sameArchetype,
+    getRowId: (row) => "" + row.row,
+    enableRowSelection: true,
+    enableBottomToolbar: true,
+    enableTopToolbar: false,
+    enableStickyHeader: true,
+    enableStickyFooter: true,
+    enableColumnResizing: true,
+    mantineTableHeadRowProps: {
+      sx: {
+        shadow: "none",
+        boxShadow: "none",
+      },
+    },
+    mantineTableProps: {
+      sx: {
+        borderCollapse: "separate",
+        border: "none",
+        borderSpacing: "0px 0px",
+      },
+      withColumnBorders: true,
+    },
+    mantineTableBodyCellProps: ({ row }) => {
+      return {
+        style: {
+          backgroundColor: duplicateProspects?.find(
+            (item) => item.row === +row.id
+          )?.override
+            ? "cyan"
+            : undefined,
+        },
+      };
+    },
+    mantineSelectAllCheckboxProps: {
+      indeterminate: !duplicateProspects?.every((item) => item.override),
+      checked: duplicateProspects?.every((item) => item.override),
+      onChange: (e) => {
+        if (!e.currentTarget.checked) {
+          console.log("testing got here: ");
+          setDuplicateProspects((prevState) =>
+            prevState
+              ? prevState.map((item) => {
+                  return { ...item, override: true };
+                })
+              : []
+          );
+        } else {
+          setDuplicateProspects((prevState) =>
+            prevState
+              ? prevState.map((item) => {
+                  return { ...item, override: false };
+                })
+              : []
+          );
+        }
+      },
+    },
+    mantineSelectCheckboxProps: ({ row }) => {
+      return {
+        checked: duplicateProspects?.find((item) => item.row === +row.id)
+          ?.override,
+        onChange: (e) => {
+          if (!e.currentTarget.checked) {
+            setDuplicateProspects((prevState) => {
+              if (!prevState) {
+                return [];
+              }
+              return prevState.map((item) => {
+                if (item.row === +row.id) {
+                  return { ...item, override: false };
+                } else {
+                  return item;
+                }
+              });
+            });
+          } else {
+            setDuplicateProspects((prevState) => {
+              if (!prevState) {
+                return [];
+              }
+              return prevState.map((item) => {
+                if (item.row === +row.id) {
+                  return { ...item, override: true };
+                } else {
+                  return item;
+                }
+              });
+            });
+          }
+        },
+      };
+    },
+  });
+
+  const differentArchetype = useMemo(() => {
+    return duplicateProspects?.filter((item) => !item.same_archetype) ?? [];
+  }, [duplicateProspects]);
+
+  const differentArchetypeTable = useMantineReactTable({
+    columns: generatedDuplicateColumns,
+    data: differentArchetype,
+    enableRowSelection: true,
+    getRowId: (row) => "" + row.row,
+    mantineTableContainerProps: {
+      sx: {
+        maxHeight: "540px",
+      },
+    },
+    enableBottomToolbar: true,
+    enableTopToolbar: false,
+    enableStickyHeader: true,
+    enableStickyFooter: true,
+    enableColumnResizing: true,
+    mantineTableHeadRowProps: {
+      sx: {
+        shadow: "none",
+        boxShadow: "none",
+      },
+    },
+    mantineTableProps: {
+      sx: {
+        borderCollapse: "separate",
+        border: "none",
+        borderSpacing: "0px 0px",
+      },
+      withColumnBorders: true,
+    },
+    mantineTableBodyCellProps: ({ row }) => {
+      return {
+        style: {
+          backgroundColor: duplicateProspects?.find(
+            (item) => item.row === +row.id
+          )?.override
+            ? "cyan"
+            : undefined,
+        },
+      };
+    },
+    mantineSelectAllCheckboxProps: {
+      indeterminate: !duplicateProspects?.every((item) => item.override),
+      checked: duplicateProspects?.every((item) => item.override),
+      onChange: (e: any) => {
+        if (!e.currentTarget.checked) {
+          setDuplicateProspects((prevState) =>
+            prevState
+              ? prevState.map((item) => {
+                  return { ...item, override: false };
+                })
+              : []
+          );
+        } else {
+          setDuplicateProspects((prevState) =>
+            prevState
+              ? prevState.map((item) => {
+                  return { ...item, override: true };
+                })
+              : []
+          );
+        }
+      },
+    },
+    mantineSelectCheckboxProps: ({ row }) => {
+      return {
+        checked: duplicateProspects?.find((item) => item.row === +row.id)
+          ?.override,
+        onChange: (e: any) => {
+          if (!e.currentTarget.checked) {
+            setDuplicateProspects((prevState) => {
+              if (!prevState) {
+                return [];
+              }
+              return prevState.map((item) => {
+                if (item.row === +row.id) {
+                  return { ...item, override: false };
+                } else {
+                  return item;
+                }
+              });
+            });
+          } else {
+            setDuplicateProspects((prevState) => {
+              if (!prevState) {
+                return [];
+              }
+              return prevState.map((item) => {
+                if (item.row === +row.id) {
+                  return { ...item, override: true };
+                } else {
+                  return item;
+                }
+              });
+            });
+          }
+        },
+      };
+    },
+  });
+
   return (
     <>
       <Modal
@@ -480,66 +915,7 @@ export default function FileDropLinkedinURLFinderPreview(
                   Prospects from different campaigns
                 </Accordion.Control>
                 <Accordion.Panel>
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th>
-                          <Checkbox
-                            onChange={(event) =>
-                              setOverrideAll(event.currentTarget.checked, false)
-                            }
-                            checked={duplicateProspects
-                              .filter((item) => !item.same_archetype)
-                              .every((item) => item.override)}
-                          />
-                        </th>
-                        <th>Name</th>
-                        <th>Company</th>
-                        <th>Title</th>
-                        <th>SDR</th>
-                        <th>Segment</th>
-                        <th>Campaign</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {duplicateProspects
-                        .filter((prospect) => !prospect.same_archetype)
-                        .map((prospect) => {
-                          return (
-                            <tr key={prospect.row}>
-                              <td>
-                                <Checkbox
-                                  checked={prospect.override}
-                                  onChange={(event) => {
-                                    setDuplicateProspects((prevState) => {
-                                      return prevState!.map((item) => {
-                                        if (item.row === prospect.row) {
-                                          return {
-                                            ...item,
-                                            override:
-                                              event.currentTarget.checked,
-                                          };
-                                        }
-
-                                        return item;
-                                      });
-                                    });
-                                  }}
-                                />
-                              </td>
-                              <td>{prospect.full_name}</td>
-                              <td>{prospect.company}</td>
-                              <td>{prospect.title}</td>
-                              <td>{prospect.sdr}</td>
-                              <td>{prospect.segment_title ?? "None"}</td>
-                              <td>{prospect.archetype}</td>
-                              <td>{prospect.status}</td>
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </Table>
+                  <MantineReactTable table={differentArchetypeTable} />
                 </Accordion.Panel>
               </Accordion.Item>
               <Accordion.Item value={"duplicate-same-archetypes"}>
@@ -547,66 +923,7 @@ export default function FileDropLinkedinURLFinderPreview(
                   Prospects from the current campaign
                 </Accordion.Control>
                 <Accordion.Panel>
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th>
-                          <Checkbox
-                            onChange={(event) =>
-                              setOverrideAll(event.currentTarget.checked, true)
-                            }
-                            checked={duplicateProspects
-                              .filter((item) => item.same_archetype)
-                              .every((item) => item.override)}
-                          />
-                        </th>
-                        <th>Name</th>
-                        <th>Company</th>
-                        <th>Title</th>
-                        <th>SDR</th>
-                        <th>Segment</th>
-                        <th>Campaign</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {duplicateProspects
-                        .filter((prospect) => prospect.same_archetype)
-                        .map((prospect) => {
-                          return (
-                            <tr key={prospect.row}>
-                              <td>
-                                <Checkbox
-                                  checked={prospect.override}
-                                  onChange={(event) => {
-                                    setDuplicateProspects((prevState) => {
-                                      return prevState!.map((item) => {
-                                        if (item.row === prospect.row) {
-                                          return {
-                                            ...item,
-                                            override:
-                                              event.currentTarget.checked,
-                                          };
-                                        }
-
-                                        return item;
-                                      });
-                                    });
-                                  }}
-                                />
-                              </td>
-                              <td>{prospect.full_name}</td>
-                              <td>{prospect.company}</td>
-                              <td>{prospect.title}</td>
-                              <td>{prospect.sdr}</td>
-                              <td>{prospect.segment_title ?? "None"}</td>
-                              <td>{prospect.archetype}</td>
-                              <td>{prospect.status}</td>
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </Table>
+                  <MantineReactTable table={sameArchetypeTable} />
                 </Accordion.Panel>
               </Accordion.Item>
             </Accordion>
@@ -806,7 +1123,7 @@ export default function FileDropLinkedinURLFinderPreview(
                       withAsterisk
                       placeholder={"custom data name or short description"}
                     />
-                  <Textarea
+                    <Textarea
                       value={customDataColumnName}
                       onChange={(event) =>
                         setCustomDataColumnName(event.currentTarget.value)
@@ -822,7 +1139,9 @@ export default function FileDropLinkedinURLFinderPreview(
                     <Button
                       disabled={!customDataColumnName}
                       onClick={() => {
-                        const column_name = customDataColumnName?.split(" ").join("_") + "_customdata_"
+                        const column_name =
+                          customDataColumnName?.split(" ").join("_") +
+                          "_customdata_";
 
                         setProspectDBColumns((prevState) => [
                           ...prevState,

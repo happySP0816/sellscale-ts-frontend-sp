@@ -129,7 +129,7 @@ interface CustomCursorWrapperProps {
 import { Dropzone, DropzoneProps } from "@mantine/dropzone";
 import { Modal, Overlay } from "@mantine/core";
 import { currentProjectState } from "@atoms/personaAtoms";
-import { getFreshCurrentProject, isFreeUser } from "@auth/core";
+import { getFreshCurrentProject, isFreeUser, saveCurrentPersonaId } from "@auth/core";
 import Tour from "reactour";
 import { useNavigate } from "react-router-dom";
 import Sequences from "@pages/CampaignV2/Sequences";
@@ -1535,11 +1535,11 @@ export default function SelinAI() {
                               <Text
                                 fw={600}
                                 onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingIndex(index);
-                                  setEditingSessionName(thread.session_name);
+                                  // e.stopPropagation();
+                                  // setEditingIndex(index);
+                                  // setEditingSessionName(thread.session_name);
                                 }}
-                                style={{ cursor: "text" }}
+                                // style={{ cursor: "text" }}
                               >
                                 {thread.session_name || "Untitled Session"}
                               </Text>
@@ -4659,9 +4659,10 @@ const TaskRenderer = ({
       (async (campaignId: any) => {
         const project = await getFreshCurrentProject(userToken, campaignId);
         setCurrentProject(project);
+        saveCurrentPersonaId(currentProject?.id.toString())
       })(currentProject?.id);
     }
-  }, [currentProject?.id]);
+  }, [currentProject]);
 
   switch (task.widget_type) {
     case "LAUNCH_CAMPAIGN":

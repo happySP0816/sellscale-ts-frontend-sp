@@ -2,13 +2,22 @@
 //break them down into three separate sections so they can be loaded asynchronously.
 import { API_URL } from "@constants/data";
 
+let campaign_v2_campaign_id = (() => {
+  const url = window.location.href;
+  if (url.includes("campaign_v2")) {
+    const match = url.match(/campaign_v2\/(\d+)/);
+    return match ? match[1] : null;
+  }
+  return null;
+})();
+
 export const fetchCampaignPersonalizers = async (
   userToken: string,
   client_archetype_id: number
 ) => {
   try {
     const response = await fetch(
-      `${API_URL}/ml/researchers/archetype/${client_archetype_id}/questions`,
+      `${API_URL}/ml/researchers/archetype/${campaign_v2_campaign_id || client_archetype_id}/questions`,
       {
         headers: {
           Authorization: "Bearer " + userToken,
@@ -37,14 +46,14 @@ export const patchTestingVolume = async (
 ) => {
   try {
     const response = await fetch(
-      `${API_URL}/client/archetype/${client_archetype_id}/testing_volume`,
+      `${API_URL}/client/archetype/${campaign_v2_campaign_id || client_archetype_id}/testing_volume`,
       {
         method: "PATCH",
         headers: {
           Authorization: "Bearer " + userToken,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ testing_volume, client_archetype_id }),
+        body: JSON.stringify({ testing_volume, client_archetype_id: campaign_v2_campaign_id || client_archetype_id }),
       }
     );
 
@@ -76,7 +85,7 @@ export const getSentVolumeDuringPeriod = async (
           Authorization: "Bearer " + userToken,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ start_date: startDate.toISOString(), end_date: endDate.toISOString(), campaign_id: campaignId}),
+        body: JSON.stringify({ start_date: startDate.toISOString(), end_date: endDate.toISOString(), campaign_id: campaign_v2_campaign_id || campaignId}),
       }
     );
 
@@ -100,7 +109,7 @@ export const fetchTotalContacts = async (
 ) => {
   try {
     const response = await fetch(
-      `${API_URL}/client/total_contacts?client_archetype_id=${client_archetype_id}`,
+      `${API_URL}/client/total_contacts?client_archetype_id=${campaign_v2_campaign_id || client_archetype_id}`,
       {
         headers: {
           Authorization: "Bearer " + userToken,
@@ -133,7 +142,7 @@ export const fetchCampaignContacts = async (
 ) => {
   try {
     const response = await fetch(
-      `${API_URL}/client/campaign_contacts?client_archetype_id=${client_archetype_id}&offset=${offset}&limit=${limit}&text=${encodeURIComponent(text)}&include_analytics=${include_analytics}`,
+      `${API_URL}/client/campaign_contacts?client_archetype_id=${campaign_v2_campaign_id || client_archetype_id}&offset=${offset}&limit=${limit}&text=${encodeURIComponent(text)}&include_analytics=${include_analytics}`,
       {
         headers: {
           Authorization: "Bearer " + userToken,
@@ -161,7 +170,7 @@ export const fetchCampaignSequences = async (
 ) => {
   try {
     const response = await fetch(
-      `${API_URL}/client/campaign_sequences?client_archetype_id=${client_archetype_id}`,
+      `${API_URL}/client/campaign_sequences?client_archetype_id=${campaign_v2_campaign_id || client_archetype_id}`,
       {
         headers: {
           Authorization: "Bearer " + userToken,
@@ -189,7 +198,7 @@ export const fetchCampaignAnalytics = async (
 ) => {
   try {
     const response = await fetch(
-      `${API_URL}/client/campaign_analytics?client_archetype_id=${client_archetype_id}`,
+      `${API_URL}/client/campaign_analytics?client_archetype_id=${campaign_v2_campaign_id || client_archetype_id}`,
       {
         method: "GET",
         headers: {
@@ -219,7 +228,7 @@ export const fetchCampaignStats = async (
 ) => {
   try {
     const response = await fetch(
-      `${API_URL}/client/campaign_stats?client_archetype_id=${client_archetype_id}`,
+      `${API_URL}/client/campaign_stats?client_archetype_id=${campaign_v2_campaign_id || client_archetype_id}`,
       {
         headers: {
           Authorization: "Bearer " + userToken,

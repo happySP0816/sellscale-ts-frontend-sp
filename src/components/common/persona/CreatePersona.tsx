@@ -149,14 +149,64 @@ export default function CreatePersona(props: PropsType) {
     //   window.location.href = "/contacts/overview";
     // }, 3000);
 
+    //this needs to be cleaned up. what a mess.
+
+
     //short circuit to enter the user into the campaign shell.
     if (result.data && !window.location.href.includes('selix')) {
+      const response = await getPersonasOverview(userToken);
+      const results =
+        response.status === "success"
+          ? (response.data as PersonaOverview[])
+          : [];
+
+
+      const currentPersonaId = result?.data as number;
+      let activeProject = null;
+      if (currentPersonaId) {
+        activeProject = results.find(
+          (project) => project.id === +currentPersonaId
+        );
+      }
+      if (!activeProject) {
+        activeProject = results.find((project) => project.active);
+      }
+      if (!activeProject) {
+        activeProject = null;
+      }
+
+      setCurrentProject(activeProject);
       window.location.href = `/campaign_v2/${result.data as number}`;
       return result.data as number;
     }
 
-    //do not reload the page if we are in selix
+    //do not reload the page if we are in selix actually i think we will never get to this first case. 
     if (!window.location.href.includes('selix')){
+
+      const response = await getPersonasOverview(userToken);
+      const results =
+        response.status === "success"
+          ? (response.data as PersonaOverview[])
+          : [];
+
+
+      const currentPersonaId = result?.data as number;
+      let activeProject = null;
+      if (currentPersonaId) {
+        activeProject = results.find(
+          (project) => project.id === +currentPersonaId
+        );
+      }
+      if (!activeProject) {
+        activeProject = results.find((project) => project.active);
+      }
+      if (!activeProject) {
+        activeProject = null;
+      }
+
+      setCurrentProject(activeProject);
+
+
     window.location.reload();
     } else  {
 

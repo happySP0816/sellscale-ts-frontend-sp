@@ -5107,7 +5107,7 @@ export const LinkedinIntroSectionV2 = function (props: {
               onClick={() => setShowEditVariants((prevState) => !prevState)}
             >
               {`Variant #${templateIndex + 1}: ${
-                props.templates[templateIndex].title ?? ""
+                props.templates?.[templateIndex]?.title ?? ""
               }`}
             </Badge>
             <ActionIcon

@@ -1,10 +1,12 @@
 import { userTokenState } from '@atoms/userAtoms';
-import { Switch, Text, Title } from '@mantine/core';
+import { Loader, Switch, Text, Title } from '@mantine/core';
 import { openConfirmModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { IconMailPause } from '@tabler/icons-react';
 import { activatePersona } from '@utils/requests/postPersonaActivation';
 import { deactivatePersona } from '@utils/requests/postPersonaDeactivation';
+import { set } from 'lodash';
+import { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
 const UserStatusToggle: React.FC<{
@@ -13,6 +15,7 @@ const UserStatusToggle: React.FC<{
   onChangeUserStatusSuccess: (status: boolean) => void;
 }> = ({ projectId, isActive = false, onChangeUserStatusSuccess }) => {
   const token = useRecoilValue(userTokenState);
+  const [loading, setLoading] = useState(false);
 
   const triggerBasicPersonaDeactivation = async () => {
     if (!projectId) {
@@ -69,11 +72,11 @@ const UserStatusToggle: React.FC<{
     const result = await activatePersona(token, projectId);
     if (result.status === 'success') {
       onChangeUserStatusSuccess?.(true);
-      showNotification({
-        title: 'Campaign Activated',
-        message: 'Your campaign has been activated.',
-        color: 'green',
-      });
+      // showNotification({
+      //   title: 'Campaign Activated',
+      //   message: 'Your campaign has been activated.',
+      //   color: 'green',
+      // });
     } else {
       showNotification({
         title: 'Error',
@@ -84,6 +87,7 @@ const UserStatusToggle: React.FC<{
   };
 
   const handleUserStatusChanges = async () => {
+    setLoading(true);
     if (isActive) {
       openConfirmModal({
         title: <Title order={3}>Deactivate Campaign</Title>,
@@ -115,32 +119,25 @@ const UserStatusToggle: React.FC<{
         },
       });
     } else {
+      setLoading(true);
       await triggerActivatePersona();
+      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (
     <>
-      <Switch
-        checked={isActive}
-        size='sm'
-        // styles={(theme) => ({
-        //   thumb: {
-        //     backgroundColor: theme.colors.blue[6],
-        //   },
-        //   track: {
-        //     backgroundColor: `${
-        //       isActive ? "#FFFFFF" : theme.colors.gray[1]
-        //     } !important`,
-        //   },
-        //   trackLabel: {
-        //     backgroundColor: `${
-        //       isActive ? "#FFFFFF" : theme.colors.gray[1]
-        //     } !important`,
-        //   },
-        // })}
-        onClick={handleUserStatusChanges}
-      />
+      {loading ? (
+        <Loader size="sm" />
+      ) : (
+        <Switch
+          checked={isActive}
+          size='sm'
+          sx={{ cursor: 'pointer' }}
+          onClick={handleUserStatusChanges}
+        />
+      )}
     </>
   );
 };

@@ -21,18 +21,41 @@ export default async function postTogglePersonaActive(userToken: string, archety
     return {} as MsgResponse;
   }
 
-  const response = await fetch(
-    `${API_URL}/client/archetype/${archetypeID}/${type}/active`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        active: active
-      }),
+  try {
+    const response = await fetch(
+      `${API_URL}/client/archetype/${archetypeID}/${type}/active`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          active: active
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      showNotification({
+        title: "Error",
+        message: errorData.message || "An error occurred",
+        color: "red",
+      });
+      return {} as MsgResponse;
     }
-  );
-  return await processResponse(response);
+
+    return await processResponse(response);
+  } catch (error) {
+    const errorMessage = (error instanceof Error ? error.message : "An error occurred");
+    if (!errorMessage.includes("Unexpected token '<'")) {
+      showNotification({
+        title: "Error",
+        message: errorMessage,
+        color: "red",
+      });
+    }
+    return {} as MsgResponse;
+  }
 }

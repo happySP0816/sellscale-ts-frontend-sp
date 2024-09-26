@@ -39,6 +39,7 @@ import {
   HoverCard,
   Table,
   Input,
+  NativeSelect,
 } from "@mantine/core";
 import {
   IconAdjustments,
@@ -143,6 +144,7 @@ import { set } from "lodash";
 import { setSmartleadCampaign } from "@utils/requests/setSmartleadCampaign";
 import SelixMemoryLogs from "./SelinMemoryLogs";
 import { Draggable } from "react-beautiful-dnd";
+import { isInt } from "@fullcalendar/core/internal";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
@@ -3972,6 +3974,8 @@ const PlannerComponent = ({
     undefined
   );
 
+  const isInternal = window.location.href.includes("internal")
+
   const campaignId = threads.find((thread) => thread.id === currentSessionId)
     ?.memory?.campaign_id;
 
@@ -3979,7 +3983,10 @@ const PlannerComponent = ({
     (thread) => thread.id === currentSessionId
   );
 //updateTask(tasks[index].id, editingTaskText, taskDraftDescription, tasks[index].status);
-  const updateTask = async (taskId: number, title: string, description: string, status: string) => {
+  const updateTask = async (taskId: number, title: string, description: string, status: string, widget_type: string | undefined) => {
+
+    if (widget_type === '' ) widget_type = undefined;
+
     try {
       const response = await fetch(`${API_URL}/selix/update-task`, {
         method: 'POST',
@@ -3992,6 +3999,7 @@ const PlannerComponent = ({
           title,
           description,
           status,
+          widgetType: widget_type
         }),
       });
 
@@ -4098,6 +4106,9 @@ const PlannerComponent = ({
   };
 
   const onDragEnd = async (result: { destination: { index: number }; source: { index: number } }) => {
+    if (!isInternal){
+      return
+    }
     if (!result.destination) {
       return;
     }
@@ -4241,7 +4252,7 @@ const PlannerComponent = ({
               source: { index: result.source.index }
             });
           }}>
-            <Droppable droppableId="tasks">
+            <Droppable isDropDisabled={!isInternal} droppableId="tasks">
               {(provided) => (
                 <div ref={provided.innerRef} {...provided.droppableProps}>
                   {tasks
@@ -4280,7 +4291,7 @@ const PlannerComponent = ({
                       };
 
                       return (
-                        <Draggable key={task.id} index={index} draggableId={`task-${task.id}`}>
+                        <Draggable key={task.id} index={index} draggableId={`task-${task.id}`} isDragDisabled={!isInternal}>
                           {(provided) => (
                             <Paper
                               withBorder
@@ -4293,22 +4304,43 @@ const PlannerComponent = ({
                             >
                               <Flex justify={"space-between"} align={"center"} p={"4px"}>
                                 {editingTask === index ? (
-                                  <Flex align="center" gap="xs" w={"50%"}>
-                                    <Input
-                                      value={editingTaskText}
-                                      onChange={(e) => {
-                                        setEditingTaskText(e.target.value);
-                                      }}
-                                      autoFocus
-                                      style={{ flexGrow: 1 }}
-                                    />
+                                  <Flex align="center" gap="xs" w={"60%"}>
+                                    <Flex w="80%" gap="xs">
+                                      <Input
+                                        value={editingTaskText}
+                                        onChange={(e) => {
+                                          setEditingTaskText(e.target.value);
+                                        }}
+                                        autoFocus
+                                        style={{ flexGrow: 1 }}
+                                      />
+                                      <NativeSelect
+                                        value={task.widget_type}
+                                        data={[
+                                          { value: '', label: 'Proof of Work (image)' },
+                                          { value: 'LAUNCH_CAMPAIGN', label: 'Launch Campaign' },
+                                          { value: 'VIEW_STRATEGY', label: 'View Strategy' },
+                                          { value: 'REVIEW_PROSPECTS', label: 'Review Prospects' },
+                                          { value: 'VIEW_SEQUENCE', label: 'View Sequence' },
+                                          { value: 'VIEW_PERSONALIZERS', label: 'Campaign Personalizers' },
+                                          { value: 'REVIEW_COMPANIES', label: 'Review Companies' },
+                                          { value: 'ONE_SHOT_GENERATOR', label: 'One Shot Generator' },
+                                        ]}
+                                        onChange={(e) => {
+                                          const updatedTasks = [...tasks];
+                                          updatedTasks[index].widget_type = e.currentTarget.value;
+                                          setTasks(updatedTasks);
+                                        }}
+                                        style={{ width: '40%' }}
+                                      />
+                                    </Flex>
                                     <Badge
                                       color="green"
-                                      style={{ cursor: 'pointer' }}
+                                      style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
                                       onClick={() => {
                                         setEditingTask(null);
                                         setTasks(tasks.map((t, i) => i === index ? { ...t, title: editingTaskText,description: taskDraftDescription.current } : t));
-                                        updateTask(tasks[index].id, editingTaskText, taskDraftDescription.current, tasks[index].status);
+                                        updateTask(tasks[index].id, editingTaskText, taskDraftDescription.current, tasks[index].status, tasks[index].widget_type);
                                       }}
                                     >
                                       Save
@@ -4328,7 +4360,7 @@ const PlannerComponent = ({
                                     >
                                       {index + 1}
                                     </ThemeIcon>
-                                    <Tooltip label="Drag to reorder">
+                                    {isInternal && <Tooltip label="Drag to reorder">
                                       <ThemeIcon
                                         color="gray"
                                         radius={"xl"}
@@ -4338,8 +4370,8 @@ const PlannerComponent = ({
                                       >
                                         <IconGripVertical size={14} />
                                       </ThemeIcon>
-                                    </Tooltip>
-                                    <Tooltip label="Edit task">
+                                    </Tooltip>}
+                                    {isInternal && <Tooltip label="Edit task">
                                       <ThemeIcon
                                         color="gray"
                                         radius={"xl"}
@@ -4357,7 +4389,7 @@ const PlannerComponent = ({
                                       >
                                         <IconPencil size={14} />
                                       </ThemeIcon>
-                                    </Tooltip>
+                                    </Tooltip>}
                                     {task.title}
                                   </Text>
                                 )}
@@ -4392,6 +4424,7 @@ const PlannerComponent = ({
                                   </Text>
                                   {editingTask === index ? (
                                     <Select
+                                      w={'140px'}
                                       value={task.status}
                                       onChange={(value) => {
                                         if (value !== null) {
@@ -4511,7 +4544,7 @@ const PlannerComponent = ({
               )}
             </Droppable>
           </DragDropContext>
-        <Flex justify="center" mt="md">
+        {isInternal && <Flex justify="center" mt="md">
           {creatingNewTask ? (
             <Loader size="md" color="blue" />
           ) : (
@@ -4574,7 +4607,7 @@ const PlannerComponent = ({
               + Add Task
             </Button>
           )}
-        </Flex>
+        </Flex>}
         </ScrollArea>
       </Collapse>
     </Paper>

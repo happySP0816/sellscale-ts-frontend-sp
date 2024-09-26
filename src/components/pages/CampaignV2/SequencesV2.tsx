@@ -1449,7 +1449,9 @@ const VoiceModal = function (props: {
                             </Flex>
                             <Switch
                               checked={existing_voice.active}
-                              label={existing_voice.active ? "active" : "inactive" }
+                              label={
+                                existing_voice.active ? "active" : "inactive"
+                              }
                               onClick={(event) =>
                                 toggleActive(
                                   existing_voice.id,
@@ -4882,7 +4884,7 @@ export const LinkedinIntroSectionV2 = function (props: {
   });
 
   useEffect(() => {
-    if (props.prospectId && props.triggerGenerate === 0) {
+    if (props.prospectId || props.triggerGenerate === 0) {
       getIntroMessage(
         props.prospectId,
         true,

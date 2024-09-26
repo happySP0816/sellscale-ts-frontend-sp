@@ -28,7 +28,7 @@ function InsertPersonalizationControl() {
   );
 }
 
-export default function RichTextArea(props: { personalizationBtn?: boolean, height?: number, value?: string | JSONContent, onChange?: (value: string, rawValue: JSONContent) => void }) {
+export default function RichTextArea(props: { personalizationBtn?: boolean, height?: number, value?: string | JSONContent, onChange?: (value: string, rawValue: JSONContent) => void, overrideSticky?: boolean }) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -66,7 +66,7 @@ export default function RichTextArea(props: { personalizationBtn?: boolean, heig
       }}
       onClick={() => editor?.commands.focus()} // Ensure the editor is focused when clicking anywhere on the textarea
     >
-      <RichTextEditor.Toolbar sticky stickyOffset={60}>
+      <RichTextEditor.Toolbar sticky={!props.overrideSticky} stickyOffset={60}>
 
         {props.personalizationBtn && (
           <RichTextEditor.ControlsGroup>

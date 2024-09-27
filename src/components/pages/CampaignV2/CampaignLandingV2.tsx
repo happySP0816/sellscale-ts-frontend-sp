@@ -343,38 +343,38 @@ export default function CampaignLandingV2(props: PropsType) {
     }
   }, [currentProject]);
 
-  const checkCanToggleLinkedin = (checkPage?: boolean) => {
-    if (checkPage && window.location.href.includes("selix")) {
-      return false;
-    }
-    if (totalContacts === 0) {
-      showNotification({
-        color: "red",
-        title: "LinkedIn Channel",
-        message: "LinkedIn channel cannot be activated without contacts.",
-      });
-      return false;
-    }
-    if (linkedinSequenceData.length === 0) {
-      showNotification({
-        color: "red",
-        title: "LinkedIn Channel",
-        message:
-          "LinkedIn channel cannot be activated without LinkedIn sequences.",
-      });
-      return false;
-    }
-    if (linkedinInitialMessageData.length === 0 && statsData?.template_mode) {
-      showNotification({
-        color: "red",
-        title: "LinkedIn Channel",
-        message:
-          "LinkedIn channel cannot be activated without LinkedIn initial messages.",
-      });
-      return false;
-    }
-    return true;
-  };
+  // const checkCanToggleLinkedin = (checkPage?: boolean) => {
+  //   if (checkPage && window.location.href.includes("selix")) {
+  //     return false;
+  //   }
+  //   if (totalContacts === 0) {
+  //     showNotification({
+  //       color: "red",
+  //       title: "LinkedIn Channel",
+  //       message: "LinkedIn channel cannot be activated without contacts.",
+  //     });
+  //     return false;
+  //   }
+  //   if (linkedinSequenceData.length === 0) {
+  //     showNotification({
+  //       color: "red",
+  //       title: "LinkedIn Channel",
+  //       message:
+  //         "LinkedIn channel cannot be activated without LinkedIn sequences.",
+  //     });
+  //     return false;
+  //   }
+  //   if (linkedinInitialMessageData.length === 0 && statsData?.template_mode) {
+  //     showNotification({
+  //       color: "red",
+  //       title: "LinkedIn Channel",
+  //       message:
+  //         "LinkedIn channel cannot be activated without LinkedIn initial messages.",
+  //     });
+  //     return false;
+  //   }
+  //   return true;
+  // };
 
   const showSuccessPopup = () => {
     setSuccessPopup(true);
@@ -383,37 +383,37 @@ export default function CampaignLandingV2(props: PropsType) {
     }, 6000);
   };
 
-  const checkCanToggleEmail = (checkPage?: boolean) => {
-    if (checkPage && window.location.href.includes("selix")) {
-      return false;
-    }
-    if (totalContacts === 0) {
-      showNotification({
-        color: "red",
-        title: "Email Channel",
-        message: "Email channel cannot be activated without contacts.",
-      });
-      return false;
-    }
-    if (emailSequenceData.length === 0) {
-      showNotification({
-        color: "red",
-        title: "Email Channel",
-        message: "Email channel cannot be activated without email sequences.",
-      });
-      return false;
-    }
-    if (emailSubjectLines.length === 0) {
-      showNotification({
-        color: "red",
-        title: "Email Channel",
-        message:
-          "Email channel cannot be activated without email subject lines.",
-      });
-      return false;
-    }
-    return true;
-  };
+  // const checkCanToggleEmail = (checkPage?: boolean) => {
+  //   if (checkPage && window.location.href.includes("selix")) {
+  //     return false;
+  //   }
+  //   if (totalContacts === 0) {
+  //     showNotification({
+  //       color: "red",
+  //       title: "Email Channel",
+  //       message: "Email channel cannot be activated without contacts.",
+  //     });
+  //     return false;
+  //   }
+  //   if (emailSequenceData.length === 0) {
+  //     showNotification({
+  //       color: "red",
+  //       title: "Email Channel",
+  //       message: "Email channel cannot be activated without email sequences.",
+  //     });
+  //     return false;
+  //   }
+  //   if (emailSubjectLines.length === 0) {
+  //     showNotification({
+  //       color: "red",
+  //       title: "Email Channel",
+  //       message:
+  //         "Email channel cannot be activated without email subject lines.",
+  //     });
+  //     return false;
+  //   }
+  //   return true;
+  // };
   const getTotalContacts = async () => {
     setLoadingTotalContacts(true);
     const response = await fetchTotalContacts(userToken, id);
@@ -1210,9 +1210,9 @@ export default function CampaignLandingV2(props: PropsType) {
                       <Group noWrap spacing={"sm"} w={"100%"}>
                         <Switch
                           onChange={() => {
-                            if (!checkCanToggleEmail(true)) {
-                              return;
-                            }
+                            // if (!checkCanToggleEmail(true)) {
+                            //   return;
+                            // }
                             togglePersonaChannel(
                               id,
                               "email",
@@ -1302,9 +1302,9 @@ export default function CampaignLandingV2(props: PropsType) {
                         </>
                         <Switch
                           onChange={() => {
-                            if (!checkCanToggleLinkedin(true)) {
-                              return;
-                            }
+                            // if (!checkCanToggleLinkedin(true)) {
+                            //   return;
+                            // }
                             togglePersonaChannel(
                               id,
                               "linkedin",
@@ -1804,10 +1804,10 @@ export default function CampaignLandingV2(props: PropsType) {
               style={{ maxWidth: "75%", minWidth: "75%" }}
             >
               <SequencesV2
-                checkCanToggleEmail={checkCanToggleEmail}
+                // checkCanToggleEmail={checkCanToggleEmail}
                 togglePersonaChannel={togglePersonaChannel}
                 statsData={statsData}
-                checkCanToggleLinkedin={checkCanToggleLinkedin}
+                // checkCanToggleLinkedin={checkCanToggleLinkedin}
                 updateConnectionType={updateConnectionType}
               />
               {/* <Sequences */}

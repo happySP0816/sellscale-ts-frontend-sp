@@ -188,10 +188,10 @@ export const IntroContext = createContext({});
 
 export const SequencesV2 = React.forwardRef((props: any, ref) => {
   const {
-    checkCanToggleEmail,
+    // checkCanToggleEmail,
     togglePersonaChannel,
     statsData,
-    checkCanToggleLinkedin,
+    // checkCanToggleLinkedin,
     updateConnectionType,
   } = props;
   const params = useParams();
@@ -658,10 +658,10 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
                     setCreateTemplateBuilder,
                     // setSequences,
                     prospectId: selectedProspect?.id,
-                    checkCanToggleEmail: checkCanToggleEmail,
+                    // checkCanToggleEmail: checkCanToggleEmail,
                     togglePersonaChannel: togglePersonaChannel,
                     statsData: statsData,
-                    checkCanToggleLinkedin: checkCanToggleLinkedin,
+                    // checkCanToggleLinkedin: checkCanToggleLinkedin,
                     updateConnectionType: updateConnectionType,
                     currentStepNum: 0,
                   },

@@ -146,10 +146,10 @@ export default function CampaignTemplateEditModal({
   cType?: string;
   prospectId?: number;
   statsData: any;
-  checkCanToggleEmail: any;
+  // checkCanToggleEmail: any;
   togglePersonaChannel: any;
   updateConnectionType: any;
-  checkCanToggleLinkedin: any;
+  // checkCanToggleLinkedin: any;
 }>) {
   const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(linkedinSequenceState);
   const [emailSequenceData, setEmailSequenceData] = useRecoilState(emailSequenceState);

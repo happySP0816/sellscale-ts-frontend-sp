@@ -308,6 +308,8 @@ export default function TrainVoice(props: {
         setSelectedMessage(messageDetails.find(item => item.id === selectedMessage.id) ?? null);
       }
 
+      console.log(messageDetails);
+
       return {
         messages: messageDetails,
         generated_prompt: response.data.computed_prompt,

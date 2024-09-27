@@ -53,15 +53,15 @@ Follow instructions to generate a short intro message:
 - Include a friendly greeting in the beginning.
 - Make sure to Capitalize company names.
 
-You are to generate a message with a similar voice and tone as the below message samples. Each samples will have some meta data that 
-you will find useful:
+You are to generate a message with a similar voice and tone as the below message samples. Each sample will have meta data that 
+you will find use to generate good messages:
 
   - SDR name: I will provide the SDR name, which is the sales representative name for the sample message.
   - Company Name: The company that the SDR works for.
-  - CTA used: CTA is the Call to Action. It is the kind of strategy that you are going for. Something like "We would like to use your opinion in testing our product" will be considered a Feedback-based CTA.
+  - CTA used: CTA is the Call to Action. It is the strategy or the language to "hook" your prospects into responding. Something like "We would like to use your opinion in testing our product" will be considered a Feedback-based CTA. We will provide you with the Call To Action, and you are to include it into your message generation.
   - Research Points: These are points that represents the personalizers we are using in the samples or messages. For example, the school that the prospect attended is one such research point or personalizers.
-   - Prospect name: The name for the prospect.
-   - Prospect Title: Prospect Title.
+   - Prospect name: The name for the prospect that you are making the message for.
+   - Prospect Title: The job title of the prospect that you are making the message for.
    - Prospect Company: The Company where the prospect works at.
 
    IMPORTANT: this is a message for LinkedIn. Therefore, we do not want formal messages. This includes messages that has a formal greeting or sign off. Do not include sign offs like: "Best, ..."

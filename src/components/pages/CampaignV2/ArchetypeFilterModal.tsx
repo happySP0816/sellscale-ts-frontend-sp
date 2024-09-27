@@ -60,8 +60,8 @@ const ArchetypeFilterModal = function ({
     <Modal
       onClose={() => setShowContactAccountFilterModal(false)}
       opened={showContactAccountFilterModal}
-      size={"90%"}
-      style={{ maxHeight: "700px", minWidth: "2000px" }}
+      size={"100%"}
+      style={{ maxHeight: "700px", minWidth: "1450px" }}
       zIndex={10}
       title={
         <Flex justify={"space-between"} gap={"36px"}>
@@ -1070,7 +1070,7 @@ export const ArchetypeFilters = function ({
   });
 
   return (
-    <Flex gap={"8px"} style={{ overflowY: "hidden", height: "100%" }}>
+    <Flex gap={"8px"} style={{ maxWidth: "1450px", height: "100%" }}>
       {isLoading && <Loader />}
       {!isLoading &&
         icp_scoring_ruleset &&
@@ -1101,7 +1101,7 @@ export const ArchetypeFilters = function ({
         style={{ maxWidth: collapseFilters ? "1450px" : "1150px" }}
       >
         {selectedContacts && selectedContacts.size > 0 && (
-          <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>
+          <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"} style={{maxWidth: "1150px"}}>
             <Text>Bulk Actions - {selectedContacts.size} Selected</Text>
             <Tooltip
               withinPortal
@@ -1259,7 +1259,7 @@ export const ArchetypeFilters = function ({
             );
           })}
         </Flex>
-        <Box style={{ maxWidth: isSelix ? "50vw" : "100%" }}>
+        <Box style={{ maxWidth: isSelix ? "50vw" : collapseFilters ? "1225px" : "950px" }}>
           {icp_scoring_ruleset_typed && <MantineReactTable table={table} />}
         </Box>
       </Flex>

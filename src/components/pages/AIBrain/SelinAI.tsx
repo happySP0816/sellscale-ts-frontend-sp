@@ -652,6 +652,15 @@ export default function SelinAI() {
     setLoadingNewChat(true);
     try {
       // create new room_id
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('session_id', session_id.toString());
+      if (window.location.href.includes('internal')) {
+        urlParams.set('internal', 'true');
+      } else {
+        urlParams.delete('internal');
+      }
+      const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+      window.history.replaceState({}, '', newUrl);
 
       setCurrentSessionId(session_id);
       sessionIDRef.current = session_id;
@@ -1111,8 +1120,13 @@ export default function SelinAI() {
       console.log("session id from url is", sessionIdFromUrl);
       console.log("got here");
       if (sessionIdFromUrl) {
-        // Clear the URL parameters from the input bar
-        const newUrl = window.location.origin + window.location.pathname;
+        // Preserve the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('session_id', sessionIdFromUrl);
+        if (threadIdFromUrl) {
+          urlParams.set('thread_id', threadIdFromUrl);
+        }
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
         window.history.replaceState({}, document.title, newUrl);
         getMessages(
           threadIdFromUrl || "",

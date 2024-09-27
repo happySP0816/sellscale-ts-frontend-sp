@@ -252,9 +252,15 @@ export default function TrainVoice(props: {
   const { isFetching, refetch } = useQuery({
     queryKey: [`query-get-voice-details-${voiceBuilderOnboardingId}`],
     queryFn: async () => {
+      const currentIndex =
+        voiceBuilderDetails?.messages.findIndex(
+          (item) => item.id === selectedMessage?.id
+        ) ?? null;
+
       const response = await getVoiceBuilderDetails(
         props.userToken,
-        voiceBuilderOnboardingId!
+        voiceBuilderOnboardingId!,
+        currentIndex
       );
 
       let messageDetails: VoiceBuilderMessages[] = [];
@@ -285,9 +291,6 @@ export default function TrainVoice(props: {
           });
       }
 
-      console.log(ctaMapping);
-      console.log(researchPointMapping);
-
       setUseNewCTAs(ctaMapping);
       setUseNewResearchPointTypes(researchPointMapping);
 
@@ -304,13 +307,12 @@ export default function TrainVoice(props: {
         setSelectedProspectId(messageDetails[index].prospect?.id ?? null);
       }
 
-      if (selectedMessage) {
-        setSelectedMessage(
-          messageDetails.find((item) => item.id === selectedMessage.id) ?? null
+      if (response.data.current_index) {
+        setSelectedMessage(messageDetails[response.data.current_index]);
+        setSelectedProspectId(
+          messageDetails[response.data.current_index]?.prospect?.id ?? null
         );
       }
-
-      console.log(messageDetails);
 
       return {
         messages: messageDetails,
@@ -651,7 +653,8 @@ export default function TrainVoice(props: {
 
   const onSaveConfiguration = async function (
     newVoiceDetails?: VoiceBuilderDetails,
-    optimistic: boolean = false
+    optimistic: boolean = false,
+    newIndex: number | null = null
   ) {
     if (!optimistic) {
       setSaveLoading(true);
@@ -1127,24 +1130,6 @@ export default function TrainVoice(props: {
                         });
 
                         await onSaveConfiguration(newDetails, true);
-
-                        const currentIndex =
-                          voiceBuilderDetails.messages.findIndex(
-                            (item) => item.id === selectedMessage.id
-                          );
-
-                        if (
-                          currentIndex <
-                          voiceBuilderDetails.messages.length - 1
-                        ) {
-                          setSelectedMessage(
-                            voiceBuilderDetails.messages[currentIndex + 1]
-                          );
-                          setSelectedProspectId(
-                            voiceBuilderDetails.messages[currentIndex + 1]
-                              ?.prospect?.id ?? null
-                          );
-                        }
                       }}
                     >
                       Approve Message

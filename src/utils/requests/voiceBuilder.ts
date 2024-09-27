@@ -107,10 +107,14 @@ export async function deleteSample(
 
 export async function getVoiceBuilderDetails(
   userToken: string,
-  voice_builder_onboarding_id: number
+  voice_builder_onboarding_id: number,
+  currentIndex?: number
 ): Promise<MsgResponse> {
+  console.log("currentIndex: ", currentIndex);
   const response = await fetch(
-    `${API_URL}/voice_builder/get_details?voice_builder_onboarding_id=${voice_builder_onboarding_id}`,
+    `${API_URL}/voice_builder/get_details?voice_builder_onboarding_id=${voice_builder_onboarding_id}&current_index=${
+      currentIndex ? currentIndex : ""
+    }`,
     {
       method: "GET",
       headers: {
@@ -154,7 +158,7 @@ export async function deleteVoiceOnboardings(
   });
 
   return await processResponse(response);
-};
+}
 
 export async function getVoiceOnboardings(
   userToken: string,

@@ -33,7 +33,12 @@ import { FaFilter } from "react-icons/fa6";
 import { socket } from "../App";
 import { DataRow } from "@pages/CampaignV2/ArchetypeFilterModal";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import { IconChevronRight } from "@tabler/icons";
+import { IconChevronRight, IconFileDownload, IconTrash } from "@tabler/icons";
+import { openConfirmModal } from "@mantine/modals";
+import { showNotification } from "@mantine/notifications";
+import BulkActions from "@common/persona/BulkActions_new";
+import { CSVLink } from "react-csv";
+import BulkActionsSegment from "@drawers/BulkActions_segment";
 
 interface ContactAccountFilterModalProps {
   showContactAccountFilterModal: boolean;
@@ -122,8 +127,6 @@ const ContactAccountFilterModal = function ({
 }: ContactAccountFilterModalProps) {
   const userToken = useRecoilValue(userTokenState);
 
-  console.log("segment is", segment);
-
   const [viewMode, setViewMode] = useState<ViewMode>("CONTACT");
   const [prospects, setProspects] = useState<Prospect[]>([]);
 
@@ -178,6 +181,8 @@ const ContactAccountFilterModal = function ({
       { key: "company", title: "Account Name" },
     ]
   );
+
+  const [removeProspectsLoading, setRemoveProspectsLoading] = useState(false);
 
   const [selectedContacts, setSelectedContacts] = useState<Set<number>>(
     new Set()
@@ -666,6 +671,65 @@ const ContactAccountFilterModal = function ({
     }
   };
 
+  const triggerMoveToUnassigned = async () => {
+    setRemoveProspectsLoading(true);
+
+    const prospectIDs = Array.from(selectedContacts);
+    try {
+      showNotification({
+        id: "prospect-removed-segment",
+        title: "Removing Prospects from Segment",
+        message: `Removed Prospects from Segments.`,
+        color: "blue",
+        autoClose: 3000,
+      });
+
+      const response = await fetch(`${API_URL}/prospect/remove_from_segment`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prospect_ids: prospectIDs,
+        }),
+      });
+
+      if (response.ok) {
+        showNotification({
+          id: "prospect-removed-segment",
+          title: "Prospects removed from Segment",
+          message: `${prospectIDs.length} prospects has been removed from your segment`,
+          color: "green",
+          autoClose: 3000,
+        });
+      } else {
+        showNotification({
+          id: "prospect-removed",
+          title: "Prospects removal failed",
+          message:
+            "These prospects could not be removed. Please try again, or contact support.",
+          color: "red",
+          autoClose: false,
+        });
+      }
+
+      refetch();
+      setSelectedContacts(new Set());
+    } catch (error) {
+      showNotification({
+        id: "prospect-removed",
+        title: "Prospects removal failed",
+        message:
+          "These prospects could not be removed. Please try again, or contact support.",
+        color: "red",
+        autoClose: false,
+      });
+    } finally {
+      setRemoveProspectsLoading(false);
+    }
+  };
+
   const generatedProspectData = useMemo(() => {
     return displayProspects.map((prospect) => {
       const p = {
@@ -956,7 +1020,9 @@ const ContactAccountFilterModal = function ({
                   label={"Email is revealed when the campaign is launched."}
                 >
                   <Box style={{ textWrap: "wrap" }}>
-                    <Text truncate>{p[keyType] ? p[keyType] : "Not Found"}</Text>
+                    <Text truncate>
+                      {p[keyType] ? p[keyType] : "Not Found"}
+                    </Text>
                   </Box>
                 </Tooltip>
               );
@@ -1379,6 +1445,127 @@ const ContactAccountFilterModal = function ({
     },
   });
 
+  const csvData = prospects
+    .filter((prospect) => {
+      return selectedContacts.has(prospect.id);
+    })
+    .map((prospect) => {
+      let readable_score = "";
+      let color = "";
+      let number = "";
+      switch (prospect.icp_fit_score) {
+        case -1:
+          readable_score = "Not Scored";
+          color = "🟪";
+          number = "0";
+          break;
+        case 0:
+          readable_score = "Very Low";
+          color = "🟥";
+          number = "1";
+          break;
+        case 1:
+          readable_score = "Low";
+          color = "🟧";
+          number = "2";
+          break;
+        case 2:
+          readable_score = "Medium";
+          color = "🟨";
+          number = "3";
+          break;
+        case 3:
+          readable_score = "High";
+          color = "🟦";
+          number = "4";
+          break;
+        case 4:
+          readable_score = "Very High";
+          color = "green";
+          color = "🟩";
+          number = "5";
+          break;
+        default:
+          readable_score = "Unknown";
+          color = "";
+          break;
+      }
+
+      let icp_fit_reason = "";
+      let ai_filters = {};
+
+      if (prospect.icp_fit_reason_v2) {
+        const reason_keys = Object.keys(prospect.icp_fit_reason_v2);
+
+        reason_keys.forEach((key) => {
+          const answer =
+            prospect.icp_fit_reason_v2[key].answer +
+            " - " +
+            prospect.icp_fit_reason_v2[key].reasoning;
+
+          if (key.includes("aiind") || key.includes("aicomp")) {
+            ai_filters = {
+              ...ai_filters,
+              [key]: answer.replace("❌", "").replace("✅", ""),
+            };
+          }
+          icp_fit_reason +=
+            key + ": " + prospect.icp_fit_reason_v2[key].reasoning + ". ";
+        });
+      }
+
+      if (prospect.icp_company_fit_reason) {
+        const reason_keys = Object.keys(prospect.icp_company_fit_reason);
+
+        reason_keys.forEach((key) => {
+          const answer =
+            prospect.icp_company_fit_reason[key].answer +
+            " - " +
+            prospect.icp_company_fit_reason[key].reasoning;
+
+          if (key.includes("aiind") || key.includes("aicomp")) {
+            ai_filters = {
+              ...ai_filters,
+              [key]: answer.replace("❌", "").replace("✅", ""),
+            };
+          }
+          icp_fit_reason +=
+            key + ": " + prospect.icp_company_fit_reason[key].reasoning + ". ";
+        });
+      }
+
+      return {
+        id: prospect.id,
+        label: `${number} ${color} ${readable_score}`.toUpperCase(),
+        full_name: prospect.full_name,
+        title: prospect.title,
+        company: prospect.company,
+        icp_fit_reason: icp_fit_reason,
+        linkedin_url: prospect.linkedin_url,
+        email: prospect.email,
+        ...ai_filters,
+      };
+    });
+
+  const csvHeaders = [
+    { label: "ID", key: "id" },
+    { label: "Label", key: "label" },
+    { label: "Full name", key: "full_name" },
+    { label: "Title", key: "title" },
+    { label: "Company", key: "company" },
+    { label: "Icp fit reason", key: "icp_fit_reason" },
+    { label: "LinkedinURL", key: "linkedin_url" },
+    { label: "Email", key: "email" },
+    ...contactTableHeaders
+      .filter(
+        (header) =>
+          header.key.includes("aiind") || header.key.includes("aicomp")
+      )
+      .map((header) => {
+        return { key: header.key, label: header.title };
+      }),
+  ];
+
   const companyTable = useMantineReactTable({
     columns: generatedProspectAccountColumns.map((column) => {
       if (column.accessorKey === "company") {
@@ -1455,8 +1642,8 @@ const ContactAccountFilterModal = function ({
       onClose={() => setShowContactAccountFilterModal(false)}
       zIndex={10}
       opened={showContactAccountFilterModal}
-      size={"90%"}
-      style={{ maxHeight: "700px", minWidth: "2000px" }}
+      size={"100%"}
+      style={{ maxHeight: "700px", minWidth: "1450px" }}
       title={
         <Flex justify={"space-between"} gap={"36px"}>
           <Title order={3} style={{ maxWidth: "600px" }}>
@@ -1499,7 +1686,7 @@ const ContactAccountFilterModal = function ({
         </Flex>
       }
     >
-      <Flex gap={"8px"} style={{ overflowY: "hidden", height: "100%" }}>
+      <Flex gap={"8px"} style={{ maxWidth: "1450px", height: "100%" }}>
         {isLoading && <Loader />}
         {!isLoading && icp_scoring_ruleset && !collapseFilters && (
           <MarketMapFilters
@@ -1529,8 +1716,83 @@ const ContactAccountFilterModal = function ({
         <Flex
           direction={"column"}
           gap={"8px"}
-          style={{ maxWidth: collapseFilters ? "1430px" : "1150px" }}
+          style={{ maxWidth: collapseFilters ? "1450px" : "1150px" }}
         >
+          {selectedContacts && selectedContacts.size > 0 && (
+            <Flex
+              justify={"flex-end"}
+              align={"center"}
+              gap={"xs"}
+              mt={"sm"}
+              style={{ maxWidth: "1150px" }}
+            >
+              <Text>Bulk Actions - {selectedContacts.size} Selected</Text>
+              <Tooltip
+                withinPortal
+                label="Remove 'Prospected' or 'Sent Outreach' prospects from this campaign."
+              >
+                <Button
+                  color="red"
+                  leftIcon={<IconTrash size={14} />}
+                  size="sm"
+                  loading={removeProspectsLoading}
+                  onClick={() => {
+                    openConfirmModal({
+                      title: "Remove these prospects?",
+                      children: (
+                        <>
+                          <Text>
+                            Are you sure you want to remove these{" "}
+                            {selectedContacts.size} prospects? This will move
+                            them into your Unassigned Contacts list.
+                          </Text>
+                          <Text mt="xs">
+                            <b>Note: </b>Only "Prospected" and "Sent Outreach"
+                            prospects will be removed.
+                          </Text>
+                        </>
+                      ),
+                      labels: {
+                        confirm: "Remove",
+                        cancel: "Cancel",
+                      },
+                      confirmProps: { color: "red" },
+                      onCancel: () => {},
+                      onConfirm: () => {
+                        triggerMoveToUnassigned();
+                      },
+                    });
+                  }}
+                >
+                  Remove
+                </Button>
+              </Tooltip>
+              <BulkActionsSegment
+                selectedProspects={prospects.filter((prospect) =>
+                  selectedContacts.has(prospect.id)
+                )}
+                backFunc={() => {
+                  setSelectedContacts(new Set());
+                  refetch();
+                  showNotification({
+                    title: "Success",
+                    message: `${selectedContacts.size} prospects has been moved to the new Segment.`,
+                    color: "green",
+                    autoClose: 5000,
+                  });
+                }}
+              />
+              <CSVLink data={csvData} headers={csvHeaders} filename="export">
+                <Button
+                  color="green"
+                  leftIcon={<IconFileDownload size={14} />}
+                  size="sm"
+                >
+                  Download CSV
+                </Button>
+              </CSVLink>
+            </Flex>
+          )}
           <Flex gap={"4px"} align={"end"} justify="space-between">
             <TextInput
               label={"Global Search"}
@@ -1541,7 +1803,11 @@ const ContactAccountFilterModal = function ({
             />
           </Flex>
           {icp_scoring_ruleset_typed && (
-            <Box>
+            <Box
+              style={{
+                maxWidth: collapseFilters ? "1225px" : "950px",
+              }}
+            >
               {!isLoading && viewMode === "ACCOUNT" ? (
                 <MantineReactTable table={companyTable} />
               ) : (

@@ -286,7 +286,7 @@ export default function TrainVoice(props: {
       }
 
       console.log(ctaMapping);
-      console.log(researchPointMapping)
+      console.log(researchPointMapping);
 
       setUseNewCTAs(ctaMapping);
       setUseNewResearchPointTypes(researchPointMapping);
@@ -302,10 +302,12 @@ export default function TrainVoice(props: {
           messageDetails.findIndex((item) => !item.is_approved) ?? 0;
         setSelectedMessage(messageDetails[index]);
         setSelectedProspectId(messageDetails[index].prospect?.id ?? null);
-      } 
+      }
 
       if (selectedMessage) {
-        setSelectedMessage(messageDetails.find(item => item.id === selectedMessage.id) ?? null);
+        setSelectedMessage(
+          messageDetails.find((item) => item.id === selectedMessage.id) ?? null
+        );
       }
 
       console.log(messageDetails);
@@ -1628,6 +1630,8 @@ const FeebackComponent = (props: {
 }) => {
   const [opened, { toggle }] = useDisclosure(false);
 
+  const [expandMore, setExpandMore] = useState<Map<number, boolean>>(new Map());
+
   return (
     <Box style={{ position: "relative" }}>
       <LoadingOverlay visible={props.loading} />
@@ -1660,7 +1664,10 @@ const FeebackComponent = (props: {
               }}
             />
             <Badge color="teal" tt={"initial"} className="absolute top-[-10px]">
-              {`${props.usedCTA.cta_type.replace("based", "")}-based`}
+              {`${props.usedCTA.cta_type
+                .replace("based", "")
+                .replace("Based", "")
+                .replace("-", "")}-based`}
             </Badge>
             <Text size={"sm"} fw={500}>
               {props.usedCTA.text_value}
@@ -1718,13 +1725,46 @@ const FeebackComponent = (props: {
                           props.setCtaOrResearchPointTypeChanged(true);
                         }}
                       />
-                      <Stack spacing={2} mt={-2}>
+                      <Stack spacing={2} mt={-2} align={"center"}>
                         <Text size={"sm"} fw={500}>
-                          {`${item.cta_type.replace("based", "")}-based`}
+                          {`${item.cta_type
+                            .replace("based", "")
+                            .replace("Based", "")
+                            .replace("-", "")}-based`}
                         </Text>
-                        <Text size={"xs"} color="gray" fw={500} lineClamp={2}>
+                        <Text
+                          size={"xs"}
+                          color="gray"
+                          fw={500}
+                          lineClamp={expandMore.get(item.id) ? 999999 : 2}
+                        >
                           {item.text_value}
                         </Text>
+                        <Button
+                          size={"xs"}
+                          radius={"xl"}
+                          variant={"outline"}
+                          onClick={() => {
+                            const newMap = new Map(expandMore);
+
+                            if (!newMap.has(item.id) || !newMap.get(item.id)) {
+                              newMap.set(item.id, true);
+                            } else {
+                              newMap.set(item.id, false);
+                            }
+
+                            setExpandMore(newMap);
+                          }}
+                        >
+                          {expandMore.has(item.id) &&
+                            expandMore.get(item.id) && (
+                              <IconChevronUp size={"0.9rem"} />
+                            )}
+                          {(!expandMore.has(item.id) ||
+                            !expandMore.get(item.id)) && (
+                            <IconChevronDown size={"0.9rem"} />
+                          )}
+                        </Button>
                       </Stack>
                     </Flex>
                   );
@@ -1751,6 +1791,7 @@ const ResearchUsedComponent = (props: {
   loading: boolean;
 }) => {
   const [opened, { toggle }] = useDisclosure(false);
+  const [expandMore, setExpandMore] = useState<Map<number, boolean>>(new Map());
 
   return (
     <Box style={{ position: "relative" }}>
@@ -1788,53 +1829,85 @@ const ResearchUsedComponent = (props: {
                       align={"start"}
                       p={"xs"}
                       className="rounded-sm"
+                      justify={"space-between"}
                     >
-                      <Checkbox
-                        size={"xs"}
-                        disabled={
-                          !props.useNewResearchPointTypes
+                      <Flex gap={"4px"}>
+                        <Checkbox
+                          size={"xs"}
+                          disabled={
+                            !props.useNewResearchPointTypes
+                              .get(props.selectedMessage.id)
+                              ?.includes(item.id) &&
+                            props.useNewResearchPointTypes.get(
+                              props.selectedMessage.id
+                            )?.length === 2
+                          }
+                          checked={props.useNewResearchPointTypes
                             .get(props.selectedMessage.id)
-                            ?.includes(item.id) &&
-                          props.useNewResearchPointTypes.get(
-                            props.selectedMessage.id
-                          )?.length === 2
-                        }
-                        checked={props.useNewResearchPointTypes
-                          .get(props.selectedMessage.id)
-                          ?.includes(item.id)}
-                        onChange={(event) => {
-                          const newMap = new Map(
-                            props.useNewResearchPointTypes
-                          );
+                            ?.includes(item.id)}
+                          onChange={(event) => {
+                            const newMap = new Map(
+                              props.useNewResearchPointTypes
+                            );
 
-                          const previousValue =
-                            newMap.get(props.selectedMessage.id) ?? [];
+                            const previousValue =
+                              newMap.get(props.selectedMessage.id) ?? [];
 
-                          newMap.set(
-                            props.selectedMessage.id,
-                            event.currentTarget.checked
-                              ? [...previousValue, item.id]
-                              : previousValue.filter((i) => i !== item.id)
-                          );
-                          props.setUseNewResearchPointTypes(newMap);
-                          props.setCtaOrResearchPointTypeChanged(true);
+                            newMap.set(
+                              props.selectedMessage.id,
+                              event.currentTarget.checked
+                                ? [...previousValue, item.id]
+                                : previousValue.filter((i) => i !== item.id)
+                            );
+                            props.setUseNewResearchPointTypes(newMap);
+                            props.setCtaOrResearchPointTypeChanged(true);
+                          }}
+                        />
+                        <Stack spacing={2} mt={-2} align={"center"}>
+                          <Text size={"sm"} fw={500}>
+                            {item.research_point_type
+                              .toLowerCase() // Convert to lowercase
+                              .split("_") // Split by underscore
+                              .map(
+                                (word) =>
+                                  word.charAt(0).toUpperCase() + word.slice(1)
+                              ) // Capitalize first letter of each word
+                              .join(" ")}
+                          </Text>
+                          <Text
+                            size={"xs"}
+                            color="gray"
+                            fw={500}
+                            lineClamp={expandMore.get(item.id) ? 999999 : 4}
+                          >
+                            {item.value}
+                          </Text>
+                        </Stack>
+                      </Flex>
+                      <Button
+                        size={"xs"}
+                        radius={"xl"}
+                        variant={"outline"}
+                        onClick={() => {
+                          const newMap = new Map(expandMore);
+
+                          if (!newMap.has(item.id) || !newMap.get(item.id)) {
+                            newMap.set(item.id, true);
+                          } else {
+                            newMap.set(item.id, false);
+                          }
+
+                          setExpandMore(newMap);
                         }}
-                      />
-                      <Stack spacing={2} mt={-2}>
-                        <Text size={"sm"} fw={500}>
-                          {item.research_point_type
-                            .toLowerCase() // Convert to lowercase
-                            .split("_") // Split by underscore
-                            .map(
-                              (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                            ) // Capitalize first letter of each word
-                            .join(" ")}
-                        </Text>
-                        <Text size={"xs"} color="gray" fw={500} lineClamp={4}>
-                          {item.value}
-                        </Text>
-                      </Stack>
+                      >
+                        {expandMore.has(item.id) && expandMore.get(item.id) && (
+                          <IconChevronUp size={"0.9rem"} />
+                        )}
+                        {(!expandMore.has(item.id) ||
+                          !expandMore.get(item.id)) && (
+                          <IconChevronDown size={"0.9rem"} />
+                        )}
+                      </Button>
                     </Flex>
                   );
                 }
@@ -1879,100 +1952,135 @@ const ResearchUsedComponent = (props: {
                       align={"start"}
                       p={"xs"}
                       className="rounded-sm"
+                      style={{ minWidth: "100%" }}
+                      justify={"space-between"}
                     >
-                      {!props.useNewResearchPointTypes
-                        .get(props.selectedMessage.id)
-                        ?.includes(item.id) &&
-                      props.useNewResearchPointTypes.get(
-                        props.selectedMessage.id
-                      )?.length === 2 ? (
-                        <Tooltip
-                          label={
-                            "Please unselect one current research point to select a new one"
-                          }
-                        >
-                          <Box>
-                            <Checkbox
-                              size={"xs"}
-                              disabled={
-                                !props.useNewResearchPointTypes
+                      <Flex>
+                        {!props.useNewResearchPointTypes
+                          .get(props.selectedMessage.id)
+                          ?.includes(item.id) &&
+                        props.useNewResearchPointTypes.get(
+                          props.selectedMessage.id
+                        )?.length === 2 ? (
+                          <Tooltip
+                            label={
+                              "Please unselect one current research point to select a new one"
+                            }
+                          >
+                            <Box>
+                              <Checkbox
+                                size={"xs"}
+                                disabled={
+                                  !props.useNewResearchPointTypes
+                                    .get(props.selectedMessage.id)
+                                    ?.includes(item.id) &&
+                                  props.useNewResearchPointTypes.get(
+                                    props.selectedMessage.id
+                                  )?.length === 2
+                                }
+                                checked={props.useNewResearchPointTypes
                                   .get(props.selectedMessage.id)
-                                  ?.includes(item.id) &&
-                                props.useNewResearchPointTypes.get(
-                                  props.selectedMessage.id
-                                )?.length === 2
-                              }
-                              checked={props.useNewResearchPointTypes
+                                  ?.includes(item.id)}
+                                onChange={(event) => {
+                                  const newMap = new Map(
+                                    props.useNewResearchPointTypes
+                                  );
+
+                                  const previousValue =
+                                    newMap.get(props.selectedMessage.id) ?? [];
+
+                                  newMap.set(
+                                    props.selectedMessage.id,
+                                    event.currentTarget.checked
+                                      ? [...previousValue, item.id]
+                                      : previousValue.filter(
+                                          (i) => i !== item.id
+                                        )
+                                  );
+                                  props.setUseNewResearchPointTypes(newMap);
+                                  props.setCtaOrResearchPointTypeChanged(true);
+                                }}
+                              />
+                            </Box>
+                          </Tooltip>
+                        ) : (
+                          <Checkbox
+                            size={"xs"}
+                            disabled={
+                              !props.useNewResearchPointTypes
                                 .get(props.selectedMessage.id)
-                                ?.includes(item.id)}
-                              onChange={(event) => {
-                                const newMap = new Map(
-                                  props.useNewResearchPointTypes
-                                );
-
-                                const previousValue =
-                                  newMap.get(props.selectedMessage.id) ?? [];
-
-                                newMap.set(
-                                  props.selectedMessage.id,
-                                  event.currentTarget.checked
-                                    ? [...previousValue, item.id]
-                                    : previousValue.filter((i) => i !== item.id)
-                                );
-                                props.setUseNewResearchPointTypes(newMap);
-                                props.setCtaOrResearchPointTypeChanged(true);
-                              }}
-                            />
-                          </Box>
-                        </Tooltip>
-                      ) : (
-                        <Checkbox
-                          size={"xs"}
-                          disabled={
-                            !props.useNewResearchPointTypes
+                                ?.includes(item.id) &&
+                              props.useNewResearchPointTypes.get(
+                                props.selectedMessage.id
+                              )?.length === 2
+                            }
+                            checked={props.useNewResearchPointTypes
                               .get(props.selectedMessage.id)
-                              ?.includes(item.id) &&
-                            props.useNewResearchPointTypes.get(
-                              props.selectedMessage.id
-                            )?.length === 2
+                              ?.includes(item.id)}
+                            onChange={(event) => {
+                              const newMap = new Map(
+                                props.useNewResearchPointTypes
+                              );
+
+                              const previousValue =
+                                newMap.get(props.selectedMessage.id) ?? [];
+
+                              newMap.set(
+                                props.selectedMessage.id,
+                                event.currentTarget.checked
+                                  ? [...previousValue, item.id]
+                                  : previousValue.filter((i) => i !== item.id)
+                              );
+                              props.setUseNewResearchPointTypes(newMap);
+                              props.setCtaOrResearchPointTypeChanged(true);
+                            }}
+                          />
+                        )}
+                        <Stack spacing={2} mt={-2} align={"center"}>
+                          <Text size={"sm"} fw={500}>
+                            {item.research_point_type
+                              .toLowerCase() // Convert to lowercase
+                              .split("_") // Split by underscore
+                              .map(
+                                (word) =>
+                                  word.charAt(0).toUpperCase() + word.slice(1)
+                              ) // Capitalize first letter of each word
+                              .join(" ")}
+                          </Text>
+                          <Text
+                            size={"xs"}
+                            color="gray"
+                            fw={500}
+                            lineClamp={expandMore.get(item.id) ? 999999 : 1}
+                          >
+                            {item.value}
+                          </Text>
+                        </Stack>
+                      </Flex>
+                      <Button
+                        size={"xs"}
+                        radius={"xl"}
+                        variant={"outline"}
+                        onClick={() => {
+                          const newMap = new Map(expandMore);
+
+                          if (!newMap.has(item.id) || !newMap.get(item.id)) {
+                            newMap.set(item.id, true);
+                          } else {
+                            newMap.set(item.id, false);
                           }
-                          checked={props.useNewResearchPointTypes
-                            .get(props.selectedMessage.id)
-                            ?.includes(item.id)}
-                          onChange={(event) => {
-                            const newMap = new Map(
-                              props.useNewResearchPointTypes
-                            );
 
-                            const previousValue =
-                              newMap.get(props.selectedMessage.id) ?? [];
-
-                            newMap.set(
-                              props.selectedMessage.id,
-                              event.currentTarget.checked
-                                ? [...previousValue, item.id]
-                                : previousValue.filter((i) => i !== item.id)
-                            );
-                            props.setUseNewResearchPointTypes(newMap);
-                            props.setCtaOrResearchPointTypeChanged(true);
-                          }}
-                        />
-                      )}
-                      <Stack spacing={2} mt={-2}>
-                        <Text size={"sm"} fw={500}>
-                          {item.research_point_type
-                            .toLowerCase() // Convert to lowercase
-                            .split("_") // Split by underscore
-                            .map(
-                              (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                            ) // Capitalize first letter of each word
-                            .join(" ")}
-                        </Text>
-                        <Text size={"xs"} color="gray" fw={500} lineClamp={1}>
-                          {item.value}
-                        </Text>
-                      </Stack>
+                          setExpandMore(newMap);
+                        }}
+                      >
+                        {expandMore.has(item.id) && expandMore.get(item.id) && (
+                          <IconChevronUp size={"0.9rem"} />
+                        )}
+                        {(!expandMore.has(item.id) ||
+                          !expandMore.get(item.id)) && (
+                          <IconChevronDown size={"0.9rem"} />
+                        )}
+                      </Button>
                     </Flex>
                   );
                 })}

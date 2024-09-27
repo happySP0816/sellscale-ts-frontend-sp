@@ -323,7 +323,7 @@ export default function ICPRouting() {
       });
       const data = await response.json();
       console.log('data', data);
-      if (data.met_conditions.length === 0) {
+      if (data?.met_conditions?.length === 0 && !data.icp_route) {
         showNotification({
           title: "No Rules Met",
           message: "Could not find a bucket for this visitor",

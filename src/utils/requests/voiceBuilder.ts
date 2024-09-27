@@ -108,7 +108,7 @@ export async function deleteSample(
 export async function getVoiceBuilderDetails(
   userToken: string,
   voice_builder_onboarding_id: number,
-  currentIndex?: number
+  currentIndex: number | null
 ): Promise<MsgResponse> {
   console.log("currentIndex: ", currentIndex);
   const response = await fetch(

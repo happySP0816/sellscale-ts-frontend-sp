@@ -1509,7 +1509,7 @@ export default function CampaignTemplateEditModal({
                                 )
                               }
                               sequenceType={sequenceType}
-                              angle={messageData.message}
+                              angle={messageData.title}
                               text={messageData.message}
                               assetId={messageData.id}
                               index={index}

@@ -160,7 +160,7 @@ export function VoiceBuilderSection(props: {
       if (onboardings.length > 0) {
         setVoiceBuilderOnboardingId(onboardings[0].id);
 
-        const detailsResponse = await getVoiceBuilderDetails(userToken, onboardings[0].id);
+        const detailsResponse = await getVoiceBuilderDetails(userToken, onboardings[0].id, null);
         if (detailsResponse.status === 'success') {
           if (detailsResponse.data.sample_info.length > 0) {
             // Sort the samples by id

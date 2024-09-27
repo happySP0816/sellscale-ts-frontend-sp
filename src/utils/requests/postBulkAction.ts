@@ -30,3 +30,25 @@ export async function postBulkActionMove(userToken: string, targetPersonaID: num
 
 }
 
+
+export async function postBulkActionSegmentMove(userToken: string, targetSegmentID: number, prospectIDs: number[]): Promise<MsgResponse> {
+
+  const response = await fetch(
+    `${API_URL}/segment/bulk_action/move`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        segment_id: targetSegmentID,
+        prospect_ids: prospectIDs,
+      })
+    }
+  );
+  return await processResponse(response);
+
+}
+
+

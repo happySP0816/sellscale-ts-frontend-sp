@@ -44,7 +44,7 @@ function Value({ value, active, label, onRemove, classNames, ...others }: any) {
           size={22}
           iconSize={14}
           tabIndex={-1}
-          mr='xs'
+          mr="xs"
         />
         <Badge
           color={active ? "green" : "red"}
@@ -52,11 +52,7 @@ function Value({ value, active, label, onRemove, classNames, ...others }: any) {
           mr="xs"
           variant="filled"
         />
-        <Badge
-          color={valueToColor(theme, label)}
-          size='xs'
-          variant='light'
-        >
+        <Badge color={valueToColor(theme, label)} size="xs" variant="light">
           {label}
         </Badge>
       </Box>
@@ -107,15 +103,117 @@ const Item = forwardRef(
   }
 );
 
-type PropsType = {
+const SegmentItem = forwardRef(({ segment_name, label, ...others }: any, ref) => {
+  return (
+    <div ref={ref} {...others}>
+      <div>{label}</div>
+    </div>
+  );
+});
+
+type SegmentPropsType = {
   disabled: boolean;
-  onChange: (archetypes: { archetype_id: number; archetype_name: string; }[]) => void;
+  onChange: (segments: { segment_id: number; segment_name: string }[]) => void;
   selectMultiple?: boolean;
   label: string;
   description: string;
   defaultValues?: number[];
   exclude?: number[];
 };
+
+type PropsType = {
+  disabled: boolean;
+  onChange: (
+    archetypes: { archetype_id: number; archetype_name: string }[]
+  ) => void;
+  selectMultiple?: boolean;
+  label: string;
+  description: string;
+  defaultValues?: number[];
+  exclude?: number[];
+};
+
+export function SegmentSelect({
+  disabled,
+  onChange,
+  selectMultiple,
+  label,
+  description,
+  defaultValues,
+  exclude,
+}: SegmentPropsType) {
+  const [userToken] = useRecoilState(userTokenState);
+  const [selectedValues, setSelectedValues] = useState<string[]>([]); // [1, 2, 3]
+
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: [`query-segments`, {}],
+    queryFn: async ({ queryKey }) => {
+      const response = await fetch(`${API_URL}/segment/all`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      if (response.status === 401) {
+        logout();
+      }
+      const res = await response.json();
+      return res;
+    },
+  });
+
+  let segmentOptions = data?.segments || [];
+  for (let i = 0; i < segmentOptions.length; i++) {
+    segmentOptions[i]["label"] = segmentOptions[i].segment_title;
+    segmentOptions[i]["value"] = segmentOptions[i].id.toString();
+  }
+  if (exclude) {
+    segmentOptions = segmentOptions.filter((x: any) => !exclude.includes(x.id));
+  }
+
+  useEffect(() => {
+    if (defaultValues) {
+      setSelectedValues(defaultValues.map((x) => x.toString()));
+    }
+  }, [defaultValues]);
+
+  return (
+    <MultiSelect
+      zIndex={1000}
+      data={segmentOptions}
+      limit={20}
+      valueComponent={Value}
+      itemComponent={SegmentItem}
+      searchable
+      required={true}
+      value={selectedValues}
+      placeholder="select segments..."
+      label={label}
+      description={description}
+      onChange={(ids) => {
+        var numVals: any = ids;
+        var returnVals = [];
+        for (let val of ids) {
+          returnVals.push({
+            segment_id: parseInt(val),
+            segment_name: segmentOptions.find((x: any) => x.value === val)
+              ?.label,
+          });
+        }
+        if (!selectMultiple) {
+          numVals = numVals.slice(0, 1);
+          returnVals = returnVals.slice(0, 1);
+        }
+        onChange(returnVals);
+        setSelectedValues(numVals);
+      }}
+      disabled={disabled}
+      w="100%"
+      withinPortal
+      styles={{ wrapper: { overflow: "visible" }, dropdown: { minWidth: 500 } }}
+    />
+  );
+}
 
 export default function PersonaSelect({
   disabled,
@@ -124,7 +222,7 @@ export default function PersonaSelect({
   label,
   description,
   defaultValues,
-  exclude
+  exclude,
 }: PropsType) {
   const [userToken] = useRecoilState(userTokenState);
   const [selectedValues, setSelectedValues] = useState<string[]>([]); // [1, 2, 3]
@@ -157,7 +255,7 @@ export default function PersonaSelect({
 
   useEffect(() => {
     if (defaultValues) {
-      setSelectedValues(defaultValues.map((x) => (x.toString())));
+      setSelectedValues(defaultValues.map((x) => x.toString()));
     }
   }, [defaultValues]);
 
@@ -175,13 +273,14 @@ export default function PersonaSelect({
       label={label}
       description={description}
       onChange={(ids) => {
-        var numVals: any = ids
-        var returnVals = []
+        var numVals: any = ids;
+        var returnVals = [];
         for (let val of ids) {
           returnVals.push({
-            "archetype_id": parseInt(val),
-            "archetype_name": personaOptions.find((x: any) => x.value === val)?.label
-          })
+            archetype_id: parseInt(val),
+            archetype_name: personaOptions.find((x: any) => x.value === val)
+              ?.label,
+          });
         }
         if (!selectMultiple) {
           numVals = numVals.slice(0, 1);
@@ -191,9 +290,9 @@ export default function PersonaSelect({
         setSelectedValues(numVals);
       }}
       disabled={disabled}
-      w='100%'
+      w="100%"
       withinPortal
-      styles={{ wrapper: { overflow: 'visible' }, dropdown: { minWidth: 500 } }}
+      styles={{ wrapper: { overflow: "visible" }, dropdown: { minWidth: 500 } }}
     />
   );
 }

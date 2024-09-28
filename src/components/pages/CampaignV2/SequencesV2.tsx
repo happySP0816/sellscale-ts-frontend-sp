@@ -1536,6 +1536,8 @@ function EmailSequencingV2(props: {
     { open: openSequenceStep, close: closeSequenceStep },
   ] = useDisclosure();
 
+  const emailSequenceData = useRecoilValue(emailSequenceState);
+
   const triggerGetEmailSubjectLineTemplates = async () => {
     const result = await getEmailSubjectLineTemplates(
       props.userToken,
@@ -1665,7 +1667,7 @@ function EmailSequencingV2(props: {
       triggerGetEmailSubjectLineTemplates();
       triggerGetEmailSequenceSteps();
     }
-  }, [props.currentProject?.id]);
+  }, [props.currentProject?.id, emailSequenceData]);
 
   return (
     <NewUIEmailSequencingV2
@@ -2644,7 +2646,7 @@ const EmailPreviewHeaderV2 = function (props: {
         </Flex>
 
         <Box>
-          {props.subjectLine && props.template && (
+          {props.subjectLine && props?.template?.step?.active && (
             <Paper withBorder style={{ borderColor: "#228be6" }} radius={"sm"}>
               <Flex
                 align={"center"}
@@ -2875,7 +2877,10 @@ const NewDetailEmailSequencingV2 = function (props: {
 
   // Active Template States
   const [activeTemplate, setTemplate] = useState<EmailSequenceStep>();
-  const [activeTemplateIndex, setActiveTemplateIndex] = useState<number>(0);
+  const [activeTemplateIndex, setActiveTemplateIndex] = useState<number>(() => {
+    const firstActiveIndex = props.templates.findIndex(template => template.step.active);
+    return firstActiveIndex !== -1 ? firstActiveIndex : -1;
+  });
   const [subjectLineText, setSubjectLineText] = useState<string | null>("");
   const [activeSubjectLine, setActiveSubjectLine] =
     useState<SubjectLineTemplate>();
@@ -2904,7 +2909,11 @@ const NewDetailEmailSequencingV2 = function (props: {
 
   useEffect(() => {
     if (props.templates.length > 0) {
-      setTemplate(props.templates[0]);
+      const firstActiveTemplate = props.templates.find(template => template.step.active);
+      if (firstActiveTemplate) {
+        setTemplate(firstActiveTemplate);
+        setActiveTemplateIndex(props.templates.indexOf(firstActiveTemplate));
+      }
     }
     if (
       props.subjectLines.length > 0 &&
@@ -3184,6 +3193,7 @@ const NewDetailEmailSequencingV2 = function (props: {
                         <Group>
                           {template.step.active && <Badge>Active</Badge>}
                           <Button
+                            disabled ={!template.step.active}
                             radius="lg"
                             size="xs"
                             color="violet"
@@ -3457,7 +3467,7 @@ const NewDetailEmailSequencingV2 = function (props: {
           setTriggerGenerate={props.setTriggerGenerate}
         />
       )}
-      <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>
+      {activeTemplate?.step?.active && <Flex align={"center"} justify={"start"} gap={"8px"} mt={"8px"}>
         <ActionIcon
           disabled={activeTemplateIndex === 0}
           onClick={() => setActiveTemplateIndex((prevValue) => prevValue - 1)}
@@ -3477,13 +3487,16 @@ const NewDetailEmailSequencingV2 = function (props: {
           }`}
         </Badge>
         <ActionIcon
-          disabled={activeTemplateIndex === props.templates.length - 1}
+          disabled={
+            activeTemplateIndex === props.templates.length - 1 ||
+            props.templates.slice(activeTemplateIndex + 1).every(template => !template.step.active)
+          }
           onClick={() => setActiveTemplateIndex((prevValue) => prevValue + 1)}
           radius={"xl"}
         >
           <IconArrowRight size={16} />
         </ActionIcon>
-      </Flex>
+      </Flex>}
       {(props.isEditing || showEditVariants) &&
         (props.currentTab === "PROSPECTED" ? (
           <Tabs

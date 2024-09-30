@@ -372,7 +372,7 @@ export default function FindContactsPage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="linkedin-url-finder" pt="xs" style={{ position: "relative" }}>
-          <Card maw="600px" ml="auto" mr="auto">
+          <Card maw="70%" ml="auto" mr="auto">
             <Title order={3}>Upload CSV</Title>
             <Text mb="md" color="gray">
               <ul>

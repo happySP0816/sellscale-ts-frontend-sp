@@ -24,6 +24,7 @@ import {
   Checkbox,
   Table,
   HoverCard,
+  Loader,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useEffect, useRef, useState } from "react";
@@ -32,6 +33,7 @@ import {
   IconBrandLinkedin,
   IconBulb,
   IconChartBar,
+  IconCheck,
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
@@ -61,9 +63,12 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { useStrategiesApi } from "@pages/Strategy/StrategyApi";
 import { showNotification } from "@mantine/notifications";
 import { set } from "lodash";
+import { TransformedSegment } from "@pages/SegmentV3/SegmentV3";
+import { useTrackApi } from "@common/settings/Traffic/WebTrafficRoutingApi";
 
 export default function UploadProspectsModal({ context, id, innerProps }: ContextModalProps<{ mode: "CREATE-ONLY"; strategy_id?: number | undefined; selixSessionId?: Number | null }>) {
   const theme = useMantineTheme();
+  const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const [personas, setPersonas] = useState<{ value: string; label: string; group: string | undefined }[]>([]);
   const [hasSequences, setHasSequences] = useState<boolean>(false); //used for the selix widget
@@ -72,6 +77,114 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
   const [loadingStrategy, setLoadingStrategy] = useState(false);
   const [handlingStrategy, setHandlingStrategy] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [segmentData, setSegmentData] = useState<TransformedSegment[]>([]);
+  const [segmentOptions, setSegmentOptions] = useState<Segment[]>([]);
+  const [fetchingSegments, setFetchingSegments] = useState(false);
+  const [selectedSegmentId, setSelectedSegmentId] = useState(-1);
+
+  const {
+    updateIcpRoute,
+    getAllIcpRoutes,
+    getWebVisits,
+    getSegments
+  } = useTrackApi(userToken);
+
+  type Segment = {
+    num_results: number;
+    attached_segments: any[];
+    client_archetype: {
+      archetype: string;
+      emoji: string;
+    };
+    client_sdr: {
+      client_id: number;
+      id: number;
+    };
+    filters: {
+      excluded_bio_keywords: string[];
+      excluded_company_keywords: string[];
+      excluded_education_keywords: string[];
+      // Add other filter fields as necessary
+    };
+    id: number;
+    num_contacted: number;
+    num_prospected: number;
+    parent_segment_id: number | null;
+    saved_apollo_query_id: number;
+    segment_title: string;
+    unique_companies: number;
+  };
+
+  const getAllSegments = async (showLoader: boolean, tagFilter?: Number) => {
+    function transformData(segments: any[]) {
+      return segments.map((segment, index) => {
+        // Assume progress, campaign, contacts, filters, assets are derived somehow
+        return {
+          id: segment.id,
+          person_name: segment.segment_title,
+          segment_title: segment.segment_title,
+          progress: Math.floor(Math.random() * 100), // Fake random progress
+          campaign: Math.floor(Math.random() * 100), // Fake random campaign ID or null
+          contacts: Math.floor(Math.random() * 2000000), // Fake random contacts number
+          filters: Object.keys(segment.filters).length, // Count of filter types
+          assets: Math.floor(Math.random() * 100), // Fake random asset count or null
+          sub_segments: [], // This needs to be populated based on more complex logic or additional data
+          client_archetype: segment.client_archetype,
+          client_sdr: segment.client_sdr,
+          num_prospected: segment.num_prospected,
+          num_contacted: segment.num_contacted,
+          apollo_query: segment.apollo_query,
+          segment_tags: segment.attached_segments,
+          autoscrape_enabled: segment.autoscrape_enabled,
+          current_scrape_page: segment.current_scrape_page,
+        };
+      });
+    }
+    if (showLoader) {
+      setLoading(true);
+    }
+    fetch(
+      `${API_URL}/segment/all?include_all_in_client=true` +
+        (tagFilter !== -1
+          ? `&tag_filter=${tagFilter}`
+          : ""),
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        const segments = data.segments;
+  
+        const parentSegments = segments.filter(
+          (segment: any) => !segment.parent_segment_id
+        );
+        let parentSegmentsTransformed = transformData(parentSegments);
+
+        const parentSegmentsTransformedWithSubSegments: any = parentSegmentsTransformed?.map(
+          (segment) => {
+            const subSegments = segments.filter(
+              (subSegment: any) => subSegment.parent_segment_id === segment.id
+            );
+            return {
+              ...segment,
+              sub_segments: transformData(subSegments),
+            };
+          }
+        );
+
+        setSegmentData(parentSegmentsTransformedWithSubSegments);
+      })
+      .finally(() => {
+        console.log("Stopping");
+        setLoading(false);
+      });
+  };
 
   const [ctas, setCTAs] = useState<{ id: number; cta: string }[]>([]);
 
@@ -160,6 +273,13 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
     feedbackBased: false,
     });
 
+    const fetchSegments = async () => {
+      setFetchingSegments(true);
+      const segments = await getSegments();
+      setSegmentOptions(segments);
+      setFetchingSegments(false);
+    };
+
 
   useEffect(() => {
     const getVoices = async () => {
@@ -175,6 +295,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
       checkIfStrategyConnectedHasCampaignWithSequences(innerProps?.selixSessionId);
     }
     handleStrategy();
+    fetchSegments();
     getVoices();
   }, [])
 
@@ -366,7 +487,6 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
 
   }
 
-  const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
   const { getAllStrategies, patchUpdateStrategy } = useStrategiesApi(userToken);
@@ -563,6 +683,57 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                   <Text size={"md"} fw={500} mb={-8}>
                     Campaign Automations
                   </Text>
+                  {window.location.href.includes('/campaigns') && <>
+                  {!fetchingSegments ? (
+                  <Select
+                    style={{ minWidth: "500px", transition: "all 0.3s ease-in-out" }}
+                    withinPortal
+                    mt={"sm"}
+                    data={segmentOptions.map((segment) => ({
+                      value: segment.id.toString(),
+                      label: segment.segment_title,
+                    }))}
+                    label={selectedSegmentId ? null : <Text color="red">No Segment Attached</Text>}
+                    placeholder="Select Segment"
+                    value={selectedSegmentId.toString()}
+                    creatable
+                    searchable
+                    getCreateLabel={(query) => `+ Create ${query}`}
+                    onCreate={(query) => {
+                      getAllSegments(false)
+                      // doStuff(query, row);
+                      return null
+                    }}
+                    onChange={(value) => {
+                      console.log('value changed', value);
+                      // updateIcpRoute(row.icpRouteId || -1, {
+                      //   segment_id: value ? parseInt(value) : undefined,
+                      // });
+                      // row.segment_id = value ? parseInt(value) : undefined;
+                      showNotification({
+                        title: "Success",
+                        message: "Segment attached successfully",
+                        color: "green",
+                        icon: <IconCheck />,
+                      });
+                      // unfocus the select
+                      setTimeout(() => {
+                        (document.activeElement as HTMLElement)?.blur();
+                      }, 0);
+                      getAllSegments(false);
+                      setSelectedSegmentId(parseInt(value || ''));
+                    }}
+                    onDropdownOpen={() => {
+                      console.log('Dropdown opened');
+                    }}
+                    onDropdownClose={() => {
+                      console.log('Dropdown closed');
+                    }}
+                  />
+                ) : (
+                  <Loader size="sm" />
+                )}
+                </>}
                   {window.location.href.includes('/campaigns') &&  <Paper withBorder p="sm">
                   <Switch
                     onChange={() => setFindSampleProspects(!findSampleProspects)}
@@ -1143,6 +1314,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
               connectedStrategyId: connectedStrategy ? connectedStrategy.id : undefined,
               override_archetype_id: (window.location.href.includes('/campaign_v2') || window.location.href.includes('selix')) ? currentProject?.id : undefined,
               purpose,
+              selectedSegmentId: selectedSegmentId,
               autoGenerationPayload : {
               findSampleProspects,
               writeEmailSequenceDraft,

@@ -39,6 +39,7 @@ type PropsType = {
     contractSize: number;
     templateMode: boolean;
     purpose: string;
+    selectedSegmentId: number;
     override_archetype_id: number | undefined;
     connectedStrategyId: number|undefined;
     autoGenerationPayload?: {
@@ -126,7 +127,8 @@ export default function CreatePersona(props: PropsType) {
       },
       autoGenerationPayload,
       props.createPersona.connectedStrategyId,
-      props.createPersona.override_archetype_id
+      props.createPersona.override_archetype_id,
+      props.createPersona.selectedSegmentId
     );
     } catch (e) {
       console.error("Failed to create persona & CTAs", e);

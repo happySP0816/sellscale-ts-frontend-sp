@@ -683,7 +683,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                   <Text size={"md"} fw={500} mb={-8}>
                     Campaign Automations
                   </Text>
-                  {window.location.href.includes('/campaigns') && <>
+                  {(((window.location.href.includes('selix')) && currentProject?.id) || window.location.href.includes('campaigns')) && <>
                   {!fetchingSegments ? (
                   <Select
                     style={{ minWidth: "500px", transition: "all 0.3s ease-in-out" }}
@@ -694,9 +694,8 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                       label: segment.segment_title,
                     }))}
                     label={selectedSegmentId ? null : <Text color="red">No Segment Attached</Text>}
-                    placeholder="Select Segment"
+                    placeholder="Attach a segment"
                     value={selectedSegmentId.toString()}
-                    creatable
                     searchable
                     getCreateLabel={(query) => `+ Create ${query}`}
                     onCreate={(query) => {

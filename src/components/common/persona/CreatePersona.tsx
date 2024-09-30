@@ -305,7 +305,7 @@ export default function CreatePersona(props: PropsType) {
           Cancel
         </Button>
         <Button
-          // disabled={!props.createPersona?.name || !props.createPersona.contactObjective}
+          disabled={(window.location.href.includes('/campaigns') && !props.createPersona?.name)}
           onClick={() => createPersonaHandler(linkedinChecked, emailChecked, props.createPersona?.autoGenerationPayload)}
           loading={creatingPersona}
           fullWidth

@@ -548,7 +548,11 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
 
                 {window.location.href.includes('/campaigns') && <TextInput
                   placeholder="eg. C-Suite Sales Leaders in tech companies"
-                  label={<Text mb="xs" size="lg">Campaign Name</Text>}
+                  label={
+                    <Text mb="xs" size="lg">
+                      Campaign Name{createdPersona.length < 1 && <span style={{ color: 'red' }}> *</span>}
+                    </Text>
+                  }
                   value={createdPersona}
                   onChange={(e) =>
                   {

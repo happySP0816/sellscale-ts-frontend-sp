@@ -43,7 +43,8 @@ export default async function createPersona(
     };
   },
   connectedStrategyId?: number | undefined,
-  override_archetype_id?: number | undefined
+  override_archetype_id?: number | undefined,
+  selectedSegmentId?: number | undefined
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/client/archetype`, {
     method: "POST",
@@ -67,6 +68,7 @@ export default async function createPersona(
       email_to_linkedin_connection: extras.connectionType,
       purpose: extras.purpose,
       auto_generation_payload: autoGenerationPayload,
+      selected_segment_id: selectedSegmentId,
     }),
   });
   if (response.status === 401) {

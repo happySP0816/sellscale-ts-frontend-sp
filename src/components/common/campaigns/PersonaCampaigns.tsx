@@ -52,6 +52,7 @@ import {
   Indicator,
   ColorSwatch,
   Checkbox,
+  Alert,
 } from "@mantine/core";
 import { useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
@@ -72,6 +73,7 @@ import {
   IconEdit,
   IconExternalLink,
   IconFlower,
+  IconInfoCircle,
   IconList,
   IconLoader,
   IconMail,
@@ -1767,7 +1769,7 @@ export function PersonCampaignCard(props: {
                   onMouseEnter={statusopenPopover}
                   onMouseLeave={statusclosePopover}
                 >
-                  {props.persona?.selix_session_id && (
+                  {props.persona?.selix_session_id ? (
                     <>
                       <Tooltip label="Jump to Selix Session" withArrow>
                         <ActionIcon
@@ -1814,8 +1816,21 @@ export function PersonCampaignCard(props: {
                         </Flex>
                       )}
                     </>
+                  ) : (
+
+                    <Alert
+                      icon={<IconInfoCircle size={20} />}
+                      // title={<Text fw={700} size="md">Notice</Text>}
+                      color="blue"
+                      variant="filled"
+                      w="100%"
+                      mt="md"
+                      sx={{ borderLeft: '4px solid #228be6', padding: '10px' }}
+                    >
+                      <Text size="sm">No Selix Session</Text>
+                    </Alert>
                   )}
-                  <Flex gap={"sm"} align={"center"}>
+                  {/* <Flex gap={"sm"} align={"center"}>
                     <IconLoader color="#228be6" />{" "}
                     <Text fw={700} size={"lg"}>
                       Campaign Status Overview
@@ -1900,7 +1915,7 @@ export function PersonCampaignCard(props: {
                     <Text color="gray" size={"xs"}>
                       Verify prospects.
                     </Text>
-                  </Box>
+                  </Box> */}
                 </Popover.Dropdown>
               </Popover>
             </Flex>

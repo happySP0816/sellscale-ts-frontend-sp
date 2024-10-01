@@ -44,6 +44,7 @@ import {
   IconRecordMail,
   IconRefresh,
   IconRobot,
+  IconMessages,
 } from "@tabler/icons";
 import moment from "moment";
 import { useRecoilValue } from "recoil";
@@ -455,6 +456,18 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
       sub: "manual entry",
       explanation: "This log represents a manual entry event",
     },
+    SLACK_MESSAGE: {
+      icon: <IconMessage size={16} />,
+      color: "green",
+      sub: "Slack Message",
+      explanation: "This log represents a slack message event",
+    },
+    EMAIL_MESSAGE: {
+      icon: <IconMessage size={16} />,
+      color: "green",
+      sub: "Email Message",
+      explanation: "This log represents a email message event",
+    },
   };
 
   // Custom implementation of drag and drop
@@ -597,8 +610,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
 
         if (closestElement) {
           closestElement.style.backgroundColor = "#d1f4d1";
-        }
-        else if (topLevel) {
+        } else if (topLevel) {
           const element = document.getElementById(`timeline-${topLevel}-card`);
           if (element) {
             const rect = element.getBoundingClientRect();
@@ -735,8 +747,20 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                       fw={log.tag === "MEMORY_METADATA_SAVED" ? 600 : 400}
                       size={log.tag === "MEMORY_METADATA_SAVED" ? "sm" : "xs"}
                     >
-                      {log.title}
+                      {log.tag === "SLACK_MESSAGE"
+                        ? `From ${log.title.split(" ")[0]}` +
+                          (isSelected
+                            ? ` to ${log.title
+                                .split(" ")
+                                .find((item) => item.includes("pipeline"))}`
+                            : "")
+                        : log.title}
                     </Text>
+                    {isSelected && (
+                      <Text fw={600} size={"sm"}>
+                        {log.description}
+                      </Text>
+                    )}
                     <Text c="dimmed" size="xs">
                       {moment(log.created_date).fromNow()} |{" "}
                       {tagToIconAndColorMap[log.tag]?.sub}
@@ -1248,17 +1272,19 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                     __html: selectedLog.metadata.replaceAll("\n", "<br />"),
                   }}
                 />
-                <Textarea
-                  value={editedDescription}
-                  autosize
-                  minRows={10}
-                  maxRows={15}
-                  mb="md"
-                  onChange={(e) => {
-                    setEditedDescription(e.currentTarget.value);
-                    setIsEditing(true);
-                  }}
-                />
+                {selectedLog.tag !== "SUPPORT_THREAD_SLACK" && (
+                  <Textarea
+                    value={editedDescription}
+                    autosize
+                    minRows={10}
+                    maxRows={15}
+                    mb="md"
+                    onChange={(e) => {
+                      setEditedDescription(e.currentTarget.value);
+                      setIsEditing(true);
+                    }}
+                  />
+                )}
                 <Card
                   withBorder
                   mb="md"

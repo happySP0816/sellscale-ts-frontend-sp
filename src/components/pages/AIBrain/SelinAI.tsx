@@ -981,6 +981,13 @@ export default function SelinAI() {
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
         window.history.replaceState({}, document.title, newUrl);
         getMessages(threadIdFromUrl || "", parseInt(sessionIdFromUrl), threads_loaded, "PLANNER");
+        setCurrentSessionId(Number(sessionIdFromUrl));
+        // console.log("meowww", data.session.id);
+        sessionIDRef.current = Number(sessionIdFromUrl);
+        roomIDref.current = threadIdFromUrl || "";
+        const currentThread = threads_loaded.find((thread: ThreadType) => thread.id === Number(sessionIdFromUrl));
+        const orderedTasks = currentThread?.tasks?.sort((a: TaskType, b: TaskType) => a.order_number - b.order_number);
+        setTasks(orderedTasks || []);
         setAIType("PLANNER");
       }
     };
@@ -4542,9 +4549,12 @@ const FilesComponent = ({ currentSessionId, attachedFile }: { currentSessionId: 
       </thead>
       <tbody>
         {files.map((file, index) => (
-          <tr key={index}>
-            <td>{file.name}</td>
-            <td>
+          <tr key={index} style={{ cursor: "pointer" }} onClick={() => setEditingTextIndex(index)}>
+            <td style={{ position: "relative" }}>
+              {file.name}
+              <IconPencil size="0.8rem" style={{ position: "absolute", right: "5px", top: "5px", color: "#888" }} />
+            </td>
+            <td style={{ position: "relative" }}>
               {editingTextIndex === index ? (
                 <Textarea
                   w={"100%"}
@@ -4554,7 +4564,7 @@ const FilesComponent = ({ currentSessionId, attachedFile }: { currentSessionId: 
                   autoFocus
                 />
               ) : (
-                <Text onClick={() => setEditingTextIndex(index)}>
+                <Text>
                   {file.description.length > 70 ? (
                     <HoverCard width={300} shadow="md">
                       <HoverCard.Target>
@@ -4575,6 +4585,7 @@ const FilesComponent = ({ currentSessionId, attachedFile }: { currentSessionId: 
                   ) : (
                     file.description
                   )}
+                  {/* <IconPencil size="0.8rem" style={{ position: 'absolute', right: '5px', top: '5px', color: '#888' }} /> */}
                 </Text>
               )}
             </td>

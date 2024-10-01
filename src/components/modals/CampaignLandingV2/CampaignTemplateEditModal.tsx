@@ -1691,7 +1691,7 @@ export default function CampaignTemplateEditModal({
                           </Tabs.List>
 
                           <Tabs.Panel value="personalization">
-                            <ScrollArea h={300}>
+                            <ScrollArea h={400}>
                               <PersonalizationSection
                                 researchPoints={researchPoints}
                                 blocklist={
@@ -1716,7 +1716,7 @@ export default function CampaignTemplateEditModal({
                             </ScrollArea>
                           </Tabs.Panel>
                           <Tabs.Panel value="ctas">
-                            <ScrollArea h={300}>
+                            <ScrollArea h={400}>
                               <CtaSection
                                 onCTAsLoaded={(data) => {
                                   setCtasItemsCount(

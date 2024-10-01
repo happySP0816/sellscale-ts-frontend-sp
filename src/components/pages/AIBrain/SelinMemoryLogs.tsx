@@ -20,6 +20,8 @@ import {
   HoverCard,
   LoadingOverlay,
   ActionIcon,
+  Portal,
+  Accordion,
 } from "@mantine/core";
 import {
   IconHistory,
@@ -51,6 +53,9 @@ import { deterministicMantineColor } from "@utils/requests/utils";
 import { showNotification } from "@mantine/notifications";
 import { socket } from "../../../components/App";
 import { ThreadType } from "./SelinAI";
+import { useQuery } from "@tanstack/react-query";
+import { ex } from "@fullcalendar/core/internal-common";
+import { isHtmlElement } from "react-router-dom/dist/dom";
 
 interface MemoryLog {
   id: number;
@@ -64,6 +69,8 @@ interface MemoryLog {
   session_id?: string;
   processing_status?: string;
   processing_status_description?: string;
+  parent_log_id?: number;
+  is_sub_event?: boolean;
 }
 
 interface MemoryLogsProps {
@@ -72,11 +79,8 @@ interface MemoryLogsProps {
 }
 
 const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
-  const [logs, setLogs] = useState<MemoryLog[]>([]);
   const [opened, setOpened] = useState(false);
-  const [selectedLog, setSelectedLog]: any = useState<MemoryLog | null>(
-    logs.reverse().find((log) => true) || null
-  );
+
   const [createLogOpened, setCreateLogOpened] = useState(false);
   const [newLog, setNewLog] = useState({
     tag: "",
@@ -94,7 +98,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
   const userToken = useRecoilValue(userTokenState);
   const [roomId, setRoomId] = useState("");
 
-  const updateMemoryLogSessionId = async (selixLogId: number, sessionId: number | undefined) => {
+  const updateMemoryLogSessionId = async (
+    selixLogId: number,
+    sessionId: number | undefined
+  ) => {
     if (!sessionId) {
       return;
     }
@@ -106,7 +113,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
           Authorization: `Bearer ${userToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ selix_log_id: selixLogId, session_id: sessionId }),
+        body: JSON.stringify({
+          selix_log_id: selixLogId,
+          session_id: sessionId,
+        }),
       });
 
       if (!response.ok) {
@@ -121,9 +131,11 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  const fetchSelixLogs = async (selixLogId: number | null = null) => {
+  const fetchSelixLogs = async (
+    selixLogId: number | null = null
+  ): Promise<MemoryLog[]> => {
     try {
       setLoading(true);
       setLoadingSelixLogs(true);
@@ -140,7 +152,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
       }
 
       const result = await response.json();
-      setLogs(result.logs);
+
       if (selixLogId) {
         setSelectedLog(
           result.logs.find((log: MemoryLog) => log.id === selixLogId) || null
@@ -150,14 +162,28 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
           result.logs.reverse().find((log: MemoryLog) => true) || null
         );
       }
-    } catch (error) {
-      console.error("Error fetching logs:", error);
-    } finally {
+
       setLoading(false);
       setLoadingSelixLogs(false);
       console.log("Logs fetched successfully");
+
+      return result.logs;
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+      return [] as MemoryLog[];
     }
   };
+
+  const { data: logs, refetch } = useQuery({
+    queryKey: ["selix_event_logs"],
+    queryFn: async () => {
+      return await fetchSelixLogs();
+    },
+  });
+
+  const [selectedLog, setSelectedLog]: any = useState<MemoryLog | null>(
+    logs?.reverse().find((log) => true) || null
+  );
 
   useEffect(() => {
     setEditedDescription(selectedLog?.description || "");
@@ -181,7 +207,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
 
       const result = await response.json();
       console.log("Log created successfully:", result);
-      fetchSelixLogs(); // Refresh logs after creation
+      refetch(); // Refresh logs after creation
       setCreateLogOpened(false); // Close the create log form
     } catch (error) {
       console.error("Error creating log:", error);
@@ -237,11 +263,40 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
 
       const result = await response.json();
       console.log("Log deleted successfully:", result);
-      fetchSelixLogs(); // Refresh logs after deletion
+      refetch(); // Refresh logs after deletion
     } catch (error) {
       console.error("Error deleting log:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const setParentEvent = async (childLogId: number, parentLogId?: number) => {
+    const response = await fetch(`${API_URL}/selix/set_child_event`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        parent_event_id: parentLogId ? parentLogId : null,
+        child_event_id: childLogId,
+      }),
+    });
+
+    if (response.ok) {
+      showNotification({
+        title: "Success",
+        message: "Successfully set parent event.",
+        color: "green",
+      });
+      refetch();
+    } else {
+      showNotification({
+        title: "Failed",
+        message: "Failed to set parent event",
+        color: "red",
+      });
     }
   };
 
@@ -279,7 +334,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
     const handleData = (incomingData: any) => {
       console.log("Incoming data:", incomingData);
       if (incomingData.room_id === roomId) {
-        fetchSelixLogs();
+        refetch();
       }
     };
 
@@ -336,13 +391,8 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
     }
   }, [userToken]);
 
-  useEffect(() => {
-    fetchSelixLogs();
-  }, []);
-
-  const reversedLogsByLogDate = logs.sort(
-    (a: MemoryLog, b: MemoryLog) => -(a.id - b.id)
-  );
+  const reversedLogsByLogDate =
+    logs?.sort((a: MemoryLog, b: MemoryLog) => -(a.id - b.id)) ?? [];
 
   const tagToIconAndColorMap: Record<
     string,
@@ -407,6 +457,344 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
     },
   };
 
+  // Custom implementation of drag and drop
+  const [draggedItem, setDraggedItem] = useState<MemoryLog | null>(null);
+  const [dragOffset, setDragOffset] = useState<{ x: number; y: number } | null>(
+    null
+  );
+  const draggedElementRef = useRef<HTMLDivElement | null>(null);
+
+  const [expandedEvent, setExpandedEvent] = useState<Map<number, boolean>>(
+    new Map()
+  );
+
+  const [holdStart, setHoldStart] = useState(0);
+  const holdThreshold = 500; // Threshold in milliseconds to differentiate between click and hold
+
+  const handleMouseDown = (
+    e: React.MouseEvent<HTMLDivElement>,
+    item: MemoryLog
+  ) => {
+    setHoldStart(new Date().getTime());
+
+    e.preventDefault();
+    e.stopPropagation();
+    const target = e.target as HTMLElement;
+    const itemRect = target.getBoundingClientRect();
+
+    setDragOffset({
+      x: e.clientX - itemRect.left,
+      y: e.clientY - itemRect.top,
+    });
+    setDraggedItem(item);
+  };
+
+  // Track mouse movement while dragging
+  const handleMouseMove = (e: MouseEvent) => {
+    if (draggedItem && draggedElementRef && draggedElementRef.current) {
+      draggedElementRef.current.style.left = `${
+        e.clientX - (dragOffset ? dragOffset.x : 0)
+      }px`;
+
+      draggedElementRef.current.style.top = `${
+        e.clientY - (dragOffset ? dragOffset.y : 0)
+      }px`;
+    }
+  };
+
+  const handleMouseUpInTimeline = async (
+    e: React.MouseEvent<HTMLDivElement>,
+    upItem?: MemoryLog
+  ) => {
+    e.preventDefault();
+
+    const holdDuration = new Date().getTime() - holdStart;
+    console.log("holdDuration: ", holdDuration);
+
+    if (holdDuration < holdThreshold) {
+      return;
+    }
+
+    setHoldStart(0);
+
+    e.currentTarget.style.backgroundColor = "";
+
+    if (
+      !draggedItem ||
+      upItem?.id === draggedItem?.id ||
+      upItem?.is_sub_event ||
+      upItem?.parent_log_id === draggedItem.id
+    ) {
+      return;
+    }
+
+    await setParentEvent(draggedItem.id, upItem?.id);
+
+    setDraggedItem(null);
+    setDragOffset(null);
+  };
+
+  const handleMouseUp = () => {
+    setDraggedItem(null);
+    setDragOffset(null);
+  };
+
+  // Example drop target to detect entering and leaving
+  const handleMouseEnterDropZone = (
+    e: React.MouseEvent<HTMLDivElement>,
+    logItem?: MemoryLog
+  ) => {
+    if (draggedItem) {
+      e.currentTarget.style.backgroundColor = "#d1f4d1"; // Highlight drop zone
+
+      if (logItem && logItem.parent_log_id) {
+        const closestElement = document.getElementById(
+          `timeline-${logItem.parent_log_id}`
+        );
+
+        if (closestElement) {
+          closestElement.style.backgroundColor = "#fff";
+        }
+      }
+      if (logItem) {
+        const cardElement = document.getElementById("timeline-event-card");
+
+        if (cardElement) {
+          cardElement.style.backgroundColor = "#fff";
+        }
+      }
+    }
+  };
+
+  const handleMouseLeaveDropZone = (
+    e: React.MouseEvent<HTMLDivElement>,
+    parentId?: number
+  ) => {
+    if (draggedItem) {
+      e.currentTarget.style.backgroundColor = ""; // Remove highlight
+
+      if (parentId) {
+        const closestElement = document.getElementById(`timeline-${parentId}`);
+
+        if (closestElement) {
+          closestElement.style.backgroundColor = "#d1f4d1";
+        }
+      } else {
+        const element = document.getElementById("timeline-event-card");
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          const mouseX = e.clientX;
+          const mouseY = e.clientY;
+
+          // Check if mouse is inside the element's bounding box
+          if (
+            mouseX >= rect.left &&
+            mouseX <= rect.right &&
+            mouseY >= rect.top &&
+            mouseY <= rect.bottom
+          ) {
+            element.style.backgroundColor = "#d1f4d1";
+          }
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Attach the mousemove and mouseup event listeners to the window
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    // Cleanup event listeners when component unmounts
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [draggedItem, dragOffset]);
+
+  const RenderTimeline = function (logArray: MemoryLog[], level: number = 1) {
+    console.log("logArray: ", logArray);
+    return (
+      <Timeline bulletSize={24}>
+        {logArray.map((log, index) => {
+          return (
+            <Timeline.Item
+              key={index}
+              id={`timeline-${log.id}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedLog(log);
+                setEditedDescription(log.description);
+                setIsEditing(false);
+              }}
+              onMouseDown={(e) => {
+                handleMouseDown(e, log);
+              }}
+              onMouseEnter={(e) => handleMouseEnterDropZone(e, log)}
+              onMouseLeave={(e) =>
+                handleMouseLeaveDropZone(e, log.parent_log_id)
+              }
+              onMouseUp={async (e) => await handleMouseUpInTimeline(e, log)}
+              sx={{
+                cursor:
+                  log.tag === "MEMORY_METADATA_SAVED" ? "pointer" : "default",
+                backgroundColor: log === selectedLog ? "#fcfcfc" : "#fff",
+                border: log === selectedLog ? "1px solid #e0e0e0" : undefined,
+              }}
+              bullet={
+                <Tooltip label={tagToIconAndColorMap[log.tag]?.explanation}>
+                  <ThemeIcon
+                    size={22}
+                    variant="filled"
+                    color={
+                      log === selectedLog
+                        ? "yellow"
+                        : tagToIconAndColorMap[log.tag]?.color || "gray"
+                    }
+                    radius="xl"
+                  >
+                    {tagToIconAndColorMap[log.tag]?.icon || (
+                      <IconBolt size="0.8rem" />
+                    )}
+                  </ThemeIcon>
+                </Tooltip>
+              }
+            >
+              <Flex direction={"column"}>
+                <Flex align="center" justify="space-between">
+                  <Box>
+                    <Text
+                      fw={log.tag === "MEMORY_METADATA_SAVED" ? 600 : 400}
+                      size={log.tag === "MEMORY_METADATA_SAVED" ? "sm" : "xs"}
+                    >
+                      {log.title}
+                    </Text>
+                    <Text c="dimmed" size="xs">
+                      {moment(log.created_date).fromNow()} |{" "}
+                      {tagToIconAndColorMap[log.tag]?.sub}
+                    </Text>
+                  </Box>
+                  <Button
+                    variant="subtle"
+                    color="red"
+                    size="xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteSelixLog(log.id);
+                    }}
+                  >
+                    <IconTrash size={16} />
+                  </Button>
+                </Flex>
+                {(() => {
+                  const childEvents = reversedLogsByLogDate.filter(
+                    (item) =>
+                      (level === 1 ? !item.is_sub_event : true) &&
+                      item.parent_log_id === log.id
+                  );
+
+                  return childEvents.length > 0 ? (
+                    <>
+                      <Divider
+                        size={"xl"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (expandedEvent.has(log.id)) {
+                            const newMap = new Map(expandedEvent);
+
+                            newMap.delete(log.id);
+                            setExpandedEvent(newMap);
+                            return;
+                          } else {
+                            const newMap = new Map(expandedEvent);
+                            newMap.set(log.id, true);
+                            setExpandedEvent(newMap);
+                            return;
+                          }
+                        }}
+                        label={
+                          expandedEvent.has(log.id)
+                            ? "Hide Sub Events"
+                            : "View Sub Events"
+                        }
+                        labelPosition={"center"}
+                      />
+                      {expandedEvent.has(log.id) &&
+                        RenderTimeline(childEvents, level + 1)}
+                    </>
+                  ) : (
+                    <></>
+                  );
+                })()}
+              </Flex>
+            </Timeline.Item>
+          );
+        })}
+        {draggedItem && (
+          <Portal>
+            <Timeline.Item
+              id={`hover-timeline-${draggedItem.id}`}
+              ref={draggedElementRef}
+              sx={{
+                position: "absolute",
+                zIndex: 9999, // Ensure dragged item is on top of everything
+                pointerEvents: "none", // Disable interactions while dragging
+                width: "200px",
+                backgroundColor: "#fff",
+                textAlign: "center",
+                lineHeight: "100px",
+                border: "1px solid #ccc",
+              }}
+              bullet={
+                <Tooltip
+                  label={tagToIconAndColorMap[draggedItem.tag]?.explanation}
+                >
+                  <ThemeIcon
+                    size={22}
+                    variant="filled"
+                    color={
+                      draggedItem === selectedLog
+                        ? "yellow"
+                        : tagToIconAndColorMap[draggedItem.tag]?.color || "gray"
+                    }
+                    radius="xl"
+                  >
+                    {tagToIconAndColorMap[draggedItem.tag]?.icon || (
+                      <IconBolt size="0.8rem" />
+                    )}
+                  </ThemeIcon>
+                </Tooltip>
+              }
+            >
+              <Flex
+                align="center"
+                justify="space-between"
+                style={{ marginLeft: "24px" }}
+              >
+                <Box>
+                  <Text
+                    fw={draggedItem.tag === "MEMORY_METADATA_SAVED" ? 600 : 400}
+                    size={
+                      draggedItem.tag === "MEMORY_METADATA_SAVED" ? "sm" : "xs"
+                    }
+                  >
+                    {draggedItem.title}
+                  </Text>
+                  <Text c="dimmed" size="xs">
+                    {moment(draggedItem.created_date).fromNow()} |{" "}
+                    {tagToIconAndColorMap[draggedItem.tag]?.sub}
+                  </Text>
+                </Box>
+              </Flex>
+            </Timeline.Item>
+          </Portal>
+        )}
+      </Timeline>
+    );
+  };
+
+  console.log("selected event: ", selectedLog);
+
   return (
     <>
       <Button
@@ -428,6 +816,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
         onClose={() => setOpened(false)}
         position="right"
         size="xl"
+        zIndex={5}
       >
         <Flex>
           <Box>
@@ -448,84 +837,32 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
         </Flex>
         <Divider mt="md" mb="lg" />
         <Flex>
-          <Box w="40%" pr="md" style={{ borderRight: "1px solid #e0e0e0" }}>
+          <Box
+            pr="md"
+            style={{
+              minWidth: "40%",
+              maxWidth: "40%",
+              borderRight: "1px solid #e0e0e0",
+            }}
+          >
             <Text fw={600} mb="md">
               Event Timeline
             </Text>
-            <Card withBorder mah="56vh" mb="md" sx={{ overflowY: "auto" }}>
+            <Card
+              withBorder
+              mb="md"
+              sx={{ minHeight: "400px", maxHeight: "500px", overflowY: "auto" }}
+              id={"timeline-event-card"}
+              onMouseEnter={(e) => handleMouseEnterDropZone(e)}
+              onMouseLeave={(e) => handleMouseLeaveDropZone(e)}
+              onMouseUp={async (e) => await handleMouseUpInTimeline(e)}
+            >
               <LoadingOverlay visible={loading || loadingSelixLogs} />
-              <Timeline bulletSize={24}>
-                {reversedLogsByLogDate.map((log, index) => {
-                  return (
-                    <Timeline.Item
-                      key={index}
-                      onClick={() => {
-                        setSelectedLog(log);
-                        setEditedDescription(log.description);
-                        setIsEditing(false);
-                      }}
-                      sx={{
-                        cursor:
-                          log.tag === "MEMORY_METADATA_SAVED"
-                            ? "pointer"
-                            : "default",
-                        backgroundColor:
-                          log === selectedLog ? "#fcfcfc" : undefined,
-                        border:
-                          log === selectedLog ? "1px solid #e0e0e0" : undefined,
-                      }}
-                      bullet={
-                        <Tooltip
-                          label={tagToIconAndColorMap[log.tag]?.explanation}
-                        >
-                          <ThemeIcon
-                            size={22}
-                            variant="filled"
-                            color={
-                              log === selectedLog
-                                ? "yellow"
-                                : tagToIconAndColorMap[log.tag]?.color || "gray"
-                            }
-                            radius="xl"
-                          >
-                            {tagToIconAndColorMap[log.tag]?.icon || (
-                              <IconBolt size="0.8rem" />
-                            )}
-                          </ThemeIcon>
-                        </Tooltip>
-                      }
-                    >
-                      <Flex align="center" justify="space-between">
-                        <Box>
-                          <Text
-                            fw={log.tag === "MEMORY_METADATA_SAVED" ? 600 : 400}
-                            size={
-                              log.tag === "MEMORY_METADATA_SAVED" ? "sm" : "xs"
-                            }
-                          >
-                            {log.title}
-                          </Text>
-                          <Text c="dimmed" size="xs">
-                            {moment(log.created_date).fromNow()} |{" "}
-                            {tagToIconAndColorMap[log.tag]?.sub}
-                          </Text>
-                        </Box>
-                        <Button
-                          variant="subtle"
-                          color="red"
-                          size="xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteSelixLog(log.id);
-                          }}
-                        >
-                          <IconTrash size={16} />
-                        </Button>
-                      </Flex>
-                    </Timeline.Item>
-                  );
-                })}
-              </Timeline>
+              {RenderTimeline(
+                reversedLogsByLogDate.filter(
+                  (log) => !log.is_sub_event && !log.parent_log_id
+                )
+              )}
             </Card>
             <Button
               onClick={() => setCreateLogOpened(true)}
@@ -659,28 +996,44 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                                     ...selectedLog,
                                     session_name: value,
                                   });
-                                  updateMemoryLogSessionId(selectedLog.id, threads.find(thread => thread.session_name === value)?.id);
+                                  updateMemoryLogSessionId(
+                                    selectedLog.id,
+                                    threads.find(
+                                      (thread) => thread.session_name === value
+                                    )?.id
+                                  );
                                   setEditingConnectedSession(false);
                                 }}
                                 size="md"
                                 mb="md"
                                 mr="sm"
                                 style={{ width: "100%" }}
-                                rightSectionWidth={'100%'}
+                                rightSectionWidth={"100%"}
                                 rightSection={
                                   selectedLog.session_name && (
                                     <Badge
-                                      color={deterministicMantineColor(selectedLog.session_name)}
+                                      color={deterministicMantineColor(
+                                        selectedLog.session_name
+                                      )}
                                       variant="filled"
-                                      style={{ width: '100%' }}
+                                      style={{ width: "100%" }}
                                       onClick={() => selectRef.current?.focus()}
                                     >
                                       {selectedLog.session_name}
                                     </Badge>
                                   )
                                 }
-                                itemComponent={({ value, label, ...others }) => {
-                                  const { onMouseDown, onMouseEnter, role, tabIndex } = others;
+                                itemComponent={({
+                                  value,
+                                  label,
+                                  ...others
+                                }) => {
+                                  const {
+                                    onMouseDown,
+                                    onMouseEnter,
+                                    role,
+                                    tabIndex,
+                                  } = others;
                                   return (
                                     <Badge
                                       color={deterministicMantineColor(value)}
@@ -688,11 +1041,12 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                                       size="sm"
                                       mr="sm"
                                       mb="sm"
-                                      style={{ width: '170px' }}
+                                      style={{ width: "170px" }}
                                       onMouseDown={onMouseDown}
                                       onMouseEnter={(event) => {
                                         onMouseEnter(event);
-                                        event.currentTarget.style.cursor = 'pointer';
+                                        event.currentTarget.style.cursor =
+                                          "pointer";
                                       }}
                                       role={role}
                                       tabIndex={tabIndex}
@@ -703,7 +1057,9 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                                 }}
                                 searchable
                                 clearable
-                                onDropdownOpen={() => selectRef.current?.focus()}
+                                onDropdownOpen={() =>
+                                  selectRef.current?.focus()
+                                }
                               />
                               {/* <ActionIcon
                                 onClick={() => {
@@ -723,7 +1079,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                               size="md"
                               mb="md"
                               mr="sm"
-                              style={{ cursor: 'pointer' }}
+                              style={{ cursor: "pointer" }}
                               onClick={() => {
                                 setEditingConnectedSession(true);
                                 setTimeout(() => {
@@ -763,9 +1119,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                             <Text
                               size="sm"
                               dangerouslySetInnerHTML={{
-                                __html: selectedLog.processing_status_description
-                                  .replaceAll("**", "")
-                                  .replaceAll("\n", "<br />"),
+                                __html:
+                                  selectedLog.processing_status_description
+                                    .replaceAll("**", "")
+                                    .replaceAll("\n", "<br />"),
                               }}
                             />
                           </HoverCard.Dropdown>
@@ -821,13 +1178,34 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                   value={editedDescription}
                   autosize
                   minRows={10}
-                  maxRows={25}
+                  maxRows={15}
                   mb="md"
                   onChange={(e) => {
                     setEditedDescription(e.currentTarget.value);
                     setIsEditing(true);
                   }}
                 />
+                <Card
+                  withBorder
+                  mb="md"
+                  sx={{
+                    minHeight: "400px",
+                    maxHeight: "500px",
+                    overflowY: "auto",
+                  }}
+                  id={"timeline-event-card"}
+                  onMouseEnter={(e) => handleMouseEnterDropZone(e)}
+                  onMouseLeave={(e) => handleMouseLeaveDropZone(e)}
+                  onMouseUp={async (e) => await handleMouseUpInTimeline(e)}
+                >
+                  <LoadingOverlay visible={loading || loadingSelixLogs} />
+                  {RenderTimeline(
+                    reversedLogsByLogDate.filter(
+                      (log) =>
+                        log.is_sub_event && log.parent_log_id === selectedLog.id
+                    )
+                  )}
+                </Card>
                 <Flex>
                   {isEditing && (
                     <Button
@@ -844,7 +1222,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                     </Button>
                   )}
                 </Flex>
-                {selectedLog.tag === "MEMORY_METADATA_SAVED" && (
+                {selectedLog.tag === "MEMORY_METADATA_SAVED" && logs && (
                   <>
                     <Text fw={600} mb="2px">
                       Updated via:

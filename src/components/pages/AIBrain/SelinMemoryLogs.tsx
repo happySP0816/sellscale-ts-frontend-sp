@@ -757,7 +757,11 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                         : log.title}
                     </Text>
                     {isSelected && (
-                      <Text fw={600} size={"sm"}>
+                      <Text
+                        fw={400}
+                        size={"sm"}
+                        style={{ whiteSpace: "pre-line" }}
+                      >
                         {log.description}
                       </Text>
                     )}
@@ -911,7 +915,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
         opened={opened}
         onClose={() => setOpened(false)}
         position="right"
-        size="xl"
+        size="900px"
         zIndex={5}
       >
         <Flex>
@@ -1051,7 +1055,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
               </Card>
             )}
           </Box>
-          <Box w="70%" pl="md">
+          <Box w="60%" pl="md">
             {selectedLog ? (
               <>
                 <Box display="flex" mb="4px">
@@ -1272,53 +1276,60 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                     __html: selectedLog.metadata.replaceAll("\n", "<br />"),
                   }}
                 />
-                {selectedLog.tag !== "SUPPORT_THREAD_SLACK" && (
-                  <Textarea
-                    value={editedDescription}
-                    autosize
-                    minRows={10}
-                    maxRows={15}
+                {selectedLog.tag !== "SUPPORT_THREAD_SLACK" &&
+                  selectedLog.tag !== "SUPPORT_THREAD_EMAIL" &&
+                  selectedLog.tag !==
+                    "SUPPORT_THREAD_EMAIL_FORWARDED_BY_OPERATOR" && (
+                    <Textarea
+                      value={editedDescription}
+                      autosize
+                      minRows={10}
+                      maxRows={15}
+                      mb="md"
+                      onChange={(e) => {
+                        setEditedDescription(e.currentTarget.value);
+                        setIsEditing(true);
+                      }}
+                    />
+                  )}
+                {reversedLogsByLogDate.filter(
+                  (log) => log.parent_log_id === selectedLog.id
+                ).length > 0 && (
+                  <Card
+                    withBorder
                     mb="md"
-                    onChange={(e) => {
-                      setEditedDescription(e.currentTarget.value);
-                      setIsEditing(true);
+                    sx={{
+                      minHeight: "400px",
+                      maxHeight: "500px",
+                      overflowY: "auto",
                     }}
-                  />
-                )}
-                <Card
-                  withBorder
-                  mb="md"
-                  sx={{
-                    minHeight: "400px",
-                    maxHeight: "500px",
-                    overflowY: "auto",
-                  }}
-                  id={`timeline-${selectedLog.id}-card`}
-                  onMouseEnter={(e) =>
-                    handleMouseEnterDropZone(e, selectedLog, true)
-                  }
-                  onMouseLeave={(e) =>
-                    handleMouseLeaveDropZone(
-                      e,
-                      selectedLog.id,
+                    id={`timeline-${selectedLog.id}-card`}
+                    onMouseEnter={(e) =>
+                      handleMouseEnterDropZone(e, selectedLog, true)
+                    }
+                    onMouseLeave={(e) =>
+                      handleMouseLeaveDropZone(
+                        e,
+                        selectedLog.id,
+                        true,
+                        selectedLog.id
+                      )
+                    }
+                    onMouseUp={async (e) =>
+                      await handleMouseUpInTimeline(e, selectedLog)
+                    }
+                  >
+                    <LoadingOverlay visible={loading || loadingSelixLogs} />
+                    {RenderTimeline(
+                      reversedLogsByLogDate.filter(
+                        (log) => log.parent_log_id === selectedLog.id
+                      ),
+                      2,
                       true,
                       selectedLog.id
-                    )
-                  }
-                  onMouseUp={async (e) =>
-                    await handleMouseUpInTimeline(e, selectedLog)
-                  }
-                >
-                  <LoadingOverlay visible={loading || loadingSelixLogs} />
-                  {RenderTimeline(
-                    reversedLogsByLogDate.filter(
-                      (log) => log.parent_log_id === selectedLog.id
-                    ),
-                    2,
-                    true,
-                    selectedLog.id
-                  )}
-                </Card>
+                    )}
+                  </Card>
+                )}
                 <Flex>
                   {isEditing && (
                     <Button

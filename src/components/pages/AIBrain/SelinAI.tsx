@@ -1121,20 +1121,23 @@ export default function SelinAI() {
       const threads_loaded = await fetchChatHistory();
       const urlParams = new URLSearchParams(window.location.search);
       const sessionIdFromUrl = urlParams.get("session_id");
-      const threadIdFromUrl = urlParams.get("thread_id");
+      // const threadIdFromUrl = urlParams.get("thread_id");
       console.log("session id from url is", sessionIdFromUrl);
       console.log("got here");
       if (sessionIdFromUrl) {
         // Preserve the URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.set("session_id", sessionIdFromUrl);
-        if (threadIdFromUrl) {
-          urlParams.set("thread_id", threadIdFromUrl);
-        }
+        // if (threadIdFromUrl) {
+        //   urlParams.set("thread_id", threadIdFromUrl);
+        // }
+        const threadId = threads_loaded.find(
+          (thread: ThreadType) => thread.id === Number(sessionIdFromUrl)
+        )?.thread_id;
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
         window.history.replaceState({}, document.title, newUrl);
         getMessages(
-          threadIdFromUrl || "",
+          threadId || "",
           parseInt(sessionIdFromUrl),
           threads_loaded,
           "PLANNER"
@@ -1142,7 +1145,7 @@ export default function SelinAI() {
         setCurrentSessionId(Number(sessionIdFromUrl));
         // console.log("meowww", data.session.id);
         sessionIDRef.current = Number(sessionIdFromUrl)
-        roomIDref.current = threadIdFromUrl || "";
+        roomIDref.current = threadId || "";
         const currentThread = threads_loaded.find((thread: ThreadType) => thread.id === Number(sessionIdFromUrl));
         const orderedTasks = currentThread?.tasks?.sort((a: TaskType, b: TaskType) => a.order_number - b.order_number);
         setTasks(orderedTasks || []);

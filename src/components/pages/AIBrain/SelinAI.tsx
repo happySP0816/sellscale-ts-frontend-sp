@@ -113,7 +113,11 @@ interface CustomCursorWrapperProps {
 import { Dropzone, DropzoneProps } from "@mantine/dropzone";
 import { Modal, Overlay } from "@mantine/core";
 import { currentProjectState } from "@atoms/personaAtoms";
-import { getFreshCurrentProject, isFreeUser, saveCurrentPersonaId } from "@auth/core";
+import {
+  getFreshCurrentProject,
+  isFreeUser,
+  saveCurrentPersonaId,
+} from "@auth/core";
 import Tour from "reactour";
 import { useNavigate } from "react-router-dom";
 import Sequences from "@pages/CampaignV2/Sequences";
@@ -946,8 +950,13 @@ export default function SelinAI() {
 
     if (recording) {
       intervalId = setInterval(() => {
-        const memory = threads.find((thread) => thread.id === currentSessionId)?.memory;
-        if (memory?.strategy_id && promptLengthRef.current > prevPromptLengthRef.current + 80) {
+        const memory = threads.find(
+          (thread) => thread.id === currentSessionId
+        )?.memory;
+        if (
+          memory?.strategy_id &&
+          promptLengthRef.current > prevPromptLengthRef.current + 80
+        ) {
           handleEditStrategy(promptRef.current);
           prevPromptLengthRef.current = promptLengthRef.current;
         }
@@ -975,7 +984,9 @@ export default function SelinAI() {
         // Preserve the URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.set("session_id", sessionIdFromUrl);
+        urlParams.set("session_id", sessionIdFromUrl);
         if (threadIdFromUrl) {
+          urlParams.set("thread_id", threadIdFromUrl);
           urlParams.set("thread_id", threadIdFromUrl);
         }
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
@@ -2004,8 +2015,13 @@ const SegmentChat = (props: any) => {
   const [uncollapsedCards, setUncollapsedCards] = useState<{
     [key: number]: boolean;
   }>({});
-  const [clientMemoryState, setClientMemoryState] = useState<string | undefined>(props.memory?.memory_line);
-  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] = useState<any>(props.memory?.memory_line_time_updated);
+  const [clientMemoryState, setClientMemoryState] = useState<
+    string | undefined
+  >(props.memory?.memory_line);
+  const [
+    clientMemoryStateUpdatedTime,
+    setClientMemoryStateUpdatedTime,
+  ] = useState<any>(props.memory?.memory_line_time_updated);
   const [memoryStateChanged, setMemoryStateChanged] = useState(false);
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
@@ -3769,7 +3785,9 @@ const PlannerComponent = ({
   const [opened, { toggle }] = useDisclosure(true);
   const taskContainerRef = useRef<HTMLDivElement>(null);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
   const [editingTask, setEditingTask] = useState<Number | null>(null);
@@ -3781,19 +3799,24 @@ const PlannerComponent = ({
   const [selectedRewindImage, setSelectedRewindImage] = useState<string>("");
   const [segment, setSegment] = useState<TransformedSegment | undefined>(undefined);
 
-  const isInternal = window.location.href.includes("internal");
+  const isInternal = window.location.href.includes("internal");;
 
   const campaignId = threads.find((thread) => thread.id === currentSessionId)?.memory?.campaign_id;
 
-  const currentThread = threads.find((thread) => thread.id === currentSessionId);
-  //updateTask(tasks[index].id, editingTaskText, taskDraftDescription, tasks[index].status);
+  const currentThread = threads.find(
+    (thread) => thread.id === currentSessionId
+  );
+//updateTask(tasks[index].id, editingTaskText, taskDraftDescription, tasks[index].status);
   const updateTask = async (taskId: number, title: string, description: string, status: string, widget_type: string | undefined) => {
-    if (widget_type === "") widget_type = undefined;
+
+    if (widget_type === '' ) widget_type = undefined;
 
     try {
       const response = await fetch(`${API_URL}/selix/update-task`, {
         method: "POST",
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
         },
@@ -3802,7 +3825,7 @@ const PlannerComponent = ({
           title,
           description,
           status,
-          widgetType: widget_type,
+          widgetType: widget_type,,
         }),
       });
 
@@ -3811,21 +3834,31 @@ const PlannerComponent = ({
           color: "red",
           title: "Error",
           message: "Failed to update task",
+          color: "red",
+          title: "Error",
+          message: "Failed to update task",
         });
+        throw new Error("Failed to update task");
         throw new Error("Failed to update task");
       }
 
       const data = await response.json();
+      console.log("Task updated successfully:", data);
       console.log("Task updated successfully:", data);
 
       showNotification({
         color: "green",
         title: "Success",
         message: "Task updated successfully",
+        color: "green",
+        title: "Success",
+        message: "Task updated successfully",
       });
     } catch (error) {
       console.error("Error updating task:", error);
+      console.error("Error updating task:", error);
     }
+  };
   };
 
   useEffect(() => {
@@ -3899,9 +3932,12 @@ const PlannerComponent = ({
     return data.segments;
   };
 
-  const onDragEnd = async (result: { destination: { index: number }; source: { index: number } }) => {
-    if (!isInternal) {
-      return;
+  const onDragEnd = async (result: {
+    destination: { index: number };
+    source: { index: number };
+  }) => {
+    if (!isInternal)  {
+      return;;
     }
     if (!result.destination) {
       return;
@@ -3917,7 +3953,9 @@ const PlannerComponent = ({
     try {
       const response = await fetch(`${API_URL}/selix/reorder-tasks`, {
         method: "POST",
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
         },
@@ -3931,8 +3969,10 @@ const PlannerComponent = ({
 
       if (!response.ok) {
         console.error("Failed to reorder tasks");
+        console.error("Failed to reorder tasks");
       }
     } catch (error) {
+      console.error("Error reordering tasks:", error);
       console.error("Error reordering tasks:", error);
     }
   };
@@ -3998,15 +4038,17 @@ const PlannerComponent = ({
       <Collapse in={opened}>
         <ScrollArea h={"55vh"} scrollHideDelay={4000} style={{ overflow: "hidden" }} viewportRef={taskContainerRef}>
           <DragDropContext
+           
             onDragEnd={(result) => {
-              if (!result.destination) {
-                return;
-              }
-              onDragEnd({
-                destination: { index: result.destination.index },
-                source: { index: result.source.index },
-              });
-            }}
+                if (!result.destination) {
+                  return;
+                }
+                onDragEnd({
+                  destination: { index: result.destination.index },
+                  source: { index: result.source.index },,
+                });
+              }}
+          
           >
             <Droppable isDropDisabled={!isInternal} droppableId="tasks">
               {(provided) => (
@@ -4027,7 +4069,8 @@ const PlannerComponent = ({
                       const statusColors = {
                         [SelixSessionTaskStatus.QUEUED]: "blue",
                         [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
-                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "orange",
+                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
+                          "orange",
                         [SelixSessionTaskStatus.COMPLETE]: "green",
                         [SelixSessionTaskStatus.CANCELLED]: "gray",
                         [SelixSessionTaskStatus.BLOCKED]: "red",
@@ -4043,7 +4086,12 @@ const PlannerComponent = ({
                       };
 
                       return (
-                        <Draggable key={task.id} index={index} draggableId={`task-${task.id}`} isDragDisabled={!isInternal}>
+                        <Draggable
+                          key={task.id}
+                          index={index}
+                          draggableId={`task-${task.id}`}
+                          isDragDisabled={!isInternal}
+                        >
                           {(provided) => (
                             <Paper
                               withBorder
@@ -4054,7 +4102,11 @@ const PlannerComponent = ({
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                             >
-                              <Flex justify={"space-between"} align={"center"} p={"4px"}>
+                              <Flex
+                                justify={"space-between"}
+                                align={"center"}
+                                p={"4px"}
+                              >
                                 {editingTask === index ? (
                                   <Flex align="center" gap="xs" w={"60%"}>
                                     <Flex w="80%" gap="xs">
@@ -4069,38 +4121,32 @@ const PlannerComponent = ({
                                       <NativeSelect
                                         value={task.widget_type}
                                         data={[
-                                          { value: "", label: "Proof of Work (image)" },
-                                          { value: "LAUNCH_CAMPAIGN", label: "Launch Campaign" },
-                                          { value: "VIEW_STRATEGY", label: "View Strategy" },
-                                          { value: "REVIEW_PROSPECTS", label: "Review Prospects" },
-                                          { value: "VIEW_SEQUENCE", label: "View Sequence" },
-                                          { value: "VIEW_PERSONALIZERS", label: "Campaign Personalizers" },
-                                          { value: "REVIEW_COMPANIES", label: "Review Companies" },
-                                          { value: "ONE_SHOT_GENERATOR", label: "One Shot Generator" },
+                                          { value: '', label: 'Proof of Work (image)' },
+                                          { value: 'LAUNCH_CAMPAIGN', label: 'Launch Campaign' },
+                                          { value: 'VIEW_STRATEGY', label: 'View Strategy' },
+                                          { value: 'REVIEW_PROSPECTS', label: 'Review Prospects' },
+                                          { value: 'VIEW_SEQUENCE', label: 'View Sequence' },
+                                          { value: 'VIEW_PERSONALIZERS', label: 'Campaign Personalizers' },
+                                          { value: 'REVIEW_COMPANIES', label: 'Review Companies' },
+                                          { value: 'ONE_SHOT_GENERATOR', label: 'One Shot Generator' },
                                         ]}
                                         onChange={(e) => {
                                           const updatedTasks = [...tasks];
-                                          updatedTasks[index].widget_type = e.currentTarget.value;
+                                          updatedTasks[index].widget_type =
+                                            e.currentTarget.value;
                                           setTasks(updatedTasks);
                                         }}
+                                        style={{ width: "40%" }}
                                         style={{ width: "40%" }}
                                       />
                                     </Flex>
                                     <Badge
                                       color="green"
-                                      style={{ cursor: "pointer", whiteSpace: "nowrap" }}
+                                      style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
                                       onClick={() => {
                                         setEditingTask(null);
-                                        setTasks(
-                                          tasks.map((t, i) => (i === index ? { ...t, title: editingTaskText, description: taskDraftDescription.current } : t))
-                                        );
-                                        updateTask(
-                                          tasks[index].id,
-                                          editingTaskText,
-                                          taskDraftDescription.current,
-                                          tasks[index].status,
-                                          tasks[index].widget_type
-                                        );
+                                        setTasks(tasks.map((t, i) => i === index ? { ...t, title: editingTaskText,description: taskDraftDescription.current } : t));
+                                        updateTask(tasks[index].id, editingTaskText, taskDraftDescription.current, tasks[index].status, tasks[index].widget_type);
                                       }}
                                     >
                                       Save
@@ -4111,34 +4157,36 @@ const PlannerComponent = ({
                                     <ThemeIcon color="gray" radius={"xl"} variant="light" size={18}>
                                       {index + 1}
                                     </ThemeIcon>
-                                    {isInternal && (
-                                      <Tooltip label="Drag to reorder">
-                                        <ThemeIcon color="gray" radius={"xl"} variant="light" size={18} style={{ cursor: "grab" }}>
-                                          <IconGripVertical size={14} />
-                                        </ThemeIcon>
-                                      </Tooltip>
-                                    )}
-                                    {isInternal && (
-                                      <Tooltip label="Edit task">
-                                        <ThemeIcon
-                                          color="gray"
-                                          radius={"xl"}
-                                          variant="light"
-                                          size={18}
-                                          style={{ cursor: "pointer" }}
-                                          onClick={() => {
-                                            setEditingTask(index);
-                                            setOpenedTaskIndex(index);
-                                            setEditingTaskText(task.title);
-                                            taskDraftDescription.current = task?.description || "";
-                                            taskDraftDescriptionRaw.current = task?.description || "";
-                                          }}
-                                          // onBlur={() => setEditingTask(null)}
-                                        >
-                                          <IconPencil size={14} />
-                                        </ThemeIcon>
-                                      </Tooltip>
-                                    )}
+                                    {isInternal && <Tooltip label="Drag to reorder">
+                                      <ThemeIcon
+                                        color="gray"
+                                        radius={"xl"}
+                                        variant="light"
+                                        size={18}
+                                        style={{ cursor: "grab" }}
+                                      >
+                                        <IconGripVertical size={14} />
+                                      </ThemeIcon>
+                                    </Tooltip>}
+                                    {isInternal && <Tooltip label="Edit task">
+                                      <ThemeIcon
+                                        color="gray"
+                                        radius={"xl"}
+                                        variant="light"
+                                        size={18}
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+                                          setEditingTask(index);
+                                          setOpenedTaskIndex(index);
+                                          setEditingTaskText(task.title);
+                                          taskDraftDescription.current=(task?.description || '');
+                                          taskDraftDescriptionRaw.current=(task?.description || '');
+                                        }}
+                                        // onBlur={() => setEditingTask(null)}
+                                      >
+                                        <IconPencil size={14} />
+                                      </ThemeIcon>
+                                    </Tooltip>}
                                     {task.title}
                                   </Text>
                                 )}
@@ -4155,7 +4203,9 @@ const PlannerComponent = ({
                                       onClick={() => {
                                         if (task.rewind_img) {
                                           setShowRewindImage(true);
-                                          setSelectedRewindImage(task.rewind_img);
+                                          setSelectedRewindImage(
+                                            task.rewind_img
+                                          );
                                         }
                                       }}
                                     >
@@ -4167,6 +4217,7 @@ const PlannerComponent = ({
                                   </Text>
                                   {editingTask === index ? (
                                     <Select
+                                      w={"140px"}
                                       w={"140px"}
                                       value={task.status}
                                       onChange={(value) => {
@@ -4182,7 +4233,9 @@ const PlannerComponent = ({
                                           setTasks(updatedTasks);
                                         }
                                       }}
-                                      data={Object.keys(humanReadableStatus).map((status) => ({
+                                      data={Object.keys(
+                                        humanReadableStatus
+                                      ).map((status) => ({
                                         value: status,
                                         label: humanReadableStatus[status],
                                         customLabel: (
@@ -4196,7 +4249,13 @@ const PlannerComponent = ({
                                           </Flex>
                                         ),
                                       }))}
-                                      itemComponent={({ value, label, ...others }) => <div {...others}>{label}</div>}
+                                      itemComponent={({ value, label, ...others }) => (
+                                        <div {...others}>
+                                          {label}
+                                        </div>
+                                      )}
+                                      
+                                    
                                     />
                                   ) : (
                                     <Flex align={"center"} gap={"xs"} w={100}>
@@ -4218,18 +4277,22 @@ const PlannerComponent = ({
                                 <Text p={"xs"} mt={"sm"} size="xs">
                                   {editingTask === index ? (
                                     <RichTextArea
-                                      overrideSticky={true}
-                                      onChange={(value, rawValue) => {
-                                        taskDraftDescriptionRaw.current = rawValue;
-                                        taskDraftDescription.current = value;
-                                      }}
-                                      value={taskDraftDescriptionRaw.current}
-                                      height={110}
-                                    />
+                                        overrideSticky={true}
+                                        onChange={(value, rawValue) => {
+                                          taskDraftDescriptionRaw.current =
+                                          rawValue;
+                                          taskDraftDescription.current = value;
+                                        }}
+                                        value={taskDraftDescriptionRaw.current}
+                                        height={110}
+                                      />
                                   ) : (
                                     <div
                                       dangerouslySetInnerHTML={{
-                                        __html: task.description?.replaceAll("\n", "<br />") || "",
+                                        __html: task.description?.replaceAll(
+                                            "\n",
+                                            "<br />"
+                                          ) || "",
                                       }}
                                     />
                                   )}
@@ -4244,7 +4307,9 @@ const PlannerComponent = ({
                                     // messages={messages}
                                     threads={threads}
                                     currentSessionId={currentSessionId}
-                                    handleStrategySubmit={handleStrategySubmit}
+                                    handleStrategySubmit={
+                                        handleStrategySubmit
+                                      }
                                   />
                                 )}
                               </Collapse>
@@ -4258,29 +4323,28 @@ const PlannerComponent = ({
               )}
             </Droppable>
           </DragDropContext>
-          {isInternal && (
-            <Flex justify="center" mt="md">
-              {creatingNewTask ? (
-                <Loader size="md" color="blue" />
-              ) : (
-                <Button
-                  variant="light"
-                  color="blue"
-                  radius="md"
-                  size="md"
-                  onClick={async () => {
-                    try {
-                      setCreatingNewTask(true);
-                      const response = await fetch(`${API_URL}/selix/create-task-id`, {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                          Authorization: `Bearer ${userToken}`,
-                        },
-                        body: JSON.stringify({
-                          selix_session_id: currentSessionId,
-                        }),
-                      });
+        {isInternal && <Flex justify="center" mt="md">
+          {creatingNewTask ? (
+            <Loader size="md" color="blue" />
+          ) : (
+            <Button
+              variant="light"
+              color="blue"
+              radius="md"
+              size="md"
+              onClick={async () => {
+                try {
+                  setCreatingNewTask(true);
+                  const response = await fetch(`${API_URL}/selix/create-task-id`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${userToken}`,
+                    },
+                    body: JSON.stringify({
+                      selix_session_id: currentSessionId,
+                    }),
+                  });
 
                       if (!response.ok) {
                         showNotification({
@@ -4291,7 +4355,7 @@ const PlannerComponent = ({
                       }
                       setCreatingNewTask(false);
 
-                      const newTask: TaskType = await response.json();
+                          const newTask: TaskType = await response.json();
 
                       setTasks([...tasks, newTask]);
                       setEditingTask(tasks.length);
@@ -4299,6 +4363,31 @@ const PlannerComponent = ({
                       taskDraftDescription.current = newTask.description || "";
                       taskDraftDescriptionRaw.current = newTask.description;
 
+                      setTimeout(() => {
+                        if (taskContainerRef.current) {
+                          taskContainerRef.current.scrollTo({
+                            top: taskContainerRef.current.scrollHeight,
+                            behavior: "smooth",
+                          });
+                        }
+                      }, 100);
+                    } catch (error) {
+                      console.error("Error creating new task:", error);
+                    }
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "scale(1.05)";
+                    e.currentTarget.style.transition = "transform 0.2s";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
+                  }}
+                >
+                  + Add Task
+                </Button>
+              )}
+            </Flex>
+          )}
                       setTimeout(() => {
                         if (taskContainerRef.current) {
                           taskContainerRef.current.scrollTo({
@@ -4367,7 +4456,7 @@ const TaskRenderer = ({
       (async (campaignId: any) => {
         const project = await getFreshCurrentProject(userToken, campaignId);
         setCurrentProject(project);
-        saveCurrentPersonaId(currentProject?.id.toString());
+        saveCurrentPersonaId(currentProject?.id.toString());;
       })(currentProject?.id);
     }
   }, [currentProject]);
@@ -4617,7 +4706,8 @@ const SelinStrategy = ({
   currentSessionId: Number | null;
   counter: Number;
 }) => {
-  const memory = threads.find((thread) => thread.id === currentSessionId)?.memory;
+  const memory = threads.find((thread) => thread.id === currentSessionId)
+    ?.memory;
 
   const hackedSubmit = () => {
     handleSubmit && handleSubmit(undefined, "Let's do it - create the task list and start executing.");

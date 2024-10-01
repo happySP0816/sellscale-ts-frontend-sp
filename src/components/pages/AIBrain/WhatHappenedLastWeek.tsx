@@ -550,258 +550,261 @@ export default function WhatHappenedLastWeek() {
                 backgroundColor: "#f8fbff",
               }}
             >
+              {cycleDataCache[index]?.analyticsData && console.log(">>>>>", cycleDataCache[index].analyticsData)}
               {!loading && cycleDataCache[index]?.analyticsData ? (
                 (showCumulative ? cycleDataCache[index].analyticsData : cycleDataCache[index].originalData).map(
                   (dataItem: { daily: any; templateAnalytics: any; top_icp_people: any; summary: any }, dataIndex: Key | null | undefined) => (
                     <>
-                      <Paper withBorder radius={"sm"} my={"sm"} mx={"lg"} style={{ border: "1px solid #f9e5fe" }}>
-                        <Flex bg={"#f9e5fe"} align={"center"} gap={"sm"} px={"sm"} py={4}>
-                          <Text color="#e663f6" fw={600}>
-                            Overall Cycle Analytics
-                          </Text>
-                          <Text size="sm" color="#e663f6">
-                            {new Date(new Date(cycleDates[index]?.start).setDate(new Date(cycleDates[index]?.start).getDate() + 1)).toLocaleDateString()} -{" "}
-                            {new Date(new Date(cycleDates[index]?.end).setDate(new Date(cycleDates[index]?.end).getDate() + 1)).toLocaleDateString()}
-                          </Text>
-                        </Flex>
-                        <Flex bg={"#fcf2fe"} p={"xs"} gap={"md"}>
-                          <Paper w={"100%"} p={"sm"}>
-                            <Flex align={"center"} justify={"space-between"}>
-                              <Flex align={"center"} gap={4}>
-                                <IconSparkles color="#e663f6" size={"1rem"} />
-                                <Text size={"sm"} fw={500} color="#e663f6">
-                                  AI Insights
-                                </Text>
-                              </Flex>
-                              <Button
-                                onClick={() => {
-                                  handleGenerateReport(index);
-                                }}
-                                leftIcon={<IconSparkles fill="white" size={"1rem"} />}
-                                size="xs"
-                                className="bg-[#e663f6] hover:bg-[#e663f6]"
-                                loading={generatingReport}
-                              >
-                                AI Generate Report
-                              </Button>
-                            </Flex>
-                            <Text size={"sm"} fw={500} mt={"xs"}>
-                              An AI-generated summary of the events that occured during this cycle period can be created by clicking this button.
+                      {dataIndex === 0 && (
+                        <Paper withBorder radius={"sm"} my={"sm"} mx={"lg"} style={{ border: "1px solid #f9e5fe" }}>
+                          <Flex bg={"#f9e5fe"} align={"center"} gap={"sm"} px={"sm"} py={4}>
+                            <Text color="#e663f6" fw={600}>
+                              Overall Cycle Analytics
                             </Text>
-                          </Paper>
-                          <Paper w={"100%"} withBorder>
-                            <Flex align={"center"} justify={"space-between"} h={"100%"} w="100%">
-                              <Box
-                                py={"sm"}
-                                px={"xs"}
-                                w={"100%"}
-                                h={"100%"}
-                                sx={{
-                                  backgroundColor: "#F7FDFF",
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  justifyContent: "center",
-                                  alignItems: "start",
-                                  "&:hover": {
+                            <Text size="sm" color="#e663f6">
+                              {new Date(new Date(cycleDates[index]?.start).setDate(new Date(cycleDates[index]?.start).getDate() + 1)).toLocaleDateString()} -{" "}
+                              {new Date(new Date(cycleDates[index]?.end).setDate(new Date(cycleDates[index]?.end).getDate() + 1)).toLocaleDateString()}
+                            </Text>
+                          </Flex>
+                          <Flex bg={"#fcf2fe"} p={"xs"} gap={"md"}>
+                            <Paper w={"100%"} p={"sm"}>
+                              <Flex align={"center"} justify={"space-between"}>
+                                <Flex align={"center"} gap={4}>
+                                  <IconSparkles color="#e663f6" size={"1rem"} />
+                                  <Text size={"sm"} fw={500} color="#e663f6">
+                                    AI Insights
+                                  </Text>
+                                </Flex>
+                                <Button
+                                  onClick={() => {
+                                    handleGenerateReport(index);
+                                  }}
+                                  leftIcon={<IconSparkles fill="white" size={"1rem"} />}
+                                  size="xs"
+                                  className="bg-[#e663f6] hover:bg-[#e663f6]"
+                                  loading={generatingReport}
+                                >
+                                  AI Generate Report
+                                </Button>
+                              </Flex>
+                              <Text size={"sm"} fw={500} mt={"xs"}>
+                                An AI-generated summary of the events that occured during this cycle period can be created by clicking this button.
+                              </Text>
+                            </Paper>
+                            <Paper w={"100%"} withBorder>
+                              <Flex align={"center"} justify={"space-between"} h={"100%"} w="100%">
+                                <Box
+                                  py={"sm"}
+                                  px={"xs"}
+                                  w={"100%"}
+                                  h={"100%"}
+                                  sx={{
                                     backgroundColor: "#F7FDFF",
-                                  },
-                                }}
-                              >
-                                <Flex align={"center"} gap={"xs"}>
-                                  <IconSend size={"0.9rem"} color="#3B85EF" className="mb-[2px]" />
-                                  <Text fw={400} size={"sm"}>
-                                    Sent
-                                  </Text>
-                                </Flex>
-                                <Flex align={"center"} gap={"sm"} mt={"sm"}>
-                                  <Text fz={20} fw={600}>
-                                    {dataItem?.daily.reduce((total: number, day: any) => total + day.num_sent, 0)}
-                                  </Text>
-                                  <Badge>
-                                    {(
-                                      (dataItem?.daily.reduce((total: number, day: any) => total + day.num_sent, 0) /
-                                        dataItem?.daily.reduce(
-                                          (total: number, day: any) =>
-                                            total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
-                                          0
-                                        )) *
-                                      100
-                                    ).toFixed(0)}
-                                    %
-                                  </Badge>
-                                </Flex>
-                              </Box>
-                              <Divider orientation="vertical" />
-                              <Box
-                                py={"sm"}
-                                px={"xs"}
-                                w={"100%"}
-                                h={"100%"}
-                                sx={{
-                                  backgroundColor: "#FFF7FB",
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  justifyContent: "center",
-                                  alignItems: "start",
-                                  "&:hover": {
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "start",
+                                    "&:hover": {
+                                      backgroundColor: "#F7FDFF",
+                                    },
+                                  }}
+                                >
+                                  <Flex align={"center"} gap={"xs"}>
+                                    <IconSend size={"0.9rem"} color="#3B85EF" className="mb-[2px]" />
+                                    <Text fw={400} size={"sm"}>
+                                      Sent
+                                    </Text>
+                                  </Flex>
+                                  <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                                    <Text fz={20} fw={600}>
+                                      {dataItem?.daily.reduce((total: number, day: any) => total + day.num_sent, 0)}
+                                    </Text>
+                                    <Badge>
+                                      {(
+                                        (dataItem?.daily.reduce((total: number, day: any) => total + day.num_sent, 0) /
+                                          dataItem?.daily.reduce(
+                                            (total: number, day: any) =>
+                                              total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
+                                            0
+                                          )) *
+                                        100
+                                      ).toFixed(0)}
+                                      %
+                                    </Badge>
+                                  </Flex>
+                                </Box>
+                                <Divider orientation="vertical" />
+                                <Box
+                                  py={"sm"}
+                                  px={"xs"}
+                                  w={"100%"}
+                                  h={"100%"}
+                                  sx={{
                                     backgroundColor: "#FFF7FB",
-                                  },
-                                }}
-                              >
-                                <Flex align={"center"} gap={6}>
-                                  <IconChecks size={"0.9rem"} color="pink" className="mb-[2px]" />
-                                  <Text fw={400} size={"sm"}>
-                                    Open
-                                  </Text>
-                                </Flex>
-                                <Flex align={"center"} gap={"sm"} mt={"sm"}>
-                                  <Text fz={20} fw={600}>
-                                    {dataItem?.daily.reduce((total: number, day: any) => total + day.num_opens, 0)}
-                                  </Text>
-                                  <Badge color="pink">
-                                    {(
-                                      (dataItem?.daily.reduce((total: number, day: any) => total + day.num_opens, 0) /
-                                        dataItem?.daily.reduce(
-                                          (total: number, day: any) =>
-                                            total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
-                                          0
-                                        )) *
-                                      100
-                                    ).toFixed(0)}
-                                    %
-                                  </Badge>
-                                </Flex>
-                              </Box>
-                              <Divider orientation="vertical" />
-                              <Box
-                                py={"sm"}
-                                px={"xs"}
-                                w={"100%"}
-                                h={"100%"}
-                                sx={{
-                                  backgroundColor: "#FFF9F2",
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  justifyContent: "center",
-                                  alignItems: "start",
-                                  "&:hover": {
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "start",
+                                    "&:hover": {
+                                      backgroundColor: "#FFF7FB",
+                                    },
+                                  }}
+                                >
+                                  <Flex align={"center"} gap={6}>
+                                    <IconChecks size={"0.9rem"} color="pink" className="mb-[2px]" />
+                                    <Text fw={400} size={"sm"}>
+                                      Open
+                                    </Text>
+                                  </Flex>
+                                  <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                                    <Text fz={20} fw={600}>
+                                      {dataItem?.daily.reduce((total: number, day: any) => total + day.num_opens, 0)}
+                                    </Text>
+                                    <Badge color="pink">
+                                      {(
+                                        (dataItem?.daily.reduce((total: number, day: any) => total + day.num_opens, 0) /
+                                          dataItem?.daily.reduce(
+                                            (total: number, day: any) =>
+                                              total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
+                                            0
+                                          )) *
+                                        100
+                                      ).toFixed(0)}
+                                      %
+                                    </Badge>
+                                  </Flex>
+                                </Box>
+                                <Divider orientation="vertical" />
+                                <Box
+                                  py={"sm"}
+                                  px={"xs"}
+                                  w={"100%"}
+                                  h={"100%"}
+                                  sx={{
                                     backgroundColor: "#FFF9F2",
-                                  },
-                                }}
-                              >
-                                <Flex align={"center"} gap={6}>
-                                  <IconMessageCheck size={"0.9rem"} color="orange" className="mb-[2px]" />
-                                  <Text fw={400} size={"sm"}>
-                                    Reply
-                                  </Text>
-                                </Flex>
-                                <Flex align={"center"} gap={"sm"} mt={"sm"}>
-                                  <Text fz={20} fw={600}>
-                                    {dataItem?.daily.reduce((total: number, day: any) => total + day.num_replies, 0)}
-                                  </Text>
-                                  <Badge color="orange">
-                                    {(
-                                      (dataItem?.daily.reduce((total: number, day: any) => total + day.num_replies, 0) /
-                                        dataItem?.daily.reduce(
-                                          (total: number, day: any) =>
-                                            total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
-                                          0
-                                        )) *
-                                      100
-                                    ).toFixed(0)}
-                                    %
-                                  </Badge>
-                                </Flex>
-                              </Box>
-                              <Divider orientation="vertical" />
-                              <Box
-                                py={"sm"}
-                                px={"xs"}
-                                w={"100%"}
-                                h={"100%"}
-                                sx={{
-                                  backgroundColor: "#F4FBF5",
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  justifyContent: "center",
-                                  alignItems: "start",
-                                  "&:hover": {
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "start",
+                                    "&:hover": {
+                                      backgroundColor: "#FFF9F2",
+                                    },
+                                  }}
+                                >
+                                  <Flex align={"center"} gap={6}>
+                                    <IconMessageCheck size={"0.9rem"} color="orange" className="mb-[2px]" />
+                                    <Text fw={400} size={"sm"}>
+                                      Reply
+                                    </Text>
+                                  </Flex>
+                                  <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                                    <Text fz={20} fw={600}>
+                                      {dataItem?.daily.reduce((total: number, day: any) => total + day.num_replies, 0)}
+                                    </Text>
+                                    <Badge color="orange">
+                                      {(
+                                        (dataItem?.daily.reduce((total: number, day: any) => total + day.num_replies, 0) /
+                                          dataItem?.daily.reduce(
+                                            (total: number, day: any) =>
+                                              total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
+                                            0
+                                          )) *
+                                        100
+                                      ).toFixed(0)}
+                                      %
+                                    </Badge>
+                                  </Flex>
+                                </Box>
+                                <Divider orientation="vertical" />
+                                <Box
+                                  py={"sm"}
+                                  px={"xs"}
+                                  w={"100%"}
+                                  h={"100%"}
+                                  sx={{
                                     backgroundColor: "#F4FBF5",
-                                  },
-                                }}
-                              >
-                                <Flex align={"center"} gap={6}>
-                                  <IconMessageCheck size={"0.9rem"} color="green" className="mb-[2px]" />
-                                  <Text fw={400} size={"sm"}>
-                                    (+) Reply
-                                  </Text>
-                                </Flex>
-                                <Flex align={"center"} gap={"sm"} mt={"sm"}>
-                                  <Text fz={20} fw={600}>
-                                    {dataItem?.daily.reduce((total: number, day: any) => total + day.num_pos_replies, 0)}
-                                  </Text>
-                                  <Badge color="green">
-                                    {(
-                                      (dataItem?.daily.reduce((total: number, day: any) => total + day.num_pos_replies, 0) /
-                                        dataItem?.daily.reduce(
-                                          (total: number, day: any) =>
-                                            total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
-                                          0
-                                        )) *
-                                      100
-                                    ).toFixed(0)}
-                                    %
-                                  </Badge>
-                                </Flex>
-                              </Box>
-                              <Divider orientation="vertical" />
-                              <Box
-                                py={"sm"}
-                                px={"xs"}
-                                w={"100%"}
-                                h={"100%"}
-                                sx={{
-                                  backgroundColor: "#F7FDFF",
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  justifyContent: "center",
-                                  alignItems: "start",
-                                  "&:hover": {
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "start",
+                                    "&:hover": {
+                                      backgroundColor: "#F4FBF5",
+                                    },
+                                  }}
+                                >
+                                  <Flex align={"center"} gap={6}>
+                                    <IconMessageCheck size={"0.9rem"} color="green" className="mb-[2px]" />
+                                    <Text fw={400} size={"sm"}>
+                                      (+) Reply
+                                    </Text>
+                                  </Flex>
+                                  <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                                    <Text fz={20} fw={600}>
+                                      {dataItem?.daily.reduce((total: number, day: any) => total + day.num_pos_replies, 0)}
+                                    </Text>
+                                    <Badge color="green">
+                                      {(
+                                        (dataItem?.daily.reduce((total: number, day: any) => total + day.num_pos_replies, 0) /
+                                          dataItem?.daily.reduce(
+                                            (total: number, day: any) =>
+                                              total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
+                                            0
+                                          )) *
+                                        100
+                                      ).toFixed(0)}
+                                      %
+                                    </Badge>
+                                  </Flex>
+                                </Box>
+                                <Divider orientation="vertical" />
+                                <Box
+                                  py={"sm"}
+                                  px={"xs"}
+                                  w={"100%"}
+                                  h={"100%"}
+                                  sx={{
                                     backgroundColor: "#F7FDFF",
-                                  },
-                                }}
-                              >
-                                <Flex align={"center"} gap={6}>
-                                  <IconCalendar size={"0.9rem"} color={"#3B85EF"} className="mb-[2px]" />
-                                  <Text fw={400}>Demo</Text>
-                                </Flex>
-                                <Flex align={"center"} gap={"sm"} mt={"sm"}>
-                                  <Text fz={20} fw={600}>
-                                    {dataItem?.daily.reduce((total: number, day: any) => total + day.num_demos, 0)}
-                                  </Text>
-                                  <Badge color="blue">
-                                    {(
-                                      (dataItem?.daily.reduce((total: number, day: any) => total + day.num_demos, 0) /
-                                        dataItem?.daily.reduce(
-                                          (total: number, day: any) =>
-                                            total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
-                                          0
-                                        )) *
-                                      100
-                                    ).toFixed(0)}
-                                    %
-                                  </Badge>
-                                </Flex>
-                              </Box>
-                            </Flex>
-                          </Paper>
-                        </Flex>
-                      </Paper>
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "start",
+                                    "&:hover": {
+                                      backgroundColor: "#F7FDFF",
+                                    },
+                                  }}
+                                >
+                                  <Flex align={"center"} gap={6}>
+                                    <IconCalendar size={"0.9rem"} color={"#3B85EF"} className="mb-[2px]" />
+                                    <Text fw={400}>Demo</Text>
+                                  </Flex>
+                                  <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                                    <Text fz={20} fw={600}>
+                                      {dataItem?.daily.reduce((total: number, day: any) => total + day.num_demos, 0)}
+                                    </Text>
+                                    <Badge color="blue">
+                                      {(
+                                        (dataItem?.daily.reduce((total: number, day: any) => total + day.num_demos, 0) /
+                                          dataItem?.daily.reduce(
+                                            (total: number, day: any) =>
+                                              total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
+                                            0
+                                          )) *
+                                        100
+                                      ).toFixed(0)}
+                                      %
+                                    </Badge>
+                                  </Flex>
+                                </Box>
+                              </Flex>
+                            </Paper>
+                          </Flex>
+                        </Paper>
+                      )}
                       <AnalyticsItem
                         showCumulative={showCumulative}
                         key={dataIndex}

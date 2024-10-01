@@ -107,8 +107,6 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
   const [sentimentPage, setSentimentPage] = useState(0);
   const [openedPopover, setOpenedPopover] = useState<string | null>(null);
 
-  console.log("-=-------", dailyData);
-
   return (
     <Box>
       {dailyData?.reduce((total: any, day: { num_sent: any }) => total + day.num_sent, 0) ? (

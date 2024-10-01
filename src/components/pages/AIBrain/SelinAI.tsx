@@ -4983,7 +4983,6 @@ const FilesComponent = ({
           <tr key={index} style={{ cursor: 'pointer' }} onClick={() => setEditingTextIndex(index)}>
             <td style={{ position: 'relative' }}>
               {file.name}
-              <IconPencil size="0.8rem" style={{ position: 'absolute', right: '5px', top: '5px', color: '#888' }} />
             </td>
             <td style={{ position: 'relative' }}>
               {editingTextIndex === index ? (
@@ -5018,7 +5017,7 @@ const FilesComponent = ({
                   ) : (
                     file.description
                   )}
-                  {/* <IconPencil size="0.8rem" style={{ position: 'absolute', right: '5px', top: '5px', color: '#888' }} /> */}
+                  <IconPencil size="0.8rem" style={{ position: 'absolute', right: '5px', top: '5px', color: '#888' }} />
                 </Text>
               )}
             </td>

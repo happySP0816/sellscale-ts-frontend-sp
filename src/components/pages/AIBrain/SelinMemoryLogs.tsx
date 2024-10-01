@@ -507,9 +507,12 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
     upItem?: MemoryLog
   ) => {
     e.preventDefault();
+    e.stopPropagation();
+
+    setDraggedItem(null);
+    setDragOffset(null);
 
     const holdDuration = new Date().getTime() - holdStart;
-    console.log("holdDuration: ", holdDuration);
 
     if (holdDuration < holdThreshold) {
       return;
@@ -522,16 +525,12 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
     if (
       !draggedItem ||
       upItem?.id === draggedItem?.id ||
-      upItem?.is_sub_event ||
       upItem?.parent_log_id === draggedItem.id
     ) {
       return;
     }
 
     await setParentEvent(draggedItem.id, upItem?.id);
-
-    setDraggedItem(null);
-    setDragOffset(null);
   };
 
   const handleMouseUp = () => {
@@ -542,14 +541,16 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
   // Example drop target to detect entering and leaving
   const handleMouseEnterDropZone = (
     e: React.MouseEvent<HTMLDivElement>,
-    logItem?: MemoryLog
+    logItem?: MemoryLog,
+    isSelectedTimeline: boolean = false
   ) => {
     if (draggedItem) {
       e.currentTarget.style.backgroundColor = "#d1f4d1"; // Highlight drop zone
 
       if (logItem && logItem.parent_log_id) {
         const closestElement = document.getElementById(
-          `timeline-${logItem.parent_log_id}`
+          `timeline-${logItem.parent_log_id}` +
+            (isSelectedTimeline ? "-selected" : "")
         );
 
         if (closestElement) {
@@ -557,10 +558,23 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
         }
       }
       if (logItem) {
-        const cardElement = document.getElementById("timeline-event-card");
+        let cardElement;
+        if (e.currentTarget.id !== "timeline-event-card") {
+          cardElement = document.getElementById("timeline-event-card");
 
-        if (cardElement) {
-          cardElement.style.backgroundColor = "#fff";
+          if (cardElement) {
+            cardElement.style.backgroundColor = "#fff";
+          }
+        }
+
+        if (e.currentTarget.id !== `timeline-${logItem.parent_log_id}-card`) {
+          cardElement = document.getElementById(
+            `timeline-${logItem.parent_log_id}-card`
+          );
+
+          if (cardElement) {
+            cardElement.style.backgroundColor = "#fff";
+          }
         }
       }
     }
@@ -568,18 +582,60 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
 
   const handleMouseLeaveDropZone = (
     e: React.MouseEvent<HTMLDivElement>,
-    parentId?: number
+    parentId?: number,
+    isSelectedTimeline: boolean = false,
+
+    topLevel?: number
   ) => {
     if (draggedItem) {
       e.currentTarget.style.backgroundColor = ""; // Remove highlight
 
       if (parentId) {
-        const closestElement = document.getElementById(`timeline-${parentId}`);
+        const closestElement = document.getElementById(
+          `timeline-${parentId}` + (isSelectedTimeline ? "-selected" : "")
+        );
 
         if (closestElement) {
           closestElement.style.backgroundColor = "#d1f4d1";
         }
+        else if (topLevel) {
+          const element = document.getElementById(`timeline-${topLevel}-card`);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            // Check if mouse is inside the element's bounding box
+            if (
+              mouseX >= rect.left &&
+              mouseX <= rect.right &&
+              mouseY >= rect.top &&
+              mouseY <= rect.bottom
+            ) {
+              element.style.backgroundColor = "#d1f4d1";
+            }
+          }
+        }
       } else {
+        if (topLevel) {
+          const element = document.getElementById(`timeline-${topLevel}-card`);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            // Check if mouse is inside the element's bounding box
+            if (
+              mouseX >= rect.left &&
+              mouseX <= rect.right &&
+              mouseY >= rect.top &&
+              mouseY <= rect.bottom
+            ) {
+              element.style.backgroundColor = "#d1f4d1";
+            }
+          }
+        }
+
         const element = document.getElementById("timeline-event-card");
         if (element) {
           const rect = element.getBoundingClientRect();
@@ -612,15 +668,19 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
     };
   }, [draggedItem, dragOffset]);
 
-  const RenderTimeline = function (logArray: MemoryLog[], level: number = 1) {
-    console.log("logArray: ", logArray);
+  const RenderTimeline = function (
+    logArray: MemoryLog[],
+    level: number = 1,
+    isSelected: boolean = false,
+    topLevel?: number
+  ) {
     return (
       <Timeline bulletSize={24}>
         {logArray.map((log, index) => {
           return (
             <Timeline.Item
               key={index}
-              id={`timeline-${log.id}`}
+              id={`timeline-${log.id}` + (isSelected ? "-selected" : "")}
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedLog(log);
@@ -630,9 +690,14 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
               onMouseDown={(e) => {
                 handleMouseDown(e, log);
               }}
-              onMouseEnter={(e) => handleMouseEnterDropZone(e, log)}
+              onMouseEnter={(e) => handleMouseEnterDropZone(e, log, isSelected)}
               onMouseLeave={(e) =>
-                handleMouseLeaveDropZone(e, log.parent_log_id)
+                handleMouseLeaveDropZone(
+                  e,
+                  log.parent_log_id,
+                  isSelected,
+                  topLevel
+                )
               }
               onMouseUp={async (e) => await handleMouseUpInTimeline(e, log)}
               sx={{
@@ -642,7 +707,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                 border: log === selectedLog ? "1px solid #e0e0e0" : undefined,
               }}
               bullet={
-                <Tooltip label={tagToIconAndColorMap[log.tag]?.explanation}>
+                <Tooltip
+                  withinPortal={true}
+                  label={tagToIconAndColorMap[log.tag]?.explanation}
+                >
                   <ThemeIcon
                     size={22}
                     variant="filled"
@@ -688,9 +756,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                 </Flex>
                 {(() => {
                   const childEvents = reversedLogsByLogDate.filter(
-                    (item) =>
-                      (level === 1 ? !item.is_sub_event : true) &&
-                      item.parent_log_id === log.id
+                    (item) => item.parent_log_id === log.id
                   );
 
                   return childEvents.length > 0 ? (
@@ -720,7 +786,12 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                         labelPosition={"center"}
                       />
                       {expandedEvent.has(log.id) &&
-                        RenderTimeline(childEvents, level + 1)}
+                        RenderTimeline(
+                          childEvents,
+                          level + 1,
+                          isSelected,
+                          topLevel
+                        )}
                     </>
                   ) : (
                     <></>
@@ -733,7 +804,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
         {draggedItem && (
           <Portal>
             <Timeline.Item
-              id={`hover-timeline-${draggedItem.id}`}
+              id={
+                `hover-timeline-${draggedItem.id}` +
+                (isSelected ? "-selected" : "")
+              }
               ref={draggedElementRef}
               sx={{
                 position: "absolute",
@@ -792,8 +866,6 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
       </Timeline>
     );
   };
-
-  console.log("selected event: ", selectedLog);
 
   return (
     <>
@@ -854,7 +926,9 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
               sx={{ minHeight: "400px", maxHeight: "500px", overflowY: "auto" }}
               id={"timeline-event-card"}
               onMouseEnter={(e) => handleMouseEnterDropZone(e)}
-              onMouseLeave={(e) => handleMouseLeaveDropZone(e)}
+              onMouseLeave={(e) =>
+                handleMouseLeaveDropZone(e, undefined, false, 1)
+              }
               onMouseUp={async (e) => await handleMouseUpInTimeline(e)}
             >
               <LoadingOverlay visible={loading || loadingSelixLogs} />
@@ -1193,17 +1267,30 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                     maxHeight: "500px",
                     overflowY: "auto",
                   }}
-                  id={"timeline-event-card"}
-                  onMouseEnter={(e) => handleMouseEnterDropZone(e)}
-                  onMouseLeave={(e) => handleMouseLeaveDropZone(e)}
-                  onMouseUp={async (e) => await handleMouseUpInTimeline(e)}
+                  id={`timeline-${selectedLog.id}-card`}
+                  onMouseEnter={(e) =>
+                    handleMouseEnterDropZone(e, selectedLog, true)
+                  }
+                  onMouseLeave={(e) =>
+                    handleMouseLeaveDropZone(
+                      e,
+                      selectedLog.id,
+                      true,
+                      selectedLog.id
+                    )
+                  }
+                  onMouseUp={async (e) =>
+                    await handleMouseUpInTimeline(e, selectedLog)
+                  }
                 >
                   <LoadingOverlay visible={loading || loadingSelixLogs} />
                   {RenderTimeline(
                     reversedLogsByLogDate.filter(
-                      (log) =>
-                        log.is_sub_event && log.parent_log_id === selectedLog.id
-                    )
+                      (log) => log.parent_log_id === selectedLog.id
+                    ),
+                    2,
+                    true,
+                    selectedLog.id
                   )}
                 </Card>
                 <Flex>

@@ -1134,6 +1134,13 @@ export default function SelinAI() {
           threads_loaded,
           "PLANNER"
         );
+        setCurrentSessionId(Number(sessionIdFromUrl));
+        // console.log("meowww", data.session.id);
+        sessionIDRef.current = Number(sessionIdFromUrl)
+        roomIDref.current = threadIdFromUrl || "";
+        const currentThread = threads_loaded.find((thread: ThreadType) => thread.id === Number(sessionIdFromUrl));
+        const orderedTasks = currentThread?.tasks?.sort((a: TaskType, b: TaskType) => a.order_number - b.order_number);
+        setTasks(orderedTasks || []);
         setAIType("PLANNER");
       }
     };

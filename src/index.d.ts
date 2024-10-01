@@ -869,6 +869,8 @@ export type SalesNavigatorLaunch = {
   sales_navigator_url: string;
   scrape_count: number;
   status: string;
+  segment_id?: number;
+  segment_title?: string;
   pb_container_id: string;
   result_available: boolean;
   launch_date: Date;

@@ -570,7 +570,12 @@ export default function SalesNavigatorComponent(props: { showPersonaSelect?: boo
                   <Badge size='xs' mb='sm'>
                     {launch.archetype}
                   </Badge>
-                )}
+                )}{launch.segment_id && (
+                  <Badge color='lime' ml='sm' size='xs' mb='sm'>
+                    {launch.segment_title}
+                  </Badge>
+                )
+                }
                 <Flex align='center' justify='space-between'>
                   <Flex align='center'>
                     <Title order={5}>{launch.name || `Scrape #${launches.length - index}`}</Title>

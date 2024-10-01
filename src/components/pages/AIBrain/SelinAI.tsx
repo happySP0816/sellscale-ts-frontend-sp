@@ -113,11 +113,7 @@ interface CustomCursorWrapperProps {
 import { Dropzone, DropzoneProps } from "@mantine/dropzone";
 import { Modal, Overlay } from "@mantine/core";
 import { currentProjectState } from "@atoms/personaAtoms";
-import {
-  getFreshCurrentProject,
-  isFreeUser,
-  saveCurrentPersonaId,
-} from "@auth/core";
+import { getFreshCurrentProject, isFreeUser, saveCurrentPersonaId } from "@auth/core";
 import Tour from "reactour";
 import { useNavigate } from "react-router-dom";
 import Sequences from "@pages/CampaignV2/Sequences";
@@ -950,13 +946,8 @@ export default function SelinAI() {
 
     if (recording) {
       intervalId = setInterval(() => {
-        const memory = threads.find(
-          (thread) => thread.id === currentSessionId
-        )?.memory;
-        if (
-          memory?.strategy_id &&
-          promptLengthRef.current > prevPromptLengthRef.current + 80
-        ) {
+        const memory = threads.find((thread) => thread.id === currentSessionId)?.memory;
+        if (memory?.strategy_id && promptLengthRef.current > prevPromptLengthRef.current + 80) {
           handleEditStrategy(promptRef.current);
           prevPromptLengthRef.current = promptLengthRef.current;
         }
@@ -1117,6 +1108,10 @@ export default function SelinAI() {
 
   const [showSidebar, setShowSidebar] = useState(true);
 
+  const [activeOpened, { toggle: ActiveToggle }] = useDisclosure(false);
+  const [needOpened, { toggle: NeedToggle }] = useDisclosure(false);
+  const [completedOpened, { toggle: CompleteToggle }] = useDisclosure(false);
+
   return (
     <DropzoneWrapper setPrompt={setPrompt} prompt={prompt} setAttachedFile={setAttachedFile} ref={dropzoneRef} handleSubmit={handleSubmit}>
       <Card maw={"100%"} style={{ backgroundColor: "transparent" }} p={0}>
@@ -1169,676 +1164,702 @@ export default function SelinAI() {
                   {showSidebar && (
                     <>
                       <Stack spacing={"xs"} mt={"xl"}>
-                        <Flex align={"center"} gap={"sm"}>
-                          <IconLoader color="#be4bdb" size={"1.4rem"} />
-                          <Text size={"md"} fw={600}>
-                            Active Sessions
-                          </Text>
-                          <Badge color="grape" size="sm">
-                            {threads.sort((a, b) => b.id - a.id).filter((thread) => thread.status === "ACTIVE").length}
-                          </Badge>
+                        <Flex align={"center"} justify={"space-between"}>
+                          <Flex align={"center"} gap={"sm"}>
+                            <IconLoader color="#be4bdb" size={"1.4rem"} />
+                            <Text size={"md"} fw={600}>
+                              Active Sessions
+                            </Text>
+                            <Badge color="grape" size="sm">
+                              {threads.sort((a, b) => b.id - a.id).filter((thread) => thread.status === "ACTIVE").length}
+                            </Badge>
+                          </Flex>
+                          <ActionIcon onClick={ActiveToggle}>{!activeOpened ? <IconChevronDown size={"1rem"} /> : <IconChevronUp size={"1rem"} />}</ActionIcon>
                         </Flex>
-                        {threads
-                          .sort((a, b) => b.id - a.id)
-                          .filter((thread) => thread.status === "ACTIVE")
-                          .map((thread: ThreadType, index) => {
-                            return (
-                              <Paper
-                                key={index}
-                                withBorder
-                                radius={"sm"}
-                                p={"sm"}
-                                w={"100%"}
-                                style={{
-                                  // cursor: "grab",
-                                  display: "inline-block",
-                                  // minWidth: "350px",
-                                  backgroundColor: sessionIDRef.current === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
-                                  borderColor: sessionIDRef.current === thread.id ? "#00796b" : "#e6ebf0", // Change border color if current thread
-                                }}
-                                className={`transition duration-300 ease-in-out transform ${
-                                  sessionIDRef.current === thread.id
-                                    ? "scale-105 shadow-2xl"
-                                    : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
-                                }`}
-                                onClick={() => {
-                                  getMessages(thread.thread_id, thread.id);
-                                  toggle();
-                                }}
-                                onMouseEnter={() => setHoverChat(thread.id)}
-                                onMouseLeave={() => setHoverChat(undefined)}
-                              >
-                                <Flex align={"center"} justify={"space-between"}>
-                                  {editingIndex === index ? (
-                                    <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()}>
-                                      <TextInput
-                                        value={editingSessionName}
-                                        onChange={(e) => setEditingSessionName(e.currentTarget.value)}
-                                        onBlur={() => editSession(thread.id, editingSessionName)}
-                                        onKeyDown={(e) => {
-                                          if (e.key === "Enter") {
-                                            editSession(thread.id, editingSessionName);
-                                          }
-                                        }}
-                                        style={{
-                                          width: `${editingSessionName.length + 2}ch`,
-                                        }}
-                                        rightSection={
+                        <Collapse in={activeOpened} transitionTimingFunction="linear">
+                          <Stack spacing={"xs"}>
+                            {threads
+                              .sort((a, b) => b.id - a.id)
+                              .filter((thread) => thread.status === "ACTIVE")
+                              .map((thread: ThreadType, index) => {
+                                return (
+                                  <Paper
+                                    key={index}
+                                    withBorder
+                                    radius={"sm"}
+                                    p={"sm"}
+                                    w={"100%"}
+                                    style={{
+                                      // cursor: "grab",
+                                      display: "inline-block",
+                                      // minWidth: "350px",
+                                      backgroundColor: sessionIDRef.current === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
+                                      borderColor: sessionIDRef.current === thread.id ? "#00796b" : "#e6ebf0", // Change border color if current thread
+                                    }}
+                                    className={`transition duration-300 ease-in-out transform ${
+                                      sessionIDRef.current === thread.id
+                                        ? "scale-105 shadow-2xl"
+                                        : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
+                                    }`}
+                                    onClick={() => {
+                                      getMessages(thread.thread_id, thread.id);
+                                      toggle();
+                                    }}
+                                    onMouseEnter={() => setHoverChat(thread.id)}
+                                    onMouseLeave={() => setHoverChat(undefined)}
+                                  >
+                                    <Flex align={"center"} justify={"space-between"}>
+                                      {editingIndex === index ? (
+                                        <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()}>
+                                          <TextInput
+                                            value={editingSessionName}
+                                            onChange={(e) => setEditingSessionName(e.currentTarget.value)}
+                                            onBlur={() => editSession(thread.id, editingSessionName)}
+                                            onKeyDown={(e) => {
+                                              if (e.key === "Enter") {
+                                                editSession(thread.id, editingSessionName);
+                                              }
+                                            }}
+                                            style={{
+                                              width: `${editingSessionName.length + 2}ch`,
+                                            }}
+                                            rightSection={
+                                              <ActionIcon
+                                                variant="transparent"
+                                                color="green"
+                                                size={"sm"}
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  editSession(thread.id, editingSessionName);
+                                                }}
+                                              >
+                                                <IconCircleCheck size={"xl"} />
+                                              </ActionIcon>
+                                            }
+                                          />
+                                        </Flex>
+                                      ) : (
+                                        <Flex align={"center"} gap={"xs"}>
+                                          <Text
+                                            fw={600}
+                                            onClick={(e) => {
+                                              // e.stopPropagation();
+                                              // setEditingIndex(index);
+                                              // setEditingSessionName(thread.session_name);
+                                            }}
+                                            // style={{ cursor: "text" }}
+                                            size={"sm"}
+                                          >
+                                            {thread.session_name || "Untitled Session"}
+                                          </Text>
                                           <ActionIcon
                                             variant="transparent"
-                                            color="green"
+                                            // color="blue"
                                             size={"sm"}
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              editSession(thread.id, editingSessionName);
+                                              setEditingIndex(index);
+                                              setEditingSessionName(thread.session_name);
+                                            }}
+                                            style={{ marginLeft: "auto" }}
+                                          >
+                                            <IconEdit size={"1rem"} />
+                                          </ActionIcon>
+                                        </Flex>
+                                      )}
+                                      {!(editingIndex === index) && hoverChat && hoverChat === thread.id && (
+                                        <>
+                                          <ActionIcon
+                                            variant="transparent"
+                                            color="red"
+                                            size={"sm"}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setThreads((prevThreads) =>
+                                                prevThreads.map((prevThread) =>
+                                                  prevThread.id === thread.id
+                                                    ? {
+                                                        ...prevThread,
+                                                        status: "CANCELLED",
+                                                      }
+                                                    : prevThread
+                                                )
+                                              );
+                                              fetch(`${API_URL}/selix/delete_session`, {
+                                                method: "DELETE",
+                                                headers: {
+                                                  "Content-Type": "application/json",
+                                                  Authorization: `Bearer ${userToken}`,
+                                                },
+                                                body: JSON.stringify({
+                                                  session_id: thread.id,
+                                                }),
+                                              })
+                                                .then((response) => {
+                                                  if (!response.ok) {
+                                                    return response.json().then((data) => {
+                                                      throw new Error(data.error || "Failed to delete session");
+                                                    });
+                                                  }
+                                                  return response.json();
+                                                })
+                                                .then((data) => {
+                                                  console.log("Session deleted:", data.message);
+                                                })
+                                                .catch((error) => {
+                                                  console.error("Error deleting session:", error);
+                                                });
                                             }}
                                           >
-                                            <IconCircleCheck size={"xl"} />
+                                            {thread.status !== "CANCELLED" && <IconArchive size={"1rem"} />}
                                           </ActionIcon>
-                                        }
-                                      />
+                                        </>
+                                      )}
                                     </Flex>
-                                  ) : (
                                     <Flex align={"center"} gap={"xs"}>
-                                      <Text
-                                        fw={600}
-                                        onClick={(e) => {
-                                          // e.stopPropagation();
-                                          // setEditingIndex(index);
-                                          // setEditingSessionName(thread.session_name);
-                                        }}
-                                        // style={{ cursor: "text" }}
-                                        size={"sm"}
-                                      >
-                                        {thread.session_name || "Untitled Session"}
-                                      </Text>
-                                      <ActionIcon
-                                        variant="transparent"
-                                        // color="blue"
-                                        size={"sm"}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setEditingIndex(index);
-                                          setEditingSessionName(thread.session_name);
-                                        }}
-                                        style={{ marginLeft: "auto" }}
-                                      >
-                                        <IconEdit size={"1rem"} />
-                                      </ActionIcon>
-                                    </Flex>
-                                  )}
-                                  {!(editingIndex === index) && hoverChat && hoverChat === thread.id && (
-                                    <>
-                                      <ActionIcon
-                                        variant="transparent"
-                                        color="red"
-                                        size={"sm"}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setThreads((prevThreads) =>
-                                            prevThreads.map((prevThread) =>
-                                              prevThread.id === thread.id
-                                                ? {
-                                                    ...prevThread,
-                                                    status: "CANCELLED",
-                                                  }
-                                                : prevThread
-                                            )
-                                          );
-                                          fetch(`${API_URL}/selix/delete_session`, {
-                                            method: "DELETE",
-                                            headers: {
-                                              "Content-Type": "application/json",
-                                              Authorization: `Bearer ${userToken}`,
-                                            },
-                                            body: JSON.stringify({
-                                              session_id: thread.id,
-                                            }),
-                                          })
-                                            .then((response) => {
-                                              if (!response.ok) {
-                                                return response.json().then((data) => {
-                                                  throw new Error(data.error || "Failed to delete session");
-                                                });
-                                              }
-                                              return response.json();
-                                            })
-                                            .then((data) => {
-                                              console.log("Session deleted:", data.message);
-                                            })
-                                            .catch((error) => {
-                                              console.error("Error deleting session:", error);
-                                            });
-                                        }}
-                                      >
-                                        {thread.status !== "CANCELLED" && <IconArchive size={"1rem"} />}
-                                      </ActionIcon>
-                                    </>
-                                  )}
-                                </Flex>
-                                <Flex align={"center"} gap={"xs"}>
-                                  {thread.status === "ACTIVE" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
+                                      {thread.status === "ACTIVE" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-green-500 rounded-full"></div>
                                       </div>
                                       <Text color="green" fw={500} size={"sm"}>
                                         Live
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Time remaining:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "PENDING_OPERATOR" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-yellow-100 rounded-full p-1 border-yellow-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "PENDING_OPERATOR" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-yellow-100 rounded-full p-1 border-yellow-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-yellow-500 rounded-full"></div>
                                       </div>
                                       <Text color="yellow" fw={500} size={"sm"}>
                                         In Progress
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Time remaining:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "BLOCKED" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-red-100 rounded-full p-1 border-red-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "BLOCKED" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-red-100 rounded-full p-1 border-red-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-red-500 rounded-full"></div>
                                       </div>
                                       <Text color="red" fw={500} size={"sm"}>
                                         Blocked
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Time remaining:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "COMPLETE" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-blue-100 rounded-full p-1 border-blue-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "COMPLETE" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-blue-100 rounded-full p-1 border-blue-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-blue-500 rounded-full"></div>
                                       </div>
                                       <Text color="blue" fw={500} size={"sm"}>
                                         Done
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Finished in:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "CANCELLED" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-gray-100 rounded-full p-1 border-gray-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Finished in:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "CANCELLED" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-gray-100 rounded-full p-1 border-gray-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-gray-500 rounded-full"></div>
                                       </div>
                                       <Text color="gray" fw={500} size={"sm"}>
                                         Cancelled
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Finished in:
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Finished in:
+                                          </Text>
+                                        </Flex>
+                                      )}
+
+                                      <Text color="gray" size={"xs"}>
+                                        {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}{" "}
+                                        {(thread.status === "ACTIVE" || thread.status === "IN_PROGRESS") && "remaining"}
                                       </Text>
                                     </Flex>
-                                  )}
-
-                                  <Text color="gray" size={"xs"}>
-                                    {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}{" "}
-                                    {(thread.status === "ACTIVE" || thread.status === "IN_PROGRESS") && "remaining"}
-                                  </Text>
-                                </Flex>
-                              </Paper>
-                            );
-                          })}
+                                  </Paper>
+                                );
+                              })}
+                          </Stack>
+                        </Collapse>
                       </Stack>
                       <Stack spacing={"xs"} mt={"xl"}>
-                        <Flex align={"center"} gap={"sm"}>
-                          <IconInfoCircle color="yellow" size={"1.4rem"} />
-                          <Text size={"md"} fw={600}>
-                            Need Input
-                          </Text>
-                          <Badge color="yellow" size="sm">
-                            {threads.sort((a, b) => b.id - a.id).filter((thread) => thread.status === "PENDING_OPERATOR" || thread.status === "BLOCKED").length}
-                          </Badge>
+                        <Flex align={"center"} justify={"space-between"}>
+                          <Flex align={"center"} gap={"sm"}>
+                            <IconInfoCircle color="orange" size={"1.4rem"} />
+                            <Text size={"md"} fw={600}>
+                              Need Input
+                            </Text>
+                            <Badge color="orange" size="sm">
+                              {
+                                threads.sort((a, b) => b.id - a.id).filter((thread) => thread.status === "PENDING_OPERATOR" || thread.status === "BLOCKED")
+                                  .length
+                              }
+                            </Badge>
+                          </Flex>
+                          <ActionIcon onClick={NeedToggle}>{!needOpened ? <IconChevronDown size={"1rem"} /> : <IconChevronUp size={"1rem"} />}</ActionIcon>
                         </Flex>
-                        {threads
-                          .sort((a, b) => b.id - a.id)
-                          .filter((thread) => thread.status === "PENDING_OPERATOR" || thread.status === "BLOCKED")
-                          .map((thread: ThreadType, index) => {
-                            return (
-                              <Paper
-                                key={index}
-                                withBorder
-                                radius={"sm"}
-                                p={"sm"}
-                                w={"100%"}
-                                style={{
-                                  // cursor: "grab",
-                                  // display: "inline-block",
-                                  // minWidth: "350px",
-                                  backgroundColor: sessionIDRef.current === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
-                                  borderColor: sessionIDRef.current === thread.id ? "#00796b" : "#e6ebf0", // Change border color if current thread
-                                }}
-                                className={`transition duration-300 ease-in-out transform ${
-                                  sessionIDRef.current === thread.id
-                                    ? "scale-105 shadow-2xl"
-                                    : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
-                                }`}
-                                onClick={() => {
-                                  getMessages(thread.thread_id, thread.id);
-                                  toggle();
-                                }}
-                                onMouseEnter={() => setHoverChat(thread.id)}
-                                onMouseLeave={() => setHoverChat(undefined)}
-                              >
-                                <Flex align={"center"} justify={"space-between"}>
-                                  {editingIndex === index ? (
-                                    <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()}>
-                                      <TextInput
-                                        value={editingSessionName}
-                                        onChange={(e) => setEditingSessionName(e.currentTarget.value)}
-                                        onBlur={() => editSession(thread.id, editingSessionName)}
-                                        onKeyDown={(e) => {
-                                          if (e.key === "Enter") {
-                                            editSession(thread.id, editingSessionName);
-                                          }
-                                        }}
-                                        style={{
-                                          width: `${editingSessionName.length + 2}ch`,
-                                        }}
-                                        rightSection={
+                        <Collapse in={needOpened} transitionTimingFunction="linear">
+                          <Stack spacing={"xs"}>
+                            {threads
+                              .sort((a, b) => b.id - a.id)
+                              .filter((thread) => thread.status === "PENDING_OPERATOR" || thread.status === "BLOCKED")
+                              .map((thread: ThreadType, index) => {
+                                return (
+                                  <Paper
+                                    key={index}
+                                    withBorder
+                                    radius={"sm"}
+                                    p={"sm"}
+                                    w={"100%"}
+                                    style={{
+                                      // cursor: "grab",
+                                      // display: "inline-block",
+                                      // minWidth: "350px",
+                                      backgroundColor: sessionIDRef.current === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
+                                      borderColor: sessionIDRef.current === thread.id ? "#00796b" : "#e6ebf0", // Change border color if current thread
+                                    }}
+                                    className={`transition duration-300 ease-in-out transform ${
+                                      sessionIDRef.current === thread.id
+                                        ? "scale-105 shadow-2xl"
+                                        : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
+                                    }`}
+                                    onClick={() => {
+                                      getMessages(thread.thread_id, thread.id);
+                                      toggle();
+                                    }}
+                                    onMouseEnter={() => setHoverChat(thread.id)}
+                                    onMouseLeave={() => setHoverChat(undefined)}
+                                  >
+                                    <Flex align={"center"} justify={"space-between"}>
+                                      {editingIndex === index ? (
+                                        <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()}>
+                                          <TextInput
+                                            value={editingSessionName}
+                                            onChange={(e) => setEditingSessionName(e.currentTarget.value)}
+                                            onBlur={() => editSession(thread.id, editingSessionName)}
+                                            onKeyDown={(e) => {
+                                              if (e.key === "Enter") {
+                                                editSession(thread.id, editingSessionName);
+                                              }
+                                            }}
+                                            style={{
+                                              width: `${editingSessionName.length + 2}ch`,
+                                            }}
+                                            rightSection={
+                                              <ActionIcon
+                                                variant="transparent"
+                                                color="green"
+                                                size={"sm"}
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  editSession(thread.id, editingSessionName);
+                                                }}
+                                              >
+                                                <IconCircleCheck size={"xl"} />
+                                              </ActionIcon>
+                                            }
+                                          />
+                                        </Flex>
+                                      ) : (
+                                        <Flex align={"center"} gap={"xs"}>
+                                          <Text
+                                            fw={600}
+                                            onClick={(e) => {
+                                              // e.stopPropagation();
+                                              // setEditingIndex(index);
+                                              // setEditingSessionName(thread.session_name);
+                                            }}
+                                            // style={{ cursor: "text" }}
+                                            size={"sm"}
+                                          >
+                                            {thread.session_name || "Untitled Session"}
+                                          </Text>
                                           <ActionIcon
                                             variant="transparent"
-                                            color="green"
+                                            // color="blue"
                                             size={"sm"}
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              editSession(thread.id, editingSessionName);
+                                              setEditingIndex(index);
+                                              setEditingSessionName(thread.session_name);
+                                            }}
+                                            style={{ marginLeft: "auto" }}
+                                          >
+                                            <IconEdit size={"1rem"} />
+                                          </ActionIcon>
+                                        </Flex>
+                                      )}
+                                      {!(editingIndex === index) && hoverChat && hoverChat === thread.id && (
+                                        <>
+                                          <ActionIcon
+                                            variant="transparent"
+                                            color="red"
+                                            size={"sm"}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setThreads((prevThreads) =>
+                                                prevThreads.map((prevThread) =>
+                                                  prevThread.id === thread.id
+                                                    ? {
+                                                        ...prevThread,
+                                                        status: "CANCELLED",
+                                                      }
+                                                    : prevThread
+                                                )
+                                              );
+                                              fetch(`${API_URL}/selix/delete_session`, {
+                                                method: "DELETE",
+                                                headers: {
+                                                  "Content-Type": "application/json",
+                                                  Authorization: `Bearer ${userToken}`,
+                                                },
+                                                body: JSON.stringify({
+                                                  session_id: thread.id,
+                                                }),
+                                              })
+                                                .then((response) => {
+                                                  if (!response.ok) {
+                                                    return response.json().then((data) => {
+                                                      throw new Error(data.error || "Failed to delete session");
+                                                    });
+                                                  }
+                                                  return response.json();
+                                                })
+                                                .then((data) => {
+                                                  console.log("Session deleted:", data.message);
+                                                })
+                                                .catch((error) => {
+                                                  console.error("Error deleting session:", error);
+                                                });
                                             }}
                                           >
-                                            <IconCircleCheck size={"xl"} />
+                                            {thread.status !== "CANCELLED" && <IconArchive size={"1rem"} />}
                                           </ActionIcon>
-                                        }
-                                      />
+                                        </>
+                                      )}
                                     </Flex>
-                                  ) : (
                                     <Flex align={"center"} gap={"xs"}>
-                                      <Text
-                                        fw={600}
-                                        onClick={(e) => {
-                                          // e.stopPropagation();
-                                          // setEditingIndex(index);
-                                          // setEditingSessionName(thread.session_name);
-                                        }}
-                                        // style={{ cursor: "text" }}
-                                        size={"sm"}
-                                      >
-                                        {thread.session_name || "Untitled Session"}
-                                      </Text>
-                                      <ActionIcon
-                                        variant="transparent"
-                                        // color="blue"
-                                        size={"sm"}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setEditingIndex(index);
-                                          setEditingSessionName(thread.session_name);
-                                        }}
-                                        style={{ marginLeft: "auto" }}
-                                      >
-                                        <IconEdit size={"1rem"} />
-                                      </ActionIcon>
-                                    </Flex>
-                                  )}
-                                  {!(editingIndex === index) && hoverChat && hoverChat === thread.id && (
-                                    <>
-                                      <ActionIcon
-                                        variant="transparent"
-                                        color="red"
-                                        size={"sm"}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setThreads((prevThreads) =>
-                                            prevThreads.map((prevThread) =>
-                                              prevThread.id === thread.id
-                                                ? {
-                                                    ...prevThread,
-                                                    status: "CANCELLED",
-                                                  }
-                                                : prevThread
-                                            )
-                                          );
-                                          fetch(`${API_URL}/selix/delete_session`, {
-                                            method: "DELETE",
-                                            headers: {
-                                              "Content-Type": "application/json",
-                                              Authorization: `Bearer ${userToken}`,
-                                            },
-                                            body: JSON.stringify({
-                                              session_id: thread.id,
-                                            }),
-                                          })
-                                            .then((response) => {
-                                              if (!response.ok) {
-                                                return response.json().then((data) => {
-                                                  throw new Error(data.error || "Failed to delete session");
-                                                });
-                                              }
-                                              return response.json();
-                                            })
-                                            .then((data) => {
-                                              console.log("Session deleted:", data.message);
-                                            })
-                                            .catch((error) => {
-                                              console.error("Error deleting session:", error);
-                                            });
-                                        }}
-                                      >
-                                        {thread.status !== "CANCELLED" && <IconArchive size={"1rem"} />}
-                                      </ActionIcon>
-                                    </>
-                                  )}
-                                </Flex>
-                                <Flex align={"center"} gap={"xs"}>
-                                  {thread.status === "ACTIVE" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
+                                      {thread.status === "ACTIVE" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-green-500 rounded-full"></div>
                                       </div>
                                       <Text color="green" fw={500} size={"sm"}>
                                         Live
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Time remaining:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "PENDING_OPERATOR" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-yellow-100 rounded-full p-1 border-yellow-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "PENDING_OPERATOR" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-yellow-100 rounded-full p-1 border-yellow-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-yellow-500 rounded-full"></div>
                                       </div>
                                       <Text color="yellow" fw={500} size={"sm"}>
                                         In Progress
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Time remaining:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "BLOCKED" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-red-100 rounded-full p-1 border-red-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "BLOCKED" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-red-100 rounded-full p-1 border-red-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-red-500 rounded-full"></div>
                                       </div>
                                       <Text color="red" fw={500} size={"sm"}>
                                         Blocked
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Time remaining:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "COMPLETE" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-blue-100 rounded-full p-1 border-blue-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "COMPLETE" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-blue-100 rounded-full p-1 border-blue-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-blue-500 rounded-full"></div>
                                       </div>
                                       <Text color="blue" fw={500} size={"sm"}>
                                         Done
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Finished in:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "CANCELLED" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-gray-100 rounded-full p-1 border-gray-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Finished in:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "CANCELLED" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-gray-100 rounded-full p-1 border-gray-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-gray-500 rounded-full"></div>
                                       </div>
                                       <Text color="gray" fw={500} size={"sm"}>
                                         Cancelled
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Finished in:
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Finished in:
+                                          </Text>
+                                        </Flex>
+                                      )}
+
+                                      <Text color="gray" size={"xs"}>
+                                        {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}{" "}
+                                        {(thread.status === "ACTIVE" || thread.status === "IN_PROGRESS") && "remaining"}
                                       </Text>
                                     </Flex>
-                                  )}
-
-                                  <Text color="gray" size={"xs"}>
-                                    {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}{" "}
-                                    {(thread.status === "ACTIVE" || thread.status === "IN_PROGRESS") && "remaining"}
-                                  </Text>
-                                </Flex>
-                              </Paper>
-                            );
-                          })}
+                                  </Paper>
+                                );
+                              })}
+                          </Stack>
+                        </Collapse>
                       </Stack>
                       <Stack spacing={"xs"} mt={"xl"}>
-                        <Flex align={"center"} gap={"sm"}>
-                          <IconCircleCheck color="green" size={"1.4rem"} />
-                          <Text size={"md"} fw={600}>
-                            Completed Sessions
-                          </Text>
-                          <Badge color="green" size="sm">
-                            {threads.sort((a, b) => b.id - a.id).filter((thread) => thread.status === "COMPLETE" || thread.status === "CANCELLED").length}
-                          </Badge>
+                        <Flex align={"center"} justify={"space-between"}>
+                          <Flex align={"center"} gap={"sm"}>
+                            <IconCircleCheck color="green" size={"1.4rem"} />
+                            <Text size={"md"} fw={600}>
+                              Completed Sessions
+                            </Text>
+                            <Badge color="green" size="sm">
+                              {threads.sort((a, b) => b.id - a.id).filter((thread) => thread.status === "COMPLETE" || thread.status === "CANCELLED").length}
+                            </Badge>
+                          </Flex>
+                          <ActionIcon onClick={CompleteToggle}>
+                            {!completedOpened ? <IconChevronDown size={"1rem"} /> : <IconChevronUp size={"1rem"} />}
+                          </ActionIcon>
                         </Flex>
-                        {threads
-                          .sort((a, b) => b.id - a.id)
-                          .filter((thread) => thread.status === "COMPLETE" || thread.status === "CANCELLED")
-                          .map((thread: ThreadType, index) => {
-                            return (
-                              <Paper
-                                key={index}
-                                withBorder
-                                radius={"sm"}
-                                p={"sm"}
-                                w={"100%"}
-                                style={{
-                                  // cursor: "grab",
-                                  // display: "inline-block",
-                                  // minWidth: "350px",
-                                  backgroundColor: sessionIDRef.current === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
-                                  borderColor: sessionIDRef.current === thread.id ? "#00796b" : "#e6ebf0", // Change border color if current thread
-                                }}
-                                className={`transition duration-300 ease-in-out transform ${
-                                  sessionIDRef.current === thread.id
-                                    ? "scale-105 shadow-2xl"
-                                    : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
-                                }`}
-                                onClick={() => {
-                                  getMessages(thread.thread_id, thread.id);
-                                  toggle();
-                                }}
-                                onMouseEnter={() => setHoverChat(thread.id)}
-                                onMouseLeave={() => setHoverChat(undefined)}
-                              >
-                                <Flex align={"center"} justify={"space-between"}>
-                                  {editingIndex === index ? (
-                                    <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()}>
-                                      <TextInput
-                                        value={editingSessionName}
-                                        onChange={(e) => setEditingSessionName(e.currentTarget.value)}
-                                        onBlur={() => editSession(thread.id, editingSessionName)}
-                                        onKeyDown={(e) => {
-                                          if (e.key === "Enter") {
-                                            editSession(thread.id, editingSessionName);
-                                          }
-                                        }}
-                                        style={{
-                                          width: `${editingSessionName.length + 2}ch`,
-                                        }}
-                                        rightSection={
+                        <Collapse in={completedOpened} transitionTimingFunction="linear">
+                          <Stack spacing={"xs"}>
+                            {threads
+                              .sort((a, b) => b.id - a.id)
+                              .filter((thread) => thread.status === "COMPLETE" || thread.status === "CANCELLED")
+                              .map((thread: ThreadType, index) => {
+                                return (
+                                  <Paper
+                                    key={index}
+                                    withBorder
+                                    radius={"sm"}
+                                    p={"sm"}
+                                    w={"100%"}
+                                    style={{
+                                      // cursor: "grab",
+                                      // display: "inline-block",
+                                      // minWidth: "350px",
+                                      backgroundColor: sessionIDRef.current === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
+                                      borderColor: sessionIDRef.current === thread.id ? "#00796b" : "#e6ebf0", // Change border color if current thread
+                                    }}
+                                    className={`transition duration-300 ease-in-out transform ${
+                                      sessionIDRef.current === thread.id
+                                        ? "scale-105 shadow-2xl"
+                                        : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
+                                    }`}
+                                    onClick={() => {
+                                      getMessages(thread.thread_id, thread.id);
+                                      toggle();
+                                    }}
+                                    onMouseEnter={() => setHoverChat(thread.id)}
+                                    onMouseLeave={() => setHoverChat(undefined)}
+                                  >
+                                    <Flex align={"center"} justify={"space-between"}>
+                                      {editingIndex === index ? (
+                                        <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()}>
+                                          <TextInput
+                                            value={editingSessionName}
+                                            onChange={(e) => setEditingSessionName(e.currentTarget.value)}
+                                            onBlur={() => editSession(thread.id, editingSessionName)}
+                                            onKeyDown={(e) => {
+                                              if (e.key === "Enter") {
+                                                editSession(thread.id, editingSessionName);
+                                              }
+                                            }}
+                                            style={{
+                                              width: `${editingSessionName.length + 2}ch`,
+                                            }}
+                                            rightSection={
+                                              <ActionIcon
+                                                variant="transparent"
+                                                color="green"
+                                                size={"sm"}
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  editSession(thread.id, editingSessionName);
+                                                }}
+                                              >
+                                                <IconCircleCheck size={"xl"} />
+                                              </ActionIcon>
+                                            }
+                                          />
+                                        </Flex>
+                                      ) : (
+                                        <Flex align={"center"} gap={"xs"}>
+                                          <Text
+                                            fw={600}
+                                            onClick={(e) => {
+                                              // e.stopPropagation();
+                                              // setEditingIndex(index);
+                                              // setEditingSessionName(thread.session_name);
+                                            }}
+                                            // style={{ cursor: "text" }}
+                                            size={"sm"}
+                                          >
+                                            {thread.session_name || "Untitled Session"}
+                                          </Text>
                                           <ActionIcon
                                             variant="transparent"
-                                            color="green"
+                                            // color="blue"
                                             size={"sm"}
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              editSession(thread.id, editingSessionName);
+                                              setEditingIndex(index);
+                                              setEditingSessionName(thread.session_name);
+                                            }}
+                                            style={{ marginLeft: "auto" }}
+                                          >
+                                            <IconEdit size={"1rem"} />
+                                          </ActionIcon>
+                                        </Flex>
+                                      )}
+                                      {!(editingIndex === index) && hoverChat && hoverChat === thread.id && (
+                                        <>
+                                          <ActionIcon
+                                            variant="transparent"
+                                            color="red"
+                                            size={"sm"}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setThreads((prevThreads) =>
+                                                prevThreads.map((prevThread) =>
+                                                  prevThread.id === thread.id
+                                                    ? {
+                                                        ...prevThread,
+                                                        status: "CANCELLED",
+                                                      }
+                                                    : prevThread
+                                                )
+                                              );
+                                              fetch(`${API_URL}/selix/delete_session`, {
+                                                method: "DELETE",
+                                                headers: {
+                                                  "Content-Type": "application/json",
+                                                  Authorization: `Bearer ${userToken}`,
+                                                },
+                                                body: JSON.stringify({
+                                                  session_id: thread.id,
+                                                }),
+                                              })
+                                                .then((response) => {
+                                                  if (!response.ok) {
+                                                    return response.json().then((data) => {
+                                                      throw new Error(data.error || "Failed to delete session");
+                                                    });
+                                                  }
+                                                  return response.json();
+                                                })
+                                                .then((data) => {
+                                                  console.log("Session deleted:", data.message);
+                                                })
+                                                .catch((error) => {
+                                                  console.error("Error deleting session:", error);
+                                                });
                                             }}
                                           >
-                                            <IconCircleCheck size={"xl"} />
+                                            {thread.status !== "CANCELLED" && <IconArchive size={"1rem"} />}
                                           </ActionIcon>
-                                        }
-                                      />
+                                        </>
+                                      )}
                                     </Flex>
-                                  ) : (
                                     <Flex align={"center"} gap={"xs"}>
-                                      <Text
-                                        fw={600}
-                                        onClick={(e) => {
-                                          // e.stopPropagation();
-                                          // setEditingIndex(index);
-                                          // setEditingSessionName(thread.session_name);
-                                        }}
-                                        // style={{ cursor: "text" }}
-                                        size={"sm"}
-                                      >
-                                        {thread.session_name || "Untitled Session"}
-                                      </Text>
-                                      <ActionIcon
-                                        variant="transparent"
-                                        // color="blue"
-                                        size={"sm"}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setEditingIndex(index);
-                                          setEditingSessionName(thread.session_name);
-                                        }}
-                                        style={{ marginLeft: "auto" }}
-                                      >
-                                        <IconEdit size={"1rem"} />
-                                      </ActionIcon>
-                                    </Flex>
-                                  )}
-                                  {!(editingIndex === index) && hoverChat && hoverChat === thread.id && (
-                                    <>
-                                      <ActionIcon
-                                        variant="transparent"
-                                        color="red"
-                                        size={"sm"}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setThreads((prevThreads) =>
-                                            prevThreads.map((prevThread) =>
-                                              prevThread.id === thread.id
-                                                ? {
-                                                    ...prevThread,
-                                                    status: "CANCELLED",
-                                                  }
-                                                : prevThread
-                                            )
-                                          );
-                                          fetch(`${API_URL}/selix/delete_session`, {
-                                            method: "DELETE",
-                                            headers: {
-                                              "Content-Type": "application/json",
-                                              Authorization: `Bearer ${userToken}`,
-                                            },
-                                            body: JSON.stringify({
-                                              session_id: thread.id,
-                                            }),
-                                          })
-                                            .then((response) => {
-                                              if (!response.ok) {
-                                                return response.json().then((data) => {
-                                                  throw new Error(data.error || "Failed to delete session");
-                                                });
-                                              }
-                                              return response.json();
-                                            })
-                                            .then((data) => {
-                                              console.log("Session deleted:", data.message);
-                                            })
-                                            .catch((error) => {
-                                              console.error("Error deleting session:", error);
-                                            });
-                                        }}
-                                      >
-                                        {thread.status !== "CANCELLED" && <IconArchive size={"1rem"} />}
-                                      </ActionIcon>
-                                    </>
-                                  )}
-                                </Flex>
-                                <Flex align={"center"} gap={"xs"}>
-                                  {thread.status === "ACTIVE" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
+                                      {thread.status === "ACTIVE" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-green-500 rounded-full"></div>
                                       </div>
                                       <Text color="green" fw={500} size={"sm"}>
                                         Live
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Time remaining:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "PENDING_OPERATOR" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-yellow-100 rounded-full p-1 border-yellow-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "PENDING_OPERATOR" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-yellow-100 rounded-full p-1 border-yellow-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-yellow-500 rounded-full"></div>
                                       </div>
                                       <Text color="yellow" fw={500} size={"sm"}>
                                         In Progress
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Time remaining:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "BLOCKED" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-red-100 rounded-full p-1 border-red-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "BLOCKED" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-red-100 rounded-full p-1 border-red-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-red-500 rounded-full"></div>
                                       </div>
                                       <Text color="red" fw={500} size={"sm"}>
                                         Blocked
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Time remaining:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "COMPLETE" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-blue-100 rounded-full p-1 border-blue-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "COMPLETE" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-blue-100 rounded-full p-1 border-blue-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-blue-500 rounded-full"></div>
                                       </div>
                                       <Text color="blue" fw={500} size={"sm"}>
                                         Done
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Finished in:
-                                      </Text>
-                                    </Flex>
-                                  )}
-                                  {thread.status === "CANCELLED" && (
-                                    <Flex align={"center"} gap={4}>
-                                      {/* <div className="flex items-center justify-center bg-gray-100 rounded-full p-1 border-gray-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Finished in:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "CANCELLED" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-gray-100 rounded-full p-1 border-gray-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-gray-500 rounded-full"></div>
                                       </div>
                                       <Text color="gray" fw={500} size={"sm"}>
                                         Cancelled
                                       </Text> */}
-                                      <Text size={"xs"} fw={500} color="gray">
-                                        Finished in:
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Finished in:
+                                          </Text>
+                                        </Flex>
+                                      )}
+
+                                      <Text color="gray" size={"xs"}>
+                                        {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}{" "}
+                                        {(thread.status === "ACTIVE" || thread.status === "IN_PROGRESS") && "remaining"}
                                       </Text>
                                     </Flex>
-                                  )}
-
-                                  <Text color="gray" size={"xs"}>
-                                    {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}{" "}
-                                    {(thread.status === "ACTIVE" || thread.status === "IN_PROGRESS") && "remaining"}
-                                  </Text>
-                                </Flex>
-                              </Paper>
-                            );
-                          })}
+                                  </Paper>
+                                );
+                              })}
+                          </Stack>
+                        </Collapse>
                       </Stack>
                     </>
                   )}
@@ -2015,13 +2036,8 @@ const SegmentChat = (props: any) => {
   const [uncollapsedCards, setUncollapsedCards] = useState<{
     [key: number]: boolean;
   }>({});
-  const [clientMemoryState, setClientMemoryState] = useState<
-    string | undefined
-  >(props.memory?.memory_line);
-  const [
-    clientMemoryStateUpdatedTime,
-    setClientMemoryStateUpdatedTime,
-  ] = useState<any>(props.memory?.memory_line_time_updated);
+  const [clientMemoryState, setClientMemoryState] = useState<string | undefined>(props.memory?.memory_line);
+  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] = useState<any>(props.memory?.memory_line_time_updated);
   const [memoryStateChanged, setMemoryStateChanged] = useState(false);
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
@@ -3785,9 +3801,7 @@ const PlannerComponent = ({
   const [opened, { toggle }] = useDisclosure(true);
   const taskContainerRef = useRef<HTMLDivElement>(null);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
   const [editingTask, setEditingTask] = useState<Number | null>(null);
@@ -3799,24 +3813,19 @@ const PlannerComponent = ({
   const [selectedRewindImage, setSelectedRewindImage] = useState<string>("");
   const [segment, setSegment] = useState<TransformedSegment | undefined>(undefined);
 
-  const isInternal = window.location.href.includes("internal");;
+  const isInternal = window.location.href.includes("internal");
 
   const campaignId = threads.find((thread) => thread.id === currentSessionId)?.memory?.campaign_id;
 
-  const currentThread = threads.find(
-    (thread) => thread.id === currentSessionId
-  );
-//updateTask(tasks[index].id, editingTaskText, taskDraftDescription, tasks[index].status);
-  const updateTask = async (taskId: number, title: string, description: string, status: string, widget_type: string | undefined) => {
+  const currentThread = threads.find((thread) => thread.id === currentSessionId);
 
-    if (widget_type === '' ) widget_type = undefined;
+  const updateTask = async (taskId: number, title: string, description: string, status: string, widget_type: string | undefined) => {
+    if (widget_type === "") widget_type = undefined;
 
     try {
       const response = await fetch(`${API_URL}/selix/update-task`, {
         method: "POST",
-        method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
         },
@@ -3825,7 +3834,7 @@ const PlannerComponent = ({
           title,
           description,
           status,
-          widgetType: widget_type,,
+          widgetType: widget_type,
         }),
       });
 
@@ -3834,31 +3843,21 @@ const PlannerComponent = ({
           color: "red",
           title: "Error",
           message: "Failed to update task",
-          color: "red",
-          title: "Error",
-          message: "Failed to update task",
         });
-        throw new Error("Failed to update task");
         throw new Error("Failed to update task");
       }
 
       const data = await response.json();
-      console.log("Task updated successfully:", data);
       console.log("Task updated successfully:", data);
 
       showNotification({
         color: "green",
         title: "Success",
         message: "Task updated successfully",
-        color: "green",
-        title: "Success",
-        message: "Task updated successfully",
       });
     } catch (error) {
       console.error("Error updating task:", error);
-      console.error("Error updating task:", error);
     }
-  };
   };
 
   useEffect(() => {
@@ -3932,12 +3931,9 @@ const PlannerComponent = ({
     return data.segments;
   };
 
-  const onDragEnd = async (result: {
-    destination: { index: number };
-    source: { index: number };
-  }) => {
-    if (!isInternal)  {
-      return;;
+  const onDragEnd = async (result: { destination: { index: number }; source: { index: number } }) => {
+    if (!isInternal) {
+      return;
     }
     if (!result.destination) {
       return;
@@ -3953,9 +3949,7 @@ const PlannerComponent = ({
     try {
       const response = await fetch(`${API_URL}/selix/reorder-tasks`, {
         method: "POST",
-        method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
         },
@@ -3969,10 +3963,8 @@ const PlannerComponent = ({
 
       if (!response.ok) {
         console.error("Failed to reorder tasks");
-        console.error("Failed to reorder tasks");
       }
     } catch (error) {
-      console.error("Error reordering tasks:", error);
       console.error("Error reordering tasks:", error);
     }
   };
@@ -4038,17 +4030,15 @@ const PlannerComponent = ({
       <Collapse in={opened}>
         <ScrollArea h={"55vh"} scrollHideDelay={4000} style={{ overflow: "hidden" }} viewportRef={taskContainerRef}>
           <DragDropContext
-           
             onDragEnd={(result) => {
-                if (!result.destination) {
-                  return;
-                }
-                onDragEnd({
-                  destination: { index: result.destination.index },
-                  source: { index: result.source.index },,
-                });
-              }}
-          
+              if (!result.destination) {
+                return;
+              }
+              onDragEnd({
+                destination: { index: result.destination.index },
+                source: { index: result.source.index },
+              });
+            }}
           >
             <Droppable isDropDisabled={!isInternal} droppableId="tasks">
               {(provided) => (
@@ -4069,8 +4059,7 @@ const PlannerComponent = ({
                       const statusColors = {
                         [SelixSessionTaskStatus.QUEUED]: "blue",
                         [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
-                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
-                          "orange",
+                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "orange",
                         [SelixSessionTaskStatus.COMPLETE]: "green",
                         [SelixSessionTaskStatus.CANCELLED]: "gray",
                         [SelixSessionTaskStatus.BLOCKED]: "red",
@@ -4086,12 +4075,7 @@ const PlannerComponent = ({
                       };
 
                       return (
-                        <Draggable
-                          key={task.id}
-                          index={index}
-                          draggableId={`task-${task.id}`}
-                          isDragDisabled={!isInternal}
-                        >
+                        <Draggable key={task.id} index={index} draggableId={`task-${task.id}`} isDragDisabled={!isInternal}>
                           {(provided) => (
                             <Paper
                               withBorder
@@ -4102,11 +4086,7 @@ const PlannerComponent = ({
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                             >
-                              <Flex
-                                justify={"space-between"}
-                                align={"center"}
-                                p={"4px"}
-                              >
+                              <Flex justify={"space-between"} align={"center"} p={"4px"}>
                                 {editingTask === index ? (
                                   <Flex align="center" gap="xs" w={"60%"}>
                                     <Flex w="80%" gap="xs">
@@ -4121,32 +4101,38 @@ const PlannerComponent = ({
                                       <NativeSelect
                                         value={task.widget_type}
                                         data={[
-                                          { value: '', label: 'Proof of Work (image)' },
-                                          { value: 'LAUNCH_CAMPAIGN', label: 'Launch Campaign' },
-                                          { value: 'VIEW_STRATEGY', label: 'View Strategy' },
-                                          { value: 'REVIEW_PROSPECTS', label: 'Review Prospects' },
-                                          { value: 'VIEW_SEQUENCE', label: 'View Sequence' },
-                                          { value: 'VIEW_PERSONALIZERS', label: 'Campaign Personalizers' },
-                                          { value: 'REVIEW_COMPANIES', label: 'Review Companies' },
-                                          { value: 'ONE_SHOT_GENERATOR', label: 'One Shot Generator' },
+                                          { value: "", label: "Proof of Work (image)" },
+                                          { value: "LAUNCH_CAMPAIGN", label: "Launch Campaign" },
+                                          { value: "VIEW_STRATEGY", label: "View Strategy" },
+                                          { value: "REVIEW_PROSPECTS", label: "Review Prospects" },
+                                          { value: "VIEW_SEQUENCE", label: "View Sequence" },
+                                          { value: "VIEW_PERSONALIZERS", label: "Campaign Personalizers" },
+                                          { value: "REVIEW_COMPANIES", label: "Review Companies" },
+                                          { value: "ONE_SHOT_GENERATOR", label: "One Shot Generator" },
                                         ]}
                                         onChange={(e) => {
                                           const updatedTasks = [...tasks];
-                                          updatedTasks[index].widget_type =
-                                            e.currentTarget.value;
+                                          updatedTasks[index].widget_type = e.currentTarget.value;
                                           setTasks(updatedTasks);
                                         }}
-                                        style={{ width: "40%" }}
                                         style={{ width: "40%" }}
                                       />
                                     </Flex>
                                     <Badge
                                       color="green"
-                                      style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                      style={{ cursor: "pointer", whiteSpace: "nowrap" }}
                                       onClick={() => {
                                         setEditingTask(null);
-                                        setTasks(tasks.map((t, i) => i === index ? { ...t, title: editingTaskText,description: taskDraftDescription.current } : t));
-                                        updateTask(tasks[index].id, editingTaskText, taskDraftDescription.current, tasks[index].status, tasks[index].widget_type);
+                                        setTasks(
+                                          tasks.map((t, i) => (i === index ? { ...t, title: editingTaskText, description: taskDraftDescription.current } : t))
+                                        );
+                                        updateTask(
+                                          tasks[index].id,
+                                          editingTaskText,
+                                          taskDraftDescription.current,
+                                          tasks[index].status,
+                                          tasks[index].widget_type
+                                        );
                                       }}
                                     >
                                       Save
@@ -4157,36 +4143,34 @@ const PlannerComponent = ({
                                     <ThemeIcon color="gray" radius={"xl"} variant="light" size={18}>
                                       {index + 1}
                                     </ThemeIcon>
-                                    {isInternal && <Tooltip label="Drag to reorder">
-                                      <ThemeIcon
-                                        color="gray"
-                                        radius={"xl"}
-                                        variant="light"
-                                        size={18}
-                                        style={{ cursor: "grab" }}
-                                      >
-                                        <IconGripVertical size={14} />
-                                      </ThemeIcon>
-                                    </Tooltip>}
-                                    {isInternal && <Tooltip label="Edit task">
-                                      <ThemeIcon
-                                        color="gray"
-                                        radius={"xl"}
-                                        variant="light"
-                                        size={18}
-                                        style={{ cursor: "pointer" }}
-                                        onClick={() => {
-                                          setEditingTask(index);
-                                          setOpenedTaskIndex(index);
-                                          setEditingTaskText(task.title);
-                                          taskDraftDescription.current=(task?.description || '');
-                                          taskDraftDescriptionRaw.current=(task?.description || '');
-                                        }}
-                                        // onBlur={() => setEditingTask(null)}
-                                      >
-                                        <IconPencil size={14} />
-                                      </ThemeIcon>
-                                    </Tooltip>}
+                                    {isInternal && (
+                                      <Tooltip label="Drag to reorder">
+                                        <ThemeIcon color="gray" radius={"xl"} variant="light" size={18} style={{ cursor: "grab" }}>
+                                          <IconGripVertical size={14} />
+                                        </ThemeIcon>
+                                      </Tooltip>
+                                    )}
+                                    {isInternal && (
+                                      <Tooltip label="Edit task">
+                                        <ThemeIcon
+                                          color="gray"
+                                          radius={"xl"}
+                                          variant="light"
+                                          size={18}
+                                          style={{ cursor: "pointer" }}
+                                          onClick={() => {
+                                            setEditingTask(index);
+                                            setOpenedTaskIndex(index);
+                                            setEditingTaskText(task.title);
+                                            taskDraftDescription.current = task?.description || "";
+                                            taskDraftDescriptionRaw.current = task?.description || "";
+                                          }}
+                                          // onBlur={() => setEditingTask(null)}
+                                        >
+                                          <IconPencil size={14} />
+                                        </ThemeIcon>
+                                      </Tooltip>
+                                    )}
                                     {task.title}
                                   </Text>
                                 )}
@@ -4203,9 +4187,7 @@ const PlannerComponent = ({
                                       onClick={() => {
                                         if (task.rewind_img) {
                                           setShowRewindImage(true);
-                                          setSelectedRewindImage(
-                                            task.rewind_img
-                                          );
+                                          setSelectedRewindImage(task.rewind_img);
                                         }
                                       }}
                                     >
@@ -4217,7 +4199,6 @@ const PlannerComponent = ({
                                   </Text>
                                   {editingTask === index ? (
                                     <Select
-                                      w={"140px"}
                                       w={"140px"}
                                       value={task.status}
                                       onChange={(value) => {
@@ -4233,9 +4214,7 @@ const PlannerComponent = ({
                                           setTasks(updatedTasks);
                                         }
                                       }}
-                                      data={Object.keys(
-                                        humanReadableStatus
-                                      ).map((status) => ({
+                                      data={Object.keys(humanReadableStatus).map((status) => ({
                                         value: status,
                                         label: humanReadableStatus[status],
                                         customLabel: (
@@ -4249,13 +4228,7 @@ const PlannerComponent = ({
                                           </Flex>
                                         ),
                                       }))}
-                                      itemComponent={({ value, label, ...others }) => (
-                                        <div {...others}>
-                                          {label}
-                                        </div>
-                                      )}
-                                      
-                                    
+                                      itemComponent={({ value, label, ...others }) => <div {...others}>{label}</div>}
                                     />
                                   ) : (
                                     <Flex align={"center"} gap={"xs"} w={100}>
@@ -4277,22 +4250,18 @@ const PlannerComponent = ({
                                 <Text p={"xs"} mt={"sm"} size="xs">
                                   {editingTask === index ? (
                                     <RichTextArea
-                                        overrideSticky={true}
-                                        onChange={(value, rawValue) => {
-                                          taskDraftDescriptionRaw.current =
-                                          rawValue;
-                                          taskDraftDescription.current = value;
-                                        }}
-                                        value={taskDraftDescriptionRaw.current}
-                                        height={110}
-                                      />
+                                      overrideSticky={true}
+                                      onChange={(value, rawValue) => {
+                                        taskDraftDescriptionRaw.current = rawValue;
+                                        taskDraftDescription.current = value;
+                                      }}
+                                      value={taskDraftDescriptionRaw.current}
+                                      height={110}
+                                    />
                                   ) : (
                                     <div
                                       dangerouslySetInnerHTML={{
-                                        __html: task.description?.replaceAll(
-                                            "\n",
-                                            "<br />"
-                                          ) || "",
+                                        __html: task.description?.replaceAll("\n", "<br />") || "",
                                       }}
                                     />
                                   )}
@@ -4307,9 +4276,7 @@ const PlannerComponent = ({
                                     // messages={messages}
                                     threads={threads}
                                     currentSessionId={currentSessionId}
-                                    handleStrategySubmit={
-                                        handleStrategySubmit
-                                      }
+                                    handleStrategySubmit={handleStrategySubmit}
                                   />
                                 )}
                               </Collapse>
@@ -4323,28 +4290,29 @@ const PlannerComponent = ({
               )}
             </Droppable>
           </DragDropContext>
-        {isInternal && <Flex justify="center" mt="md">
-          {creatingNewTask ? (
-            <Loader size="md" color="blue" />
-          ) : (
-            <Button
-              variant="light"
-              color="blue"
-              radius="md"
-              size="md"
-              onClick={async () => {
-                try {
-                  setCreatingNewTask(true);
-                  const response = await fetch(`${API_URL}/selix/create-task-id`, {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${userToken}`,
-                    },
-                    body: JSON.stringify({
-                      selix_session_id: currentSessionId,
-                    }),
-                  });
+          {isInternal && (
+            <Flex justify="center" mt="md">
+              {creatingNewTask ? (
+                <Loader size="md" color="blue" />
+              ) : (
+                <Button
+                  variant="light"
+                  color="blue"
+                  radius="md"
+                  size="md"
+                  onClick={async () => {
+                    try {
+                      setCreatingNewTask(true);
+                      const response = await fetch(`${API_URL}/selix/create-task-id`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${userToken}`,
+                        },
+                        body: JSON.stringify({
+                          selix_session_id: currentSessionId,
+                        }),
+                      });
 
                       if (!response.ok) {
                         showNotification({
@@ -4355,7 +4323,7 @@ const PlannerComponent = ({
                       }
                       setCreatingNewTask(false);
 
-                          const newTask: TaskType = await response.json();
+                      const newTask: TaskType = await response.json();
 
                       setTasks([...tasks, newTask]);
                       setEditingTask(tasks.length);
@@ -4363,31 +4331,6 @@ const PlannerComponent = ({
                       taskDraftDescription.current = newTask.description || "";
                       taskDraftDescriptionRaw.current = newTask.description;
 
-                      setTimeout(() => {
-                        if (taskContainerRef.current) {
-                          taskContainerRef.current.scrollTo({
-                            top: taskContainerRef.current.scrollHeight,
-                            behavior: "smooth",
-                          });
-                        }
-                      }, 100);
-                    } catch (error) {
-                      console.error("Error creating new task:", error);
-                    }
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "scale(1.05)";
-                    e.currentTarget.style.transition = "transform 0.2s";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "scale(1)";
-                  }}
-                >
-                  + Add Task
-                </Button>
-              )}
-            </Flex>
-          )}
                       setTimeout(() => {
                         if (taskContainerRef.current) {
                           taskContainerRef.current.scrollTo({
@@ -4456,7 +4399,7 @@ const TaskRenderer = ({
       (async (campaignId: any) => {
         const project = await getFreshCurrentProject(userToken, campaignId);
         setCurrentProject(project);
-        saveCurrentPersonaId(currentProject?.id.toString());;
+        saveCurrentPersonaId(currentProject?.id.toString());
       })(currentProject?.id);
     }
   }, [currentProject]);
@@ -4706,8 +4649,7 @@ const SelinStrategy = ({
   currentSessionId: Number | null;
   counter: Number;
 }) => {
-  const memory = threads.find((thread) => thread.id === currentSessionId)
-    ?.memory;
+  const memory = threads.find((thread) => thread.id === currentSessionId)?.memory;
 
   const hackedSubmit = () => {
     handleSubmit && handleSubmit(undefined, "Let's do it - create the task list and start executing.");

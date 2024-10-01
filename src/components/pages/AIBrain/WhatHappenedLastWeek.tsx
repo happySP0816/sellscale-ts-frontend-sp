@@ -3,7 +3,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import logotrial from "../../../components/PersonaCampaigns/Logo-Trial-3.gif";
 import RichTextArea from "@common/library/RichTextArea";
-import {socket} from '../../App';
+import { socket } from "../../App";
 import {
   ActionIcon,
   Box,
@@ -50,7 +50,7 @@ import { showNotification } from "@mantine/notifications";
 
 export default function WhatHappenedLastWeek() {
   const [cycleDataCache, setCycleDataCache] = useState<{ [key: number]: any }>({});
-  console.log('cycle data cache:', cycleDataCache);
+  console.log("cycle data cache:", cycleDataCache);
 
   const [sentimentPage, setSentimentPage] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -75,29 +75,32 @@ export default function WhatHappenedLastWeek() {
           borderDash: [5, 5],
         },
       },
-      yAxes: [{
-        scaleLabel: {
-          display: true,
-          labelString: 'LABEL',
+      yAxes: [
+        {
+          scaleLabel: {
+            display: true,
+            labelString: "LABEL",
+          },
+          type: "logarithmic",
+          position: "left",
+          ticks: {
+            min: 0.1, //minimum tick
+            max: 1000, //maximum tick
+            callback: function (value: { toString: () => any }, index: any, values: any) {
+              return Number(value.toString()); //pass tick values as a string into Number function
+            },
+          },
+          afterBuildTicks: function (chartObj: { ticks: number[] }) {
+            //Build ticks labelling as per your need
+            chartObj.ticks = [];
+            chartObj.ticks.push(0.1);
+            chartObj.ticks.push(1);
+            chartObj.ticks.push(10);
+            chartObj.ticks.push(100);
+            chartObj.ticks.push(1000);
+          },
         },
-        type: 'logarithmic',
-        position: 'left',
-        ticks: {
-          min: 0.1, //minimum tick
-          max: 1000, //maximum tick
-          callback: function (value: { toString: () => any; }, index: any, values: any) {
-            return Number(value.toString());//pass tick values as a string into Number function
-          }
-        },
-        afterBuildTicks: function (chartObj: { ticks: number[]; }) { //Build ticks labelling as per your need
-          chartObj.ticks = [];
-          chartObj.ticks.push(0.1);
-          chartObj.ticks.push(1);
-          chartObj.ticks.push(10);
-          chartObj.ticks.push(100);
-          chartObj.ticks.push(1000);
-        }
-      }],
+      ],
     },
     elements: {
       point: {
@@ -111,10 +114,10 @@ export default function WhatHappenedLastWeek() {
 
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
-  const [cycleDates, setCycleDates] = useState<{ start: string, end: string }[]>([]);
+  const [cycleDates, setCycleDates] = useState<{ start: string; end: string }[]>([]);
   const [generatingReport, setGeneratingReport] = useState(false);
   const dataFetchedRef = useRef(false);
-  const roomIDref = useRef<string>('');
+  const roomIDref = useRef<string>("");
 
   const getCumulativeData = (data: any) => {
     if (!data) return [];
@@ -130,7 +133,7 @@ export default function WhatHappenedLastWeek() {
       // console.log('handling data', incomingData);
       // console.log('room id', roomIDref.current);
       if (incomingData.room_id === roomIDref.current) {
-        setReceivedObjects(prev => prev + 1);
+        setReceivedObjects((prev) => prev + 1);
       }
     };
 
@@ -148,9 +151,9 @@ export default function WhatHappenedLastWeek() {
     const fetchCycleDates = async () => {
       try {
         const response = await fetch(`${API_URL}/analytics/get_cycle_dates`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${userToken}`,
           },
         });
@@ -165,12 +168,12 @@ export default function WhatHappenedLastWeek() {
           acc[index] = null;
           return acc;
         }, {});
-        setCycleDataCache(prevCache => ({
+        setCycleDataCache((prevCache) => ({
           ...initialCache,
           ...prevCache,
         }));
       } catch (error) {
-        console.error('Error fetching cycle dates:', error);
+        console.error("Error fetching cycle dates:", error);
       }
     };
 
@@ -181,7 +184,7 @@ export default function WhatHappenedLastWeek() {
   const [opened, setOpened] = useState(false);
 
   const handleGenerateReport = (index: number) => {
-    setCycleDataCache(prevCache => ({
+    setCycleDataCache((prevCache) => ({
       ...prevCache,
       [index]: {
         ...prevCache[index],
@@ -192,51 +195,50 @@ export default function WhatHappenedLastWeek() {
     const cycleData = cycleDataCache[index]?.originalData;
 
     if (!cycleData) {
-      console.error('No data found for cycle:', index);
+      console.error("No data found for cycle:", index);
       return;
     }
 
     //make the report generation api call here
 
     const reportGeneration = async (cycleData: any) => {
-      try{
-      const response = await fetch(`${API_URL}/analytics/generate_report`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          cycleData: {analyticsData: cycleData},
-        }),
-      });
-      const data = await response.json();
-      
-      //set the generatedReport attribute of the cycleDataCache
-      setCycleDataCache(prevCache => ({
-        ...prevCache,
-        [index]: {
-          ...prevCache[index],
-          generatedReport: data,
-        },
-      }));
-      console.log('Report generation response:', data);
-    } catch (error) {
-      console.error('Error generating report:', error);
-    } finally
-    {
-      setGeneratingReport(false);
-    }
-  }
-  reportGeneration(cycleData);
-  }
+      try {
+        const response = await fetch(`${API_URL}/analytics/generate_report`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            cycleData: { analyticsData: cycleData },
+          }),
+        });
+        const data = await response.json();
+
+        //set the generatedReport attribute of the cycleDataCache
+        setCycleDataCache((prevCache) => ({
+          ...prevCache,
+          [index]: {
+            ...prevCache[index],
+            generatedReport: data,
+          },
+        }));
+        console.log("Report generation response:", data);
+      } catch (error) {
+        console.error("Error generating report:", error);
+      } finally {
+        setGeneratingReport(false);
+      }
+    };
+    reportGeneration(cycleData);
+  };
 
   const fetchCycleReport = async (index: number) => {
     try {
       const response = await fetch(`${API_URL}/analytics/fetch_report?cycle_number=${cycleDates.length - index}`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
         },
       });
@@ -251,42 +253,41 @@ export default function WhatHappenedLastWeek() {
         throw new Error(`Error fetching report: ${data.message}`);
       }
 
-      setCycleDataCache(prevCache => ({
+      setCycleDataCache((prevCache) => ({
         ...prevCache,
         [index]: {
           ...prevCache[index],
-          generatedReport: {report: data.report.report}
+          generatedReport: { report: data.report.report },
         },
       }));
 
-      console.log('Report fetch response:', data);
+      console.log("Report fetch response:", data);
     } catch (error) {
-      console.error('Error fetching report:', error);
+      console.error("Error fetching report:", error);
     }
-  }
+  };
 
   // Function to fetch data for a specific cycle
   const fetchCycleData = async (index: number) => {
     const cycle = cycleDates[index];
 
     // Initiate fetch requests for three different endpoints
-    const analyticsData = fetch(`${API_URL}/client/campaign_analytics?start_date=${cycle.start}&end_date=${cycle.end}&verbose=true&room_id=${roomIDref.current}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userToken}`,
-      },
-    }).catch(error => {
-      console.error('Error fetching analytics data:', error);
+    const analyticsData = fetch(
+      `${API_URL}/client/campaign_analytics?start_date=${cycle.start}&end_date=${cycle.end}&verbose=true&room_id=${roomIDref.current}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    ).catch((error) => {
+      console.error("Error fetching analytics data:", error);
       return null;
-    })
+    });
 
     // Wait for all fetch requests to complete
-    const [
-      analyticsDataResponse,
-    ] = await Promise.all([
-      analyticsData,
-    ]);
+    const [analyticsDataResponse] = await Promise.all([analyticsData]);
 
     // Parse the JSON responses
     const parseJsonResponse = async (response: Response | null) => {
@@ -294,7 +295,7 @@ export default function WhatHappenedLastWeek() {
       try {
         return await response.json();
       } catch (error) {
-        console.error('Error parsing JSON:', error);
+        console.error("Error parsing JSON:", error);
         return null;
       }
     };
@@ -320,43 +321,40 @@ export default function WhatHappenedLastWeek() {
 
       // If the data for the selected cycle is not cached, fetch and cache it
       if (!cycleDataCache[index]) {
-      const room_id = Array.from({ length: 16 }, () => Math.random().toString(36)[2]).join('');
-      roomIDref.current = room_id;
-      socket.emit("join-room", {
-        payload: { room_id: room_id },
-      });
-        setLoading(true);
-      const [_, data] = await Promise.all([
-        fetchCycleReport(index),
-        fetchCycleData(index)
-      ]);
-      // Combine the relevant data into a single object
-      const combinedCycleAnalyticsData = (data.analyticsData || []).reduce((acc: any, current: any) => {
-        Object.keys(current).forEach(key => {
-          if (typeof current[key] === 'number') {
-            acc[key] = (acc[key] || 0) + current[key];
-          } else if (Array.isArray(current[key])) {
-            acc[key] = (acc[key] || []).concat(current[key]);
-          } else if (typeof current[key] === 'object' && current[key] !== null) {
-            acc[key] = { ...acc[key], ...current[key] };
-          } else {
-            acc[key] = current[key];
-          }
+        const room_id = Array.from({ length: 16 }, () => Math.random().toString(36)[2]).join("");
+        roomIDref.current = room_id;
+        socket.emit("join-room", {
+          payload: { room_id: room_id },
         });
-        return acc;
-      }, {});
-      setCycleDataCache(prevCache => ({
-        ...prevCache,
-        [index]: {
-          ...prevCache[index],
-          analyticsData: [combinedCycleAnalyticsData],
-          originalData: data.analyticsData,
-        },
-      }));
+        setLoading(true);
+        const [_, data] = await Promise.all([fetchCycleReport(index), fetchCycleData(index)]);
+        // Combine the relevant data into a single object
+        const combinedCycleAnalyticsData = (data.analyticsData || []).reduce((acc: any, current: any) => {
+          Object.keys(current).forEach((key) => {
+            if (typeof current[key] === "number") {
+              acc[key] = (acc[key] || 0) + current[key];
+            } else if (Array.isArray(current[key])) {
+              acc[key] = (acc[key] || []).concat(current[key]);
+            } else if (typeof current[key] === "object" && current[key] !== null) {
+              acc[key] = { ...acc[key], ...current[key] };
+            } else {
+              acc[key] = current[key];
+            }
+          });
+          return acc;
+        }, {});
+        setCycleDataCache((prevCache) => ({
+          ...prevCache,
+          [index]: {
+            ...prevCache[index],
+            analyticsData: [combinedCycleAnalyticsData],
+            originalData: data.analyticsData,
+          },
+        }));
 
-      console.log('cycle data cache:', cycleDataCache);
-      setLoading(false); 
-       }
+        console.log("cycle data cache:", cycleDataCache);
+        setLoading(false);
+      }
     }
   };
   return (
@@ -371,17 +369,17 @@ export default function WhatHappenedLastWeek() {
             }}
           >
             {}
-            { opened && (selectStep === index) && cycleDataCache[index]?.generatedReport?.report && (
-                <div 
-                  style={{ 
-                    maxHeight: '300px', 
-                    overflowY: 'auto', 
-                    paddingLeft: '20px', 
-                    paddingRight: '20px',
-                    position: 'relative' 
-                  }} 
-                >
-                  {/* <RichTextArea
+            {opened && selectStep === index && cycleDataCache[index]?.generatedReport?.report && (
+              <div
+                style={{
+                  maxHeight: "300px",
+                  overflowY: "auto",
+                  paddingLeft: "20px",
+                  paddingRight: "20px",
+                  position: "relative",
+                }}
+              >
+                {/* <RichTextArea
                     onChange={(value, rawValue) => {
                       // descriptionRaw.current = rawValue;
                       // description.current = value;
@@ -390,97 +388,131 @@ export default function WhatHappenedLastWeek() {
                     }}
                     value={cycleDataCache[index]?.generatedReport?.report}
                   /> */}
-                  <div 
-                    contentEditable 
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(cycleDataCache[index]?.generatedReport?.report, { ALLOWED_ATTR: ['style', 'th', 'table', 'tr', 'td', 'thead', 'tbody', 'tfoot', 'class', 'id', 'data-*', 'role', 'aria-*', 'head', 'body', 'h1', 'h2', 'p', 'border', 'cellpadding', 'cellspacing', 'width', 'align', 'meta', 'title'] }) }} 
-                    onInput={(e) => {setCycleDataCache(prevCache => ({
+                <div
+                  contentEditable
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(cycleDataCache[index]?.generatedReport?.report, {
+                      ALLOWED_ATTR: [
+                        "style",
+                        "th",
+                        "table",
+                        "tr",
+                        "td",
+                        "thead",
+                        "tbody",
+                        "tfoot",
+                        "class",
+                        "id",
+                        "data-*",
+                        "role",
+                        "aria-*",
+                        "head",
+                        "body",
+                        "h1",
+                        "h2",
+                        "p",
+                        "border",
+                        "cellpadding",
+                        "cellspacing",
+                        "width",
+                        "align",
+                        "meta",
+                        "title",
+                      ],
+                    }),
+                  }}
+                  onInput={(e) => {
+                    setCycleDataCache((prevCache) => ({
                       ...prevCache,
                       [index]: {
                         ...prevCache[index],
-                          editedReport: e.currentTarget?.innerHTML,
+                        editedReport: e.currentTarget?.innerHTML,
                       },
-                    })
-                  
-                  )
-                } 
-                    
-                  }
-                  />
-                  <Button 
-                    style={{ 
-                      position: 'absolute', 
-                      top: '10px', 
-                      right: '10px' 
-                    }} 
-                    size="xs" 
-                    color="blue" 
-                    onClick={() => {
+                    }));
+                  }}
+                />
+                <Button
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                  }}
+                  size="xs"
+                  color="blue"
+                  onClick={() => {
+                    //call endpoint to save the report
 
-                      //call endpoint to save the report
+                    const saveReport = async () => {
+                      try {
+                        const response = await fetch(`${API_URL}/analytics/save_report`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${userToken}`,
+                          },
+                          body: JSON.stringify({
+                            cycle_number: cycleDates.length - index, //this is pretty derpy
+                            report: cycleDataCache[index]?.editedReport || cycleDataCache[index]?.generatedReport?.report,
+                          }),
+                        });
+                        const data = await response.json();
+                        console.log("Report save response:", data);
+                        showNotification({
+                          title: "Report saved",
+                          message: "The report has been saved successfully",
+                          color: "teal",
+                        });
+                      } catch (error) {
+                        console.error("Error saving report:", error);
+                      }
+                    };
 
-                      const saveReport = async () => {
-                        try {
-                          const response = await fetch(`${API_URL}/analytics/save_report`, {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                              Authorization: `Bearer ${userToken}`,
-                            },
-                            body: JSON.stringify({
-                              cycle_number: cycleDates.length - index, //this is pretty derpy
-                              report: cycleDataCache[index]?.editedReport || cycleDataCache[index]?.generatedReport?.report,
-                            }),
-                          });
-                          const data = await response.json();
-                          console.log('Report save response:', data);
-                          showNotification({
-                            title: 'Report saved',
-                            message: 'The report has been saved successfully',
-                            color: 'teal',
-                          }
-                          )
-                        } catch (error) {
-                          console.error('Error saving report:', error);
-                        }
-                      };
+                    saveReport();
 
-                      saveReport();
-                    
-                      // try {
-                      //   const element = document.createElement('a');
-                      //   const file = new Blob([cycleDataCache[index]?.generatedReport?.report || ''], { type: 'text/html' });
-                      //   element.href = URL.createObjectURL(file);
-                      //   const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
-                      //   element.download = `report_cycle_${index}_${currentDate}.html`;
-                      //   document.body.appendChild(element);
-                      //   element.click();
-                      //   document.body.removeChild(element);
-                      // } catch (error) {
-                      //   console.error('Failed to create HTML document:', error);
-                      // }
-                    }}
-                  >
-                    Save
-                  </Button>
-                </div>
-              )}
+                    // try {
+                    //   const element = document.createElement('a');
+                    //   const file = new Blob([cycleDataCache[index]?.generatedReport?.report || ''], { type: 'text/html' });
+                    //   element.href = URL.createObjectURL(file);
+                    //   const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+                    //   element.download = `report_cycle_${index}_${currentDate}.html`;
+                    //   document.body.appendChild(element);
+                    //   element.click();
+                    //   document.body.removeChild(element);
+                    // } catch (error) {
+                    //   console.error('Failed to create HTML document:', error);
+                    // }
+                  }}
+                >
+                  Save
+                </Button>
+              </div>
+            )}
             <Flex align={"center"} justify={"space-between"} px={"sm"} py={"xs"}>
               <Flex align={"center"} gap={"xs"} justify={"space-between"}>
                 <Flex align={"center"} gap={"xs"} direction="column">
-                  {cycleDataCache[index]?.analyticsData && opened && (selectStep === index) && (
-                    <Button mt="sm" loading={generatingReport} color="grape" size="xs" ml="md" onClick={() => { handleGenerateReport(index) }}>
+                  {/* {cycleDataCache[index]?.analyticsData && opened && selectStep === index && (
+                    <Button
+                      mt="sm"
+                      loading={generatingReport}
+                      color="grape"
+                      size="xs"
+                      ml="md"
+                      onClick={() => {
+                        handleGenerateReport(index);
+                      }}
+                    >
                       Generate Report
                     </Button>
-                  )}
+                  )} */}
                   <Flex align={"center"} gap={"xs"}>
                     <Text size={"sm"} fw={600} color="gray">
                       Cycle {cycleDates.length - index}:
                     </Text>
-                      <Text size="sm" color="blue">
-                        Sun {new Date(new Date(cycleDates[index]?.start).setDate(new Date(cycleDates[index]?.start).getDate() + 1)).toLocaleDateString()}
-                      </Text>
-                      <Text size="sm" color="blue">
-                        Mon {new Date(new Date(cycleDates[index]?.end).setDate(new Date(cycleDates[index]?.end).getDate() + 1)).toLocaleDateString()}
+                    <Text size="sm" color="blue">
+                      Sun {new Date(new Date(cycleDates[index]?.start).setDate(new Date(cycleDates[index]?.start).getDate() + 1)).toLocaleDateString()}
+                    </Text>
+                    <Text size="sm" color="blue">
+                      Mon {new Date(new Date(cycleDates[index]?.end).setDate(new Date(cycleDates[index]?.end).getDate() + 1)).toLocaleDateString()}
                     </Text>
                   </Flex>
                 </Flex>
@@ -495,63 +527,320 @@ export default function WhatHappenedLastWeek() {
                 </ActionIcon>
               </Flex>
             </Flex>
-            {selectStep === index && opened && cycleDataCache[index]?.analyticsData &&  <Flex mr="sm" mb="sm" align="center" gap="xs" justify="flex-end">
-              <Stack spacing="sm">
-                <Flex align="center">
-                  <Text size="sm" mr="sm" fw={600} color="gray">Show Cumulative:</Text>
-                  <Switch size="sm" checked={showCumulative} onChange={() => setShowCumulative(!showCumulative)} />
-                </Flex>
-              </Stack>
-            </Flex>}
-            <Collapse 
-              in={selectStep === index && opened} 
-              transitionDuration={500} 
+            {selectStep === index && opened && cycleDataCache[index]?.analyticsData && (
+              <Flex mr="sm" mb="sm" align="center" gap="xs" justify="flex-end">
+                <Stack spacing="sm">
+                  <Flex align="center">
+                    <Text size="sm" mr="sm" fw={600} color="gray">
+                      Show Cumulative:
+                    </Text>
+                    <Switch size="sm" checked={showCumulative} onChange={() => setShowCumulative(!showCumulative)} />
+                  </Flex>
+                </Stack>
+              </Flex>
+            )}
+            <Collapse
+              in={selectStep === index && opened}
+              transitionDuration={500}
               transitionTimingFunction="ease-in-out"
               style={{
-
-                borderRadius: '8px',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                padding: '10px',
-                backgroundColor: '#f8fbff',
+                borderRadius: "8px",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                padding: "10px",
+                backgroundColor: "#f8fbff",
               }}
             >
-              {!loading && cycleDataCache[index]?.analyticsData ?
-                (showCumulative ? cycleDataCache[index].analyticsData : cycleDataCache[index].originalData).map((dataItem: { daily: any; templateAnalytics: any; top_icp_people: any; summary:any }, dataIndex: Key | null | undefined) => (
-                  <AnalyticsItem
-                    showCumulative={showCumulative}
-                    key={dataIndex}
-                    dailyData={dataItem?.daily}
-                    templateAnalytics={dataItem?.templateAnalytics}
-                    topIcpPeople={dataItem?.top_icp_people}
-                    summaryData={dataItem?.summary?.[0] || []}
-                  />
-                )) : (
-                  <Center mt="xl" mb="xl">
-                    <Flex direction="column" align="center">
-                      <Text
-                        mr="xl"
-                        color="grape"
-                        mt="sm"
-                        sx={{
-                          animation: 'pulse 2s infinite',
-                          '@keyframes pulse': {
-                            '0%': { transform: 'scale(1)' },
-                            '50%': { transform: 'scale(1.5)' },
-                            '100%': { transform: 'scale(1)' },
-                          },
-                        }}
-                      >
-                        Loading analytics...
-                      </Text>
-                      <img src={logotrial} alt="Loading..." width="75px" />
-                      <Text mt="sm" color="grape">
-                        Calculated analytics for {receivedObjects} campaigns...
-                      </Text>
-                    </Flex>
-                  </Center>
-                )}
-
-
+              {cycleDataCache[index]?.analyticsData && console.log(">>>>>", cycleDataCache[index].analyticsData)}
+              {!loading && cycleDataCache[index]?.analyticsData ? (
+                (showCumulative ? cycleDataCache[index].analyticsData : cycleDataCache[index].originalData).map(
+                  (dataItem: { daily: any; templateAnalytics: any; top_icp_people: any; summary: any }, dataIndex: Key | null | undefined) => (
+                    <>
+                      {dataIndex === 0 && (
+                        <Paper withBorder radius={"sm"} my={"sm"} mx={"lg"} style={{ border: "1px solid #f9e5fe" }}>
+                          <Flex bg={"#f9e5fe"} align={"center"} gap={"sm"} px={"sm"} py={4}>
+                            <Text color="#e663f6" fw={600}>
+                              Overall Cycle Analytics
+                            </Text>
+                            <Text size="sm" color="#e663f6">
+                              {new Date(new Date(cycleDates[index]?.start).setDate(new Date(cycleDates[index]?.start).getDate() + 1)).toLocaleDateString()} -{" "}
+                              {new Date(new Date(cycleDates[index]?.end).setDate(new Date(cycleDates[index]?.end).getDate() + 1)).toLocaleDateString()}
+                            </Text>
+                          </Flex>
+                          <Flex bg={"#fcf2fe"} p={"xs"} gap={"md"}>
+                            <Paper w={"100%"} p={"sm"}>
+                              <Flex align={"center"} justify={"space-between"}>
+                                <Flex align={"center"} gap={4}>
+                                  <IconSparkles color="#e663f6" size={"1rem"} />
+                                  <Text size={"sm"} fw={500} color="#e663f6">
+                                    AI Insights
+                                  </Text>
+                                </Flex>
+                                <Button
+                                  onClick={() => {
+                                    handleGenerateReport(index);
+                                  }}
+                                  leftIcon={<IconSparkles fill="white" size={"1rem"} />}
+                                  size="xs"
+                                  className="bg-[#e663f6] hover:bg-[#e663f6]"
+                                  loading={generatingReport}
+                                >
+                                  AI Generate Report
+                                </Button>
+                              </Flex>
+                              <Text size={"sm"} fw={500} mt={"xs"}>
+                                An AI-generated summary of the events that occured during this cycle period can be created by clicking this button.
+                              </Text>
+                            </Paper>
+                            <Paper w={"100%"} withBorder>
+                              <Flex align={"center"} justify={"space-between"} h={"100%"} w="100%">
+                                <Box
+                                  py={"sm"}
+                                  px={"xs"}
+                                  w={"100%"}
+                                  h={"100%"}
+                                  sx={{
+                                    backgroundColor: "#F7FDFF",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "start",
+                                    "&:hover": {
+                                      backgroundColor: "#F7FDFF",
+                                    },
+                                  }}
+                                >
+                                  <Flex align={"center"} gap={"xs"}>
+                                    <IconSend size={"0.9rem"} color="#3B85EF" className="mb-[2px]" />
+                                    <Text fw={400} size={"sm"}>
+                                      Sent
+                                    </Text>
+                                  </Flex>
+                                  <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                                    <Text fz={20} fw={600}>
+                                      {dataItem?.daily.reduce((total: number, day: any) => total + day.num_sent, 0)}
+                                    </Text>
+                                    <Badge>
+                                      {(
+                                        (dataItem?.daily.reduce((total: number, day: any) => total + day.num_sent, 0) /
+                                          dataItem?.daily.reduce(
+                                            (total: number, day: any) =>
+                                              total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
+                                            0
+                                          )) *
+                                        100
+                                      ).toFixed(0)}
+                                      %
+                                    </Badge>
+                                  </Flex>
+                                </Box>
+                                <Divider orientation="vertical" />
+                                <Box
+                                  py={"sm"}
+                                  px={"xs"}
+                                  w={"100%"}
+                                  h={"100%"}
+                                  sx={{
+                                    backgroundColor: "#FFF7FB",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "start",
+                                    "&:hover": {
+                                      backgroundColor: "#FFF7FB",
+                                    },
+                                  }}
+                                >
+                                  <Flex align={"center"} gap={6}>
+                                    <IconChecks size={"0.9rem"} color="pink" className="mb-[2px]" />
+                                    <Text fw={400} size={"sm"}>
+                                      Open
+                                    </Text>
+                                  </Flex>
+                                  <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                                    <Text fz={20} fw={600}>
+                                      {dataItem?.daily.reduce((total: number, day: any) => total + day.num_opens, 0)}
+                                    </Text>
+                                    <Badge color="pink">
+                                      {(
+                                        (dataItem?.daily.reduce((total: number, day: any) => total + day.num_opens, 0) /
+                                          dataItem?.daily.reduce(
+                                            (total: number, day: any) =>
+                                              total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
+                                            0
+                                          )) *
+                                        100
+                                      ).toFixed(0)}
+                                      %
+                                    </Badge>
+                                  </Flex>
+                                </Box>
+                                <Divider orientation="vertical" />
+                                <Box
+                                  py={"sm"}
+                                  px={"xs"}
+                                  w={"100%"}
+                                  h={"100%"}
+                                  sx={{
+                                    backgroundColor: "#FFF9F2",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "start",
+                                    "&:hover": {
+                                      backgroundColor: "#FFF9F2",
+                                    },
+                                  }}
+                                >
+                                  <Flex align={"center"} gap={6}>
+                                    <IconMessageCheck size={"0.9rem"} color="orange" className="mb-[2px]" />
+                                    <Text fw={400} size={"sm"}>
+                                      Reply
+                                    </Text>
+                                  </Flex>
+                                  <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                                    <Text fz={20} fw={600}>
+                                      {dataItem?.daily.reduce((total: number, day: any) => total + day.num_replies, 0)}
+                                    </Text>
+                                    <Badge color="orange">
+                                      {(
+                                        (dataItem?.daily.reduce((total: number, day: any) => total + day.num_replies, 0) /
+                                          dataItem?.daily.reduce(
+                                            (total: number, day: any) =>
+                                              total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
+                                            0
+                                          )) *
+                                        100
+                                      ).toFixed(0)}
+                                      %
+                                    </Badge>
+                                  </Flex>
+                                </Box>
+                                <Divider orientation="vertical" />
+                                <Box
+                                  py={"sm"}
+                                  px={"xs"}
+                                  w={"100%"}
+                                  h={"100%"}
+                                  sx={{
+                                    backgroundColor: "#F4FBF5",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "start",
+                                    "&:hover": {
+                                      backgroundColor: "#F4FBF5",
+                                    },
+                                  }}
+                                >
+                                  <Flex align={"center"} gap={6}>
+                                    <IconMessageCheck size={"0.9rem"} color="green" className="mb-[2px]" />
+                                    <Text fw={400} size={"sm"}>
+                                      (+) Reply
+                                    </Text>
+                                  </Flex>
+                                  <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                                    <Text fz={20} fw={600}>
+                                      {dataItem?.daily.reduce((total: number, day: any) => total + day.num_pos_replies, 0)}
+                                    </Text>
+                                    <Badge color="green">
+                                      {(
+                                        (dataItem?.daily.reduce((total: number, day: any) => total + day.num_pos_replies, 0) /
+                                          dataItem?.daily.reduce(
+                                            (total: number, day: any) =>
+                                              total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
+                                            0
+                                          )) *
+                                        100
+                                      ).toFixed(0)}
+                                      %
+                                    </Badge>
+                                  </Flex>
+                                </Box>
+                                <Divider orientation="vertical" />
+                                <Box
+                                  py={"sm"}
+                                  px={"xs"}
+                                  w={"100%"}
+                                  h={"100%"}
+                                  sx={{
+                                    backgroundColor: "#F7FDFF",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "start",
+                                    "&:hover": {
+                                      backgroundColor: "#F7FDFF",
+                                    },
+                                  }}
+                                >
+                                  <Flex align={"center"} gap={6}>
+                                    <IconCalendar size={"0.9rem"} color={"#3B85EF"} className="mb-[2px]" />
+                                    <Text fw={400}>Demo</Text>
+                                  </Flex>
+                                  <Flex align={"center"} gap={"sm"} mt={"sm"}>
+                                    <Text fz={20} fw={600}>
+                                      {dataItem?.daily.reduce((total: number, day: any) => total + day.num_demos, 0)}
+                                    </Text>
+                                    <Badge color="blue">
+                                      {(
+                                        (dataItem?.daily.reduce((total: number, day: any) => total + day.num_demos, 0) /
+                                          dataItem?.daily.reduce(
+                                            (total: number, day: any) =>
+                                              total + day.num_sent + day.num_demos + day.num_opens + day.num_pos_replies + day.num_replies,
+                                            0
+                                          )) *
+                                        100
+                                      ).toFixed(0)}
+                                      %
+                                    </Badge>
+                                  </Flex>
+                                </Box>
+                              </Flex>
+                            </Paper>
+                          </Flex>
+                        </Paper>
+                      )}
+                      <AnalyticsItem
+                        showCumulative={showCumulative}
+                        key={dataIndex}
+                        dailyData={dataItem?.daily}
+                        templateAnalytics={dataItem?.templateAnalytics}
+                        topIcpPeople={dataItem?.top_icp_people}
+                        summaryData={dataItem?.summary?.[0] || []}
+                      />
+                    </>
+                  )
+                )
+              ) : (
+                <Center mt="xl" mb="xl">
+                  <Flex direction="column" align="center">
+                    <Text
+                      mr="xl"
+                      color="grape"
+                      mt="sm"
+                      sx={{
+                        animation: "pulse 2s infinite",
+                        "@keyframes pulse": {
+                          "0%": { transform: "scale(1)" },
+                          "50%": { transform: "scale(1.5)" },
+                          "100%": { transform: "scale(1)" },
+                        },
+                      }}
+                    >
+                      Loading analytics...
+                    </Text>
+                    <img src={logotrial} alt="Loading..." width="75px" />
+                    <Text mt="sm" color="grape">
+                      Calculated analytics for {receivedObjects} campaigns...
+                    </Text>
+                  </Flex>
+                </Center>
+              )}
             </Collapse>
           </Box>
         );

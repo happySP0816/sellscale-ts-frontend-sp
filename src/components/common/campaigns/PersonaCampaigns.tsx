@@ -172,6 +172,8 @@ export type CampaignPersona = {
   smartlead_campaign_id?: number;
   meta_data?: Record<string, any>;
   first_message_delay_days?: number;
+  selix_session_id?: number;
+  latest_selix_task?: any;
   email_to_linkedin_connection?: string;
   cycle?: number;
   setup_status?: string;
@@ -1613,13 +1615,13 @@ export function PersonCampaignCard(props: {
         >
           <Group sx={{ width: "130px", padding: "0 4px" }}>
             <Flex
-              onClick={() => {
-                navigateToPage(
-                  navigate,
-                  `/contacts`,
-                  new URLSearchParams(`?campaign_id=${props.persona.id}`)
-                );
-              }}
+              // onClick={() => {
+              //   navigateToPage(
+              //     navigate,
+              //     `/contacts`,
+              //     new URLSearchParams(`?campaign_id=${props.persona.id}`)
+              //   );
+              // }}
               mt={5}
               w={"100%"}
               gap={"5px"}
@@ -1722,13 +1724,17 @@ export function PersonCampaignCard(props: {
                 </Popover.Dropdown>
               </Popover>
               <Popover
+                withinPortal
                 width={350}
                 position="bottom"
                 shadow="lg"
                 opened={statuspopoverOpened}
               >
                 <Popover.Target>
-                  <Box>
+                  <Box
+                    onMouseEnter={statusopenPopover}
+                    onMouseLeave={statusclosePopover}
+                  >
                     <Badge
                       size="xs"
                       color={
@@ -1740,8 +1746,6 @@ export function PersonCampaignCard(props: {
                           ? "red"
                           : "gray"
                       }
-                      onMouseEnter={statusopenPopover}
-                      onMouseLeave={statusclosePopover}
                     >
                       {props.persona.setup_status}
                     </Badge>
@@ -1757,7 +1761,60 @@ export function PersonCampaignCard(props: {
                     )}
                   </Box>
                 </Popover.Target>
-                <Popover.Dropdown sx={{ borderRadius: "8px" }} p={"xl"}>
+                <Popover.Dropdown
+                  sx={{ borderRadius: "8px", transform: "translateY(-10px)" }}
+                  p={"xl"}
+                  onMouseEnter={statusopenPopover}
+                  onMouseLeave={statusclosePopover}
+                >
+                  {props.persona?.selix_session_id && (
+                    <>
+                      <Tooltip label="Jump to Selix Session" withArrow>
+                        <ActionIcon
+                          w="100%"
+                          onClick={() => {
+                            window.open(`/selix?session_id=${props.persona?.selix_session_id}`, '_blank');
+                          }}
+                          size="sm"
+                          ml="4px"
+                        >
+                          <Badge color="grape" size="xs" w="100%">
+                            Jump to Selix Session <IconExternalLink size="0.8rem" style={{ marginLeft: '4px', marginTop:'2px' }} />
+                          </Badge>
+                        </ActionIcon>
+                      </Tooltip>
+                      {props.persona?.latest_selix_task && (
+                        <Flex w="100%" align="center" gap="md">
+                          <Text size="xs">
+                            Current task:{" "}
+                            <b>{props.persona.latest_selix_task.title}</b>
+                          </Text>
+                          <Badge
+                            w="150px"
+                            size="xs"
+                            color={
+                              props.persona.latest_selix_task.status === "QUEUED"
+                                ? "yellow"
+                                : props.persona.latest_selix_task.status === "IN_PROGRESS"
+                                ? "blue"
+                                : props.persona.latest_selix_task.status === "IN_PROGRESS_REVIEW_NEEDED"
+                                ? "orange"
+                                : props.persona.latest_selix_task.status === "COMPLETE"
+                                ? "green"
+                                : props.persona.latest_selix_task.status === "CANCELLED"
+                                ? "red"
+                                : props.persona.latest_selix_task.status === "BLOCKED"
+                                ? "black"
+                                : "gray"
+                            }
+                            sx={{ whiteSpace: 'nowrap', }}
+                          >
+                            {props.persona.latest_selix_task.status}
+                          </Badge>
+                        </Flex>
+                      )}
+                    </>
+                  )}
                   <Flex gap={"sm"} align={"center"}>
                     <IconLoader color="#228be6" />{" "}
                     <Text fw={700} size={"lg"}>

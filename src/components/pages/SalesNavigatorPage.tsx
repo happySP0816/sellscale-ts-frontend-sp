@@ -21,6 +21,8 @@ import {
   Box,
   Progress,
   LoadingOverlay,
+  Select,
+  Checkbox,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { openConfirmModal } from '@mantine/modals';
@@ -32,6 +34,7 @@ import {
   IconRefresh,
   IconZoomReset,
   IconX,
+  IconCheck,
 } from '@tabler/icons';
 import { setPageTitle } from '@utils/documentChange';
 import { valueToColor } from '@utils/general';
@@ -45,6 +48,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { SalesNavigatorLaunch } from 'src';
 import { patchSalesNavigatorLaunchAccountFiltersUrl } from '@utils/requests/patchAccountFiltersURL';
+import { TransformedSegment } from './SegmentV3/SegmentV3';
+import { API_URL } from '@constants/data';
+import { useTrackApi } from '@common/settings/Traffic/WebTrafficRoutingApi';
 
 export default function SalesNavigatorComponent(props: { showPersonaSelect?: boolean }) {
   setPageTitle('Find Contacts');
@@ -56,6 +62,113 @@ export default function SalesNavigatorComponent(props: { showPersonaSelect?: boo
   const launchName = useRef<HTMLInputElement>(null);
   const currentProject = useRecoilValue(currentProjectState);
 
+  const [segmentData, setSegmentData] = useState<TransformedSegment[]>([]);
+  const [segmentOptions, setSegmentOptions] = useState<Segment[]>([]);
+  const [fetchingSegments, setFetchingSegments] = useState(false);
+  const [selectedSegmentId, setSelectedSegmentId] = useState<number>(-1);
+  const [shouldCreateProspectsAutomatically, setShouldCreateProspectsAutomatically] = useState(false);
+
+  const {
+    getSegments
+  } = useTrackApi(userToken);
+
+  type Segment = {
+    num_results: number;
+    attached_segments: any[];
+    client_archetype: {
+      archetype: string;
+      emoji: string;
+    };
+    client_sdr: {
+      client_id: number;
+      id: number;
+    };
+    filters: {
+      excluded_bio_keywords: string[];
+      excluded_company_keywords: string[];
+      excluded_education_keywords: string[];
+      // Add other filter fields as necessary
+    };
+    id: number;
+    num_contacted: number;
+    num_prospected: number;
+    parent_segment_id: number | null;
+    saved_apollo_query_id: number;
+    segment_title: string;
+    unique_companies: number;
+  };
+
+  const getAllSegments = async (showLoader: boolean, tagFilter?: Number) => {
+    function transformData(segments: any[]) {
+      return segments.map((segment, index) => {
+        // Assume progress, campaign, contacts, filters, assets are derived somehow
+        return {
+          id: segment.id,
+          person_name: segment.segment_title,
+          segment_title: segment.segment_title,
+          progress: Math.floor(Math.random() * 100), // Fake random progress
+          campaign: Math.floor(Math.random() * 100), // Fake random campaign ID or null
+          contacts: Math.floor(Math.random() * 2000000), // Fake random contacts number
+          filters: Object.keys(segment.filters).length, // Count of filter types
+          assets: Math.floor(Math.random() * 100), // Fake random asset count or null
+          sub_segments: [], // This needs to be populated based on more complex logic or additional data
+          client_archetype: segment.client_archetype,
+          client_sdr: segment.client_sdr,
+          num_prospected: segment.num_prospected,
+          num_contacted: segment.num_contacted,
+          apollo_query: segment.apollo_query,
+          segment_tags: segment.attached_segments,
+          autoscrape_enabled: segment.autoscrape_enabled,
+          current_scrape_page: segment.current_scrape_page,
+        };
+      });
+    }
+    // if (showLoader) {
+    //   setLoading(true);
+    // }
+    fetch(
+      `${API_URL}/segment/all?include_all_in_client=true` +
+        (tagFilter !== -1
+          ? `&tag_filter=${tagFilter}`
+          : ""),
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        const segments = data.segments;
+  
+        const parentSegments = segments.filter(
+          (segment: any) => !segment.parent_segment_id
+        );
+        let parentSegmentsTransformed = transformData(parentSegments);
+
+        const parentSegmentsTransformedWithSubSegments: any = parentSegmentsTransformed?.map(
+          (segment) => {
+            const subSegments = segments.filter(
+              (subSegment: any) => subSegment.parent_segment_id === segment.id
+            );
+            return {
+              ...segment,
+              sub_segments: transformData(subSegments),
+            };
+          }
+        );
+
+        setSegmentData(parentSegmentsTransformedWithSubSegments);
+      })
+      .finally(() => {
+        console.log("Stopping");
+        // setLoading(false);
+      });
+  };
+
+  //this looks sketchy
   const [uploadPersonaId, setUploadPersonaId]: any = useState<number>(currentProject?.id || -1);
 
   const clickAccountFilterURL = (launchId: number, launchAccountFiltersURL: string) => {
@@ -156,7 +269,7 @@ export default function SalesNavigatorComponent(props: { showPersonaSelect?: boo
         message: result.message,
       });
     }
-    setLaunches(result.data.launches);
+    result.data && setLaunches(result.data.launches);
 
     setLoading(false);
   };
@@ -181,6 +294,7 @@ export default function SalesNavigatorComponent(props: { showPersonaSelect?: boo
   };
 
   const triggerPostLaunchSalesNavigator = async () => {
+    console.log('triggering')
     setLoading(true);
 
     let personaId: number | undefined = uploadPersonaId;
@@ -193,7 +307,8 @@ export default function SalesNavigatorComponent(props: { showPersonaSelect?: boo
       salesNavigatorForm.values.url,
       salesNavigatorForm.values.numberOfContacts,
       launchName.current!.value,
-      personaId
+      personaId,
+      selectedSegmentId !== -1 ? selectedSegmentId : undefined
     );
     if (result.status != 'success') {
       showNotification({
@@ -212,14 +327,24 @@ export default function SalesNavigatorComponent(props: { showPersonaSelect?: boo
     setLoading(false);
   };
 
+  const fetchSegments = async () => {
+    setFetchingSegments(true);
+    const segments = await getSegments();
+    setSegmentOptions(segments);
+    setFetchingSegments(false);
+  };
+
+
   useEffect(() => {
     triggerGetSalesNavigatorLaunches();
 
     // Call myFunction every 20 seconds
     const intervalId = setInterval(triggerGetSalesNavigatorLaunches, 20000); // 20,000 milliseconds = 20 seconds
-
+    getAllSegments(true);
+    fetchSegments();
     // Clean up the interval when the component is unmounted
     return () => clearInterval(intervalId);
+    
   }, []);
 
   const salesNavigatorForm = useForm({
@@ -278,6 +403,82 @@ export default function SalesNavigatorComponent(props: { showPersonaSelect?: boo
               required
             />
           </Tooltip>
+          <Flex
+            mt="lg"
+            ml="lg"
+            p="md"
+            sx={(theme) => ({
+              border: `1px solid ${theme.colors.gray[4]}`,
+              borderRadius: theme.radius.md,
+              backgroundColor: theme.colors.gray[0],
+            })}
+          >
+            <Checkbox
+              mt={'xs'}
+              label={
+                <Text weight={500} size="sm">
+                  Create prospects
+                </Text>
+              }
+              checked={shouldCreateProspectsAutomatically}
+              onChange={(event) => {
+                if (!event.currentTarget.checked) {
+                  setSelectedSegmentId(-1);
+                }
+                setShouldCreateProspectsAutomatically(event.currentTarget.checked);
+              }}
+              
+            />
+            {shouldCreateProspectsAutomatically && (
+              <Box mt="md">
+                <Select
+                  ml="sm"
+                  mt="-md"
+                  miw={300}
+                  withinPortal
+                  data={segmentOptions.map((segment) => ({
+                    value: segment.id.toString(),
+                    label: segment.segment_title,
+                  }))}
+                  label={
+                    <Text weight={500} size="sm">
+                      Destination Segment (optional)
+                    </Text>
+                  }
+                  placeholder="Attach a segment"
+                  value={selectedSegmentId.toString()}
+                  searchable
+                  getCreateLabel={(query) => `+ Create ${query}`}
+                  rightSection={
+                    selectedSegmentId !== -1 ? (
+                      <ActionIcon onClick={() => setSelectedSegmentId(-1)}>
+                        <IconX size="1rem" />
+                      </ActionIcon>
+                    ) : null
+                  }
+                  onChange={(value) => {
+                    console.log('value changed', value);
+                    showNotification({
+                      title: "Success",
+                      message: "Segment attached successfully",
+                      color: "green",
+                      icon: <IconCheck />,
+                    });
+                    setTimeout(() => {
+                      (document.activeElement as HTMLElement)?.blur();
+                    }, 0);
+                    setSelectedSegmentId(parseInt(value || ''));
+                  }}
+                  onDropdownOpen={() => {
+                    console.log('Dropdown opened');
+                  }}
+                  onDropdownClose={() => {
+                    console.log('Dropdown closed');
+                  }}
+                />
+              </Box>
+            )}
+          </Flex>
         </Flex>
         <Flex mt='md' align='center'>
           {props.showPersonaSelect && (

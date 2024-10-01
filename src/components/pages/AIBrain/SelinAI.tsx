@@ -1108,8 +1108,8 @@ export default function SelinAI() {
 
   const [showSidebar, setShowSidebar] = useState(true);
 
-  const [activeOpened, { toggle: ActiveToggle }] = useDisclosure(false);
-  const [needOpened, { toggle: NeedToggle }] = useDisclosure(false);
+  const [activeOpened, { toggle: ActiveToggle }] = useDisclosure(true);
+  const [needOpened, { toggle: NeedToggle }] = useDisclosure(true);
   const [completedOpened, { toggle: CompleteToggle }] = useDisclosure(false);
 
   return (

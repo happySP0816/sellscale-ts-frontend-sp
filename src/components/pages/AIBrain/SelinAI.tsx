@@ -352,6 +352,19 @@ export default function SelinAI() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingSessionName, setEditingSessionName] = useState<string>("");
 
+  // Active threads in 'Active Sessions'
+  const activeThreads = threads
+    .filter((thread) => thread.status && thread.status !== "COMPLETE" && thread.status !== "CANCELLED" && !(thread.tasks && thread.tasks.some((task) => task.status === "BLOCKED")))
+    .sort((a, b) => b.id - a.id);
+  // Blocked threads in 'Need Input'
+  const needInputThreads = threads
+    .filter((thread) => thread.status && thread.status !== "COMPLETE" && thread.status !== "CANCELLED" && thread.tasks && thread.tasks.some((task) => task.status === "BLOCKED"))
+    .sort((a, b) => b.id - a.id);
+  // Completed threads
+  const completedThreads = threads
+    .filter((thread) => thread.status && (thread.status === "COMPLETE" || thread.status === "CANCELLED"))
+    .sort((a, b) => b.id - a.id);
+
   const editSession = (sessionId: number, newName: string) => {
     setEditingIndex(null);
     setThreads((prevThreads) => prevThreads.map((prevThread) => (prevThread.id === sessionId ? { ...prevThread, session_name: newName } : prevThread)));
@@ -1187,20 +1200,14 @@ export default function SelinAI() {
                               Active Sessions
                             </Text>
                             <Badge color="grape" size="sm">
-                              {threads
-                                .sort((a, b) => b.id - a.id)
-                                .filter((thread) => thread.status === "ACTIVE" && !(thread.tasks && thread.tasks.some(task => task.status === "BLOCKED")))
-                                .length}
+                              {activeThreads.length}
                             </Badge>
                           </Flex>
                           <ActionIcon onClick={ActiveToggle}>{!activeOpened ? <IconChevronDown size={"1rem"} /> : <IconChevronUp size={"1rem"} />}</ActionIcon>
                         </Flex>
                         <Collapse in={activeOpened} transitionTimingFunction="linear">
                           <Stack spacing={"xs"}>
-                            {threads
-                              .sort((a, b) => b.id - a.id)
-                              .filter((thread) => thread.status === "ACTIVE" && !(thread.tasks && thread.tasks.some(task => task.status === "BLOCKED")))
-                              .map((thread: ThreadType, index) => {
+                            {activeThreads.map((thread: ThreadType, index) => {
                                 return (
                                   <Paper
                                     key={index}
@@ -1421,21 +1428,14 @@ export default function SelinAI() {
                               Need Input
                             </Text>
                             <Badge color="orange" size="sm">
-                              {
-                                threads.sort((a, b) => b.id - a.id).filter((thread) => 
-                                  (thread.tasks && thread.tasks.some(task => task.status === "BLOCKED"))
-                                ).length
-                              }
+                              {needInputThreads.length}
                             </Badge>
                           </Flex>
                           <ActionIcon onClick={NeedToggle}>{!needOpened ? <IconChevronDown size={"1rem"} /> : <IconChevronUp size={"1rem"} />}</ActionIcon>
                         </Flex>
                         <Collapse in={needOpened} transitionTimingFunction="linear">
                           <Stack spacing={"xs"}>
-                            {threads
-                              .sort((a, b) => b.id - a.id)
-                              .filter((thread) => thread.tasks && thread.tasks.some(task => task.status === "BLOCKED"))
-                              .map((thread: ThreadType, index) => {
+                            {needInputThreads.map((thread: ThreadType, index) => {
                                 return (
                                   <Paper
                                     key={index}
@@ -1656,12 +1656,7 @@ export default function SelinAI() {
                               Completed Sessions
                             </Text>
                             <Badge color="green" size="sm">
-                              {threads
-                                .sort((a, b) => b.id - a.id)
-                                .filter((thread) => 
-                                  (thread.status === "COMPLETE" || thread.status === "CANCELLED") && 
-                                  !(thread.tasks && thread.tasks.some(task => task.status === "BLOCKED"))
-                                ).length}
+                              {completedThreads.length}
                             </Badge>
                           </Flex>
                           <ActionIcon onClick={CompleteToggle}>
@@ -1670,13 +1665,7 @@ export default function SelinAI() {
                         </Flex>
                         <Collapse in={completedOpened} transitionTimingFunction="linear">
                           <Stack spacing={"xs"}>
-                            {threads
-                              .sort((a, b) => b.id - a.id)
-                              .filter((thread) => 
-                                (thread.status === "COMPLETE" || thread.status === "CANCELLED") && 
-                                !(thread.tasks && thread.tasks.some(task => task.status === "BLOCKED"))
-                              )
-                              .map((thread: ThreadType, index) => {
+                            {completedThreads.map((thread: ThreadType, index) => {
                                 return (
                                   <Paper
                                     key={index}

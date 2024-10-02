@@ -93,23 +93,19 @@ useEffect(() => {
   }
 }, [recording]);
 
-  useEffect(() => {
-    const requestMicrophoneAccess = async () => {
-      try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        console.log("Microphone access granted.");
-      } catch (error) {
-        console.error("Error accessing media devices.", error);
-        showNotification({
-          color: "red",
-          title: "Error accessing media devices",
-          message: "Permission denied. Please allow access to the microphone.",
-        });
-      }
-    };
-
-    requestMicrophoneAccess();
-  }, []);
+const requestMicrophoneAccess = async () => {
+  try {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+    console.log("Microphone access granted.");
+  } catch (error) {
+    console.error("Error accessing media devices.", error);
+    showNotification({
+      color: "red",
+      title: "Error accessing media devices",
+      message: "Permission denied. Please allow access to the microphone.",
+    });
+  }
+};
 
   useEffect(() => {
     onTranscriptionChanged(transcribedText);
@@ -152,6 +148,11 @@ useEffect(() => {
   };
 
   const handleToggleRecording = async () => {
+    navigator.permissions.query({ name: 'microphone' as PermissionName }).then((permissionStatus) => {
+      if (permissionStatus.state !== 'granted') {
+        requestMicrophoneAccess();
+      }
+    });
     setShowAnimation(false);
     if (recording) {
       setRecording(false);

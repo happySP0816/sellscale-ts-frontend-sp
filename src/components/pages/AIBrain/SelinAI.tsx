@@ -1187,7 +1187,10 @@ export default function SelinAI() {
                               Active Sessions
                             </Text>
                             <Badge color="grape" size="sm">
-                              {threads.sort((a, b) => b.id - a.id).filter((thread) => thread.status === "ACTIVE").length}
+                              {threads
+                                .sort((a, b) => b.id - a.id)
+                                .filter((thread) => thread.status === "ACTIVE" && !(thread.tasks && thread.tasks.some(task => task.status === "BLOCKED")))
+                                .length}
                             </Badge>
                           </Flex>
                           <ActionIcon onClick={ActiveToggle}>{!activeOpened ? <IconChevronDown size={"1rem"} /> : <IconChevronUp size={"1rem"} />}</ActionIcon>
@@ -1196,7 +1199,7 @@ export default function SelinAI() {
                           <Stack spacing={"xs"}>
                             {threads
                               .sort((a, b) => b.id - a.id)
-                              .filter((thread) => thread.status === "ACTIVE")
+                              .filter((thread) => thread.status === "ACTIVE" && !(thread.tasks && thread.tasks.some(task => task.status === "BLOCKED")))
                               .map((thread: ThreadType, index) => {
                                 return (
                                   <Paper
@@ -1419,8 +1422,9 @@ export default function SelinAI() {
                             </Text>
                             <Badge color="orange" size="sm">
                               {
-                                threads.sort((a, b) => b.id - a.id).filter((thread) => thread.status === "PENDING_OPERATOR" || thread.status === "BLOCKED")
-                                  .length
+                                threads.sort((a, b) => b.id - a.id).filter((thread) => 
+                                  (thread.tasks && thread.tasks.some(task => task.status === "BLOCKED"))
+                                ).length
                               }
                             </Badge>
                           </Flex>
@@ -1430,7 +1434,7 @@ export default function SelinAI() {
                           <Stack spacing={"xs"}>
                             {threads
                               .sort((a, b) => b.id - a.id)
-                              .filter((thread) => thread.status === "PENDING_OPERATOR" || thread.status === "BLOCKED")
+                              .filter((thread) => thread.tasks && thread.tasks.some(task => task.status === "BLOCKED"))
                               .map((thread: ThreadType, index) => {
                                 return (
                                   <Paper
@@ -1652,7 +1656,12 @@ export default function SelinAI() {
                               Completed Sessions
                             </Text>
                             <Badge color="green" size="sm">
-                              {threads.sort((a, b) => b.id - a.id).filter((thread) => thread.status === "COMPLETE" || thread.status === "CANCELLED").length}
+                              {threads
+                                .sort((a, b) => b.id - a.id)
+                                .filter((thread) => 
+                                  (thread.status === "COMPLETE" || thread.status === "CANCELLED") && 
+                                  !(thread.tasks && thread.tasks.some(task => task.status === "BLOCKED"))
+                                ).length}
                             </Badge>
                           </Flex>
                           <ActionIcon onClick={CompleteToggle}>
@@ -1663,7 +1672,10 @@ export default function SelinAI() {
                           <Stack spacing={"xs"}>
                             {threads
                               .sort((a, b) => b.id - a.id)
-                              .filter((thread) => thread.status === "COMPLETE" || thread.status === "CANCELLED")
+                              .filter((thread) => 
+                                (thread.status === "COMPLETE" || thread.status === "CANCELLED") && 
+                                !(thread.tasks && thread.tasks.some(task => task.status === "BLOCKED"))
+                              )
                               .map((thread: ThreadType, index) => {
                                 return (
                                   <Paper

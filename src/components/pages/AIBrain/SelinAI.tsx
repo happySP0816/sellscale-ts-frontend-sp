@@ -295,6 +295,15 @@ export interface ThreadType {
   thread_id: string;
 }
 
+interface SuggestedMessage {
+  client_id: number;
+  id: number;
+  name: string;
+  status: string;
+  strategy_id: number;
+  transcript: string;
+};
+
 interface MessageType {
   created_time: string;
   message: string;
@@ -327,7 +336,7 @@ export default function SelinAI() {
   const promptLengthRef = useRef<number>(0);
   const [suggestion, setSuggestion] = useState("");
   const [suggestionHidden, setSuggestionHidden] = useState(true);
-  const [suggestedFirstMessage, setSuggestedFirstMessage] = useState<string[]>([]);
+  const [suggestedFirstMessage, setSuggestedFirstMessage] = useState<(string | SuggestedMessage)[]>([]);
   const [recording, setRecording] = useState(false);
   const prevPromptLengthRef = useRef<number>(0);
   const prevSlideUpTime = useRef<number>(0);
@@ -1929,7 +1938,7 @@ export default function SelinAI() {
 const SegmentChat = (props: any) => {
   const attachedFile = props.attachedFile;
   const setAttachedFile = props.setAttachedFile;
-  const suggestedFirstMessage: string[] = props.suggestedFirstMessage;
+  const suggestedFirstMessage: (string | SuggestedMessage)[] = props.suggestedFirstMessage;
   const handleSubmit = props.handleSubmit;
   const dropzoneRef = props.dropzoneRef;
   const prompt = props.prompt;
@@ -2953,7 +2962,7 @@ const SegmentChat = (props: any) => {
                         withBorder
                         p={"xs"}
                         radius={"md"}
-                        className="hover:border-[#E25DEE] cursor-pointer transition-all duration-300 transform hover:scale-110"
+                        className={`hover:border-[#E25DEE] cursor-pointer transition-all duration-300 transform hover:scale-110 ${typeof message !== 'string' ? 'bg-blue-100' : ''}`}
                         style={{
                           boxShadow: "0 6px 12px rgba(226, 93, 238, 0.3)",
                           transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
@@ -2971,7 +2980,12 @@ const SegmentChat = (props: any) => {
                           setTimeout(() => {
                             e.currentTarget.style.backgroundColor = "white";
                           }, 300);
-                          handleListClick(message);
+                          if (typeof message === 'string') {
+                            handleListClick(message);
+                          } else if (typeof message === 'object') {
+                            //attach the strategy here.
+                            handleListClick(message.transcript);
+                          }
                         }}
                       >
                         <Flex
@@ -2979,12 +2993,17 @@ const SegmentChat = (props: any) => {
                           gap={"xs"}
                           className="transition-transform duration-300 transform hover:translate-x-2"
                         >
-                          <ThemeIcon color="grape" size={"xl"} >
+                          <ThemeIcon color={typeof message === 'string' ? "grape" : "blue"} size={"xl"} >
                             <IconBrain size={"1.4rem"} />
                           </ThemeIcon>
-                          <Text color="#E25DEE" fw={600} size={"sm"} className="transition-colors duration-300 hover:text-[#49494]">
-                            {message}
+                          <Text color={typeof message === 'string' ? "#E25DEE" : "blue"} fw={600} size={"sm"} className="transition-colors duration-300 hover:text-[#49494]">
+                            {typeof message === 'string' ? message : message.name}
                           </Text>
+                          {typeof message !== 'string' && (
+                            <ThemeIcon color="blue" size={"sm"} className="ml-auto">
+                              <IconChevronRight size={"1rem"} />
+                            </ThemeIcon>
+                          )}
                         </Flex>
                       </Paper>
                     ))}

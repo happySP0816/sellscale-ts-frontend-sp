@@ -42,6 +42,7 @@ import {
   IconArrowsMaximize,
   IconArrowsMinimize,
   IconArrowsMove,
+  IconBrain,
   IconBrowser,
   IconBulb,
   IconCheck,
@@ -2931,56 +2932,64 @@ const SegmentChat = (props: any) => {
                   );
                 })}
               </Flex>
-              <div className="absolute bottom-0 right-0 flex flex-col w-4/5 gap-1 pr-4">
-                {suggestedFirstMessage.map((message, index) => (
-                  <Paper key={index} withBorder p={"xs"} radius={"md"} className="hover:border-[#49494] cursor-pointer">
-                    <Flex align={"center"} gap={"xs"} onClick={() => handleListClick(message)}>
-                      <ThemeIcon color="grape" size={"xl"} variant="light">
-                        <IconUserShare size={"1.4rem"} />
-                      </ThemeIcon>
-                      <Text color="#E25DEE" fw={500} size={"sm"}>
-                        {message}
-                      </Text>
-                    </Flex>
-                  </Paper>
-                ))}
-                {/* <Paper className="hover:border-[#49494] cursor-pointer" withBorder p={"xs"} radius={"md"} >
-                <Flex
-                  align={"center"}
-                  gap={"xs"}
-                  onClick={() =>
-                    handleListClick(
-                      "I want to set up pre-meetings for a conference in Vegas"
-                    )
-                  }
+              <div className="absolute bottom-2 right-0 w-5/6 pr-4">
+                <Paper
+                  withBorder
+                  p={"md"}
+                  radius={"lg"}
+                  className="bg-white shadow-lg"
+                  style={{
+                    border: "2px solid #E25DEE",
+                    boxShadow: "0 8px 16px rgba(226, 93, 238, 0.2)",
+                  }}
                 >
-                  <ThemeIcon color="grape" size={"xl"} variant="light">
-                    <IconUserShare size={"1.4rem"} />
-                  </ThemeIcon>
-                  <Text color="#E25DEE" fw={500} size={"sm"}>
-                    I need assistance organizing pre-meetings for an upcoming
-                    conference
+                  <Text fw={700} size={"md"} color="#E25DEE" mb={"sm"}>
+                    💡 Suggestions
                   </Text>
-                </Flex>
-              </Paper>
-              <Paper className="hover:border-[#49494] cursor-pointer" withBorder p={"xs"} radius={"md"}>
-                <Flex
-                  align={"center"}
-                  gap={"xs"}
-                  onClick={() =>
-                    handleListClick(
-                      "I have a campaign idea I've wanted to implement"
-                    )
-                  }
-                >
-                  <ThemeIcon color="grape" size={"xl"} variant="light">
-                    <IconUserShare size={"1.4rem"} />
-                  </ThemeIcon>
-                  <Text color="#E25DEE" fw={500} size={"sm"}>
-                    I have a campaign idea to implement
-                  </Text>
-                </Flex>
-              </Paper> */}
+                  <div className="flex flex-col gap-2">
+                    {suggestedFirstMessage.map((message, index) => (
+                      <Paper
+                        key={index}
+                        withBorder
+                        p={"xs"}
+                        radius={"md"}
+                        className="hover:border-[#E25DEE] cursor-pointer transition-all duration-300 transform hover:scale-110"
+                        style={{
+                          boxShadow: "0 6px 12px rgba(226, 93, 238, 0.3)",
+                          transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.boxShadow = "0 12px 24px rgba(226, 93, 238, 0.5)";
+                          e.currentTarget.style.transform = "translateY(-4px) scale(1.05)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.boxShadow = "0 6px 12px rgba(226, 93, 238, 0.3)";
+                          e.currentTarget.style.transform = "translateY(0) scale(1)";
+                        }}
+                        onClick={(e) => {
+                          e.currentTarget.style.backgroundColor = "#F3E8FF";
+                          setTimeout(() => {
+                            e.currentTarget.style.backgroundColor = "white";
+                          }, 300);
+                          handleListClick(message);
+                        }}
+                      >
+                        <Flex
+                          align={"center"}
+                          gap={"xs"}
+                          className="transition-transform duration-300 transform hover:translate-x-2"
+                        >
+                          <ThemeIcon color="grape" size={"xl"} >
+                            <IconBrain size={"1.4rem"} />
+                          </ThemeIcon>
+                          <Text color="#E25DEE" fw={600} size={"sm"} className="transition-colors duration-300 hover:text-[#49494]">
+                            {message}
+                          </Text>
+                        </Flex>
+                      </Paper>
+                    ))}
+                  </div>
+                </Paper>
               </div>
             </>
           )}

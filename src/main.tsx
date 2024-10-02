@@ -81,6 +81,7 @@ import HomePageV2 from "@pages/Overview/HomePageV2";
 import ProspectPuller from "@pages/ProspectPuller";
 import WebsitePage from "@pages/Website/WebsitePage";
 import SelinAI from "@pages/AIBrain/SelinAI";
+import Suggestions from "@pages/Suggestions";
 import { SelixAIRetool } from "@pages/AIBrain/SelixAIRetool";
 import { SelixTaskPuppet } from "@pages/AIBrain/SelixTaskPuppet";
 import SignupPage from "@pages/SignUp";
@@ -594,6 +595,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/selix",
         element: <SelinAI />,
+      },
+      {
+        path: "/suggestions",
+        element: <Suggestions />,
       },
       {
         path: "/selix_onboarding",

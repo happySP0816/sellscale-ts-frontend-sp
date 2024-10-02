@@ -360,6 +360,10 @@ export default function SelinAI() {
   const needInputThreads = threads
     .filter((thread) => thread.status && thread.status !== "COMPLETE" && thread.status !== "CANCELLED" && thread.tasks && thread.tasks.some((task) => task.status === "BLOCKED"))
     .sort((a, b) => b.id - a.id);
+
+
+  console.log('need input threads length is', needInputThreads.length);
+
   // Completed threads
   const completedThreads = threads
     .filter((thread) => thread.status && (thread.status === "COMPLETE" || thread.status === "CANCELLED"))
@@ -771,8 +775,11 @@ export default function SelinAI() {
       // Ensure the task is added correctly to the current session
       setThreads((prevThreads) => {
         const updatedThreads = prevThreads.map((thread) => {
-          if (task.selix_session_id === sessionIDRef.current) {
-            const updatedTasks = Array.isArray(thread.tasks) ? [...thread.tasks, task] : [task];
+          if (thread.id === sessionIDRef.current) {
+            const updatedTasks = Array.isArray(thread.tasks) ? thread.tasks.map(t => t.id === task.id ? task : t) : [task];
+            if (!updatedTasks.some(t => t.id === task.id)) {
+              updatedTasks.push(task);
+            }
             return { ...thread, tasks: updatedTasks };
           } else {
             console.log("found no match for the current session. we compared", task.selix_session_id, "and", sessionIDRef.current);
@@ -2977,10 +2984,14 @@ const SegmentChat = (props: any) => {
                           e.currentTarget.style.transform = "translateY(0) scale(1)";
                         }}
                         onClick={(e) => {
-                          e.currentTarget.style.backgroundColor = "#F3E8FF";
-                          setTimeout(() => {
-                            e.currentTarget.style.backgroundColor = "white";
-                          }, 300);
+                          if (e.currentTarget) {
+                            e.currentTarget.style.backgroundColor = "#F3E8FF";
+                            setTimeout(() => {
+                              if (e.currentTarget) {
+                                e.currentTarget.style.backgroundColor = "white";
+                              }
+                            }, 300);
+                          }
                           if (typeof message === 'string') {
                             handleListClick(message);
                           } else if (typeof message === 'object') {

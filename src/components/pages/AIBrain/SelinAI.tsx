@@ -2004,6 +2004,8 @@ const SegmentChat = (props: any) => {
   const [newMemoryTitle, setNewMemoryTitle] = useState("");
   // const [recording, setRecording] = useState(false);
 
+  const messageRefs = useRef<any>([]);
+
   const [normalInputMode, setNormalInputMode] = useState(true);
 
   const lastPromptRef = useRef<string>("");
@@ -2752,7 +2754,7 @@ const SegmentChat = (props: any) => {
                     {message.type === "message" || message.type === "slack" ? (
                       <>
                       {/* name section */}
-                       <Flex gap={4} align={"center"} ml={message.role === "user" ? "auto" : "0"} style={{ width: "85%", marginBottom: "-10px" }}>
+                       <Flex gap={4} align={"center"} ml={message.role === "user" ? "auto" : "0"} style={{  width: messageRefs.current[index]?.offsetWidth || '85%', marginBottom: "-10px" }}>
                           <Avatar src={message.sender_name? null : message.role === "user" ? userData.img_url : Logo} size={"xs"} radius={"xl"} />
                           <Text fw={600} size={"xs"}>
                             {message.sender_name ? message.sender_name : (message.role !== "assistant" ? userData.sdr_name : "Selix AI")}
@@ -2792,6 +2794,7 @@ const SegmentChat = (props: any) => {
                           border: "1px solid #e7ebef",
                           padding: "10px",
                         }}
+                        ref={(el) => (messageRefs.current[index] = el)}
                       >    
                         <Flex className=" rounded-lg rounded-br-none" px={"sm"} py={7}>
                           <Text size={"xs"} fw={500}>

@@ -406,6 +406,7 @@ const SegmentAIGeneration = (props: any) => {
     "extra-asset-1.pdf",
   ]);
   const [generatingFilters, setGeneratingFilters] = useState(false);
+  const [generatingBlankFilter, setGeneratingBlankFilter] = useState(false);
   const [loadingIndex, setLoadingIndex] = useState<number>(0);
   const userToken = useRecoilValue(userTokenState);
 
@@ -443,6 +444,41 @@ const SegmentAIGeneration = (props: any) => {
       return updatedSegments;
     });
   };
+
+  const handleBlankResponse = async () => {
+    setGeneratingBlankFilter(true);
+    try {
+      const response = await fetch(`${API_URL}/contacts/new-blank-icp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        console.error("Error handling chat ICP:", data.message);
+        return;
+      }
+
+      console.log("data is", data.data);
+
+      props.setSegment((prevSegments: any) => [
+        ...prevSegments,
+        {
+          makers: data["makers"],
+          industry: data["industry"],
+          pain_point: data["pain_point"],
+          id: data?.data?.saved_query_id,
+          total_entries: data?.data?.pagination?.total_entries,
+        },
+      ]);
+    } catch (error) {
+      console.error("Error handling chat ICP:", error);
+    }
+    setGeneratingBlankFilter(false);
+  }
 
   const [prefilters, setPrefilters] = useState<any>([]);
 
@@ -568,7 +604,58 @@ const SegmentAIGeneration = (props: any) => {
                 <IconLoader size={"1rem"} color="orange" />
               )
             }
-            title={!showChat ? "" : "Generated Segments"}
+            title={
+              !showChat ? (
+                <Flex align="center" gap="sm">
+                <Button
+                  loading={generatingBlankFilter}
+                  mt="md"
+                  color="grape"
+                  size="sm"
+                  leftIcon={<IconPlus size={"1rem"} />}
+                  style={{ marginLeft: "auto" }}
+                  onClick={() => {
+                    handleBlankResponse();
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "scale(1.05)";
+                    e.currentTarget.style.transition = "transform 0.2s";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.transition = "transform 0.2s";
+                  }}
+                >
+                  New ICP Filter
+                </Button>
+                </Flex>
+              ) : (
+                <Flex align="center" gap="sm">
+                  Generated Segments
+                  <Button
+                    loading={generatingBlankFilter}
+                    mt="md"
+                    color="grape"
+                    size="sm"
+                    leftIcon={<IconPlus size={"1rem"} />}
+                    style={{ marginLeft: "auto" }}
+                    onClick={() => {
+                      handleBlankResponse();
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.05)";
+                      e.currentTarget.style.transition = "transform 0.2s";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "scale(1)";
+                      e.currentTarget.style.transition = "transform 0.2s";
+                    }}
+                  >
+                    New ICP Filter
+                  </Button>
+                </Flex>
+              )
+            }
           >
             <table
               style={{

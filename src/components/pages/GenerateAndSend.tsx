@@ -132,11 +132,26 @@ export default function GenerateAndSend({ outboundCampaignId, campaignUUID }: { 
         },
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error('Failed to approve campaign');
       }
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (jsonError) {
+        if (jsonError instanceof Error) {
+          if (responseText === 'OK') {
+            data = { message: 'OK' };
+          } else {
+            throw new Error(`Failed to parse response JSON: ${jsonError.message}`);
+          }
+        } else {
+          throw new Error('Failed to parse response JSON: Unknown error');
+        }
+      }
+
       console.log('Approved campaign:', data);
 
       showNotification({

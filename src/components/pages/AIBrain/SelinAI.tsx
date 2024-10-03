@@ -78,6 +78,7 @@ import {
   IconTriangleInverted,
   IconX,
 } from "@tabler/icons";
+import SlackLogo from "@assets/images/slack-logo.png";
 import { IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
 import { Dispatch, Fragment, Key, memo, SetStateAction, useEffect, useRef, useState } from "react";
@@ -308,8 +309,10 @@ interface MessageType {
   created_time: string;
   message: string;
   role: "user" | "assistant" | "system";
-  type: "message" | "strategy" | "planner" | "analytics" | "action";
+  sender_name?: string; // Used for Slack messages, sometimes the sender name is different from us in the thread
+  type: "message" | "strategy" | "planner" | "analytics" | "action" | "slack";
   action_description?: string;
+  slack_channel?: string;
   action_title?: string;
   action_function?: string;
   action_params?: {
@@ -647,6 +650,36 @@ export default function SelinAI() {
       setMessages(filteredMessages);
       const currentThread = threads_passed?.find((thread) => thread.id === session_id) || threads.find((thread) => thread.id === session_id);
 
+
+      // SPECIAL PARSING FOR SLACK MESSAGES
+      const transformedMessages = filteredMessages.map((message: MessageType) => {
+        if (message.message.includes("SLACK MESSAGE")) {
+          try {
+            const parsedMessage = JSON.parse(message.message);
+
+            const sender_name = parsedMessage.title.split(" sent to ")[0];
+            const is_from_me = sender_name === userData.sdr_name;
+
+            // console.log("parsed message is", parsedMessage);
+            return {
+              ...message,
+              type: "slack",
+              role: is_from_me ? "user" : "assistant",
+              sender_name,
+              slack_channel: parsedMessage.title.split(" sent to ")[1].split(" at ")[0],
+              message: parsedMessage.data,
+              title: parsedMessage.title,
+              timestamp: parsedMessage.timestamp,
+            };
+          } catch (error) {
+            console.error("Error parsing SLACK MESSAGE:", error);
+            return message;
+          }
+        }
+        return message;
+      });
+      setMessages(transformedMessages);
+
       const memory: MemoryType | undefined = currentThread?.memory;
       console.log("current thread is", currentThread);
       if (currentThread?.tasks) {
@@ -694,6 +727,7 @@ export default function SelinAI() {
     }
   };
 
+  const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
 
   const handleNewMessage = (data: { message?: string; action?: any; device_id?: string; role: "user" | "assistant" | "system"; thread_id: string }) => {
@@ -1970,6 +2004,8 @@ const SegmentChat = (props: any) => {
   const [newMemoryTitle, setNewMemoryTitle] = useState("");
   // const [recording, setRecording] = useState(false);
 
+  const messageRefs = useRef<any>([]);
+
   const [normalInputMode, setNormalInputMode] = useState(true);
 
   const lastPromptRef = useRef<string>("");
@@ -2715,7 +2751,37 @@ const SegmentChat = (props: any) => {
               {messages.map((message: MessageType, index: number) => {
                 return (
                   <>
-                    {message.type === "message" ? (
+                    {message.type === "message" || message.type === "slack" ? (
+                      <>
+                      {/* name section */}
+                       <Flex gap={4} align={"center"} ml={message.role === "user" ? "auto" : "0"} style={{  width: messageRefs.current[index]?.offsetWidth || '85%', marginBottom: "-10px" }}>
+                          <Avatar src={message.sender_name? null : message.role === "user" ? userData.img_url : Logo} size={"xs"} radius={"xl"} />
+                          <Text fw={600} size={"xs"}>
+                            {message.sender_name ? message.sender_name : (message.role !== "assistant" ? userData.sdr_name : "Selix AI")}
+                            {message.type === "slack" && message.slack_channel && (
+                              <Text component="span" fw={700}>
+                                {" via "}
+                                <img src={SlackLogo} alt="slack" width={10} height={10} style={{ margin: "0 4px" }} />
+                                {" Slack"}
+                                <Text
+                                  component="a"
+                                  href={`https://slack.com/app_redirect?channel=${message.slack_channel}`}
+                                  style={{ color: "#1E90FF", textDecoration: "underline", marginLeft: "4px" }}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  #{message.slack_channel}
+                                </Text>
+                              </Text>
+                            )}
+                          </Text>
+                          {message.role !== "user" && message.message !== "loading" && index === messages.length - 1 && (
+                            <Flex align="center" gap="xs">
+                              {showLoader && <Loader variant="bars" color="grape" size="xs" ml={10} />}
+                            </Flex>
+                          )}
+                        </Flex>
+                        {/* rest of message */}
                       <Flex
                         direction={"column"}
                         maw={"85%"}
@@ -2728,18 +2794,8 @@ const SegmentChat = (props: any) => {
                           border: "1px solid #e7ebef",
                           padding: "10px",
                         }}
-                      >
-                        <Flex gap={4} align={"center"}>
-                          <Avatar src={message.role === "user" ? userData.img_url : Logo} size={"xs"} radius={"xl"} />
-                          <Text fw={600} size={"xs"}>
-                            {message.role !== "assistant" ? userData.sdr_name : "Selix AI"}
-                          </Text>
-                          {message.role !== "user" && message.message !== "loading" && index === messages.length - 1 && (
-                            <Flex align="center" gap="xs">
-                              {showLoader && <Loader variant="bars" color="grape" size="xs" ml={10} />}
-                            </Flex>
-                          )}
-                        </Flex>
+                        ref={(el) => (messageRefs.current[index] = el)}
+                      >    
                         <Flex className=" rounded-lg rounded-br-none" px={"sm"} py={7}>
                           <Text size={"xs"} fw={500}>
                             {message.role === "user" ? (
@@ -2774,6 +2830,7 @@ const SegmentChat = (props: any) => {
                           </Text>
                         </Text>
                       </Flex>
+                      </>
                     ) : (
                       <Card
                         key={index}

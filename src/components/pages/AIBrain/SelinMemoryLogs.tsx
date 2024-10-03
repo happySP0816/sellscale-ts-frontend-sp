@@ -20,8 +20,10 @@ import {
   HoverCard,
   LoadingOverlay,
   ActionIcon,
-  Portal,
+  Modal,
   Accordion,
+  Portal,
+  Switch,
 } from "@mantine/core";
 import {
   IconHistory,
@@ -77,11 +79,18 @@ interface MemoryLog {
 interface MemoryLogsProps {
   onRevert: (log: string) => void;
   threads: ThreadType[];
+  opened: boolean;
+  setOpen: (isOpen: boolean) => void;
+  sessionId?: number;
 }
 
-const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
-  const [opened, setOpened] = useState(false);
-
+const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
+  onRevert,
+  threads,
+  opened,
+  setOpen,
+  sessionId,
+}) => {
   const [createLogOpened, setCreateLogOpened] = useState(false);
   const [newLog, setNewLog] = useState({
     tag: "",
@@ -98,6 +107,8 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
   const [editingConnectedSession, setEditingConnectedSession] = useState(false);
   const userToken = useRecoilValue(userTokenState);
   const [roomId, setRoomId] = useState("");
+
+  const [isShortTerm, setIsShortTerm] = useState<boolean>(false);
 
   const updateMemoryLogSessionId = async (
     selixLogId: number,
@@ -787,7 +798,8 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                     (item) => item.parent_log_id === log.id
                   );
 
-                  return childEvents.length > 0 ? (
+                  return childEvents.length > 0 &&
+                    (isSelected || !log.parent_log_id) ? (
                     <>
                       <Divider
                         size={"xl"}
@@ -896,89 +908,96 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
   };
 
   return (
-    <>
-      <Button
-        onClick={() => setOpened(true)}
-        size="xs"
-        color="teal"
-        ml="auto"
-        variant="outline"
-        pt="2px"
-        pb="2px"
-        mb="4px"
-        leftIcon={<IconHistory size={16} />}
-      >
-        Event Logs
-      </Button>
-
-      <Drawer
-        opened={opened}
-        onClose={() => setOpened(false)}
-        position="right"
-        size="900px"
-        zIndex={5}
-      >
-        <Flex>
-          <Box>
-            <Title order={3}>Event Logs</Title>
+    <Modal
+      opened={opened}
+      onClose={() => setOpen(false)}
+      size="1100px"
+      zIndex={5}
+    >
+      <Flex>
+        <Box>
+          <Flex gap={"16px"} align={"center"}>
+            <Title order={3}>
+              {isShortTerm ? "Short Term Memory" : "Long Term Memory"}
+            </Title>
+            <Switch
+              size={"lg"}
+              label={isShortTerm ? "Short Term" : "Long Term"}
+              checked={isShortTerm}
+              onChange={(event) => setIsShortTerm(event.currentTarget.checked)}
+              fw={600}
+            />
+          </Flex>
+          {isShortTerm ? (
             <Text style={{ marginBottom: "1rem" }}>
-              View a history of all memory saves and task completions.
+              View the history of events for each session below.
             </Text>
-          </Box>
-          <ActionIcon
-            onClick={() => fetchSelixLogs()}
-            size="lg"
-            color="gray"
-            ml="auto"
-            variant="subtle"
-          >
-            <IconRefresh size={16} />
-          </ActionIcon>
-        </Flex>
-        <Divider mt="md" mb="lg" />
-        <Flex>
-          <Box
-            pr="md"
-            style={{
-              minWidth: "40%",
-              maxWidth: "40%",
-              borderRight: "1px solid #e0e0e0",
-            }}
-          >
-            <Text fw={600} mb="md">
-              Event Timeline
+          ) : (
+            <Text style={{ marginBottom: "1rem" }}>
+              View the history of long term memory updates for each session
+              below, as well as the events that triggered it.
             </Text>
-            <Card
-              withBorder
-              mb="md"
-              sx={{ minHeight: "400px", maxHeight: "500px", overflowY: "auto" }}
-              id={"timeline-event-card"}
-              onMouseEnter={(e) => handleMouseEnterDropZone(e)}
-              onMouseLeave={(e) =>
-                handleMouseLeaveDropZone(e, undefined, false, 1)
-              }
-              onMouseUp={async (e) => await handleMouseUpInTimeline(e)}
-            >
-              <LoadingOverlay visible={loading || loadingSelixLogs} />
-              {RenderTimeline(
-                reversedLogsByLogDate.filter(
-                  (log) => !log.is_sub_event && !log.parent_log_id
-                )
-              )}
-            </Card>
-            <Button
-              onClick={() => setCreateLogOpened(true)}
-              size="xs"
-              color="blue"
-              mt="md"
-              variant="outline"
-            >
-              Create New Log
-            </Button>
-            {createLogOpened && (
-              <Card withBorder mt="md">
-                <Box mt="md">
-                  {/* <TextInput
+          )}
+          {/* {isShortTerm && ( */}
+          {/*   <Select data={logs ? logs.map(item => { */}
+          {/*     return */}
+          {/*   }) : []}/> */}
+          {/* )} */}
+        </Box>
+        <ActionIcon
+          onClick={() => fetchSelixLogs()}
+          size="lg"
+          color="gray"
+          ml="auto"
+          variant="subtle"
+        >
+          <IconRefresh size={16} />
+        </ActionIcon>
+      </Flex>
+      <Divider mt="md" mb="lg" />
+      <Flex>
+        <Box
+          pr="md"
+          style={{
+            minWidth: "40%",
+            maxWidth: "40%",
+            borderRight: "1px solid #e0e0e0",
+          }}
+        >
+          <Text fw={600} mb="md">
+            Event Timeline
+          </Text>
+          <Card
+            withBorder
+            mb="md"
+            sx={{ minHeight: "400px", maxHeight: "500px", overflowY: "auto" }}
+            id={"timeline-event-card"}
+            onMouseEnter={(e) => handleMouseEnterDropZone(e)}
+            onMouseLeave={(e) =>
+              handleMouseLeaveDropZone(e, undefined, false, 1)
+            }
+            onMouseUp={async (e) => await handleMouseUpInTimeline(e)}
+          >
+            <LoadingOverlay visible={loading || loadingSelixLogs} />
+            {RenderTimeline(
+              reversedLogsByLogDate.filter(
+                (log) => !log.is_sub_event && !log.parent_log_id
+              )
+            )}
+          </Card>
+          <Button
+            onClick={() => setCreateLogOpened(true)}
+            size="xs"
+            color="blue"
+            mt="md"
+            variant="outline"
+          >
+            Create New Log
+          </Button>
+          {createLogOpened && (
+            <Card withBorder mt="md">
+              <Box mt="md">
+                {/* <TextInput
                     label="Title"
                     value={newLog.title}
                     onChange={(e) =>
@@ -986,184 +1005,178 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                     }
                     mb="sm"
                   /> */}
-                  <Select
-                    label="Tag"
-                    value={newLog.tag}
-                    onChange={(value: any) =>
-                      setNewLog({ ...newLog, tag: value })
-                    }
-                    withinPortal
-                    data={[
-                      {
-                        value: "SELIX_TASK_COMPLETE",
-                        label: "✅ Selix Task Complete",
-                      },
-                      {
-                        value: "SELLSCALE_ACTION_COMPLETE",
-                        label: "📈 Selix Action Complete",
-                      },
-                      {
-                        value: "SUPPORT_THREAD_SLACK",
-                        label: "💬 Support Thread Slack",
-                      },
-                      {
-                        value: "SUPPORT_THREAD_EMAIL",
-                        label: "📧 Direct Email from User",
-                      },
-                      {
-                        value: "SUPPORT_THREAD_EMAIL_FORWARDED_BY_OPERATOR",
-                        label: "📧 Email Frwd. by Ops",
-                      },
-                      {
-                        value: "USER_INTERACTION",
-                        label: "👤 User Interaction",
-                      },
-                      {
-                        value: "MEETING_TRANSCRIPT",
-                        label: "📜 Meeting Transcript",
-                      },
-                      {
-                        value: "MANUAL",
-                        label: "✍️ Manual",
-                      },
-                    ]}
-                    mb="sm"
-                  />
-                  <Textarea
-                    label="Description"
-                    value={newLog.description}
-                    onChange={(e) =>
-                      setNewLog({
-                        ...newLog,
-                        description: e.currentTarget.value,
-                      })
-                    }
-                    autosize
-                    minRows={3}
-                    mb="sm"
-                  />
-                  <Button
-                    onClick={createSelixLog}
-                    size="xs"
-                    color="green"
-                    variant="outline"
-                    disabled={!newLog.tag || !newLog.description}
-                  >
-                    Submit
-                  </Button>
-                </Box>
-              </Card>
-            )}
-          </Box>
-          <Box w="60%" pl="md">
-            {selectedLog ? (
-              <>
-                <Box display="flex" mb="4px">
-                  <Box w="70%">
-                    <Box>
-                      <Tooltip label={selectedLog.title}>
-                        <Text fw={600} size="lg" style={{ maxWidth: "70%" }}>
-                          {selectedLog.title.length > 50
-                            ? selectedLog.title.substring(0, 26) + "..."
-                            : selectedLog.title}
-                        </Text>
-                      </Tooltip>
-
-                      <Text size="sm" color="gray" mb="md">
-                        {moment(selectedLog.created_date).fromNow()}
+                <Select
+                  label="Tag"
+                  value={newLog.tag}
+                  onChange={(value: any) =>
+                    setNewLog({ ...newLog, tag: value })
+                  }
+                  withinPortal
+                  data={[
+                    {
+                      value: "SELIX_TASK_COMPLETE",
+                      label: "✅ Selix Task Complete",
+                    },
+                    {
+                      value: "SELLSCALE_ACTION_COMPLETE",
+                      label: "📈 Selix Action Complete",
+                    },
+                    {
+                      value: "SUPPORT_THREAD_SLACK",
+                      label: "💬 Support Thread Slack",
+                    },
+                    {
+                      value: "SUPPORT_THREAD_EMAIL",
+                      label: "📧 Direct Email from User",
+                    },
+                    {
+                      value: "SUPPORT_THREAD_EMAIL_FORWARDED_BY_OPERATOR",
+                      label: "📧 Email Frwd. by Ops",
+                    },
+                    {
+                      value: "USER_INTERACTION",
+                      label: "👤 User Interaction",
+                    },
+                    {
+                      value: "MEETING_TRANSCRIPT",
+                      label: "📜 Meeting Transcript",
+                    },
+                    {
+                      value: "MANUAL",
+                      label: "✍️ Manual",
+                    },
+                  ]}
+                  mb="sm"
+                />
+                <Textarea
+                  label="Description"
+                  value={newLog.description}
+                  onChange={(e) =>
+                    setNewLog({
+                      ...newLog,
+                      description: e.currentTarget.value,
+                    })
+                  }
+                  autosize
+                  minRows={3}
+                  mb="sm"
+                />
+                <Button
+                  onClick={createSelixLog}
+                  size="xs"
+                  color="green"
+                  variant="outline"
+                  disabled={!newLog.tag || !newLog.description}
+                >
+                  Submit
+                </Button>
+              </Box>
+            </Card>
+          )}
+        </Box>
+        <Box w="60%" pl="md">
+          {selectedLog ? (
+            <>
+              <Box display="flex" mb="4px">
+                <Box w="70%">
+                  <Box>
+                    <Tooltip label={selectedLog.title}>
+                      <Text fw={600} size="lg" style={{ maxWidth: "70%" }}>
+                        {selectedLog.title.length > 50
+                          ? selectedLog.title.substring(0, 26) + "..."
+                          : selectedLog.title}
                       </Text>
-                    </Box>
-                    <Flex>
-                      {selectedLog.session_name && (
-                        <Box>
-                          <Flex align="center">
-                            <Text size="10px" color="gray">
-                              Connected session:
-                            </Text>
-                            {/* <ActionIcon onClick={() => setEditingConnectedSession(true)}>
+                    </Tooltip>
+
+                    <Text size="sm" color="gray" mb="md">
+                      {moment(selectedLog.created_date).fromNow()}
+                    </Text>
+                  </Box>
+                  <Flex>
+                    {selectedLog.session_name && (
+                      <Box>
+                        <Flex align="center">
+                          <Text size="10px" color="gray">
+                            Connected session:
+                          </Text>
+                          {/* <ActionIcon onClick={() => setEditingConnectedSession(true)}>
                               <IconPencil size={12} color="gray" style={{ marginLeft: '4px' }} />
                             </ActionIcon> */}
-                          </Flex>
-                          {editingConnectedSession ? (
-                            <Flex align="center" style={{ width: "200px" }}>
-                              <Select
-                                ref={selectRef}
-                                data={threads.map((thread) => ({
-                                  value: thread.session_name,
-                                  label: thread.session_name,
-                                }))}
-                                value={null}
-                                onChange={(value) => {
-                                  setSelectedLog({
-                                    ...selectedLog,
-                                    session_name: value,
-                                  });
-                                  updateMemoryLogSessionId(
-                                    selectedLog.id,
-                                    threads.find(
-                                      (thread) => thread.session_name === value
-                                    )?.id
-                                  );
-                                  setEditingConnectedSession(false);
-                                }}
-                                size="md"
-                                mb="md"
-                                mr="sm"
-                                style={{ width: "100%" }}
-                                rightSectionWidth={"100%"}
-                                rightSection={
-                                  selectedLog.session_name && (
-                                    <Badge
-                                      color={deterministicMantineColor(
-                                        selectedLog.session_name
-                                      )}
-                                      variant="filled"
-                                      style={{ width: "100%" }}
-                                      onClick={() => selectRef.current?.focus()}
-                                    >
-                                      {selectedLog.session_name}
-                                    </Badge>
-                                  )
-                                }
-                                itemComponent={({
-                                  value,
-                                  label,
-                                  ...others
-                                }) => {
-                                  const {
-                                    onMouseDown,
-                                    onMouseEnter,
-                                    role,
-                                    tabIndex,
-                                  } = others;
-                                  return (
-                                    <Badge
-                                      color={deterministicMantineColor(value)}
-                                      variant="filled"
-                                      size="sm"
-                                      mr="sm"
-                                      mb="sm"
-                                      style={{ width: "170px" }}
-                                      onMouseDown={onMouseDown}
-                                      onMouseEnter={(event) => {
-                                        onMouseEnter(event);
-                                        event.currentTarget.style.cursor =
-                                          "pointer";
-                                      }}
-                                      role={role}
-                                      tabIndex={tabIndex}
-                                    >
-                                      {label}
-                                    </Badge>
-                                  );
-                                }}
-                                searchable
-                                clearable
-                                onDropdownOpen={() =>
-                                  selectRef.current?.focus()
-                                }
-                              />
-                              {/* <ActionIcon
+                        </Flex>
+                        {editingConnectedSession ? (
+                          <Flex align="center" style={{ width: "200px" }}>
+                            <Select
+                              ref={selectRef}
+                              data={threads.map((thread) => ({
+                                value: thread.session_name,
+                                label: thread.session_name,
+                              }))}
+                              value={null}
+                              onChange={(value) => {
+                                setSelectedLog({
+                                  ...selectedLog,
+                                  session_name: value,
+                                });
+                                updateMemoryLogSessionId(
+                                  selectedLog.id,
+                                  threads.find(
+                                    (thread) => thread.session_name === value
+                                  )?.id
+                                );
+                                setEditingConnectedSession(false);
+                              }}
+                              size="md"
+                              mb="md"
+                              mr="sm"
+                              style={{ width: "100%" }}
+                              rightSectionWidth={"100%"}
+                              rightSection={
+                                selectedLog.session_name && (
+                                  <Badge
+                                    color={deterministicMantineColor(
+                                      selectedLog.session_name
+                                    )}
+                                    variant="filled"
+                                    style={{ width: "100%" }}
+                                    onClick={() => selectRef.current?.focus()}
+                                  >
+                                    {selectedLog.session_name}
+                                  </Badge>
+                                )
+                              }
+                              itemComponent={({ value, label, ...others }) => {
+                                const {
+                                  onMouseDown,
+                                  onMouseEnter,
+                                  role,
+                                  tabIndex,
+                                } = others;
+                                return (
+                                  <Badge
+                                    color={deterministicMantineColor(value)}
+                                    variant="filled"
+                                    size="sm"
+                                    mr="sm"
+                                    mb="sm"
+                                    style={{ width: "170px" }}
+                                    onMouseDown={onMouseDown}
+                                    onMouseEnter={(event) => {
+                                      onMouseEnter(event);
+                                      event.currentTarget.style.cursor =
+                                        "pointer";
+                                    }}
+                                    role={role}
+                                    tabIndex={tabIndex}
+                                  >
+                                    {label}
+                                  </Badge>
+                                );
+                              }}
+                              searchable
+                              clearable
+                              onDropdownOpen={() => selectRef.current?.focus()}
+                            />
+                            {/* <ActionIcon
                                 onClick={() => {
                                   setEditingConnectedSession(false);
                                   updateMemoryLogSessionId(selectedLog.id, threads.find(thread => thread.session_name === selectedLog.session_name)?.id);
@@ -1171,269 +1184,264 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({ onRevert, threads }) => {
                               >
                                 <IconCircleCheck size={16} color="green" />
                               </ActionIcon> */}
-                            </Flex>
-                          ) : (
+                          </Flex>
+                        ) : (
+                          <Badge
+                            color={deterministicMantineColor(
+                              selectedLog.session_name
+                            )}
+                            variant="filled"
+                            size="md"
+                            mb="md"
+                            mr="sm"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => {
+                              setEditingConnectedSession(true);
+                              setTimeout(() => {
+                                selectRef.current?.focus();
+                                selectRef.current?.click();
+                              }, 0);
+                            }}
+                          >
+                            {selectedLog.session_name}
+                          </Badge>
+                        )}
+                      </Box>
+                    )}
+                    {selectedLog.processing_status ? (
+                      <HoverCard width={400} shadow="md">
+                        <HoverCard.Target>
+                          <Box>
+                            <Text size="10px" color="gray">
+                              Processing status:
+                            </Text>
                             <Badge
                               color={deterministicMantineColor(
-                                selectedLog.session_name
+                                selectedLog.processing_status
                               )}
                               variant="filled"
                               size="md"
                               mb="md"
-                              mr="sm"
-                              style={{ cursor: "pointer" }}
-                              onClick={() => {
-                                setEditingConnectedSession(true);
-                                setTimeout(() => {
-                                  selectRef.current?.focus();
-                                  selectRef.current?.click();
-                                }, 0);
-                              }}
                             >
-                              {selectedLog.session_name}
+                              {selectedLog.processing_status.replace(/_/g, " ")}
                             </Badge>
-                          )}
-                        </Box>
-                      )}
-                      {selectedLog.processing_status ? (
-                        <HoverCard width={400} shadow="md">
-                          <HoverCard.Target>
-                            <Box>
-                              <Text size="10px" color="gray">
-                                Processing status:
-                              </Text>
-                              <Badge
-                                color={deterministicMantineColor(
-                                  selectedLog.processing_status
-                                )}
-                                variant="filled"
-                                size="md"
-                                mb="md"
-                              >
-                                {selectedLog.processing_status.replace(
-                                  /_/g,
-                                  " "
-                                )}
-                              </Badge>
-                            </Box>
-                          </HoverCard.Target>
-                          <HoverCard.Dropdown>
-                            <Text
-                              size="sm"
-                              dangerouslySetInnerHTML={{
-                                __html:
-                                  selectedLog.processing_status_description
-                                    .replaceAll("**", "")
-                                    .replaceAll("\n", "<br />"),
-                              }}
-                            />
-                          </HoverCard.Dropdown>
-                        </HoverCard>
-                      ) : selectedLog.tag != "MEMORY_METADATA_SAVED" ? (
-                        <Button
-                          onClick={() => updateProcessingType(selectedLog.id)}
-                          size="xs"
-                          color="blue"
-                          ml="lg"
-                          variant="outline"
-                          mb="md"
-                        >
-                          {loading ? (
-                            <Loader size="xs" />
-                          ) : (
-                            "Update Processing Type"
-                          )}
-                        </Button>
-                      ) : (
-                        <Box></Box>
-                      )}
-                    </Flex>
-                  </Box>
-                  <Box w="30%">
-                    <Badge
-                      color={deterministicMantineColor(selectedLog.tag)}
-                      variant="filled"
-                      size="sm"
-                      ml="auto"
-                    >
-                      {tagToIconAndColorMap[selectedLog.tag]?.sub ||
-                        selectedLog.tag}
-                    </Badge>
-                    <Text size="10px" color="gray">
-                      {selectedLog.json_data &&
-                      JSON.parse(selectedLog.json_data)?.email_source
-                        ? "Sent by: " +
-                          JSON.parse(selectedLog.json_data)?.email_source
-                        : ""}
-                    </Text>
-                  </Box>
+                          </Box>
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown>
+                          <Text
+                            size="sm"
+                            dangerouslySetInnerHTML={{
+                              __html: selectedLog.processing_status_description
+                                .replaceAll("**", "")
+                                .replaceAll("\n", "<br />"),
+                            }}
+                          />
+                        </HoverCard.Dropdown>
+                      </HoverCard>
+                    ) : selectedLog.tag != "MEMORY_METADATA_SAVED" ? (
+                      <Button
+                        onClick={() => updateProcessingType(selectedLog.id)}
+                        size="xs"
+                        color="blue"
+                        ml="lg"
+                        variant="outline"
+                        mb="md"
+                      >
+                        {loading ? (
+                          <Loader size="xs" />
+                        ) : (
+                          "Update Processing Type"
+                        )}
+                      </Button>
+                    ) : (
+                      <Box></Box>
+                    )}
+                  </Flex>
                 </Box>
-                <Text
-                  size="10px"
-                  mb="4px"
-                  color="gray"
-                  dangerouslySetInnerHTML={{
-                    __html: selectedLog.metadata.replaceAll("\n", "<br />"),
-                  }}
-                />
-                {selectedLog.tag !== "SUPPORT_THREAD_SLACK" &&
-                  selectedLog.tag !== "SUPPORT_THREAD_EMAIL" &&
-                  selectedLog.tag !==
-                    "SUPPORT_THREAD_EMAIL_FORWARDED_BY_OPERATOR" && (
-                    <Textarea
-                      value={editedDescription}
-                      autosize
-                      minRows={10}
-                      maxRows={15}
-                      mb="md"
-                      onChange={(e) => {
-                        setEditedDescription(e.currentTarget.value);
-                        setIsEditing(true);
-                      }}
-                    />
-                  )}
-                {reversedLogsByLogDate.filter(
-                  (log) => log.parent_log_id === selectedLog.id
-                ).length > 0 && (
-                  <Card
-                    withBorder
-                    mb="md"
-                    sx={{
-                      minHeight: "400px",
-                      maxHeight: "500px",
-                      overflowY: "auto",
-                    }}
-                    id={`timeline-${selectedLog.id}-card`}
-                    onMouseEnter={(e) =>
-                      handleMouseEnterDropZone(e, selectedLog, true)
-                    }
-                    onMouseLeave={(e) =>
-                      handleMouseLeaveDropZone(
-                        e,
-                        selectedLog.id,
-                        true,
-                        selectedLog.id
-                      )
-                    }
-                    onMouseUp={async (e) =>
-                      await handleMouseUpInTimeline(e, selectedLog)
-                    }
+                <Box w="30%">
+                  <Badge
+                    color={deterministicMantineColor(selectedLog.tag)}
+                    variant="filled"
+                    size="sm"
+                    ml="auto"
                   >
-                    <LoadingOverlay visible={loading || loadingSelixLogs} />
-                    {RenderTimeline(
-                      reversedLogsByLogDate.filter(
-                        (log) => log.parent_log_id === selectedLog.id
-                      ),
-                      2,
+                    {tagToIconAndColorMap[selectedLog.tag]?.sub ||
+                      selectedLog.tag}
+                  </Badge>
+                  <Text size="10px" color="gray">
+                    {selectedLog.json_data &&
+                    JSON.parse(selectedLog.json_data)?.email_source
+                      ? "Sent by: " +
+                        JSON.parse(selectedLog.json_data)?.email_source
+                      : ""}
+                  </Text>
+                </Box>
+              </Box>
+              <Text
+                size="10px"
+                mb="4px"
+                color="gray"
+                dangerouslySetInnerHTML={{
+                  __html: selectedLog.metadata.replaceAll("\n", "<br />"),
+                }}
+              />
+              {selectedLog.tag !== "SUPPORT_THREAD_SLACK" &&
+                selectedLog.tag !== "SUPPORT_THREAD_EMAIL" &&
+                selectedLog.tag !==
+                  "SUPPORT_THREAD_EMAIL_FORWARDED_BY_OPERATOR" && (
+                  <Textarea
+                    value={editedDescription}
+                    autosize
+                    minRows={10}
+                    maxRows={15}
+                    mb="md"
+                    onChange={(e) => {
+                      setEditedDescription(e.currentTarget.value);
+                      setIsEditing(true);
+                    }}
+                  />
+                )}
+              {reversedLogsByLogDate.filter(
+                (log) => log.parent_log_id === selectedLog.id
+              ).length > 0 && (
+                <Card
+                  withBorder
+                  mb="md"
+                  sx={{
+                    minHeight: "400px",
+                    maxHeight: "500px",
+                    overflowY: "auto",
+                  }}
+                  id={`timeline-${selectedLog.id}-card`}
+                  onMouseEnter={(e) =>
+                    handleMouseEnterDropZone(e, selectedLog, true)
+                  }
+                  onMouseLeave={(e) =>
+                    handleMouseLeaveDropZone(
+                      e,
+                      selectedLog.id,
                       true,
                       selectedLog.id
-                    )}
-                  </Card>
-                )}
-                <Flex>
-                  {isEditing && (
-                    <Button
-                      onClick={() =>
-                        editSelixLog(selectedLog.id, editedDescription)
-                      }
-                      size="xs"
-                      color="green"
-                      variant="outline"
-                      mb="md"
-                      ml="auto"
-                    >
-                      {loading ? <Loader size="xs" /> : "Save"}
-                    </Button>
+                    )
+                  }
+                  onMouseUp={async (e) =>
+                    await handleMouseUpInTimeline(e, selectedLog)
+                  }
+                >
+                  <LoadingOverlay visible={loading || loadingSelixLogs} />
+                  {RenderTimeline(
+                    reversedLogsByLogDate.filter(
+                      (log) => log.parent_log_id === selectedLog.id
+                    ),
+                    2,
+                    true,
+                    selectedLog.id
                   )}
-                </Flex>
-                {selectedLog.tag === "MEMORY_METADATA_SAVED" && logs && (
-                  <>
-                    <Text fw={600} mb="2px">
-                      Updated via:
-                    </Text>
-                    <Text mb="md">
-                      {selectedLog.json_data
-                        ? JSON.parse(selectedLog.json_data).updated_from
-                        : "No update information available"}
-                    </Text>
-                    <Text fw={600} mb="2px">
-                      Completed since last log:
-                    </Text>
-                    <Box mb="md">
-                      {logs
-                        .filter(
-                          (log) =>
-                            new Date(log.created_date) <
-                              new Date(selectedLog.created_date) &&
-                            log.tag !== "MEMORY_METADATA_SAVED" &&
-                            new Date(log.created_date) >
-                              new Date(
-                                logs
-                                  .filter(
-                                    (l) =>
-                                      l.tag === "MEMORY_METADATA_SAVED" &&
-                                      new Date(l.created_date) <
-                                        new Date(selectedLog.created_date)
-                                  )
-                                  .sort(
-                                    (a, b) =>
-                                      new Date(b.created_date).getTime() -
-                                      new Date(a.created_date).getTime()
-                                  )[0]?.created_date || 0
-                              )
-                        )
-                        .map((log, index) => (
-                          <Card
-                            withBorder
-                            shadow="sm"
-                            radius="md"
-                            p="sm"
-                            mb="sm"
-                            key={index}
-                          >
-                            <Text size="sm" color="black" fw={600}>
-                              ⚡️ {log.title}
-                            </Text>
-                            <Text size="xs" color="gray">
-                              {log.description}
-                            </Text>
-                            <Text
-                              size="xs"
-                              color="gray"
-                              align="left"
-                              mt="xs"
-                              style={{ fontSize: "10px" }}
-                            >
-                              Completed: {moment(log.created_date).fromNow()}
-                            </Text>
-                          </Card>
-                        ))}
-                    </Box>
-                    <Box w="100%">
-                      <Button
-                        leftIcon={<IconHistory size={16} />}
-                        color="red"
-                        variant="outline"
-                        size="xs"
-                        mt="lg"
-                        onClick={() => {
-                          onRevert(selectedLog.description);
-                          setOpened(false);
-                        }}
-                      >
-                        Revert to this Memory
-                      </Button>
-                    </Box>
-                  </>
+                </Card>
+              )}
+              <Flex>
+                {isEditing && (
+                  <Button
+                    onClick={() =>
+                      editSelixLog(selectedLog.id, editedDescription)
+                    }
+                    size="xs"
+                    color="green"
+                    variant="outline"
+                    mb="md"
+                    ml="auto"
+                  >
+                    {loading ? <Loader size="xs" /> : "Save"}
+                  </Button>
                 )}
-              </>
-            ) : (
-              <Text>Select a log to view details</Text>
-            )}
-          </Box>
-        </Flex>
-      </Drawer>
-    </>
+              </Flex>
+              {selectedLog.tag === "MEMORY_METADATA_SAVED" && logs && (
+                <>
+                  <Text fw={600} mb="2px">
+                    Updated via:
+                  </Text>
+                  <Text mb="md">
+                    {selectedLog.json_data
+                      ? JSON.parse(selectedLog.json_data).updated_from
+                      : "No update information available"}
+                  </Text>
+                  <Text fw={600} mb="2px">
+                    Completed since last log:
+                  </Text>
+                  <Box mb="md">
+                    {logs
+                      .filter(
+                        (log) =>
+                          new Date(log.created_date) <
+                            new Date(selectedLog.created_date) &&
+                          log.tag !== "MEMORY_METADATA_SAVED" &&
+                          new Date(log.created_date) >
+                            new Date(
+                              logs
+                                .filter(
+                                  (l) =>
+                                    l.tag === "MEMORY_METADATA_SAVED" &&
+                                    new Date(l.created_date) <
+                                      new Date(selectedLog.created_date)
+                                )
+                                .sort(
+                                  (a, b) =>
+                                    new Date(b.created_date).getTime() -
+                                    new Date(a.created_date).getTime()
+                                )[0]?.created_date || 0
+                            )
+                      )
+                      .map((log, index) => (
+                        <Card
+                          withBorder
+                          shadow="sm"
+                          radius="md"
+                          p="sm"
+                          mb="sm"
+                          key={index}
+                        >
+                          <Text size="sm" color="black" fw={600}>
+                            ⚡️ {log.title}
+                          </Text>
+                          <Text size="xs" color="gray">
+                            {log.description}
+                          </Text>
+                          <Text
+                            size="xs"
+                            color="gray"
+                            align="left"
+                            mt="xs"
+                            style={{ fontSize: "10px" }}
+                          >
+                            Completed: {moment(log.created_date).fromNow()}
+                          </Text>
+                        </Card>
+                      ))}
+                  </Box>
+                  <Box w="100%">
+                    <Button
+                      leftIcon={<IconHistory size={16} />}
+                      color="red"
+                      variant="outline"
+                      size="xs"
+                      mt="lg"
+                      onClick={() => {
+                        onRevert(selectedLog.description);
+                        setOpen(false);
+                      }}
+                    >
+                      Revert to this Memory
+                    </Button>
+                  </Box>
+                </>
+              )}
+            </>
+          ) : (
+            <Text>Select a log to view details</Text>
+          )}
+        </Box>
+      </Flex>
+    </Modal>
   );
 };
 

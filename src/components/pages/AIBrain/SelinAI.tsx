@@ -749,7 +749,7 @@ export default function SelinAI() {
 
       // SPECIAL PARSING FOR SLACK MESSAGES
       const transformedMessages = filteredMessages.map((message: MessageType) => {
-        if (message.message?.includes("SLACK MESSAGE")) {
+        if (message.message?.includes("SLACK MESSAGE") || (message.message?.includes("SUPPORT THREAD SLACK"))) {
           try {
             const parsedMessage = JSON.parse(message.message);
 

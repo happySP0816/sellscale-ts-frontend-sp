@@ -452,9 +452,7 @@ export default function CampaignTemplateEditModal({
                     userToken,
                     !alteredEmailActive
                   );
-                  if (success) {
-                    setAlteredEmailActive(!alteredEmailActive);
-                  }
+                  setAlteredEmailActive(!alteredEmailActive);
                 }}
                 checked={alteredEmailActive}
                 labelPosition="left"
@@ -542,15 +540,9 @@ export default function CampaignTemplateEditModal({
                       userToken,
                       !alteredLinkedinActive
                     );
-                    if (success) {
-                      setAlteredLinkedinActive(!alteredLinkedinActive);
-                      console.log(
-                        `LinkedIn channel for persona ${campaignId} has been toggled.`
-                      );
-                      innerProps?.refetchSequenceData(campaignId);
-                    } else {
-                      console.log("Failed to toggle LinkedIn channel");
-                    }
+                    setAlteredLinkedinActive(!alteredLinkedinActive);
+                    innerProps?.refetchSequenceData(campaignId);
+                    
                   } catch (error) {
                     console.log("Failed to toggle LinkedIn channel");
                     console.error("Failed to toggle LinkedIn channel", error);

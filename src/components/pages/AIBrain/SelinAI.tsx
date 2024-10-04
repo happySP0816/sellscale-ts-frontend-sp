@@ -840,21 +840,45 @@ export default function SelinAI() {
   }) => {
     console.log("new message is", data);
     // if the message is not for the current device, ignore it
-    // console.log("comparing device id", data.device_id, deviceIDRef.current);
     if (data?.device_id === deviceIDRef.current) {
       return;
     }
     if (data.thread_id === roomIDref.current) {
       if (data.message) {
+        let newMessage: MessageType = {
+          created_time: moment().format("MMMM D, h:mm a"),
+          message: data?.message || "",
+          role: data?.role || "assistant",
+          type: "message",
+        };
+
+        // Handle slack message
+        if (data.message.includes("SLACK MESSAGE") || data.message.includes("SUPPORT THREAD SLACK")) {
+          try {
+            const parsedMessage = JSON.parse(data.message);
+            const sender_name = parsedMessage.title.split(" sent to ")[0];
+            const is_from_me = sender_name === userData.sdr_name;
+
+            newMessage = {
+              ...newMessage,
+              type: "slack",
+              role: is_from_me ? "user" : "assistant",
+              sender_name,
+              slack_channel: parsedMessage.title.split(" sent to ")[1].split(" at ")[0],
+              message: parsedMessage.data,
+              // title: parsedMessage.title,
+              created_time: parsedMessage.timestamp,
+            };
+          } catch (error) {
+            console.error("Error parsing SLACK MESSAGE:", error);
+          }
+        }
+
         setMessages((chatContent: MessageType[]) => [
           ...chatContent,
-          {
-            created_time: moment().format("MMMM D, h:mm a"),
-            message: data?.message || "",
-            role: data?.role || "assistant",
-            type: "message",
-          },
+          newMessage,
         ]);
+
         if (data.role === "assistant") {
           setMessages((chatContent: MessageType[]) =>
             chatContent.filter((message) => message.message !== "loading")

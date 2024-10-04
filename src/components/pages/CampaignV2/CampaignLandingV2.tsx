@@ -939,13 +939,8 @@ export default function CampaignLandingV2(props: PropsType) {
                           <IconBrandLinkedin fill="#228be6" color="#f6f9f8" size={"1.4rem"} />
                         </div>
                       )}
-                      {!showOnlyHeader && (
-                        <Button disabled={false} size="sm" color="blue" onClick={() => setOpenGenerationCenter(true)}>
-                          Generate & Send
-                        </Button>
-                      )}
                     </Flex>
-                    {props.showLaunchButton &&
+                    {true &&
                       (statsData?.linkedin_active || statsData?.email_active ? (
                         <Flex
                           align="center"
@@ -1011,6 +1006,15 @@ export default function CampaignLandingV2(props: PropsType) {
                         </Button>
                       ))}
                   </Flex>
+                  {!showOnlyHeader && (
+                        <ActionIcon
+                          color="gray"
+                          onClick={() => setOpenGenerationCenter(true)}
+                          style={{ marginLeft: "auto" }}
+                        >
+                          <IconSend size="0.9rem" />
+                        </ActionIcon>
+                      )}
                 </Flex>
                 {/* <Flex align={"center"} w={"100%"} gap={"xs"}>
                   <Flex w={"100%"} align={"center"} gap={"sm"}>

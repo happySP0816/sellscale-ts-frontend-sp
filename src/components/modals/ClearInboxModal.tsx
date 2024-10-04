@@ -107,20 +107,19 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
       // });
       // setTimeout(() => setFetchingProspectId(-1), 15000);
 
-      // setFetchingProspectId(openedProspectId);
       sendLinkedInMessage(
         userToken,
         prospectId,
-        msg,
-        true,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        moment().add(3, 'days').toDate(),
-        new Date() //schedule day.
+        msg,//message
+        true, //ai generated
+        true, // purgatory
+        undefined, // bump_framework_id
+        undefined, // bump_framework_title
+        undefined, // bump_framework_description
+        undefined, // bump_framework_length
+        undefined, // account_research_points
+        moment().add(3, 'days').toDate(), // purgatory_date
+        new Date() // scheduled_send_date
       ).then(() => {
         queryClient.refetchQueries({
           queryKey: [`query-get-dashboard-prospect-${prospectId}-convo-${tabValue.toUpperCase()}`],
@@ -165,12 +164,12 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
     } else if (tabValue === "email") {
       const prospectid = inboxClearingData[selectedNum].prospect_info.id;
       const response = await postSmartleadReply(
-        userToken,
-        prospectid,
-        aiGeneratedMessage,
-        new Date(),
-        [],
-        []
+        userToken, // User authentication token
+        prospectid, // ID of the prospect
+        aiGeneratedMessage, // The body of the email
+        new Date(), // Scheduled send date
+        [], // CC email addresses
+        [] // BCC email addresses
       );
 
       queryClient.refetchQueries({

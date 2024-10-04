@@ -441,18 +441,20 @@ export default function CampaignTemplateEditModal({
             <Group noWrap spacing={"sm"} w={"100%"}>
               <Switch
                 // disabled  // disabled for now
-                onChange={() => {
+                onChange={async () => {
                   // if (!innerProps?.checkCanToggleEmail(true)) {
                   //   return;
                   // }
                   console.log('params are', id, userToken, !alteredEmailActive);
-                  innerProps?.togglePersonaChannel(
+                  const success = await innerProps?.togglePersonaChannel(
                     campaignId,
                     "email",
                     userToken,
                     !alteredEmailActive
                   );
-                  setAlteredEmailActive(!alteredEmailActive);
+                  if (success) {
+                    setAlteredEmailActive(!alteredEmailActive);
+                  }
                 }}
                 checked={alteredEmailActive}
                 labelPosition="left"
@@ -532,22 +534,27 @@ export default function CampaignTemplateEditModal({
               </>
               <Switch
                 // disabled
-                onChange={() => {
-                  // if (!innerProps?.checkCanToggleLinkedin(true)) {
-                  //   return;
-                  // }
-                  setAlteredLinkedinActive(!alteredLinkedinActive);
-                  innerProps?.togglePersonaChannel(
-                    campaignId,
-                    "linkedin",
-                    userToken,
-                    !alteredLinkedinActive
-                  );
-                  console.log(
-                    `LinkedIn channel for persona ${campaignId} has been toggled.`
-                  );
-                  innerProps?.refetchSequenceData(campaignId);
-                  
+                onChange={async () => {
+                  try {
+                    const success = await innerProps?.togglePersonaChannel(
+                      campaignId,
+                      "linkedin",
+                      userToken,
+                      !alteredLinkedinActive
+                    );
+                    if (success) {
+                      setAlteredLinkedinActive(!alteredLinkedinActive);
+                      console.log(
+                        `LinkedIn channel for persona ${campaignId} has been toggled.`
+                      );
+                      innerProps?.refetchSequenceData(campaignId);
+                    } else {
+                      console.log("Failed to toggle LinkedIn channel");
+                    }
+                  } catch (error) {
+                    console.log("Failed to toggle LinkedIn channel");
+                    console.error("Failed to toggle LinkedIn channel", error);
+                  }
                 }}
                 checked={alteredLinkedinActive}
                 labelPosition="left"

@@ -12,10 +12,14 @@ import { closeAllModals, ContextModalProps, openContextModal } from "@mantine/mo
 import { showNotification } from "@mantine/notifications";
 import { IconAlarm, IconArrowLeft, IconArrowRight, IconArrowsUp, IconBrandLinkedin, IconBriefcase, IconCalendarEvent, IconDoorExit, IconMail, IconSend, IconTrash, IconX } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
+import { QueryClient } from "@tanstack/react-query";
 import displayNotification from "@utils/notificationFlow";
+import postSmartleadReply from "@utils/requests/postSmartleadReply";
+import { sendLinkedInMessage } from "@utils/requests/sendMessage";
 import { setDemoSetProspect } from "@utils/requests/setDemoSetProspect";
 import { snoozeProspect, snoozeProspectEmail } from "@utils/requests/snoozeProspect";
 import { update } from "lodash";
+import moment from "moment";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { Channel } from "src";
@@ -77,6 +81,121 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
     }
     getSuggestedMessageAndAction(inboxClearingData[selectedNum]);
   }, [selectedNum, tabValue]);
+
+  const queryClient = new QueryClient();
+
+  const sendMessage = async () => {
+    setLoadingAiGeneratedMessage(true);
+
+    // Delete the auto bump message if it exists
+    // await deleteAutoBumpMessage(userToken, props.prospectId);
+
+    const prospectId = inboxClearingData[selectedNum].prospect_info.id;
+
+    // Hack to update the prospect list to temp show they're in purgatory
+    // setTempHiddenProspects(tempHiddenProspects.concat([props.prospectId]));
+
+    if (tabValue === "linkedin") {
+      const msg = aiGeneratedMessage;
+      // setMessageDraft("");
+      // showNotification({
+      //   id: "send-linkedin-message",
+      //   title: scheduleDay ? "Scheduling message..." : "Sending message ...",
+      //   message: "Message is sending. Do not refresh the page.",
+      //   color: "blue",
+      //   autoClose: 7000,
+      // });
+      // setTimeout(() => setFetchingProspectId(-1), 15000);
+
+      // setFetchingProspectId(openedProspectId);
+      sendLinkedInMessage(
+        userToken,
+        prospectId,
+        msg,
+        true,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        moment().add(3, 'days').toDate(),
+        new Date() //schedule day.
+      ).then(() => {
+        queryClient.refetchQueries({
+          queryKey: [`query-get-dashboard-prospect-${prospectId}-convo-${tabValue.toUpperCase()}`],
+        });
+      });
+      if (true) {
+        // let yourMessage = _.cloneDeep(currentConvoLiMessages || [])
+        //   .reverse()
+        //   .find((msg) => msg.connection_degree === "You");
+        if (false) {
+          // yourMessage.message = msg;
+          // yourMessage.date = new Date().toUTCString();
+          // yourMessage.ai_generated = false;
+          // yourMessage.is_sending = true;
+          // setCurrentConvoLiMessages([
+          //   ...(currentConvoLiMessages || []),
+          //   yourMessage,
+          // ]);
+        } else {
+          queryClient.refetchQueries({
+            queryKey: [`query-get-dashboard-prospect-${prospectId}-convo-${tabValue.toUpperCase()}`],
+          });
+          queryClient.refetchQueries({
+            queryKey: ["query-prospects-list"],
+          });
+        }
+        // showNotification({
+        //   id: "send-linkedin-message-complete",
+        //   title: scheduleDay ? "Message Scheduled" : "Message Sent",
+        //   message: "",
+        //   color: "green",
+        // });
+      } else {
+        showNotification({
+          id: "send-linkedin-message-error",
+          title: "Error",
+          message: "Failed to send message. Please try again later.",
+          color: "red",
+          autoClose: false,
+        });
+      }
+    } else if (tabValue === "email") {
+      const prospectid = inboxClearingData[selectedNum].prospect_info.id;
+      const response = await postSmartleadReply(
+        userToken,
+        prospectid,
+        aiGeneratedMessage,
+        new Date(),
+        [],
+        []
+      );
+
+      queryClient.refetchQueries({
+        queryKey: [`query-get-dashboard-prospect-${prospectId}-convo-${'SMARTLEAD'}`],
+      });
+
+      // if (props?.triggerGetSmartleadProspectConvo) {
+      //   props?.triggerGetSmartleadProspectConvo();
+      // }
+      // setScheduleDay(undefined);
+    } 
+
+    // setTimeout(() => {
+    //   if (scheduledMessageRef.current) {
+    //     (scheduledMessageRef.current as any).refreshScheduledMessages();
+    //   }
+    // }, 200);
+
+    
+
+    // setMsgLoading(false);
+    // setAiGenerated(false);
+    // setTimeout(() => props.scrollToBottom && props.scrollToBottom(), 100);
+    setLoadingAiGeneratedMessage(false);
+  };
 
   const changeStatus = async (
     status: string,
@@ -190,6 +309,9 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
   
 
   const handleSendMessage = () => {
+
+    sendMessage();
+
     setShowSendWidget(false);
 
     setInboxClearingData((prevData: InboxClearingData[]) => {
@@ -425,7 +547,7 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
                 );
               })}
             </ScrollArea>
-            {!loadingAiGeneratedMessage &&  inboxClearingData[selectedNum].prospect_info.status === "ACTIVE_CONVO_REVIVAL" && showSendWidget && !inboxClearingData[selectedNum].cleared && (
+            {!loadingAiGeneratedMessage &&  showSendWidget && !inboxClearingData[selectedNum].cleared && (
               <Box className="absolute w-full bottom-0">
                 <Paper
                   withBorder

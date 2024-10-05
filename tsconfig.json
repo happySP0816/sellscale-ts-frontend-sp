@@ -18,6 +18,10 @@
     "jsx": "react-jsx"
   },
   "include": ["src"],
-  "exclude": ["legacy_code"],
+  "exclude": [
+    "legacy_code",
+    "styled-components",
+    "@tiptap/extension-text-style"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

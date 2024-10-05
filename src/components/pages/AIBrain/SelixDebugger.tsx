@@ -11,7 +11,6 @@ import {
   Title,
 } from "@mantine/core";
 import { IconPlayerPlay, IconPlayerPause, IconSquare } from "@tabler/icons";
-import Mermaid from "react-mermaid2";
 import { ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -339,7 +338,7 @@ export default function SelixDebugger() {
               onChange={(e) => {
                 const searchTerm = e.target.value.toLowerCase();
                 const logs = document.querySelectorAll(".log-entry");
-                logs.forEach((log) => {
+                logs.forEach((log: any) => {
                   const text = log.textContent.toLowerCase();
                   log.style.display = text.includes(searchTerm)
                     ? "block"

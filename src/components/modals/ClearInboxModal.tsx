@@ -193,6 +193,13 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
     // setMsgLoading(false);
     // setAiGenerated(false);
     // setTimeout(() => props.scrollToBottom && props.scrollToBottom(), 100);
+    markProspectAsRevival(prospectId);
+
+    queryClient.refetchQueries({
+      queryKey: ["query-prospects-list"],
+    });
+
+
     setLoadingAiGeneratedMessage(false);
   };
 
@@ -273,6 +280,35 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
       scrollArea.scrollTop = scrollArea.scrollHeight;
     }
   }, [selectedNum, tabValue]);
+
+  const markProspectAsRevival = async (prospectId: number) => {
+    const response = await updateChannelStatus(
+      prospectId,
+      userToken,
+      tabValue === "email" ? "EMAIL" : "LINKEDIN",
+      "ACTIVE_CONVO_REVIVAL",
+      true,
+      false,
+      null
+    );
+
+    if (response.status !== "success") {
+      showNotification({
+        title: "Error",
+        message: "There was an error marking the prospect as revival",
+        color: "red",
+        autoClose: 5000,
+      });
+      return;
+    } else {
+      showNotification({
+        title: "Prospect marked as revival",
+        message: `Prospect has been marked as revival`,
+        color: "green",
+        autoClose: 5000,
+      });
+    }
+  }
 
   const getSuggestedMessageAndAction = async (inboxClearingData: InboxClearingData) => {
     setLoadingAiGeneratedMessage(true);

@@ -74,6 +74,7 @@ export interface InboxClearingData {
     time_sent: string;
   }[];
   prospect_info: {
+    client_sdr_name: string;
     avatar: string;
     id: number;
     company: string;
@@ -191,7 +192,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
   }, []);
 
   const fetchAIConversations = (limit = 10, offset = 0) => {
-    fetch(`${API_URL}/sight_inbox/conversations?limit=${10000}&offset=${offset}`, {
+    fetch(`${API_URL}/sight_inbox/conversations?limit=${1000}&offset=${offset}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

@@ -483,9 +483,14 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
         </Modal>
       <Paper p={"sm"} withBorder radius={"sm"}>
         <Flex align={"center"} justify={"space-between"}>
-          <Text fw={500} w={"30%"}>
-            Inbox Status
-          </Text>
+          <Flex align={"center"} justify={"flex-start"} w={"30%"}>
+            <Text fw={500}>
+              Inbox Status
+            </Text>
+            <Badge ml="sm" color="blue" variant="light">
+              {inboxClearingData[selectedNum].prospect_info.status}
+            </Badge>
+          </Flex>
           <Flex align={"center"} gap={4} w={"70%"}>
             {inboxClearingData.map((item, index) => {
               return (
@@ -518,9 +523,20 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
         <Paper withBorder radius={"sm"} p={"sm"} w={"65%"} h={585}>
           <Flex align={"center"} justify={"space-between"}>
             <Box w={"100%"} mt={8}>
-              <Text fw={500} size={"sm"}>
-                Chat Preview
-              </Text>
+              <Flex align={"center"} gap={"sm"}>
+                <Box
+                  sx={(theme) => ({
+                    backgroundColor: theme.colors.blue[0],
+                    padding: theme.spacing.xs,
+                    borderRadius: theme.radius.sm,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: theme.spacing.xs,
+                  })}
+                >
+                  <Text size={"sm"}>👤 {inboxClearingData[selectedNum].prospect_info.client_sdr_name}</Text>
+                </Box>
+              </Flex>
               <Divider size="sm" mt={4} />
             </Box>
             <Flex align={"center"} gap={"sm"} w={275}>

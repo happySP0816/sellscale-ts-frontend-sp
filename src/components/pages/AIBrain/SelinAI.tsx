@@ -746,34 +746,40 @@ export default function SelinAI() {
         threads_passed?.find((thread) => thread.id === session_id) ||
         threads.find((thread) => thread.id === session_id);
 
-
       // SPECIAL PARSING FOR SLACK MESSAGES
-      const transformedMessages = filteredMessages.map((message: MessageType) => {
-        if (message.message?.includes("SLACK MESSAGE") || (message.message?.includes("SUPPORT THREAD SLACK"))) {
-          try {
-            const parsedMessage = JSON.parse(message.message);
+      const transformedMessages = filteredMessages.map(
+        (message: MessageType) => {
+          if (
+            message.message?.includes("SLACK MESSAGE") ||
+            message.message?.includes("SUPPORT THREAD SLACK")
+          ) {
+            try {
+              const parsedMessage = JSON.parse(message.message);
 
-            const sender_name = parsedMessage.title.split(" sent to ")[0];
-            const is_from_me = sender_name === userData.sdr_name;
+              const sender_name = parsedMessage.title.split(" sent to ")[0];
+              const is_from_me = sender_name === userData.sdr_name;
 
-            // console.log("parsed message is", parsedMessage);
-            return {
-              ...message,
-              type: "slack",
-              role: is_from_me ? "user" : "assistant",
-              sender_name,
-              slack_channel: parsedMessage.title.split(" sent to ")[1].split(" at ")[0],
-              message: parsedMessage.data,
-              title: parsedMessage.title,
-              timestamp: parsedMessage.timestamp,
-            };
-          } catch (error) {
-            console.error("Error parsing SLACK MESSAGE:", error);
-            return message;
+              // console.log("parsed message is", parsedMessage);
+              return {
+                ...message,
+                type: "slack",
+                role: is_from_me ? "user" : "assistant",
+                sender_name,
+                slack_channel: parsedMessage.title
+                  .split(" sent to ")[1]
+                  .split(" at ")[0],
+                message: parsedMessage.data,
+                title: parsedMessage.title,
+                timestamp: parsedMessage.timestamp,
+              };
+            } catch (error) {
+              console.error("Error parsing SLACK MESSAGE:", error);
+              return message;
+            }
           }
+          return message;
         }
-        return message;
-      });
+      );
       setMessages(transformedMessages);
 
       const memory: MemoryType | undefined = currentThread?.memory;
@@ -853,7 +859,10 @@ export default function SelinAI() {
         };
 
         // Handle slack message
-        if (data.message.includes("SLACK MESSAGE") || data.message.includes("SUPPORT THREAD SLACK")) {
+        if (
+          data.message.includes("SLACK MESSAGE") ||
+          data.message.includes("SUPPORT THREAD SLACK")
+        ) {
           try {
             const parsedMessage = JSON.parse(data.message);
             const sender_name = parsedMessage.title.split(" sent to ")[0];
@@ -864,7 +873,9 @@ export default function SelinAI() {
               type: "slack",
               role: is_from_me ? "user" : "assistant",
               sender_name,
-              slack_channel: parsedMessage.title.split(" sent to ")[1].split(" at ")[0],
+              slack_channel: parsedMessage.title
+                .split(" sent to ")[1]
+                .split(" at ")[0],
               message: parsedMessage.data,
               // title: parsedMessage.title,
               created_time: parsedMessage.timestamp,
@@ -1202,9 +1213,8 @@ export default function SelinAI() {
 
     if (recording) {
       intervalId = setInterval(() => {
-        const memory = threads.find(
-          (thread) => thread.id === currentSessionId
-        )?.memory;
+        const memory = threads.find((thread) => thread.id === currentSessionId)
+          ?.memory;
         if (
           memory?.strategy_id &&
           promptLengthRef.current > prevPromptLengthRef.current + 80
@@ -2583,8 +2593,10 @@ const SegmentChat = (props: any) => {
   const [clientMemoryState, setClientMemoryState] = useState<
     string | undefined
   >(props.memory?.memory_line);
-  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
-    useState<any>(props.memory?.memory_line_time_updated);
+  const [
+    clientMemoryStateUpdatedTime,
+    setClientMemoryStateUpdatedTime,
+  ] = useState<any>(props.memory?.memory_line_time_updated);
   const [memoryStateChanged, setMemoryStateChanged] = useState(false);
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
@@ -3297,192 +3309,281 @@ const SegmentChat = (props: any) => {
                               </>
                             ))}
 
-                      <Box mt="sm">
-                        {(x == "needs_user_input" || x == "needs_ai_input") && (
-                          <>
-                            {!showAddMemoryInput && (
-                              <Button
-                                variant="outline"
-                                ml="auto"
-                                size="xs"
-                                color="gray"
-                                onClick={() => {
-                                  if (showAddMemoryInput) {
-                                    setShowAddMemoryInput(false);
-                                    setShowMemoryForKey("");
-                                  } else {
-                                    setShowAddMemoryInput(true);
-                                    setShowMemoryForKey(x);
-                                  }
-                                }}
-                              >
-                                +
-                              </Button>
-                            )}
-                            {showAddMemoryInput && showMemoryForKey === x && (
-                              <Flex mt="xs" align="center">
-                                <TextInput
-                                  placeholder="Enter memory title"
-                                  value={newMemoryTitle}
-                                  onChange={(event) => setNewMemoryTitle(event.currentTarget.value)}
-                                  onKeyDown={(event) => {
-                                    if (event.key === "Enter") {
-                                      addMemory(newMemoryTitle, newMemoryTitle, x == "needs_user_input" ? true : false);
-                                      setNewMemoryTitle("");
+                        <Box mt="sm">
+                          {(x == "needs_user_input" ||
+                            x == "needs_ai_input") && (
+                            <>
+                              {!showAddMemoryInput && (
+                                <Button
+                                  variant="outline"
+                                  ml="auto"
+                                  size="xs"
+                                  color="gray"
+                                  onClick={() => {
+                                    if (showAddMemoryInput) {
                                       setShowAddMemoryInput(false);
+                                      setShowMemoryForKey("");
+                                    } else {
+                                      setShowAddMemoryInput(true);
+                                      setShowMemoryForKey(x);
                                     }
                                   }}
-                                  width="100%"
-                                  mr="xs"
-                                />
-                                <Button
-                                  size="xs"
-                                  color="green"
-                                  onClick={() => {
-                                    addMemory(newMemoryTitle, newMemoryTitle, x == "needs_user_input" ? true : false);
-                                    setNewMemoryTitle("");
-                                    setShowAddMemoryInput(false);
-                                  }}
                                 >
-                                  Add
+                                  +
                                 </Button>
-                                <Button
-                                  size="xs"
-                                  color="red"
-                                  onClick={() => {
-                                    setNewMemoryTitle("");
-                                    setShowAddMemoryInput(false);
-                                  }}
-                                  ml="xs"
-                                >
-                                  Cancel
-                                </Button>
-                              </Flex>
-                            )}
-                          </>
-                        )}
-                      </Box>
-                    </Box>
-                  );
-                })}
-            </Card>
-          </Popover.Dropdown>
-        </Popover>
-      </Flex>
-      <Divider bg="gray" />
-      <div style={{ position: "relative", height: "48vh" }}>
-        <ScrollArea
-          h={"53vh"}
-          viewportRef={viewport}
-          scrollHideDelay={4000}
-          style={{
-            overflow: "hidden",
-            // transform: !normalInputMode ? "translateY(-250px)" : "none",
-            transition: "transform 0.3s ease",
-          }}
-        >
-          {messages.length > 1 ? (
-            <Flex direction={"column"} gap={"sm"} p={"md"} h={"100%"} className=" overflow-auto">
-              {messages.map((message: MessageType, index: number) => {
-                return (
-                  <>
-                    {message.type === "message" || message.type === "slack" ? (
-                      <>
-                      {/* name section */}
-                       <Flex gap={4} align={"center"} ml={message.role === "user" ? "auto" : "0"} style={{  width: messageRefs.current[index]?.offsetWidth || '85%', marginBottom: "-10px" }}>
-                          <Avatar src={message.sender_name? null : message.role === "user" ? userData.img_url : Logo} size={"xs"} radius={"xl"} />
-                          <Text fw={600} size={"xs"}>
-                            {message.sender_name ? message.sender_name : (message.role !== "assistant" ? userData.sdr_name : "Selix AI")}
-                            {message.type === "slack" && message.slack_channel && (
-                              <Text component="span" fw={700}>
-                                {" via "}
-                                <img src={SlackLogo} alt="slack" width={10} height={10} style={{ margin: "0 4px" }} />
-                                {" Slack"}
-                                <Text
-                                  component="a"
-                                  href={`https://slack.com/app_redirect?channel=${message.slack_channel}`}
-                                  style={{ color: "#1E90FF", textDecoration: "underline", marginLeft: "4px" }}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  #{message.slack_channel}
-                                </Text>
-                              </Text>
-                            )}
-                          </Text>
-                          {message.role !== "user" && message.message !== "loading" && index === messages.length - 1 && (
-                            <Flex align="center" gap="xs">
-                              {showLoader && <Loader variant="bars" color="grape" size="xs" ml={10} />}
-                            </Flex>
+                              )}
+                              {showAddMemoryInput && showMemoryForKey === x && (
+                                <Flex mt="xs" align="center">
+                                  <TextInput
+                                    placeholder="Enter memory title"
+                                    value={newMemoryTitle}
+                                    onChange={(event) =>
+                                      setNewMemoryTitle(
+                                        event.currentTarget.value
+                                      )
+                                    }
+                                    onKeyDown={(event) => {
+                                      if (event.key === "Enter") {
+                                        addMemory(
+                                          newMemoryTitle,
+                                          newMemoryTitle,
+                                          x == "needs_user_input" ? true : false
+                                        );
+                                        setNewMemoryTitle("");
+                                        setShowAddMemoryInput(false);
+                                      }
+                                    }}
+                                    width="100%"
+                                    mr="xs"
+                                  />
+                                  <Button
+                                    size="xs"
+                                    color="green"
+                                    onClick={() => {
+                                      addMemory(
+                                        newMemoryTitle,
+                                        newMemoryTitle,
+                                        x == "needs_user_input" ? true : false
+                                      );
+                                      setNewMemoryTitle("");
+                                      setShowAddMemoryInput(false);
+                                    }}
+                                  >
+                                    Add
+                                  </Button>
+                                  <Button
+                                    size="xs"
+                                    color="red"
+                                    onClick={() => {
+                                      setNewMemoryTitle("");
+                                      setShowAddMemoryInput(false);
+                                    }}
+                                    ml="xs"
+                                  >
+                                    Cancel
+                                  </Button>
+                                </Flex>
+                              )}
+                            </>
                           )}
-                        </Flex>
-                        {/* rest of message */}
-                      <Flex
-                        direction={"column"}
-                        maw={"85%"}
-                        gap={4}
-                        key={index}
-                        ml={message.role === "user" ? "auto" : "0"}
-                        style={{
-                          backgroundColor: message.role === "user" ? "#f7ffff" : "#fafafa",
-                          borderRadius: "10px",
-                          border: "1px solid #e7ebef",
-                          padding: "10px",
-                        }}
-                        ref={(el) => (messageRefs.current[index] = el)}
-                      >
-                        <Flex className=" rounded-lg rounded-br-none" px={"sm"} py={7}>
-                          <Text size={"xs"} fw={500}>
-                            {message.role === "user" ? (
-                              message.message
-                                .split(" ")
-                                .map((x) => x.substring(0, 40) + (x.length > 40 ? "..." : ""))
-                                .join(" ")
-                            ) : message.message === "loading" ? (
-                              <Flex align="center" gap="xs">
-                                <Loader color="black" variant="dots" />
-                              </Flex>
-                            ) : (
-                              <Text>
-                                {message.message
-                                  .split(" ")
-                                  .map((x) => x.substring(0, 40) + (x.length > 40 ? "..." : ""))
-                                  .join(" ")
-                                  .split("\n")
-                                  .map((line, index) => (
-                                    <Fragment key={index}>
-                                      {line}
-                                      <br />
-                                    </Fragment>
-                                  ))}
-                              </Text>
-                            )}
-                          </Text>
-                        </Flex>
-                        <Text color="gray" size={"xs"} ml={message.role === "user" ? "auto" : "0"}>
-                          <Text color="gray" size="xs" ml={message.role === "user" ? "auto" : "0"}>
-                            {moment(message.created_time).format("MMMM D, h:mm A")}
-                          </Text>
-                        </Text>
-                      </Flex>
-                      </>
-                    ) : (
-                      <Card
-                        key={index}
-                        className="border border-[#E25DEE] border-solid rounded-md"
-                        shadow="sm"
-                        withBorder
-                        radius="md"
-                        style={{ marginLeft: 0 }}
-                      >
-                        <Card.Section>
+                        </Box>
+                      </Box>
+                    );
+                  })}
+              </Card>
+            </Popover.Dropdown>
+          </Popover>
+        </Flex>
+        <Divider bg="gray" />
+        <div style={{ position: "relative", height: "48vh" }}>
+          <ScrollArea
+            h={"53vh"}
+            viewportRef={viewport}
+            scrollHideDelay={4000}
+            style={{
+              overflow: "hidden",
+              // transform: !normalInputMode ? "translateY(-250px)" : "none",
+              transition: "transform 0.3s ease",
+            }}
+          >
+            {messages.length > 1 ? (
+              <Flex
+                direction={"column"}
+                gap={"sm"}
+                p={"md"}
+                h={"100%"}
+                className=" overflow-auto"
+              >
+                {messages.map((message: MessageType, index: number) => {
+                  return (
+                    <>
+                      {message.type === "message" ||
+                      message.type === "slack" ? (
+                        <>
+                          {/* name section */}
                           <Flex
-                            justify="space-between"
-                            align="center"
-                            className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
-                            onClick={() => toggleCardCollapse(index)}
+                            gap={4}
+                            align={"center"}
+                            ml={message.role === "user" ? "auto" : "0"}
+                            style={{
+                              width:
+                                messageRefs.current[index]?.offsetWidth ||
+                                "85%",
+                              marginBottom: "-10px",
+                            }}
                           >
-                            {!messages[index + 1] && <Loader size="sm" color="white" />}
+                            <Avatar
+                              src={
+                                message.sender_name
+                                  ? null
+                                  : message.role === "user"
+                                  ? userData.img_url
+                                  : Logo
+                              }
+                              size={"xs"}
+                              radius={"xl"}
+                            />
+                            <Text fw={600} size={"xs"}>
+                              {message.sender_name
+                                ? message.sender_name
+                                : message.role !== "assistant"
+                                ? userData.sdr_name
+                                : "Selix AI"}
+                              {message.type === "slack" &&
+                                message.slack_channel && (
+                                  <Text component="span" fw={700}>
+                                    {" via "}
+                                    <img
+                                      src={SlackLogo}
+                                      alt="slack"
+                                      width={10}
+                                      height={10}
+                                      style={{ margin: "0 4px" }}
+                                    />
+                                    {" Slack"}
+                                    <Text
+                                      component="a"
+                                      href={`https://slack.com/app_redirect?channel=${message.slack_channel}`}
+                                      style={{
+                                        color: "#1E90FF",
+                                        textDecoration: "underline",
+                                        marginLeft: "4px",
+                                      }}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      #{message.slack_channel}
+                                    </Text>
+                                  </Text>
+                                )}
+                            </Text>
+                            {message.role !== "user" &&
+                              message.message !== "loading" &&
+                              index === messages.length - 1 && (
+                                <Flex align="center" gap="xs">
+                                  {showLoader && (
+                                    <Loader
+                                      variant="bars"
+                                      color="grape"
+                                      size="xs"
+                                      ml={10}
+                                    />
+                                  )}
+                                </Flex>
+                              )}
+                          </Flex>
+                          {/* rest of message */}
+                          <Flex
+                            direction={"column"}
+                            maw={"85%"}
+                            gap={4}
+                            key={index}
+                            ml={message.role === "user" ? "auto" : "0"}
+                            style={{
+                              backgroundColor:
+                                message.role === "user" ? "#f7ffff" : "#fafafa",
+                              borderRadius: "10px",
+                              border: "1px solid #e7ebef",
+                              padding: "10px",
+                            }}
+                            ref={(el) => (messageRefs.current[index] = el)}
+                          >
+                            <Flex
+                              className=" rounded-lg rounded-br-none"
+                              px={"sm"}
+                              py={7}
+                            >
+                              <Text size={"xs"} fw={500}>
+                                {message.role === "user" ? (
+                                  message.message
+                                    .split(" ")
+                                    .map(
+                                      (x) =>
+                                        x.substring(0, 40) +
+                                        (x.length > 40 ? "..." : "")
+                                    )
+                                    .join(" ")
+                                ) : message.message === "loading" ? (
+                                  <Flex align="center" gap="xs">
+                                    <Loader color="black" variant="dots" />
+                                  </Flex>
+                                ) : (
+                                  <Text>
+                                    {message.message
+                                      .split(" ")
+                                      .map(
+                                        (x) =>
+                                          x.substring(0, 40) +
+                                          (x.length > 40 ? "..." : "")
+                                      )
+                                      .join(" ")
+                                      .split("\n")
+                                      .map((line, index) => (
+                                        <Fragment key={index}>
+                                          {line}
+                                          <br />
+                                        </Fragment>
+                                      ))}
+                                  </Text>
+                                )}
+                              </Text>
+                            </Flex>
+                            <Text
+                              color="gray"
+                              size={"xs"}
+                              ml={message.role === "user" ? "auto" : "0"}
+                            >
+                              <Text
+                                color="gray"
+                                size="xs"
+                                ml={message.role === "user" ? "auto" : "0"}
+                              >
+                                {moment(message.created_time).format(
+                                  "MMMM D, h:mm A"
+                                )}
+                              </Text>
+                            </Text>
+                          </Flex>
+                        </>
+                      ) : (
+                        <Card
+                          key={index}
+                          className="border border-[#E25DEE] border-solid rounded-md"
+                          shadow="sm"
+                          withBorder
+                          radius="md"
+                          style={{ marginLeft: 0 }}
+                        >
+                          <Card.Section>
+                            <Flex
+                              justify="space-between"
+                              align="center"
+                              className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
+                              onClick={() => toggleCardCollapse(index)}
+                            >
+                              {!messages[index + 1] && (
+                                <Loader size="sm" color="white" />
+                              )}
 
                               <Text fw={600} size="xs">
                                 ✨ {message.action_title}
@@ -4041,6 +4142,17 @@ const SegmentChat = (props: any) => {
               </Flex>
             </Flex>
           </Paper>
+          <ActionIcon
+            size="sm"
+            ml="xs"
+            mb="xs"
+            onClick={() => {
+              const url = `/selix_debugger?session_id=${sessionId}`;
+              window.open(url, "_blank");
+            }}
+          >
+            <IconSettings size={"1rem"} />
+          </ActionIcon>
         </div>
       </Paper>
       <SelixMemoryLogs
@@ -4690,8 +4802,9 @@ const PlannerComponent = ({
   const [opened, { toggle }] = useDisclosure(true);
   const taskContainerRef = useRef<HTMLDivElement>(null);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
   const [editingTask, setEditingTask] = useState<Number | null>(null);
@@ -5311,8 +5424,7 @@ const PlannerComponent = ({
                                     <RichTextArea
                                       overrideSticky={true}
                                       onChange={(value, rawValue) => {
-                                        taskDraftDescriptionRaw.current =
-                                          rawValue;
+                                        taskDraftDescriptionRaw.current = rawValue;
                                         taskDraftDescription.current = value;
                                       }}
                                       value={taskDraftDescriptionRaw.current}
@@ -5449,8 +5561,9 @@ const TaskRenderer = ({
   segment?: TransformedSegment | undefined;
   handleStrategySubmit: () => void;
 }) => {
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const sequencesV2Ref = useRef(null);
   const [lastLoadedProjectId, setLastLoadedProjectId] = useState<number>(-1);
   const [sequences, setSequences] = useState<any[]>([]);
@@ -5773,9 +5886,8 @@ const SelinStrategy = ({
   currentSessionId: Number | null;
   counter: Number;
 }) => {
-  const memory = threads.find(
-    (thread) => thread.id === currentSessionId
-  )?.memory;
+  const memory = threads.find((thread) => thread.id === currentSessionId)
+    ?.memory;
 
   const hackedSubmit = () => {
     handleSubmit &&

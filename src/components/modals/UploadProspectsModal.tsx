@@ -99,8 +99,20 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
 
     if (checked) {
       setIncludedAssetIdArray((prevArray) => [...prevArray, id]);
+      const asset = assets.find(asset => asset.id === id);
+      if (asset) {
+        const assetRawValue = asset.asset_raw_value ?? '';
+        setEmailAssetIngestor((prevString) => prevString.includes(assetRawValue) ? prevString : prevString + assetRawValue);
+        setLiAssetIngestor((prevString) => prevString.includes(assetRawValue) ? prevString : prevString + assetRawValue);
+      }
     } else {
       setIncludedAssetIdArray((prevArray) => prevArray.filter(assetId => assetId !== id));
+      const asset = assets.find(asset => asset.id === id);
+      if (asset) {
+        const assetRawValue = asset.asset_raw_value ?? '';
+        setEmailAssetIngestor((prevString) => prevString.replace(assetRawValue, ''));
+        setLiAssetIngestor((prevString) => prevString.replace(assetRawValue, ''));
+      }
     }
   };
 
@@ -273,6 +285,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
   const [liCtaGenerator, setLiCtaGenerator] = useState(false);
   const [liPainPoint, setLiPainPoint] = useState("");
   const setLiSequenceToggle = () => setLiSequenceOpened(!liSequenceOpened);
+  const [assetSearch, setAssetSearch] = useState("");
   const [liSequenceState, setLiSequenceState] = useState({
     howItWorks: false,
     varyIntroMessages: false,
@@ -300,6 +313,10 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
       setSegmentOptions(segments);
       setFetchingSegments(false);
     };
+
+    const assetMatchesSearchCriteria = (asset: AssetType) => {
+      return asset.asset_key.toLowerCase().includes(assetSearch.toLowerCase()) || asset?.asset_raw_value?.toLowerCase().includes(assetSearch.toLowerCase());
+    }
 
     const fetchAllAssets = async () => {
       try {
@@ -847,9 +864,15 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                     {isListOpen && assets.length > 0 && (
                       <ScrollArea style={{ height: 200 }}>
                         <Accordion mt={4}>
+                          <TextInput
+                            placeholder="Search assets"
+                            onChange={(e) => setAssetSearch(e.currentTarget.value)}
+                            mb={4}
+                          />
                           <Table>
                             <tbody>
                               {assets
+                                .filter(asset => assetMatchesSearchCriteria(asset)) // Assuming assetMatchesSearchCriteria is a function that filters assets based on search criteria
                                 .sort((a, b) => {
                                   const aSendRate = a.num_sends === 0 ? 0 : a.num_opens / a.num_sends;
                                   const bSendRate = b.num_sends === 0 ? 0 : b.num_opens / b.num_sends;

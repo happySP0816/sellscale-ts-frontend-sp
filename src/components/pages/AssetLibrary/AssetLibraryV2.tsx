@@ -1,100 +1,173 @@
-import { Badge, Box, Button, Divider, Flex, Group, List, Modal, Radio, Stack, Switch, Text, TextInput, Textarea } from '@mantine/core';
-import { IconCloudUpload, IconEdit, IconLayoutBoard, IconList, IconPlus, IconTrash } from '@tabler/icons';
+import { Badge, Box, Button, Divider, Flex, Group, List, Modal, Radio, Stack, Switch, Text, TextInput, Textarea, useMantineTheme } from '@mantine/core';
+import { IconCloudUpload, IconEdit, IconFileSpreadsheet, IconLayoutBoard, IconList, IconPlus, IconTrash, IconUpload, IconX } from '@tabler/icons';
 import { IconArrowRight, IconBulb, IconToggleRight } from '@tabler/icons';
 import { useDisclosure } from '@mantine/hooks';
 import { IconSparkles } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import CardView from './CardView';
 import ListView from './ListView';
+import { API_URL } from '@constants/data';
+import { useRecoilValue } from 'recoil';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { showNotification } from '@mantine/notifications';
+import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
+
+export type AssetType = {
+  asset_key: string;
+  asset_raw_value: string | null;
+  asset_tags: string[];
+  asset_type: 'PDF' | 'URL' | 'TEXT';
+  asset_value: string;
+  client_archetype_ids: number[];
+  client_id: number;
+  id: number;
+  num_opens: number;
+  num_replies: number;
+  num_sends: number;
+};
 
 export default function AssetLibraryV2() {
   const [opened, { open, close }] = useDisclosure(false);
   const [openedAsset, { open: openAsset, close: closeAsset }] = useDisclosure(false);
+  const theme = useMantineTheme();
 
   const [viewType, setViewType] = useState('card');
   const [tabs, setTabs] = useState('non_generative');
   const [semiTabs, setSemiTabs] = useState('');
+  const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
+  const MAX_FILE_SIZE_MB = 2;
+  const [preview, setPreview] = useState(false);
 
-  const [ingestionType, setIngestionType] = useState('');
-  const [assetType, setAssetType] = useState('');
+  const [ingestionType, setIngestionType] = useState<'PDF' | 'URL' | 'TEXT' | 'IMAGE' | ''>('');
+  const [assetType, setAssetType] = useState<
+    | 'subject line'
+    | 'email template'
+    | 'linkedin'
+    | 'CTO'
+    | 'Intro email'
+    | 'Small startups'
+    | 'hello world'
+    | 'Healthcare intro'
+    | 'LinkedIn Template'
+    | 'email'
+    | 'Solution Based'
+    | 'Research'
+    | 'Template-test'
+    | 'brand'
+    | 'LinkedIn CTA'
+    | 'Supply Chain'
+    | 'Intro'
+    | 'Pain Based'
+    | 'PTAL'
+    | 'pain-based'
+    | 'need-based'
+    | 'pain based'
+    | 'first email (v2)'
+    | 'Pain-Based'
+    | 'FOMO Based'
+    | 'Phrase'
+    | 'linkedin template'
+    | 'Offer'
+    | 'CTA'
+    | 'smile based'
+    | 'e'
+    | null
+    | 'Social Proof'
+    | 'Pain Point'
+    | 'CRM Based'
+    | 'test'
+    | 'Value Prop'
+    | 'Case Study'
+    | 'Testimonial'
+    | 'Quote'
+    | 'How It Works'
+    | 'Email Template'
+    | 'followup'
+    | 'email 2'
+    | 'E2'
+    | 'Social Proof Based'
+    | 'GCP_EMAIL_1'
+    | 'message 1'
+    | 'affiliate marketing'
+    | 'Dan-Approved'
+  >(null);
+  const [assetName, setAssetName] = useState('');
+  const [assetValue, setAssetValue] = useState('');
   const [editSummary, setEditSummary] = useState(false);
   const [summary, setSummary] = useState('');
-  const data = [
-    {
-      num: 0,
-      usage: true,
-      ingestion_type: 'pdf',
-      title: 'Behavioral Health ROI',
-      type: 'case study',
-      open_rate: 76,
-      reply_rate: 68,
-      ai_reponse: true,
-    },
-    {
-      num: 1,
-      usage: false,
-      ingestion_type: 'text',
-      title: 'NewtonX G2 Winnsdndndndd',
-      type: 'offer',
-      open_rate: 76,
-      reply_rate: 68,
-      ai_reponse: false,
-    },
-    {
-      num: 2,
-      usage: true,
-      ingestion_type: 'pdf',
-      title: 'Phrase: NewtonX teststsdasd',
-      type: 'value prop',
-      open_rate: 76,
-      reply_rate: 68,
-      ai_reponse: true,
-    },
-    {
-      num: 3,
-      usage: false,
-      ingestion_type: 'text',
-      title: 'NewtonX G2 Winnsdndndndd',
-      type: 'offer',
-      open_rate: 76,
-      reply_rate: 68,
-      ai_reponse: false,
-    },
-    {
-      num: 4,
-      usage: false,
-      ingestion_type: 'text',
-      title: 'NewtonX G2 Winnsdndndndd',
-      type: 'offer',
-      open_rate: 76,
-      reply_rate: 68,
-      ai_reponse: false,
-    },
-    {
-      num: 5,
-      usage: false,
-      ingestion_type: 'text',
-      title: 'NewtonX G2 Winnsdndndndd',
-      type: 'offer',
-      open_rate: 76,
-      reply_rate: 68,
-      ai_reponse: false,
-    },
-  ];
+  const [file, setFile] = useState<File | null>(null);
 
-  const [usedData, setUsedData] = useState<any>([]);
-  const [unusedData, setUnUsedData] = useState<any>([]);
+  const [usedData, setUsedData] = useState<AssetType[]>([]);
+  const [unusedData, setUnUsedData] = useState<AssetType[]>([]);
+  const filterData = (data: AssetType[]) => {
+    switch (semiTabs) {
+      case 'offers':
+        return data.filter((asset) => asset.asset_tags.includes('Offer'));
+      case 'phrases':
+        return data.filter((asset) => asset.asset_tags.includes('Phrase'));
+      case 'study':
+        return data.filter((asset) => asset.asset_tags.includes('Case Study'));
+      case 'research':
+        return data.filter((asset) => asset.asset_tags.includes('Research'));
+      case 'email_subject_lines':
+        return data.filter((asset) => asset.asset_tags.includes('subject line'));
+      case 'linkedin_cta':
+        return data.filter((asset) => asset.asset_tags.includes('LinkedIn CTA'));
+      case 'cta':
+        return data.filter((asset) => asset.asset_tags.includes('CTA'));
+      case 'email_templates':
+        return data.filter((asset) => asset.asset_tags.includes('email template'));
+      case 'linkedin_templates':
+        return data.filter((asset) => asset.asset_tags.includes('linkedin template'));
+      default:
+        return data;
+    }
+  };
+
+  const filteredUsedData = filterData(usedData);
+  const filteredUnusedData = filterData(unusedData);
+
 
   useEffect(() => {
-    let usedData = data.filter((data) => data.usage === true);
-    setUsedData(usedData);
-    let unusedData = data.filter((data) => data.usage === false);
-    setUnUsedData(unusedData);
+    fetchAllAssets();
   }, []);
+
+  const fetchAllAssets = async () => {
+    try {
+      const response = await fetch(`${API_URL}/client/all_assets_in_client`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const result = await response.json();
+      if (result.message === 'Success') {
+        const assets: AssetType[] = result.data;
+        const usedData = assets.filter((asset: AssetType) => asset.client_archetype_ids.length > 0);
+        setUsedData(usedData);
+        const unusedData = assets.filter((asset: AssetType) => asset.client_archetype_ids.length === 0);
+        setUnUsedData(unusedData);
+
+      } else {
+        showNotification({
+          title: 'Error',
+          message: 'Failed to fetch assets',
+          color: 'red',
+        });
+      }
+    } catch (error) {
+      showNotification({
+        title: 'Error',
+        message: 'An error occurred while fetching assets',
+        color: 'red',
+      });
+    }
+  };
 
   return (
     <Flex direction={'column'} px={'5%'} gap={'sm'} bg={'white'}>
-      <Flex align={'center'} justify={'space-between'}>
+      <Flex mt="md" align={'center'} justify={'space-between'}>
         <Text size={'25px'} fw={700}>
           SellScale's Asset Library
         </Text>
@@ -199,16 +272,16 @@ export default function AssetLibraryV2() {
         )}
         {/* {tabs === 'non_generative' ? <NonGenerative view={viewType} data={data} /> : <Generative view={viewType} data={data} />} */}
         {viewType === 'card' ? (
-          <CardView type={tabs} view={viewType} semiTabs={semiTabs} useData={usedData} unUseData={unusedData} />
+          <CardView fetchAssets={fetchAllAssets} type={tabs} view={viewType} semiTabs={semiTabs} useData={filteredUsedData} unUseData={filteredUnusedData} />
         ) : (
-          <ListView type={tabs} view={viewType} semiTabs={semiTabs} useData={usedData} unUseData={unusedData} />
+          <ListView fetchAssets={fetchAllAssets} type={tabs} view={viewType} semiTabs={semiTabs} useData={filteredUsedData} unUseData={filteredUnusedData} />
         )}
       </Box>
       <Modal
         opened={opened}
         onClose={() => {
           close();
-          setAssetType('');
+          setAssetType(null);
           setIngestionType('');
         }}
         size='640px'
@@ -219,18 +292,23 @@ export default function AssetLibraryV2() {
         }
       >
         <Flex direction={'column'} gap={'md'}>
-          <TextInput label='Name of Asset' placeholder='Enter name' />
+          <TextInput 
+            label='Name of Asset' 
+            placeholder='Enter name' 
+            required 
+            onChange={(e) => setAssetName(e.target.value)}
+          />
           <Flex direction={'column'}>
             <Text size={'14px'} fw={400} mb={'3px'}>
               Asset Type
             </Text>
-            <Radio.Group onChange={(e) => setAssetType(e)} style={{ border: '1px solid #ced4da', borderRadius: '8px' }} p={'sm'} pt={'-sm'}>
+            <Radio.Group onChange={(e) => setAssetType(e as any)} style={{ border: '1px solid #ced4da', borderRadius: '8px' }} p={'sm'} pt={'-sm'}>
               <Group mt='xs'>
-                <Radio value='cta' label='CTAs' size='sm' />
-                <Radio value='offer' label='Offers' size='sm' />
-                <Radio value='value_prop' label='Value Prop' size='sm' />
-                <Radio value='case_study' label='Case Studies' size='sm' />
-                <Radio value='research_point' label='Research Points' size='sm' />
+                <Radio value='CTA' label='CTAs' size='sm' />
+                <Radio value='Offer' label='Offers' size='sm' />
+                <Radio value='Value Prop' label='Value Prop' size='sm' />
+                <Radio value='Case Study' label='Case Studies' size='sm' />
+                <Radio value='Research' label='Research Points' size='sm' />
               </Group>
             </Radio.Group>
           </Flex>
@@ -238,18 +316,18 @@ export default function AssetLibraryV2() {
             <Text size={'14px'} fw={400} mb={'3px'}>
               Ingestion Method
             </Text>
-            <Radio.Group onChange={(e) => setIngestionType(e)} style={{ border: '1px solid #ced4da', borderRadius: '8px' }} p={'sm'} pt={'-sm'}>
+            <Radio.Group onChange={(e) => setIngestionType(e as 'PDF' | 'URL' | 'TEXT' | '')} style={{ border: '1px solid #ced4da', borderRadius: '8px' }} p={'sm'} pt={'-sm'}>
               <Group mt='xs'>
-                <Radio value='Text Dump' label='Text Dump' size='sm' />
-                <Radio value='Link' label='Link' size='sm' />
-                <Radio value='PDF' label='PDF' size='sm' />
-                <Radio value='Image' label='Image' size='sm' />
+                <Radio value='TEXT' label='Text Dump' size='sm' />
                 <Radio value='URL' label='URL' size='sm' />
-                <Radio value='Write Manually' label='Write Manually' size='sm' />
+                <Radio value='PDF' label='PDF' size='sm' />
+                <Radio value='IMAGE' label='Image' size='sm' />
+                {/* <Radio value='URL' label='URL' size='sm' /> */}
+                {/* <Radio value='TEXT' label='Write Manually' size='sm' /> */}
               </Group>
             </Radio.Group>
           </Flex>
-          {assetType !== '' && ingestionType === 'Image' ? (
+          {assetType !== null && (ingestionType === 'PDF' ||  ingestionType === 'IMAGE') ? (
             <Flex
               style={{ border: '1px solid #e2edfc', borderRadius: '8px', borderStyle: 'dashed' }}
               bg={'#f5f9fe'}
@@ -258,30 +336,81 @@ export default function AssetLibraryV2() {
               align={'center'}
               gap={'lg'}
             >
-              <Flex>
-                <IconCloudUpload color='#228be6' size={'4rem'} />
+              {!file ? (
+            <Dropzone
+              loading={false}
+              multiple={false}
+              maxSize={MAX_FILE_SIZE_MB * 1024 ** 2}
+              onDrop={async (files: any) => {
+                
+                setFile(files[0]);
+                setPreview(true);
+              }}
+              onReject={(files: any) => {
+                const error = files[0].errors[0];
+                showNotification({
+                  id: "file-upload-error",
+                  title: `Error uploading file`,
+                  message: error.message,
+                  color: "red",
+                  autoClose: 5000,
+                });
+              }}
+              accept={[MIME_TYPES.pdf, MIME_TYPES.png, MIME_TYPES.jpeg]}
+              bg={"#f5f9ff"}
+              style={{ border: "2px solid #afcdf9", borderStyle: "dashed" }}
+            >
+              <Flex align={"center"} justify={"center"} gap={80} py={20} style={{ minHeight: 200, pointerEvents: "none" }}>
+                <Group>
+                  <Dropzone.Accept>
+                    <IconUpload size={80} stroke={1.5} color={theme.colors[theme.primaryColor][theme.colorScheme === "dark" ? 4 : 6]} />
+                  </Dropzone.Accept>
+                  <Dropzone.Reject>
+                    <IconX size={80} stroke={1.5} color={theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]} />
+                  </Dropzone.Reject>
+                  <Dropzone.Idle>
+                    <IconCloudUpload color="#2476eb" size={100} stroke={0.5} />
+                  </Dropzone.Idle>
+
+                  <div>
+                    <Text align="center" size="xl" inline fw={500}>
+                      Drag & drop files or <span style={{ color: "#2476eb", textDecoration: "underline" }}>Browse</span>
+                    </Text>
+                    <Text size="sm" color="dimmed" inline mt={12}>
+                      Acceptable formats: JPG, PNG, PDF 
+                    </Text>
+                  </div>
+                </Group>
               </Flex>
-              <Box>
-                <Text size={'lg'} fw={600}>
-                  Drag & drop files or <span className='text-[#228be6] underline'>Browse</span>
-                </Text>
-                <Flex gap={'sm'} align={'center'}>
-                  <Text color='gray' fw={400} size={'sm'}>
-                    Supported formats: jpeg, png
-                  </Text>
-                  <Divider orientation='vertical' />
-                  <Text color='gray' fw={400} size={'sm'}>
-                    Max file size: 2MB
-                  </Text>
-                </Flex>
-              </Box>
+            </Dropzone>
+          ) : (
+            <Flex gap={"xs"} align={"center"} justify={"space-between"} px={"md"}>
+              <Flex>
+                <IconFileSpreadsheet color="teal" />
+                <Text size={"lg"} style={{ color: "teal" }}>{file?.name}</Text>
+              </Flex>
+              <IconX
+                color="red"
+                size={"1.2rem"}
+                className="hover:cursor-pointer"
+                onClick={() => {
+                  // setFileJSON(null);
+                  setFile(null);
+                }}
+              />
             </Flex>
-          ) : assetType !== '' && ingestionType === 'Text Dump' ? (
+          )}
+            </Flex>
+          ) : assetType !== null && ingestionType === 'TEXT' || ingestionType === 'URL' ? (
             <Flex direction={'column'}>
               <Textarea
                 minRows={3}
                 label={ingestionType}
-                placeholder='Copy/paste contents of a PDF, webpage, or sequence and the AI will summarize and Ingest it.'
+                placeholder='Paste text here.'
+                value={assetValue}
+                onChange={(event) => {
+                  setAssetValue(event.target.value);
+                }}
               />
             </Flex>
           ) : (
@@ -294,14 +423,65 @@ export default function AssetLibraryV2() {
               w={'100%'}
               onClick={() => {
                 close();
-                setAssetType('');
+                setAssetType(null);
                 setIngestionType('');
               }}
             >
               Go Back
             </Button>
-            <Button w={'100%'} disabled={assetType && ingestionType ? false : true}>
-              Summarize Asset
+            <Button 
+              w={'100%'} 
+              disabled={assetType && ingestionType && assetName ? false : true}
+              onClick={async () => {
+
+                const fileAsB64Raw = file ? btoa(unescape(encodeURIComponent(await file.text()))) : null;
+
+                fetch(`${API_URL}/client/create_archetype_asset`, {
+                  method: 'POST',
+                  headers: {
+                    Authorization: `Bearer ${userToken}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    asset_key: assetName,
+                    asset_raw_value: (ingestionType === 'TEXT' || ingestionType === 'URL') ? assetValue : file ? fileAsB64Raw : null,
+                    asset_tags: [assetType],
+                    asset_type: ingestionType,
+                    asset_value: (ingestionType === 'TEXT' || ingestionType === 'URL') ? assetValue : file ? fileAsB64Raw : null,
+                    client_archetype_ids: [],
+                    client_id: userData.client.id,
+                  }),
+                })
+                  .then((response) => response.json())
+                  .then((result) => {
+                    if (result.message === 'Success') {
+                      showNotification({
+                        title: 'Success',
+                        message: 'Asset added successfully',
+                        color: 'green',
+                      });
+                      fetchAllAssets();
+                      close();
+                      setAssetType(null);
+                      setIngestionType('');
+                    } else {
+                      showNotification({
+                        title: 'Error',
+                        message: 'Failed to add asset',
+                        color: 'red',
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    showNotification({
+                      title: 'Error',
+                      message: 'An error occurred while adding asset',
+                      color: 'red',
+                    });
+                  });
+              }}
+            >
+              Summarize & Add Asset
             </Button>
           </Flex>
         </Flex>

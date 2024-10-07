@@ -33,6 +33,7 @@ import AIBrainStrategy from "./Strategy/AIBrainStrategy";
 import SellScaleAssistant from "./AIBrain/SellScaleAssistant";
 import WhatHappenedLastWeek from "./AIBrain/WhatHappenedLastWeek";
 import CampaignCurator from "@common/campaigns/CampaignCuratorV2";
+import AssetLibraryV2 from "./AssetLibrary/AssetLibraryV2";
 
 const AnalyticsPageNew = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -77,6 +78,7 @@ const AnalyticsPageNew = () => {
           <Tabs.Tab value="segment_builder">Segments Builder </Tabs.Tab>
           <Tabs.Tab value="what_happened_last_week">What Happened Last Week </Tabs.Tab>
           <Tabs.Tab value="campaign_curator">Campaign Curator</Tabs.Tab>
+          <Tabs.Tab value="asset_library">Asset Library</Tabs.Tab>
           <Tabs.Tab value="tam" ml="auto">
             TAM
           </Tabs.Tab>
@@ -136,6 +138,9 @@ const AnalyticsPageNew = () => {
         </Tabs.Panel>
         <Tabs.Panel value="campaign_curator" pt="xs">
           <CampaignCurator />
+        </Tabs.Panel>
+        <Tabs.Panel value="asset_library" pt="xs">
+          <AssetLibraryV2 />
         </Tabs.Panel>
         <Tabs.Panel value="assets" pt="xs">
           <Group position="right" pr={40}>

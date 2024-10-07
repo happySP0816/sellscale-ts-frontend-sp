@@ -149,6 +149,7 @@ export default function CampaignChannelPage(props: {
   };
 
   const toggleEmail = async () => {
+    window.alert("Toggling email");
     setLoading(true);
     const result = await postTogglePersonaActive(
       userToken,

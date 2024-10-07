@@ -679,9 +679,10 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
                 });
               }}
             >
-              Add
+              Add / Edit
             </Button>
-            <Button
+            {/* Simulator switch */}
+            {/* <Button
               variant="outline"
               radius="md"
               sx={{
@@ -722,7 +723,7 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
                   Edit
                 </span>
               </Group>
-            </Button>
+            </Button> */}
           </Flex>
         </Group>
       </Card.Section>

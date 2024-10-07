@@ -25,6 +25,8 @@ import {
   Table,
   HoverCard,
   Loader,
+  List,
+  ScrollArea,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useEffect, useRef, useState } from "react";
@@ -41,6 +43,7 @@ import {
   IconCircleCheck,
   IconEye,
   IconInfoCircle,
+  IconLayoutBoard,
   IconMailOpened,
   IconPencil,
   IconPlus,
@@ -65,6 +68,7 @@ import { showNotification } from "@mantine/notifications";
 import { set } from "lodash";
 import { TransformedSegment } from "@pages/SegmentV3/SegmentV3";
 import { useTrackApi } from "@common/settings/Traffic/WebTrafficRoutingApi";
+import { AssetType } from "@pages/AssetLibrary/AssetLibraryV2";
 
 export default function UploadProspectsModal({ context, id, innerProps }: ContextModalProps<{ mode: "CREATE-ONLY"; strategy_id?: number | undefined; selixSessionId?: Number | null }>) {
   const theme = useMantineTheme();
@@ -79,9 +83,26 @@ export default function UploadProspectsModal({ context, id, innerProps }: Contex
   const [handlingStrategy, setHandlingStrategy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [segmentData, setSegmentData] = useState<TransformedSegment[]>([]);
+  const [assets, setAssets] = useState<AssetType[]>([]);
+  const [checkedStates, setCheckedStates] = useState<boolean[]>([]);
+  const [includedAssetIdArray, setIncludedAssetIdArray] = useState<number[]>([]);
+  const [isListOpen, setIsListOpen] = useState(false);
   const [segmentOptions, setSegmentOptions] = useState<Segment[]>([]);
   const [fetchingSegments, setFetchingSegments] = useState(false);
   const [selectedSegmentId, setSelectedSegmentId] = useState(-1);
+
+  const handleCheckboxChange = (checked: boolean, index: number, id: number) => {
+
+    const newCheckedStates = [...checkedStates];
+    newCheckedStates[index] = checked;
+    setCheckedStates(newCheckedStates);
+
+    if (checked) {
+      setIncludedAssetIdArray((prevArray) => [...prevArray, id]);
+    } else {
+      setIncludedAssetIdArray((prevArray) => prevArray.filter(assetId => assetId !== id));
+    }
+  };
 
   const {
     updateIcpRoute,
@@ -280,6 +301,34 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
       setFetchingSegments(false);
     };
 
+    const fetchAllAssets = async () => {
+      try {
+        const response = await fetch(`${API_URL}/client/all_assets_in_client`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+        const result = await response.json();
+        if (result.message === 'Success') {
+          const assets: AssetType[] = result.data;
+          setAssets(assets);
+        } else {
+          showNotification({
+            title: 'Error',
+            message: 'Failed to fetch assets',
+            color: 'red',
+          });
+        }
+      } catch (error) {
+        showNotification({
+          title: 'Error',
+          message: 'An error occurred while fetching assets',
+          color: 'red',
+        });
+      }
+    };
+
 
   useEffect(() => {
     const getVoices = async () => {
@@ -297,6 +346,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
     handleStrategy();
     fetchSegments();
     getVoices();
+    fetchAllAssets();
   }, [])
 
   const checkIfStrategyConnectedHasCampaignWithSequences = async (selixSessionId: Number) => {
@@ -773,6 +823,70 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                     </Accordion>
                   )}
                   </Paper>}
+                  
+                  
+
+                  <Paper withBorder p="md">
+                    <Flex align="center" style={{ marginBottom: '8px', justifyContent: 'space-between', width: '100%' }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <IconLayoutBoard size={"1.4rem"} fill="#228be6" color="white" style={{ marginRight: '8px' }} />
+                        <Text fw={500} size={"sm"}>
+                          Assets
+                        </Text>
+                      </div>
+                      <Switch
+                        checked={isListOpen}
+                        onChange={() => setIsListOpen(!isListOpen)}
+                        styles={{
+                          root: {
+                            marginTop: '8px',
+                          },
+                        }}
+                      />
+                    </Flex>
+                    {isListOpen && assets.length > 0 && (
+                      <ScrollArea style={{ height: 200 }}>
+                        <Accordion mt={4}>
+                          <Table>
+                            <tbody>
+                              {assets
+                                .sort((a, b) => {
+                                  const aSendRate = a.num_sends === 0 ? 0 : a.num_opens / a.num_sends;
+                                  const bSendRate = b.num_sends === 0 ? 0 : b.num_opens / b.num_sends;
+                                  return bSendRate - aSendRate;
+                                })
+                                .map((asset, index) => (
+                                  <tr key={asset.id}>
+                                    <td>
+                                      <Checkbox 
+                                        checked={checkedStates[index] || false} 
+                                        onChange={(e) => handleCheckboxChange(e.target.checked, index, asset.id)}
+                                      />
+                                    </td>
+                                    <td>
+                                      <HoverCard withinPortal width={280} shadow="md">
+                                        <HoverCard.Target>
+                                          <Text>
+                                            {asset.asset_key} - <Badge color="green">{isNaN(asset.num_opens / asset.num_sends) || asset.num_sends === 0 ? 0 : ((asset.num_opens / asset.num_sends) * 100).toFixed(2)}%</Badge>
+                                          </Text>
+                                        </HoverCard.Target>
+                                        <HoverCard.Dropdown>
+                                          <Text size="sm">{asset.asset_raw_value}</Text>
+                                        </HoverCard.Dropdown>
+                                      </HoverCard>
+                                    </td>
+                                    <td>
+                                      <Badge>{asset.asset_type}</Badge>
+                                      {asset.asset_tags.length > 0 && asset.asset_tags.some(tag => tag?.trim() !== '') && <Badge color="grape">{asset.asset_tags.join(', ')}</Badge>}
+                                    </td>
+                                  </tr>
+                                ))}
+                            </tbody>
+                          </Table>
+                        </Accordion>
+                      </ScrollArea>
+                    )}
+                  </Paper>
                    <Paper withBorder p="md">
                   <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                     <Flex direction="column" gap={"xs"} align={"flex-start"} w="100%" justify="flex-start">
@@ -1338,6 +1452,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
               liSequenceState,
               emailSequenceState: emailSequenceStateRaw,
             },
+            assetIds: includedAssetIdArray,
             }}
           />
         </Stack>

@@ -83,7 +83,8 @@ type PropsType = {
         formerWorkAlum: boolean;
         feedbackBased: boolean;
       };
-    }
+    };
+    assetIds?: number[];
   };
 };
 
@@ -128,7 +129,8 @@ export default function CreatePersona(props: PropsType) {
       autoGenerationPayload,
       props.createPersona.connectedStrategyId,
       props.createPersona.override_archetype_id,
-      props.createPersona.selectedSegmentId
+      props.createPersona.selectedSegmentId,
+      props.createPersona?.assetIds,
     );
     } catch (e) {
       console.error("Failed to create persona & CTAs", e);

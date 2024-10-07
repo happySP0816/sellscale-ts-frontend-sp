@@ -9,11 +9,15 @@ import {
   Flex,
   Grid,
   Group,
+  HoverCard,
+  List,
   Modal,
+  MultiSelect,
   Select,
   Stack,
   Text,
   Textarea,
+  TextInput,
   Tooltip,
 } from '@mantine/core';
 import {
@@ -31,6 +35,11 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { IconFileTypePdf, IconPdf, IconSparkles } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
+import { AssetType } from './AssetLibraryV2';
+import { useRecoilValue } from 'recoil';
+import { API_URL } from '@constants/data';
+import { userTokenState } from '@atoms/userAtoms';
+import { showNotification } from '@mantine/notifications';
 
 export default function CardView(props: any) {
   const [tabs, setTabs] = useState('all');
@@ -41,14 +50,135 @@ export default function CardView(props: any) {
   const [stepModalOpened, { open: stepOpen, close: stepClose }] = useDisclosure(false);
   const [useModalOpened, { open: useOpen, close: useClose }] = useDisclosure(false);
   const [assetModalOpened, { open: assetOpen, close: assetClose }] = useDisclosure(false);
+  const [editAsset, setEditAsset] = useState<AssetType>();
+  const [reason, setReason] = useState('');
+  const userToken = useRecoilValue(userTokenState);
 
   const [stepData, setStepData] = useState('Use in Any Step');
   const [stepValue, setStepValue] = useState('Use in Any Step');
   const [stepStatus, setStepStatus] = useState(false);
   const [stepKey, setStepKey] = useState();
 
+  const useData = props.useData as AssetType[];
+  const unUseData = props.unUseData as AssetType[];
+
   return (
     <>
+    <Modal opened={!!editAsset} onClose={() => setEditAsset(undefined)} title="Edit Asset">
+      {editAsset && (
+        <Stack spacing="md">
+          <TextInput
+            label="Asset Key"
+            value={editAsset.asset_key}
+            onChange={(e) => setEditAsset({ ...editAsset, asset_key: e.target.value })}
+          />
+          <Textarea
+            label="Asset Raw Value"
+            value={editAsset.asset_raw_value || ''}
+            onChange={(e) => setEditAsset({ ...editAsset, asset_raw_value: e.target.value })}
+          />
+          <Select
+            label="Asset Type"
+            value={editAsset.asset_type}
+            onChange={(value) => setEditAsset({ ...editAsset, asset_type: value as 'PDF' | 'URL' | 'TEXT' })}
+            data={[
+              { value: 'PDF', label: 'PDF' },
+              { value: 'URL', label: 'URL' },
+              { value: 'TEXT', label: 'TEXT' },
+            ]}
+          />
+          <TextInput
+            label="Asset Value"
+            value={editAsset.asset_value}
+            onChange={(e) => setEditAsset({ ...editAsset, asset_value: e.target.value })}
+          />
+          <MultiSelect
+            label="Client Archetypes"
+            data={editAsset.client_archetype_ids.map(id => ({ value: id.toString(), label: id.toString() }))}
+            value={editAsset.client_archetype_ids.map(id => id.toString())}
+            onChange={(values) => setEditAsset({ ...editAsset, client_archetype_ids: values.map(Number) })}
+            placeholder="Select archetype IDs"
+            creatable
+            searchable
+            getCreateLabel={(query) => `+ Create ${query}`}
+            onCreate={(query) => {
+              const newId = Number(query);
+              if (!isNaN(newId)) {
+                setEditAsset((prev: any) => ({
+                  ...prev,
+                  client_archetype_ids: [...prev.client_archetype_ids, newId],
+                }));
+                return { value: query, label: query };
+              }
+              return null;
+            }}
+          />
+          {/* <TextInput
+            label="Client ID"
+            value={editAsset.client_id.toString()}
+            onChange={(e) => setEditAsset({ ...editAsset, client_id: Number(e.target.value) })}
+          /> */}
+          <MultiSelect
+            label="Asset Tags"
+            data={[
+              { value: 'Offer', label: 'Offer' },
+              { value: 'Phrase', label: 'Phrase' },
+              { value: 'Case Study', label: 'Case Study' },
+              { value: 'Research', label: 'Research' },
+              { value: 'subject line', label: 'subject line' },
+              { value: 'LinkedIn CTA', label: 'LinkedIn CTA' },
+              { value: 'CTA', label: 'CTA' },
+              { value: 'email template', label: 'email template' },
+              { value: 'linkedin template', label: 'linkedin template' },
+            ]}
+            value={editAsset.asset_tags}
+            onChange={(values) => setEditAsset({ ...editAsset, asset_tags: values })}
+            placeholder="Select or create tags"
+            creatable
+            searchable
+            getCreateLabel={(query) => `+ Create ${query}`}
+            onCreate={(query) => {
+              setEditAsset((prev: any) => ({
+                ...prev,
+                asset_tags: [...prev.asset_tags, query],
+              }));
+              return { value: query, label: query };
+            }}
+          />
+          <TextInput
+            disabled
+            label="Number of Opens"
+            value={editAsset.num_opens ? editAsset.num_opens.toString() : '0'}
+            onChange={(e) => setEditAsset({ ...editAsset, num_opens: Number(e.target.value) })}
+          />
+          <TextInput
+            disabled
+            label="Number of Replies"
+            value={editAsset.num_replies ? editAsset.num_replies.toString() : '0'}
+            onChange={(e) => setEditAsset({ ...editAsset, num_replies: Number(e.target.value) })}
+          />
+          <TextInput
+            disabled
+            label="Number of Sends"
+            value={editAsset.num_sends ? editAsset.num_sends.toString() : '0'}
+            onChange={(e) => setEditAsset({ ...editAsset, num_sends: Number(e.target.value) })}
+          />
+          <Button onClick={() => { 
+            fetch(`${API_URL}/client/update_asset`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${userToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ ...editAsset, asset_id: editAsset.id }),
+            }).then(() => {
+              props.fetchAssets();
+              setEditAsset(undefined);
+            });
+          }}>Save Changes</Button>
+        </Stack>
+      )}
+    </Modal>
       <Stack mt={'lg'}>
         <Flex gap={'sm'} align={'center'} w={'100%'}>
           <Text sx={{ whiteSpace: 'nowrap' }} color='gray' fw={500}>
@@ -61,7 +191,7 @@ export default function CardView(props: any) {
         </Flex>
         <Collapse in={openedUsed}>
           <Grid>
-            {props.useData?.map((item: any, index: number) => {
+            {useData?.map((item: AssetType, index: number) => {
               return (
                 <Grid.Col span={4} key={index}>
                   <Flex
@@ -71,21 +201,33 @@ export default function CardView(props: any) {
                     gap={'sm'}
                   >
                     <Flex align={'center'} justify={'space-between'}>
-                      <Badge
-                        leftSection={
-                          item?.usage ? (
-                            <IconCircleCheck size={'1rem'} style={{ marginTop: '7px' }} />
-                          ) : (
-                            ''
-                          )
-                        }
-                        variant='filled'
-                        size='lg'
-                        color={item?.usage ? 'blue' : 'gray'}
-                      >
-                        {item?.usage ? 'used in campaign' : 'not used'}
-                      </Badge>
-                      <Button
+                      <HoverCard width={280} shadow="md">
+                        <HoverCard.Target>
+                          <Badge
+                            leftSection={
+                              <IconCircleCheck size={'1rem'} style={{ marginTop: '7px' }} />
+                            }
+                            variant='filled'
+                            size='lg'
+                            color={'blue'}
+                          >
+                            {'used in campaign'}
+                          </Badge>
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown>
+                          <Text size="sm" weight={500}>
+                            Campaigns:
+                          </Text>
+                          <List size="sm" spacing="xs">
+                            {item.client_archetype_ids.map((campaign, idx) => (
+                              <List.Item key={idx}>
+                                <a href={`/campaign_v2/${campaign}`} target="_blank" rel="noopener noreferrer">{campaign}</a>
+                              </List.Item>
+                            ))}
+                          </List>
+                        </HoverCard.Dropdown>
+                      </HoverCard>
+                     {item.asset_type === 'PDF' && <Button
                         radius={'xl'}
                         size='xs'
                         variant='light'
@@ -93,28 +235,28 @@ export default function CardView(props: any) {
                         onClick={assetOpen}
                       >
                         View PDF
-                      </Button>
+                      </Button>}
                     </Flex>
                     <Flex gap={'5px'}>
                       <Badge
                         size='lg'
                         color={
-                          item?.type === 'case study'
+                          item.asset_type === 'PDF'
                             ? 'pink'
-                            : item?.type === 'offer'
+                            : item?.asset_type === 'URL'
                             ? 'orange'
                             : 'green'
                         }
                       >
-                        {item?.type}
+                        {item?.asset_tags.join(', ')}
                       </Badge>
                       <Badge variant='outline' color='gray' size='lg'>
-                        ingestion type: {item?.ingestion_type}
+                        ingestion type: {item?.asset_type}
                       </Badge>
                     </Flex>
                     <Flex align={'center'} w={'fit-content'}>
-                      <Text fw={700} lineClamp={1} w={'210px'} size={'xl'}>
-                        {item?.title}
+                      <Text fw={700} lineClamp={1} w={'100%'} size={'xl'}>
+                        {item?.asset_key}
                       </Text>
                       <Tooltip
                         key={index}
@@ -130,10 +272,10 @@ export default function CardView(props: any) {
                       p={'md'}
                       direction={'column'}
                       gap={'xs'}
-                      bg={item?.ai_reponse ? '#fff5ff' : '#f4f9ff'}
+                      bg={item?.asset_raw_value ? '#fff5ff' : '#f4f9ff'}
                       style={{ borderRadius: '8px' }}
                     >
-                      {item?.ai_reponse && (
+                      {/* {!item?.asset_raw_value && (
                         <Flex align={'center'} justify={'space-between'}>
                           <Text
                             color='#ec58fb'
@@ -145,15 +287,15 @@ export default function CardView(props: any) {
                           </Text>
                           <IconEdit color='gray' size={'1.2rem'} />
                         </Flex>
-                      )}
+                      )} */}
                       <Flex align={'end'}>
                         <Text lineClamp={2} size={'sm'} color='gray' fw={600}>
                           {
-                            'This cas study explores how lorem Ipsum dolor sit amet, consectetur adipiscing elit testsdsdasdfasdasdfasdfasdfasdf'
+                            item?.asset_raw_value || item?.asset_value
                           }
                         </Text>
-                        {!item?.ai_reponse && (
-                          <Flex>
+                        {true && (
+                          <Flex onClick={() => setEditAsset(item)}>
                             <IconEdit color='gray' size={'1.2rem'} />
                           </Flex>
                         )}
@@ -190,8 +332,8 @@ export default function CardView(props: any) {
                         size={'sm'}
                       >
                         Open Rate:{' '}
-                        <Text fw={500} color={item?.open_rate > 50 ? 'green' : 'orange'}>
-                          {item?.open_rate}%
+                        <Text fw={500} color={item?.num_opens > 50 ? 'green' : 'orange'}>
+                          {item?.num_opens}%
                         </Text>
                       </Text>
                       <Divider orientation='vertical' />
@@ -202,8 +344,8 @@ export default function CardView(props: any) {
                         size={'sm'}
                       >
                         Reply Rate:{' '}
-                        <Text fw={500} color={item?.reply_rate > 50 ? 'green' : 'orange'}>
-                          {item?.reply_rate}%
+                        <Text fw={500} color={item?.num_replies > 50 ? 'green' : 'orange'}>
+                          {item?.num_replies}%
                         </Text>
                       </Text>
                     </Group>
@@ -227,6 +369,19 @@ export default function CardView(props: any) {
                         color='gray'
                         variant='outline'
                         leftIcon={<IconCircleX size={'1.2rem'} />}
+                        onClick={() => {
+                          fetch(`${API_URL}/client/update_asset`, {
+                            method: 'POST',
+                            headers: {
+                              Authorization: `Bearer ${userToken}`,
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ ...item, client_archetype_ids: [], asset_id: item.id }),
+                          }).then(() => {
+                            props.fetchAssets();
+                            showNotification({ title: 'Asset removed from campaigns', message: 'Asset removed from campaigns' });
+                          });
+                        }}
                       >
                         Stop Using
                       </Button>
@@ -239,7 +394,7 @@ export default function CardView(props: any) {
         </Collapse>
         <Flex gap={'sm'} align={'center'} w={'100%'}>
           <Text sx={{ whiteSpace: 'nowrap' }} color='gray' fw={500}>
-            UnUsed Assets
+            Un-used Assets
           </Text>
           <Divider w={'100%'} />
           <ActionIcon onClick={unusedToggle}>
@@ -248,7 +403,7 @@ export default function CardView(props: any) {
         </Flex>
         <Collapse in={openedUnUsed}>
           <Grid>
-            {props.unUseData?.map((item: any, index: number) => {
+            {unUseData?.map((item: AssetType, index: number) => {
               return (
                 <Grid.Col span={4} key={index}>
                   <Flex
@@ -260,7 +415,7 @@ export default function CardView(props: any) {
                     <Flex align={'center'} justify={'space-between'}>
                       <Badge
                         leftSection={
-                          item?.usage ? (
+                          item?.client_archetype_ids && item.client_archetype_ids.length > 0 ? (
                             <IconCircleCheck size={'1rem'} style={{ marginTop: '7px' }} />
                           ) : (
                             ''
@@ -268,11 +423,11 @@ export default function CardView(props: any) {
                         }
                         variant='filled'
                         size='lg'
-                        color={item?.usage ? 'blue' : 'gray'}
+                        color={item?.client_archetype_ids && item.client_archetype_ids.length > 0 ? 'blue' : 'gray'}
                       >
-                        {item?.usage ? 'used in campaign' : 'not used'}
+                        {item?.client_archetype_ids && item.client_archetype_ids.length > 0 ? 'used in campaign' : 'not used'}
                       </Badge>
-                      <Button
+                      {item.asset_type === 'PDF' && <Button
                         radius={'xl'}
                         size='xs'
                         variant='light'
@@ -280,38 +435,39 @@ export default function CardView(props: any) {
                         onClick={assetOpen}
                       >
                         View PDF
-                      </Button>
+                      </Button>}
                     </Flex>
                     <Flex gap={'5px'}>
                       <Badge
                         size='lg'
                         color={
-                          item?.type === 'case study'
+                          item?.asset_type === 'PDF'
                             ? 'pink'
-                            : item?.type === 'offer'
+                            : item?.asset_type === 'URL'
                             ? 'orange'
                             : 'green'
                         }
                       >
-                        {item?.type}
+                        {item?.asset_type}
                       </Badge>
                       <Badge variant='outline' color='gray' size='lg'>
-                        ingestion type: {item?.ingestion_type}
+                        ingestion type: {item?.asset_type}
                       </Badge>
                     </Flex>
                     <Flex align={'center'} w={'fit-content'}>
-                      <Text fw={700} lineClamp={1} w={'210px'} size={'xl'}>
-                        {item?.title}
+                      <Text fw={700} lineClamp={1} w={'100%'} size={'xl'}>
+                        {item?.asset_key}
                       </Text>
                     </Flex>
                     <Flex
                       p={'md'}
                       direction={'column'}
                       gap={'xs'}
-                      bg={item?.ai_reponse ? '#fff5ff' : '#f4f9ff'}
+                      // ai response?
+                      bg={false ? '#fff5ff' : '#f4f9ff'} 
                       style={{ borderRadius: '8px' }}
                     >
-                      {item?.ai_reponse && (
+                      {/* {item?.ai_reponse && (
                         <Flex align={'center'} justify={'space-between'}>
                           <Text
                             color='#ec58fb'
@@ -323,16 +479,18 @@ export default function CardView(props: any) {
                           </Text>
                           <IconEdit color='gray' size={'1.2rem'} />
                         </Flex>
-                      )}
+                      )} */}
                       <Flex align={'end'}>
                         <Text lineClamp={2} size={'sm'} color='gray' fw={600}>
                           {
-                            'This cas study explores how lorem Ipsum dolor sit amet, consectetur adipiscing elit testsdsdasdfasdasdfasdfasdfasdf'
-                          }
+                            item?.asset_raw_value || item?.asset_value
+                            }
                         </Text>
-                        {!item?.ai_reponse && (
-                          <Flex>
-                            <IconEdit color='gray' size={'1.2rem'} />
+                        {true &&(
+                          <Flex ml='sm' onClick={() => {
+                            setEditAsset(item);
+                          }}>
+                            <IconEdit color='gray'/>
                           </Flex>
                         )}
                       </Flex>
@@ -368,8 +526,8 @@ export default function CardView(props: any) {
                         size={'sm'}
                       >
                         Open Rate:{' '}
-                        <Text fw={500} color={item?.open_rate > 50 ? 'green' : 'orange'}>
-                          {item?.open_rate}%
+                        <Text fw={500} color={item?.num_opens > 50 ? 'green' : 'orange'}>
+                          {item?.num_sends ? (item?.num_opens / item?.num_sends) : 0}%
                         </Text>
                       </Text>
                       <Divider orientation='vertical' />
@@ -380,8 +538,8 @@ export default function CardView(props: any) {
                         size={'sm'}
                       >
                         Reply Rate:{' '}
-                        <Text fw={500} color={item?.reply_rate > 50 ? 'green' : 'orange'}>
-                          {item?.reply_rate}%
+                        <Text fw={500} color={item?.num_replies > 50 ? 'green' : 'orange'}>
+                          {item?.num_sends ? (item?.num_replies / item?.num_sends) : 0}%
                         </Text>
                       </Text>
                     </Group>
@@ -392,8 +550,22 @@ export default function CardView(props: any) {
                         size='md'
                         variant='outline'
                         onClick={() => {
-                          useOpen();
-                          //   setStepKey(index);
+                          fetch(`${API_URL}/client/toggle_archetype_id_in_asset_ids`, {
+                            method: 'POST',
+                            headers: {
+                              Authorization: `Bearer ${userToken}`,
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              asset_id: item.id,
+                              client_archetype_id: -1,
+                              reason: reason || null,
+                              step_number: item.asset_tags.includes('Linkedin CTA') ? 1 : null,
+                            }),
+                          }).then(() => {
+                            useOpen();
+                            props.fetchAssets();
+                          });
                         }}
                         leftIcon={<IconCircleCheck size={'1rem'} />}
                       >
@@ -405,6 +577,19 @@ export default function CardView(props: any) {
                         color='red'
                         variant='outline'
                         leftIcon={<IconTrash color='red' size={'1rem'} />}
+                        onClick={() => {
+                          fetch(`${API_URL}/client/asset`, {
+                            method: 'DELETE',
+                            headers: {
+                              Authorization: `Bearer ${userToken}`,
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ asset_id: item.id }),
+                          }).then(() => {
+                            props.fetchAssets();
+                            showNotification({ title: 'Asset Deleted', message: 'The asset has been successfully deleted.' });
+                          });
+                        }}
                       >
                         Delete
                       </Button>
@@ -466,7 +651,14 @@ export default function CardView(props: any) {
             </Flex>
           </Box>
         </Flex>
-        <Textarea placeholder='Enter reason here' mt={'md'} minRows={5} radius={'md'} />
+        <Textarea 
+          placeholder='Enter reason here' 
+          mt={'md'} 
+          minRows={5} 
+          radius={'md'} 
+          value={reason} 
+          onChange={(event) => setReason(event.currentTarget.value)} 
+        />
         <Flex gap={'xl'} mt={'xl'}>
           <Button variant='outline' color='gray' size='md' fullWidth onClick={useClose}>
             Go Back

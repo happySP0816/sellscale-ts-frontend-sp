@@ -1,17 +1,24 @@
 import {
   ActionIcon,
+  Avatar,
   Badge,
+  Box,
+  Button,
   Collapse,
   Divider,
   Flex,
+  Grid,
+  Group,
+  HoverCard,
+  List,
+  Modal,
   Select,
-  useMantineTheme,
+  Stack,
   Switch,
   Text,
-  Stack,
-  Tooltip,
-  Box,
   Textarea,
+  Tooltip,
+  useMantineTheme,
 } from '@mantine/core';
 import {
   IconArrowsDownUp,
@@ -19,15 +26,21 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconChevronUp,
+  IconCircleCheck,
+  IconCircleX,
+  IconEdit,
+  IconExternalLink,
   IconFileUnknown,
   IconInfoCircle,
   IconLetterT,
+  IconLink,
   IconPencil,
   IconTrash,
 } from '@tabler/icons';
 import { useDisclosure } from '@mantine/hooks';
-import { IconMessageCheck, IconSparkles } from '@tabler/icons-react';
-import { SetStateAction, useEffect, useState } from 'react';
+import { IconFileTypePdf, IconMessageCheck, IconPdf, IconSparkles } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
+import { AssetType } from './AssetLibraryV2';
 import { DataGrid } from 'mantine-data-grid';
 import EmailSubject from './EmailSubject';
 import LinkedinCTAs from './LinkedinCta';
@@ -43,8 +56,20 @@ export default function ListView(props: any) {
 
   const [usedDetail, setUsedDetail] = useState(false);
   const [unusedDetail, setUnUsedDetail] = useState(false);
-  const [usedDetailId, setUsedDetailId] = useState(null);
-  const [unusedDetailId, setUnUsedDetailId] = useState(null);
+  const [usedDetailId, setUsedDetailId] = useState(-1);
+  const [unusedDetailId, setUnUsedDetailId] = useState(-1);
+
+  const [stepModalOpened, { open: stepOpen, close: stepClose }] = useDisclosure(false);
+  const [useModalOpened, { open: useOpen, close: useClose }] = useDisclosure(false);
+  const [assetModalOpened, { open: assetOpen, close: assetClose }] = useDisclosure(false);
+
+  const [stepData, setStepData] = useState('Use in Any Step');
+  const [stepValue, setStepValue] = useState('Use in Any Step');
+  const [stepStatus, setStepStatus] = useState(false);
+  const [stepKey, setStepKey] = useState();
+
+  const useData = props.useData as AssetType[];
+  const unUseData = props.unUseData as AssetType[];
 
   return (
     <Stack mt={'md'}>
@@ -65,7 +90,7 @@ export default function ListView(props: any) {
           </Flex>
           <Collapse in={openedUsed}>
             <DataGrid
-              data={props.useData}
+              data={useData}
               highlightOnHover
               withPagination
               withSorting
@@ -92,11 +117,9 @@ export default function ListView(props: any) {
                     </Flex>
                   ),
                   cell: (cell) => {
-                    // const { status } = cell.row.original;
-
                     return (
                       <Flex w={'100%'} h={'100%'} px={'sm'} align={'center'}>
-                        <Text>{'Objection-Sol....'}</Text>
+                        <Text>{cell.row.original.asset_key}</Text>
                       </Flex>
                     );
                   },
@@ -112,8 +135,7 @@ export default function ListView(props: any) {
                     </Flex>
                   ),
                   cell: (cell) => {
-                    // @ts-ignore
-                    const { num } = cell.row.original;
+                    const { id } = cell.row.original;
 
                     return (
                       <Flex
@@ -141,15 +163,13 @@ export default function ListView(props: any) {
                               fontSize: '13px',
                             }}
                           >
-                            Financial industry clients likely already have a secretes management
-                            solution, like Vault, which we want to get ahead of by saying if they're
-                            open to a re-evaluation to see what's on the market.
+                            {cell.row.original.asset_raw_value || cell.row.original.asset_value}
                           </p>
                           <Flex align={'center'} gap={'4px'} mt={usedDetail ? 10 : 0}>
                             <Tooltip
                               withArrow
                               w={400}
-                              label={`Northrop Gruman is a defense company and so are all the people in this campaign. They would find this case study very relevant.`}
+                              label={cell.row.original.asset_raw_value || cell.row.original.asset_value}
                               styles={{
                                 tooltip: {
                                   whiteSpace: 'normal',
@@ -163,14 +183,14 @@ export default function ListView(props: any) {
                             <ActionIcon
                               onClick={() => {
                                 setUsedDetail(!usedDetail);
-                                setUsedDetailId(num);
+                                setUsedDetailId(id);
                               }}
                             >
                               <IconArrowsDownUp size={'1rem'} />
                             </ActionIcon>
                           </Flex>
                         </Flex>
-                        {usedDetail && usedDetailId === num && (
+                        {usedDetail && usedDetailId === id && (
                           <Flex
                             p={'sm'}
                             direction={'column'}
@@ -188,8 +208,7 @@ export default function ListView(props: any) {
                               </Text>
                             </Flex>
                             <Text size={'xs'} mt={3}>
-                              This case study explores how lorem Ipsum dolor sit amet, consectetur
-                              adipiscing elit
+                              {'Some AI Summary'}
                             </Text>
                           </Flex>
                         )}
@@ -208,11 +227,9 @@ export default function ListView(props: any) {
                     </Flex>
                   ),
                   cell: (cell) => {
-                    // const { rep, rep_profile_picture } = cell.row.original;
-
                     return (
                       <Flex gap={'sm'} w={'100%'} px={'sm'} h={'100%'} align={'center'}>
-                        <Text fw={500}>{'CTA'}</Text>
+                        <Badge>{cell.row.original.asset_tags}</Badge>
                       </Flex>
                     );
                   },
@@ -229,8 +246,6 @@ export default function ListView(props: any) {
                   minSize: 120,
                   enableResizing: true,
                   cell: (cell) => {
-                    // const {  } = cell.row.original;
-
                     return (
                       <Flex
                         align={'center'}
@@ -241,7 +256,7 @@ export default function ListView(props: any) {
                         h={'100%'}
                       >
                         <Flex justify={'center'} w={'100%'} align={'center'} gap={'md'}>
-                          <Badge>Link</Badge>
+                          <Badge>{cell.row.original.asset_type}</Badge>
                         </Flex>
                       </Flex>
                     );
@@ -259,8 +274,6 @@ export default function ListView(props: any) {
                   minSize: 220,
                   enableResizing: true,
                   cell: (cell) => {
-                    // const {  } = cell.row.original;
-
                     return (
                       <Flex
                         direction={'column'}
@@ -270,7 +283,11 @@ export default function ListView(props: any) {
                         h={'100%'}
                         py={'sm'}
                       >
-                        <Badge color='green'>76% Success</Badge>
+                        <Badge color='green'>
+                          {cell.row.original.num_sends === 0
+                            ? '0%'
+                            : `${((cell.row.original.num_opens / cell.row.original.num_sends) * 100).toFixed(2)}% Success`}
+                        </Badge>
                       </Flex>
                     );
                   },
@@ -296,7 +313,11 @@ export default function ListView(props: any) {
                         w={'100%'}
                         h={'100%'}
                       >
-                        <Badge color='green'>76% Success</Badge>
+                        <Badge color='green'>
+                          {cell.row.original.num_sends === 0
+                            ? '0'
+                            : cell.row.original.num_opens / cell.row.original.num_sends}% Success
+                        </Badge>
                       </Flex>
                     );
                   },
@@ -461,7 +482,7 @@ export default function ListView(props: any) {
           </Collapse>
           <Flex gap={'sm'} align={'center'} w={'100%'}>
             <Text sx={{ whiteSpace: 'nowrap' }} color='gray' fw={500}>
-              UnUsed Assets
+              Un-used Assets
             </Text>
             <Divider w={'100%'} />
             <ActionIcon onClick={unusedToggle}>
@@ -470,7 +491,7 @@ export default function ListView(props: any) {
           </Flex>
           <Collapse in={openedUnUsed} mb={'md'}>
             <DataGrid
-              data={props.unUseData}
+              data={unUseData}
               highlightOnHover
               withPagination
               withSorting
@@ -501,7 +522,7 @@ export default function ListView(props: any) {
 
                     return (
                       <Flex w={'100%'} h={'100%'} px={'sm'} align={'center'}>
-                        <Text>{'Objection-Sol....'}</Text>
+                        <Text>{cell.row.original.asset_key}</Text>
                       </Flex>
                     );
                   },
@@ -519,7 +540,7 @@ export default function ListView(props: any) {
 
                   cell: (cell) => {
                     // @ts-ignore
-                    const { num } = cell.row.original;
+                    const { id } = cell.row.original;
 
                     return (
                       <Flex
@@ -548,15 +569,13 @@ export default function ListView(props: any) {
                               fontSize: '13px',
                             }}
                           >
-                            Financial industry clients likely already have a secretes management
-                            solution, like Vault, which we want to get ahead of by saying if they're
-                            open to a re-evaluation to see what's on the market.
+                            {cell.row.original.asset_raw_value || cell.row.original.asset_value}
                           </p>
                           <Flex align={'center'} gap={'4px'} mt={unusedDetail ? 10 : 0}>
                             <Tooltip
                               withArrow
                               w={400}
-                              label={`Northrop Gruman is a defense company and so are all the people in this campaign. They would find this case study very relevant.`}
+                              label={cell.row.original.asset_raw_value || cell.row.original.asset_value}
                               styles={{
                                 tooltip: {
                                   whiteSpace: 'normal',
@@ -570,14 +589,14 @@ export default function ListView(props: any) {
                             <ActionIcon
                               onClick={() => {
                                 setUnUsedDetail(!unusedDetail);
-                                setUnUsedDetailId(num);
+                                setUnUsedDetailId(id);
                               }}
                             >
                               <IconArrowsDownUp size={'1rem'} />
                             </ActionIcon>
                           </Flex>
                         </Flex>
-                        {unusedDetail && unusedDetailId === num && (
+                        {unusedDetail && unusedDetailId === id && (
                           <Flex
                             p={'sm'}
                             direction={'column'}
@@ -619,7 +638,7 @@ export default function ListView(props: any) {
 
                     return (
                       <Flex gap={'sm'} w={'100%'} px={'sm'} h={'100%'} align={'center'}>
-                        <Text fw={500}>{'CTA'}</Text>
+                        <Badge>{cell.row.original.asset_tags}</Badge>
                       </Flex>
                     );
                   },
@@ -648,7 +667,7 @@ export default function ListView(props: any) {
                         h={'100%'}
                       >
                         <Flex justify={'center'} w={'100%'} align={'center'} gap={'md'}>
-                          <Badge>Link</Badge>
+                          <Badge>{cell.row.original.asset_type}</Badge>
                         </Flex>
                       </Flex>
                     );
@@ -677,7 +696,11 @@ export default function ListView(props: any) {
                         h={'100%'}
                         py={'sm'}
                       >
-                        <Badge color='green'>76% Success</Badge>
+                        <Badge color='green'>
+                          {cell.row.original.num_sends === 0
+                            ? '0%'
+                            : `${((cell.row.original.num_opens / cell.row.original.num_sends) * 100).toFixed(2)}% Success`}
+                        </Badge>
                       </Flex>
                     );
                   },
@@ -703,7 +726,11 @@ export default function ListView(props: any) {
                         w={'100%'}
                         h={'100%'}
                       >
-                        <Badge color='green'>76% Success</Badge>
+                        <Badge color='green'>
+                          {cell.row.original.num_sends === 0
+                            ? '0%'
+                            : `${((cell.row.original.num_opens / cell.row.original.num_sends) * 100).toFixed(2)}% Success`}
+                        </Badge>
                       </Flex>
                     );
                   },

@@ -44,7 +44,8 @@ export default async function createPersona(
   },
   connectedStrategyId?: number | undefined,
   override_archetype_id?: number | undefined,
-  selectedSegmentId?: number | undefined
+  selectedSegmentId?: number | undefined,
+  assetIds?: number[] | undefined
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/client/archetype`, {
     method: "POST",
@@ -69,6 +70,7 @@ export default async function createPersona(
       purpose: extras.purpose,
       auto_generation_payload: autoGenerationPayload,
       selected_segment_id: selectedSegmentId,
+      asset_ids: assetIds,
     }),
   });
   if (response.status === 401) {

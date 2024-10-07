@@ -3643,27 +3643,6 @@ const SegmentChat = (props: any) => {
                             justify="center"
                             mx="auto"
                           >
-                            <Flex
-                              data-tour="selix-tour"
-                              direction="column"
-                              align="center"
-                              justify="center"
-                              bg="#f0f4ff"
-                              w="200%"
-                              p="md"
-                              mb="md"
-                              style={{
-                                border: "1px solid #d0d7ff",
-                                borderRadius: "8px",
-                              }}
-                            >
-                              <Text fw={600} size="md" color="#1e3a8a">
-                                Speak into the microphone 🎙
-                              </Text>
-                              <Text fw={600} size="md" color="gray">
-                                Typing is less effective.
-                              </Text>
-                            </Flex>
                             {/* <Flex gap={4} align={"center"}>
                           <Avatar
                             src={

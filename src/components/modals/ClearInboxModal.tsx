@@ -13,8 +13,9 @@ import { closeAllModals, ContextModalProps, openContextModal } from "@mantine/mo
 import { showNotification } from "@mantine/notifications";
 import { IconAlarm, IconArrowLeft, IconArrowRight, IconArrowsUp, IconBrandLinkedin, IconBriefcase, IconCalendarEvent, IconDoorExit, IconMail, IconSend, IconTrash, IconX } from "@tabler/icons";
 import { IconSparkles } from "@tabler/icons-react";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, useQuery } from "@tanstack/react-query";
 import displayNotification from "@utils/notificationFlow";
+import { getProspectByID } from "@utils/requests/getProspectByID";
 import postSmartleadReply from "@utils/requests/postSmartleadReply";
 import { sendLinkedInMessage } from "@utils/requests/sendMessage";
 import { setDemoSetProspect } from "@utils/requests/setDemoSetProspect";
@@ -23,7 +24,7 @@ import { update } from "lodash";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Channel } from "src";
+import { Channel, ProspectDetails } from "src";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -77,6 +78,25 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
   const [recommendedAction, setRecommendedAction] = useState("");
   const [overview, setOverview] = useState("");
   const [loadingAiGeneratedMessage, setLoadingAiGeneratedMessage] = useState(false);
+
+  const { data: prospectDetails } = useQuery({
+    queryKey: [
+      `query-get-dashboard-prospect-${openedProspectId}`,
+      { openedProspectId },
+    ],
+    queryFn: async ({ queryKey }) => {
+      // @ts-ignore
+      // eslint-disable-next-line
+      const [_key, { openedProspectId }] = queryKey;
+
+      const response = await getProspectByID(userToken, openedProspectId);
+      return response.status === "success"
+        ? (response.data as ProspectDetails)
+        : undefined;
+    },
+    enabled: openedProspectId !== -1,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     const scrollArea = scrollAreaRef.current;
@@ -687,6 +707,12 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
                 <IconArrowRight size={"1rem"} />
               </ActionIcon>
             </Flex>
+            <Badge size="xs" color="gray" variant="outline">
+                      Previously:{" "}
+                      {prospectDetails?.details?.previous_status
+                        ?.replaceAll("ACTIVE_CONVO_", "")
+                        .replaceAll("_", " ")}
+                    </Badge>
             <ScrollArea style={{ height: '500px' }}>
               <InboxProspectDetails />
             </ScrollArea>

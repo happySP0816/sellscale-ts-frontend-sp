@@ -5395,7 +5395,7 @@ const PlannerComponent = ({
                                       <IconChevronDown size={"1rem"} />
                                     )}
                                   </ActionIcon>
-                                <ActionIcon
+                                {isInternal && <ActionIcon
                                   onClick={async () => {
                                     try {
                                       const response = await fetch(`${API_URL}/selix/task`, {
@@ -5432,7 +5432,7 @@ const PlannerComponent = ({
                                   color="red"
                                 >
                                   <IconTrash size={"1rem"} />
-                                </ActionIcon>
+                                </ActionIcon>}
                                 </Flex>
                               </Flex>
                               <Collapse in={openedTaskIndex === index}>

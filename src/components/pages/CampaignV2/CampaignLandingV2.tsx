@@ -1404,17 +1404,6 @@ export default function CampaignLandingV2(props: PropsType) {
                   </Flex>
                 </Flex>
               )}
-              {!loadingContacts && activeStep !== 3 && (
-                <Box data-tour="campaign-progress" px={"xl"} py={"md"} bg={"#FAFAFA"}>
-                  {!window.location.href.includes("selix") && (
-                    <Stepper active={activeStep} size="xs" iconSize={28}>
-                      <Stepper.Step label="Add Contacts" />
-                      <Stepper.Step label="Setup Templates" />
-                      <Stepper.Step label="Add Personalizers" />
-                    </Stepper>
-                  )}
-                </Box>
-              )}
             </Flex>
           ) : (
             <Flex

@@ -327,8 +327,8 @@ export default function ClearInboxModal({ inboxClearingData, setInboxClearingDat
       return;
     } else {
       showNotification({
-        title: "Prospect marked as revival",
-        message: `Prospect has been marked as revival`,
+        title: "Prospect has been snoozed for 3 days.",
+        message: `Next steps: revival / wait for response `,
         color: "green",
         autoClose: 5000,
       });

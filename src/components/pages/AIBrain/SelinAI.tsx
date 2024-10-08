@@ -5395,6 +5395,44 @@ const PlannerComponent = ({
                                       <IconChevronDown size={"1rem"} />
                                     )}
                                   </ActionIcon>
+                                <ActionIcon
+                                  onClick={async () => {
+                                    try {
+                                      const response = await fetch(`${API_URL}/selix/task`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                          'Content-Type': 'application/json',
+                                          Authorization: `Bearer ${userToken}`,
+                                        },
+                                        body: JSON.stringify({ task_id: task.id }),
+                                      });
+
+                                      const data = await response.json();
+
+                                      if (!response.ok) {
+                                        throw new Error(data.error || 'Failed to delete task');
+                                      }
+
+                                      showNotification({
+                                        color: 'green',
+                                        title: 'Success',
+                                        message: data.message,
+                                      });
+                                      setTasks(tasks.filter((t, i) => i !== index));
+
+                                    } catch (error) {
+                                      console.error('Error deleting task:', error);
+                                      showNotification({
+                                        color: 'red',
+                                        title: 'Error',
+                                        message: 'Failed to delete task',
+                                      });
+                                    }
+                                  }}
+                                  color="red"
+                                >
+                                  <IconTrash size={"1rem"} />
+                                </ActionIcon>
                                 </Flex>
                               </Flex>
                               <Collapse in={openedTaskIndex === index}>

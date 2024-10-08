@@ -223,7 +223,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets, ref
       opened={showClearInboxModal}
       onClose={() => { setShowClearInboxModal(false); setOpenedList(true); props.refetch(); }}
       size="xxl"
-      styles={{ content: { width: '70%', maxWidth: '1200px', height: '700px' } }} // Set width to 70% with a max-width of 1200px
+      styles={{ content: { width: '90%', maxWidth: '1200px', height: '700px' } }} // Set width to 70% with a max-width of 1200px
     >
       <ClearInboxModal inboxClearingData={inboxClearingData} setInboxClearingData={setInboxClearingData} />
     </Modal>

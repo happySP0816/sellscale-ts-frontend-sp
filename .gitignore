@@ -13,7 +13,7 @@ dist-ssr
 *.local
 
 # Package lock files
-package-lock.json
+# package-lock.json
 yarn.lock
 pnpm-lock.yaml
 

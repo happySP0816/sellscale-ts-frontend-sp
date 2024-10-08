@@ -84,7 +84,7 @@ export interface InboxClearingData {
   };
 }
 
-export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
+export function InboxProspectListRestruct(props: { buckets: ProspectBuckets, refetch: () => void }) {
   const theme = useMantineTheme();
   const [openedList, setOpenedList] = useRecoilState(openedProspectListState);
   const adminData = useRecoilValue(adminDataState);
@@ -221,7 +221,7 @@ export function InboxProspectListRestruct(props: { buckets: ProspectBuckets }) {
     <Modal
       withCloseButton={false}
       opened={showClearInboxModal}
-      onClose={() => { setShowClearInboxModal(false); setOpenedList(true); }}
+      onClose={() => { setShowClearInboxModal(false); setOpenedList(true); props.refetch(); }}
       size="xxl"
       styles={{ content: { width: '70%', maxWidth: '1200px', height: '700px' } }} // Set width to 70% with a max-width of 1200px
     >

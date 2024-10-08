@@ -232,7 +232,7 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
             left: 0,
           }}
         >
-          <InboxProspectListRestruct buckets={data} />
+          <InboxProspectListRestruct buckets={data} refetch={refetch}/>
         </Box>
       )}
     </Box>

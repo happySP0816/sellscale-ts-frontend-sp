@@ -200,6 +200,7 @@ export default function CreateSegmentModal(props: CreateSegment) {
               <Select
                 label="Segment"
                 withinPortal
+                searchable
                 placeholder="Select an option"
                 onChange={(value) => setSelectedSegment(value ?? "")}
                 mt="md"

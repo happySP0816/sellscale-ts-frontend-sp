@@ -113,7 +113,7 @@ export async function getVoiceBuilderDetails(
   console.log("currentIndex: ", currentIndex);
   const response = await fetch(
     `${API_URL}/voice_builder/get_details?voice_builder_onboarding_id=${voice_builder_onboarding_id}&current_index=${
-      currentIndex ? currentIndex : ""
+      currentIndex || currentIndex === 0 ? currentIndex : ""
     }`,
     {
       method: "GET",

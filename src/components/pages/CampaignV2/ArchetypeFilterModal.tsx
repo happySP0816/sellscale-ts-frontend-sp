@@ -557,6 +557,8 @@ export const ArchetypeFilters = function ({
       }),
   ];
 
+  console.log("propsects: ", prospects);
+
   const generatedData = useMemo(() => {
     return displayProspects.map((prospect) => {
       const p = {
@@ -578,7 +580,7 @@ export const ArchetypeFilters = function ({
 
       return row;
     });
-  }, [displayProspects, contactTableHeaders]);
+  }, [displayProspects, contactTableHeaders, icp_scoring_ruleset]);
 
   const generatedColumns = useMemo(() => {
     if (!icp_scoring_ruleset_typed) {
@@ -651,7 +653,7 @@ export const ArchetypeFilters = function ({
                 ) ||
                   icp_scoring_ruleset_typed.company_personalizers?.includes(
                     item.key
-                 )) && (
+                  )) && (
                   <Badge size={"xs"} color={"green"}>
                     Personalizer
                   </Badge>
@@ -761,12 +763,7 @@ export const ArchetypeFilters = function ({
                             .split("_")
                             .join(" ");
 
-                          if (
-                            section.answer === "NO" &&
-                            icp_scoring_ruleset_typed.dealbreakers?.includes(
-                              key
-                            )
-                          ) {
+                          if (section.answer === "NO") {
                             return (
                               <Flex key={key} gap={"4px"}>
                                 <Text>❌</Text>
@@ -820,12 +817,7 @@ export const ArchetypeFilters = function ({
                               .split("_")
                               .join(" ");
 
-                            if (
-                              section.answer === "NO" &&
-                              icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                key
-                              )
-                            ) {
+                            if (section.answer === "NO") {
                               return (
                                 <Flex key={key} gap={"4px"}>
                                   <Text>❌</Text>
@@ -866,6 +858,90 @@ export const ArchetypeFilters = function ({
                             return <></>;
                           }
                         )}
+                      {icp_scoring_ruleset_typed &&
+                        icp_scoring_ruleset_typed.individual_ai_filters &&
+                        icp_scoring_ruleset_typed.individual_ai_filters
+                          .filter((item) => {
+                            if (prospect.icp_fit_reason_v2) {
+                              return (
+                                !(item.key in prospect.icp_fit_reason_v2) ||
+                                prospect.icp_fit_reason_v2[item.key].answer ===
+                                  "LOADING"
+                              );
+                            }
+
+                            return true;
+                          })
+                          .map((item) => {
+                            const title = item.key
+                              .replace("_individual_", "_")
+                              .replace("_company_", "_")
+                              .replace("aicomp_", "")
+                              .replace("aiind_", "")
+                              .replace("keywords", "")
+                              .split("_")
+                              .join(" ");
+                            return (
+                              <Flex key={item.key} gap={"4px"}>
+                                <Text size="sm">
+                                  <span
+                                    style={{
+                                      fontWeight: "bold",
+                                      marginRight: "8px",
+                                    }}
+                                  >
+                                    {title}:
+                                  </span>
+                                  {prospect.icp_fit_reason_v2
+                                    ? "Loading"
+                                    : "Not Scored"}
+                                </Text>
+                              </Flex>
+                            );
+                          })}
+                      {icp_scoring_ruleset_typed &&
+                        icp_scoring_ruleset_typed.company_ai_filters &&
+                        icp_scoring_ruleset_typed.company_ai_filters
+                          .filter((item) => {
+                            if (prospect.icp_company_fit_reason) {
+                              return (
+                                !(
+                                  item.key in prospect.icp_company_fit_reason
+                                ) ||
+                                prospect.icp_company_fit_reason[item.key]
+                                  .answer === "LOADING"
+                              );
+                            }
+
+                            return true;
+                          })
+                          .map((item) => {
+                            const title = item.key
+                              .replace("_individual_", "_")
+                              .replace("_company_", "_")
+                              .replace("aicomp_", "")
+                              .replace("aiind_", "")
+                              .replace("keywords", "")
+                              .split("_")
+                              .join(" ");
+                            return (
+                              <Flex key={item.key} gap={"4px"}>
+                                <Text size="sm">
+                                  <span
+                                    style={{
+                                      fontWeight: "bold",
+                                      marginRight: "8px",
+                                    }}
+                                  >
+                                    {title}:
+                                  </span>
+                                  {prospect.icp_company_fit_reason
+                                    ? "Loading"
+                                    : "Not Scored"}
+                                </Text>
+                              </Flex>
+                            );
+                          })}
                     </Flex>
                   }
                 >
@@ -909,7 +985,9 @@ export const ArchetypeFilters = function ({
                   label={"Email is revealed when the campaign is launched."}
                 >
                   <Box style={{ textWrap: "wrap", maxWidth: "250px" }}>
-                    <Text truncate>{p[keyType] ? p[keyType] : "Not Found"}</Text>
+                    <Text truncate>
+                      {p[keyType] ? p[keyType] : "Not Found"}
+                    </Text>
                   </Box>
                 </Tooltip>
               );
@@ -925,7 +1003,9 @@ export const ArchetypeFilters = function ({
                 <HoverCard position="bottom" withinPortal>
                   <HoverCard.Target>
                     {value.answer === "LOADING" ? (
-                      <Loader size={"xs"} />
+                      <Text>
+                        <Loader size={"xs"} />
+                      </Text>
                     ) : (
                       <Text
                         color={value.answer === "YES" ? "green" : "red"}
@@ -990,7 +1070,7 @@ export const ArchetypeFilters = function ({
         },
       };
     });
-  }, [prospects, updatedIndividualColumns, icp_scoring_ruleset_typed]);
+  }, [prospects, updatedIndividualColumns, icp_scoring_ruleset]);
 
   const table = useMantineReactTable({
     columns: generatedColumns,
@@ -1101,7 +1181,13 @@ export const ArchetypeFilters = function ({
         style={{ maxWidth: collapseFilters ? "1450px" : "1150px" }}
       >
         {selectedContacts && selectedContacts.size > 0 && (
-          <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"} style={{maxWidth: "1150px"}}>
+          <Flex
+            justify={"flex-end"}
+            align={"center"}
+            gap={"xs"}
+            mt={"sm"}
+            style={{ maxWidth: "1150px" }}
+          >
             <Text>Bulk Actions - {selectedContacts.size} Selected</Text>
             <Tooltip
               withinPortal
@@ -1259,7 +1345,11 @@ export const ArchetypeFilters = function ({
             );
           })}
         </Flex>
-        <Box style={{ maxWidth: isSelix ? "50vw" : collapseFilters ? "1225px" : "950px" }}>
+        <Box
+          style={{
+            maxWidth: isSelix ? "50vw" : collapseFilters ? "1225px" : "950px",
+          }}
+        >
           {icp_scoring_ruleset_typed && <MantineReactTable table={table} />}
         </Box>
       </Flex>

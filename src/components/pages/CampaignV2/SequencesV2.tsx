@@ -4905,7 +4905,7 @@ export const LinkedinIntroSectionV2 = function (props: {
         props.selectedTemplateId === -1 ? undefined : props.selectedTemplateId
       );
     }
-  }, [props.triggerGenerate]);
+  }, [props.triggerGenerate, props.prospectId]);
 
   const [opened, { open, close }] = useDisclosure(false);
 

@@ -1329,7 +1329,7 @@ export default function SelinAI() {
                                       />
                                     </Flex>
                                   ) : (
-                                    <Flex align={"center"} justify={"space-between"}>
+                                    <Flex align={"center"} justify={"space-between"} w={"100%"}>
                                       <Flex align={"center"} gap={"xs"}>
                                         <Text
                                           fw={600}
@@ -1343,20 +1343,20 @@ export default function SelinAI() {
                                         >
                                           {thread.session_name || "Untitled Session"}
                                         </Text>
-                                        <ActionIcon
-                                          variant="transparent"
-                                          // color="blue"
-                                          size={"sm"}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingIndex(index);
-                                            setEditingSessionName(thread.session_name);
-                                          }}
-                                          style={{ marginLeft: "auto" }}
-                                        >
-                                          <IconEdit size={"1rem"} />
-                                        </ActionIcon>
                                       </Flex>
+                                      <ActionIcon
+                                        variant="transparent"
+                                        // color="blue"
+                                        size={"sm"}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingIndex(index);
+                                          setEditingSessionName(thread.session_name);
+                                        }}
+                                        style={{ marginLeft: "auto" }}
+                                      >
+                                        <IconEdit size={"1rem"} />
+                                      </ActionIcon>
                                       <Tooltip label="Needs more input" withArrow position="top">
                                         <Box>
                                           <IconInfoCircle fill="orange" color="white" size={"1.2rem"} className="mt-1" />
@@ -1456,7 +1456,7 @@ export default function SelinAI() {
                               >
                                 <Flex align={"center"} justify={"space-between"}>
                                   {editingIndex === index ? (
-                                    <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()}>
+                                    <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()} w={"100%"}>
                                       <TextInput
                                         value={editingSessionName}
                                         onChange={(e) => setEditingSessionName(e.currentTarget.value)}
@@ -1485,7 +1485,7 @@ export default function SelinAI() {
                                       />
                                     </Flex>
                                   ) : (
-                                    <Flex align={"center"} justify={"space-between"}>
+                                    <Flex align={"center"} justify={"space-between"} w={"100%"}>
                                       <Flex align={"center"} gap={"xs"}>
                                         <Text
                                           fw={600}
@@ -1499,20 +1499,20 @@ export default function SelinAI() {
                                         >
                                           {thread.session_name || "Untitled Session"}
                                         </Text>
-                                        <ActionIcon
-                                          variant="transparent"
-                                          // color="blue"
-                                          size={"sm"}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingIndex(index);
-                                            setEditingSessionName(thread.session_name);
-                                          }}
-                                          style={{ marginLeft: "auto" }}
-                                        >
-                                          <IconEdit size={"1rem"} />
-                                        </ActionIcon>
                                       </Flex>
+                                      <ActionIcon
+                                        variant="transparent"
+                                        // color="blue"
+                                        size={"sm"}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingIndex(index);
+                                          setEditingSessionName(thread.session_name);
+                                        }}
+                                        style={{ marginLeft: "auto" }}
+                                      >
+                                        <IconEdit size={"1rem"} />
+                                      </ActionIcon>
                                       <Tooltip label="X more inputs" withArrow position="top">
                                         <Box>
                                           <IconHourglassLow fill="purple" color="white" size={"1.2rem"} className="mt-1" />

@@ -4025,9 +4025,7 @@ const LinkedinSequenceSectionV2 = function (props: {
     if (!props.prospectId || props.prospectId === -1) return;
 
     if (
-      props.triggerGenerate !== -1 ||
-      linkedinSequenceMessage?.metadata.bump_framework_id !==
-        props.sequence[currentSequenceIndex].bump_framework_id
+      props.triggerGenerate !== -1
     ) {
       getLiFollowUpMessage(
         props.prospectId,
@@ -4039,7 +4037,7 @@ const LinkedinSequenceSectionV2 = function (props: {
           setLinkedinSequenceMessage(msg);
         }
         props.setTriggerGenerate(-1);
-      });
+      }); 
     }
   }, [
     props.prospectId,

@@ -2154,7 +2154,7 @@ export function PersonCampaignCard(props: {
                   width="w-[93px]"
                   icon={<IconSend color={theme.colors.blue[6]} size="0.9rem" />}
                   label="Sent"
-                  total={total_sent ?? 0}
+                  total={total_sent + props.persona.li_queued?? 0}
                   percentage={Math.floor(
                     ((total_sent ?? 0) / (total_sent || 1)) * 100
                   )}
@@ -2623,6 +2623,21 @@ function CampaignProgressDropdown(props: {
         </Text>
       </Box>
 
+      <Divider my={"sm"} />
+
+      <List>
+        <Flex align={"center"} justify={"space-between"}>
+          <List.Item sx={{ color: "gray", fontSize: "14px" }} fw={500}>
+            Queued:
+          </List.Item>
+          <Text fw={600} size={"sm"}>
+            {total_queued}
+          </Text>
+        </Flex>
+      </List>
+
+<Divider my={"sm"} />
+
       <Box mt={"md"}>
         <Text size={"md"} fw={700}>
           SUMMARY
@@ -2655,22 +2670,6 @@ function CampaignProgressDropdown(props: {
           </Text>
         </Flex>
       </List>
-
-      <Divider my={"sm"} />
-      <Divider my={"sm"} />
-
-      <List>
-        <Flex align={"center"} justify={"space-between"}>
-          <List.Item sx={{ color: "gray", fontSize: "14px" }} fw={500}>
-            Queued:
-          </List.Item>
-          <Text fw={600} size={"sm"}>
-            {total_queued}
-          </Text>
-        </Flex>
-      </List>
-
-      <Divider my={"sm"} />
 
       <Box>
         <Text size={"md"} fw={700}>

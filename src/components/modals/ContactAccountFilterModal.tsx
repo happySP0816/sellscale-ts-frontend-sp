@@ -751,7 +751,7 @@ const ContactAccountFilterModal = function ({
 
       return row;
     });
-  }, [displayProspects, contactTableHeaders]);
+  }, [displayProspects, contactTableHeaders, icp_scoring_ruleset]);
 
   const generatedProspectAccountData = useMemo(() => {
     return displayProspectAccounts.map((prospectAccount) => {
@@ -779,7 +779,12 @@ const ContactAccountFilterModal = function ({
 
       return row;
     });
-  }, [prospects, companyTableHeaders, displayProspectAccounts]);
+  }, [
+    prospects,
+    companyTableHeaders,
+    displayProspectAccounts,
+    icp_scoring_ruleset,
+  ]);
 
   const generatedProspectColumns = useMemo(() => {
     if (!icp_scoring_ruleset_typed) {
@@ -935,12 +940,7 @@ const ContactAccountFilterModal = function ({
                             .split("_")
                             .join(" ");
 
-                          if (
-                            section.answer === "NO" &&
-                            icp_scoring_ruleset_typed.dealbreakers?.includes(
-                              key
-                            )
-                          ) {
+                          if (section.answer === "NO") {
                             return (
                               <Flex key={key} gap={"4px"}>
                                 <Text>❌</Text>
@@ -980,6 +980,47 @@ const ContactAccountFilterModal = function ({
 
                           return <></>;
                         })}
+                      {icp_scoring_ruleset_typed &&
+                        icp_scoring_ruleset_typed.individual_ai_filters &&
+                        icp_scoring_ruleset_typed.individual_ai_filters
+                          .filter((item) => {
+                            if (prospect.icp_fit_reason_v2) {
+                              return (
+                                !(item.key in prospect.icp_fit_reason_v2) ||
+                                prospect.icp_fit_reason_v2[item.key].answer ===
+                                  "LOADING"
+                              );
+                            }
+
+                            return true;
+                          })
+                          .map((item) => {
+                            const title = item.key
+                              .replace("_individual_", "_")
+                              .replace("_company_", "_")
+                              .replace("aicomp_", "")
+                              .replace("aiind_", "")
+                              .replace("keywords", "")
+                              .split("_")
+                              .join(" ");
+                            return (
+                              <Flex key={item.key} gap={"4px"}>
+                                <Text size="sm">
+                                  <span
+                                    style={{
+                                      fontWeight: "bold",
+                                      marginRight: "8px",
+                                    }}
+                                  >
+                                    {title}:
+                                  </span>
+                                  {prospect.icp_fit_reason_v2
+                                    ? "Loading"
+                                    : "Not Scored"}
+                                </Text>
+                              </Flex>
+                            );
+                          })}
                     </Flex>
                   }
                 >
@@ -1103,7 +1144,7 @@ const ContactAccountFilterModal = function ({
         },
       };
     });
-  }, [prospects, updatedIndividualColumns, icp_scoring_ruleset_typed]);
+  }, [prospects, updatedIndividualColumns, icp_scoring_ruleset]);
 
   const generatedProspectAccountColumns = useMemo(() => {
     if (!icp_scoring_ruleset_typed) {
@@ -1258,12 +1299,7 @@ const ContactAccountFilterModal = function ({
                               .split("_")
                               .join(" ");
 
-                            if (
-                              section.answer === "NO" &&
-                              icp_scoring_ruleset_typed.dealbreakers?.includes(
-                                key
-                              )
-                            ) {
+                            if (section.answer === "NO") {
                               return (
                                 <Flex key={key} gap={"4px"}>
                                   <Text>❌</Text>
@@ -1304,6 +1340,49 @@ const ContactAccountFilterModal = function ({
                             return <></>;
                           }
                         )}
+                      {icp_scoring_ruleset_typed &&
+                        icp_scoring_ruleset_typed.company_ai_filters &&
+                        icp_scoring_ruleset_typed.company_ai_filters
+                          .filter((item) => {
+                            if (prospect.icp_company_fit_reason) {
+                              return (
+                                !(
+                                  item.key in prospect.icp_company_fit_reason
+                                ) ||
+                                prospect.icp_company_fit_reason[item.key]
+                                  .answer === "LOADING"
+                              );
+                            }
+
+                            return true;
+                          })
+                          .map((item) => {
+                            const title = item.key
+                              .replace("_individual_", "_")
+                              .replace("_company_", "_")
+                              .replace("aicomp_", "")
+                              .replace("aiind_", "")
+                              .replace("keywords", "")
+                              .split("_")
+                              .join(" ");
+                            return (
+                              <Flex key={item.key} gap={"4px"}>
+                                <Text size="sm">
+                                  <span
+                                    style={{
+                                      fontWeight: "bold",
+                                      marginRight: "8px",
+                                    }}
+                                  >
+                                    {title}:
+                                  </span>
+                                  {prospect.icp_company_fit_reason
+                                    ? "Loading"
+                                    : "Not Scored"}
+                                </Text>
+                              </Flex>
+                            );
+                          })}
                     </Flex>
                   }
                 >
@@ -1412,7 +1491,7 @@ const ContactAccountFilterModal = function ({
         },
       };
     });
-  }, [prospects, updatedCompanyColumns, icp_scoring_ruleset_typed]);
+  }, [prospects, updatedCompanyColumns, icp_scoring_ruleset]);
 
   const contactTable = useMantineReactTable({
     columns: generatedProspectColumns,

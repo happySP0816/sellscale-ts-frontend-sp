@@ -304,7 +304,7 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
       const response = await getLiTemplates(userToken, currentProject!.id);
 
       return response.status === "success"
-        ? (response.data as Templates[])
+        ? (response.data as Templates[]).filter((template) => template.active)
         : [];
     },
     refetchOnWindowFocus: false,
@@ -4025,9 +4025,7 @@ const LinkedinSequenceSectionV2 = function (props: {
     if (!props.prospectId || props.prospectId === -1) return;
 
     if (
-      props.triggerGenerate !== -1 ||
-      linkedinSequenceMessage?.metadata.bump_framework_id !==
-        props.sequence[currentSequenceIndex].bump_framework_id
+      props.triggerGenerate !== -1
     ) {
       getLiFollowUpMessage(
         props.prospectId,
@@ -4039,7 +4037,7 @@ const LinkedinSequenceSectionV2 = function (props: {
           setLinkedinSequenceMessage(msg);
         }
         props.setTriggerGenerate(-1);
-      });
+      }); 
     }
   }, [
     props.prospectId,
@@ -4898,14 +4896,14 @@ export const LinkedinIntroSectionV2 = function (props: {
   });
 
   useEffect(() => {
-    if (props.prospectId || props.triggerGenerate === 0) {
+    if (props.prospectId || props.triggerGenerate === 0 && !linkedinInitialMessageGenerationInProgress) {
       getIntroMessage(
         props.prospectId,
         true,
         props.selectedTemplateId === -1 ? undefined : props.selectedTemplateId
       );
     }
-  }, [props.prospectId, props.triggerGenerate, props.selectedTemplateId]);
+  }, [props.triggerGenerate, props.prospectId]);
 
   const [opened, { open, close }] = useDisclosure(false);
 

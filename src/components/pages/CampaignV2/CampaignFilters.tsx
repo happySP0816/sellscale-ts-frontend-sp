@@ -35,7 +35,13 @@ import { API_URL } from "@constants/data";
 import { useQueryClient } from "@tanstack/react-query";
 import { showNotification } from "@mantine/notifications";
 import { IconSparkles } from "@tabler/icons-react";
-import { IconChevronLeft, IconFilter, IconTrash, IconUser, IconUsers } from "@tabler/icons";
+import {
+  IconChevronLeft,
+  IconFilter,
+  IconTrash,
+  IconUser,
+  IconUsers,
+} from "@tabler/icons";
 
 interface CampaignFiltersProps {
   prospects: Prospect[];
@@ -80,8 +86,7 @@ const CampaignFilters = function ({
 
   useEffect(() => {
     fetchSavedQueries();
-  }
-  , [userToken]);
+  }, [userToken]);
 
   const [
     included_individual_title_keywords,
@@ -274,21 +279,27 @@ const CampaignFilters = function ({
 
   const queryClient = useQueryClient();
 
-  const onAddIndividualAIFilters = (
+  const onAddIndividualAIFilters = async (
     title: string,
     prompt: string,
     use_linkedin: boolean
   ) => {
     const key = "aiind_" + title.toLowerCase().split(" ").join("_");
-    setIndividualAIFilters([
+    const newIndividualAIFilters = [
       ...individual_ai_filters,
       { key: key, title: title, prompt: prompt, use_linkedin: use_linkedin },
-    ]);
+    ];
+    let newDealbreaker = [...dealbreakers];
+    let newIndividualAIPersonalizer = [...individual_personalizers];
+
+    setIndividualAIFilters(newIndividualAIFilters);
 
     if (individual_ai_dealbreaker) {
+      newDealbreaker = [...dealbreakers, key];
       setDealBreakers([...dealbreakers, key]);
     }
     if (individual_ai_personalizer) {
+      newIndividualAIPersonalizer = [...individual_personalizers, key];
       setIndividualPersonalizers([...individual_personalizers, key]);
     }
 
@@ -296,23 +307,38 @@ const CampaignFilters = function ({
     setIndividualAIPrompt("");
     setIndividualAIDealbreaker(false);
     setIndividualAIPersonalizer(false);
+
+    await addAIFilter(
+      company_ai_filters,
+      newIndividualAIFilters,
+      newDealbreaker,
+      company_personalizers,
+      newIndividualAIPersonalizer
+    );
   };
 
-  const onAddCompanyAIFilters = (
+  const onAddCompanyAIFilters = async (
     title: string,
     prompt: string,
     use_linkedin: boolean
   ) => {
     const key = "aicomp_" + title.toLowerCase().split(" ").join("_");
-    setCompanyAIFilters([
+    const newCompanyAIFilters = [
       ...company_ai_filters,
       { key: key, title: title, prompt: prompt, use_linkedin: use_linkedin },
-    ]);
+    ];
+
+    let newDealbreaker = [...dealbreakers];
+    let newCompanyAIPersonalizer = [...individual_personalizers];
+
+    setCompanyAIFilters(newCompanyAIFilters);
 
     if (company_ai_dealbreaker) {
+      newDealbreaker = [...dealbreakers, key];
       setDealBreakers([...dealbreakers, key]);
     }
     if (company_ai_personalizer) {
+      newCompanyAIPersonalizer = [...company_personalizers, key];
       setCompanyPersonalizers([...company_personalizers, key]);
     }
 
@@ -320,6 +346,14 @@ const CampaignFilters = function ({
     setCompanyAIPrompt("");
     setCompanyAIDealbreaker(false);
     setCompanyAIPersonalizer(false);
+
+    await addAIFilter(
+      newCompanyAIFilters,
+      individual_ai_filters,
+      newDealbreaker,
+      newCompanyAIPersonalizer,
+      individual_personalizers
+    );
   };
 
   const titleOptions = [
@@ -376,13 +410,35 @@ const CampaignFilters = function ({
         if (data.status === "success") {
           const queryDetails = data.data;
 
-          const updateState = (setter: { (value: React.SetStateAction<string[]>): void; (value: React.SetStateAction<string[]>): void; (value: React.SetStateAction<string[]>): void; (value: React.SetStateAction<string[]>): void; (value: React.SetStateAction<string[]>): void; (value: React.SetStateAction<string[]>): void; (arg0: (prevState: any) => any[]): void; }, value: any) => {
-            setter((prevState) => Array.from(new Set([...prevState, ...value])));
+          const updateState = (
+            setter: {
+              (value: React.SetStateAction<string[]>): void;
+              (value: React.SetStateAction<string[]>): void;
+              (value: React.SetStateAction<string[]>): void;
+              (value: React.SetStateAction<string[]>): void;
+              (value: React.SetStateAction<string[]>): void;
+              (value: React.SetStateAction<string[]>): void;
+              (arg0: (prevState: any) => any[]): void;
+            },
+            value: any
+          ) => {
+            setter((prevState) =>
+              Array.from(new Set([...prevState, ...value]))
+            );
           };
 
-          updateState(setIncludedIndividualTitleKeywords, queryDetails.data.person_titles || []);
-          updateState(setIncludedIndividualSeniorityKeywords, queryDetails.data.person_seniorities || []);
-          updateState(setExcludedIndividualTitleKeywords, queryDetails.data.person_not_titles || []);
+          updateState(
+            setIncludedIndividualTitleKeywords,
+            queryDetails.data.person_titles || []
+          );
+          updateState(
+            setIncludedIndividualSeniorityKeywords,
+            queryDetails.data.person_seniorities || []
+          );
+          updateState(
+            setExcludedIndividualTitleKeywords,
+            queryDetails.data.person_not_titles || []
+          );
 
           const industryBreadcrumbs = queryDetails.results.breadcrumbs.filter(
             (breadcrumb: any) => breadcrumb.label === "Industry"
@@ -401,12 +457,15 @@ const CampaignFilters = function ({
 
             updateState(setIncludedCompanyIndustriesKeywords, industryNames);
             // updateState(setIndustryOptions, industryNames);
-          //   setIndustryOptionsWithIds((prevOptions: any) => ({
-          //     ...prevOptions,
-          //     ...industryIds,
-          //   }));
-          // } else {
-            updateState(setIncludedCompanyIndustriesKeywords, queryDetails.data.organization_industry_tag_ids || []);
+            //   setIndustryOptionsWithIds((prevOptions: any) => ({
+            //     ...prevOptions,
+            //     ...industryIds,
+            //   }));
+            // } else {
+            updateState(
+              setIncludedCompanyIndustriesKeywords,
+              queryDetails.data.organization_industry_tag_ids || []
+            );
           }
 
           // setRevenue((prev) => ({
@@ -419,7 +478,9 @@ const CampaignFilters = function ({
           // }));
 
           // setCompanyName((prev) => queryDetails.data.q_person_title || prev);
-          setIncludedCompanyNameKeywords((prev) => queryDetails.data.q_organization_keyword_tags || prev);
+          setIncludedCompanyNameKeywords(
+            (prev) => queryDetails.data.q_organization_keyword_tags || prev
+          );
 
           const companyBreadcrumbs = queryDetails.results.breadcrumbs.filter(
             (breadcrumb: any) => breadcrumb.label === "Companies"
@@ -442,7 +503,10 @@ const CampaignFilters = function ({
           //   updateState(setSelectedCompanies, queryDetails.data.organization_ids || []);
           // }
 
-          updateState(setIncludedIndividualLocationsKeywords, queryDetails.data.person_locations || []);
+          updateState(
+            setIncludedIndividualLocationsKeywords,
+            queryDetails.data.person_locations || []
+          );
           // setExperience((prev) => queryDetails.data.person_seniorities || prev);
           // updateState(setFundraise, queryDetails.data.organization_latest_funding_stage_cd || []);
           // setCompanyDomain((prev) => queryDetails.data.q_organization_search_list_id || prev);
@@ -518,6 +582,53 @@ const CampaignFilters = function ({
     //   prefilters.find((prefilter) => prefilter.id === Number(selectedFilter))
     //     ?.id
     // );
+  };
+
+  const addAIFilter = async (
+    companyAIFilters: AIFilters[],
+    individualAIFilters: AIFilters[],
+    dealbreakers: string[],
+    companyPersonalizers: string[],
+    individualPersonalizers: string[]
+  ) => {
+    const response = await fetch(`${API_URL}/icp_scoring/add_ai_filter`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        archetype_id: archetype_id,
+        individual_personalizers: individualPersonalizers,
+        company_personalizers: companyPersonalizers,
+        dealbreakers: dealbreakers,
+        individual_ai_filters: individualAIFilters,
+        compay_ai_filters: companyAIFilters,
+      }),
+    });
+
+    if (response.status === 200) {
+      await queryClient.invalidateQueries(["archetypeProspects", archetype_id]);
+      await queryClient.invalidateQueries(["icpScoringRuleset", archetype_id]);
+      setScoreLoading(false);
+      showNotification({
+        title: "Success",
+        message: "Successfully added AI Filter to the ICP ruleset.",
+        color: "blue",
+      });
+
+      await queryClient.invalidateQueries([
+        `query-get-research-point-types`,
+        archetype_id,
+      ]);
+    } else {
+      setScoreLoading(false);
+      showNotification({
+        title: "Error",
+        message: "Failed to add AI filters to the ICP ruleset",
+        color: "red",
+      });
+    }
   };
 
   const scoreCampaignFilters = async () => {
@@ -751,7 +862,7 @@ const CampaignFilters = function ({
                         !individual_ai_prompt ||
                         !individual_ai_prompt.includes("[[prospect]]")
                       }
-                      onClick={() => {
+                      onClick={async () => {
                         const key =
                           "aiind_" +
                           individual_ai_title
@@ -769,7 +880,7 @@ const CampaignFilters = function ({
                           ]);
                           return [...set];
                         });
-                        onAddIndividualAIFilters(
+                        await onAddIndividualAIFilters(
                           individual_ai_title,
                           individual_ai_prompt,
                           individual_ai_use_linkedin
@@ -844,7 +955,7 @@ const CampaignFilters = function ({
                         !company_ai_prompt ||
                         !company_ai_prompt.includes("[[company]]")
                       }
-                      onClick={() => {
+                      onClick={async () => {
                         const key =
                           "aicomp_" +
                           company_ai_title.toLowerCase().split(" ").join("_");
@@ -859,7 +970,7 @@ const CampaignFilters = function ({
                           ]);
                           return [...set];
                         });
-                        onAddCompanyAIFilters(
+                        await onAddCompanyAIFilters(
                           company_ai_title,
                           company_ai_prompt,
                           company_ai_use_linkedin
@@ -903,7 +1014,13 @@ const CampaignFilters = function ({
                                   Individual
                                 </Badge>
                                 <ActionIcon
-                                  onClick={() => {
+                                  onClick={async () => {
+                                    let newIndividualAIFilters: AIFilters[] =
+                                      [];
+                                    let newDealbreaker: string[] = [];
+                                    let newIndividualAIPersonalizer: string[] =
+                                      [];
+
                                     setHeaderSet((prevState) => {
                                       prevState.delete(aiFilter.key);
                                       return new Set([...prevState]);
@@ -913,20 +1030,38 @@ const CampaignFilters = function ({
                                         (item) => item.key !== aiFilter.key
                                       )
                                     );
-                                    setDealBreakers((prevState) =>
-                                      prevState.filter(
+                                    setDealBreakers((prevState) => {
+                                      newDealbreaker = prevState.filter(
                                         (x) => x !== aiFilter.key
-                                      )
-                                    );
-                                    setIndividualPersonalizers((prevState) =>
-                                      prevState.filter(
+                                      );
+                                      return prevState.filter(
                                         (x) => x !== aiFilter.key
-                                      )
-                                    );
-                                    setIndividualAIFilters((prevState) =>
-                                      prevState.filter(
+                                      );
+                                    });
+                                    setIndividualPersonalizers((prevState) => {
+                                      newIndividualAIPersonalizer =
+                                        prevState.filter(
+                                          (x) => x !== aiFilter.key
+                                        );
+                                      return prevState.filter(
+                                        (x) => x !== aiFilter.key
+                                      );
+                                    });
+                                    setIndividualAIFilters((prevState) => {
+                                      newIndividualAIFilters = prevState.filter(
                                         (item) => item.key !== aiFilter.key
-                                      )
+                                      );
+                                      return prevState.filter(
+                                        (item) => item.key !== aiFilter.key
+                                      );
+                                    });
+
+                                    await addAIFilter(
+                                      company_ai_filters,
+                                      newIndividualAIFilters,
+                                      newDealbreaker,
+                                      company_personalizers,
+                                      newIndividualAIPersonalizer
                                     );
                                   }}
                                 >
@@ -1035,7 +1170,11 @@ const CampaignFilters = function ({
                                   Company
                                 </Badge>
                                 <ActionIcon
-                                  onClick={() => {
+                                  onClick={async () => {
+                                    let newCompanyAIFilters: AIFilters[] = [];
+                                    let newDealbreaker: string[] = [];
+                                    let newCompanyAIPersonalizer: string[] = [];
+
                                     setHeaderSet((prevState) => {
                                       prevState.delete(aiFilter.key);
                                       return new Set([...prevState]);
@@ -1045,20 +1184,39 @@ const CampaignFilters = function ({
                                         (item) => item.key !== aiFilter.key
                                       )
                                     );
-                                    setDealBreakers((prevState) =>
-                                      prevState.filter(
+                                    setDealBreakers((prevState) => {
+                                      newDealbreaker = prevState.filter(
                                         (x) => x !== aiFilter.key
-                                      )
-                                    );
-                                    setCompanyPersonalizers((prevState) =>
-                                      prevState.filter(
+                                      );
+                                      return prevState.filter(
                                         (x) => x !== aiFilter.key
-                                      )
-                                    );
-                                    setCompanyAIFilters((prevState) =>
-                                      prevState.filter(
+                                      );
+                                    });
+                                    setCompanyPersonalizers((prevState) => {
+                                      newCompanyAIPersonalizer =
+                                        prevState.filter(
+                                          (x) => x !== aiFilter.key
+                                        );
+                                      return prevState.filter(
+                                        (x) => x !== aiFilter.key
+                                      );
+                                    });
+                                    setCompanyAIFilters((prevState) => {
+                                      newCompanyAIFilters = prevState.filter(
                                         (item) => item.key !== aiFilter.key
-                                      )
+                                      );
+
+                                      return prevState.filter(
+                                        (item) => item.key !== aiFilter.key
+                                      );
+                                    });
+
+                                    await addAIFilter(
+                                      newCompanyAIFilters,
+                                      individual_ai_filters,
+                                      newDealbreaker,
+                                      newCompanyAIPersonalizer,
+                                      individual_personalizers
                                     );
                                   }}
                                 >
@@ -1159,7 +1317,8 @@ const CampaignFilters = function ({
               <Accordion.Control
                 icon={<IconUser fill={"black"} size={"1.3rem"} />}
               >
-                Individual <Badge ml="sm" color="gray">
+                Individual{" "}
+                <Badge ml="sm" color="gray">
                   {included_individual_title_keywords.length +
                     excluded_individual_title_keywords.length +
                     included_individual_seniority_keywords.length +
@@ -1546,18 +1705,15 @@ const CampaignFilters = function ({
               >
                 Company
                 <Badge ml="sm" color="gray">
-                  {
-                    included_company_name_keywords.length +
+                  {included_company_name_keywords.length +
                     excluded_company_name_keywords.length +
                     included_company_locations_keywords.length +
                     excluded_company_locations_keywords.length +
                     included_company_industries_keywords.length +
                     excluded_company_industries_keywords.length +
-                    included_company_generalized_keywords.length+
-                    excluded_company_generalized_keywords.length
-                  }
+                    included_company_generalized_keywords.length +
+                    excluded_company_generalized_keywords.length}
                 </Badge>
-
               </Accordion.Control>
               <Accordion.Panel>
                 <Flex direction={"column"} gap={"4px"}>
@@ -1822,50 +1978,50 @@ const CampaignFilters = function ({
               </Accordion.Panel>
             </Accordion.Item>
             <Accordion.Item value="saved_icp_filter">
-          <Accordion.Control
-            icon={<IconFilter fill={"black"} size={"1.3rem"} />}
-          >
-            Apply saved ICP filter
-          </Accordion.Control>
-          <Accordion.Panel>
-            <Flex direction={"column"} gap={"4px"} w="500px">
-              <Select
-              w="100%"
-              label="Saved filters"
-              placeholder="Pick one"
-              data={prefilters.map((prefilter) => ({
-                value: prefilter.id,
-                label: prefilter.title,
-              }))}
-              value={selectedFilter}
-              onChange={(value) => {
-                setSelectedFilter(value);
-                const handleApply = async (value: any) => {
-                  mergeSavedQueries(Number(value));
-                  // if (!value) return;
-                  // innerProps.id = Number(value);
-                  // setShowApplyButton(false);
-                  // setCurrentSavedQueryId(prefilters.find((prefilter) => prefilter.id === Number(value))?.id);
-                };
-                handleApply(value);
-                // setShowApplyButton(true);
-              }}
-              rightSection={
-                false && (
-                  <Button
-                    onClick={handleApply}
-                    size="xs"
-                    style={{ marginLeft: "-60px" }}
-                  >
-                    Apply
-                  </Button>
-                )
-              }
-              style={{ width: "50%" }}
-            />
-            </Flex>
-          </Accordion.Panel>
-        </Accordion.Item>
+              <Accordion.Control
+                icon={<IconFilter fill={"black"} size={"1.3rem"} />}
+              >
+                Apply saved ICP filter
+              </Accordion.Control>
+              <Accordion.Panel>
+                <Flex direction={"column"} gap={"4px"} w="500px">
+                  <Select
+                    w="100%"
+                    label="Saved filters"
+                    placeholder="Pick one"
+                    data={prefilters.map((prefilter) => ({
+                      value: prefilter.id,
+                      label: prefilter.title,
+                    }))}
+                    value={selectedFilter}
+                    onChange={(value) => {
+                      setSelectedFilter(value);
+                      const handleApply = async (value: any) => {
+                        mergeSavedQueries(Number(value));
+                        // if (!value) return;
+                        // innerProps.id = Number(value);
+                        // setShowApplyButton(false);
+                        // setCurrentSavedQueryId(prefilters.find((prefilter) => prefilter.id === Number(value))?.id);
+                      };
+                      handleApply(value);
+                      // setShowApplyButton(true);
+                    }}
+                    rightSection={
+                      false && (
+                        <Button
+                          onClick={handleApply}
+                          size="xs"
+                          style={{ marginLeft: "-60px" }}
+                        >
+                          Apply
+                        </Button>
+                      )
+                    }
+                    style={{ width: "50%" }}
+                  />
+                </Flex>
+              </Accordion.Panel>
+            </Accordion.Item>
           </Accordion>
         </ScrollArea>
       </Box>

@@ -16,6 +16,8 @@ import {
   Divider,
   Flex,
   Group,
+  HoverCard,
+  List,
   Loader,
   LoadingOverlay,
   Modal,
@@ -307,7 +309,7 @@ export default function TrainVoice(props: {
         setSelectedProspectId(messageDetails[index].prospect?.id ?? null);
       }
 
-      if (response.data.current_index) {
+      if (response.data.current_index && selectedMessage?.is_approved) {
         setSelectedMessage(messageDetails[response.data.current_index]);
         setSelectedProspectId(
           messageDetails[response.data.current_index]?.prospect?.id ?? null
@@ -654,7 +656,8 @@ export default function TrainVoice(props: {
   const onSaveConfiguration = async function (
     newVoiceDetails?: VoiceBuilderDetails,
     optimistic: boolean = false,
-    newIndex: number | null = null
+    newIndex: number | null = null,
+    fullSave: boolean = false
   ) {
     if (!optimistic) {
       setSaveLoading(true);
@@ -673,6 +676,7 @@ export default function TrainVoice(props: {
             ? newVoiceDetails
             : voiceBuilderDetails,
           name: voiceName,
+          full_save: fullSave,
         }),
       }
     );
@@ -777,7 +781,8 @@ export default function TrainVoice(props: {
                     <Button
                       color={"green"}
                       onClick={async () => {
-                        await onSaveConfiguration();
+                        await onSaveConfiguration(undefined, false, null, true);
+                        props.close();
                       }}
                       disabled={saveLoading}
                     >
@@ -792,7 +797,8 @@ export default function TrainVoice(props: {
                     <Button
                       color={"green"}
                       onClick={async () => {
-                        await onSaveConfiguration();
+                        await onSaveConfiguration(undefined, false, null, true);
+                        props.close();
                       }}
                       disabled={saveLoading}
                     >
@@ -987,28 +993,133 @@ export default function TrainVoice(props: {
                           {selectedMessage?.value.length}/300
                         </Text>
                       </Paper>
-                      <Textarea
+                      <Box
                         w={"100%"}
-                        autosize
-                        minRows={7}
-                        value={selectedMessage.value}
-                        onChange={(e) =>
-                          setSelectedMessage((prevState) => {
-                            return { ...prevState!, value: e.target.value };
-                          })
-                        }
-                        styles={{
-                          input: {
-                            background:
-                              selectedMessage?.value.length > 300
-                                ? "#FFA3A5"
-                                : "#F1F3F5",
-                          },
+                        onClick={(e) => {
+                          if (!messageEditMode) {
+                            setMessageEditMode(true);
+                          }
                         }}
-                        disabled={!messageEditMode}
-                      />
+                      >
+                        <Textarea
+                          w={"100%"}
+                          autosize
+                          minRows={7}
+                          value={selectedMessage.value}
+                          onChange={(e) =>
+                            setSelectedMessage((prevState) => {
+                              return { ...prevState!, value: e.target.value };
+                            })
+                          }
+                          styles={{
+                            input: {
+                              background:
+                                selectedMessage?.value.length > 300
+                                  ? "#FFA3A5"
+                                  : "#FFF",
+                            },
+                          }}
+                          disabled={!messageEditMode}
+                        />
+                      </Box>
+                      <Group pt="xs" noWrap style={{ width: "100%" }}>
+                        {selectedMessage && (
+                          <>
+                            <HoverCard
+                              shadow="md"
+                              position={"bottom"}
+                              withinPortal
+                              closeDelay={0}
+                            >
+                              <HoverCard.Target>
+                                <Badge
+                                  color="blue"
+                                  styles={{
+                                    root: { textTransform: "initial" },
+                                  }}
+                                  variant={"outline"}
+                                  radius={"sm"}
+                                  w={"50%"}
+                                >
+                                  CTA Used:{" "}
+                                  <Text fw={500} span>
+                                    {_.truncate(
+                                      selectedMessage?.meta_data?.cta
+                                        ?.text_value ?? "None",
+                                      {
+                                        length: 45,
+                                      }
+                                    )}
+                                  </Text>
+                                </Badge>
+                              </HoverCard.Target>
+                              <HoverCard.Dropdown>
+                                <Text size="sm">
+                                  {selectedMessage?.meta_data?.cta
+                                    ?.text_value ?? ""}
+                                </Text>
+                              </HoverCard.Dropdown>
+                            </HoverCard>
+
+                            <HoverCard
+                              withinPortal
+                              shadow="md"
+                              position="bottom"
+                              closeDelay={0}
+                            >
+                              <HoverCard.Target>
+                                <Badge
+                                  variant={"outline"}
+                                  radius={"sm"}
+                                  color="green"
+                                  styles={{
+                                    root: {
+                                      textTransform: "initial",
+                                    },
+                                  }}
+                                  w={"50%"}
+                                >
+                                  Personalizations:{" "}
+                                  <Text fw={500} span>
+                                    {selectedMessage.meta_data?.research_points
+                                      ?.length + " used"}
+                                  </Text>
+                                </Badge>
+                              </HoverCard.Target>
+                              <HoverCard.Dropdown>
+                                {selectedMessage.meta_data?.research_points && (
+                                  <List>
+                                    {selectedMessage.meta_data?.research_points.map(
+                                      (combined_data: any, index: number) => {
+                                        return (
+                                          <List.Item key={index}>
+                                            <Flex direction={"column"}>
+                                              <Text fz="sm" fw={"bold"}>
+                                                {_.startCase(
+                                                  combined_data.research_point_type
+                                                    .toLowerCase()
+                                                    .replaceAll("_", " ")
+                                                    .replace("aicomp", "")
+                                                    .replace("aiind", "")
+                                                )}
+                                              </Text>
+                                              <Text fz="sm">
+                                                {combined_data.value}
+                                              </Text>
+                                            </Flex>
+                                          </List.Item>
+                                        );
+                                      }
+                                    )}
+                                  </List>
+                                )}
+                              </HoverCard.Dropdown>
+                            </HoverCard>
+                          </>
+                        )}
+                      </Group>
                     </Flex>
-                    {messageEditMode ? (
+                    {messageEditMode && (
                       <Flex
                         align={"center"}
                         mt={"md"}
@@ -1035,7 +1146,10 @@ export default function TrainVoice(props: {
                             const newMessages =
                               voiceBuilderDetails!.messages.map((item) => {
                                 if (item.id === selectedMessage!.id) {
-                                  return { ...selectedMessage };
+                                  return {
+                                    ...selectedMessage,
+                                    is_approved: true,
+                                  };
                                 } else {
                                   return item;
                                 }
@@ -1047,22 +1161,14 @@ export default function TrainVoice(props: {
                             };
                             setVoiceBuilderDetails(newDetails);
                             setMessageEditMode(false);
+                            setSelectedMessage((prevState) => {
+                              return { ...prevState!, is_approved: true };
+                            });
 
                             await onSaveConfiguration(newDetails, true);
                           }}
                         >
                           Save
-                        </Button>
-                      </Flex>
-                    ) : (
-                      <Flex align={"center"} direction={"column"} mt={"8px"}>
-                        <Button
-                          w={200}
-                          onClick={() => {
-                            setMessageEditMode(true);
-                          }}
-                        >
-                          Edit
                         </Button>
                       </Flex>
                     )}

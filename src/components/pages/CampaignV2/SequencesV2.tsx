@@ -304,7 +304,7 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
       const response = await getLiTemplates(userToken, currentProject!.id);
 
       return response.status === "success"
-        ? (response.data as Templates[])
+        ? (response.data as Templates[]).filter((template) => template.active)
         : [];
     },
     refetchOnWindowFocus: false,
@@ -4898,14 +4898,14 @@ export const LinkedinIntroSectionV2 = function (props: {
   });
 
   useEffect(() => {
-    if (props.prospectId || props.triggerGenerate === 0) {
+    if (props.prospectId || props.triggerGenerate === 0 && !linkedinInitialMessageGenerationInProgress) {
       getIntroMessage(
         props.prospectId,
         true,
         props.selectedTemplateId === -1 ? undefined : props.selectedTemplateId
       );
     }
-  }, [props.prospectId, props.triggerGenerate, props.selectedTemplateId]);
+  }, [props.triggerGenerate]);
 
   const [opened, { open, close }] = useDisclosure(false);
 

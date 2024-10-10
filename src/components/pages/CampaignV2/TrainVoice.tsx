@@ -1029,6 +1029,7 @@ export default function TrainVoice(props: {
                               shadow="md"
                               position={"bottom"}
                               withinPortal
+                              closeDelay={0}
                             >
                               <HoverCard.Target>
                                 <Badge
@@ -1064,6 +1065,7 @@ export default function TrainVoice(props: {
                               withinPortal
                               shadow="md"
                               position="bottom"
+                              closeDelay={0}
                             >
                               <HoverCard.Target>
                                 <Badge
@@ -1079,7 +1081,8 @@ export default function TrainVoice(props: {
                                 >
                                   Personalizations:{" "}
                                   <Text fw={500} span>
-                                    {selectedMessage.meta_data?.research_points?.length + " used"}
+                                    {selectedMessage.meta_data?.research_points
+                                      ?.length + " used"}
                                   </Text>
                                 </Badge>
                               </HoverCard.Target>

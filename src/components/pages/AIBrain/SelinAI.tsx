@@ -40,6 +40,8 @@ import {
   Table,
   Input,
   NativeSelect,
+  Switch,
+  Checkbox,
 } from "@mantine/core";
 import {
   IconAdjustments,
@@ -71,6 +73,7 @@ import {
   IconLink,
   IconList,
   IconLoader,
+  IconMail,
   IconParachute,
   IconPencil,
   IconPlus,
@@ -474,7 +477,7 @@ export default function SelinAI() {
 
   const handleSubmit = async (
     file?: { name: string; description: string; base64: string },
-    forcePrompt?: string
+    forcePrompt?: string, sendAsSelix?: boolean, sendSlack?: boolean, sendEmail?: boolean
   ) => {
     let messagToSend = forcePrompt || prompt;
 
@@ -508,7 +511,7 @@ export default function SelinAI() {
         {
           created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
           message: prompt,
-          role: "user",
+          role: sendAsSelix ? "assistant" : "user",
           type: "message",
         },
       ]);
@@ -563,7 +566,7 @@ export default function SelinAI() {
       const newChatPrompt: MessageType = {
         created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
         message: messagToSend,
-        role: "user",
+        role: sendAsSelix ? "assistant" : "user",
         type: "message",
       };
       setMessages((chatContent: MessageType[]) => [
@@ -577,17 +580,19 @@ export default function SelinAI() {
       slideDown();
       // setLoading(true);
 
-      const loadingMessage: MessageType = {
-        created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
-        message: "loading",
-        role: "assistant",
-        type: "message",
-      };
+      if (!sendAsSelix) {
+        const loadingMessage: MessageType = {
+          created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
+          message: "loading",
+          role: "assistant",
+          type: "message",
+        };
 
-      setMessages((chatContent: MessageType[]) => [
-        ...chatContent,
-        loadingMessage,
-      ]);
+        setMessages((chatContent: MessageType[]) => [
+          ...chatContent,
+          loadingMessage,
+        ]);
+      }
 
       try {
         const response = await fetch(`${API_URL}/selix/create_message`, {
@@ -597,6 +602,9 @@ export default function SelinAI() {
             Authorization: `Bearer ${userToken}`,
           },
           body: JSON.stringify({
+            as_assistant: sendAsSelix,
+            send_slack: sendSlack,
+            send_email: sendEmail,
             device_id: deviceIDRef.current,
             session_id: currentSessionId,
             message: messagToSend,
@@ -2472,7 +2480,7 @@ const SegmentChat = (props: any) => {
   const setAttachedFile = props.setAttachedFile;
   const suggestedFirstMessage: (string | SuggestedMessage)[] =
     props.suggestedFirstMessage;
-  const handleSubmit = props.handleSubmit;
+  const handleSubmit: (file?: { name: string; description: string; base64: string }, forcePrompt?: string, sendAsSelix?: boolean, sendSlack?: boolean, sendEmail?: boolean) => Promise<void> = props.handleSubmit;
   const dropzoneRef = props.dropzoneRef;
   const prompt = props.prompt;
   const aiType = props.aiType;
@@ -2492,8 +2500,13 @@ const SegmentChat = (props: any) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showAddMemoryInput, setShowAddMemoryInput] = useState(false);
   const [showMemoryForKey, setShowMemoryForKey] = useState("");
+  const [sendAsSelix, setSendAsSelix] = useState(false);
+  const [sendSlack, setSendSlack] = useState(false);
+  const [sendEmail, setSendEmail] = useState(false);
   const [newMemoryTitle, setNewMemoryTitle] = useState("");
   // const [recording, setRecording] = useState(false);
+
+  const isInternal = window.location.href.includes("internal");
 
   const messageRefs = useRef<any>([]);
 
@@ -2582,7 +2595,7 @@ const SegmentChat = (props: any) => {
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       setRecording(false);
-      handleSubmit();
+      handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail);
     }
   };
 
@@ -3939,7 +3952,7 @@ const SegmentChat = (props: any) => {
             <Textarea
               ref={textareaRef}
               value={prompt}
-              placeholder="Chat with AI..."
+              placeholder={sendAsSelix ? "Chat To User..." : "Chat with AI..."}
               onKeyDown={handleKeyDown}
               onChange={(e) => {
                 setPrompt(e.target.value);
@@ -4101,7 +4114,7 @@ const SegmentChat = (props: any) => {
                   variant="filled"
                   className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
                   onClick={() => {
-                    handleSubmit();
+                    handleSubmit(undefined,undefined,sendAsSelix, sendSlack, sendEmail);
                     setRecording(false);
                   }}
                   // leftIcon={<IconSend size={"1rem"} />}
@@ -4121,17 +4134,63 @@ const SegmentChat = (props: any) => {
               </Flex>
             </Flex>
           </Paper>
-          <ActionIcon
-            size="sm"
-            ml="xs"
-            mb="xs"
-            onClick={() => {
-              const url = `/selix_debugger?session_id=${sessionId}`;
-              window.open(url, "_blank");
-            }}
-          >
-            <IconSettings size={"1rem"} />
-          </ActionIcon>
+          <Flex align="center" gap="0.5rem">
+            <ActionIcon
+              size="sm"
+              onClick={() => {
+                const url = `/selix_debugger?session_id=${sessionId}`;
+                window.open(url, "_blank");
+              }}
+            >
+              <IconSettings size={"1rem"} />
+            </ActionIcon>
+            {isInternal && <>
+            <Switch
+              size="sm"
+              color='grape'
+              checked={sendAsSelix}
+              onChange={() => {
+                const newSendAsSelix = !sendAsSelix;
+                setSendAsSelix(newSendAsSelix);
+                if (!newSendAsSelix) {
+                  setSendEmail(false);
+                  setSendSlack(false);
+                }
+              }}
+              label="As Selix"
+              labelPosition="right"
+              styles={{
+                label: { color: "grape" }
+              }}
+            />
+            {sendAsSelix && (
+              <>
+                <Checkbox
+                  checked={sendEmail}
+                  onChange={() => setSendEmail(!sendEmail)}
+                  label={<IconMail stroke={2.5} color="black" />}
+                  size="sm"
+                  mr="xs"
+                  mt="xs"
+                  color="grape"
+                />
+                <Checkbox
+                  checked={sendSlack}
+                  onChange={() => setSendSlack(!sendSlack)}
+                  label={<img
+                    src={SlackLogo}
+                    alt="slack"
+                    width={20}
+                    height={20}
+                  />}
+
+                  size="sm"
+                  color="grape"
+                />
+              </>
+            )}
+            </>}
+          </Flex>
         </div>
       </Paper>
       <SelixMemoryLogs

@@ -765,7 +765,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                                 .split(" ")
                                 .find((item) => item.includes("pipeline"))}`
                             : "")
-                        : log.title}
+                        : log.tag === "SUPPORT_THREAD_SLACK" ? `Slack Thread on ${log.created_date}` : log.title}
                     </Text>
                     {isSelected && (
                       <Text
@@ -799,7 +799,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                   );
 
                   return childEvents.length > 0 &&
-                    (isSelected || !log.parent_log_id) ? (
+                    (isSelected || !log.parent_log_id) && (!isSelected && log.tag === "MEMORY_METADATA_SAVED") ? (
                     <>
                       <Divider
                         size={"xl"}
@@ -1232,8 +1232,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                             size="sm"
                             dangerouslySetInnerHTML={{
                               __html: selectedLog.processing_status_description
-                                .replaceAll("**", "")
-                                .replaceAll("\n", "<br />"),
+                                ? selectedLog.processing_status_description
+                                    .replaceAll("**", "")
+                                    .replaceAll("\n", "<br />")
+                                : "",
                             }}
                           />
                         </HoverCard.Dropdown>

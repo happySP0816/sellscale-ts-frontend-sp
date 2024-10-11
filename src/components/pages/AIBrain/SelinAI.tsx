@@ -653,7 +653,8 @@ export default function SelinAI() {
             device_id: deviceIDRef.current,
             session_id: currentSessionId,
             message: messagToSend,
-            scheduleDay: scheduleDay
+            scheduleDay: scheduleDay,
+            task_id: attachedInternalTask?.id
           }),
         });
 

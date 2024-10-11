@@ -1363,7 +1363,9 @@ export default function CampaignTemplateEditModal({
                   align={"center"}
                   justify={"space-between"}
                   onClick={() => {
-                    if (steps < 5) setSteps((item) => (item = item + 1));
+                    if (steps < 5 && (steps === 0 || emailSequenceData[steps - 1]?.some(template => template.active))) {
+                      setSteps((item) => (item = item + 1));
+                    }
                   }}
                 >
                   <Text

@@ -4289,7 +4289,7 @@ const SegmentChat = (props: any) => {
               <Popover.Dropdown>
                 <Calendar
                   placeholder={"Select a date"}
-                  minDate={moment(new Date()).add(1, "days").toDate()}
+                  minDate={moment(new Date()).add(0, "days").toDate()}
                   getDayProps={(date) => ({
                     selected: moment(scheduleDay).isSame(date, "day"),
                     onClick: () => {

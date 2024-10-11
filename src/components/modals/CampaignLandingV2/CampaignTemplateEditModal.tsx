@@ -173,8 +173,8 @@ export default function CampaignTemplateEditModal({
   );
   const [steps, setSteps] = useState(
     sequenceType === "email"
-      ? emailSequenceData.length || 3
-      : linkedinSequenceData.length || 3
+      ? emailSequenceData.length || 0
+      : linkedinSequenceData.length || 0
   );
   const [generatingSubjectLines, setGeneratingSubjectLines] = useState(false);
   const [currentStepNum, setCurrentStepNum] = useState(
@@ -1101,7 +1101,7 @@ export default function CampaignTemplateEditModal({
                   />
                 </>
               )}
-              {steps &&
+              {steps > 0 &&
                 Array.from({ length: Number(steps) }, (_, index) => {
                   const tabValue = (index + 1).toString();
                   return (

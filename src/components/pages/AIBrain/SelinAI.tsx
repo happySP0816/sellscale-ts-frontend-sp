@@ -60,6 +60,7 @@ import {
   IconChevronUp,
   IconCircleCheck,
   IconClock,
+  IconClockHour12,
   IconCloud,
   IconEar,
   IconEdit,
@@ -370,6 +371,7 @@ interface MessageType {
     title: string;
     description: string;
   };
+  hidden_until?: Date;
   actual_completion_time?: string | null;
   id?: number;
   selix_session_id?: number;
@@ -554,6 +556,7 @@ export default function SelinAI() {
       setMessages((chatContent: MessageType[]) => [
         ...chatContent,
         {
+          hidden_until: scheduleDay,
           created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
           message: prompt,
           role: sendAsSelix ? "assistant" : "user",
@@ -610,6 +613,7 @@ export default function SelinAI() {
     if (messagToSend.trim() !== "") {
       const newChatPrompt: MessageType = {
         created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
+        hidden_until: scheduleDay,
         message: messagToSend,
         role: sendAsSelix ? "assistant" : "user",
         type: "message",
@@ -627,6 +631,7 @@ export default function SelinAI() {
 
       if (!sendAsSelix) {
         const loadingMessage: MessageType = {
+          hidden_until: scheduleDay,
           created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
           message: "loading",
           role: "assistant",
@@ -818,6 +823,7 @@ export default function SelinAI() {
               return {
                 ...message,
                 type: "slack",
+                hidden_until: message.hidden_until,
                 role: is_from_me ? "user" : "assistant",
                 sender_name,
                 slack_channel: parsedMessage.title
@@ -2671,6 +2677,8 @@ const SegmentChat = (props: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       setRecording(false);
       handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail, scheduleDay);
+      setScheduleDay(undefined);
+      props.setAttachedInternalTask(undefined);
     }
   };
 
@@ -3589,7 +3597,7 @@ const SegmentChat = (props: any) => {
                             ml={message.role === "user" ? "auto" : "0"}
                             style={{
                               backgroundColor:
-                                message.role === "user" ? "#f7ffff" : "#fafafa",
+                                message.hidden_until ? "#ADD8E6" : (message.role === "user" ? "#f7ffff" : "#fafafa"),
                               borderRadius: "10px",
                               border: "1px solid #e7ebef",
                               padding: "10px",
@@ -3642,12 +3650,34 @@ const SegmentChat = (props: any) => {
                               ml={message.role === "user" ? "auto" : "0"}
                             >
                               <Text
-                                color="gray"
+                                color={message.hidden_until ? "white" : "gray"}
                                 size="xs"
                                 ml={message.role === "user" ? "auto" : "0"}
                               >
-                                {moment(message.created_time).format(
-                                  "MMMM D, h:mm A"
+                                {message.hidden_until ? (
+                                  <>
+                                    <style>
+                                      {`
+                                        @keyframes spin {
+                                          0% { transform: rotate(0deg); }
+                                          100% { transform: rotate(360deg); }
+                                        }
+                                      `}
+                                    </style>
+                                    <IconClockHour12
+                                      size={"0.8rem"}
+                                      style={{
+                                        animation: "spin 2s linear infinite",
+                                      }}
+                                    />{" "}
+                                    {moment(message.hidden_until).format(
+                                      "MMMM D, h:mm A"
+                                    )}
+                                  </>
+                                ) : (
+                                  moment(message.created_time).format(
+                                    "MMMM D, h:mm A"
+                                  )
                                 )}
                               </Text>
                             </Text>
@@ -4191,6 +4221,8 @@ const SegmentChat = (props: any) => {
                   onClick={() => {
                     handleSubmit(undefined,undefined,sendAsSelix, sendSlack, sendEmail, scheduleDay);
                     setRecording(false);
+                    setScheduleDay(undefined);
+                    props.setAttachedInternalTask(undefined);
                   }}
                   // leftIcon={<IconSend size={"1rem"} />}
                 >

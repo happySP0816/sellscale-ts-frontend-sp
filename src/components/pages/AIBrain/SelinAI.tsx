@@ -48,12 +48,14 @@ import {
   IconBrowser,
   IconBulb,
   IconCheck,
+  IconChecklist,
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
   IconChevronUp,
   IconCircleCheck,
   IconClock,
+  IconClockHour12,
   IconCloud,
   IconEar,
   IconEdit,
@@ -83,7 +85,7 @@ import {
   IconX,
 } from "@tabler/icons";
 import SlackLogo from "@assets/images/slack-logo.png";
-import { IconSparkles, IconUserShare } from "@tabler/icons-react";
+import { IconClock24, IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
 import { Dispatch, Fragment, Key, memo, SetStateAction, useEffect, useRef, useState } from "react";
 import React, { forwardRef, useImperativeHandle } from "react";
@@ -135,6 +137,7 @@ import { setSmartleadCampaign } from "@utils/requests/setSmartleadCampaign";
 import SelixMemoryLogs from "./SelinMemoryLogs";
 import { Draggable } from "react-beautiful-dnd";
 import { isInt } from "@fullcalendar/core/internal";
+import { Calendar, TimeInput } from "@mantine/dates";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -323,6 +326,7 @@ interface MessageType {
     title: string;
     description: string;
   };
+  hidden_until?: Date;
   actual_completion_time?: string | null;
   id?: number;
   selix_session_id?: number;
@@ -345,6 +349,7 @@ export default function SelinAI() {
   const [suggestionHidden, setSuggestionHidden] = useState(true);
   const [suggestedFirstMessage, setSuggestedFirstMessage] = useState<(string | SuggestedMessage)[]>([]);
   const [recording, setRecording] = useState(false);
+  const [attachedInternalTask, setAttachedInternalTask] = useState<TaskType | undefined>(undefined);
   const prevPromptLengthRef = useRef<number>(0);
   const prevSlideUpTime = useRef<number>(0);
   const dropzoneRef = useRef<{
@@ -400,6 +405,48 @@ export default function SelinAI() {
     });
   };
 
+  const isInternal = window.location.href.includes("internal");
+  const onDragEnd = async (result: {
+    destination: { index: number };
+    source: { index: number };
+  }) => {
+    if (!isInternal) {
+      return;
+    }
+    if (!result.destination) {
+      return;
+    }
+    const reorderedTasks = Array.from(tasks);
+    const [removed] = reorderedTasks.splice(result.source.index, 1);
+    reorderedTasks.splice(result.destination.index, 0, removed);
+
+    // Update the state with the reordered tasks
+    setTasks(reorderedTasks);
+
+    // Call the API to reorder the tasks
+    try {
+      const response = await fetch(`${API_URL}/selix/reorder-tasks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          tasks: reorderedTasks.map((task, index) => ({
+            id: task.id,
+            order: index,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to reorder tasks");
+      }
+    } catch (error) {
+      console.error("Error reordering tasks:", error);
+    }
+  };
+
   // console.log("current session is", currentSessionId);
 
   useEffect(() => {
@@ -412,10 +459,7 @@ export default function SelinAI() {
 
   const handleSubmit = async (
     file?: { name: string; description: string; base64: string },
-    forcePrompt?: string,
-    sendAsSelix?: boolean,
-    sendSlack?: boolean,
-    sendEmail?: boolean
+    forcePrompt?: string, sendAsSelix?: boolean, sendSlack?: boolean, sendEmail?: boolean, scheduleDay?: Date
   ) => {
     let messagToSend = forcePrompt || prompt;
 
@@ -447,6 +491,7 @@ export default function SelinAI() {
       setMessages((chatContent: MessageType[]) => [
         ...chatContent,
         {
+          hidden_until: scheduleDay,
           created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
           message: prompt,
           role: sendAsSelix ? "assistant" : "user",
@@ -502,6 +547,7 @@ export default function SelinAI() {
     if (messagToSend.trim() !== "") {
       const newChatPrompt: MessageType = {
         created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
+        hidden_until: scheduleDay,
         message: messagToSend,
         role: sendAsSelix ? "assistant" : "user",
         type: "message",
@@ -516,6 +562,7 @@ export default function SelinAI() {
 
       if (!sendAsSelix) {
         const loadingMessage: MessageType = {
+          hidden_until: scheduleDay,
           created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
           message: "loading",
           role: "assistant",
@@ -539,6 +586,8 @@ export default function SelinAI() {
             device_id: deviceIDRef.current,
             session_id: currentSessionId,
             message: messagToSend,
+            scheduleDay: scheduleDay,
+            task_id: attachedInternalTask?.id
           }),
         });
 
@@ -674,28 +723,36 @@ export default function SelinAI() {
       const currentThread = threads_passed?.find((thread) => thread.id === session_id) || threads.find((thread) => thread.id === session_id);
 
       // SPECIAL PARSING FOR SLACK MESSAGES
-      const transformedMessages = filteredMessages.map((message: MessageType) => {
-        if (message.message?.includes("SLACK MESSAGE") || message.message?.includes("SUPPORT THREAD SLACK")) {
-          try {
-            const parsedMessage = JSON.parse(message.message);
+      const transformedMessages = filteredMessages.map(
+        (message: MessageType) => {
+          if (
+            message.message?.includes("SLACK MESSAGE") ||
+            message.message?.includes("SUPPORT THREAD SLACK")
+          ) {
+            try {
+              const parsedMessage = JSON.parse(message.message);
 
-            const sender_name = parsedMessage.title.split(" sent to ")[0];
-            const is_from_me = sender_name === userData.sdr_name;
+              const sender_name = parsedMessage.title.split(" sent to ")[0];
+              const is_from_me = sender_name === userData.sdr_name;
 
-            // console.log("parsed message is", parsedMessage);
-            return {
-              ...message,
-              type: "slack",
-              role: is_from_me ? "user" : "assistant",
-              sender_name,
-              slack_channel: parsedMessage.title.split(" sent to ")[1].split(" at ")[0],
-              message: parsedMessage.data,
-              title: parsedMessage.title,
-              timestamp: parsedMessage.timestamp,
-            };
-          } catch (error) {
-            console.error("Error parsing SLACK MESSAGE:", error);
-            return message;
+              // console.log("parsed message is", parsedMessage);
+              return {
+                ...message,
+                type: "slack",
+                hidden_until: message.hidden_until,
+                role: is_from_me ? "user" : "assistant",
+                sender_name,
+                slack_channel: parsedMessage.title
+                  .split(" sent to ")[1]
+                  .split(" at ")[0],
+                message: parsedMessage.data,
+                title: parsedMessage.title,
+                timestamp: parsedMessage.timestamp,
+              };
+            } catch (error) {
+              console.error("Error parsing SLACK MESSAGE:", error);
+              return message;
+            }
           }
         }
         return message;
@@ -1820,6 +1877,28 @@ export default function SelinAI() {
               </Box>
             </Paper>
             <Flex w={"100%"} gap={"md"} p={"lg"}>
+            <DragDropContext
+            onDragEnd={(result) => {
+
+              if (result && result.destination && result.destination.droppableId === 'droppable-area') {
+                if (!result.draggableId.includes('-')){
+                  return
+                }
+                const attachedTaskId = Number(result.draggableId.split('-')[1]);
+                const task = tasks.find((task) => task.id === attachedTaskId);
+                setAttachedInternalTask(task);
+                return;
+              }
+
+              if (!result.destination) {
+                return;
+              }
+              onDragEnd({
+                destination: { index: result.destination.index },
+                source: { index: result.source.index },
+              });
+            }}
+          >
               <SegmentChat
                 setAttachedFile={setAttachedFile}
                 attachedFile={attachedFile}
@@ -1831,6 +1910,8 @@ export default function SelinAI() {
                 suggestionHidden={suggestionHidden}
                 suggestion={suggestion}
                 handleSubmit={handleSubmit}
+                attachedInternalTask={attachedInternalTask}
+                setAttachedInternalTask={setAttachedInternalTask}
                 prompt={prompt}
                 promptRef={promptRef}
                 setPrompt={setPrompt}
@@ -1864,6 +1945,7 @@ export default function SelinAI() {
                 setMessages={setMessages}
                 currentSessionId={sessionIDRef.current}
               />
+              </DragDropContext>
             </Flex>
           </Flex>
         )}
@@ -1875,14 +1957,9 @@ export default function SelinAI() {
 const SegmentChat = (props: any) => {
   const attachedFile = props.attachedFile;
   const setAttachedFile = props.setAttachedFile;
-  const suggestedFirstMessage: (string | SuggestedMessage)[] = props.suggestedFirstMessage;
-  const handleSubmit: (
-    file?: { name: string; description: string; base64: string },
-    forcePrompt?: string,
-    sendAsSelix?: boolean,
-    sendSlack?: boolean,
-    sendEmail?: boolean
-  ) => Promise<void> = props.handleSubmit;
+  const suggestedFirstMessage: (string | SuggestedMessage)[] =
+    props.suggestedFirstMessage;
+  const handleSubmit: (file?: { name: string; description: string; base64: string }, forcePrompt?: string, sendAsSelix?: boolean, sendSlack?: boolean, sendEmail?: boolean, scheduleDay?: Date) => Promise<void> = props.handleSubmit;
   const dropzoneRef = props.dropzoneRef;
   const prompt = props.prompt;
   const aiType = props.aiType;
@@ -1896,6 +1973,7 @@ const SegmentChat = (props: any) => {
   const sessionId = props.currentSessionId;
   const setPrompt = props.setPrompt;
   const messages: MessageType[] = props.messages;
+  const attachedInternalTask: TaskType | undefined = props.attachedInternalTask;
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [showLoader, setShowLoader] = useState(false);
@@ -1904,6 +1982,8 @@ const SegmentChat = (props: any) => {
   const [showMemoryForKey, setShowMemoryForKey] = useState("");
   const [sendAsSelix, setSendAsSelix] = useState(false);
   const [sendSlack, setSendSlack] = useState(false);
+  const [scheduleDay, setScheduleDay] = useState<Date | undefined>(undefined);
+  const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
   const [newMemoryTitle, setNewMemoryTitle] = useState("");
   // const [recording, setRecording] = useState(false);
@@ -1994,7 +2074,9 @@ const SegmentChat = (props: any) => {
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       setRecording(false);
-      handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail);
+      handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail, scheduleDay);
+      setScheduleDay(undefined);
+      props.setAttachedInternalTask(undefined);
     }
   };
 
@@ -2724,7 +2806,8 @@ const SegmentChat = (props: any) => {
                             key={index}
                             ml={message.role === "user" ? "auto" : "0"}
                             style={{
-                              backgroundColor: message.role === "user" ? "#f7ffff" : "#fafafa",
+                              backgroundColor:
+                                message.hidden_until ? "#ADD8E6" : (message.role === "user" ? "#f7ffff" : "#fafafa"),
                               borderRadius: "10px",
                               border: "1px solid #e7ebef",
                               padding: "10px",
@@ -2759,9 +2842,41 @@ const SegmentChat = (props: any) => {
                                 )}
                               </Text>
                             </Flex>
-                            <Text color="gray" size={"xs"} ml={message.role === "user" ? "auto" : "0"}>
-                              <Text color="gray" size="xs" ml={message.role === "user" ? "auto" : "0"}>
-                                {moment(message.created_time).format("MMMM D, h:mm A")}
+                            <Text
+                              color="gray"
+                              size={"xs"}
+                              ml={message.role === "user" ? "auto" : "0"}
+                            >
+                              <Text
+                                color={message.hidden_until ? "white" : "gray"}
+                                size="xs"
+                                ml={message.role === "user" ? "auto" : "0"}
+                              >
+                                {message.hidden_until ? (
+                                  <>
+                                    <style>
+                                      {`
+                                        @keyframes spin {
+                                          0% { transform: rotate(0deg); }
+                                          100% { transform: rotate(360deg); }
+                                        }
+                                      `}
+                                    </style>
+                                    <IconClockHour12
+                                      size={"0.8rem"}
+                                      style={{
+                                        animation: "spin 2s linear infinite",
+                                      }}
+                                    />{" "}
+                                    {moment(message.hidden_until).format(
+                                      "MMMM D, h:mm A"
+                                    )}
+                                  </>
+                                ) : (
+                                  moment(message.created_time).format(
+                                    "MMMM D, h:mm A"
+                                  )
+                                )}
                               </Text>
                             </Text>
                           </Flex>
@@ -3222,8 +3337,10 @@ const SegmentChat = (props: any) => {
                   variant="filled"
                   className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
                   onClick={() => {
-                    handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail);
+                    handleSubmit(undefined,undefined,sendAsSelix, sendSlack, sendEmail, scheduleDay);
                     setRecording(false);
+                    setScheduleDay(undefined);
+                    props.setAttachedInternalTask(undefined);
                   }}
                   // leftIcon={<IconSend size={"1rem"} />}
                 >
@@ -3272,27 +3389,184 @@ const SegmentChat = (props: any) => {
                     label: { color: "grape" },
                   }}
                 />
-                {sendAsSelix && (
-                  <>
-                    <Checkbox
-                      checked={sendEmail}
-                      onChange={() => setSendEmail(!sendEmail)}
-                      label={<IconMail stroke={2.5} color="black" />}
-                      size="sm"
-                      mr="xs"
-                      mt="xs"
-                      color="grape"
-                    />
-                    <Checkbox
-                      checked={sendSlack}
-                      onChange={() => setSendSlack(!sendSlack)}
-                      label={<img src={SlackLogo} alt="slack" width={20} height={20} />}
-                      size="sm"
-                      color="grape"
-                    />
-                  </>
+                <Popover
+              position="bottom"
+              withArrow
+              shadow="md"
+              trapFocus
+              opened={showSchedulePopup}
+            >
+              <Popover.Target>
+                <Tooltip
+                  label="Schedule a send time into the future"
+                  withArrow
+                  withinPortal
+                >
+                  <Flex>
+                    <Button
+                      onClick={() => setShowSchedulePopup((v) => !v)}
+                      size="xs"
+                    >
+                      <IconClock24 size={"1rem"} />
+                    </Button>
+                  </Flex>
+                </Tooltip>
+              </Popover.Target>
+
+              <Popover.Dropdown>
+                <Calendar
+                  placeholder={"Select a date"}
+                  minDate={moment(new Date()).add(0, "days").toDate()}
+                  getDayProps={(date) => ({
+                    selected: moment(scheduleDay).isSame(date, "day"),
+                    onClick: () => {
+                      // Preserve the time
+                      const hour = moment(scheduleDay).hour();
+                      const minute = moment(scheduleDay).minute();
+                      const newDate = moment(date)
+                        .set("hour", hour)
+                        .set("minute", minute)
+                        .toDate();
+                      setScheduleDay(newDate);
+                    },
+                  })}
+                  onPointerEnterCapture={() => {}}
+                  onPointerLeaveCapture={() => {}}
+                />
+                <Flex
+                  mt="xs"
+                  direction="row"
+                  justify={"space-between"}
+                  align="flex-end"
+                >
+                  <TimeInput
+                    w="100%"
+                    label="Custom Time"
+                    size="sm"
+                    value={moment(scheduleDay).format("HH:mm")}
+                    onChange={(event) => {
+                      const value = event.currentTarget.value; // Format is HH:MM
+                      const hour = parseInt(value.split(":")[0]);
+                      const minute = parseInt(value.split(":")[1]);
+                      const newDate = moment(scheduleDay)
+                        .set("hour", hour)
+                        .set("minute", minute)
+                        .toDate();
+                      setScheduleDay(newDate);
+                    }}
+                  />
+                  <Tooltip label="Schedule for now" withArrow withinPortal>
+                    <Flex>
+                      <Button
+                        size="xs"
+                        mb="xs"
+                        ml="sm"
+                        variant="transparent"
+                        color="red"
+                        onClick={() => {
+                          setShowSchedulePopup(false);
+                          setScheduleDay(undefined);
+                        }}
+                      >
+                        <IconX size="1rem" />
+                      </Button>
+                    </Flex>
+                  </Tooltip>
+                </Flex>
+              </Popover.Dropdown>
+            </Popover>
+              {!attachedInternalTask ? <Droppable droppableId="droppable-area">
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    style={{
+                      border: snapshot.isDraggingOver ? "1px solid #4caf50" : "1px dashed #ccc",
+                      padding: "10px",
+                      marginLeft: '5px',
+                      height: "10px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: snapshot.isDraggingOver ? "#f0fff0" : "transparent",
+                      overflow: "hidden", // Changed from "auto" to "hidden" to prevent expansion
+                    }}
+                    onDragEnter={(event) => {
+                      console.log('Drag Enter event:', event);
+                    }}
+                    onDragOver={(event) => {
+                      console.log('Drag Over event:', event);
+                      event.preventDefault();
+                    }}
+                    onDragLeave={(event) => {
+                      console.log('Drag Leave event:', event);
+                    }}
+                    onDrop={(event) => {
+                      console.log('Drop event:', event);
+                      event.preventDefault();
+                      const data = event.dataTransfer.getData('text');
+                      console.log('Dropped item:', data);
+                      alert('Dropped item: ' + data);
+                    }}
+                    onMouseEnter={(event) => {
+                      console.log('Mouse entered droppable area');
+                    }}
+                    onMouseLeave={() => {
+                      console.log('Mouse left droppable area');
+                    }}
+                  >
+                    <Tooltip label="Drag task here to attach" withArrow withinPortal>
+                      <Flex >
+                        <IconChecklist size="1rem" />
+                        {provided.placeholder}
+                      </Flex>
+                    </Tooltip>
+                  </div>
                 )}
+              </Droppable> : (
+                <div style={{ position: "relative" }}>
+                  <Text
+                    style={{
+                      fontSize: "0.8rem",
+                      fontWeight: "bold",
+                      color: "#4caf50",
+                      padding: "0px",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                      marginRight: '14px',
+                      backgroundColor: "#f9f9f9",
+                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                      textAlign: "center",
+                    }}
+                  >
+                    {attachedInternalTask.title}
+                  </Text>
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "0",
+                      right: "0",
+                      cursor: "pointer",
+                      color: "green",
+                      fontSize: "0.8rem",
+                      transition: "transform 0.2s ease-in-out",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.2)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
+                    onClick={(e) => {
+                        props.setAttachedInternalTask(undefined);
+                    }}
+                  >
+                    ✖
+                  </div>
+                  
+                </div>
+              )}
               </>
+              
             )}
           </Flex>
         </div>
@@ -4015,44 +4289,6 @@ const PlannerComponent = ({
     return data.segments;
   };
 
-  const onDragEnd = async (result: { destination: { index: number }; source: { index: number } }) => {
-    if (!isInternal) {
-      return;
-    }
-    if (!result.destination) {
-      return;
-    }
-    const reorderedTasks = Array.from(tasks);
-    const [removed] = reorderedTasks.splice(result.source.index, 1);
-    reorderedTasks.splice(result.destination.index, 0, removed);
-
-    // Update the state with the reordered tasks
-    setTasks(reorderedTasks);
-
-    // Call the API to reorder the tasks
-    try {
-      const response = await fetch(`${API_URL}/selix/reorder-tasks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          tasks: reorderedTasks.map((task, index) => ({
-            id: task.id,
-            order: index,
-          })),
-        }),
-      });
-
-      if (!response.ok) {
-        console.error("Failed to reorder tasks");
-      }
-    } catch (error) {
-      console.error("Error reordering tasks:", error);
-    }
-  };
-
   return (
     <Paper p={"sm"} withBorder radius={"sm"}>
       <Flex w={"100%"} align={"center"} gap={"xs"}>
@@ -4112,18 +4348,12 @@ const PlannerComponent = ({
         <img src={selectedRewindImage} alt="Rewind" width={"100%"} height={"100%"} style={{ marginTop: "10px" }} />
       </Modal>
       <Collapse in={opened}>
-        <ScrollArea h={"55vh"} scrollHideDelay={4000} style={{ overflow: "hidden" }} viewportRef={taskContainerRef}>
-          <DragDropContext
-            onDragEnd={(result) => {
-              if (!result.destination) {
-                return;
-              }
-              onDragEnd({
-                destination: { index: result.destination.index },
-                source: { index: result.source.index },
-              });
-            }}
-          >
+        <ScrollArea
+          h={"55vh"}
+          scrollHideDelay={4000}
+          style={{ overflow: "hidden" }}
+          viewportRef={taskContainerRef}
+        >
             <Droppable isDropDisabled={!isInternal} droppableId="tasks">
               {(provided) => (
                 <div ref={provided.innerRef} {...provided.droppableProps}>
@@ -4447,7 +4677,6 @@ const PlannerComponent = ({
                 </div>
               )}
             </Droppable>
-          </DragDropContext>
           {isInternal && (
             <Flex justify="center" mt="md">
               {creatingNewTask ? (

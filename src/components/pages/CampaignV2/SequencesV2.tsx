@@ -376,48 +376,54 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
     },
   });
 
-  const emailSteps = useMemo(() => {
-    if (emailSequenceData && Array.isArray(emailSequenceData)) {
-      return (
-        <Stepper
-          active={stepNumber}
-          onStepClick={(number) => {
-            setStepNumber(number);
-            setTriggerGenerate(number);
-          }}
-          orientation="vertical"
-          styles={() => ({
-            separator: {
-              borderColor: theme.colors.gray[4],
-            },
-            stepCompletedIcon: {
-              backgroundColor: "transparent",
-            },
-            color: "transparent",
+const emailSteps = useMemo(() => {
+  if (emailSequenceData && Array.isArray(emailSequenceData)) {
+    return (
+      <Stepper
+        active={stepNumber}
+        onStepClick={(number) => {
+          setStepNumber(number);
+          setTriggerGenerate(number);
+        }}
+        orientation="vertical"
+        styles={() => ({
+          separator: {
+            borderColor: theme.colors.gray[4],
+          },
+          stepCompletedIcon: {
             backgroundColor: "transparent",
-          })}
-          size={"xs"}
-          style={{
-            minWidth: "fit-content",
-            minHeight: "100%",
-            marginTop: "8px",
-            padding: "auto",
-          }}
-        >
-          {emailSequenceData.map((item, index) => {
+          },
+          color: "transparent",
+          backgroundColor: "transparent",
+        })}
+        size={"xs"}
+        style={{
+          minWidth: "fit-content",
+          minHeight: "100%",
+          marginTop: "8px",
+          padding: "auto",
+        }}
+      >
+        {emailSequenceData.map((item, index) => {
+          const hasActiveTemplate = item.some(
+            (template) => template.active
+          );
+          if (hasActiveTemplate) {
             return (
               <Stepper.Step
                 key={index}
                 style={{ backgroundColor: "transparent" }}
               />
             );
-          })}
-        </Stepper>
-      );
-    } else {
-      return <></>;
-    }
-  }, [emailSequenceData, stepNumber]);
+          }
+          return null;
+        })}
+      </Stepper>
+    );
+  } else {
+    return <></>;
+  }
+}, [emailSequenceData, stepNumber]);
 
   const linkedinSteps = useMemo(() => {
     if (linkedinSequenceData && Array.isArray(linkedinSequenceData)) {
@@ -569,6 +575,7 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
 
   const onRegenerate = async () => {
     if (selectedProspect) {
+      console.log('regenerating with prospect', selectedProspect)
       setTriggerGenerate(stepNumber);
       // await getIntroMessage(selectedProspect.id, true, selectedTemplateId);
     }
@@ -1732,22 +1739,26 @@ const NewUIEmailSequencingV2 = function (props: {
   const viewport = useRef<HTMLDivElement>(null);
   const scrollToTop = () => viewport.current!.scrollTo({ top: 0 });
 
+
   React.useEffect(() => {
+   console.log('sequence bucket is ', props.templateBuckets);
     if (props.archetypeID === -1) return;
     // Reupdate the selected templates
+    let selectedBuckets: EmailSequenceStep[] = [];
     if (props.emailTab === "PROSPECTED") {
-      setSelectedTemplates(props.templateBuckets?.PROSPECTED.templates);
+      selectedBuckets = props.templateBuckets?.PROSPECTED.templates;
     } else if (props.emailTab === "ACCEPTED") {
-      setSelectedTemplates(props.templateBuckets?.ACCEPTED.templates);
-    } else if (props.emailTab.includes("BUMPED-")) {
-      const bumpCount = props.emailTab.split("-")[1];
-      const bumpCountInt = parseInt(bumpCount);
-      const sequenceBucket = props.templateBuckets?.BUMPED[bumpCountInt];
+      selectedBuckets = props.templateBuckets?.ACCEPTED.templates;
+    } else if (props.emailTab.includes("BUMPED")) {
+      const bumpCount = props.stepNumber - 1;
+      const sequenceBucket = props.templateBuckets?.BUMPED[bumpCount];
       if (sequenceBucket) {
-        setSelectedTemplates(sequenceBucket.templates);
+        selectedBuckets = sequenceBucket.templates;
       }
     }
-  }, [props.templateBuckets, props.archetypeID, props.emailTab]);
+    console.log('selected buckets', selectedBuckets);
+    setSelectedTemplates(selectedBuckets);
+  }, [props.templateBuckets, props.archetypeID, props.emailTab, props.stepNumber]);
 
   return (
     <NewDetailEmailSequencingV2
@@ -1902,6 +1913,7 @@ const EmailPreviewHeaderV2 = function (props: {
   }, [userToken]);
 
   useEffect(() => {
+    console.log('trigger generate is ', props.triggerGenerate, 'step number is ', props.stepNumber);
     if (props.triggerGenerate === props.stepNumber) {
       refetch();
       props.setTriggerGenerate(-1);
@@ -2012,10 +2024,31 @@ const EmailPreviewHeaderV2 = function (props: {
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
+      // console.log('Query Parameters:', {
+      //   queryKey,
+      //   subjectLine: props.subjectLine,
+      //   template: props.template,
+      //   currentTab: props.currentTab,
+      //   prospectId: props.prospectId
+      // });
+
       const [_key, { prospectId, currentTab, template, subjectLine }]: any =
         queryKey;
 
-      if (!props.subjectLine?.id || !props.template?.step.id) {
+      if (!props.subjectLine?.id) {
+        showNotification({
+          title: "Error",
+          message: "Please create a subject line.",
+          color: "red",
+        });
+        return null;
+      }
+      if (!props.template?.step.id) {
+        showNotification({
+          title: "Error",
+          message: "Please create an email template.",
+          color: "red",
+        });
         return null;
       }
 
@@ -2098,6 +2131,8 @@ const EmailPreviewHeaderV2 = function (props: {
       }
     },
     refetchOnWindowFocus: false,
+    retry: 0,
+    enabled: props.triggerGenerate !== -1
   });
 
   const generateInitialEmail = async (

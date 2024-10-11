@@ -53,6 +53,7 @@ import {
   IconBrowser,
   IconBulb,
   IconCheck,
+  IconChecklist,
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
@@ -87,7 +88,7 @@ import {
   IconX,
 } from "@tabler/icons";
 import SlackLogo from "@assets/images/slack-logo.png";
-import { IconSparkles, IconUserShare } from "@tabler/icons-react";
+import { IconClock24, IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
 import {
   Dispatch,
@@ -156,6 +157,7 @@ import { setSmartleadCampaign } from "@utils/requests/setSmartleadCampaign";
 import SelixMemoryLogs from "./SelinMemoryLogs";
 import { Draggable } from "react-beautiful-dnd";
 import { isInt } from "@fullcalendar/core/internal";
+import { Calendar, TimeInput } from "@mantine/dates";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
@@ -394,6 +396,7 @@ export default function SelinAI() {
     (string | SuggestedMessage)[]
   >([]);
   const [recording, setRecording] = useState(false);
+  const [attachedInternalTask, setAttachedInternalTask] = useState<TaskType | undefined>(undefined);
   const prevPromptLengthRef = useRef<number>(0);
   const prevSlideUpTime = useRef<number>(0);
   const dropzoneRef = useRef<{
@@ -465,6 +468,48 @@ export default function SelinAI() {
     });
   };
 
+  const isInternal = window.location.href.includes("internal");
+  const onDragEnd = async (result: {
+    destination: { index: number };
+    source: { index: number };
+  }) => {
+    if (!isInternal) {
+      return;
+    }
+    if (!result.destination) {
+      return;
+    }
+    const reorderedTasks = Array.from(tasks);
+    const [removed] = reorderedTasks.splice(result.source.index, 1);
+    reorderedTasks.splice(result.destination.index, 0, removed);
+
+    // Update the state with the reordered tasks
+    setTasks(reorderedTasks);
+
+    // Call the API to reorder the tasks
+    try {
+      const response = await fetch(`${API_URL}/selix/reorder-tasks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          tasks: reorderedTasks.map((task, index) => ({
+            id: task.id,
+            order: index,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to reorder tasks");
+      }
+    } catch (error) {
+      console.error("Error reordering tasks:", error);
+    }
+  };
+
   // console.log("current session is", currentSessionId);
 
   useEffect(() => {
@@ -477,7 +522,7 @@ export default function SelinAI() {
 
   const handleSubmit = async (
     file?: { name: string; description: string; base64: string },
-    forcePrompt?: string, sendAsSelix?: boolean, sendSlack?: boolean, sendEmail?: boolean
+    forcePrompt?: string, sendAsSelix?: boolean, sendSlack?: boolean, sendEmail?: boolean, scheduleDay?: Date
   ) => {
     let messagToSend = forcePrompt || prompt;
 
@@ -608,6 +653,7 @@ export default function SelinAI() {
             device_id: deviceIDRef.current,
             session_id: currentSessionId,
             message: messagToSend,
+            scheduleDay: scheduleDay
           }),
         });
 
@@ -2417,6 +2463,28 @@ export default function SelinAI() {
               </Box>
             </Paper>
             <Flex w={"100%"} gap={"md"} p={"lg"}>
+            <DragDropContext
+            onDragEnd={(result) => {
+
+              if (result && result.destination && result.destination.droppableId === 'droppable-area') {
+                if (!result.draggableId.includes('-')){
+                  return
+                }
+                const attachedTaskId = Number(result.draggableId.split('-')[1]);
+                const task = tasks.find((task) => task.id === attachedTaskId);
+                setAttachedInternalTask(task);
+                return;
+              }
+
+              if (!result.destination) {
+                return;
+              }
+              onDragEnd({
+                destination: { index: result.destination.index },
+                source: { index: result.source.index },
+              });
+            }}
+          >
               <SegmentChat
                 setAttachedFile={setAttachedFile}
                 attachedFile={attachedFile}
@@ -2428,6 +2496,8 @@ export default function SelinAI() {
                 suggestionHidden={suggestionHidden}
                 suggestion={suggestion}
                 handleSubmit={handleSubmit}
+                attachedInternalTask={attachedInternalTask}
+                setAttachedInternalTask={setAttachedInternalTask}
                 prompt={prompt}
                 promptRef={promptRef}
                 setPrompt={setPrompt}
@@ -2467,6 +2537,7 @@ export default function SelinAI() {
                 setMessages={setMessages}
                 currentSessionId={sessionIDRef.current}
               />
+              </DragDropContext>
             </Flex>
           </Flex>
         )}
@@ -2480,7 +2551,7 @@ const SegmentChat = (props: any) => {
   const setAttachedFile = props.setAttachedFile;
   const suggestedFirstMessage: (string | SuggestedMessage)[] =
     props.suggestedFirstMessage;
-  const handleSubmit: (file?: { name: string; description: string; base64: string }, forcePrompt?: string, sendAsSelix?: boolean, sendSlack?: boolean, sendEmail?: boolean) => Promise<void> = props.handleSubmit;
+  const handleSubmit: (file?: { name: string; description: string; base64: string }, forcePrompt?: string, sendAsSelix?: boolean, sendSlack?: boolean, sendEmail?: boolean, scheduleDay?: Date) => Promise<void> = props.handleSubmit;
   const dropzoneRef = props.dropzoneRef;
   const prompt = props.prompt;
   const aiType = props.aiType;
@@ -2494,6 +2565,7 @@ const SegmentChat = (props: any) => {
   const sessionId = props.currentSessionId;
   const setPrompt = props.setPrompt;
   const messages: MessageType[] = props.messages;
+  const attachedInternalTask: TaskType | undefined = props.attachedInternalTask;
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [showLoader, setShowLoader] = useState(false);
@@ -2502,6 +2574,8 @@ const SegmentChat = (props: any) => {
   const [showMemoryForKey, setShowMemoryForKey] = useState("");
   const [sendAsSelix, setSendAsSelix] = useState(false);
   const [sendSlack, setSendSlack] = useState(false);
+  const [scheduleDay, setScheduleDay] = useState<Date | undefined>(undefined);
+  const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
   const [newMemoryTitle, setNewMemoryTitle] = useState("");
   // const [recording, setRecording] = useState(false);
@@ -2595,7 +2669,7 @@ const SegmentChat = (props: any) => {
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       setRecording(false);
-      handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail);
+      handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail, scheduleDay);
     }
   };
 
@@ -4114,7 +4188,7 @@ const SegmentChat = (props: any) => {
                   variant="filled"
                   className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
                   onClick={() => {
-                    handleSubmit(undefined,undefined,sendAsSelix, sendSlack, sendEmail);
+                    handleSubmit(undefined,undefined,sendAsSelix, sendSlack, sendEmail, scheduleDay);
                     setRecording(false);
                   }}
                   // leftIcon={<IconSend size={"1rem"} />}
@@ -4187,7 +4261,184 @@ const SegmentChat = (props: any) => {
                   size="sm"
                   color="grape"
                 />
+                <Popover
+              position="bottom"
+              withArrow
+              shadow="md"
+              trapFocus
+              opened={showSchedulePopup}
+            >
+              <Popover.Target>
+                <Tooltip
+                  label="Schedule a send time into the future"
+                  withArrow
+                  withinPortal
+                >
+                  <Flex>
+                    <Button
+                      onClick={() => setShowSchedulePopup((v) => !v)}
+                      size="xs"
+                    >
+                      <IconClock24 size={"1rem"} />
+                    </Button>
+                  </Flex>
+                </Tooltip>
+              </Popover.Target>
+
+              <Popover.Dropdown>
+                <Calendar
+                  placeholder={"Select a date"}
+                  minDate={moment(new Date()).add(1, "days").toDate()}
+                  getDayProps={(date) => ({
+                    selected: moment(scheduleDay).isSame(date, "day"),
+                    onClick: () => {
+                      // Preserve the time
+                      const hour = moment(scheduleDay).hour();
+                      const minute = moment(scheduleDay).minute();
+                      const newDate = moment(date)
+                        .set("hour", hour)
+                        .set("minute", minute)
+                        .toDate();
+                      setScheduleDay(newDate);
+                    },
+                  })}
+                  onPointerEnterCapture={() => {}}
+                  onPointerLeaveCapture={() => {}}
+                />
+                <Flex
+                  mt="xs"
+                  direction="row"
+                  justify={"space-between"}
+                  align="flex-end"
+                >
+                  <TimeInput
+                    w="100%"
+                    label="Custom Time"
+                    size="sm"
+                    value={moment(scheduleDay).format("HH:mm")}
+                    onChange={(event) => {
+                      const value = event.currentTarget.value; // Format is HH:MM
+                      const hour = parseInt(value.split(":")[0]);
+                      const minute = parseInt(value.split(":")[1]);
+                      const newDate = moment(scheduleDay)
+                        .set("hour", hour)
+                        .set("minute", minute)
+                        .toDate();
+                      setScheduleDay(newDate);
+                    }}
+                  />
+                  <Tooltip label="Schedule for now" withArrow withinPortal>
+                    <Flex>
+                      <Button
+                        size="xs"
+                        mb="xs"
+                        ml="sm"
+                        variant="transparent"
+                        color="red"
+                        onClick={() => {
+                          setShowSchedulePopup(false);
+                          setScheduleDay(undefined);
+                        }}
+                      >
+                        <IconX size="1rem" />
+                      </Button>
+                    </Flex>
+                  </Tooltip>
+                </Flex>
+              </Popover.Dropdown>
+            </Popover>
+              {!attachedInternalTask ? <Droppable droppableId="droppable-area">
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    style={{
+                      border: snapshot.isDraggingOver ? "1px solid #4caf50" : "1px dashed #ccc",
+                      padding: "10px",
+                      marginLeft: '5px',
+                      height: "10px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: snapshot.isDraggingOver ? "#f0fff0" : "transparent",
+                      overflow: "hidden", // Changed from "auto" to "hidden" to prevent expansion
+                    }}
+                    onDragEnter={(event) => {
+                      console.log('Drag Enter event:', event);
+                    }}
+                    onDragOver={(event) => {
+                      console.log('Drag Over event:', event);
+                      event.preventDefault();
+                    }}
+                    onDragLeave={(event) => {
+                      console.log('Drag Leave event:', event);
+                    }}
+                    onDrop={(event) => {
+                      console.log('Drop event:', event);
+                      event.preventDefault();
+                      const data = event.dataTransfer.getData('text');
+                      console.log('Dropped item:', data);
+                      alert('Dropped item: ' + data);
+                    }}
+                    onMouseEnter={(event) => {
+                      console.log('Mouse entered droppable area');
+                    }}
+                    onMouseLeave={() => {
+                      console.log('Mouse left droppable area');
+                    }}
+                  >
+                    <Tooltip label="Drag task here to attach" withArrow withinPortal>
+                      <Flex >
+                        <IconChecklist size="1rem" />
+                        {provided.placeholder}
+                      </Flex>
+                    </Tooltip>
+                  </div>
+                )}
+              </Droppable> : (
+                <div style={{ position: "relative" }}>
+                  <Text
+                    style={{
+                      fontSize: "0.8rem",
+                      fontWeight: "bold",
+                      color: "#4caf50",
+                      padding: "0px",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                      marginRight: '14px',
+                      backgroundColor: "#f9f9f9",
+                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                      textAlign: "center",
+                    }}
+                  >
+                    {attachedInternalTask.title}
+                  </Text>
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "0",
+                      right: "0",
+                      cursor: "pointer",
+                      color: "green",
+                      fontSize: "0.8rem",
+                      transition: "transform 0.2s ease-in-out",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.2)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
+                    onClick={(e) => {
+                        props.setAttachedInternalTask(undefined);
+                    }}
+                  >
+                    ✖
+                  </div>
+                  
+                </div>
+              )}
               </>
+              
             )}
             </>}
           </Flex>
@@ -4990,46 +5241,6 @@ const PlannerComponent = ({
     return data.segments;
   };
 
-  const onDragEnd = async (result: {
-    destination: { index: number };
-    source: { index: number };
-  }) => {
-    if (!isInternal) {
-      return;
-    }
-    if (!result.destination) {
-      return;
-    }
-    const reorderedTasks = Array.from(tasks);
-    const [removed] = reorderedTasks.splice(result.source.index, 1);
-    reorderedTasks.splice(result.destination.index, 0, removed);
-
-    // Update the state with the reordered tasks
-    setTasks(reorderedTasks);
-
-    // Call the API to reorder the tasks
-    try {
-      const response = await fetch(`${API_URL}/selix/reorder-tasks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          tasks: reorderedTasks.map((task, index) => ({
-            id: task.id,
-            order: index,
-          })),
-        }),
-      });
-
-      if (!response.ok) {
-        console.error("Failed to reorder tasks");
-      }
-    } catch (error) {
-      console.error("Error reordering tasks:", error);
-    }
-  };
 
   return (
     <Paper p={"sm"} withBorder radius={"sm"}>
@@ -5131,17 +5342,7 @@ const PlannerComponent = ({
           style={{ overflow: "hidden" }}
           viewportRef={taskContainerRef}
         >
-          <DragDropContext
-            onDragEnd={(result) => {
-              if (!result.destination) {
-                return;
-              }
-              onDragEnd({
-                destination: { index: result.destination.index },
-                source: { index: result.source.index },
-              });
-            }}
-          >
+        
             <Droppable isDropDisabled={!isInternal} droppableId="tasks">
               {(provided) => (
                 <div ref={provided.innerRef} {...provided.droppableProps}>
@@ -5544,7 +5745,6 @@ const PlannerComponent = ({
                 </div>
               )}
             </Droppable>
-          </DragDropContext>
           {isInternal && (
             <Flex justify="center" mt="md">
               {creatingNewTask ? (

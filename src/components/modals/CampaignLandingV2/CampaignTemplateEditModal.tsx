@@ -171,11 +171,26 @@ export default function CampaignTemplateEditModal({
   const [sequenceType, setSequenceType]: any = useState<string>(
     innerProps.sequenceType || "email"
   );
-  const [steps, setSteps] = useState(
-    sequenceType === "email"
-      ? emailSequenceData.length || 0
-      : linkedinSequenceData.length || 0
-  );
+
+  const [steps, setSteps] = useState(() => {
+    if (sequenceType === "email") {
+      return emailSequenceData && emailSequenceData.length > 0 ? emailSequenceData.length : 0;
+    } else {
+      return linkedinSequenceData && linkedinSequenceData.length > 0 ? linkedinSequenceData.length : 0;
+    }
+  });
+
+
+  //there was a problem where the steps were not updating when the sequence type was changed via the sequence type dropdown
+  useEffect(() => {
+    if (sequenceType === "email") {
+      setSteps(emailSequenceData && emailSequenceData.length > 0 ? emailSequenceData.length : 0);
+    } else {
+      setSteps(linkedinSequenceData && linkedinSequenceData.length > 0 ? linkedinSequenceData.length : 0);
+    }
+  }, [sequenceType, emailSequenceData, linkedinSequenceData]);
+
+
   const [generatingSubjectLines, setGeneratingSubjectLines] = useState(false);
   const [currentStepNum, setCurrentStepNum] = useState(
     (innerProps.currentStepNum || innerProps.currentStepNum === 0) ? innerProps.currentStepNum : 1

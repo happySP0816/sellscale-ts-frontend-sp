@@ -659,7 +659,8 @@ export default function SelinAI() {
             session_id: currentSessionId,
             message: messagToSend,
             scheduleDay: scheduleDay,
-            task_id: attachedInternalTask?.id
+            task_id: attachedInternalTask?.id,
+            intendedTaskChange: intendedTaskChange
           }),
         });
 
@@ -1398,6 +1399,8 @@ export default function SelinAI() {
   const [openedChat, setOpened] = useState(false);
 
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
+
+  const [intendedTaskChange, setIntendedTaskChange] = useState<"ACTIVE" | "COMPLETE" | "CANCELLED" | "PENDING_OPERATOR" | "BLOCKED" | "IN_PROGRESS" | undefined>(undefined);
 
   const containerRef = useRef<HTMLDivElement>(null);
   let isDown = false;
@@ -2493,6 +2496,7 @@ export default function SelinAI() {
             }}
           >
               <SegmentChat
+                setIntendedTaskChange={setIntendedTaskChange}
                 setAttachedFile={setAttachedFile}
                 attachedFile={attachedFile}
                 threads={threads}
@@ -2580,6 +2584,7 @@ const SegmentChat = (props: any) => {
   const [showAddMemoryInput, setShowAddMemoryInput] = useState(false);
   const [showMemoryForKey, setShowMemoryForKey] = useState("");
   const [sendAsSelix, setSendAsSelix] = useState(false);
+  const setIntendedTaskChange = props.setIntendedTaskChange;
   const [sendSlack, setSendSlack] = useState(false);
   const [scheduleDay, setScheduleDay] = useState<Date | undefined>(undefined);
   const [showSchedulePopup, setShowSchedulePopup] = useState(false);
@@ -2678,6 +2683,7 @@ const SegmentChat = (props: any) => {
       setRecording(false);
       handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail, scheduleDay);
       setScheduleDay(undefined);
+      setIntendedTaskChange(undefined);
       props.setAttachedInternalTask(undefined);
     }
   };
@@ -4222,6 +4228,7 @@ const SegmentChat = (props: any) => {
                     handleSubmit(undefined,undefined,sendAsSelix, sendSlack, sendEmail, scheduleDay);
                     setRecording(false);
                     setScheduleDay(undefined);
+                    setIntendedTaskChange(undefined);
                     props.setAttachedInternalTask(undefined);
                   }}
                   // leftIcon={<IconSend size={"1rem"} />}
@@ -4445,6 +4452,27 @@ const SegmentChat = (props: any) => {
                   >
                     {attachedInternalTask.title}
                   </Text>
+                  <select
+                    style={{
+                      fontSize: "0.8rem",
+                      marginTop: "5px",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                      padding: "2px",
+                      backgroundColor: "#f9f9f9",
+                      width: "100%",
+                    }}
+                    onChange={(e) => {
+                      setIntendedTaskChange(e.target.value);
+                    }}
+                  >
+                    <option value="QUEUED">New Status: Queued</option>
+                    <option value="IN_PROGRESS">New Status: In Progress</option>
+                    <option value="IN_PROGRESS_REVIEW_NEEDED">New Status: In Progress Review Needed</option>
+                    <option value="COMPLETE">New Status: Complete</option>
+                    <option value="CANCELLED">New Status: Cancelled</option>
+                    <option value="BLOCKED">New Status: Blocked</option>
+                  </select>
                   <div
                     style={{
                       position: "absolute",
@@ -4467,7 +4495,6 @@ const SegmentChat = (props: any) => {
                   >
                     ✖
                   </div>
-                  
                 </div>
               )}
               </>

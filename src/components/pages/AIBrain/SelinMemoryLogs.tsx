@@ -48,7 +48,7 @@ import {
   IconRobot,
   IconMessages,
 } from "@tabler/icons";
-import moment from "moment";
+import moment from "moment-timezone";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
@@ -109,6 +109,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
   const [roomId, setRoomId] = useState("");
 
   const [isShortTerm, setIsShortTerm] = useState<boolean>(false);
+
+  const [selectedSessionView, setSelectedSessionView] = useState<string | null>(
+    "0: View All Sessions"
+  );
 
   const updateMemoryLogSessionId = async (
     selixLogId: number,
@@ -404,7 +408,21 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
   }, [userToken]);
 
   const reversedLogsByLogDate =
-    logs?.sort((a: MemoryLog, b: MemoryLog) => -(a.id - b.id)) ?? [];
+    logs
+      ?.filter((log) => {
+        if (selectedSessionView) {
+          const id = selectedSessionView.split(":")[0];
+
+          if (id === "0") {
+            return true;
+          }
+
+          return log.session_id ? +log.session_id === +id : false;
+        }
+
+        return true;
+      })
+      .sort((a: MemoryLog, b: MemoryLog) => -(a.id - b.id)) ?? [];
 
   const tagToIconAndColorMap: Record<
     string,
@@ -765,6 +783,8 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                                 .split(" ")
                                 .find((item) => item.includes("pipeline"))}`
                             : "")
+                        : log.tag === "SUPPORT_THREAD_SLACK"
+                        ? `Slack Thread on ${log.created_date}`
                         : log.title}
                     </Text>
                     {isSelected && (
@@ -777,8 +797,11 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                       </Text>
                     )}
                     <Text c="dimmed" size="xs">
-                      {moment(log.created_date).fromNow()} |{" "}
-                      {tagToIconAndColorMap[log.tag]?.sub}
+                      {moment
+                        .utc(log.created_date, "YYYY-MM-DD HH:mm:ss")
+                        .tz("America/Los_Angeles")
+                        .format("YYYY-MM-DD HH:mm:ss")}{" "}
+                      | {tagToIconAndColorMap[log.tag]?.sub}
                     </Text>
                   </Box>
                   <Button
@@ -799,7 +822,9 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                   );
 
                   return childEvents.length > 0 &&
-                    (isSelected || !log.parent_log_id) ? (
+                    (isSelected || !log.parent_log_id) &&
+                    !isSelected &&
+                    log.tag === "MEMORY_METADATA_SAVED" ? (
                     <>
                       <Divider
                         size={"xl"}
@@ -895,8 +920,11 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                     {draggedItem.title}
                   </Text>
                   <Text c="dimmed" size="xs">
-                    {moment(draggedItem.created_date).fromNow()} |{" "}
-                    {tagToIconAndColorMap[draggedItem.tag]?.sub}
+                    {moment
+                      .utc(draggedItem.created_date, "YYYY-MM-DD HH:mm:ss")
+                      .tz("America/Los_Angeles")
+                      .format("YYYY-MM-DD HH:mm:ss")}{" "}
+                    | {tagToIconAndColorMap[draggedItem.tag]?.sub}
                   </Text>
                 </Box>
               </Flex>
@@ -918,11 +946,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
         <Box>
           <Flex gap={"16px"} align={"center"}>
             <Title order={3}>
-              {isShortTerm ? "Short Term Memory" : "Long Term Memory"}
+              {isShortTerm ? "Session Memory" : "Supervisor Memory"}
             </Title>
             <Switch
               size={"lg"}
-              label={isShortTerm ? "Short Term" : "Long Term"}
               checked={isShortTerm}
               onChange={(event) => setIsShortTerm(event.currentTarget.checked)}
               fw={600}
@@ -938,11 +965,19 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
               below, as well as the events that triggered it.
             </Text>
           )}
-          {/* {isShortTerm && ( */}
-          {/*   <Select data={logs ? logs.map(item => { */}
-          {/*     return */}
-          {/*   }) : []}/> */}
-          {/* )} */}
+          {isShortTerm && (
+            <Select
+              data={[
+                "0: View All Sessions",
+                ...threads
+                  .filter((item) => item.status !== "COMPLETE")
+                  .map((item) => `${item.id}: ${item.session_name}`),
+              ]}
+              onChange={setSelectedSessionView}
+              value={selectedSessionView}
+              style={{ width: "40%" }}
+            ></Select>
+          )}
         </Box>
         <ActionIcon
           onClick={() => fetchSelixLogs()}
@@ -977,8 +1012,9 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
               handleMouseLeaveDropZone(e, undefined, false, 1)
             }
             onMouseUp={async (e) => await handleMouseUpInTimeline(e)}
+            style={{ position: "relative" }}
           >
-            <LoadingOverlay visible={loading || loadingSelixLogs} />
+            <LoadingOverlay visible={loading || loadingSelixLogs} zIndex={2} />
             {RenderTimeline(
               reversedLogsByLogDate.filter(
                 (log) => !log.is_sub_event && !log.parent_log_id
@@ -1089,7 +1125,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                     </Tooltip>
 
                     <Text size="sm" color="gray" mb="md">
-                      {moment(selectedLog.created_date).fromNow()}
+                      {moment
+                        .utc(selectedLog.created_date, "YYYY-MM-DD HH:mm:ss")
+                        .tz("America/Los_Angeles")
+                        .format("YYYY-MM-DD HH:mm:ss")}
                     </Text>
                   </Box>
                   <Flex>
@@ -1232,8 +1271,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                             size="sm"
                             dangerouslySetInnerHTML={{
                               __html: selectedLog.processing_status_description
-                                .replaceAll("**", "")
-                                .replaceAll("\n", "<br />"),
+                                ? selectedLog.processing_status_description
+                                    .replaceAll("**", "")
+                                    .replaceAll("\n", "<br />")
+                                : "",
                             }}
                           />
                         </HoverCard.Dropdown>
@@ -1413,7 +1454,11 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                             mt="xs"
                             style={{ fontSize: "10px" }}
                           >
-                            Completed: {moment(log.created_date).fromNow()}
+                            Completed:{" "}
+                            {moment
+                              .utc(log.created_date, "YYYY-MM-DD HH:mm:ss")
+                              .tz("America/Los_Angeles")
+                              .format("YYYY-MM-DD HH:mm:ss")}
                           </Text>
                         </Card>
                       ))}

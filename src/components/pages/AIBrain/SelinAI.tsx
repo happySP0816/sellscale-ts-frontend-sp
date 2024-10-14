@@ -48,12 +48,14 @@ import {
   IconBrowser,
   IconBulb,
   IconCheck,
+  IconChecklist,
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
   IconChevronUp,
   IconCircleCheck,
   IconClock,
+  IconClockHour12,
   IconCloud,
   IconEar,
   IconEdit,
@@ -83,7 +85,7 @@ import {
   IconX,
 } from "@tabler/icons";
 import SlackLogo from "@assets/images/slack-logo.png";
-import { IconSparkles, IconUserShare } from "@tabler/icons-react";
+import { IconClock24, IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
 import { Dispatch, Fragment, Key, memo, SetStateAction, useEffect, useRef, useState } from "react";
 import React, { forwardRef, useImperativeHandle } from "react";
@@ -135,6 +137,7 @@ import { setSmartleadCampaign } from "@utils/requests/setSmartleadCampaign";
 import SelixMemoryLogs from "./SelinMemoryLogs";
 import { Draggable } from "react-beautiful-dnd";
 import { isInt } from "@fullcalendar/core/internal";
+import { Calendar, TimeInput } from "@mantine/dates";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -323,6 +326,7 @@ interface MessageType {
     title: string;
     description: string;
   };
+  hidden_until?: Date;
   actual_completion_time?: string | null;
   id?: number;
   selix_session_id?: number;
@@ -345,6 +349,7 @@ export default function SelinAI() {
   const [suggestionHidden, setSuggestionHidden] = useState(true);
   const [suggestedFirstMessage, setSuggestedFirstMessage] = useState<(string | SuggestedMessage)[]>([]);
   const [recording, setRecording] = useState(false);
+  const [attachedInternalTask, setAttachedInternalTask] = useState<TaskType | undefined>(undefined);
   const prevPromptLengthRef = useRef<number>(0);
   const prevSlideUpTime = useRef<number>(0);
   const dropzoneRef = useRef<{
@@ -400,6 +405,45 @@ export default function SelinAI() {
     });
   };
 
+  const isInternal = window.location.href.includes("internal");
+  const onDragEnd = async (result: { destination: { index: number }; source: { index: number } }) => {
+    if (!isInternal) {
+      return;
+    }
+    if (!result.destination) {
+      return;
+    }
+    const reorderedTasks = Array.from(tasks);
+    const [removed] = reorderedTasks.splice(result.source.index, 1);
+    reorderedTasks.splice(result.destination.index, 0, removed);
+
+    // Update the state with the reordered tasks
+    setTasks(reorderedTasks);
+
+    // Call the API to reorder the tasks
+    try {
+      const response = await fetch(`${API_URL}/selix/reorder-tasks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          tasks: reorderedTasks.map((task, index) => ({
+            id: task.id,
+            order: index,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to reorder tasks");
+      }
+    } catch (error) {
+      console.error("Error reordering tasks:", error);
+    }
+  };
+
   // console.log("current session is", currentSessionId);
 
   useEffect(() => {
@@ -415,7 +459,8 @@ export default function SelinAI() {
     forcePrompt?: string,
     sendAsSelix?: boolean,
     sendSlack?: boolean,
-    sendEmail?: boolean
+    sendEmail?: boolean,
+    scheduleDay?: Date
   ) => {
     let messagToSend = forcePrompt || prompt;
 
@@ -447,6 +492,7 @@ export default function SelinAI() {
       setMessages((chatContent: MessageType[]) => [
         ...chatContent,
         {
+          hidden_until: scheduleDay,
           created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
           message: prompt,
           role: sendAsSelix ? "assistant" : "user",
@@ -502,6 +548,7 @@ export default function SelinAI() {
     if (messagToSend.trim() !== "") {
       const newChatPrompt: MessageType = {
         created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
+        hidden_until: scheduleDay,
         message: messagToSend,
         role: sendAsSelix ? "assistant" : "user",
         type: "message",
@@ -516,6 +563,7 @@ export default function SelinAI() {
 
       if (!sendAsSelix) {
         const loadingMessage: MessageType = {
+          hidden_until: scheduleDay,
           created_time: moment().format("ddd, DD MMM YYYY HH:mm:ss [GMT]"),
           message: "loading",
           role: "assistant",
@@ -539,6 +587,9 @@ export default function SelinAI() {
             device_id: deviceIDRef.current,
             session_id: currentSessionId,
             message: messagToSend,
+            scheduleDay: scheduleDay,
+            task_id: attachedInternalTask?.id,
+            intendedTaskChange: intendedTaskChange,
           }),
         });
 
@@ -686,6 +737,7 @@ export default function SelinAI() {
             return {
               ...message,
               type: "slack",
+              hidden_until: message.hidden_until,
               role: is_from_me ? "user" : "assistant",
               sender_name,
               slack_channel: parsedMessage.title.split(" sent to ")[1].split(" at ")[0],
@@ -875,6 +927,10 @@ export default function SelinAI() {
   };
 
   const handleNewSession = async (data: { session: ThreadType; thread_id: string }) => {
+    //only create new sessions if they were meant for the current user
+    if (data.session.client_sdr_id !== userData.id) {
+      return;
+    }
     // if (data.thread_id === roomIDref.current) {
     // just update the local state
     setThreads((prevThreads) => [...prevThreads, data.session]);
@@ -1162,6 +1218,10 @@ export default function SelinAI() {
   const [openedChat, setOpened] = useState(false);
 
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
+
+  const [intendedTaskChange, setIntendedTaskChange] = useState<
+    "ACTIVE" | "COMPLETE" | "CANCELLED" | "PENDING_OPERATOR" | "BLOCKED" | "IN_PROGRESS" | undefined
+  >(undefined);
 
   const containerRef = useRef<HTMLDivElement>(null);
   let isDown = false;
@@ -1820,50 +1880,75 @@ export default function SelinAI() {
               </Box>
             </Paper>
             <Flex w={"100%"} gap={"md"} p={"lg"}>
-              <SegmentChat
-                setAttachedFile={setAttachedFile}
-                attachedFile={attachedFile}
-                threads={threads}
-                deviceIDRef={deviceIDRef}
-                dropzoneRef={dropzoneRef}
-                suggestedFirstMessage={suggestedFirstMessage}
-                setSuggestionHidden={setSuggestionHidden}
-                suggestionHidden={suggestionHidden}
-                suggestion={suggestion}
-                handleSubmit={handleSubmit}
-                prompt={prompt}
-                promptRef={promptRef}
-                setPrompt={setPrompt}
-                setSegment={setSegment}
-                messages={messages}
-                setMessages={setMessages}
-                segment={segment}
-                setAIType={setAIType}
-                recording={recording}
-                setRecording={setRecording}
-                aiType={aiType}
-                currentSessionId={sessionIDRef.current}
-                memoryState={threads.find((thread) => thread.id === sessionIDRef.current)?.memory.memory_state}
-                memory={threads.find((thread) => thread.id === sessionIDRef.current)?.memory}
-                // generateResponse={generateResponse}
-                // chatContent={chatContent}
-                // setChatContent={setChatContent}
-              />
-              <SelixControlCenter
-                setTasks={setTasks}
-                attachedFile={attachedFile}
-                counter={counter}
-                recording={recording}
-                tasks={tasks}
-                setPrompt={setPrompt}
-                handleSubmit={handleSubmit}
-                setAIType={setAIType}
-                aiType={aiType}
-                threads={threads}
-                messages={messages}
-                setMessages={setMessages}
-                currentSessionId={sessionIDRef.current}
-              />
+              <DragDropContext
+                onDragEnd={(result) => {
+                  if (result && result.destination && result.destination.droppableId === "droppable-area") {
+                    if (!result.draggableId.includes("-")) {
+                      return;
+                    }
+                    const attachedTaskId = Number(result.draggableId.split("-")[1]);
+                    const task = tasks.find((task) => task.id === attachedTaskId);
+                    setAttachedInternalTask(task);
+                    return;
+                  }
+
+                  if (!result.destination) {
+                    return;
+                  }
+                  onDragEnd({
+                    destination: { index: result.destination.index },
+                    source: { index: result.source.index },
+                  });
+                }}
+              >
+                <SegmentChat
+                  setIntendedTaskChange={setIntendedTaskChange}
+                  setAttachedFile={setAttachedFile}
+                  attachedFile={attachedFile}
+                  threads={threads}
+                  deviceIDRef={deviceIDRef}
+                  dropzoneRef={dropzoneRef}
+                  suggestedFirstMessage={suggestedFirstMessage}
+                  setSuggestionHidden={setSuggestionHidden}
+                  suggestionHidden={suggestionHidden}
+                  suggestion={suggestion}
+                  handleSubmit={handleSubmit}
+                  attachedInternalTask={attachedInternalTask}
+                  setAttachedInternalTask={setAttachedInternalTask}
+                  prompt={prompt}
+                  promptRef={promptRef}
+                  setPrompt={setPrompt}
+                  setSegment={setSegment}
+                  messages={messages}
+                  setMessages={setMessages}
+                  segment={segment}
+                  setAIType={setAIType}
+                  recording={recording}
+                  setRecording={setRecording}
+                  aiType={aiType}
+                  currentSessionId={sessionIDRef.current}
+                  memoryState={threads.find((thread) => thread.id === sessionIDRef.current)?.memory.memory_state}
+                  memory={threads.find((thread) => thread.id === sessionIDRef.current)?.memory}
+                  // generateResponse={generateResponse}
+                  // chatContent={chatContent}
+                  // setChatContent={setChatContent}
+                />
+                <SelixControlCenter
+                  setTasks={setTasks}
+                  attachedFile={attachedFile}
+                  counter={counter}
+                  recording={recording}
+                  tasks={tasks}
+                  setPrompt={setPrompt}
+                  handleSubmit={handleSubmit}
+                  setAIType={setAIType}
+                  aiType={aiType}
+                  threads={threads}
+                  messages={messages}
+                  setMessages={setMessages}
+                  currentSessionId={sessionIDRef.current}
+                />
+              </DragDropContext>
             </Flex>
           </Flex>
         )}
@@ -1881,7 +1966,8 @@ const SegmentChat = (props: any) => {
     forcePrompt?: string,
     sendAsSelix?: boolean,
     sendSlack?: boolean,
-    sendEmail?: boolean
+    sendEmail?: boolean,
+    scheduleDay?: Date
   ) => Promise<void> = props.handleSubmit;
   const dropzoneRef = props.dropzoneRef;
   const prompt = props.prompt;
@@ -1896,6 +1982,7 @@ const SegmentChat = (props: any) => {
   const sessionId = props.currentSessionId;
   const setPrompt = props.setPrompt;
   const messages: MessageType[] = props.messages;
+  const attachedInternalTask: TaskType | undefined = props.attachedInternalTask;
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [showLoader, setShowLoader] = useState(false);
@@ -1903,7 +1990,10 @@ const SegmentChat = (props: any) => {
   const [showAddMemoryInput, setShowAddMemoryInput] = useState(false);
   const [showMemoryForKey, setShowMemoryForKey] = useState("");
   const [sendAsSelix, setSendAsSelix] = useState(false);
+  const setIntendedTaskChange = props.setIntendedTaskChange;
   const [sendSlack, setSendSlack] = useState(false);
+  const [scheduleDay, setScheduleDay] = useState<Date | undefined>(undefined);
+  const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
   const [newMemoryTitle, setNewMemoryTitle] = useState("");
   // const [recording, setRecording] = useState(false);
@@ -1994,7 +2084,10 @@ const SegmentChat = (props: any) => {
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       setRecording(false);
-      handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail);
+      handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail, scheduleDay);
+      setScheduleDay(undefined);
+      setIntendedTaskChange(undefined);
+      props.setAttachedInternalTask(undefined);
     }
   };
 
@@ -2724,7 +2817,7 @@ const SegmentChat = (props: any) => {
                             key={index}
                             ml={message.role === "user" ? "auto" : "0"}
                             style={{
-                              backgroundColor: message.role === "user" ? "#f7ffff" : "#fafafa",
+                              backgroundColor: message.hidden_until ? "#ADD8E6" : message.role === "user" ? "#f7ffff" : "#fafafa",
                               borderRadius: "10px",
                               border: "1px solid #e7ebef",
                               padding: "10px",
@@ -2760,8 +2853,28 @@ const SegmentChat = (props: any) => {
                               </Text>
                             </Flex>
                             <Text color="gray" size={"xs"} ml={message.role === "user" ? "auto" : "0"}>
-                              <Text color="gray" size="xs" ml={message.role === "user" ? "auto" : "0"}>
-                                {moment(message.created_time).format("MMMM D, h:mm A")}
+                              <Text color={message.hidden_until ? "white" : "gray"} size="xs" ml={message.role === "user" ? "auto" : "0"}>
+                                {message.hidden_until ? (
+                                  <>
+                                    <style>
+                                      {`
+                                        @keyframes spin {
+                                          0% { transform: rotate(0deg); }
+                                          100% { transform: rotate(360deg); }
+                                        }
+                                      `}
+                                    </style>
+                                    <IconClockHour12
+                                      size={"0.8rem"}
+                                      style={{
+                                        animation: "spin 2s linear infinite",
+                                      }}
+                                    />{" "}
+                                    {moment(message.hidden_until).format("MMMM D, h:mm A")}
+                                  </>
+                                ) : (
+                                  moment(message.created_time).format("MMMM D, h:mm A")
+                                )}
                               </Text>
                             </Text>
                           </Flex>
@@ -3222,8 +3335,11 @@ const SegmentChat = (props: any) => {
                   variant="filled"
                   className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
                   onClick={() => {
-                    handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail);
+                    handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail, scheduleDay);
                     setRecording(false);
+                    setScheduleDay(undefined);
+                    setIntendedTaskChange(undefined);
+                    props.setAttachedInternalTask(undefined);
                   }}
                   // leftIcon={<IconSend size={"1rem"} />}
                 >
@@ -3290,6 +3406,180 @@ const SegmentChat = (props: any) => {
                       size="sm"
                       color="grape"
                     />
+                    <Popover position="bottom" withArrow shadow="md" trapFocus opened={showSchedulePopup}>
+                      <Popover.Target>
+                        <Tooltip label="Schedule a send time into the future" withArrow withinPortal>
+                          <Flex>
+                            <Button onClick={() => setShowSchedulePopup((v) => !v)} size="xs">
+                              <IconClock24 size={"1rem"} />
+                            </Button>
+                          </Flex>
+                        </Tooltip>
+                      </Popover.Target>
+
+                      <Popover.Dropdown>
+                        <Calendar
+                          placeholder={"Select a date"}
+                          minDate={moment(new Date()).add(0, "days").toDate()}
+                          getDayProps={(date) => ({
+                            selected: moment(scheduleDay).isSame(date, "day"),
+                            onClick: () => {
+                              // Preserve the time
+                              const hour = moment(scheduleDay).hour();
+                              const minute = moment(scheduleDay).minute();
+                              const newDate = moment(date).set("hour", hour).set("minute", minute).toDate();
+                              setScheduleDay(newDate);
+                            },
+                          })}
+                          onPointerEnterCapture={() => {}}
+                          onPointerLeaveCapture={() => {}}
+                        />
+                        <Flex mt="xs" direction="row" justify={"space-between"} align="flex-end">
+                          <TimeInput
+                            w="100%"
+                            label="Custom Time"
+                            size="sm"
+                            value={moment(scheduleDay).format("HH:mm")}
+                            onChange={(event) => {
+                              const value = event.currentTarget.value; // Format is HH:MM
+                              const hour = parseInt(value.split(":")[0]);
+                              const minute = parseInt(value.split(":")[1]);
+                              const newDate = moment(scheduleDay).set("hour", hour).set("minute", minute).toDate();
+                              setScheduleDay(newDate);
+                            }}
+                          />
+                          <Tooltip label="Schedule for now" withArrow withinPortal>
+                            <Flex>
+                              <Button
+                                size="xs"
+                                mb="xs"
+                                ml="sm"
+                                variant="transparent"
+                                color="red"
+                                onClick={() => {
+                                  setShowSchedulePopup(false);
+                                  setScheduleDay(undefined);
+                                }}
+                              >
+                                <IconX size="1rem" />
+                              </Button>
+                            </Flex>
+                          </Tooltip>
+                        </Flex>
+                      </Popover.Dropdown>
+                    </Popover>
+                    {!attachedInternalTask ? (
+                      <Droppable droppableId="droppable-area">
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            style={{
+                              border: snapshot.isDraggingOver ? "1px solid #4caf50" : "1px dashed #ccc",
+                              padding: "10px",
+                              marginLeft: "5px",
+                              height: "10px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: snapshot.isDraggingOver ? "#f0fff0" : "transparent",
+                              overflow: "hidden", // Changed from "auto" to "hidden" to prevent expansion
+                            }}
+                            onDragEnter={(event) => {
+                              console.log("Drag Enter event:", event);
+                            }}
+                            onDragOver={(event) => {
+                              console.log("Drag Over event:", event);
+                              event.preventDefault();
+                            }}
+                            onDragLeave={(event) => {
+                              console.log("Drag Leave event:", event);
+                            }}
+                            onDrop={(event) => {
+                              console.log("Drop event:", event);
+                              event.preventDefault();
+                              const data = event.dataTransfer.getData("text");
+                              console.log("Dropped item:", data);
+                              alert("Dropped item: " + data);
+                            }}
+                            onMouseEnter={(event) => {
+                              console.log("Mouse entered droppable area");
+                            }}
+                            onMouseLeave={() => {
+                              console.log("Mouse left droppable area");
+                            }}
+                          >
+                            <Tooltip label="Drag task here to attach" withArrow withinPortal>
+                              <Flex>
+                                <IconChecklist size="1rem" />
+                                {provided.placeholder}
+                              </Flex>
+                            </Tooltip>
+                          </div>
+                        )}
+                      </Droppable>
+                    ) : (
+                      <div style={{ position: "relative" }}>
+                        <Text
+                          style={{
+                            fontSize: "0.8rem",
+                            fontWeight: "bold",
+                            color: "#4caf50",
+                            padding: "0px",
+                            border: "1px solid #ccc",
+                            borderRadius: "5px",
+                            marginRight: "14px",
+                            backgroundColor: "#f9f9f9",
+                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                            textAlign: "center",
+                          }}
+                        >
+                          {attachedInternalTask.title}
+                        </Text>
+                        <select
+                          style={{
+                            fontSize: "0.8rem",
+                            marginTop: "5px",
+                            border: "1px solid #ccc",
+                            borderRadius: "5px",
+                            padding: "2px",
+                            backgroundColor: "#f9f9f9",
+                            width: "100%",
+                          }}
+                          onChange={(e) => {
+                            setIntendedTaskChange(e.target.value);
+                          }}
+                        >
+                          <option value="QUEUED">New Status: Queued</option>
+                          <option value="IN_PROGRESS">New Status: In Progress</option>
+                          <option value="IN_PROGRESS_REVIEW_NEEDED">New Status: In Progress Review Needed</option>
+                          <option value="COMPLETE">New Status: Complete</option>
+                          <option value="CANCELLED">New Status: Cancelled</option>
+                          <option value="BLOCKED">New Status: Blocked</option>
+                        </select>
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "0",
+                            right: "0",
+                            cursor: "pointer",
+                            color: "green",
+                            fontSize: "0.8rem",
+                            transition: "transform 0.2s ease-in-out",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "scale(1.2)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "scale(1)";
+                          }}
+                          onClick={(e) => {
+                            props.setAttachedInternalTask(undefined);
+                          }}
+                        >
+                          ✖
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </>
@@ -3607,7 +3897,7 @@ const SelixControlCenter = ({
           ]}
         />
       </Paper>
-      <ScrollArea bg={"#f7f8fa"} h={"87%"} scrollHideDelay={4000} p={"md"}>
+      <ScrollArea h={"87%"} scrollHideDelay={4000}>
         {aiType === "STRATEGY_CREATOR" ? (
           <SelinStrategy
             counter={counter}
@@ -4054,12 +4344,12 @@ const PlannerComponent = ({
   };
 
   return (
-    <Paper p={"sm"} withBorder radius={"sm"}>
+    <Paper p={"sm"} radius={"sm"}>
       <Flex w={"100%"} align={"center"} gap={"xs"}>
         {/* <Divider label="Next in line" labelPosition="left" w={"100%"} color="gray" fw={500} />
         <ActionIcon onClick={toggle}>{opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}</ActionIcon> */}
       </Flex>
-      <Paper withBorder bg={"#fefafe"} my={"sm"} px={"sm"} py={8} style={{ borderColor: "#fadafc" }}>
+      <Paper bg={"#fefafe"} my={"sm"} px={"sm"} py={8} style={{ borderColor: "#fadafc" }}>
         <Flex align={"center"} gap={"xs"} justify={"space-between"}>
           <Text size={"xs"} color="#E25DEE" fw={600}>
             Selix Tasks: <span className="font-medium text-gray-500">This is work that I'll execute. I'll ask you if anything comes up.</span>
@@ -4113,341 +4403,315 @@ const PlannerComponent = ({
       </Modal>
       <Collapse in={opened}>
         <ScrollArea h={"55vh"} scrollHideDelay={4000} style={{ overflow: "hidden" }} viewportRef={taskContainerRef}>
-          <DragDropContext
-            onDragEnd={(result) => {
-              if (!result.destination) {
-                return;
-              }
-              onDragEnd({
-                destination: { index: result.destination.index },
-                source: { index: result.source.index },
-              });
-            }}
-          >
-            <Droppable isDropDisabled={!isInternal} droppableId="tasks">
-              {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {tasks
-                    ?.filter((task: TaskType, index: number, self: any) => task.selix_session_id === currentSessionId)
-                    .map((task: TaskType, index: number, array) => {
-                      // index = array.length - 1 - index;
-                      const SelixSessionTaskStatus = {
-                        QUEUED: "QUEUED",
-                        IN_PROGRESS: "IN_PROGRESS",
-                        IN_PROGRESS_REVIEW_NEEDED: "IN_PROGRESS_REVIEW_NEEDED",
-                        COMPLETE: "COMPLETE",
-                        CANCELLED: "CANCELLED",
-                        BLOCKED: "BLOCKED",
-                      };
+          <Droppable isDropDisabled={!isInternal} droppableId="tasks">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {tasks
+                  ?.filter((task: TaskType, index: number, self: any) => task.selix_session_id === currentSessionId)
+                  .map((task: TaskType, index: number, array) => {
+                    // index = array.length - 1 - index;
+                    const SelixSessionTaskStatus = {
+                      QUEUED: "QUEUED",
+                      IN_PROGRESS: "IN_PROGRESS",
+                      IN_PROGRESS_REVIEW_NEEDED: "IN_PROGRESS_REVIEW_NEEDED",
+                      COMPLETE: "COMPLETE",
+                      CANCELLED: "CANCELLED",
+                      BLOCKED: "BLOCKED",
+                    };
 
-                      const statusColors = {
-                        [SelixSessionTaskStatus.QUEUED]: "blue",
-                        [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
-                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "orange",
-                        [SelixSessionTaskStatus.COMPLETE]: "green",
-                        [SelixSessionTaskStatus.CANCELLED]: "gray",
-                        [SelixSessionTaskStatus.BLOCKED]: "red",
-                      };
+                    const statusColors = {
+                      [SelixSessionTaskStatus.QUEUED]: "blue",
+                      [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
+                      [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "orange",
+                      [SelixSessionTaskStatus.COMPLETE]: "green",
+                      [SelixSessionTaskStatus.CANCELLED]: "gray",
+                      [SelixSessionTaskStatus.BLOCKED]: "red",
+                    };
 
-                      const humanReadableStatus = {
-                        [SelixSessionTaskStatus.QUEUED]: "Queued",
-                        [SelixSessionTaskStatus.IN_PROGRESS]: "In Progress",
-                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "In Progress",
-                        [SelixSessionTaskStatus.COMPLETE]: "Complete",
-                        [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
-                        [SelixSessionTaskStatus.BLOCKED]: "⚠️ Blocked",
-                      };
+                    const humanReadableStatus = {
+                      [SelixSessionTaskStatus.QUEUED]: "Queued",
+                      [SelixSessionTaskStatus.IN_PROGRESS]: "In Progress",
+                      [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "In Progress",
+                      [SelixSessionTaskStatus.COMPLETE]: "Complete",
+                      [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
+                      [SelixSessionTaskStatus.BLOCKED]: "⚠️ Blocked",
+                    };
 
-                      return (
-                        <Draggable key={task.id} index={index} draggableId={`task-${task.id}`} isDragDisabled={!isInternal}>
-                          {(provided) => (
-                            <Paper
-                              withBorder
-                              p={"sm"}
-                              mb={"xs"}
-                              radius={"md"}
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                            >
-                              <Flex justify={"space-between"} align={"center"} p={"4px"}>
-                                {editingTask === index ? (
-                                  <Flex align="center" gap="xs" w={"60%"}>
-                                    <Flex w="80%" gap="xs">
-                                      <Input
-                                        value={editingTaskText}
-                                        onChange={(e) => {
-                                          setEditingTaskText(e.target.value);
-                                        }}
-                                        autoFocus
-                                        style={{ flexGrow: 1 }}
-                                      />
-                                      <NativeSelect
-                                        value={task.widget_type}
-                                        data={[
-                                          {
-                                            value: "",
-                                            label: "Proof of Work (image)",
-                                          },
-                                          {
-                                            value: "LAUNCH_CAMPAIGN",
-                                            label: "Launch Campaign",
-                                          },
-                                          {
-                                            value: "VIEW_STRATEGY",
-                                            label: "View Strategy",
-                                          },
-                                          {
-                                            value: "REVIEW_PROSPECTS",
-                                            label: "Review Prospects",
-                                          },
-                                          {
-                                            value: "VIEW_SEQUENCE",
-                                            label: "View Sequence",
-                                          },
-                                          {
-                                            value: "VIEW_PERSONALIZERS",
-                                            label: "Campaign Personalizers",
-                                          },
-                                          {
-                                            value: "REVIEW_COMPANIES",
-                                            label: "Review Companies",
-                                          },
-                                          {
-                                            value: "ONE_SHOT_GENERATOR",
-                                            label: "One Shot Generator",
-                                          },
-                                        ]}
-                                        onChange={(e) => {
-                                          const updatedTasks = [...tasks];
-                                          updatedTasks[index].widget_type = e.currentTarget.value;
-                                          setTasks(updatedTasks);
-                                        }}
-                                        style={{ width: "40%" }}
-                                      />
-                                    </Flex>
-                                    <Badge
-                                      color="green"
-                                      style={{
-                                        cursor: "pointer",
-                                        whiteSpace: "nowrap",
+                    return (
+                      <Draggable key={task.id} index={index} draggableId={`task-${task.id}`} isDragDisabled={!isInternal}>
+                        {(provided) => (
+                          <Paper withBorder p={"sm"} mb={"xs"} radius={"md"} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                            <Flex justify={"space-between"} align={"center"} p={"4px"}>
+                              {editingTask === index ? (
+                                <Flex align="center" gap="xs" w={"60%"}>
+                                  <Flex w="80%" gap="xs">
+                                    <Input
+                                      value={editingTaskText}
+                                      onChange={(e) => {
+                                        setEditingTaskText(e.target.value);
                                       }}
-                                      onClick={() => {
-                                        setEditingTask(null);
-                                        setTasks(
-                                          tasks.map((t, i) =>
-                                            i === index
-                                              ? {
-                                                  ...t,
-                                                  title: editingTaskText,
-                                                  description: taskDraftDescription.current,
-                                                }
-                                              : t
-                                          )
-                                        );
-                                        updateTask(
-                                          tasks[index].id,
-                                          editingTaskText,
-                                          taskDraftDescription.current,
-                                          tasks[index].status,
-                                          tasks[index].widget_type
-                                        );
+                                      autoFocus
+                                      style={{ flexGrow: 1 }}
+                                    />
+                                    <NativeSelect
+                                      value={task.widget_type}
+                                      data={[
+                                        {
+                                          value: "",
+                                          label: "Proof of Work (image)",
+                                        },
+                                        {
+                                          value: "LAUNCH_CAMPAIGN",
+                                          label: "Launch Campaign",
+                                        },
+                                        {
+                                          value: "VIEW_STRATEGY",
+                                          label: "View Strategy",
+                                        },
+                                        {
+                                          value: "REVIEW_PROSPECTS",
+                                          label: "Review Prospects",
+                                        },
+                                        {
+                                          value: "VIEW_SEQUENCE",
+                                          label: "View Sequence",
+                                        },
+                                        {
+                                          value: "VIEW_PERSONALIZERS",
+                                          label: "Campaign Personalizers",
+                                        },
+                                        {
+                                          value: "REVIEW_COMPANIES",
+                                          label: "Review Companies",
+                                        },
+                                        {
+                                          value: "ONE_SHOT_GENERATOR",
+                                          label: "One Shot Generator",
+                                        },
+                                      ]}
+                                      onChange={(e) => {
+                                        const updatedTasks = [...tasks];
+                                        updatedTasks[index].widget_type = e.currentTarget.value;
+                                        setTasks(updatedTasks);
                                       }}
-                                    >
-                                      Save
-                                    </Badge>
+                                      style={{ width: "40%" }}
+                                    />
                                   </Flex>
-                                ) : (
-                                  <Text className="flex gap-1 items-center" fw={600} size={"sm"}>
-                                    <ThemeIcon color="gray" radius={"xl"} variant="light" size={18}>
-                                      {index + 1}
-                                    </ThemeIcon>
-                                    {isInternal && (
-                                      <Tooltip label="Drag to reorder">
-                                        <ThemeIcon color="gray" radius={"xl"} variant="light" size={18} style={{ cursor: "grab" }}>
-                                          <IconGripVertical size={14} />
-                                        </ThemeIcon>
-                                      </Tooltip>
-                                    )}
-                                    {isInternal && (
-                                      <Tooltip label="Edit task">
-                                        <ThemeIcon
-                                          color="gray"
-                                          radius={"xl"}
-                                          variant="light"
-                                          size={18}
-                                          style={{ cursor: "pointer" }}
-                                          onClick={() => {
-                                            setEditingTask(index);
-                                            setOpenedTaskIndex(index);
-                                            setEditingTaskText(task.title);
-                                            taskDraftDescription.current = task?.description || "";
-                                            taskDraftDescriptionRaw.current = task?.description || "";
-                                          }}
-                                          // onBlur={() => setEditingTask(null)}
-                                        >
-                                          <IconPencil size={14} />
-                                        </ThemeIcon>
-                                      </Tooltip>
-                                    )}
-                                    {task.title}
-                                  </Text>
-                                )}
-                                <Flex align={"center"} gap={"xs"}>
-                                  <Tooltip label={!task.rewind_img ? "No rewind available" : "View rewind"}>
-                                    <Button
-                                      size={"xs"}
-                                      variant="outline"
-                                      color={task.rewind_img ? "blue" : "gray"}
-                                      leftIcon={<IconHistory size={14} />}
-                                      sx={{
-                                        opacity: task.rewind_img ? 1 : 0.3,
-                                      }}
-                                      onClick={() => {
-                                        if (task.rewind_img) {
-                                          setShowRewindImage(true);
-                                          setSelectedRewindImage(task.rewind_img);
-                                        }
-                                      }}
-                                    >
-                                      Show Rewind
-                                    </Button>
-                                  </Tooltip>
-                                  <Text color="gray" size={"sm"} fw={500}>
-                                    {/* {moment(task.created_at).format("MM/DD/YY, h:mm a")} */}
-                                  </Text>
-                                  {editingTask === index ? (
-                                    <Select
-                                      w={"140px"}
-                                      value={task.status}
-                                      onChange={(value) => {
-                                        if (value !== null) {
-                                          const updatedTasks = [...tasks];
-                                          updatedTasks[index].status = value as
-                                            | "QUEUED"
-                                            | "IN_PROGRESS"
-                                            | "IN_PROGRESS_REVIEW_NEEDED"
-                                            | "COMPLETE"
-                                            | "CANCELLED"
-                                            | "BLOCKED";
-                                          setTasks(updatedTasks);
-                                        }
-                                      }}
-                                      data={Object.keys(humanReadableStatus).map((status) => ({
-                                        value: status,
-                                        label: humanReadableStatus[status],
-                                        customLabel: (
-                                          <Flex align={"center"} gap={"xs"}>
-                                            <ThemeIcon color={statusColors[status]} radius={"xl"} size={10}>
-                                              <span />
-                                            </ThemeIcon>
-                                            <Text color={statusColors[status]} size={"sm"} fw={500}>
-                                              {humanReadableStatus[status]}
-                                            </Text>
-                                          </Flex>
-                                        ),
-                                      }))}
-                                      itemComponent={({ value, label, ...others }) => <div {...others}>{label}</div>}
-                                    />
-                                  ) : (
-                                    <Flex align={"center"} gap={"xs"} w={100}>
-                                      <ThemeIcon color={statusColors[task.status]} radius={"xl"} size={10}>
-                                        <span />
-                                      </ThemeIcon>
-                                      <Text color={statusColors[task.status]} size={"sm"} fw={500}>
-                                        {humanReadableStatus[task.status]}
-                                      </Text>
-                                    </Flex>
-                                  )}
-
-                                  <ActionIcon onClick={() => setOpenedTaskIndex(openedTaskIndex === index ? null : index)}>
-                                    {openedTaskIndex === index ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}
-                                  </ActionIcon>
-                                  {isInternal && (
-                                    <ActionIcon
-                                      onClick={async () => {
-                                        try {
-                                          const response = await fetch(`${API_URL}/selix/task`, {
-                                            method: "DELETE",
-                                            headers: {
-                                              "Content-Type": "application/json",
-                                              Authorization: `Bearer ${userToken}`,
-                                            },
-                                            body: JSON.stringify({ task_id: task.id }),
-                                          });
-
-                                          const data = await response.json();
-
-                                          if (!response.ok) {
-                                            throw new Error(data.error || "Failed to delete task");
-                                          }
-
-                                          showNotification({
-                                            color: "green",
-                                            title: "Success",
-                                            message: data.message,
-                                          });
-                                          setTasks(tasks.filter((t, i) => i !== index));
-                                        } catch (error) {
-                                          console.error("Error deleting task:", error);
-                                          showNotification({
-                                            color: "red",
-                                            title: "Error",
-                                            message: "Failed to delete task",
-                                          });
-                                        }
-                                      }}
-                                      color="red"
-                                    >
-                                      <IconTrash size={"1rem"} />
-                                    </ActionIcon>
-                                  )}
+                                  <Badge
+                                    color="green"
+                                    style={{
+                                      cursor: "pointer",
+                                      whiteSpace: "nowrap",
+                                    }}
+                                    onClick={() => {
+                                      setEditingTask(null);
+                                      setTasks(
+                                        tasks.map((t, i) =>
+                                          i === index
+                                            ? {
+                                                ...t,
+                                                title: editingTaskText,
+                                                description: taskDraftDescription.current,
+                                              }
+                                            : t
+                                        )
+                                      );
+                                      updateTask(tasks[index].id, editingTaskText, taskDraftDescription.current, tasks[index].status, tasks[index].widget_type);
+                                    }}
+                                  >
+                                    Save
+                                  </Badge>
                                 </Flex>
-                              </Flex>
-                              <Collapse in={openedTaskIndex === index}>
-                                <Text p={"xs"} mt={"sm"} size="xs">
-                                  {editingTask === index ? (
-                                    <RichTextArea
-                                      overrideSticky={true}
-                                      onChange={(value, rawValue) => {
-                                        taskDraftDescriptionRaw.current = rawValue;
-                                        taskDraftDescription.current = value;
-                                      }}
-                                      value={taskDraftDescriptionRaw.current}
-                                      height={110}
-                                    />
-                                  ) : (
-                                    <div
-                                      dangerouslySetInnerHTML={{
-                                        __html: task.description?.replaceAll("\n", "<br />") || "",
-                                      }}
-                                    />
+                              ) : (
+                                <Text className="flex gap-1 items-center" fw={600} size={"sm"}>
+                                  <ThemeIcon color="gray" radius={"xl"} variant="light" size={18}>
+                                    {index + 1}
+                                  </ThemeIcon>
+                                  {isInternal && (
+                                    <Tooltip label="Drag to reorder">
+                                      <ThemeIcon color="gray" radius={"xl"} variant="light" size={18} style={{ cursor: "grab" }}>
+                                        <IconGripVertical size={14} />
+                                      </ThemeIcon>
+                                    </Tooltip>
                                   )}
+                                  {isInternal && (
+                                    <Tooltip label="Edit task">
+                                      <ThemeIcon
+                                        color="gray"
+                                        radius={"xl"}
+                                        variant="light"
+                                        size={18}
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+                                          setEditingTask(index);
+                                          setOpenedTaskIndex(index);
+                                          setEditingTaskText(task.title);
+                                          taskDraftDescription.current = task?.description || "";
+                                          taskDraftDescriptionRaw.current = task?.description || "";
+                                        }}
+                                        // onBlur={() => setEditingTask(null)}
+                                      >
+                                        <IconPencil size={14} />
+                                      </ThemeIcon>
+                                    </Tooltip>
+                                  )}
+                                  {task.title}
                                 </Text>
-                                {/* eventually delete this */}
-                                {currentThread?.memory.campaign_id && openedTaskIndex === index && (
-                                  <TaskRenderer
-                                    // key={currentProject?.id}
-                                    task={task}
-                                    counter={counter}
-                                    segment={segment}
-                                    // messages={messages}
-                                    threads={threads}
-                                    currentSessionId={currentSessionId}
-                                    handleStrategySubmit={handleStrategySubmit}
+                              )}
+                              <Flex align={"center"} gap={"xs"}>
+                                <Tooltip label={!task.rewind_img ? "No rewind available" : "View rewind"}>
+                                  <Button
+                                    size={"xs"}
+                                    variant="outline"
+                                    color={task.rewind_img ? "blue" : "gray"}
+                                    leftIcon={<IconHistory size={14} />}
+                                    sx={{
+                                      opacity: task.rewind_img ? 1 : 0.3,
+                                    }}
+                                    onClick={() => {
+                                      if (task.rewind_img) {
+                                        setShowRewindImage(true);
+                                        setSelectedRewindImage(task.rewind_img);
+                                      }
+                                    }}
+                                  >
+                                    Show Rewind
+                                  </Button>
+                                </Tooltip>
+                                <Text color="gray" size={"sm"} fw={500}>
+                                  {/* {moment(task.created_at).format("MM/DD/YY, h:mm a")} */}
+                                </Text>
+                                {editingTask === index ? (
+                                  <Select
+                                    w={"140px"}
+                                    value={task.status}
+                                    onChange={(value) => {
+                                      if (value !== null) {
+                                        const updatedTasks = [...tasks];
+                                        updatedTasks[index].status = value as
+                                          | "QUEUED"
+                                          | "IN_PROGRESS"
+                                          | "IN_PROGRESS_REVIEW_NEEDED"
+                                          | "COMPLETE"
+                                          | "CANCELLED"
+                                          | "BLOCKED";
+                                        setTasks(updatedTasks);
+                                      }
+                                    }}
+                                    data={Object.keys(humanReadableStatus).map((status) => ({
+                                      value: status,
+                                      label: humanReadableStatus[status],
+                                      customLabel: (
+                                        <Flex align={"center"} gap={"xs"}>
+                                          <ThemeIcon color={statusColors[status]} radius={"xl"} size={10}>
+                                            <span />
+                                          </ThemeIcon>
+                                          <Text color={statusColors[status]} size={"sm"} fw={500}>
+                                            {humanReadableStatus[status]}
+                                          </Text>
+                                        </Flex>
+                                      ),
+                                    }))}
+                                    itemComponent={({ value, label, ...others }) => <div {...others}>{label}</div>}
+                                  />
+                                ) : (
+                                  <Flex align={"center"} gap={"xs"} w={100}>
+                                    <ThemeIcon color={statusColors[task.status]} radius={"xl"} size={10}>
+                                      <span />
+                                    </ThemeIcon>
+                                    <Text color={statusColors[task.status]} size={"sm"} fw={500}>
+                                      {humanReadableStatus[task.status]}
+                                    </Text>
+                                  </Flex>
+                                )}
+
+                                <ActionIcon onClick={() => setOpenedTaskIndex(openedTaskIndex === index ? null : index)}>
+                                  {openedTaskIndex === index ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}
+                                </ActionIcon>
+                                {isInternal && (
+                                  <ActionIcon
+                                    onClick={async () => {
+                                      try {
+                                        const response = await fetch(`${API_URL}/selix/task`, {
+                                          method: "DELETE",
+                                          headers: {
+                                            "Content-Type": "application/json",
+                                            Authorization: `Bearer ${userToken}`,
+                                          },
+                                          body: JSON.stringify({ task_id: task.id }),
+                                        });
+
+                                        const data = await response.json();
+
+                                        if (!response.ok) {
+                                          throw new Error(data.error || "Failed to delete task");
+                                        }
+
+                                        showNotification({
+                                          color: "green",
+                                          title: "Success",
+                                          message: data.message,
+                                        });
+                                        setTasks(tasks.filter((t, i) => i !== index));
+                                      } catch (error) {
+                                        console.error("Error deleting task:", error);
+                                        showNotification({
+                                          color: "red",
+                                          title: "Error",
+                                          message: "Failed to delete task",
+                                        });
+                                      }
+                                    }}
+                                    color="red"
+                                  >
+                                    <IconTrash size={"1rem"} />
+                                  </ActionIcon>
+                                )}
+                              </Flex>
+                            </Flex>
+                            <Collapse in={openedTaskIndex === index}>
+                              <Text p={"xs"} mt={"sm"} size="xs">
+                                {editingTask === index ? (
+                                  <RichTextArea
+                                    overrideSticky={true}
+                                    onChange={(value, rawValue) => {
+                                      taskDraftDescriptionRaw.current = rawValue;
+                                      taskDraftDescription.current = value;
+                                    }}
+                                    value={taskDraftDescriptionRaw.current}
+                                    height={110}
+                                  />
+                                ) : (
+                                  <div
+                                    dangerouslySetInnerHTML={{
+                                      __html: task.description?.replaceAll("\n", "<br />") || "",
+                                    }}
                                   />
                                 )}
-                              </Collapse>
-                            </Paper>
-                          )}
-                        </Draggable>
-                      );
-                    })}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+                              </Text>
+                              {/* eventually delete this */}
+                              {currentThread?.memory.campaign_id && openedTaskIndex === index && (
+                                <TaskRenderer
+                                  // key={currentProject?.id}
+                                  task={task}
+                                  counter={counter}
+                                  segment={segment}
+                                  // messages={messages}
+                                  threads={threads}
+                                  currentSessionId={currentSessionId}
+                                  handleStrategySubmit={handleStrategySubmit}
+                                />
+                              )}
+                            </Collapse>
+                          </Paper>
+                        )}
+                      </Draggable>
+                    );
+                  })}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
           {isInternal && (
             <Flex justify="center" mt="md">
               {creatingNewTask ? (

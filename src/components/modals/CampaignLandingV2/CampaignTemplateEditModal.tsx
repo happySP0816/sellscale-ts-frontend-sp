@@ -171,11 +171,26 @@ export default function CampaignTemplateEditModal({
   const [sequenceType, setSequenceType]: any = useState<string>(
     innerProps.sequenceType || "email"
   );
-  const [steps, setSteps] = useState(
-    sequenceType === "email"
-      ? emailSequenceData.length || 3
-      : linkedinSequenceData.length || 3
-  );
+
+  const [steps, setSteps] = useState(() => {
+    if (sequenceType === "email") {
+      return emailSequenceData && emailSequenceData.length > 0 ? emailSequenceData.length : 0;
+    } else {
+      return linkedinSequenceData && linkedinSequenceData.length > 0 ? linkedinSequenceData.length : 0;
+    }
+  });
+
+
+  //there was a problem where the steps were not updating when the sequence type was changed via the sequence type dropdown
+  useEffect(() => {
+    if (sequenceType === "email") {
+      setSteps(emailSequenceData && emailSequenceData.length > 0 ? emailSequenceData.length : 0);
+    } else {
+      setSteps(linkedinSequenceData && linkedinSequenceData.length > 0 ? linkedinSequenceData.length : 0);
+    }
+  }, [sequenceType, emailSequenceData, linkedinSequenceData]);
+
+
   const [generatingSubjectLines, setGeneratingSubjectLines] = useState(false);
   const [currentStepNum, setCurrentStepNum] = useState(
     (innerProps.currentStepNum || innerProps.currentStepNum === 0) ? innerProps.currentStepNum : 1
@@ -975,12 +990,17 @@ export default function CampaignTemplateEditModal({
                           ? "Connection Request"
                           : "Connection Request"}
                       </Text>
-                      {currentProject?.template_mode && (
+                      {currentProject?.template_mode ? (
                         <Text color="gray" size={"sm"}>
                           {linkedinInitialMessageData?.filter(message => message.active).length ?? 0}{" "}
                           {linkedinInitialMessageData?.filter(message => message.active).length === 1
                             ? "Active"
                             : "Active"}
+                        </Text>
+                      ) : (
+                        <Text color="gray" size={"sm"}>
+                          {ctasItemsCount ?? 0}{" "}
+                          {ctasItemsCount === 1 ? "Active CTA" : "Active CTAs"}
                         </Text>
                       )}
                     </Flex>
@@ -1101,7 +1121,7 @@ export default function CampaignTemplateEditModal({
                   />
                 </>
               )}
-              {steps &&
+              {steps > 0 &&
                 Array.from({ length: Number(steps) }, (_, index) => {
                   const tabValue = (index + 1).toString();
                   return (
@@ -1363,7 +1383,11 @@ export default function CampaignTemplateEditModal({
                   align={"center"}
                   justify={"space-between"}
                   onClick={() => {
-                    if (steps < 5) setSteps((item) => (item = item + 1));
+                    if (steps < 5 && (steps === 0 || (sequenceType === "email" 
+                      ? emailSequenceData[steps - 1]?.some(template => template.active) 
+                      : linkedinSequenceData[steps - 1]?.some(template => template.active)))) {
+                      setSteps((item) => (item = item + 1));
+                    }
                   }}
                 >
                   <Text

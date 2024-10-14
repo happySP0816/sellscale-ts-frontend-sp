@@ -53,6 +53,7 @@ import {
   ColorSwatch,
   Checkbox,
   Alert,
+  Accordion,
 } from "@mantine/core";
 import { useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
@@ -1120,6 +1121,172 @@ export function PersonCampaignCard(props: {
   ] = useDisclosure(false);
 
   const ChannelModal = () => {
+
+
+    const ActiveConvoOOODropdown = () => {
+      if (!filteredCampaignList?.some(item => item.outreach_status === 'ACTIVE_CONVO_OOO')) {
+        return null;
+      }
+
+      return (
+        <Accordion>
+          <Accordion.Item value="active-convo-ooo">
+            <Accordion.Control>
+              <Text fw={600} color="gray">
+                Out-Of-Office Conversations
+              </Text>
+            </Accordion.Control>
+            <Accordion.Panel>
+              {filteredCampaignList
+                ?.filter((item) => item.outreach_status === 'ACTIVE_CONVO_OOO')
+                .map((item, index) => (
+                  <Group
+                    grow
+                    style={{
+                      justifyContent: "start",
+                      gap: "0px",
+                    }}
+                    key={index}
+                  >
+                    <Flex
+                      mx={25}
+                      w={"100%"}
+                      style={{
+                        borderRadius: "10px",
+                        border: "3px solid #e9ecef",
+                      }}
+                    >
+                      <Box
+                        px={15}
+                        py={12}
+                        style={{
+                          borderRight: "3px solid #e9ecef",
+                          position: "relative",
+                        }}
+                        w={"30rem"}
+                      >
+                        <Flex align={"center"} gap={10} mb={8}>
+                          <Avatar src={item.img_url} radius="xl" size="lg" />
+                          <Button
+                            style={{
+                              position: "absolute",
+                              top: 15,
+                              right: 10,
+                            }}
+                            size="xs"
+                            variant="default"
+                            compact
+                            component="a"
+                            target="_blank"
+                            href={`/prospects/${item.prospect_id}`}
+                          >
+                            Open Convo
+                          </Button>
+                          <Box>
+                            <Flex align={"center"} gap={10}>
+                              <Text fw={600}>{item.prospect_name}</Text>
+                            </Flex>
+                            <Flex align={"center"} gap={10} w={"100%"} mt={3}>
+                              <Text>ICP Score: </Text>
+                              <Badge
+                                color={
+                                  item.prospect_icp_fit_score === "VERY HIGH"
+                                    ? "green"
+                                    : item.prospect_icp_fit_score === "HIGH"
+                                    ? "blue"
+                                    : item.prospect_icp_fit_score === "MEDIUM"
+                                    ? "yellow"
+                                    : item.prospect_icp_fit_score === "LOW"
+                                    ? "orange"
+                                    : item.prospect_icp_fit_score === "VERY LOW"
+                                    ? "red"
+                                    : "gray"
+                                }
+                                fw={600}
+                              >
+                                {item.prospect_icp_fit_score}
+                              </Badge>
+                            </Flex>
+                          </Box>
+                        </Flex>
+                        <Flex gap={6}>
+                          <div className="mt-1">
+                            <IconMan size={20} color="#817e7e" />
+                          </div>
+                          <Text color="#817e7e" mt={3}>
+                            {campaignName}
+                          </Text>
+                        </Flex>
+                        <Flex gap={6}>
+                          <div className="mt-1">
+                            <IconBriefcase size={20} color="#817e7e" />
+                          </div>
+                          <Text color="#817e7e" mt={3}>
+                            {item.prospect_title}
+                          </Text>
+                        </Flex>
+                        <Flex gap={6}>
+                          <div className="mt-1">
+                            <IconBuilding size={20} color="#817e7e" />
+                          </div>
+                          <Text color="#817e7e" mt={3}>
+                            {item.prospect_company}
+                          </Text>
+                        </Flex>
+                      </Box>
+                      <Box px={15} py={12} w={"100%"}>
+                        <Flex justify={"space-between"}>
+                          <Text color="#817e7e" fw={600}>
+                            {item?.last_message_from_prospect?.includes(
+                              "no response yet."
+                            )
+                              ? "Last Message From You:"
+                              : "Last Message From Prospect:"}
+                          </Text>
+                          <Text color="#817e7e">
+                            {item.last_message_timestamp}
+                          </Text>
+                        </Flex>
+                        <Box
+                          bg={
+                            value === "sent"
+                              ? "#e7f5ff"
+                              : value === "open"
+                              ? "#ffedff"
+                              : value === "reply"
+                              ? "#fff5ee"
+                              : value === "pos_reply"
+                              ? "#F6E4FF"
+                              : "#e2f6e7"
+                          }
+                          p={20}
+                          mt={15}
+                          style={{
+                            borderRadius: "10px",
+                          }}
+                        >
+                          <Text fw={500}>
+                            {item?.last_message_from_prospect?.includes(
+                              "no response yet."
+                            )
+                              ? item?.last_message_from_prospect.split(
+                                  "no response yet.###"
+                                )[1]
+                              : item?.last_message_from_prospect}
+                          </Text>
+                        </Box>
+                      </Box>
+                    </Flex>
+                  </Group>
+                ))}
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
+      );
+    }
+
+
+
     return (
       <Modal
         opened={channelOpened}
@@ -1279,7 +1446,9 @@ export function PersonCampaignCard(props: {
           </Group>
           <ScrollArea h={600} scrollbarSize={6}>
             <Flex direction={"column"} gap={20} my={20}>
-              {filteredCampaignList?.map((item, index) => {
+              {filteredCampaignList
+                ?.filter((item) => item.outreach_status !== 'ACTIVE_CONVO_OOO')
+                .map((item, index) => {
                 return (
                   <Group
                     grow
@@ -1421,6 +1590,7 @@ export function PersonCampaignCard(props: {
                   </Group>
                 );
               })}
+            <ActiveConvoOOODropdown/>
             </Flex>
           </ScrollArea>
         </Modal.Body>

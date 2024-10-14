@@ -1001,7 +1001,11 @@ export default function CampaignTemplateEditModal({
                       border: currentStepNum === 0 ? "1px solid #228be6 " : "",
                     }}
                   >
-                    <Flex direction="column" align={"left"} justify={"space-between"}>
+                    <Flex
+                      direction="column"
+                      align={"left"}
+                      justify={"space-between"}
+                    >
                       <Text
                         color="gray"
                         size={"sm"}
@@ -1027,9 +1031,9 @@ export default function CampaignTemplateEditModal({
                           : "Connection Request"}
                       </Text>
                       {currentProject?.template_mode ? (
-                        <Flex gap={5} ml='lg' mt={2} align={"center"}>
+                        <Flex gap={5} ml="lg" mt={2} align={"center"}>
                           <ThemeIcon
-                            ml='xs'
+                            ml="xs"
                             size={14}
                             variant="outline"
                             color="green"
@@ -1042,16 +1046,22 @@ export default function CampaignTemplateEditModal({
                             />
                           </ThemeIcon>
                           <Text size={"xs"} fw={600}>
-                            {linkedinInitialMessageData.filter(template => template.active).length || 0}
+                            {linkedinInitialMessageData.filter(
+                              (template) => template.active
+                            ).length || 0}
                           </Text>
                           <Text size={"xs"} fw={600}>
-                            {linkedinInitialMessageData.filter(template => template.active).length > 1 ? "Templates Active" : "Template Active"}
+                            {linkedinInitialMessageData.filter(
+                              (template) => template.active
+                            ).length > 1
+                              ? "Templates Active"
+                              : "Template Active"}
                           </Text>
                         </Flex>
                       ) : (
-                        <Flex ml='lg' gap={5} mt={2} align={"center"}>
+                        <Flex ml="lg" gap={5} mt={2} align={"center"}>
                           <ThemeIcon
-                            ml='xs'
+                            ml="xs"
                             size={14}
                             variant="outline"
                             color="green"
@@ -1063,12 +1073,20 @@ export default function CampaignTemplateEditModal({
                               size={"3rem"}
                             />
                           </ThemeIcon>
-                          <Text size={"xs"} fw={600} style={{ whiteSpace: "nowrap" }}>
+                          <Text
+                            size={"xs"}
+                            fw={600}
+                            style={{ whiteSpace: "nowrap" }}
+                          >
                             {ctasItemsCount}
                           </Text>
-                          <Text size={"xs"} fw={600} style={{ whiteSpace: "nowrap" }}>
-                            {ctasItemsCount && ctasItemsCount > 1 
-                              ? "Templates Active" 
+                          <Text
+                            size={"xs"}
+                            fw={600}
+                            style={{ whiteSpace: "nowrap" }}
+                          >
+                            {ctasItemsCount && ctasItemsCount > 1
+                              ? "Templates Active"
                               : "Template Active"}
                           </Text>
                         </Flex>
@@ -1109,7 +1127,7 @@ export default function CampaignTemplateEditModal({
                         size={"sm"}
                         className="flex items-center gap-2"
                       >
-                        <ThemeIcon size={"sm"}>
+                        <ThemeIcon size={"sm"} color="white">
                           <IconClock color="orange" size={"1rem"} />
                         </ThemeIcon>
                         {isEditingInitialMessageBumpDelayDays !== null ? (
@@ -1207,25 +1225,29 @@ export default function CampaignTemplateEditModal({
                           : "Subject Lines"}
                       </Text>
                     </Flex>
-                  <Flex gap={5} ml={30} mt={6} align={"center"}>
-                    <ThemeIcon
-                      size={14}
-                      variant="outline"
-                      color="green"
-                      radius={"xl"}
-                      mb={2}
-                    >
-                      <IconPoint
-                        fill="#40C057"
-                        color="#40C057"
-                        size={"3rem"}
-                      />
-                    </ThemeIcon>
-                    <Text size={"xs"} fw={600}>
-                      {emailSubjectLines.filter(template => template.active).length || 0}{" "}
-                      {emailSubjectLines.filter(template => template.active).length > 1 ? "Templates Active" : "Template Active"}
-                    </Text>
-                  </Flex>
+                    <Flex gap={5} ml={30} mt={6} align={"center"}>
+                      <ThemeIcon
+                        size={14}
+                        variant="outline"
+                        color="green"
+                        radius={"xl"}
+                        mb={2}
+                      >
+                        <IconPoint
+                          fill="#40C057"
+                          color="#40C057"
+                          size={"3rem"}
+                        />
+                      </ThemeIcon>
+                      <Text size={"xs"} fw={600}>
+                        {emailSubjectLines.filter((template) => template.active)
+                          .length || 0}{" "}
+                        {emailSubjectLines.filter((template) => template.active)
+                          .length > 1
+                          ? "Templates Active"
+                          : "Template Active"}
+                      </Text>
+                    </Flex>
                   </Paper>
                   <Divider
                     orientation="vertical"
@@ -1360,7 +1382,7 @@ export default function CampaignTemplateEditModal({
                                 px={4}
                               >
                                 <Flex align={"center"} gap={4}>
-                                  <ThemeIcon size={"sm"}>
+                                  <ThemeIcon size={"sm"} color="white">
                                     <IconClock color="orange" size={"1rem"} />
                                   </ThemeIcon>
                                   {sequenceType === "email" ? (

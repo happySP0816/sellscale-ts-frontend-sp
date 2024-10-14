@@ -964,13 +964,12 @@ export default function CampaignTemplateEditModal({
                       border: currentStepNum === 0 ? "1px solid #228be6 " : "",
                     }}
                   >
-                    <Flex align={"center"} justify={"space-between"}>
+                    <Flex direction="column" align={"left"} justify={"space-between"}>
                       <Text
                         color="gray"
                         size={"sm"}
                         className="flex items-center gap-2"
                       >
-                        {" "}
                         <ThemeIcon size={"sm"}>
                           {sequenceType === "linkedin" ? (
                             <IconBrandLinkedin
@@ -991,17 +990,51 @@ export default function CampaignTemplateEditModal({
                           : "Connection Request"}
                       </Text>
                       {currentProject?.template_mode ? (
-                        <Text color="gray" size={"sm"}>
-                          {linkedinInitialMessageData?.filter(message => message.active).length ?? 0}{" "}
-                          {linkedinInitialMessageData?.filter(message => message.active).length === 1
-                            ? "Active"
-                            : "Active"}
-                        </Text>
+                        <Flex gap={5} ml='lg' mt={2} align={"center"}>
+                          <ThemeIcon
+                            ml='xs'
+                            size={14}
+                            variant="outline"
+                            color="green"
+                            radius={"xl"}
+                          >
+                            <IconPoint
+                              fill="#40C057"
+                              color="#40C057"
+                              size={"3rem"}
+                            />
+                          </ThemeIcon>
+                          <Text size={"xs"} fw={600}>
+                            {linkedinInitialMessageData.filter(template => template.active).length || 0}
+                          </Text>
+                          <Text size={"xs"} fw={600}>
+                            {linkedinInitialMessageData.filter(template => template.active).length > 1 ? "Templates Active" : "Template Active"}
+                          </Text>
+                        </Flex>
                       ) : (
-                        <Text color="gray" size={"sm"}>
-                          {ctasItemsCount ?? 0}{" "}
-                          {ctasItemsCount === 1 ? "Active CTA" : "Active CTAs"}
-                        </Text>
+                        <Flex ml='lg' gap={5} mt={2} align={"center"}>
+                          <ThemeIcon
+                            ml='xs'
+                            size={14}
+                            variant="outline"
+                            color="green"
+                            radius={"xl"}
+                          >
+                            <IconPoint
+                              fill="#40C057"
+                              color="#40C057"
+                              size={"3rem"}
+                            />
+                          </ThemeIcon>
+                          <Text size={"xs"} fw={600} style={{ whiteSpace: "nowrap" }}>
+                            {ctasItemsCount}
+                          </Text>
+                          <Text size={"xs"} fw={600} style={{ whiteSpace: "nowrap" }}>
+                            {ctasItemsCount && ctasItemsCount > 1 
+                              ? "Templates Active" 
+                              : "Template Active"}
+                          </Text>
+                        </Flex>
                       )}
                     </Flex>
                   </Paper>
@@ -1106,12 +1139,31 @@ export default function CampaignTemplateEditModal({
                             style={{ width: "90%", height: "90%" }}
                           />
                         </ThemeIcon>
-                        {emailSubjectLines.length}{" "}
+                        {/* {emailSubjectLines.length}{" "} */}
                         {emailSubjectLines.length === 1
-                          ? "Subject Line"
+                          ? "Subject Lines"
                           : "Subject Lines"}
                       </Text>
                     </Flex>
+                  <Flex gap={5} ml={30} mt={6} align={"center"}>
+                    <ThemeIcon
+                      size={14}
+                      variant="outline"
+                      color="green"
+                      radius={"xl"}
+                      mb={2}
+                    >
+                      <IconPoint
+                        fill="#40C057"
+                        color="#40C057"
+                        size={"3rem"}
+                      />
+                    </ThemeIcon>
+                    <Text size={"xs"} fw={600}>
+                      {emailSubjectLines.filter(template => template.active).length || 0}{" "}
+                      {emailSubjectLines.filter(template => template.active).length > 1 ? "Templates Active" : "Template Active"}
+                    </Text>
+                  </Flex>
                   </Paper>
                   <Divider
                     orientation="vertical"

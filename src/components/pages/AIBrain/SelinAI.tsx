@@ -1066,6 +1066,10 @@ export default function SelinAI() {
     session: ThreadType;
     thread_id: string;
   }) => {
+    //only create new sessions if they were meant for the current user
+    if (data.session.client_sdr_id !== userData.id) {
+      return
+    }
     // if (data.thread_id === roomIDref.current) {
     // just update the local state
     setThreads((prevThreads) => [...prevThreads, data.session]);

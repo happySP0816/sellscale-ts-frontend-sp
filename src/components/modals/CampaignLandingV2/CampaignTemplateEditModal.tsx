@@ -990,12 +990,17 @@ export default function CampaignTemplateEditModal({
                           ? "Connection Request"
                           : "Connection Request"}
                       </Text>
-                      {currentProject?.template_mode && (
+                      {currentProject?.template_mode ? (
                         <Text color="gray" size={"sm"}>
                           {linkedinInitialMessageData?.filter(message => message.active).length ?? 0}{" "}
                           {linkedinInitialMessageData?.filter(message => message.active).length === 1
                             ? "Active"
                             : "Active"}
+                        </Text>
+                      ) : (
+                        <Text color="gray" size={"sm"}>
+                          {ctasItemsCount ?? 0}{" "}
+                          {ctasItemsCount === 1 ? "Active CTA" : "Active CTAs"}
                         </Text>
                       )}
                     </Flex>

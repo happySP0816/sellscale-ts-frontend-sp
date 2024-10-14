@@ -140,14 +140,16 @@ const InlineTemplateAdder: React.FC<InlineAdderProps> = ({
           // Highlight the textarea with a red outline if the number of opening and closing brackets do not match
           outline: (manuallyAddedTemplate.match(/\[\[/g)?.length || 0) !== (manuallyAddedTemplate.match(/\]\]/g)?.length || 0) ? "2px solid red" : "none",
         }}
-      /> : <RichTextArea
-      onChange={(value, rawValue) => {
-        messageDraftRichRaw.current = rawValue;
-        messageDraftEmail.current = value;
-        setManuallyAddedTemplate(value);
-      }}
-      value={messageDraftRichRaw.current}
-      height={110}
+      /> :
+        // for new email template
+      <RichTextArea
+              onChange={(value, rawValue) => {
+                messageDraftRichRaw.current = rawValue;
+                messageDraftEmail.current = value;
+                setManuallyAddedTemplate(value);
+              }}
+              value={messageDraftRichRaw.current}
+              height={110}
     />}
       <Flex align="center" mt="xs" mb="xs">
         {loadingTemplateSuggestions && (

@@ -4848,7 +4848,7 @@ const SelixControlCenter = ({
           ]}
         />
       </Paper>
-      <ScrollArea bg={"#f7f8fa"} h={"87%"} scrollHideDelay={4000} p={"md"}>
+      <ScrollArea h={"87%"} scrollHideDelay={4000}>
         {aiType === "STRATEGY_CREATOR" ? (
           <SelinStrategy
             counter={counter}
@@ -5303,13 +5303,12 @@ const PlannerComponent = ({
 
 
   return (
-    <Paper p={"sm"} withBorder radius={"sm"}>
+    <Paper p={"sm"} radius={"sm"}>
       <Flex w={"100%"} align={"center"} gap={"xs"}>
         {/* <Divider label="Next in line" labelPosition="left" w={"100%"} color="gray" fw={500} />
         <ActionIcon onClick={toggle}>{opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}</ActionIcon> */}
       </Flex>
       <Paper
-        withBorder
         bg={"#fefafe"}
         my={"sm"}
         px={"sm"}

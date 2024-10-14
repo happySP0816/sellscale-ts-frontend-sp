@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Textarea, Button, Loader, Flex, Text } from "@mantine/core";
 import { IconArrowRight } from "@tabler/icons";
 import { getTemplateSuggestion } from "@utils/requests/generateSequence";
@@ -6,6 +6,8 @@ import { useRecoilValue } from "recoil";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { API_URL } from "@constants/data";
 import { set } from "lodash";
+import RichTextArea from "@common/library/RichTextArea";
+import { JSONContent } from "@tiptap/react";
 
 interface InlineAdderProps {
   manuallyAddedTemplate: string;
@@ -119,10 +121,14 @@ const InlineTemplateAdder: React.FC<InlineAdderProps> = ({
 }) => {
   const currentProject = useRecoilValue(currentProjectState);
   const [loadingTemplateSuggestions, setLoadingTemplateSuggestions] = useState(false);
+  const messageDraftEmail = useRef("");
+  // We use this to store the raw value of the rich text editor
+  const messageDraftRichRaw = useRef<JSONContent | string>();
+
 
   return (
     <>
-      <Textarea
+      {sequenceType === 'linkedin' ? <Textarea
         minRows={4}
         placeholder="Prefer to create your own message? Write directly in here ..."
         value={manuallyAddedTemplate}
@@ -134,7 +140,15 @@ const InlineTemplateAdder: React.FC<InlineAdderProps> = ({
           // Highlight the textarea with a red outline if the number of opening and closing brackets do not match
           outline: (manuallyAddedTemplate.match(/\[\[/g)?.length || 0) !== (manuallyAddedTemplate.match(/\]\]/g)?.length || 0) ? "2px solid red" : "none",
         }}
-      />
+      /> : <RichTextArea
+      onChange={(value, rawValue) => {
+        messageDraftRichRaw.current = rawValue;
+        messageDraftEmail.current = value;
+        setManuallyAddedTemplate(value);
+      }}
+      value={messageDraftRichRaw.current}
+      height={110}
+    />}
       <Flex align="center" mt="xs" mb="xs">
         {loadingTemplateSuggestions && (
           <>

@@ -33,7 +33,10 @@ import {
   postSequenceStepDeactivate,
 } from "@utils/requests/emailSequencing";
 import { showNotification } from "@mantine/notifications";
-import { postBumpActivate, postBumpDeactivate } from "@utils/requests/postBumpDeactivate";
+import {
+  postBumpActivate,
+  postBumpDeactivate,
+} from "@utils/requests/postBumpDeactivate";
 import RichTextArea from "@common/library/RichTextArea";
 import { JSONContent } from "@tiptap/react";
 import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
@@ -72,6 +75,7 @@ interface SequenceVariantProps {
   setSuggestionData?: (data: any) => void;
   setAddingLinkedinAsset?: (value: boolean) => void;
   setManuallyAddedTemplate?: (value: string) => void;
+  sequenceStep?: number;
 }
 
 const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
@@ -95,6 +99,7 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
     showAll,
     sequenceType,
     currentStepNum,
+    sequenceStep,
     setSuggestionData,
     setAddingLinkedinAsset,
     setManuallyAddedTemplate,
@@ -154,7 +159,7 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
         <Flex align={"center"} gap={"xs"}>
           <IconMessages color="#228be6" size={"0.9rem"} />
           <Text color="gray" fw={500} size={"xs"}>
-            Variant #{index + 1}:
+            Variant #{index + 1}: {currentStepNum}
           </Text>
           <Text fw={600} size={"xs"} ml={"-5px"}>
             {angle}
@@ -192,19 +197,19 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
                     let result;
                     if (assetType === "email") {
                       if (asset.active) {
-                      result = await postSequenceStepDeactivate(
-                        userToken,
-                        assetId
-                      );
-                    } else {
-                      result = await postSequenceStepActivate(
-                        userToken,
-                        assetId
-                      );
-                    }
+                        result = await postSequenceStepDeactivate(
+                          userToken,
+                          assetId
+                        );
+                      } else {
+                        result = await postSequenceStepActivate(
+                          userToken,
+                          assetId
+                        );
+                      }
                     } else if (assetType === "linkedin") {
-
-                      if (asset.id && !asset.bump_framework_id) { //this is the case for linkedin templates
+                      if (asset.id && !asset.bump_framework_id) {
+                        //this is the case for linkedin templates
                         updateLiTemplate(
                           userToken,
                           currentProject?.id || -1,
@@ -216,24 +221,21 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
                           asset.times_accepted,
                           asset.research_points,
                           asset.additional_instructions
-                        )
+                        );
                         refetch();
-                        return
+                        return;
                       }
 
-                        if (asset.active) {
-
+                      if (asset.active) {
                         result = await postBumpDeactivate(
                           userToken,
                           asset.bump_framework_id
                         );
                       } else {
-
                         result = await postBumpActivate(
                           userToken,
                           asset.bump_framework_id
                         );
-
                       }
                     }
 

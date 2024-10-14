@@ -151,19 +151,44 @@ export default function CampaignTemplateEditModal({
   updateConnectionType: any;
   // checkCanToggleLinkedin: any;
 }>) {
-  const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(linkedinSequenceState);
-  const [emailSequenceData, setEmailSequenceData] = useRecoilState(emailSequenceState);
+  const [linkedinSequenceData, setLinkedinSequenceData] = useRecoilState(
+    linkedinSequenceState
+  );
+  const [emailSequenceData, setEmailSequenceData] = useRecoilState(
+    emailSequenceState
+  );
   const [emailSubjectLines, setEmailSubjectLines] = useRecoilState(
     emailSubjectLinesState
   );
-  const [alteredLinkedinActive, setAlteredLinkedinActive] = useState(innerProps.statsData.linkedin_active);
-  const [alteredEmailActive, setAlteredEmailActive] = useState(innerProps.statsData.email_active);
-  const [isEditingInitialMessageBumpDelayDays, setIsEditingInitialMessageBumpDelayDays] = useState<number | null>(null);
-  const [newInitialMessageBumpDelayDays, setNewInitialMessageBumpDelayDays] = useState(0);
-  const [linkedinInitialMessageData, setLinkedinInitialMessageData] = useRecoilState(linkedinInitialMessageState);
-  const [linkedinInitialMessageStagingData, setLinkedinInitialMessageStagingData] = useState<string[]>([]);
-  const [linkedinInitialMessageEntry, setLinkedinInitialMessageEntry] = useState<string>('');
-  const [isEditingBumpDelayDays, setIsEditingBumpDelayDays] = useState<number | null>(null);
+  const [alteredLinkedinActive, setAlteredLinkedinActive] = useState(
+    innerProps.statsData.linkedin_active
+  );
+  const [alteredEmailActive, setAlteredEmailActive] = useState(
+    innerProps.statsData.email_active
+  );
+  const [
+    isEditingInitialMessageBumpDelayDays,
+    setIsEditingInitialMessageBumpDelayDays,
+  ] = useState<number | null>(null);
+  const [
+    newInitialMessageBumpDelayDays,
+    setNewInitialMessageBumpDelayDays,
+  ] = useState(0);
+  const [
+    linkedinInitialMessageData,
+    setLinkedinInitialMessageData,
+  ] = useRecoilState(linkedinInitialMessageState);
+  const [
+    linkedinInitialMessageStagingData,
+    setLinkedinInitialMessageStagingData,
+  ] = useState<string[]>([]);
+  const [
+    linkedinInitialMessageEntry,
+    setLinkedinInitialMessageEntry,
+  ] = useState<string>("");
+  const [isEditingBumpDelayDays, setIsEditingBumpDelayDays] = useState<
+    number | null
+  >(null);
   const [newBumpDelayDays, setNewBumpDelayDays] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -174,26 +199,38 @@ export default function CampaignTemplateEditModal({
 
   const [steps, setSteps] = useState(() => {
     if (sequenceType === "email") {
-      return emailSequenceData && emailSequenceData.length > 0 ? emailSequenceData.length : 0;
+      return emailSequenceData && emailSequenceData.length > 0
+        ? emailSequenceData.length
+        : 0;
     } else {
-      return linkedinSequenceData && linkedinSequenceData.length > 0 ? linkedinSequenceData.length : 0;
+      return linkedinSequenceData && linkedinSequenceData.length > 0
+        ? linkedinSequenceData.length
+        : 0;
     }
   });
-
 
   //there was a problem where the steps were not updating when the sequence type was changed via the sequence type dropdown
   useEffect(() => {
     if (sequenceType === "email") {
-      setSteps(emailSequenceData && emailSequenceData.length > 0 ? emailSequenceData.length : 0);
+      setSteps(
+        emailSequenceData && emailSequenceData.length > 0
+          ? emailSequenceData.length
+          : 0
+      );
     } else {
-      setSteps(linkedinSequenceData && linkedinSequenceData.length > 0 ? linkedinSequenceData.length : 0);
+      setSteps(
+        linkedinSequenceData && linkedinSequenceData.length > 0
+          ? linkedinSequenceData.length
+          : 0
+      );
     }
   }, [sequenceType, emailSequenceData, linkedinSequenceData]);
 
-
   const [generatingSubjectLines, setGeneratingSubjectLines] = useState(false);
   const [currentStepNum, setCurrentStepNum] = useState(
-    (innerProps.currentStepNum || innerProps.currentStepNum === 0) ? innerProps.currentStepNum : 1
+    innerProps.currentStepNum || innerProps.currentStepNum === 0
+      ? innerProps.currentStepNum
+      : 1
   );
   const [generateSequence, setGenerateSequence] = useState(false);
   const [openid, setOpenId] = useState<number>(0);
@@ -451,7 +488,7 @@ export default function CampaignTemplateEditModal({
               // make background a grid of dots
               backgroundSize: "20px 20px",
             }}
-          // withBorder
+            // withBorder
           >
             <Group noWrap spacing={"sm"} w={"100%"}>
               <Switch
@@ -460,7 +497,7 @@ export default function CampaignTemplateEditModal({
                   // if (!innerProps?.checkCanToggleEmail(true)) {
                   //   return;
                   // }
-                  console.log('params are', id, userToken, !alteredEmailActive);
+                  console.log("params are", id, userToken, !alteredEmailActive);
                   const success = await innerProps?.togglePersonaChannel(
                     campaignId,
                     "email",
@@ -557,7 +594,6 @@ export default function CampaignTemplateEditModal({
                     );
                     setAlteredLinkedinActive(!alteredLinkedinActive);
                     innerProps?.refetchSequenceData(campaignId);
-                    
                   } catch (error) {
                     console.log("Failed to toggle LinkedIn channel");
                     console.error("Failed to toggle LinkedIn channel", error);
@@ -926,10 +962,11 @@ export default function CampaignTemplateEditModal({
                                 ).then((project: any) => {
                                   showNotification({
                                     title: "Success",
-                                    message: `Template mode ${project?.template_mode
-                                      ? "enabled"
-                                      : "disabled"
-                                      }`,
+                                    message: `Template mode ${
+                                      project?.template_mode
+                                        ? "enabled"
+                                        : "disabled"
+                                    }`,
                                     color: "green",
                                     icon: <IconCheck size="1rem" />,
                                   });
@@ -1054,9 +1091,16 @@ export default function CampaignTemplateEditModal({
                     onClick={() => {
                       setIsEditingInitialMessageBumpDelayDays(0);
                     }}
-                    bg={isEditingInitialMessageBumpDelayDays !== null ? "#f9fbfe" : ""}
+                    bg={
+                      isEditingInitialMessageBumpDelayDays !== null
+                        ? "#f9fbfe"
+                        : ""
+                    }
                     style={{
-                      border: isEditingInitialMessageBumpDelayDays !== null ? "1px solid #228be6 " : "",
+                      border:
+                        isEditingInitialMessageBumpDelayDays !== null
+                          ? "1px solid #228be6 "
+                          : "",
                     }}
                   >
                     <Flex align={"center"} justify={"space-between"}>
@@ -1071,24 +1115,43 @@ export default function CampaignTemplateEditModal({
                         {isEditingInitialMessageBumpDelayDays !== null ? (
                           <Input
                             ref={inputRef}
-                            style={{ width: '60px' }}
+                            style={{ width: "60px" }}
                             type="number"
                             fw={500}
                             size={"sm"}
                             value={newInitialMessageBumpDelayDays}
-                            onChange={(e) => setNewInitialMessageBumpDelayDays(parseInt(e.target.value, 10))}
+                            onChange={(e) =>
+                              setNewInitialMessageBumpDelayDays(
+                                parseInt(e.target.value, 10)
+                              )
+                            }
                             onBlur={async () => {
                               if (!isNaN(newInitialMessageBumpDelayDays)) {
-                                await patchArchetypeDelayDays(userToken, currentProject?.id || -1, newInitialMessageBumpDelayDays);
+                                await patchArchetypeDelayDays(
+                                  userToken,
+                                  currentProject?.id || -1,
+                                  newInitialMessageBumpDelayDays
+                                );
                                 setIsEditingInitialMessageBumpDelayDays(null);
-                                setCurrentProject((prevProject) => prevProject ? { ...prevProject, first_message_delay_days: newInitialMessageBumpDelayDays } : null);
+                                setCurrentProject((prevProject) =>
+                                  prevProject
+                                    ? {
+                                        ...prevProject,
+                                        first_message_delay_days: newInitialMessageBumpDelayDays,
+                                      }
+                                    : null
+                                );
                               }
                             }}
                             onFocus={(e) => e.target.select()}
                           />
                         ) : (
                           <Text size={"sm"} fw={500} color="black">
-                            {currentProject?.first_message_delay_days || 0} {(currentProject?.first_message_delay_days || 0) === 1 ? "day" : "days"}
+                            {currentProject?.first_message_delay_days || 0}{" "}
+                            {(currentProject?.first_message_delay_days || 0) ===
+                            1
+                              ? "day"
+                              : "days"}
                           </Text>
                         )}
                       </Text>
@@ -1100,7 +1163,6 @@ export default function CampaignTemplateEditModal({
                     variant="dashed"
                     ml={20}
                   />
-
                 </>
               )}
               {sequenceType === "email" && (
@@ -1245,15 +1307,23 @@ export default function CampaignTemplateEditModal({
                           </ThemeIcon>
                           <Text size={"xs"} fw={600}>
                             {sequenceType === "email"
-                              ? emailSequenceData[index]?.filter(template => template.active).length || 0
-                              : linkedinSequenceData[index]?.filter(template => template.active).length || 0}{" "}
+                              ? emailSequenceData[index]?.filter(
+                                  (template) => template.active
+                                ).length || 0
+                              : linkedinSequenceData[index]?.filter(
+                                  (template) => template.active
+                                ).length || 0}{" "}
                             {sequenceType === "email"
-                              ? (emailSequenceData[index]?.filter(template => template.active).length || 0) > 1
+                              ? (emailSequenceData[index]?.filter(
+                                  (template) => template.active
+                                ).length || 0) > 1
                                 ? "Templates Active"
                                 : "Template Active"
-                              : (linkedinSequenceData[index]?.filter(template => template.active).length || 0) > 1
-                                ? "Templates Active"
-                                : "Template Active"}
+                              : (linkedinSequenceData[index]?.filter(
+                                  (template) => template.active
+                                ).length || 0) > 1
+                              ? "Templates Active"
+                              : "Template Active"}
                           </Text>
                         </Flex>
                         {stagingData[sequenceType] && (
@@ -1270,162 +1340,210 @@ export default function CampaignTemplateEditModal({
                       </Paper>
                       {(sequenceType === "email"
                         ? emailSequenceData[index]?.length > 0
-                        : linkedinSequenceData[index]?.length > 0) && <>
-                         
-                         { (sequenceType === "email"
-                              ? emailSequenceData[index]?.length > 0
-                              : linkedinSequenceData[index]?.length > 0) && <>
-                        <Divider
-                          orientation="vertical"
-                          h={20}
-                          variant="dashed"
-                          ml={20}
-                        />
-                        <Paper withBorder w={'40%'} radius={"sm"} p={1} px={4}>
-                          <Flex align={"center"} gap={4}>
-                          <ThemeIcon size={"sm"}>
-                          <IconClock color="orange" size={"1rem"} />
-                        </ThemeIcon>
-                            {sequenceType === "email" ? (
-                              isEditingBumpDelayDays === index ? (
-                                <Input
-                                  ref={inputRef}
-                                  style={{ width: '40px' }}
-                                  type="number"
-                                  fw={500}
-                                  size={"sm"}
-                                  value={newBumpDelayDays}
-                                  onChange={(e) => setNewBumpDelayDays(parseInt(e.target.value, 10))}
-                                  onBlur={async () => {
-                                    if (!isNaN(newBumpDelayDays)) {
-                                      for (let i = 0; i < emailSequenceData[index].length; i++) {
-                                        patchSequenceStep(
-                                          userToken,
-                                          emailSequenceData[index][i].id || -1, 
-                                          emailSequenceData[index][i].overall_status || '',
-                                          emailSequenceData[index][i].title || '',
-                                          emailSequenceData[index][i].description,
-                                          emailSequenceData[index][i].bumped_count,
-                                          false,
-                                          newBumpDelayDays,
-                                          ['']
-                                        );
-                                      }
-                                      setEmailSequenceData((prevData) => {
-                                        const newData = [...prevData];
-                                        newData[index] = newData[index].map((item) => ({
-                                          ...item,
-                                          sequence_delay_days: newBumpDelayDays,
-                                        }));
-                                        return newData;
-                                      });
-                                      setIsEditingBumpDelayDays(null);
-                                    }
-                                  }}
-                                />
-                              ) : (
-                                <Text
-                                  fw={500}
-                                  size={"sm"}
-                                  onClick={() => {
+                        : linkedinSequenceData[index]?.length > 0) && (
+                        <>
+                          {(sequenceType === "email"
+                            ? emailSequenceData[index]?.length > 0
+                            : linkedinSequenceData[index]?.length > 0) && (
+                            <>
+                              <Divider
+                                orientation="vertical"
+                                h={20}
+                                variant="dashed"
+                                ml={20}
+                              />
+                              <Paper
+                                withBorder
+                                w={"40%"}
+                                radius={"sm"}
+                                p={1}
+                                px={4}
+                              >
+                                <Flex align={"center"} gap={4}>
+                                  <ThemeIcon size={"sm"}>
+                                    <IconClock color="orange" size={"1rem"} />
+                                  </ThemeIcon>
+                                  {sequenceType === "email" ? (
+                                    isEditingBumpDelayDays === index ? (
+                                      <Input
+                                        ref={inputRef}
+                                        style={{ width: "40px" }}
+                                        type="number"
+                                        fw={500}
+                                        size={"sm"}
+                                        value={newBumpDelayDays}
+                                        onChange={(e) =>
+                                          setNewBumpDelayDays(
+                                            parseInt(e.target.value, 10)
+                                          )
+                                        }
+                                        onBlur={async () => {
+                                          if (!isNaN(newBumpDelayDays)) {
+                                            for (
+                                              let i = 0;
+                                              i <
+                                              emailSequenceData[index].length;
+                                              i++
+                                            ) {
+                                              patchSequenceStep(
+                                                userToken,
+                                                emailSequenceData[index][i]
+                                                  .id || -1,
+                                                emailSequenceData[index][i]
+                                                  .overall_status || "",
+                                                emailSequenceData[index][i]
+                                                  .title || "",
+                                                emailSequenceData[index][i]
+                                                  .description,
+                                                emailSequenceData[index][i]
+                                                  .bumped_count,
+                                                false,
+                                                newBumpDelayDays,
+                                                [""]
+                                              );
+                                            }
+                                            setEmailSequenceData((prevData) => {
+                                              const newData = [...prevData];
+                                              newData[index] = newData[
+                                                index
+                                              ].map((item) => ({
+                                                ...item,
+                                                sequence_delay_days: newBumpDelayDays,
+                                              }));
+                                              return newData;
+                                            });
+                                            setIsEditingBumpDelayDays(null);
+                                          }
+                                        }}
+                                      />
+                                    ) : (
+                                      <Text
+                                        fw={500}
+                                        size={"sm"}
+                                        onClick={() => {
+                                          if (currentProject?.email_active) {
+                                            showNotification({
+                                              title: "Error",
+                                              message:
+                                                "Cannot update bump delay days for an already active email campaign",
+                                              color: "red",
+                                            });
+                                            return;
+                                          }
 
-                                    if (currentProject?.email_active) {
-                                      showNotification({
-                                        title: "Error",
-                                        message: "Cannot update bump delay days for an already active email campaign",
-                                        color: "red",
-                                      });
-                                      return;
-                                    }
-
-                                    setNewBumpDelayDays(emailSequenceData[index]?.[0]?.sequence_delay_days || 0);
-                                    setIsEditingBumpDelayDays(index);
-                                  }}
-                                
-                                >
-                                  {emailSequenceData[index]?.[0]?.sequence_delay_days || 0}
-                                </Text>
-                              )
-                            ) : (
-                              isEditingBumpDelayDays === index ? (
-                                <Input
-                                  ref={inputRef}
-                                  style={{ width: '40px' }}
-                                  type="number"
-                                  fw={500}
-                                  size={"sm"}
-                                  value={newBumpDelayDays}
-                                  onChange={(e) => setNewBumpDelayDays(parseInt(e.target.value, 10))}
-                                  onBlur={async () => {
-                                    if (!isNaN(newBumpDelayDays)) {
-                                      for (let i = 0; i < linkedinSequenceData[index].length; i++) {
-                                        patchBumpFramework(
-                                          userToken,
-                                          linkedinSequenceData[index][i].bump_framework_id,
-                                          linkedinSequenceData[index][i].overall_status || '',
-                                          linkedinSequenceData[index][i].title || '',
-                                          linkedinSequenceData[index][i].description,
-                                          '',
-                                          linkedinSequenceData[index][i].bumped_count,
-                                          newBumpDelayDays,
-                                          linkedinSequenceData[index][i].active,
-                                          false,
-                                          [''],
-                                          '',
-                                          '',
-                                          '',
-                                          '',
-                                          index + 1,
-                                        );
+                                          setNewBumpDelayDays(
+                                            emailSequenceData[index]?.[0]
+                                              ?.sequence_delay_days || 0
+                                          );
+                                          setIsEditingBumpDelayDays(index);
+                                        }}
+                                      >
+                                        {emailSequenceData[index]?.[0]
+                                          ?.sequence_delay_days || 0}
+                                      </Text>
+                                    )
+                                  ) : isEditingBumpDelayDays === index ? (
+                                    <Input
+                                      ref={inputRef}
+                                      style={{ width: "40px" }}
+                                      type="number"
+                                      fw={500}
+                                      size={"sm"}
+                                      value={newBumpDelayDays}
+                                      onChange={(e) =>
+                                        setNewBumpDelayDays(
+                                          parseInt(e.target.value, 10)
+                                        )
                                       }
-                                      setLinkedinSequenceData((prevData) => {
-                                        const newData = [...prevData];
-                                        newData[index] = newData[index].map((item) => ({
-                                          ...item,
-                                          bump_delay_days: newBumpDelayDays,
-                                        }));
-                                        return newData;
-                                      });
-                                      setIsEditingBumpDelayDays(null);
-                                    }
-                                  }}
-                                />
-                              ) : (
-                                <Text
-                                  fw={500}
-                                  size={"sm"}
-                                  onClick={() => {
-                                    setNewBumpDelayDays(linkedinSequenceData[index]?.[0]?.bump_delay_days || 0);
-                                    setIsEditingBumpDelayDays(index);
-                                  }}
-                                
-                                >
-                                  {linkedinSequenceData[index]?.[0]?.bump_delay_days || 0}
-                                </Text>
-                              )
-                            )}
-                            <Text size="sm" fw={500}>
-                              {sequenceType === "email" 
-                                ? emailSequenceData[index]?.[0]?.sequence_delay_days === 1 
-                                  ? "day" 
-                                  : "days"
-                                : linkedinSequenceData[index]?.[0]?.bump_delay_days === 1 
-                                  ? "day" 
-                                  : "days"}
-                            </Text>
-                          </Flex>
-                        </Paper>
-                      </>}
-        
-               
-              
+                                      onBlur={async () => {
+                                        if (!isNaN(newBumpDelayDays)) {
+                                          for (
+                                            let i = 0;
+                                            i <
+                                            linkedinSequenceData[index].length;
+                                            i++
+                                          ) {
+                                            patchBumpFramework(
+                                              userToken,
+                                              linkedinSequenceData[index][i]
+                                                .bump_framework_id,
+                                              linkedinSequenceData[index][i]
+                                                .overall_status || "",
+                                              linkedinSequenceData[index][i]
+                                                .title || "",
+                                              linkedinSequenceData[index][i]
+                                                .description,
+                                              "",
+                                              linkedinSequenceData[index][i]
+                                                .bumped_count,
+                                              newBumpDelayDays,
+                                              linkedinSequenceData[index][i]
+                                                .active,
+                                              false,
+                                              [""],
+                                              "",
+                                              "",
+                                              "",
+                                              "",
+                                              index + 1
+                                            );
+                                          }
+                                          setLinkedinSequenceData(
+                                            (prevData) => {
+                                              const newData = [...prevData];
+                                              newData[index] = newData[
+                                                index
+                                              ].map((item) => ({
+                                                ...item,
+                                                bump_delay_days: newBumpDelayDays,
+                                              }));
+                                              return newData;
+                                            }
+                                          );
+                                          setIsEditingBumpDelayDays(null);
+                                        }
+                                      }}
+                                    />
+                                  ) : (
+                                    <Text
+                                      fw={500}
+                                      size={"sm"}
+                                      onClick={() => {
+                                        setNewBumpDelayDays(
+                                          linkedinSequenceData[index]?.[0]
+                                            ?.bump_delay_days || 0
+                                        );
+                                        setIsEditingBumpDelayDays(index);
+                                      }}
+                                    >
+                                      {linkedinSequenceData[index]?.[0]
+                                        ?.bump_delay_days || 0}
+                                    </Text>
+                                  )}
+                                  <Text size="sm" fw={500}>
+                                    {sequenceType === "email"
+                                      ? emailSequenceData[index]?.[0]
+                                          ?.sequence_delay_days === 1
+                                        ? "day"
+                                        : "days"
+                                      : linkedinSequenceData[index]?.[0]
+                                          ?.bump_delay_days === 1
+                                      ? "day"
+                                      : "days"}
+                                  </Text>
+                                </Flex>
+                              </Paper>
+                            </>
+                          )}
+
                           <Divider
                             orientation="vertical"
                             h={20}
                             variant="dashed"
                             ml={20}
                           />
-                        </>}
+                        </>
+                      )}
                     </>
                   );
                 })}
@@ -1435,9 +1553,17 @@ export default function CampaignTemplateEditModal({
                   align={"center"}
                   justify={"space-between"}
                   onClick={() => {
-                    if (steps < 5 && (steps === 0 || (sequenceType === "email" 
-                      ? emailSequenceData[steps - 1]?.some(template => template.active) 
-                      : linkedinSequenceData[steps - 1]?.some(template => template.active)))) {
+                    if (
+                      steps < 5 &&
+                      (steps === 0 ||
+                        (sequenceType === "email"
+                          ? emailSequenceData[steps - 1]?.some(
+                              (template) => template.active
+                            )
+                          : linkedinSequenceData[steps - 1]?.some(
+                              (template) => template.active
+                            )))
+                    ) {
                       setSteps((item) => (item = item + 1));
                     }
                   }}
@@ -1577,112 +1703,124 @@ export default function CampaignTemplateEditModal({
               {currentStepNum === 0 && sequenceType === "linkedin" && (
                 <>
                   <ScrollArea viewportRef={viewport}>
-                    {linkedinInitialMessageData.length > 0 && currentProject?.template_mode &&
+                    {linkedinInitialMessageData.length > 0 &&
+                      currentProject?.template_mode &&
                       [...linkedinInitialMessageData]
-                        .sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))
-                        .map((messageData: LinkedinInitialMessageDataType, index: number) => (
-                          <Box p={"xs"} h={"100%"}>
-                            <SequenceVariant
-                              asset={messageData}
-                              assetType={"linkedin"}
-                              refetch={() =>
-                                innerProps.refetchSequenceData(
-                                  innerProps.campaignId
-                                )
-                              }
-                              sequenceType={sequenceType}
-                              angle={messageData.title}
-                              text={messageData.message}
-                              assetId={messageData.id}
-                              index={index}
-                              isSaved={true}
-                              selectStep={selectStep ?? 0}
-                              opened={opened}
-                              userImgUrl={userData.img_url}
-                              removeFromStagingData={removeFromStagingData}
-                              handleToggle={handleToggle}
-                              stagingData={stagingData}
-                              setStagingData={setStagingData}
-                              currentStepNum={currentStepNum}
-                            />
-                          </Box>
+                        .sort((a, b) =>
+                          a.active === b.active ? 0 : a.active ? -1 : 1
                         )
+                        .map(
+                          (
+                            messageData: LinkedinInitialMessageDataType,
+                            index: number
+                          ) => (
+                            <Box p={"xs"} h={"100%"}>
+                              <SequenceVariant
+                                asset={messageData}
+                                assetType={"linkedin"}
+                                refetch={() =>
+                                  innerProps.refetchSequenceData(
+                                    innerProps.campaignId
+                                  )
+                                }
+                                sequenceType={sequenceType}
+                                angle={messageData.title}
+                                text={messageData.message}
+                                assetId={messageData.id}
+                                index={index}
+                                isSaved={true}
+                                selectStep={selectStep ?? 0}
+                                opened={opened}
+                                userImgUrl={userData.img_url}
+                                removeFromStagingData={removeFromStagingData}
+                                handleToggle={handleToggle}
+                                stagingData={stagingData}
+                                setStagingData={setStagingData}
+                                currentStepNum={currentStepNum}
+                              />
+                            </Box>
+                          )
                         )}
-                    {linkedinInitialMessageStagingData.length > 0 && currentProject?.template_mode && (
-                      <Flex justify="center" align="center">
-                        <Divider
-                          orientation="horizontal"
-                          color="yellow"
-                          size={"2px"}
-                          style={{ margin: "0 25px", flex: 1 }}
-                        />
-                        <Badge variant="outline" color="yellow" tt={"initial"}>
-                          New
-                        </Badge>
-                        <Divider
-                          orientation="horizontal"
-                          color="yellow"
-                          size={"2px"}
-                          style={{ margin: "0 25px", flex: 1 }}
-                        />
-                      </Flex>
-                    )}
+                    {linkedinInitialMessageStagingData.length > 0 &&
+                      currentProject?.template_mode && (
+                        <Flex justify="center" align="center">
+                          <Divider
+                            orientation="horizontal"
+                            color="yellow"
+                            size={"2px"}
+                            style={{ margin: "0 25px", flex: 1 }}
+                          />
+                          <Badge
+                            variant="outline"
+                            color="yellow"
+                            tt={"initial"}
+                          >
+                            New
+                          </Badge>
+                          <Divider
+                            orientation="horizontal"
+                            color="yellow"
+                            size={"2px"}
+                            style={{ margin: "0 25px", flex: 1 }}
+                          />
+                        </Flex>
+                      )}
                     <Flex p={"xs"} h={"100%"} direction={"column"}>
                       {linkedinInitialMessageStagingData.length > 0
                         ? linkedinInitialMessageStagingData.map(
-                          (message: string, index4: number) => (
-                            <SequenceVariant
-                              asset={{ message }}
-                              assetType={"linkedin"}
-                              refetch={() =>
-                                innerProps.refetchSequenceData(
-                                  innerProps.campaignId
-                                )
-                              }
-                              sequenceType={sequenceType}
-                              angle={message}
-                              text={message}
-                              assetId={-1}
-                              index={index4}
-                              isSaved={false}
-                              selectStep={selectStep ?? 0}
-                              opened={opened}
-                              userImgUrl={userData.img_url}
-                              removeFromStagingData={removeFromStagingData}
-                              handleToggle={handleToggle}
-                              stagingData={stagingData}
-                              setStagingData={setStagingData}
-                              currentStepNum={currentStepNum}
-                            />
+                            (message: string, index4: number) => (
+                              <SequenceVariant
+                                asset={{ message }}
+                                assetType={"linkedin"}
+                                refetch={() =>
+                                  innerProps.refetchSequenceData(
+                                    innerProps.campaignId
+                                  )
+                                }
+                                sequenceType={sequenceType}
+                                angle={message}
+                                text={message}
+                                assetId={-1}
+                                index={index4}
+                                isSaved={false}
+                                selectStep={selectStep ?? 0}
+                                opened={opened}
+                                userImgUrl={userData.img_url}
+                                removeFromStagingData={removeFromStagingData}
+                                handleToggle={handleToggle}
+                                stagingData={stagingData}
+                                setStagingData={setStagingData}
+                                currentStepNum={currentStepNum}
+                              />
+                            )
                           )
-                        )
                         : linkedinInitialMessageStagingData.map(
-                          (message: string, index4: number) => (
-                            <SequenceVariant
-                              asset={{ message }}
-                              assetType={"linkedin"}
-                              refetch={() =>
-                                innerProps.refetchSequenceData(
-                                  innerProps.campaignId
-                                )
-                              }
-                              sequenceType={sequenceType}
-                              angle={message}
-                              text={message}
-                              assetId={index4}
-                              index={index4}
-                              isSaved={true}
-                              selectStep={selectStep ?? 0}
-                              opened={opened}
-                              userImgUrl={userData.img_url}
-                              removeFromStagingData={removeFromStagingData}
-                              handleToggle={handleToggle}
-                              stagingData={stagingData}
-                              setStagingData={setStagingData}
-                              currentStepNum={currentStepNum}
-                            />
-                          )
-                        )}
+                            (message: string, index4: number) => (
+                              <SequenceVariant
+                                asset={{ message }}
+                                assetType={"linkedin"}
+                                refetch={() =>
+                                  innerProps.refetchSequenceData(
+                                    innerProps.campaignId
+                                  )
+                                }
+                                sequenceType={sequenceType}
+                                angle={message}
+                                text={message}
+                                assetId={index4}
+                                index={index4}
+                                isSaved={true}
+                                selectStep={selectStep ?? 0}
+                                opened={opened}
+                                userImgUrl={userData.img_url}
+                                removeFromStagingData={removeFromStagingData}
+                                handleToggle={handleToggle}
+                                stagingData={stagingData}
+                                setStagingData={setStagingData}
+                                currentStepNum={currentStepNum}
+                              />
+                            )
+                          )}
                       {!currentProject?.template_mode && (
                         <Tabs
                           value={activeTab}
@@ -1812,36 +1950,45 @@ export default function CampaignTemplateEditModal({
                       )}
                     </Flex>
                   </ScrollArea>
-                  {currentProject?.template_mode && <Flex direction="column" p="lg" gap="md">
-                    <Textarea
-                      placeholder="Prefer to create your own initial message? Add it here"
-                      value={linkedinInitialMessageEntry}
-                      onChange={(event) =>
-                        setLinkedinInitialMessageEntry(event.currentTarget.value)
-                      }
-                      autosize
-                      minRows={3}
-                    />
-                    <Flex justify="flex-end">
-                      <Button
-                        rightIcon={<IconArrowRight size={"0.8rem"} />}
-                        onClick={() => {
-                          if (linkedinInitialMessageEntry) {
-                            setLinkedinInitialMessageStagingData((prevData: any[]) => [...prevData, linkedinInitialMessageEntry])
-                            setLinkedinInitialMessageEntry("");
-                            setTimeout(() => {
-                              viewport.current?.scrollTo({
-                                top: viewport.current?.scrollHeight,
-                                behavior: "smooth",
-                              });
-                            }, 20);
-                          }
-                        }}
-                      >
-                        Add Message
-                      </Button>
+                  {currentProject?.template_mode && (
+                    <Flex direction="column" p="lg" gap="md">
+                      <Textarea
+                        placeholder="Prefer to create your own initial message? Add it here"
+                        value={linkedinInitialMessageEntry}
+                        onChange={(event) =>
+                          setLinkedinInitialMessageEntry(
+                            event.currentTarget.value
+                          )
+                        }
+                        autosize
+                        minRows={3}
+                      />
+                      <Flex justify="flex-end">
+                        <Button
+                          rightIcon={<IconArrowRight size={"0.8rem"} />}
+                          onClick={() => {
+                            if (linkedinInitialMessageEntry) {
+                              setLinkedinInitialMessageStagingData(
+                                (prevData: any[]) => [
+                                  ...prevData,
+                                  linkedinInitialMessageEntry,
+                                ]
+                              );
+                              setLinkedinInitialMessageEntry("");
+                              setTimeout(() => {
+                                viewport.current?.scrollTo({
+                                  top: viewport.current?.scrollHeight,
+                                  behavior: "smooth",
+                                });
+                              }, 20);
+                            }
+                          }}
+                        >
+                          Add Message
+                        </Button>
+                      </Flex>
                     </Flex>
-                  </Flex>}
+                  )}
                 </>
               )}
               {currentStepNum === steps + 1 && sequenceType === "email" && (
@@ -1925,31 +2072,36 @@ export default function CampaignTemplateEditModal({
                           ? [...emailSequenceData[currentStepNum - 1]] // Create shallow copy
                           : [...linkedinSequenceData[currentStepNum - 1]] || []
                         )
-                          ?.sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))
+                          ?.sort((a, b) =>
+                            a.active === b.active ? 0 : a.active ? -1 : 1
+                          )
                           .map((existingAsset: any, index2: number) => {
                             return (
-                              <SequenceVariant
-                                asset={existingAsset}
-                                assetType={sequenceType}
-                                refetch={() =>
-                                  innerProps.refetchSequenceData(
-                                    innerProps.campaignId
-                                  )
-                                }
-                                sequenceType={sequenceType}
-                                angle={existingAsset.title}
-                                text={existingAsset.description}
-                                assetId={existingAsset.id}
-                                isSaved={true}
-                                index={index2}
-                                selectStep={selectStep2 ?? 0}
-                                opened={opened2}
-                                userImgUrl={userData.img_url}
-                                removeFromStagingData={removeFromStagingData}
-                                handleToggle={handleToggle2}
-                                stagingData={stagingData}
-                                setStagingData={setStagingData}
-                              />
+                              <>
+                                <SequenceVariant
+                                  asset={existingAsset}
+                                  assetType={sequenceType}
+                                  refetch={() =>
+                                    innerProps.refetchSequenceData(
+                                      innerProps.campaignId
+                                    )
+                                  }
+                                  sequenceType={sequenceType}
+                                  angle={existingAsset.title}
+                                  text={existingAsset.description}
+                                  assetId={existingAsset.id}
+                                  isSaved={true}
+                                  index={index2}
+                                  selectStep={selectStep2 ?? 0}
+                                  opened={opened2}
+                                  userImgUrl={userData.img_url}
+                                  removeFromStagingData={removeFromStagingData}
+                                  handleToggle={handleToggle2}
+                                  stagingData={stagingData}
+                                  setStagingData={setStagingData}
+                                  currentStepNum={currentStepNum}
+                                />
+                              </>
                             );
                           })}
                     </Flex>
@@ -1957,24 +2109,24 @@ export default function CampaignTemplateEditModal({
                     {stagingData[sequenceType]?.filter(
                       (asset: any) => asset.step_num === currentStepNum
                     ).length > 0 && (
-                        <Flex justify="center" align="center">
-                          <Divider
-                            orientation="horizontal"
-                            color="yellow"
-                            size={"2px"}
-                            style={{ margin: "0 25px", flex: 1 }}
-                          />
-                          <Badge variant="outline" color="yellow" tt={"initial"}>
-                            New
-                          </Badge>
-                          <Divider
-                            orientation="horizontal"
-                            color="yellow"
-                            size={"2px"}
-                            style={{ margin: "0 25px", flex: 1 }}
-                          />
-                        </Flex>
-                      )}
+                      <Flex justify="center" align="center">
+                        <Divider
+                          orientation="horizontal"
+                          color="yellow"
+                          size={"2px"}
+                          style={{ margin: "0 25px", flex: 1 }}
+                        />
+                        <Badge variant="outline" color="yellow" tt={"initial"}>
+                          New
+                        </Badge>
+                        <Divider
+                          orientation="horizontal"
+                          color="yellow"
+                          size={"2px"}
+                          style={{ margin: "0 25px", flex: 1 }}
+                        />
+                      </Flex>
+                    )}
                     {/* STAGING DATA */}
                     <Flex p={"lg"} h={"100%"} direction={"column"}>
                       <>
@@ -2004,6 +2156,7 @@ export default function CampaignTemplateEditModal({
                                 handleToggle={handleToggle}
                                 stagingData={stagingData}
                                 setStagingData={setStagingData}
+                                currentStepNum={currentStepNum}
                               />
                             );
                           })}
@@ -2069,7 +2222,7 @@ export default function CampaignTemplateEditModal({
                                 opened={true}
                                 userImgUrl={userData.img_url}
                                 removeFromStagingData={removeFromStagingData}
-                                handleToggle={() => { }}
+                                handleToggle={() => {}}
                                 showAll={true}
                                 stagingData={stagingData}
                                 setStagingData={setStagingData}
@@ -2098,7 +2251,9 @@ export default function CampaignTemplateEditModal({
                 >
                   {emailSubjectLines
                     ?.slice()
-                    ?.sort((a, b) => (a.active === b.active ? 0 : a.active ? -1 : 1))
+                    ?.sort((a, b) =>
+                      a.active === b.active ? 0 : a.active ? -1 : 1
+                    )
                     ?.map((subjectLine: SubjectLineTemplate) => {
                       return (
                         <SubjectLineItem
@@ -2156,24 +2311,11 @@ export default function CampaignTemplateEditModal({
                         Generate Subject Lines
                       </Button>
                     )}
-                    <Flex align="center" mt="xl">
+                    <Flex align="center" mt="xs">
                       {!addedTheMagic && (
                         <Button
                           disabled={addedTheMagic}
-                          style={{
-                            background:
-                              !currentProject?.ai_researcher_id ||
-                                !currentProject.is_ai_research_personalization_enabled
-                                ? "grey"
-                                : "linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))",
-                            color: "white",
-                            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                            backdropFilter: "blur(10px)",
-                            padding: "10px 20px",
-                            transition:
-                              "background 0.3s ease, box-shadow 0.3s ease",
-                            border: "1px solid grey",
-                          }}
+                          color="teal"
                           leftIcon={<IconSparkles size={"0.9rem"} />}
                           loading={loadingMagicSubjectLine}
                           onClick={async () => {
@@ -2206,18 +2348,6 @@ export default function CampaignTemplateEditModal({
                             }
                           }}
                           fullWidth
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background =
-                              "linear-gradient(135deg, rgba(75,0,130,1), rgba(0,255,255,1))";
-                            e.currentTarget.style.boxShadow =
-                              "0 6px 8px rgba(0, 0, 0, 0.2)";
-                          }}
-                          onMouseLeave={(e) => {
-                            (e.currentTarget.style.background =
-                              "linear-gradient(135deg, rgba(255,255,0,0.8), rgba(0,255,0,0.8), rgba(0,0,255,0.8))"),
-                              (e.currentTarget.style.boxShadow =
-                                "0 4px 6px rgba(0, 0, 0, 0.1)");
-                          }}
                         >
                           Add Magic Subject Line
                           <Tooltip
@@ -2235,13 +2365,7 @@ export default function CampaignTemplateEditModal({
                             withArrow
                             position="top"
                           >
-                            <Text
-                              color="white"
-                              size="xl"
-                              style={{ marginLeft: "30px" }}
-                            >
-                              <IconQuestionMark size={"1rem"} color="white" />
-                            </Text>
+                            <Text color="white" size="xl"></Text>
                           </Tooltip>
                         </Button>
                       )}
@@ -2278,21 +2402,21 @@ export default function CampaignTemplateEditModal({
                     }
 
                     if (linkedinInitialMessageStagingData.length > 0) {
-
                       addSequence(
                         userToken,
                         userData?.client?.id,
                         campaignId,
                         addType,
                         [],
-                        linkedinInitialMessageStagingData.map((message, index) => ({
-                          step_num: 1,
-                          text: message,
-                          assets: [],
-                          angle: message,
-                        }))
+                        linkedinInitialMessageStagingData.map(
+                          (message, index) => ({
+                            step_num: 1,
+                            text: message,
+                            assets: [],
+                            angle: message,
+                          })
+                        )
                       );
-
                     }
 
                     addSequence(
@@ -2301,10 +2425,9 @@ export default function CampaignTemplateEditModal({
                       campaignId,
                       addType,
                       [],
-                      //since we have initial messages, we need to increment step num by 1 here. todo: inline adding messages for initial messages.
                       stagingData[sequenceType]?.map((item: any) => ({
                         ...item,
-                        step_num: item.step_num + 1,
+                        step_num: item.step_num,
                       }))
                     );
 

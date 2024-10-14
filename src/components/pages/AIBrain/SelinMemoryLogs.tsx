@@ -408,19 +408,21 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
   }, [userToken]);
 
   const reversedLogsByLogDate =
-    logs?.filter(log => {
-    if (selectedSessionView) {
-      const id = selectedSessionView.split(":")[0];
-      
-      if (id === "0") {
+    logs
+      ?.filter((log) => {
+        if (selectedSessionView) {
+          const id = selectedSessionView.split(":")[0];
+
+          if (id === "0") {
+            return true;
+          }
+
+          return log.session_id ? +log.session_id === +id : false;
+        }
+
         return true;
-      }
-
-      return log.session_id ? +log.session_id === +id : false;
-    }
-
-    return true;
-  }).sort((a: MemoryLog, b: MemoryLog) => -(a.id - b.id)) ?? [];
+      })
+      .sort((a: MemoryLog, b: MemoryLog) => -(a.id - b.id)) ?? [];
 
   const tagToIconAndColorMap: Record<
     string,
@@ -963,17 +965,19 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
               below, as well as the events that triggered it.
             </Text>
           )}
-          <Select
-            data={[
-              "0: View All Sessions",
-              ...threads
-                .filter((item) => item.status !== "COMPLETE")
-                .map((item) => `${item.id}: ${item.session_name}`),
-            ]}
-            onChange={setSelectedSessionView}
-            value={selectedSessionView}
-            style={{width: "40%"}}
-          ></Select>
+          {isShortTerm && (
+            <Select
+              data={[
+                "0: View All Sessions",
+                ...threads
+                  .filter((item) => item.status !== "COMPLETE")
+                  .map((item) => `${item.id}: ${item.session_name}`),
+              ]}
+              onChange={setSelectedSessionView}
+              value={selectedSessionView}
+              style={{ width: "40%" }}
+            ></Select>
+          )}
         </Box>
         <ActionIcon
           onClick={() => fetchSelixLogs()}
@@ -1010,7 +1014,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
             onMouseUp={async (e) => await handleMouseUpInTimeline(e)}
             style={{ position: "relative" }}
           >
-            <LoadingOverlay visible={loading || loadingSelixLogs} zIndex={2}/>
+            <LoadingOverlay visible={loading || loadingSelixLogs} zIndex={2} />
             {RenderTimeline(
               reversedLogsByLogDate.filter(
                 (log) => !log.is_sub_event && !log.parent_log_id

@@ -901,6 +901,8 @@ export default function CampaignLandingV2(props: PropsType) {
                         size="lg"
                         color={status === "SETUP" ? "orange" : status === "ACTIVE" ? "green" : status === "INACTIVE" ? "red" : "gray"}
                         ml={"sm"}
+                        mr={'sm'}
+                        style={{ overflow: "visible" }}
                       >
                         {status}
                       </Badge>

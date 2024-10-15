@@ -148,6 +148,7 @@ const InlineTemplateAdder: React.FC<InlineAdderProps> = ({
                 messageDraftRichRaw.current = rawValue;
                 messageDraftEmail.current = value;
                 // setManuallyAddedTemplate(value);
+                // setManuallyAddedTemplate(value);
               }}
               value={messageDraftRichRaw.current}
               height={210}
@@ -167,8 +168,9 @@ const InlineTemplateAdder: React.FC<InlineAdderProps> = ({
           ml="auto"
           rightIcon={<IconArrowRight size={"0.9rem"} />}
           onClick={() => {
+
             handleAssetCreation(
-              manuallyAddedTemplate,
+              messageDraftEmail.current || manuallyAddedTemplate,
               sequenceType,
               userData,
               userToken,
@@ -183,6 +185,7 @@ const InlineTemplateAdder: React.FC<InlineAdderProps> = ({
               false,
               setLoadingTemplateSuggestions
             );
+            messageDraftEmail.current = "";
           }}
         >
           Add Message

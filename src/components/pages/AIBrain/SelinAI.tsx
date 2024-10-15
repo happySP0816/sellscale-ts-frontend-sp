@@ -5217,14 +5217,14 @@ const PlannerComponent = ({
 
   useEffect(() => {
     if (openedTaskIndex === tasks.length - 1) {
-      if (taskContainerRef.current) {
-        taskContainerRef.current.scrollTo({
+      setTimeout(() => {
+        taskContainerRef.current?.scrollTo({
           top: taskContainerRef.current.scrollHeight,
           behavior: "smooth",
         });
-      }
+      }, 200);
     }
-  }, [openedTaskIndex]);
+  }, [openedTaskIndex, tasks.length]);
 
   useEffect(() => {
     (async () => {
@@ -5426,9 +5426,8 @@ const PlannerComponent = ({
           style={{ marginTop: "10px" }}
         />
       </Modal>
-      <Collapse in={opened}>
         <ScrollArea
-          h={"55vh"}
+          h={"70vh"}
           scrollHideDelay={4000}
           style={{ overflow: "hidden" }}
           viewportRef={taskContainerRef}
@@ -5451,6 +5450,25 @@ const PlannerComponent = ({
                       CANCELLED: "CANCELLED",
                       BLOCKED: "BLOCKED",
                     };
+        
+            <Droppable isDropDisabled={!isInternal} droppableId="tasks">
+              {(provided) => (
+                <div ref={provided.innerRef} {...provided.droppableProps}>
+                  {tasks
+                    ?.filter(
+                      (task: TaskType, index: number, self: any) =>
+                        task.selix_session_id === currentSessionId
+                    )
+                    .map((task: TaskType, index: number, array) => {
+                      // index = array.length - 1 - index;
+                      const SelixSessionTaskStatus = {
+                        QUEUED: "QUEUED",
+                        IN_PROGRESS: "IN_PROGRESS",
+                        IN_PROGRESS_REVIEW_NEEDED: "IN_PROGRESS_REVIEW_NEEDED",
+                        COMPLETE: "COMPLETE",
+                        CANCELLED: "CANCELLED",
+                        BLOCKED: "BLOCKED",
+                      };
 
                     const statusColors = {
                       [SelixSessionTaskStatus.QUEUED]: "blue",
@@ -5917,7 +5935,6 @@ const PlannerComponent = ({
             </Flex>
           )}
         </ScrollArea>
-      </Collapse>
     </Paper>
   );
 };

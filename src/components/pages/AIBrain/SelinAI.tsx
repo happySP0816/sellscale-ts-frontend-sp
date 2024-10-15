@@ -65,6 +65,7 @@ import {
   IconCloud,
   IconEar,
   IconEdit,
+  IconExternalLink,
   IconEye,
   IconEyeOff,
   IconFile,
@@ -5387,7 +5388,21 @@ const PlannerComponent = ({
           <Text size={"xs"} color="#E25DEE" fw={600}>
             Selix Tasks:{" "}
             <span className="font-medium text-gray-500">
-              This is work that I'll execute. I'll ask you if anything comes up.
+              {currentThread?.memory.campaign_id && currentThread?.memory.campaign_id === currentProject?.id ? (
+                <>
+                  {currentProject.name}{" "}
+                  <a
+                    href={`/campaign_v2/${currentProject.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ marginLeft: "5px" }}
+                  >
+                    <IconExternalLink size="0.8rem" />
+                  </a>
+                </>
+              ) : (
+                "This is work that I'll execute. I'll ask you if anything comes up."
+              )}
             </span>
           </Text>
           {threads.find((thread) => thread.id === currentSessionId)

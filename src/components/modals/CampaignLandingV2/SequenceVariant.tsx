@@ -113,7 +113,7 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
   const currentProject = useRecoilValue(currentProjectState);
 
   const [showEditor, setShowEditor] = useState(false);
-  const bodyRich = useRef<JSONContent | null>(null);
+  const bodyRich = useRef<JSONContent | null | string>(null);
   const bodyRef = useRef<string | null>(null);
   const [textState, setTextState] = useState<string>(text);
 
@@ -159,7 +159,7 @@ const SequenceVariant: React.FC<SequenceVariantProps> = (props) => {
         <Flex align={"center"} gap={"xs"}>
           <IconMessages color="#228be6" size={"0.9rem"} />
           <Text color="gray" fw={500} size={"xs"}>
-            Variant #{index + 1}: {currentStepNum}
+            Variant #{index + 1}:
           </Text>
           <Text fw={600} size={"xs"} ml={"-5px"}>
             {angle}

@@ -147,7 +147,7 @@ const InlineTemplateAdder: React.FC<InlineAdderProps> = ({
               onChange={(value, rawValue) => {
                 messageDraftRichRaw.current = rawValue;
                 messageDraftEmail.current = value;
-                setManuallyAddedTemplate(value);
+                // setManuallyAddedTemplate(value);
               }}
               value={messageDraftRichRaw.current}
               height={210}

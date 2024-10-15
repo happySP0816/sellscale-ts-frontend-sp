@@ -53,6 +53,7 @@ import {
   IconBrowser,
   IconBulb,
   IconCheck,
+  IconCheckbox,
   IconChecklist,
   IconChevronDown,
   IconChevronLeft,
@@ -1287,9 +1288,8 @@ export default function SelinAI() {
 
     if (recording) {
       intervalId = setInterval(() => {
-        const memory = threads.find(
-          (thread) => thread.id === currentSessionId
-        )?.memory;
+        const memory = threads.find((thread) => thread.id === currentSessionId)
+          ?.memory;
         if (
           memory?.strategy_id &&
           promptLengthRef.current > prevPromptLengthRef.current + 80
@@ -1596,11 +1596,21 @@ export default function SelinAI() {
                               onMouseLeave={() => setHoverChat(undefined)}
                             >
                               <Flex align={"center"} justify={"space-between"}>
-                                <Flex
-                                  align={"center"}
-                                  justify={"space-between"}
-                                  w={"100%"}
-                                >
+                                <Flex align={"left"} w={"100%"}>
+                                  <Tooltip
+                                    label="Needs more input"
+                                    withArrow
+                                    position="top"
+                                  >
+                                    <Box mr="xs">
+                                      <IconInfoCircle
+                                        fill="orange"
+                                        color="white"
+                                        size={"1.2rem"}
+                                        className="mt-1"
+                                      />
+                                    </Box>
+                                  </Tooltip>
                                   <Flex align={"center"} gap={"xs"}>
                                     <Text
                                       fw={600}
@@ -1616,36 +1626,13 @@ export default function SelinAI() {
                                         "Brainstorm Session"}
                                     </Text>
                                   </Flex>
-                                  <Tooltip
-                                    label="Needs more input"
-                                    withArrow
-                                    position="top"
-                                  >
-                                    <Box>
-                                      <IconInfoCircle
-                                        fill="orange"
-                                        color="white"
-                                        size={"1.2rem"}
-                                        className="mt-1"
-                                      />
-                                    </Box>
-                                  </Tooltip>
                                 </Flex>
-                              </Flex>
-                              <Flex align={"center"} gap={"xs"}>
-                                <Text size={"xs"} fw={500} color="yellow">
-                                  Need more Input
-                                </Text>
-                                {/* <Text color="gray" size={"xs"}>
-                                    {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}{" "}
-                                    {(thread.status === "ACTIVE" || thread.status === "IN_PROGRESS") && "remaining"}
-                                  </Text> */}
                               </Flex>
                             </Paper>
                           )}
                           {activeThreads
                             .filter((thread) => !thread.is_brainstorm_session)
-                            .map((thread: ThreadType, index) => {
+                            .map((thread: any, index) => {
                               return (
                                 <Paper
                                   key={index}
@@ -1738,42 +1725,12 @@ export default function SelinAI() {
                                         justify={"space-between"}
                                         w={"100%"}
                                       >
-                                        <Flex align={"center"} gap={"xs"}>
-                                          <Text
-                                            fw={600}
-                                            onClick={(e) => {
-                                              // e.stopPropagation();
-                                              // setEditingIndex(index);
-                                              // setEditingSessionName(thread.session_name);
-                                            }}
-                                            // style={{ cursor: "text" }}
-                                            size={"sm"}
-                                          >
-                                            {thread.session_name ||
-                                              "Untitled Session"}
-                                          </Text>
-                                        </Flex>
-                                        <ActionIcon
-                                          variant="transparent"
-                                          // color="blue"
-                                          size={"sm"}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingIndex(index);
-                                            setEditingSessionName(
-                                              thread.session_name
-                                            );
-                                          }}
-                                          style={{ marginLeft: "auto" }}
-                                        >
-                                          <IconEdit size={"1rem"} />
-                                        </ActionIcon>
                                         <Tooltip
                                           label="Needs more input"
                                           withArrow
                                           position="top"
                                         >
-                                          <Box>
+                                          <Box mr="xs">
                                             <IconInfoCircle
                                               fill="orange"
                                               color="white"
@@ -1782,84 +1739,127 @@ export default function SelinAI() {
                                             />
                                           </Box>
                                         </Tooltip>
-                                      </Flex>
-                                    )}
-                                    {!(editingIndex === index) &&
-                                      hoverChat &&
-                                      hoverChat === thread.id && (
-                                        <>
+                                        <Flex align={"center"} gap={"xs"}>
+                                          <Tooltip label={thread.session_name}>
+                                            <Text
+                                              fw={600}
+                                              onClick={(e) => {
+                                                // e.stopPropagation();
+                                                // setEditingIndex(index);
+                                                // setEditingSessionName(thread.session_name);
+                                              }}
+                                              // style={{ cursor: "text" }}
+                                              size={"sm"}
+                                            >
+                                              {thread.session_name.substring(
+                                                0,
+                                                27
+                                              ) +
+                                                (thread.session_name.length > 27
+                                                  ? "..."
+                                                  : "") || "Untitled Session"}
+                                            </Text>
+                                          </Tooltip>
+                                        </Flex>
+                                        <Tooltip
+                                          label="Edit session name"
+                                          withArrow
+                                          position="top"
+                                        >
                                           <ActionIcon
                                             variant="transparent"
-                                            color="red"
+                                            // color="blue"
                                             size={"sm"}
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              setThreads((prevThreads) =>
-                                                prevThreads.map((prevThread) =>
-                                                  prevThread.id === thread.id
-                                                    ? {
-                                                        ...prevThread,
-                                                        status: "CANCELLED",
-                                                      }
-                                                    : prevThread
-                                                )
+                                              setEditingIndex(index);
+                                              setEditingSessionName(
+                                                thread.session_name
                                               );
-                                              fetch(
-                                                `${API_URL}/selix/delete_session`,
-                                                {
-                                                  method: "DELETE",
-                                                  headers: {
-                                                    "Content-Type":
-                                                      "application/json",
-                                                    Authorization: `Bearer ${userToken}`,
-                                                  },
-                                                  body: JSON.stringify({
-                                                    session_id: thread.id,
-                                                  }),
-                                                }
-                                              )
-                                                .then((response) => {
-                                                  if (!response.ok) {
-                                                    return response
-                                                      .json()
-                                                      .then((data) => {
-                                                        throw new Error(
-                                                          data.error ||
-                                                            "Failed to delete session"
-                                                        );
-                                                      });
-                                                  }
-                                                  return response.json();
-                                                })
-                                                .then((data) => {
-                                                  console.log(
-                                                    "Session deleted:",
-                                                    data.message
-                                                  );
-                                                })
-                                                .catch((error) => {
-                                                  console.error(
-                                                    "Error deleting session:",
-                                                    error
-                                                  );
-                                                });
                                             }}
+                                            style={{ marginLeft: "auto" }}
                                           >
-                                            {thread.status !== "CANCELLED" && (
-                                              <IconArchive size={"1rem"} />
-                                            )}
+                                            <IconEdit size={"1rem"} />
                                           </ActionIcon>
+                                        </Tooltip>
+                                      </Flex>
+                                    )}
+                                    {thread.status !== "COMPLETE" &&
+                                      thread.status !== "CANCELLED" && (
+                                        <>
+                                          <Tooltip
+                                            label="Archive session"
+                                            withArrow
+                                            position="top"
+                                          >
+                                            <ActionIcon
+                                              variant="transparent"
+                                              color="red"
+                                              size={"sm"}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setThreads((prevThreads) =>
+                                                  prevThreads.map(
+                                                    (prevThread) =>
+                                                      prevThread.id ===
+                                                      thread.id
+                                                        ? {
+                                                            ...prevThread,
+                                                            status: "CANCELLED",
+                                                          }
+                                                        : prevThread
+                                                  )
+                                                );
+                                                fetch(
+                                                  `${API_URL}/selix/delete_session`,
+                                                  {
+                                                    method: "DELETE",
+                                                    headers: {
+                                                      "Content-Type":
+                                                        "application/json",
+                                                      Authorization: `Bearer ${userToken}`,
+                                                    },
+                                                    body: JSON.stringify({
+                                                      session_id: thread.id,
+                                                    }),
+                                                  }
+                                                )
+                                                  .then((response) => {
+                                                    if (!response.ok) {
+                                                      return response
+                                                        .json()
+                                                        .then((data) => {
+                                                          throw new Error(
+                                                            data.error ||
+                                                              "Failed to delete session"
+                                                          );
+                                                        });
+                                                    }
+                                                    return response.json();
+                                                  })
+                                                  .then((data) => {
+                                                    console.log(
+                                                      "Session deleted:",
+                                                      data.message
+                                                    );
+                                                  })
+                                                  .catch((error) => {
+                                                    console.error(
+                                                      "Error deleting session:",
+                                                      error
+                                                    );
+                                                  });
+                                              }}
+                                            >
+                                              {thread.status !== "CANCELLED" &&
+                                                thread.status !==
+                                                  "COMPLETE" && (
+                                                  <IconArchive size={"1rem"} />
+                                                )}
+                                            </ActionIcon>
+                                          </Tooltip>
                                         </>
                                       )}
-                                  </Flex>
-                                  <Flex align={"center"} gap={"xs"}>
-                                    <Text size={"xs"} fw={500} color="yellow">
-                                      Need more Input
-                                    </Text>
-                                    {/* <Text color="gray" size={"xs"}>
-                                    {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}{" "}
-                                    {(thread.status === "ACTIVE" || thread.status === "IN_PROGRESS") && "remaining"}
-                                  </Text> */}
                                   </Flex>
                                 </Paper>
                               );
@@ -1960,42 +1960,12 @@ export default function SelinAI() {
                                       justify={"space-between"}
                                       w={"100%"}
                                     >
-                                      <Flex align={"center"} gap={"xs"}>
-                                        <Text
-                                          fw={600}
-                                          onClick={(e) => {
-                                            // e.stopPropagation();
-                                            // setEditingIndex(index);
-                                            // setEditingSessionName(thread.session_name);
-                                          }}
-                                          // style={{ cursor: "text" }}
-                                          size={"sm"}
-                                        >
-                                          {thread.session_name ||
-                                            "Untitled Session"}
-                                        </Text>
-                                      </Flex>
-                                      <ActionIcon
-                                        variant="transparent"
-                                        // color="blue"
-                                        size={"sm"}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setEditingIndex(index);
-                                          setEditingSessionName(
-                                            thread.session_name
-                                          );
-                                        }}
-                                        style={{ marginLeft: "auto" }}
-                                      >
-                                        <IconEdit size={"1rem"} />
-                                      </ActionIcon>
                                       <Tooltip
                                         label="X more inputs"
                                         withArrow
                                         position="top"
                                       >
-                                        <Box>
+                                        <Box mr="xs">
                                           <IconHourglassLow
                                             fill="purple"
                                             color="white"
@@ -2004,12 +1974,58 @@ export default function SelinAI() {
                                           />
                                         </Box>
                                       </Tooltip>
+                                      <Flex align={"center"} gap={"xs"}>
+                                        <Tooltip label={thread.session_name}>
+                                          <Text
+                                            fw={600}
+                                            onClick={(e) => {
+                                              // e.stopPropagation();
+                                              // setEditingIndex(index);
+                                              // setEditingSessionName(thread.session_name);
+                                            }}
+                                            // style={{ cursor: "text" }}
+                                            size={"sm"}
+                                          >
+                                            {thread.session_name.substring(
+                                              0,
+                                              27
+                                            ) +
+                                              (thread.session_name.length > 27
+                                                ? "..."
+                                                : "") || "Untitled Session"}
+                                          </Text>
+                                        </Tooltip>
+                                      </Flex>
+                                      <Tooltip
+                                        label="Edit session name"
+                                        withArrow
+                                        position="top"
+                                      >
+                                        <ActionIcon
+                                          variant="transparent"
+                                          // color="blue"
+                                          size={"sm"}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingIndex(index);
+                                            setEditingSessionName(
+                                              thread.session_name
+                                            );
+                                          }}
+                                          style={{ marginLeft: "auto" }}
+                                        >
+                                          <IconEdit size={"1rem"} />
+                                        </ActionIcon>
+                                      </Tooltip>
                                     </Flex>
                                   )}
-                                  {!(editingIndex === index) &&
-                                    hoverChat &&
-                                    hoverChat === thread.id && (
-                                      <>
+                                  {
+                                    <>
+                                      <Tooltip
+                                        label="Archive session"
+                                        withArrow
+                                        position="top"
+                                      >
                                         <ActionIcon
                                           variant="transparent"
                                           color="red"
@@ -2067,21 +2083,14 @@ export default function SelinAI() {
                                               });
                                           }}
                                         >
-                                          {thread.status !== "CANCELLED" && (
-                                            <IconArchive size={"1rem"} />
-                                          )}
+                                          {thread.status !== "CANCELLED" &&
+                                            thread.status !== "COMPLETE" && (
+                                              <IconArchive size={"1rem"} />
+                                            )}
                                         </ActionIcon>
-                                      </>
-                                    )}
-                                </Flex>
-                                <Flex align={"center"} gap={"xs"}>
-                                  <Text size={"xs"} fw={500} color="grape">
-                                    In progress
-                                  </Text>
-                                  {/* <Text color="gray" size={"xs"}>
-                                    {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}{" "}
-                                    {(thread.status === "ACTIVE" || thread.status === "IN_PROGRESS") && "remaining"}
-                                  </Text> */}
+                                      </Tooltip>
+                                    </>
+                                  }
                                 </Flex>
                               </Paper>
                             );
@@ -2202,41 +2211,63 @@ export default function SelinAI() {
                                           />
                                         </Flex>
                                       ) : (
-                                        <Flex align={"center"} gap={"xs"}>
-                                          <Text
-                                            fw={600}
-                                            onClick={(e) => {
-                                              // e.stopPropagation();
-                                              // setEditingIndex(index);
-                                              // setEditingSessionName(thread.session_name);
-                                            }}
-                                            // style={{ cursor: "text" }}
-                                            size={"sm"}
+                                        <Flex align={"center"}>
+                                          <Tooltip
+                                            label="Needs more input"
+                                            withArrow
+                                            position="top"
                                           >
-                                            {thread.session_name ||
-                                              "Untitled Session"}
-                                          </Text>
-                                          <ActionIcon
-                                            variant="transparent"
-                                            // color="blue"
-                                            size={"sm"}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setEditingIndex(index);
-                                              setEditingSessionName(
-                                                thread.session_name
-                                              );
-                                            }}
-                                            style={{ marginLeft: "auto" }}
-                                          >
-                                            <IconEdit size={"1rem"} />
-                                          </ActionIcon>
+                                            <Box mr="xs">
+                                              <IconCircleCheck
+                                                color="green"
+                                                size={"1.2rem"}
+                                              />
+                                            </Box>
+                                          </Tooltip>
+                                          <Tooltip label={thread.session_name}>
+                                            <Text
+                                              fw={600}
+                                              onClick={(e) => {
+                                                // e.stopPropagation();
+                                                // setEditingIndex(index);
+                                                // setEditingSessionName(thread.session_name);
+                                              }}
+                                              // style={{ cursor: "text" }}
+                                              size={"sm"}
+                                            >
+                                              {thread.session_name.substring(
+                                                0,
+                                                27
+                                              ) +
+                                                (thread.session_name.length > 27
+                                                  ? "..."
+                                                  : "") || "Untitled Session"}
+                                            </Text>
+                                          </Tooltip>
                                         </Flex>
                                       )}
-                                      {!(editingIndex === index) &&
-                                        hoverChat &&
-                                        hoverChat === thread.id && (
-                                          <>
+                                      <ActionIcon
+                                        variant="transparent"
+                                        ml={"auto"}
+                                        size={"sm"}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingIndex(index);
+                                          setEditingSessionName(
+                                            thread.session_name
+                                          );
+                                        }}
+                                        style={{ marginLeft: "auto" }}
+                                      >
+                                        <IconEdit size={"1rem"} />
+                                      </ActionIcon>
+                                      {
+                                        <>
+                                          <Tooltip
+                                            label="Archive session"
+                                            withArrow
+                                            position="top"
+                                          >
                                             <ActionIcon
                                               variant="transparent"
                                               color="red"
@@ -2296,13 +2327,15 @@ export default function SelinAI() {
                                                   });
                                               }}
                                             >
-                                              {thread.status !==
-                                                "CANCELLED" && (
-                                                <IconArchive size={"1rem"} />
-                                              )}
+                                              {thread.status !== "CANCELLED" &&
+                                                thread.status !==
+                                                  "COMPLETE" && (
+                                                  <IconArchive size={"1rem"} />
+                                                )}
                                             </ActionIcon>
-                                          </>
-                                        )}
+                                          </Tooltip>
+                                        </>
+                                      }
                                     </Flex>
                                     <Flex align={"center"} gap={"xs"}>
                                       {thread.status === "ACTIVE" && (
@@ -2658,8 +2691,10 @@ const SegmentChat = (props: any) => {
   const [clientMemoryState, setClientMemoryState] = useState<
     string | undefined
   >(props.memory?.memory_line);
-  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
-    useState<any>(props.memory?.memory_line_time_updated);
+  const [
+    clientMemoryStateUpdatedTime,
+    setClientMemoryStateUpdatedTime,
+  ] = useState<any>(props.memory?.memory_line_time_updated);
   const [memoryStateChanged, setMemoryStateChanged] = useState(false);
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
@@ -5144,8 +5179,9 @@ const PlannerComponent = ({
   const [opened, { toggle }] = useDisclosure(true);
   const taskContainerRef = useRef<HTMLDivElement>(null);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
   const [editingTask, setEditingTask] = useState<Number | null>(null);
@@ -5934,8 +5970,9 @@ const TaskRenderer = ({
   segment?: TransformedSegment | undefined;
   handleStrategySubmit: () => void;
 }) => {
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const sequencesV2Ref = useRef(null);
   const [lastLoadedProjectId, setLastLoadedProjectId] = useState<number>(-1);
   const [sequences, setSequences] = useState<any[]>([]);
@@ -6258,9 +6295,8 @@ const SelinStrategy = ({
   currentSessionId: Number | null;
   counter: Number;
 }) => {
-  const memory = threads.find(
-    (thread) => thread.id === currentSessionId
-  )?.memory;
+  const memory = threads.find((thread) => thread.id === currentSessionId)
+    ?.memory;
 
   const hackedSubmit = () => {
     handleSubmit &&

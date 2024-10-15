@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import {
   Drawer,
   Button,
@@ -55,7 +55,7 @@ import { API_URL } from "@constants/data";
 import { deterministicMantineColor } from "@utils/requests/utils";
 import { showNotification } from "@mantine/notifications";
 import { socket } from "../../../components/App";
-import { ThreadType } from "./SelinAI";
+import { PlannerComponent, SelinContext, ThreadType } from "./SelinAI";
 import { useQuery } from "@tanstack/react-query";
 import { ex } from "@fullcalendar/core/internal-common";
 import { isHtmlElement } from "react-router-dom/dist/dom";
@@ -74,6 +74,7 @@ interface MemoryLog {
   processing_status_description?: string;
   parent_log_id?: number;
   is_sub_event?: boolean;
+  is_supervisor: boolean;
 }
 
 interface MemoryLogsProps {
@@ -101,7 +102,9 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
   });
   const [loading, setLoading] = useState(false);
   const selectRef = useRef<HTMLInputElement>(null);
+
   const [loadingSelixLogs, setLoadingSelixLogs] = useState(false);
+
   const [isEditing, setIsEditing] = useState(false);
   const [editedDescription, setEditedDescription] = useState("");
   const [editingConnectedSession, setEditingConnectedSession] = useState(false);
@@ -113,6 +116,8 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
   const [selectedSessionView, setSelectedSessionView] = useState<string | null>(
     "0: View All Sessions"
   );
+
+  const value: any = useContext(SelinContext);
 
   const updateMemoryLogSessionId = async (
     selixLogId: number,
@@ -175,7 +180,13 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
         );
       } else {
         setSelectedLog(
-          result.logs.reverse().find((log: MemoryLog) => true) || null
+          result.logs.reverse().find((log: MemoryLog) => {
+            if (isShortTerm) {
+              return !log.is_supervisor;
+            }
+
+            return log.is_supervisor;
+          }) || null
         );
       }
 
@@ -225,6 +236,31 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
       console.log("Log created successfully:", result);
       refetch(); // Refresh logs after creation
       setCreateLogOpened(false); // Close the create log form
+    } catch (error) {
+      console.error("Error creating log:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createSelixSupervisorLog = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/selix/add_supervisor_log`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create log");
+      }
+
+      const result = await response.json();
+      console.log("Log created successfully:", result);
+      refetch(); // Refresh logs after creation
     } catch (error) {
       console.error("Error creating log:", error);
     } finally {
@@ -1017,13 +1053,25 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
           >
             <LoadingOverlay visible={loading || loadingSelixLogs} zIndex={2} />
             {RenderTimeline(
-              reversedLogsByLogDate.filter(
-                (log) => !log.is_sub_event && !log.parent_log_id
-              )
+              reversedLogsByLogDate
+                .filter((log) => !log.is_sub_event && !log.parent_log_id)
+                .filter((log) => {
+                  if (isShortTerm) {
+                    return !log.is_supervisor;
+                  } else {
+                    return log.is_supervisor;
+                  }
+                })
             )}
           </Card>
           <Button
-            onClick={() => setCreateLogOpened(true)}
+            onClick={async () => {
+              if (isShortTerm) {
+                setCreateLogOpened(true);
+              } else {
+                await createSelixSupervisorLog();
+              }
+            }}
             size="xs"
             color="blue"
             mt="md"
@@ -1034,14 +1082,6 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
           {createLogOpened && (
             <Card withBorder mt="md">
               <Box mt="md">
-                {/* <TextInput
-                    label="Title"
-                    value={newLog.title}
-                    onChange={(e) =>
-                      setNewLog({ ...newLog, title: e.currentTarget.value })
-                    }
-                    mb="sm"
-                  /> */}
                 <Select
                   label="Tag"
                   value={newLog.tag}
@@ -1133,7 +1173,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                     </Text>
                   </Box>
                   <Flex>
-                    {selectedLog.session_name && (
+                    {selectedLog.session_name && isShortTerm && (
                       <Box>
                         <Flex align="center">
                           <Text size="10px" color="gray">
@@ -1248,7 +1288,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                         )}
                       </Box>
                     )}
-                    {selectedLog.processing_status ? (
+                    {selectedLog.processing_status && isShortTerm ? (
                       <HoverCard width={400} shadow="md">
                         <HoverCard.Target>
                           <Box>
@@ -1301,15 +1341,17 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                   </Flex>
                 </Box>
                 <Box w="30%">
-                  <Badge
-                    color={deterministicMantineColor(selectedLog.tag)}
-                    variant="filled"
-                    size="sm"
-                    ml="auto"
-                  >
-                    {tagToIconAndColorMap[selectedLog.tag]?.sub ||
-                      selectedLog.tag}
-                  </Badge>
+                  {isShortTerm && (
+                    <Badge
+                      color={deterministicMantineColor(selectedLog.tag)}
+                      variant="filled"
+                      size="sm"
+                      ml="auto"
+                    >
+                      {tagToIconAndColorMap[selectedLog.tag]?.sub ||
+                        selectedLog.tag}
+                    </Badge>
+                  )}
                   <Text size="10px" color="gray">
                     {selectedLog.json_data &&
                     JSON.parse(selectedLog.json_data)?.email_source
@@ -1327,6 +1369,19 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                   __html: selectedLog.metadata.replaceAll("\n", "<br />"),
                 }}
               />
+              {selectedLog.tag === "MEMORY_METADATA_SAVED" &&
+                logs &&
+                !selectedLog.is_supervisor && (
+                  <PlannerComponent
+                    setTasks={value.setTasks}
+                    counter={value.counter}
+                    messagesLength={value.messagesLength}
+                    threads={threads}
+                    tasks={value.tasks}
+                    currentSessionId={selectedLog.session_id}
+                    handleStrategySubmit={value.handleSubmit}
+                  />
+                )}
               {selectedLog.tag !== "SUPPORT_THREAD_SLACK" &&
                 selectedLog.tag !== "SUPPORT_THREAD_EMAIL" &&
                 selectedLog.tag !==
@@ -1381,6 +1436,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                   )}
                 </Card>
               )}
+
               <Flex>
                 {isEditing && (
                   <Button
@@ -1465,19 +1521,21 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                       ))}
                   </Box>
                   <Box w="100%">
-                    <Button
-                      leftIcon={<IconHistory size={16} />}
-                      color="red"
-                      variant="outline"
-                      size="xs"
-                      mt="lg"
-                      onClick={() => {
-                        onRevert(selectedLog.description);
-                        setOpen(false);
-                      }}
-                    >
-                      Revert to this Memory
-                    </Button>
+                    {isShortTerm && (
+                      <Button
+                        leftIcon={<IconHistory size={16} />}
+                        color="red"
+                        variant="outline"
+                        size="xs"
+                        mt="lg"
+                        onClick={() => {
+                          onRevert(selectedLog.description);
+                          setOpen(false);
+                        }}
+                      >
+                        Revert to this Memory
+                      </Button>
+                    )}
                   </Box>
                 </>
               )}

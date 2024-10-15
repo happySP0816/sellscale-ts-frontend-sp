@@ -95,6 +95,7 @@ import SlackLogo from "@assets/images/slack-logo.png";
 import { IconClock24, IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
 import {
+  createContext,
   Dispatch,
   Fragment,
   Key,
@@ -162,6 +163,8 @@ import SelixMemoryLogs from "./SelinMemoryLogs";
 import { Draggable } from "react-beautiful-dnd";
 import { isInt } from "@fullcalendar/core/internal";
 import { Calendar, TimeInput } from "@mantine/dates";
+
+export const SelinContext = createContext({});
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
@@ -1289,8 +1292,9 @@ export default function SelinAI() {
 
     if (recording) {
       intervalId = setInterval(() => {
-        const memory = threads.find((thread) => thread.id === currentSessionId)
-          ?.memory;
+        const memory = threads.find(
+          (thread) => thread.id === currentSessionId
+        )?.memory;
         if (
           memory?.strategy_id &&
           promptLengthRef.current > prevPromptLengthRef.current + 80
@@ -1598,35 +1602,19 @@ export default function SelinAI() {
                             >
                               <Flex align={"center"} justify={"space-between"}>
                                 <Flex align={"left"} w={"100%"}>
-                                  <Tooltip
-                                    label="Needs more input"
-                                    withArrow
-                                    position="top"
+                                  <Text
+                                    fw={600}
+                                    onClick={(e) => {
+                                      // e.stopPropagation();
+                                      // setEditingIndex(index);
+                                      // setEditingSessionName(thread.session_name);
+                                    }}
+                                    // style={{ cursor: "text" }}
+                                    size={"sm"}
                                   >
-                                    <Box mr="xs">
-                                      <IconInfoCircle
-                                        fill="orange"
-                                        color="white"
-                                        size={"1.2rem"}
-                                        className="mt-1"
-                                      />
-                                    </Box>
-                                  </Tooltip>
-                                  <Flex align={"center"} gap={"xs"}>
-                                    <Text
-                                      fw={600}
-                                      onClick={(e) => {
-                                        // e.stopPropagation();
-                                        // setEditingIndex(index);
-                                        // setEditingSessionName(thread.session_name);
-                                      }}
-                                      // style={{ cursor: "text" }}
-                                      size={"sm"}
-                                    >
-                                      {brainstorm_thread.session_name ||
-                                        "Brainstorm Session"}
-                                    </Text>
-                                  </Flex>
+                                    {brainstorm_thread.session_name ||
+                                      "Brainstorm Session"}
+                                  </Text>
                                 </Flex>
                               </Flex>
                             </Paper>
@@ -1867,235 +1855,237 @@ export default function SelinAI() {
                             })}
                         </Stack>
                         <Stack spacing={"xs"}>
-                          {needInputThreads.map((thread: ThreadType, index) => {
-                            return (
-                              <Paper
-                                key={index}
-                                withBorder
-                                radius={"sm"}
-                                p={"sm"}
-                                w={"100%"}
-                                style={{
-                                  // cursor: "grab",
-                                  // display: "inline-block",
-                                  // minWidth: "350px",
-                                  backgroundColor:
+                          {needInputThreads
+                            .filter((thread) => !thread.is_brainstorm_session)
+                            .map((thread: ThreadType, index) => {
+                              return (
+                                <Paper
+                                  key={index}
+                                  withBorder
+                                  radius={"sm"}
+                                  p={"sm"}
+                                  w={"100%"}
+                                  style={{
+                                    // cursor: "grab",
+                                    // display: "inline-block",
+                                    // minWidth: "350px",
+                                    backgroundColor:
+                                      sessionIDRef.current === thread.id
+                                        ? "#d0f0c0"
+                                        : "white", // Highlight if current thread
+                                    borderColor:
+                                      sessionIDRef.current === thread.id
+                                        ? "#00796b"
+                                        : "#e6ebf0", // Change border color if current thread
+                                  }}
+                                  className={`transition duration-300 ease-in-out transform ${
                                     sessionIDRef.current === thread.id
-                                      ? "#d0f0c0"
-                                      : "white", // Highlight if current thread
-                                  borderColor:
-                                    sessionIDRef.current === thread.id
-                                      ? "#00796b"
-                                      : "#e6ebf0", // Change border color if current thread
-                                }}
-                                className={`transition duration-300 ease-in-out transform ${
-                                  sessionIDRef.current === thread.id
-                                    ? "scale-105 shadow-2xl"
-                                    : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
-                                }`}
-                                onClick={() => {
-                                  getMessages(thread.thread_id, thread.id);
-                                  toggle();
-                                }}
-                                onMouseEnter={() => setHoverChat(thread.id)}
-                                onMouseLeave={() => setHoverChat(undefined)}
-                              >
-                                <Flex
-                                  align={"center"}
-                                  justify={"space-between"}
+                                      ? "scale-105 shadow-2xl"
+                                      : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
+                                  }`}
+                                  onClick={() => {
+                                    getMessages(thread.thread_id, thread.id);
+                                    toggle();
+                                  }}
+                                  onMouseEnter={() => setHoverChat(thread.id)}
+                                  onMouseLeave={() => setHoverChat(undefined)}
                                 >
-                                  {editingIndex === index ? (
-                                    <Flex
-                                      align={"center"}
-                                      gap={"sm"}
-                                      onClick={(e) => e.stopPropagation()}
-                                      w={"100%"}
-                                    >
-                                      <TextInput
-                                        value={editingSessionName}
-                                        onChange={(e) =>
-                                          setEditingSessionName(
-                                            e.currentTarget.value
-                                          )
-                                        }
-                                        onBlur={() =>
-                                          editSession(
-                                            thread.id,
-                                            editingSessionName
-                                          )
-                                        }
-                                        onKeyDown={(e) => {
-                                          if (e.key === "Enter") {
+                                  <Flex
+                                    align={"center"}
+                                    justify={"space-between"}
+                                  >
+                                    {editingIndex === index ? (
+                                      <Flex
+                                        align={"center"}
+                                        gap={"sm"}
+                                        onClick={(e) => e.stopPropagation()}
+                                        w={"100%"}
+                                      >
+                                        <TextInput
+                                          value={editingSessionName}
+                                          onChange={(e) =>
+                                            setEditingSessionName(
+                                              e.currentTarget.value
+                                            )
+                                          }
+                                          onBlur={() =>
                                             editSession(
                                               thread.id,
                                               editingSessionName
-                                            );
+                                            )
                                           }
-                                        }}
-                                        style={{
-                                          width: `${
-                                            editingSessionName.length + 2
-                                          }ch`,
-                                        }}
-                                        rightSection={
-                                          <ActionIcon
-                                            variant="transparent"
-                                            color="green"
-                                            size={"sm"}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
+                                          onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
                                               editSession(
                                                 thread.id,
                                                 editingSessionName
                                               );
-                                            }}
-                                          >
-                                            <IconCircleCheck size={"xl"} />
-                                          </ActionIcon>
-                                        }
-                                      />
-                                    </Flex>
-                                  ) : (
-                                    <Flex
-                                      align={"center"}
-                                      justify={"space-between"}
-                                      w={"100%"}
-                                    >
-                                      <Tooltip
-                                        label="X more inputs"
-                                        withArrow
-                                        position="top"
+                                            }
+                                          }}
+                                          style={{
+                                            width: `${
+                                              editingSessionName.length + 2
+                                            }ch`,
+                                          }}
+                                          rightSection={
+                                            <ActionIcon
+                                              variant="transparent"
+                                              color="green"
+                                              size={"sm"}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                editSession(
+                                                  thread.id,
+                                                  editingSessionName
+                                                );
+                                              }}
+                                            >
+                                              <IconCircleCheck size={"xl"} />
+                                            </ActionIcon>
+                                          }
+                                        />
+                                      </Flex>
+                                    ) : (
+                                      <Flex
+                                        align={"center"}
+                                        justify={"space-between"}
+                                        w={"100%"}
                                       >
-                                        <Box mr="xs">
-                                          <IconHourglassLow
-                                            fill="purple"
-                                            color="white"
-                                            size={"1.2rem"}
-                                            className="mt-1"
-                                          />
-                                        </Box>
-                                      </Tooltip>
-                                      <Flex align={"center"} gap={"xs"}>
-                                        <Tooltip label={thread.session_name}>
-                                          <Text
-                                            fw={600}
-                                            onClick={(e) => {
-                                              // e.stopPropagation();
-                                              // setEditingIndex(index);
-                                              // setEditingSessionName(thread.session_name);
-                                            }}
-                                            // style={{ cursor: "text" }}
+                                        <Tooltip
+                                          label="X more inputs"
+                                          withArrow
+                                          position="top"
+                                        >
+                                          <Box mr="xs">
+                                            <IconHourglassLow
+                                              fill="purple"
+                                              color="white"
+                                              size={"1.2rem"}
+                                              className="mt-1"
+                                            />
+                                          </Box>
+                                        </Tooltip>
+                                        <Flex align={"center"} gap={"xs"}>
+                                          <Tooltip label={thread.session_name}>
+                                            <Text
+                                              fw={600}
+                                              onClick={(e) => {
+                                                // e.stopPropagation();
+                                                // setEditingIndex(index);
+                                                // setEditingSessionName(thread.session_name);
+                                              }}
+                                              // style={{ cursor: "text" }}
+                                              size={"sm"}
+                                            >
+                                              {thread.session_name.substring(
+                                                0,
+                                                27
+                                              ) +
+                                                (thread.session_name.length > 27
+                                                  ? "..."
+                                                  : "") || "Untitled Session"}
+                                            </Text>
+                                          </Tooltip>
+                                        </Flex>
+                                        <Tooltip
+                                          label="Edit session name"
+                                          withArrow
+                                          position="top"
+                                        >
+                                          <ActionIcon
+                                            variant="transparent"
+                                            // color="blue"
                                             size={"sm"}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setEditingIndex(index);
+                                              setEditingSessionName(
+                                                thread.session_name
+                                              );
+                                            }}
+                                            style={{ marginLeft: "auto" }}
                                           >
-                                            {thread.session_name.substring(
-                                              0,
-                                              27
-                                            ) +
-                                              (thread.session_name.length > 27
-                                                ? "..."
-                                                : "") || "Untitled Session"}
-                                          </Text>
+                                            <IconEdit size={"1rem"} />
+                                          </ActionIcon>
                                         </Tooltip>
                                       </Flex>
-                                      <Tooltip
-                                        label="Edit session name"
-                                        withArrow
-                                        position="top"
-                                      >
-                                        <ActionIcon
-                                          variant="transparent"
-                                          // color="blue"
-                                          size={"sm"}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingIndex(index);
-                                            setEditingSessionName(
-                                              thread.session_name
-                                            );
-                                          }}
-                                          style={{ marginLeft: "auto" }}
+                                    )}
+                                    {
+                                      <>
+                                        <Tooltip
+                                          label="Archive session"
+                                          withArrow
+                                          position="top"
                                         >
-                                          <IconEdit size={"1rem"} />
-                                        </ActionIcon>
-                                      </Tooltip>
-                                    </Flex>
-                                  )}
-                                  {
-                                    <>
-                                      <Tooltip
-                                        label="Archive session"
-                                        withArrow
-                                        position="top"
-                                      >
-                                        <ActionIcon
-                                          variant="transparent"
-                                          color="red"
-                                          size={"sm"}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setThreads((prevThreads) =>
-                                              prevThreads.map((prevThread) =>
-                                                prevThread.id === thread.id
-                                                  ? {
-                                                      ...prevThread,
-                                                      status: "CANCELLED",
-                                                    }
-                                                  : prevThread
-                                              )
-                                            );
-                                            fetch(
-                                              `${API_URL}/selix/delete_session`,
-                                              {
-                                                method: "DELETE",
-                                                headers: {
-                                                  "Content-Type":
-                                                    "application/json",
-                                                  Authorization: `Bearer ${userToken}`,
-                                                },
-                                                body: JSON.stringify({
-                                                  session_id: thread.id,
-                                                }),
-                                              }
-                                            )
-                                              .then((response) => {
-                                                if (!response.ok) {
-                                                  return response
-                                                    .json()
-                                                    .then((data) => {
-                                                      throw new Error(
-                                                        data.error ||
-                                                          "Failed to delete session"
-                                                      );
-                                                    });
+                                          <ActionIcon
+                                            variant="transparent"
+                                            color="red"
+                                            size={"sm"}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setThreads((prevThreads) =>
+                                                prevThreads.map((prevThread) =>
+                                                  prevThread.id === thread.id
+                                                    ? {
+                                                        ...prevThread,
+                                                        status: "CANCELLED",
+                                                      }
+                                                    : prevThread
+                                                )
+                                              );
+                                              fetch(
+                                                `${API_URL}/selix/delete_session`,
+                                                {
+                                                  method: "DELETE",
+                                                  headers: {
+                                                    "Content-Type":
+                                                      "application/json",
+                                                    Authorization: `Bearer ${userToken}`,
+                                                  },
+                                                  body: JSON.stringify({
+                                                    session_id: thread.id,
+                                                  }),
                                                 }
-                                                return response.json();
-                                              })
-                                              .then((data) => {
-                                                console.log(
-                                                  "Session deleted:",
-                                                  data.message
-                                                );
-                                              })
-                                              .catch((error) => {
-                                                console.error(
-                                                  "Error deleting session:",
-                                                  error
-                                                );
-                                              });
-                                          }}
-                                        >
-                                          {thread.status !== "CANCELLED" &&
-                                            thread.status !== "COMPLETE" && (
-                                              <IconArchive size={"1rem"} />
-                                            )}
-                                        </ActionIcon>
-                                      </Tooltip>
-                                    </>
-                                  }
-                                </Flex>
-                              </Paper>
-                            );
-                          })}
+                                              )
+                                                .then((response) => {
+                                                  if (!response.ok) {
+                                                    return response
+                                                      .json()
+                                                      .then((data) => {
+                                                        throw new Error(
+                                                          data.error ||
+                                                            "Failed to delete session"
+                                                        );
+                                                      });
+                                                  }
+                                                  return response.json();
+                                                })
+                                                .then((data) => {
+                                                  console.log(
+                                                    "Session deleted:",
+                                                    data.message
+                                                  );
+                                                })
+                                                .catch((error) => {
+                                                  console.error(
+                                                    "Error deleting session:",
+                                                    error
+                                                  );
+                                                });
+                                            }}
+                                          >
+                                            {thread.status !== "CANCELLED" &&
+                                              thread.status !== "COMPLETE" && (
+                                                <IconArchive size={"1rem"} />
+                                              )}
+                                          </ActionIcon>
+                                        </Tooltip>
+                                      </>
+                                    }
+                                  </Flex>
+                                </Paper>
+                              );
+                            })}
                         </Stack>
                       </Stack>
 
@@ -2478,59 +2468,73 @@ export default function SelinAI() {
                   });
                 }}
               >
-                <SegmentChat
-                  setIntendedTaskChange={setIntendedTaskChange}
-                  setAttachedFile={setAttachedFile}
-                  attachedFile={attachedFile}
-                  threads={threads}
-                  deviceIDRef={deviceIDRef}
-                  dropzoneRef={dropzoneRef}
-                  suggestedFirstMessage={suggestedFirstMessage}
-                  setSuggestionHidden={setSuggestionHidden}
-                  suggestionHidden={suggestionHidden}
-                  suggestion={suggestion}
-                  handleSubmit={handleSubmit}
-                  attachedInternalTask={attachedInternalTask}
-                  setAttachedInternalTask={setAttachedInternalTask}
-                  prompt={prompt}
-                  promptRef={promptRef}
-                  setPrompt={setPrompt}
-                  setSegment={setSegment}
-                  messages={messages}
-                  setMessages={setMessages}
-                  segment={segment}
-                  setAIType={setAIType}
-                  recording={recording}
-                  setRecording={setRecording}
-                  aiType={aiType}
-                  currentSessionId={sessionIDRef.current}
-                  memoryState={
-                    threads.find((thread) => thread.id === sessionIDRef.current)
-                      ?.memory.memory_state
-                  }
-                  memory={
-                    threads.find((thread) => thread.id === sessionIDRef.current)
-                      ?.memory
-                  }
-                  // generateResponse={generateResponse}
-                  // chatContent={chatContent}
-                  // setChatContent={setChatContent}
-                />
-                <SelixControlCenter
-                  setTasks={setTasks}
-                  attachedFile={attachedFile}
-                  counter={counter}
-                  recording={recording}
-                  tasks={tasks}
-                  setPrompt={setPrompt}
-                  handleSubmit={handleSubmit}
-                  setAIType={setAIType}
-                  aiType={aiType}
-                  threads={threads}
-                  messages={messages}
-                  setMessages={setMessages}
-                  currentSessionId={sessionIDRef.current}
-                />
+                <SelinContext.Provider
+                  value={{
+                    setTasks: setTasks,
+                    counter: counter,
+                    messagesLength: messages.length,
+                    threads: threads,
+                    tasks: tasks,
+                    currentSessionId: currentSessionId,
+                    handleStrategySubmit: handleSubmit,
+                  }}
+                >
+                  <SegmentChat
+                    setIntendedTaskChange={setIntendedTaskChange}
+                    setAttachedFile={setAttachedFile}
+                    attachedFile={attachedFile}
+                    threads={threads}
+                    deviceIDRef={deviceIDRef}
+                    dropzoneRef={dropzoneRef}
+                    suggestedFirstMessage={suggestedFirstMessage}
+                    setSuggestionHidden={setSuggestionHidden}
+                    suggestionHidden={suggestionHidden}
+                    suggestion={suggestion}
+                    handleSubmit={handleSubmit}
+                    attachedInternalTask={attachedInternalTask}
+                    setAttachedInternalTask={setAttachedInternalTask}
+                    prompt={prompt}
+                    promptRef={promptRef}
+                    setPrompt={setPrompt}
+                    setSegment={setSegment}
+                    messages={messages}
+                    setMessages={setMessages}
+                    segment={segment}
+                    setAIType={setAIType}
+                    recording={recording}
+                    setRecording={setRecording}
+                    aiType={aiType}
+                    currentSessionId={sessionIDRef.current}
+                    memoryState={
+                      threads.find(
+                        (thread) => thread.id === sessionIDRef.current
+                      )?.memory.memory_state
+                    }
+                    memory={
+                      threads.find(
+                        (thread) => thread.id === sessionIDRef.current
+                      )?.memory
+                    }
+                    // generateResponse={generateResponse}
+                    // chatContent={chatContent}
+                    // setChatContent={setChatContent}
+                  />
+                  <SelixControlCenter
+                    setTasks={setTasks}
+                    attachedFile={attachedFile}
+                    counter={counter}
+                    recording={recording}
+                    tasks={tasks}
+                    setPrompt={setPrompt}
+                    handleSubmit={handleSubmit}
+                    setAIType={setAIType}
+                    aiType={aiType}
+                    threads={threads}
+                    messages={messages}
+                    setMessages={setMessages}
+                    currentSessionId={sessionIDRef.current}
+                  />
+                </SelinContext.Provider>
               </DragDropContext>
             </Flex>
           </Flex>
@@ -2589,6 +2593,30 @@ const SegmentChat = (props: any) => {
   const [normalInputMode, setNormalInputMode] = useState(true);
 
   const lastPromptRef = useRef<string>("");
+
+  const createSelixSupervisorLog = async () => {
+    try {
+      setGeneratingNewMemoryLine(true);
+      const response = await fetch(`${API_URL}/selix/add_supervisor_log`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create log");
+      }
+
+      const result = await response.json();
+      console.log("Log created successfully:", result);
+    } catch (error) {
+      console.error("Error creating log:", error);
+    } finally {
+      setGeneratingNewMemoryLine(false);
+    }
+  };
 
   const processTranscription = async () => {
     try {
@@ -2692,10 +2720,8 @@ const SegmentChat = (props: any) => {
   const [clientMemoryState, setClientMemoryState] = useState<
     string | undefined
   >(props.memory?.memory_line);
-  const [
-    clientMemoryStateUpdatedTime,
-    setClientMemoryStateUpdatedTime,
-  ] = useState<any>(props.memory?.memory_line_time_updated);
+  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
+    useState<any>(props.memory?.memory_line_time_updated);
   const [memoryStateChanged, setMemoryStateChanged] = useState(false);
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
@@ -2846,6 +2872,8 @@ const SegmentChat = (props: any) => {
 
       const result = await response.json();
       const memory_line = result.memory_line;
+
+      await createSelixSupervisorLog();
 
       setClientMemoryState(memory_line);
       setMemoryStateChanged(true);
@@ -5160,7 +5188,7 @@ const SelixControlCenter = ({
 //   );
 // };
 
-const PlannerComponent = ({
+export const PlannerComponent = ({
   threads,
   counter,
   currentSessionId,
@@ -5168,6 +5196,7 @@ const PlannerComponent = ({
   tasks,
   setTasks,
   handleStrategySubmit,
+  isTimeline,
 }: {
   threads: ThreadType[];
   currentSessionId: Number | null;
@@ -5176,13 +5205,13 @@ const PlannerComponent = ({
   tasks: TaskType[];
   counter: Number;
   handleStrategySubmit: () => void;
+  isTimeline?: boolean;
 }) => {
   const [opened, { toggle }] = useDisclosure(true);
   const taskContainerRef = useRef<HTMLDivElement>(null);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
   const [editingTask, setEditingTask] = useState<Number | null>(null);
@@ -5388,7 +5417,8 @@ const PlannerComponent = ({
           <Text size={"xs"} color="#E25DEE" fw={600}>
             Selix Tasks:{" "}
             <span className="font-medium text-gray-500">
-              {currentThread?.memory.campaign_id && currentThread?.memory.campaign_id === currentProject?.id ? (
+              {currentThread?.memory.campaign_id &&
+              currentThread?.memory.campaign_id === currentProject?.id ? (
                 <>
                   {currentProject.name}{" "}
                   <a
@@ -5478,7 +5508,7 @@ const PlannerComponent = ({
         />
       </Modal>
       <ScrollArea
-        h={"70vh"}
+        h={isTimeline ? "200px" : "70vh"}
         scrollHideDelay={4000}
         style={{ overflow: "hidden" }}
         viewportRef={taskContainerRef}
@@ -5985,9 +6015,8 @@ const TaskRenderer = ({
   segment?: TransformedSegment | undefined;
   handleStrategySubmit: () => void;
 }) => {
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const sequencesV2Ref = useRef(null);
   const [lastLoadedProjectId, setLastLoadedProjectId] = useState<number>(-1);
   const [sequences, setSequences] = useState<any[]>([]);
@@ -6310,8 +6339,9 @@ const SelinStrategy = ({
   currentSessionId: Number | null;
   counter: Number;
 }) => {
-  const memory = threads.find((thread) => thread.id === currentSessionId)
-    ?.memory;
+  const memory = threads.find(
+    (thread) => thread.id === currentSessionId
+  )?.memory;
 
   const hackedSubmit = () => {
     handleSubmit &&

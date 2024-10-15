@@ -2834,6 +2834,8 @@ const SegmentChat = (props: any) => {
 
       const result = await response.json();
 
+      await createSelixSupervisorLog();
+
       if (response.ok) {
         showNotification({
           title: "Memory Line Updated",
@@ -2872,8 +2874,6 @@ const SegmentChat = (props: any) => {
 
       const result = await response.json();
       const memory_line = result.memory_line;
-
-      await createSelixSupervisorLog();
 
       setClientMemoryState(memory_line);
       setMemoryStateChanged(true);

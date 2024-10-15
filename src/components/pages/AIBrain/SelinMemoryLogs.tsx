@@ -208,6 +208,18 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
     },
   });
 
+  useEffect(() => {
+    setSelectedLog(
+      logs?.reverse().find((log: MemoryLog) => {
+        if (isShortTerm) {
+          return !log.is_supervisor;
+        }
+
+        return log.is_supervisor;
+      }) || null
+    );
+  }, [isShortTerm]);
+
   const [selectedLog, setSelectedLog]: any = useState<MemoryLog | null>(
     logs?.reverse().find((log) => true) || null
   );

@@ -149,7 +149,7 @@ const InlineTemplateAdder: React.FC<InlineAdderProps> = ({
                 setManuallyAddedTemplate(value);
               }}
               value={messageDraftRichRaw.current}
-              height={110}
+              height={210}
     />}
       <Flex align="center" mt="xs" mb="xs">
         {loadingTemplateSuggestions && (

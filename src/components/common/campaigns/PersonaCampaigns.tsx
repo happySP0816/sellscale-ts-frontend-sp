@@ -2324,7 +2324,7 @@ export function PersonCampaignCard(props: {
                   width="w-[93px]"
                   icon={<IconSend color={theme.colors.blue[6]} size="0.9rem" />}
                   label="Sent"
-                  total={total_sent + props.persona.li_queued?? 0}
+                  total={liNumerator + emailNumerator ?? 0}
                   percentage={Math.floor(
                     ((total_sent ?? 0) / (total_sent || 1)) * 100
                   )}

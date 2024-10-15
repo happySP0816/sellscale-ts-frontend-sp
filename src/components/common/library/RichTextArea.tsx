@@ -12,7 +12,7 @@ import Superscript from "@tiptap/extension-superscript";
 import SubScript from "@tiptap/extension-subscript";
 import { IconRobot } from "@tabler/icons";
 import Placeholder from '@tiptap/extension-placeholder';
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ScrollArea } from "@mantine/core";
 
 function InsertPersonalizationControl() {
@@ -28,7 +28,9 @@ function InsertPersonalizationControl() {
   );
 }
 
-export default function RichTextArea(props: { personalizationBtn?: boolean, height?: number, value?: string | JSONContent, onChange?: (value: string, rawValue: JSONContent) => void, overrideSticky?: boolean }) {
+export default function RichTextArea(props: { personalizationBtn?: boolean, height?: number, value?: string | JSONContent, onChange?: (value: string, rawValue: JSONContent) => void, overrideSticky?: boolean, resize?: boolean }) {
+  const [scrollAreaHeight, setScrollAreaHeight] = useState(props.height || 200);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -53,6 +55,24 @@ export default function RichTextArea(props: { personalizationBtn?: boolean, heig
     editor && props.value && editor.commands.setContent(props.value)
   }, [props.value]);
 
+  const handleResize = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const startY = event.clientY;
+    const startHeight = scrollAreaHeight;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const newHeight = startHeight + (moveEvent.clientY - startY);
+      setScrollAreaHeight(newHeight > 100 ? newHeight : 100); // Minimum height of 100
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
   return (
     <RichTextEditor
       editor={editor}
@@ -61,7 +81,7 @@ export default function RichTextArea(props: { personalizationBtn?: boolean, heig
           p: {
             fontSize: 14,
           },
-          minHeight: props.height || 200,
+          minHeight: scrollAreaHeight,
         }
       }}
       onClick={() => editor?.commands.focus()} // Ensure the editor is focused when clicking anywhere on the textarea
@@ -100,9 +120,25 @@ export default function RichTextArea(props: { personalizationBtn?: boolean, heig
           <RichTextEditor.Unlink />
         </RichTextEditor.ControlsGroup>
       </RichTextEditor.Toolbar>
-      <ScrollArea h={props.height || 200}>
+      <ScrollArea h={scrollAreaHeight}>
         <RichTextEditor.Content />
       </ScrollArea>
+      {props.resize && (
+        <div
+          style={{
+            height: '10px',
+            cursor: 'row-resize',
+            backgroundColor: '#f0f0f0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'gray', // Set text color to white
+          }}
+          onMouseDown={handleResize}
+        >
+          ...
+        </div>
+      )}
     </RichTextEditor>
   );
 }

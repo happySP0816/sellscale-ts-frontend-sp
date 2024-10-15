@@ -143,6 +143,7 @@ const InlineTemplateAdder: React.FC<InlineAdderProps> = ({
       /> :
         // for new email template
       <RichTextArea
+              resize={true}
               onChange={(value, rawValue) => {
                 messageDraftRichRaw.current = rawValue;
                 messageDraftEmail.current = value;

@@ -784,10 +784,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                                 .find((item) => item.includes("pipeline"))}`
                             : "")
                         : log.tag === "SUPPORT_THREAD_SLACK"
-                        ? `Slack Thread on ${log.created_date}`
+                        ? `Slack Thread`
                         : log.title}
                     </Text>
-                    {isSelected && (
+                    {isSelected && log.tag !== "SUPPORT_THREAD_SLACK" && (
                       <Text
                         fw={400}
                         size={"sm"}
@@ -800,8 +800,9 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                       {moment
                         .utc(log.created_date, "YYYY-MM-DD HH:mm:ss")
                         .tz("America/Los_Angeles")
-                        .format("YYYY-MM-DD HH:mm:ss")}{" "}
-                      | {tagToIconAndColorMap[log.tag]?.sub}
+                        .format("YYYY-MM-DD HH:mm:ss")}
+                      {log.tag !== "SUPPORT_THREAD_SLACK" &&
+                        ` | ${tagToIconAndColorMap[log.tag]?.sub}`}
                     </Text>
                   </Box>
                   <Button

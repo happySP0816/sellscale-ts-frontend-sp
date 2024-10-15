@@ -1,18 +1,17 @@
-import { Flex, Image } from '@mantine/core';
-import IconImg from '@assets/images/icon.svg';
-import LogoImg from '@assets/images/logo.svg';
+import { Flex, Image } from "@mantine/core";
+import IconImg from "@assets/images/icon.png";
+import LogoImg from "@assets/images/logo.svg";
 
 export function LogoIcon(props: { size?: number }) {
-
   return (
     <Flex
       wrap="nowrap"
       onClick={() => {
-        window.location.href = '/';
+        window.location.href = "/";
       }}
-      py='xs'
+      py="xs"
       className="cursor-pointer"
-      sx={{ userSelect: 'none' }}
+      sx={{ userSelect: "none" }}
     >
       <Image
         width={props.size || 30}
@@ -24,22 +23,20 @@ export function LogoIcon(props: { size?: number }) {
   );
 }
 
-
 export function LogoFull(props: { size?: number }) {
-
   return (
     <Flex
       wrap="nowrap"
       onClick={() => {
-        window.location.href = '/';
+        window.location.href = "/";
       }}
-      py='xs'
+      py="xs"
       className="cursor-pointer"
-      sx={{ userSelect: 'none' }}
+      sx={{ userSelect: "none" }}
     >
       <Image
         height={props.size || 26}
-        sx={{ minWidth: '100px' }}
+        sx={{ minWidth: "100px" }}
         fit="contain"
         src={LogoImg}
         alt="SellScale Sight"

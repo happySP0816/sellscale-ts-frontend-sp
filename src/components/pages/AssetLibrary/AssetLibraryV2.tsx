@@ -31,6 +31,7 @@ export default function AssetLibraryV2() {
   const [opened, { open, close }] = useDisclosure(false);
   const [openedAsset, { open: openAsset, close: closeAsset }] = useDisclosure(false);
   const theme = useMantineTheme();
+  const isSelix = window.location.href.includes('selix');
 
   const [viewType, setViewType] = useState('card');
   const [tabs, setTabs] = useState('non_generative');
@@ -196,7 +197,7 @@ export default function AssetLibraryV2() {
       <LoadingOverlay visible={loading} />
       <Flex mt="md" align={'center'} justify={'space-between'}>
         <Text size={'25px'} fw={700}>
-          SellScale's Asset Library
+          {isSelix ? "Session Asset Library" : "SellScale's Asset Library"}
         </Text>
         <Flex gap={'sm'}>
           <Flex>
@@ -225,7 +226,7 @@ export default function AssetLibraryV2() {
         </Flex>
       </Flex>
       <Box>
-        <Flex justify={'space-between'} align={'center'}>
+        {!isSelix && <Flex justify={'space-between'} align={'center'}>
           <Flex
             align={'center'}
             w={'fit-content'}
@@ -255,8 +256,8 @@ export default function AssetLibraryV2() {
             </Button>
           </Flex>
           <Switch defaultChecked label='Show Used Assets Only' mr={'xs'} />
-        </Flex>
-        {tabs === 'non_generative' ? (
+        </Flex>}
+        {tabs === 'non_generative' && !isSelix ? (
           <Flex align={'center'} justify={'space-between'} w={'100%'} bg={'#f3f4f6'} p={8} style={{ borderRadius: '8px', borderTopLeftRadius: '0px' }}>
             <Flex>
               <Button onClick={() => setSemiTabs('all')} color={'gray'} variant={semiTabs === 'all' ? 'white' : 'tranparent'}>
@@ -273,7 +274,7 @@ export default function AssetLibraryV2() {
               </Button>
             </Flex>
           </Flex>
-        ) : (
+        ): !isSelix ? (
           <Flex align={'center'} justify={'space-between'} w={'100%'} bg={'#f3f4f6'} p={8} style={{ borderRadius: '8px', borderTopLeftRadius: '0px' }}>
             <Flex>
               <Button onClick={() => setSemiTabs('offers')} color={'gray'} variant={semiTabs === 'offers' ? 'white' : 'tranparent'}>
@@ -296,7 +297,7 @@ export default function AssetLibraryV2() {
               </Button>
             </Flex>
           </Flex>
-        )}
+        ): <></>}
         {/* {tabs === 'non_generative' ? <NonGenerative view={viewType} data={data} /> : <Generative view={viewType} data={data} />} */}
         {viewType === 'card' ? (
           <CardView fetchAssets={fetchAllAssets} type={tabs} view={viewType} semiTabs={semiTabs} useData={filteredUsedData} unUseData={filteredUnusedData} />
@@ -470,6 +471,7 @@ export default function AssetLibraryV2() {
                     'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({
+                    selix_session_id: isSelix ? new URLSearchParams(window.location.search).get('session_id') : undefined,
                     asset_key: assetName,
                     asset_raw_value: (ingestionType === 'TEXT' || ingestionType === 'URL') ? assetValue : file ? fileAsB64Raw : null,
                     asset_tags: [assetType],

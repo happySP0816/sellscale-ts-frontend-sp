@@ -397,6 +397,7 @@ export default function SelinAI() {
   const [currentSessionId, setCurrentSessionId] = useState<Number | null>(null);
   const sessionIDRef = useRef<Number>(-1);
   const [loadingNewChat, setLoadingNewChat] = useState(false);
+  const [refreshAssetLibrary, setRefreshAssetLibrary] = useState<number>(0);
   const [prompt, setPrompt] = useState("");
   const promptRef = useRef<string>("");
   const promptLengthRef = useRef<number>(0);
@@ -994,6 +995,10 @@ export default function SelinAI() {
   const handleChangeTab = (data: { tab: string; thread_id: string }) => {
     if (data.thread_id === roomIDref.current) {
       //re-render hack
+      if (data.tab === 'ASSETS'){
+        const randomInt = Math.floor(Math.random() * 100);
+        setRefreshAssetLibrary(randomInt);
+      }
       if (data.tab === "ICP") {
         setAIType("");
         setTimeout(() => setAIType("ICP"), 0);
@@ -2469,73 +2474,60 @@ export default function SelinAI() {
                   });
                 }}
               >
-                <SelinContext.Provider
-                  value={{
-                    setTasks: setTasks,
-                    counter: counter,
-                    messagesLength: messages.length,
-                    threads: threads,
-                    tasks: tasks,
-                    currentSessionId: currentSessionId,
-                    handleStrategySubmit: handleSubmit,
-                  }}
-                >
-                  <SegmentChat
-                    setIntendedTaskChange={setIntendedTaskChange}
-                    setAttachedFile={setAttachedFile}
-                    attachedFile={attachedFile}
-                    threads={threads}
-                    deviceIDRef={deviceIDRef}
-                    dropzoneRef={dropzoneRef}
-                    suggestedFirstMessage={suggestedFirstMessage}
-                    setSuggestionHidden={setSuggestionHidden}
-                    suggestionHidden={suggestionHidden}
-                    suggestion={suggestion}
-                    handleSubmit={handleSubmit}
-                    attachedInternalTask={attachedInternalTask}
-                    setAttachedInternalTask={setAttachedInternalTask}
-                    prompt={prompt}
-                    promptRef={promptRef}
-                    setPrompt={setPrompt}
-                    setSegment={setSegment}
-                    messages={messages}
-                    setMessages={setMessages}
-                    segment={segment}
-                    setAIType={setAIType}
-                    recording={recording}
-                    setRecording={setRecording}
-                    aiType={aiType}
-                    currentSessionId={sessionIDRef.current}
-                    memoryState={
-                      threads.find(
-                        (thread) => thread.id === sessionIDRef.current
-                      )?.memory.memory_state
-                    }
-                    memory={
-                      threads.find(
-                        (thread) => thread.id === sessionIDRef.current
-                      )?.memory
-                    }
-                    // generateResponse={generateResponse}
-                    // chatContent={chatContent}
-                    // setChatContent={setChatContent}
-                  />
-                  <SelixControlCenter
-                    setTasks={setTasks}
-                    attachedFile={attachedFile}
-                    counter={counter}
-                    recording={recording}
-                    tasks={tasks}
-                    setPrompt={setPrompt}
-                    handleSubmit={handleSubmit}
-                    setAIType={setAIType}
-                    aiType={aiType}
-                    threads={threads}
-                    messages={messages}
-                    setMessages={setMessages}
-                    currentSessionId={sessionIDRef.current}
-                  />
-                </SelinContext.Provider>
+                <SegmentChat
+                  setIntendedTaskChange={setIntendedTaskChange}
+                  setAttachedFile={setAttachedFile}
+                  attachedFile={attachedFile}
+                  threads={threads}
+                  deviceIDRef={deviceIDRef}
+                  dropzoneRef={dropzoneRef}
+                  suggestedFirstMessage={suggestedFirstMessage}
+                  setSuggestionHidden={setSuggestionHidden}
+                  suggestionHidden={suggestionHidden}
+                  suggestion={suggestion}
+                  handleSubmit={handleSubmit}
+                  attachedInternalTask={attachedInternalTask}
+                  setAttachedInternalTask={setAttachedInternalTask}
+                  prompt={prompt}
+                  promptRef={promptRef}
+                  setPrompt={setPrompt}
+                  setSegment={setSegment}
+                  messages={messages}
+                  setMessages={setMessages}
+                  segment={segment}
+                  setAIType={setAIType}
+                  recording={recording}
+                  setRecording={setRecording}
+                  aiType={aiType}
+                  currentSessionId={sessionIDRef.current}
+                  memoryState={
+                    threads.find((thread) => thread.id === sessionIDRef.current)
+                      ?.memory.memory_state
+                  }
+                  memory={
+                    threads.find((thread) => thread.id === sessionIDRef.current)
+                      ?.memory
+                  }
+                  // generateResponse={generateResponse}
+                  // chatContent={chatContent}
+                  // setChatContent={setChatContent}
+                />
+                <SelixControlCenter
+                  setTasks={setTasks}
+                  attachedFile={attachedFile}
+                  refreshAssetLibrary={refreshAssetLibrary}
+                  counter={counter}
+                  recording={recording}
+                  tasks={tasks}
+                  setPrompt={setPrompt}
+                  handleSubmit={handleSubmit}
+                  setAIType={setAIType}
+                  aiType={aiType}
+                  threads={threads}
+                  messages={messages}
+                  setMessages={setMessages}
+                  currentSessionId={sessionIDRef.current}
+                />
               </DragDropContext>
             </Flex>
           </Flex>
@@ -4585,6 +4577,7 @@ const SelixControlCenter = ({
   recording,
   counter,
   messages,
+  refreshAssetLibrary,
   setMessages,
   setPrompt,
   handleSubmit,
@@ -4594,6 +4587,7 @@ const SelixControlCenter = ({
   setAIType: React.Dispatch<React.SetStateAction<string>>;
   attachedFile: File | null;
   aiType: string;
+  refreshAssetLibrary: number;
   setTasks: React.Dispatch<React.SetStateAction<any>>;
   tasks: any;
   recording: boolean;
@@ -4995,7 +4989,7 @@ const SelixControlCenter = ({
             currentSessionId={currentSessionId}
           />
         ) : aiType === "ASSETS" ? (
-          <AssetLibraryV2 />
+          <AssetLibraryV2 key={refreshAssetLibrary}/>
         ) : (
           <Center style={{ height: "100%" }}>
             <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>

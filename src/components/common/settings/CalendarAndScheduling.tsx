@@ -19,6 +19,7 @@ import {
   AspectRatio,
   Box,
   Stack,
+  ScrollArea,
 } from "@mantine/core";
 import {
   IconCheck,
@@ -69,7 +70,46 @@ export default function CalendarAndScheduling() {
     userData.scheduling_link || ""
   );
 
+  const [sdrSchedulingLinks, setSdrSchedulingLinks] = useState<{ label: string; value: string }[]>([
+  ]);
+
+  const get_all_sdr_scheduling_links = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/client/sdr/scheduling_links?all=true`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (response) {
+        setSdrSchedulingLinks(result.data);
+        console.log('setting links to', result.data);
+
+        setTeam(result.data.map((item: any) => ({
+          fullname: item.label,
+          avatar: "",
+          job: "",
+          id: item.id,
+          calendar_link: item.value || null
+        })));
+
+      } else {
+        setSdrSchedulingLinks([]);
+      }
+    } catch (error) {
+      setSdrSchedulingLinks([]);
+    }
+  }
+
   useEffect(() => {
+    get_all_sdr_scheduling_links();
     if (timeZone && timeZone !== userData.timezone) {
       (async () => {
         const response = await fetch(`${API_URL}/client/sdr/timezone`, {
@@ -162,147 +202,10 @@ export default function CalendarAndScheduling() {
   };
 
   const [team, setTeam] = useState([
-    {
-      avatar: "",
-      fullname: "John Smith",
-      job: "Marketing Manager",
-      calendar_link: "calendly.com/john-smith",
-    },
-    {
-      avatar: "",
-      fullname: "Sarah Doe",
-      job: "Marketing Manager",
-      calendar_link: "calendly.com/sarah-doe",
-    },
   ]);
 
   return (
     <Paper withBorder m="xs" p="md" radius="md">
-      <Card mt="md" padding="lg" radius="md" withBorder bg={"#fcfcfd"}>
-        <Flex align={"center"} justify={"space-between"}>
-          <Box>
-            <Title order={3}>Teamwide Calendar Integration</Title>
-            <Text mt="sm" fz="sm">
-              Add your team's calendars to refernece when scheduling, or have
-              the AI pull a certain rep's time
-            </Text>
-          </Box>
-          <Button leftIcon={<IconPlus size={"0.9rem"} />}>Add New</Button>
-        </Flex>
-        <DataGrid
-          data={team}
-          mt={"sm"}
-          withBorder
-          withColumnBorders
-          withRowSelection
-          columns={[
-            {
-              accessorKey: "name",
-              header: () => (
-                <Flex align={"center"} gap={"3px"}>
-                  <IconLetterT color="gray" size={"0.9rem"} />
-                  <Text color="gray">Name</Text>
-                </Flex>
-              ),
-              maxSize: 250,
-              minSize: 250,
-              cell: (cell) => {
-                const { avatar, fullname }: any = cell.row.original;
-
-                return (
-                  <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
-                    <Avatar src={avatar} size={"md"} radius={"xl"} />
-                    <Text fw={500}>{fullname}</Text>
-                  </Flex>
-                );
-              },
-            },
-            {
-              accessorKey: "title",
-              maxSize: 250,
-              minSize: 250,
-              header: () => (
-                <Flex align={"center"} gap={"3px"}>
-                  <IconLetterT color="gray" size={"0.9rem"} />
-                  <Text color="gray">Title</Text>
-                </Flex>
-              ),
-
-              enableResizing: true,
-              cell: (cell) => {
-                const { job } = cell.row.original;
-
-                return (
-                  <Flex align={"center"} gap={"xs"} w={"100%"} h={"100%"}>
-                    <Text fw={500}>{job}</Text>
-                  </Flex>
-                );
-              },
-            },
-            {
-              accessorKey: "calendar",
-              header: () => (
-                <Flex align={"center"} gap={"3px"}>
-                  <IconLink color="gray" size={"0.9rem"} />
-                  <Text color="gray">Calendar Link</Text>
-                </Flex>
-              ),
-              cell: (cell) => {
-                const { calendar_link } = cell.row.original;
-
-                return (
-                  <Flex
-                    gap={"xs"}
-                    w={"100%"}
-                    h={"100%"}
-                    align={"center"}
-                    justify={"space-between"}
-                  >
-                    <Flex align={"center"} justify={"space-between"} w={"100%"}>
-                      <Text fw={500} lineClamp={2} maw={200}>
-                        {calendar_link}
-                      </Text>
-                      <ActionIcon>
-                        <IconEdit size={"1rem"} />
-                      </ActionIcon>
-                    </Flex>
-                  </Flex>
-                );
-              },
-            },
-          ]}
-          styles={{
-            dataCellContent: {
-              marginBlock: "auto",
-              width: "100%",
-            },
-          }}
-        />
-        {/* <Stack spacing={"sm"} mt={"sm"}>
-          {team.map((item, index) => {
-            return (
-              <Box key={index}>
-                <Flex align={"center"} gap={"sm"}>
-                  <Avatar radius={"xl"} size={50} />
-                  <Box>
-                    <Text size={"lg"} fw={600}>
-                      {item.fullname}
-                    </Text>
-                    <Text size={"sm"} fw={500} color="gray">
-                      {item.job}
-                    </Text>
-                  </Box>
-                </Flex>
-                <Flex gap={"sm"} my={"xs"} align={"end"}>
-                  <TextInput label="CALENDAR_LINK:" placeholder={item.calendar_link} w={"100%"} />
-                  <Button leftIcon={<IconEdit size={"0.9rem"} />}>Edit</Button>
-                </Flex>
-                {index < team.length - 1 && <Divider mt={"md"} />}
-              </Box>
-            );
-          })}
-        </Stack> */}
-      </Card>
       <Card mt="md" padding="lg" radius="md" withBorder>
         <LoadingOverlay visible={isLoading} />
         <Flex gap={4} align={"center"}>
@@ -456,6 +359,189 @@ export default function CalendarAndScheduling() {
             </Box>
           </Flex>
         </Flex>
+      </Card>
+      <Card mt="md" padding="lg" radius="md" withBorder bg={"#fcfcfd"}>
+        <Flex align={"center"} justify={"space-between"}>
+          <Box>
+            <Title order={3}>Teamwide Calendar Integration</Title>
+            <Text mt="sm" fz="sm">
+              Add your team's calendars to refernece when scheduling, or have
+              the AI pull a certain rep's time
+            </Text>
+          </Box>
+          {/* <Button leftIcon={<IconPlus size={"0.9rem"} />}>Add New</Button> */}
+        </Flex>
+        <ScrollArea h={300}>
+        <DataGrid
+          data={[...team.filter((member: { id: string }) => member.id.toString() === userData.id.toString()), ...team.filter((member: { id: string }) => member.id.toString() !== userData.id.toString())]}
+          mt={"sm"}
+          withBorder
+          withColumnBorders
+          columns={[
+            {
+              accessorKey: "name",
+              header: () => (
+                <Flex align={"center"} gap={"3px"}>
+                  <IconLetterT color="gray" size={"0.9rem"} />
+                  <Text color="gray">Name</Text>
+                </Flex>
+              ),
+              maxSize: 250,
+              minSize: 250,
+              cell: (cell) => {
+                const { avatar, fullname }: any = cell.row.original;
+
+                return (
+                  <Flex gap={"xs"} w={"100%"} h={"100%"} align={"center"}>
+                    <Avatar src={avatar} size={"md"} radius={"xl"} />
+                    <Text fw={500}>{fullname}</Text>
+                  </Flex>
+                );
+              },
+            },
+            // {
+            //   accessorKey: "title",
+            //   maxSize: 250,
+            //   minSize: 250,
+            //   header: () => (
+            //     <Flex align={"center"} gap={"3px"}>
+            //       <IconLetterT color="gray" size={"0.9rem"} />
+            //       <Text color="gray">Title</Text>
+            //     </Flex>
+            //   ),
+
+            //   enableResizing: true,
+            //   cell: (cell) => {
+            //     const { job } = cell.row.original;
+
+            //     return (
+            //       <Flex align={"center"} gap={"xs"} w={"100%"} h={"100%"}>
+            //         <Text fw={500}>{job}</Text>
+            //       </Flex>
+            //     );
+            //   },
+            // },
+            {
+              accessorKey: "calendar",
+              header: () => (
+                <Flex align={"center"} gap={"3px"}>
+                  <IconLink color="gray" size={"0.9rem"} />
+                  <Text color="gray">Calendar Link</Text>
+                </Flex>
+              ),
+              cell: (cell) => {
+                const { calendar_link, id } = cell.row.original;
+                const [isEditing, setIsEditing] = useState(false);
+                const [newCalendarLink, setNewCalendarLink] = useState<string>(calendar_link);
+
+                const handleEditClick = async () => {
+                  if (isEditing) {
+                    try {
+                      const response = await fetch(`${API_URL}/client/sdr/update_calendar`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${userToken}`,
+                        },
+                        body: JSON.stringify({
+                          sdr_id: id,
+                          calendar_link: newCalendarLink,
+                        }),
+                      });
+
+                      if (response.ok) {
+                        showNotification({
+                          title: "Success",
+                          message: "Calendar link updated successfully",
+                          color: "teal",
+                          autoClose: 3000,
+                        });
+                        setTeam((prev: Array<{ id: string; calendar_link: string }>) =>
+                          prev.map((item) => {
+                            if (item.id === id) {
+                              return { ...item, calendar_link: newCalendarLink };
+                            }
+                            return item;
+                          }) as never[] );
+                     
+                        
+
+                      } else {
+                        throw new Error("Failed to update calendar link");
+                      }
+                    } catch (error : any) {
+                      showNotification({
+                        title: "Error",
+                        message: error.message,
+                        color: "red",
+                        autoClose: 3000,
+                      });
+                    }
+                  }
+                  setIsEditing(!isEditing);
+                };
+
+                return (
+                  <Flex
+                    gap={"xs"}
+                    w={"100%"}
+                    h={"100%"}
+                    align={"center"}
+                    justify={"space-between"}
+                  >
+                    <Flex align={"center"} justify={"space-between"} w={"100%"}>
+                      {isEditing ? (
+                        <Input
+                          value={newCalendarLink}
+                          onChange={(e) => setNewCalendarLink(() => e.target.value)}
+                          w={"100%"}
+                        />
+                      ) : (
+                        <Text fw={500} lineClamp={2} >
+                          {calendar_link}
+                        </Text>
+                      )}
+                      <ActionIcon onClick={handleEditClick}>
+                        {isEditing ? <IconCheck size={"1rem"} /> : <IconEdit size={"1rem"} />}
+                      </ActionIcon>
+                    </Flex>
+                  </Flex>
+                );
+              },
+            },
+          ]}
+          styles={{
+            dataCellContent: {
+              marginBlock: "auto",
+              width: "100%",
+            },
+          }}
+        />
+        </ScrollArea>
+        {/* <Stack spacing={"sm"} mt={"sm"}>
+          {team.map((item, index) => {
+            return (
+              <Box key={index}>
+                <Flex align={"center"} gap={"sm"}>
+                  <Avatar radius={"xl"} size={50} />
+                  <Box>
+                    <Text size={"lg"} fw={600}>
+                      {item.fullname}
+                    </Text>
+                    <Text size={"sm"} fw={500} color="gray">
+                      {item.job}
+                    </Text>
+                  </Box>
+                </Flex>
+                <Flex gap={"sm"} my={"xs"} align={"end"}>
+                  <TextInput label="CALENDAR_LINK:" placeholder={item.calendar_link} w={"100%"} />
+                  <Button leftIcon={<IconEdit size={"0.9rem"} />}>Edit</Button>
+                </Flex>
+                {index < team.length - 1 && <Divider mt={"md"} />}
+              </Box>
+            );
+          })}
+        </Stack> */}
       </Card>
       {/* <Card>
         <Text fz='lg' fw='bold'>

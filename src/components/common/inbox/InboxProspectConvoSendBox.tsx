@@ -57,6 +57,7 @@ import {
   IconEdit,
   IconAdjustmentsHorizontal,
   IconArrowsMoveVertical,
+  IconCopy,
 } from "@tabler/icons";
 import {
   IconClock24,
@@ -215,6 +216,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(
     openedBumpFameworksState
   );
+const [sdrSchedulingLinks, setSdrSchedulingLinks] = useState<{ label: string; value: string }[]>([
+]);
   const [
     setOpenBumpFrameworksSubstatus,
     setSetOpenBumpFrameworksSubstatus,
@@ -494,6 +497,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
   );
 
   useEffect(() => {
+    get_all_sdr_scheduling_links();
+
     (async () => {
       const result = await getBumpFrameworks(
         userToken,
@@ -523,6 +528,32 @@ export default forwardRef(function InboxProspectConvoSendBox(
       );
     })();
   }, [props.prospectId, props.archetypeId, replyLabel]);
+
+  const get_all_sdr_scheduling_links = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/client/sdr/scheduling_links`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (response) {
+        setSdrSchedulingLinks(result.data);
+        console.log('setting links to', result.data);
+      } else {
+        setSdrSchedulingLinks([]);
+      }
+    } catch (error) {
+      setSdrSchedulingLinks([]);
+    }
+  }
 
   const smartGenerate = async (additional_instructions: string) => {
     setMsgLoading(true);
@@ -1228,8 +1259,39 @@ export default forwardRef(function InboxProspectConvoSendBox(
             >
               Generate {openedOutboundChannel === "LINKEDIN" ? "" : "Email"}
             </Button>
+          {sdrSchedulingLinks && (
+            <Select
+              placeholder="Select a scheduling link"
+              value={null}
+              data={sdrSchedulingLinks.map(link => ({ label: link.label, value: link.value }))}
+              onChange={(value) => {
+                if (value) {
+                  const selectedLink = sdrSchedulingLinks.find(link => link.value === value);
+                  const linkOwner = selectedLink ? selectedLink.label : "Unknown";
+                  navigator.clipboard.writeText(value).then(() => {
+                    showNotification({
+                      title: "Link Copied",
+                      message: `Scheduling link for ${linkOwner} has been copied to clipboard.`,
+                      color: "green",
+                      autoClose: 3000,
+                    });
+                  }).catch(() => {
+                    showNotification({
+                      title: "Error",
+                      message: "Failed to copy the link. Please try again.",
+                      color: "red",
+                      autoClose: 3000,
+                    });
+                  });
+                }
+              }}
+              size="xs"
+              radius="md"
+              icon={<IconCalendar size={"0.8rem"} />}
+            />
+          )}
           </Flex>
-          <Popover
+          {/* <Popover
             width={200}
             position="bottom"
             withArrow
@@ -1313,7 +1375,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 <Divider />
               </Radio.Group>
             </Popover.Dropdown>
-          </Popover>
+          </Popover> */}
         </Flex>
 
         <Box pos={"relative"}>

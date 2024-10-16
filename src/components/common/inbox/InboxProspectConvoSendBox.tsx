@@ -1291,7 +1291,7 @@ const [sdrSchedulingLinks, setSdrSchedulingLinks] = useState<{ label: string; va
             />
           )}
           </Flex>
-          <Popover
+          {/* <Popover
             width={200}
             position="bottom"
             withArrow
@@ -1375,7 +1375,7 @@ const [sdrSchedulingLinks, setSdrSchedulingLinks] = useState<{ label: string; va
                 <Divider />
               </Radio.Group>
             </Popover.Dropdown>
-          </Popover>
+          </Popover> */}
         </Flex>
 
         <Box pos={"relative"}>

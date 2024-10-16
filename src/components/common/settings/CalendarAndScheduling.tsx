@@ -373,7 +373,7 @@ export default function CalendarAndScheduling() {
         </Flex>
         <ScrollArea h={300}>
         <DataGrid
-          data={team}
+          data={[...team.filter((member: { id: string }) => member.id.toString() === userData.id.toString()), ...team.filter((member: { id: string }) => member.id.toString() !== userData.id.toString())]}
           mt={"sm"}
           withBorder
           withColumnBorders

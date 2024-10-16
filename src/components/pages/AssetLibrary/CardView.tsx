@@ -405,7 +405,7 @@ export default function CardView(props: any) {
           <Grid>
             {unUseData?.map((item: AssetType, index: number) => {
               return (
-                <Grid.Col span={4} key={index}>
+                <Grid.Col span={window.location.href.includes('selix') ? 6 : 4} key={index}>
                   <Flex
                     style={{ border: '1px solid #ced4da', borderRadius: '8px' }}
                     p={'xl'}

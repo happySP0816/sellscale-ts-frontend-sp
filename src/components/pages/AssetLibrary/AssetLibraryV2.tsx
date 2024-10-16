@@ -138,7 +138,14 @@ export default function AssetLibraryV2() {
   const fetchAllAssets = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/client/all_assets_in_client`, {
+      const is_selix_in_url = window.location.href.includes('selix');
+      if (is_selix_in_url) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session_id');
+      }
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session_id');
+      const response = await fetch(`${API_URL}/client/all_assets_in_client${sessionId ? `?session_id=${sessionId}` : ''}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${userToken}`,

@@ -397,6 +397,7 @@ export default function SelinAI() {
   const [currentSessionId, setCurrentSessionId] = useState<Number | null>(null);
   const sessionIDRef = useRef<Number>(-1);
   const [loadingNewChat, setLoadingNewChat] = useState(false);
+  const [refreshAssetLibrary, setRefreshAssetLibrary] = useState<number>(0);
   const [prompt, setPrompt] = useState("");
   const promptRef = useRef<string>("");
   const promptLengthRef = useRef<number>(0);
@@ -994,6 +995,10 @@ export default function SelinAI() {
   const handleChangeTab = (data: { tab: string; thread_id: string }) => {
     if (data.thread_id === roomIDref.current) {
       //re-render hack
+      if (data.tab === 'ASSETS'){
+        const randomInt = Math.floor(Math.random() * 100);
+        setRefreshAssetLibrary(randomInt);
+      }
       if (data.tab === "ICP") {
         setAIType("");
         setTimeout(() => setAIType("ICP"), 0);
@@ -2522,6 +2527,7 @@ export default function SelinAI() {
                   />
                   <SelixControlCenter
                     setTasks={setTasks}
+                    refreshAssetLibrary={refreshAssetLibrary}
                     attachedFile={attachedFile}
                     counter={counter}
                     recording={recording}
@@ -4585,6 +4591,7 @@ const SelixControlCenter = ({
   recording,
   counter,
   messages,
+  refreshAssetLibrary,
   setMessages,
   setPrompt,
   handleSubmit,
@@ -4594,6 +4601,7 @@ const SelixControlCenter = ({
   setAIType: React.Dispatch<React.SetStateAction<string>>;
   attachedFile: File | null;
   aiType: string;
+  refreshAssetLibrary: number;
   setTasks: React.Dispatch<React.SetStateAction<any>>;
   tasks: any;
   recording: boolean;
@@ -4995,7 +5003,7 @@ const SelixControlCenter = ({
             currentSessionId={currentSessionId}
           />
         ) : aiType === "ASSETS" ? (
-          <AssetLibraryV2 />
+          <AssetLibraryV2 key={refreshAssetLibrary}/>
         ) : (
           <Center style={{ height: "100%" }}>
             <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>

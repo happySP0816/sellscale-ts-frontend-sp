@@ -155,6 +155,8 @@ export default function SegmentV3(props: PropsType) {
   );
 
   const [showViewProspectsModal, setShowViewProspectsModal] = useState(false);
+  const [showAddCompaniesModal, setShowAddCompaniesModal] = useState(false);
+  const [showEditCompaniesModal, setShowEditCompaniesModal] = useState(false);
   const [showViewProspectsModalOld, setShowViewProspectsModalOld] = useState(
     false
   );
@@ -264,6 +266,8 @@ export default function SegmentV3(props: PropsType) {
         current_scrape_page: segment.current_scrape_page,
         is_market_map: segment.is_market_map ?? false,
         is_company_segment: segment.is_company_segment ?? false,
+        unique_companies_in_company_map:
+          segment.unique_companies_in_company_map,
       };
     });
   }
@@ -596,6 +600,42 @@ export default function SegmentV3(props: PropsType) {
   return (
     <Box>
       {/* Old view prospects modal */}
+      <Modal
+        opened={showAddCompaniesModal}
+        onClose={() => {
+          setShowAddCompaniesModal(false);
+          getAllSegments(true);
+        }}
+        size="1200px"
+        padding="md"
+        title="Add Companies"
+      >
+        <iframe
+          // Edit URL: https://sellscale.retool.com/editor/06ae64ca-8b40-11ef-8667-7ff11a0817d0/Segments%20v2%20Modules/Segments%20-%20Search%20%26%20Add%20Companies
+          src={`https://sellscale.retool.com/embedded/public/b94afb73-72a8-42f0-8325-5613192d524a#authToken=${userToken}&segmentId=${selectedSegmentId}&defaultTab=0`}
+          width="100%"
+          height="700px"
+          style={{ border: "none" }}
+        ></iframe>
+      </Modal>
+      <Modal
+        opened={showEditCompaniesModal}
+        onClose={() => {
+          setShowEditCompaniesModal(false);
+          getAllSegments(true);
+        }}
+        size="1200px"
+        padding="md"
+        title="View Company List"
+      >
+        <iframe
+          // Edit URL: https://sellscale.retool.com/editor/06ae64ca-8b40-11ef-8667-7ff11a0817d0/Segments%20v2%20Modules/Segments%20-%20Search%20%26%20Add%20Companies
+          src={`https://sellscale.retool.com/embedded/public/b94afb73-72a8-42f0-8325-5613192d524a#authToken=${userToken}&segmentId=${selectedSegmentId}&defaultTab=1`}
+          width="100%"
+          height="700px"
+          style={{ border: "none" }}
+        ></iframe>
+      </Modal>
       <Modal
         opened={showViewProspectsModalOld}
         onClose={() => {
@@ -1499,6 +1539,7 @@ export default function SegmentV3(props: PropsType) {
                   sub_segments: any[];
                   is_market_map: boolean;
                   is_company_segment: boolean;
+                  unique_companies_in_company_map?: number;
                 },
                 index: number
               ) => {
@@ -1619,11 +1660,21 @@ export default function SegmentV3(props: PropsType) {
                               <>
                                 <Menu.Label>Companies</Menu.Label>
 
-                                <Menu.Item>
+                                <Menu.Item
+                                  onClick={() => {
+                                    setSelectedSegmentId(item.id);
+                                    setShowAddCompaniesModal(true);
+                                  }}
+                                >
                                   <IconUsersPlus size={"0.9rem"} />
                                   Add Companies
                                 </Menu.Item>
-                                <Menu.Item>
+                                <Menu.Item
+                                  onClick={() => {
+                                    setSelectedSegmentId(item.id);
+                                    setShowEditCompaniesModal(true);
+                                  }}
+                                >
                                   <IconUsers size={"0.9rem"} />
                                   View Companies
                                 </Menu.Item>
@@ -1927,18 +1978,30 @@ export default function SegmentV3(props: PropsType) {
                       />
                     </Flex>
                     <Box mt={"sm"}>
-                      <Flex align={"center"} gap={"xs"}>
-                        <Text color="gray" size={"sm"} fw={500}>
-                          Prospects:
-                        </Text>
-                        <Text fw={600} size={"sm"}>
-                          {item.contacts} people
-                        </Text>{" "}
-                        {/* <Divider orientation="vertical" />
+                      {!item.is_company_segment && (
+                        <Flex align={"center"} gap={"xs"}>
+                          <Text color="gray" size={"sm"} fw={500}>
+                            Prospects:
+                          </Text>
+                          <Text fw={600} size={"sm"}>
+                            {item.contacts} people
+                          </Text>{" "}
+                          {/* <Divider orientation="vertical" />
                       <Text fw={600} size={"sm"}>
                         {item.assets} accounts
                       </Text> */}
-                      </Flex>
+                        </Flex>
+                      )}
+                      {item.is_company_segment && (
+                        <Flex align={"center"} gap={"xs"}>
+                          <Text color="gray" size={"sm"} fw={500}>
+                            Companies:
+                          </Text>
+                          <Text fw={600} size={"sm"}>
+                            {item.unique_companies_in_company_map} companies
+                          </Text>
+                        </Flex>
+                      )}
                       <Flex align={"center"} gap={"sm"} mt={"sm"}>
                         <Text color="gray" size={"sm"} fw={500}>
                           Created by:

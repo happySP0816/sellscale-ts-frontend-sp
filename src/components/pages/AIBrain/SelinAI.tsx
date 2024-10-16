@@ -164,6 +164,7 @@ import { Draggable } from "react-beautiful-dnd";
 import { isInt } from "@fullcalendar/core/internal";
 import { Calendar, TimeInput } from "@mantine/dates";
 import AssetLibraryV2 from "@pages/AssetLibrary/AssetLibraryV2";
+import CompanySegmentReview from "@pages/SegmentV2/CompanySegmentReview";
 
 export const SelinContext = createContext({});
 
@@ -320,6 +321,7 @@ export interface MemoryType {
   strategy_id: number;
   campaign_id: number;
   memory_state: string;
+  company_segment_id?: number;
   tab: "STRATEGY_CREATOR" | "PLANNER" | "BROWSER" | "ICP" | "ASSETS";
   search?: {
     query: string;
@@ -995,7 +997,7 @@ export default function SelinAI() {
   const handleChangeTab = (data: { tab: string; thread_id: string }) => {
     if (data.thread_id === roomIDref.current) {
       //re-render hack
-      if (data.tab === 'ASSETS'){
+      if (data.tab === "ASSETS") {
         const randomInt = Math.floor(Math.random() * 100);
         setRefreshAssetLibrary(randomInt);
       }
@@ -5004,7 +5006,7 @@ const SelixControlCenter = ({
             currentSessionId={currentSessionId}
           />
         ) : aiType === "ASSETS" ? (
-          <AssetLibraryV2 key={refreshAssetLibrary}/>
+          <AssetLibraryV2 key={refreshAssetLibrary} />
         ) : (
           <Center style={{ height: "100%" }}>
             <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
@@ -6132,7 +6134,12 @@ const TaskRenderer = ({
         />
       );
     case "COMPANY_SEGMENT":
-      return <ComingSoonCard />;
+      return (
+        <CompanySegmentReview
+          selixSessionId={currentSessionId}
+          connectedCompanySegmentId={currentThread?.memory?.company_segment_id}
+        />
+      );
     case "REVIEW_COMPANIES":
       if (!segment) {
         return (

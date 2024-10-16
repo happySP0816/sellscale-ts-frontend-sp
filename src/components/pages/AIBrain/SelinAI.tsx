@@ -2474,60 +2474,74 @@ export default function SelinAI() {
                   });
                 }}
               >
-                <SegmentChat
-                  setIntendedTaskChange={setIntendedTaskChange}
-                  setAttachedFile={setAttachedFile}
-                  attachedFile={attachedFile}
-                  threads={threads}
-                  deviceIDRef={deviceIDRef}
-                  dropzoneRef={dropzoneRef}
-                  suggestedFirstMessage={suggestedFirstMessage}
-                  setSuggestionHidden={setSuggestionHidden}
-                  suggestionHidden={suggestionHidden}
-                  suggestion={suggestion}
-                  handleSubmit={handleSubmit}
-                  attachedInternalTask={attachedInternalTask}
-                  setAttachedInternalTask={setAttachedInternalTask}
-                  prompt={prompt}
-                  promptRef={promptRef}
-                  setPrompt={setPrompt}
-                  setSegment={setSegment}
-                  messages={messages}
-                  setMessages={setMessages}
-                  segment={segment}
-                  setAIType={setAIType}
-                  recording={recording}
-                  setRecording={setRecording}
-                  aiType={aiType}
-                  currentSessionId={sessionIDRef.current}
-                  memoryState={
-                    threads.find((thread) => thread.id === sessionIDRef.current)
-                      ?.memory.memory_state
-                  }
-                  memory={
-                    threads.find((thread) => thread.id === sessionIDRef.current)
-                      ?.memory
-                  }
-                  // generateResponse={generateResponse}
-                  // chatContent={chatContent}
-                  // setChatContent={setChatContent}
-                />
-                <SelixControlCenter
-                  setTasks={setTasks}
-                  attachedFile={attachedFile}
-                  refreshAssetLibrary={refreshAssetLibrary}
-                  counter={counter}
-                  recording={recording}
-                  tasks={tasks}
-                  setPrompt={setPrompt}
-                  handleSubmit={handleSubmit}
-                  setAIType={setAIType}
-                  aiType={aiType}
-                  threads={threads}
-                  messages={messages}
-                  setMessages={setMessages}
-                  currentSessionId={sessionIDRef.current}
-                />
+                <SelinContext.Provider
+                  value={{
+                    setTasks: setTasks,
+                    counter: counter,
+                    messagesLength: messages.length,
+                    threads: threads,
+                    tasks: tasks,
+                    currentSessionId: currentSessionId,
+                    handleStrategySubmit: handleSubmit,
+                  }}
+                >
+                  <SegmentChat
+                    setIntendedTaskChange={setIntendedTaskChange}
+                    setAttachedFile={setAttachedFile}
+                    attachedFile={attachedFile}
+                    threads={threads}
+                    deviceIDRef={deviceIDRef}
+                    dropzoneRef={dropzoneRef}
+                    suggestedFirstMessage={suggestedFirstMessage}
+                    setSuggestionHidden={setSuggestionHidden}
+                    suggestionHidden={suggestionHidden}
+                    suggestion={suggestion}
+                    handleSubmit={handleSubmit}
+                    attachedInternalTask={attachedInternalTask}
+                    setAttachedInternalTask={setAttachedInternalTask}
+                    prompt={prompt}
+                    promptRef={promptRef}
+                    setPrompt={setPrompt}
+                    setSegment={setSegment}
+                    messages={messages}
+                    setMessages={setMessages}
+                    segment={segment}
+                    setAIType={setAIType}
+                    recording={recording}
+                    setRecording={setRecording}
+                    aiType={aiType}
+                    currentSessionId={sessionIDRef.current}
+                    memoryState={
+                      threads.find(
+                        (thread) => thread.id === sessionIDRef.current
+                      )?.memory.memory_state
+                    }
+                    memory={
+                      threads.find(
+                        (thread) => thread.id === sessionIDRef.current
+                      )?.memory
+                    }
+                    // generateResponse={generateResponse}
+                    // chatContent={chatContent}
+                    // setChatContent={setChatContent}
+                  />
+                  <SelixControlCenter
+                    setTasks={setTasks}
+                    refreshAssetLibrary={refreshAssetLibrary}
+                    attachedFile={attachedFile}
+                    counter={counter}
+                    recording={recording}
+                    tasks={tasks}
+                    setPrompt={setPrompt}
+                    handleSubmit={handleSubmit}
+                    setAIType={setAIType}
+                    aiType={aiType}
+                    threads={threads}
+                    messages={messages}
+                    setMessages={setMessages}
+                    currentSessionId={sessionIDRef.current}
+                  />
+                </SelinContext.Provider>
               </DragDropContext>
             </Flex>
           </Flex>

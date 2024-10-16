@@ -1124,9 +1124,6 @@ export function PersonCampaignCard(props: {
 
 
     const ActiveConvoOOODropdown = () => {
-      if (!filteredCampaignList?.some(item => item.outreach_status === 'ACTIVE_CONVO_OOO')) {
-        return null;
-      }
 
       return (
         <Accordion>
@@ -1137,9 +1134,7 @@ export function PersonCampaignCard(props: {
               </Text>
             </Accordion.Control>
             <Accordion.Panel>
-              {filteredCampaignList
-                ?.filter((item) => item.outreach_status === 'ACTIVE_CONVO_OOO')
-                .map((item, index) => (
+              {outOfOfficeCampaignList?.map((item, index) => (
                   <Group
                     grow
                     style={{
@@ -1590,7 +1585,7 @@ export function PersonCampaignCard(props: {
                   </Group>
                 );
               })}
-            <ActiveConvoOOODropdown/>
+            {outOfOfficeCampaignList.length > 0 && <ActiveConvoOOODropdown/>}
             </Flex>
           </ScrollArea>
         </Modal.Body>
@@ -1637,34 +1632,81 @@ export function PersonCampaignCard(props: {
       .catch((error) => console.log("error", error));
   };
 
+  const isOutOfOffice = (message: string) => {
+    const oooPhrases = [
+      "out of office", 
+      "on vacation", 
+      "away from office", 
+      "out of the office",
+      "on leave",
+      "taking a break",
+      "unavailable until",
+      "on medical leave",
+      "will not be checking my work email or work phone",
+      "If you need urgent attention",
+    ];
+    const oooRegex = new RegExp(oooPhrases.join("|"), "i");
+    return oooRegex.test(message);
+  };
+
   const filteredCampaignList = useMemo(() => {
+    const uniqueProspects = new Set();
+    const filterUnique = (item: any) => {
+      if (!uniqueProspects.has(item.prospect_name)) {
+        uniqueProspects.add(item.prospect_name);
+        return true;
+      }
+      return false;
+    };
+
     if (value === "sent") {
       return campaignList?.filter(
-        (item: any) => item.to_status === "SENT_OUTREACH"
+        (item: any) => item.to_status === "SENT_OUTREACH" && filterUnique(item)
       );
     } else if (value === "open") {
       return campaignList?.filter(
         (item: any) =>
-          item.to_status === "ACCEPTED" ||
+          (item.to_status === "ACCEPTED" ||
           item.to_status === "EMAIL_OPENED" ||
-          item.to_status.includes("ACTIVE_CONVO")
+          item.to_status.includes("ACTIVE_CONVO")) &&
+          item.to_status !== "ACTIVE_CONVO_OOO" &&
+          !isOutOfOffice(item.last_message_from_prospect || "") &&
+          filterUnique(item)
       );
     } else if (value === "reply") {
       return campaignList?.filter(
-        (item: any) => item.to_status.includes("ACTIVE_CONVO") // will catch all active convo statuses
+        (item: any) => 
+          item.to_status.includes("ACTIVE_CONVO") &&
+          item.to_status !== "ACTIVE_CONVO_OOO" &&
+          !isOutOfOffice(item.last_message_from_prospect || "") &&
+          filterUnique(item)
       );
     } else if (value === "demo") {
-      return campaignList?.filter((item: any) => item.to_status === "DEMO_SET");
+      return campaignList?.filter(
+        (item: any) => item.to_status === "DEMO_SET" && filterUnique(item)
+      );
     } else if (value === "pos_reply") {
       return campaignList?.filter((item: any) =>
         [
           "ACTIVE_CONVO_SCHEDULING",
           "ACTIVE_CONVO_NEXT_STEPS",
           "ACTIVE_CONVO_QUESTION",
-        ].includes(item.to_status)
+        ].includes(item.to_status) && filterUnique(item)
       );
     }
   }, [value, campaignList]);
+
+  const outOfOfficeCampaignList = useMemo(() => {
+    const uniqueProspects = new Set();
+    return campaignList?.filter((item: any) => 
+      (item.to_status === 'ACTIVE_CONVO_OOO' || 
+      isOutOfOffice(item.last_message_from_prospect || "")) &&
+      !uniqueProspects.has(item.prospect_name) &&
+      uniqueProspects.add(item.prospect_name)
+    );
+  }, [campaignList]);
+
+  console.log('campaign list is', campaignList);
 
   const unusedProspects =
     (props.project?.num_unused_email_prospects ?? 0) +

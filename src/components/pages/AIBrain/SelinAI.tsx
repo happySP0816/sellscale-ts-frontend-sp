@@ -1293,9 +1293,8 @@ export default function SelinAI() {
 
     if (recording) {
       intervalId = setInterval(() => {
-        const memory = threads.find(
-          (thread) => thread.id === currentSessionId
-        )?.memory;
+        const memory = threads.find((thread) => thread.id === currentSessionId)
+          ?.memory;
         if (
           memory?.strategy_id &&
           promptLengthRef.current > prevPromptLengthRef.current + 80
@@ -2721,8 +2720,10 @@ const SegmentChat = (props: any) => {
   const [clientMemoryState, setClientMemoryState] = useState<
     string | undefined
   >(props.memory?.memory_line);
-  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
-    useState<any>(props.memory?.memory_line_time_updated);
+  const [
+    clientMemoryStateUpdatedTime,
+    setClientMemoryStateUpdatedTime,
+  ] = useState<any>(props.memory?.memory_line_time_updated);
   const [memoryStateChanged, setMemoryStateChanged] = useState(false);
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
@@ -5228,8 +5229,9 @@ export const PlannerComponent = ({
   const [opened, { toggle }] = useDisclosure(true);
   const taskContainerRef = useRef<HTMLDivElement>(null);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
   const [editingTask, setEditingTask] = useState<Number | null>(null);
@@ -5638,6 +5640,10 @@ export const PlannerComponent = ({
                                         value: "ONE_SHOT_GENERATOR",
                                         label: "One Shot Generator",
                                       },
+                                      {
+                                        value: "COMPANY_SEGMENT",
+                                        label: "Company Segment",
+                                      },
                                     ]}
                                     onChange={(e) => {
                                       const updatedTasks = [...tasks];
@@ -6033,8 +6039,9 @@ const TaskRenderer = ({
   segment?: TransformedSegment | undefined;
   handleStrategySubmit: () => void;
 }) => {
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const sequencesV2Ref = useRef(null);
   const [lastLoadedProjectId, setLastLoadedProjectId] = useState<number>(-1);
   const [sequences, setSequences] = useState<any[]>([]);
@@ -6116,6 +6123,8 @@ const TaskRenderer = ({
           }}
         />
       );
+    case "COMPANY_SEGMENT":
+      return <ComingSoonCard />;
     case "REVIEW_COMPANIES":
       if (!segment) {
         return (
@@ -6357,9 +6366,8 @@ const SelinStrategy = ({
   currentSessionId: Number | null;
   counter: Number;
 }) => {
-  const memory = threads.find(
-    (thread) => thread.id === currentSessionId
-  )?.memory;
+  const memory = threads.find((thread) => thread.id === currentSessionId)
+    ?.memory;
 
   const hackedSubmit = () => {
     handleSubmit &&

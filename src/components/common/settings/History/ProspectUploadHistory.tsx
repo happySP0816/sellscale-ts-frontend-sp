@@ -65,12 +65,25 @@ interface UploadHistoryDataType {
   status: "UPLOAD_COMPLETE" | "UPLOAD_IN_PROGRESS";
 }
 
+import { socket } from '../../../App';
+
 export default function ProspectUploadHistory() {
   const userToken = useRecoilValue(userTokenState);
   const [opened, setOpened] = useRecoilState(prospectUploadDrawerOpenState);
   const [uploadID, setUploadID] = useRecoilState(prospectUploadDrawerIdState);
 
   const theme = useMantineTheme();
+
+  // Adding a socket listener here
+  useEffect(() => {
+    socket.on(`update_progress_status`, (data) => {
+      refetch();
+    })
+
+    return () => {
+      socket.off(`update_progress_status`);
+    }
+  })
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-upload-history-all`],

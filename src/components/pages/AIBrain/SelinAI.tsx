@@ -162,6 +162,7 @@ import SelixMemoryLogs from "./SelinMemoryLogs";
 import { Draggable } from "react-beautiful-dnd";
 import { isInt } from "@fullcalendar/core/internal";
 import { Calendar, TimeInput } from "@mantine/dates";
+import AssetLibraryV2 from "@pages/AssetLibrary/AssetLibraryV2";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
@@ -316,7 +317,7 @@ export interface MemoryType {
   strategy_id: number;
   campaign_id: number;
   memory_state: string;
-  tab: "STRATEGY_CREATOR" | "PLANNER" | "BROWSER" | "ICP";
+  tab: "STRATEGY_CREATOR" | "PLANNER" | "BROWSER" | "ICP" | "ASSETS";
   search?: {
     query: string;
     response: string;
@@ -4874,6 +4875,21 @@ const SelixControlCenter = ({
                 </div>
               ),
             },
+            {
+              value: "ASSETS",
+              label: (
+                <div
+                  onMouseEnter={() => handlePopoverOpen(3)}
+                  onMouseLeave={handlePopoverClose}
+                  // onClick={() => setShowICPModal(true)}
+                >
+                  <Center style={{ gap: 10 }}>
+                    <IconArchive size={"1rem"} />
+                    <span>Assets</span>
+                  </Center>
+                </div>
+              ),
+            },
           ]}
         />
       </Paper>
@@ -4950,6 +4966,8 @@ const SelixControlCenter = ({
             attachedFile={attachedFile}
             currentSessionId={currentSessionId}
           />
+        ) : aiType === "ASSETS" ? (
+          <AssetLibraryV2 />
         ) : (
           <Center style={{ height: "100%" }}>
             <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>

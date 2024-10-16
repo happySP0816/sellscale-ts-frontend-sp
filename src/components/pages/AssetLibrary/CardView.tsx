@@ -94,8 +94,8 @@ export default function CardView(props: any) {
           />
           <MultiSelect
             label="Client Archetypes"
-            data={editAsset.client_archetype_ids.map(id => ({ value: id.toString(), label: id.toString() }))}
-            value={editAsset.client_archetype_ids.map(id => id.toString())}
+            data={editAsset.client_archetype_ids ? editAsset.client_archetype_ids.map(id => ({ value: id.toString(), label: id.toString() })) : []}
+            value={editAsset.client_archetype_ids?.map(id => id.toString())}
             onChange={(values) => setEditAsset({ ...editAsset, client_archetype_ids: values.map(Number) })}
             placeholder="Select archetype IDs"
             creatable
@@ -193,7 +193,7 @@ export default function CardView(props: any) {
           <Grid>
             {useData?.map((item: AssetType, index: number) => {
               return (
-                <Grid.Col span={4} key={index}>
+                <Grid.Col span={window.location.href.includes('selix') ? 6 : 4} key={index}>
                   <Flex
                     style={{ border: '1px solid #ced4da', borderRadius: '8px' }}
                     p={'xl'}
@@ -219,7 +219,7 @@ export default function CardView(props: any) {
                             Campaigns:
                           </Text>
                           <List size="sm" spacing="xs">
-                            {item.client_archetype_ids.map((campaign, idx) => (
+                            {item.client_archetype_ids?.map((campaign, idx) => (
                               <List.Item key={idx}>
                                 <a href={`/campaign_v2/${campaign}`} target="_blank" rel="noopener noreferrer">{campaign}</a>
                               </List.Item>

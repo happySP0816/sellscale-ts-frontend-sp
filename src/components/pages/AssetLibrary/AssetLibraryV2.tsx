@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Divider, Flex, Group, List, Modal, Radio, Stack, Switch, Text, TextInput, Textarea, useMantineTheme } from '@mantine/core';
+import { Badge, Box, Button, Divider, Flex, Group, List, LoadingOverlay, Modal, Radio, Stack, Switch, Text, TextInput, Textarea, useMantineTheme } from '@mantine/core';
 import { IconCloudUpload, IconEdit, IconFileSpreadsheet, IconLayoutBoard, IconList, IconPlus, IconTrash, IconUpload, IconX } from '@tabler/icons';
 import { IconArrowRight, IconBulb, IconToggleRight } from '@tabler/icons';
 import { useDisclosure } from '@mantine/hooks';
@@ -15,10 +15,11 @@ import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
 export type AssetType = {
   asset_key: string;
   asset_raw_value: string | null;
+  created_at: Date;
   asset_tags: string[];
   asset_type: 'PDF' | 'URL' | 'TEXT';
   asset_value: string;
-  client_archetype_ids: number[];
+  client_archetype_ids: number[] | null;
   client_id: number;
   id: number;
   num_opens: number;
@@ -35,6 +36,7 @@ export default function AssetLibraryV2() {
   const [tabs, setTabs] = useState('non_generative');
   const [semiTabs, setSemiTabs] = useState('');
   const userToken = useRecoilValue(userTokenState);
+  const [loading, setLoading] = useState(false);
   const userData = useRecoilValue(userDataState);
   const MAX_FILE_SIZE_MB = 2;
   const [preview, setPreview] = useState(false);
@@ -135,6 +137,7 @@ export default function AssetLibraryV2() {
 
   const fetchAllAssets = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`${API_URL}/client/all_assets_in_client`, {
         method: 'GET',
         headers: {
@@ -144,10 +147,22 @@ export default function AssetLibraryV2() {
       const result = await response.json();
       if (result.message === 'Success') {
         const assets: AssetType[] = result.data;
-        const usedData = assets.filter((asset: AssetType) => asset.client_archetype_ids.length > 0);
+        const usedData = assets.filter((asset: AssetType) => asset.client_archetype_ids && asset.client_archetype_ids.some(id => id !== null));
         setUsedData(usedData);
-        const unusedData = assets.filter((asset: AssetType) => asset.client_archetype_ids.length === 0);
+        const unusedData = assets.filter((asset: AssetType) => !asset.client_archetype_ids || asset.client_archetype_ids.every(id => id === null));
         setUnUsedData(unusedData);
+        const urlParams = new URLSearchParams(window.location.search);
+        const isSelix = urlParams.toString().includes('selix');
+
+        if (isSelix) {
+          const dataOrderedByMostRecent = assets.sort((a, b) => {
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          });
+          const usedData = dataOrderedByMostRecent.filter((asset: AssetType) => asset.client_archetype_ids && asset.client_archetype_ids.some(id => id !== null));
+          const unusedData = dataOrderedByMostRecent.filter((asset: AssetType) => !asset.client_archetype_ids || asset.client_archetype_ids.every(id => id === null));
+          setUsedData(usedData);
+          setUnUsedData(unusedData);
+        }
 
       } else {
         showNotification({
@@ -157,16 +172,21 @@ export default function AssetLibraryV2() {
         });
       }
     } catch (error) {
+      console.error(error);
       showNotification({
         title: 'Error',
         message: 'An error occurred while fetching assets',
         color: 'red',
       });
     }
+    finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Flex direction={'column'} px={'5%'} gap={'sm'} bg={'white'}>
+      <LoadingOverlay visible={loading} />
       <Flex mt="md" align={'center'} justify={'space-between'}>
         <Text size={'25px'} fw={700}>
           SellScale's Asset Library

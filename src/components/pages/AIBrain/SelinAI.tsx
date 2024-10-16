@@ -164,6 +164,7 @@ import { Draggable } from "react-beautiful-dnd";
 import { isInt } from "@fullcalendar/core/internal";
 import { Calendar, TimeInput } from "@mantine/dates";
 import AssetLibraryV2 from "@pages/AssetLibrary/AssetLibraryV2";
+import CompanySegmentReview from "@pages/SegmentV2/CompanySegmentReview";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
@@ -318,6 +319,7 @@ export interface MemoryType {
   strategy_id: number;
   campaign_id: number;
   memory_state: string;
+  company_segment_id?: number;
   tab: "STRATEGY_CREATOR" | "PLANNER" | "BROWSER" | "ICP" | "ASSETS";
   search?: {
     query: string;
@@ -6113,7 +6115,12 @@ const TaskRenderer = ({
         />
       );
     case "COMPANY_SEGMENT":
-      return <ComingSoonCard />;
+      return (
+        <CompanySegmentReview
+          selixSessionId={currentSessionId}
+          connectedCompanySegmentId={currentThread?.memory?.company_segment_id}
+        />
+      );
     case "REVIEW_COMPANIES":
       if (!segment) {
         return (

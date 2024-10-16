@@ -55,7 +55,7 @@ import { API_URL } from "@constants/data";
 import { deterministicMantineColor } from "@utils/requests/utils";
 import { showNotification } from "@mantine/notifications";
 import { socket } from "../../../components/App";
-import { PlannerComponent, SelinContext, ThreadType } from "./SelinAI";
+import { ThreadType } from "./SelinAI";
 import { useQuery } from "@tanstack/react-query";
 import { ex } from "@fullcalendar/core/internal-common";
 import { isHtmlElement } from "react-router-dom/dist/dom";
@@ -116,8 +116,6 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
   const [selectedSessionView, setSelectedSessionView] = useState<string | null>(
     "0: View All Sessions"
   );
-
-  const value: any = useContext(SelinContext);
 
   const updateMemoryLogSessionId = async (
     selixLogId: number,
@@ -1381,19 +1379,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                   __html: selectedLog.metadata.replaceAll("\n", "<br />"),
                 }}
               />
-              {selectedLog.tag === "MEMORY_METADATA_SAVED" &&
-                logs &&
-                !selectedLog.is_supervisor && (
-                  <PlannerComponent
-                    setTasks={value.setTasks}
-                    counter={value.counter}
-                    messagesLength={value.messagesLength}
-                    threads={threads}
-                    tasks={value.tasks}
-                    currentSessionId={selectedLog.session_id}
-                    handleStrategySubmit={value.handleSubmit}
-                  />
-                )}
+              {/* {selectedLog.tag === "MEMORY_METADATA_SAVED" && */}
+              {/*   logs && */}
+              {/*   !selectedLog.is_supervisor && ( */}
+              {/*   )} */}
               {selectedLog.tag !== "SUPPORT_THREAD_SLACK" &&
                 selectedLog.tag !== "SUPPORT_THREAD_EMAIL" &&
                 selectedLog.tag !==

@@ -70,32 +70,6 @@ import { GenerationCenter } from "./GenerationCenter";
 import GenerateAndSend from "@pages/GenerateAndSend";
 // import ToneAdjuster from "./ToneAdjuster";
 
-interface StatsData {
-  id: number;
-  meta_data?: {
-    linkedin_has_been_active?: boolean;
-    email_has_been_active?: boolean;
-  };
-  li_seq_generation_in_progress?: boolean;
-  email_seq_generation_in_progress?: boolean;
-  is_setting_up: boolean;
-  archetype_name: string;
-  created_at: string;
-  emoji: string;
-  testing_volume: number;
-  template_mode: boolean;
-  active: boolean;
-  email_to_linkedin_connection?: string;
-  ai_researcher_id?: number;
-  sdr_img_url: string;
-  num_prospects: number;
-  num_prospects_with_emails: number;
-  email_active: boolean;
-  linkedin_active: boolean;
-  sdr_name: string;
-  is_ai_research_personalization_enabled: boolean;
-  setup_status: string;
-}
 
 const steps = [
   {
@@ -160,50 +134,6 @@ export default function CampaignLandingV2(props: PropsType) {
     localStorage.setItem("campaignTourSeen", "true");
   };
 
-  const convertStatsDataToPersonaOverview = (statsData: StatsData): PersonaOverview => {
-    return {
-      active: statsData.active,
-      id: statsData.id,
-      name: statsData.archetype_name,
-      num_prospects: statsData.num_prospects,
-      num_unused_email_prospects: 0,
-      num_unused_li_prospects: 0,
-      icp_matching_prompt: "",
-      icp_matching_option_filters: {},
-      is_unassigned_contact_archetype: false,
-      persona_fit_reason: "",
-      persona_contact_objective: "",
-      uploads: [],
-      li_seq_generation_in_progress: statsData.li_seq_generation_in_progress,
-      email_seq_generation_in_progress: statsData.email_seq_generation_in_progress,
-      contract_size: 0,
-      transformer_blocklist: [],
-      transformer_blocklist_initial: [],
-      emoji: statsData.emoji,
-      avg_icp_fit_score: 0,
-      li_bump_amount: 0,
-      cta_framework_company: "",
-      cta_framework_persona: "",
-      cta_framework_action: "",
-      use_cases: "",
-      filters: "",
-      lookalike_profile_1: "",
-      lookalike_profile_2: "",
-      lookalike_profile_3: "",
-      lookalike_profile_4: "",
-      lookalike_profile_5: "",
-      template_mode: statsData.template_mode,
-      smartlead_campaign_id: undefined,
-      meta_data: statsData.meta_data,
-      first_message_delay_days: undefined,
-      linkedin_active: statsData.linkedin_active,
-      email_active: statsData.email_active,
-      email_open_tracking_enabled: false,
-      email_link_tracking_enabled: false,
-      is_ai_research_personalization_enabled: statsData.is_ai_research_personalization_enabled,
-      ai_researcher_id: statsData.ai_researcher_id,
-    };
-  };
   const userData = useRecoilValue(userDataState);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
@@ -239,7 +169,6 @@ export default function CampaignLandingV2(props: PropsType) {
 
   const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<SubjectLineTemplate[]>(emailSubjectLinesState);
 
-  const [statsData, setStatsData] = useState<StatsData | null>(null);
   const [isEditingCampaignName, setIsEditingCampaignName] = useState(false);
   const [editableText, setEditableText] = useState("");
   const [showActivateWarningModal, setShowActivateWarningModal] = useState(false);
@@ -432,12 +361,15 @@ export default function CampaignLandingV2(props: PropsType) {
         console.error("Error updating connection type", error);
       })
       .finally(() => {
-        setStatsData({
-          ...(statsData as StatsData),
-          email_to_linkedin_connection: newConnectionType,
+        setCurrentProject((prevProject) => {
+          if (!prevProject) return null;
+          return {
+            ...prevProject,
+            email_to_linkedin_connection: newConnectionType,
+          };
         });
-        if (statsData && statsData.testing_volume) {
-          setTestingVolume(statsData.testing_volume);
+        if (currentProject && currentProject.testing_volume) {
+          setTestingVolume(currentProject.testing_volume);
         }
         setLoadingStats(false);
       });
@@ -448,8 +380,8 @@ export default function CampaignLandingV2(props: PropsType) {
     const statsPromise = fetchCampaignStats(userToken, id);
     statsPromise
       .then((stats) => {
-        const loadedStats = stats as StatsData;
-        setStatsData(loadedStats);
+        const loadedStats = stats as PersonaOverview;
+        setCurrentProject(loadedStats);
         if (loadedStats && loadedStats.testing_volume) {
           setTestingVolume(loadedStats.testing_volume);
         }
@@ -511,10 +443,10 @@ export default function CampaignLandingV2(props: PropsType) {
 
       Promise.all([statsPromise, totalContactsPromise])
         .then(([stats, totalContacts]) => {
-          const loadedStats = stats as StatsData;
+          const loadedStats = stats as PersonaOverview;
           console.log("stats", loadedStats);
-          setStatsData(loadedStats);
-          !props.forcedCampaignId && setCurrentProject(convertStatsDataToPersonaOverview(loadedStats as StatsData));
+          setCurrentProject(loadedStats);
+          !props.forcedCampaignId && setCurrentProject(loadedStats);
           if (loadedStats && loadedStats.testing_volume) {
             setTestingVolume(loadedStats.testing_volume);
           }
@@ -788,7 +720,7 @@ export default function CampaignLandingV2(props: PropsType) {
           </Modal>
         </>
       )}
-      {loadingStats || !statsData ? (
+      {loadingStats || !currentProject ? (
         <Flex
           mx={"xl"}
           direction="column"
@@ -840,14 +772,14 @@ export default function CampaignLandingV2(props: PropsType) {
                             </Text>
                             <Avatar size={"sm"} src={userData.img_url} sx={{ borderRadius: "50%" }} />
                             <Text fw={600} size={"xs"}>
-                              {statsData?.sdr_name}
+                              {currentProject?.sdr_name}
                             </Text>
                             <Divider orientation="vertical" />
                             <Text color="gray" size={"xs"} fw={600}>
                               Created:
                             </Text>
                             <Text fw={600} size={"xs"}>
-                              {new Date(statsData.created_at).toLocaleString("en-US", {
+                              {new Date(currentProject.created_at).toLocaleString("en-US", {
                                 dateStyle: "full",
                               })}
                             </Text>
@@ -860,7 +792,7 @@ export default function CampaignLandingV2(props: PropsType) {
                             onChange={(e) => setEditableText(e.currentTarget.value)}
                             onBlur={() => {
                               setIsEditingCampaignName(false);
-                              setStatsData((prevData: any) => ({
+                              setCurrentProject((prevData: any) => ({
                                 ...prevData,
                                 archetype_name: editableText,
                               }));
@@ -869,7 +801,7 @@ export default function CampaignLandingV2(props: PropsType) {
                             onKeyDown={(e) => {
                               if (e.key === "Enter") {
                                 setIsEditingCampaignName(false);
-                                setStatsData((prevData: any) => ({
+                                setCurrentProject((prevData: any) => ({
                                   ...prevData,
                                   archetype_name: editableText,
                                 }));
@@ -884,13 +816,13 @@ export default function CampaignLandingV2(props: PropsType) {
                             fw={600}
                             size={20}
                             onClick={() => {
-                              setEditableText(`${statsData?.archetype_name}`);
+                              setEditableText(`${currentProject?.name}`);
                               setIsEditingCampaignName(true);
                             }}
                             style={{ cursor: "text" }}
                           >
-                            {statsData?.emoji} {statsData?.archetype_name?.substring(0, 70)}
-                            {statsData?.archetype_name?.length > 70 && "..."}
+                            {currentProject?.emoji} {currentProject?.archetype?.substring(0, 70) || currentProject?.name?.substring(0, 70)}
+                            {(currentProject?.archetype && currentProject?.archetype?.length > 70 || currentProject?.name?.length > 70) && "..."}
                           </Text>
                         )}
                       </Tooltip>
@@ -931,19 +863,19 @@ export default function CampaignLandingV2(props: PropsType) {
                       <GenerationCenter />
                     </Modal>
                     <Flex gap={"sm"} align={"center"}>
-                      {statsData?.email_active && (
+                      {currentProject?.email_active && (
                         <div className="flex justify-center items-center p-2 bg-[#f6f9f8] border border-gray-400 rounded-sm">
                           <IconMail fill="#228be6" color="#f6f9f8" size={"1.4rem"} />
                         </div>
                       )}
-                      {statsData?.linkedin_active && (
+                      {currentProject?.linkedin_active && (
                         <div className="flex justify-center items-center p-2 bg-[#f6f9f8] border border-gray-400 rounded-sm">
                           <IconBrandLinkedin fill="#228be6" color="#f6f9f8" size={"1.4rem"} />
                         </div>
                       )}
                     </Flex>
                     {true &&
-                      (statsData?.linkedin_active || statsData?.email_active ? (
+                      (currentProject?.linkedin_active || currentProject?.email_active ? (
                         <Flex
                           align="center"
                           color="green"
@@ -973,7 +905,7 @@ export default function CampaignLandingV2(props: PropsType) {
                                 "Content-Type": "application/json",
                               },
                               body: JSON.stringify({
-                                message: `⚠️⚠️⚠️\nUser ${statsData?.sdr_name} launched '${statsData?.archetype_name}' campaign.\n⚠️⚠️⚠️`,
+                                message: `⚠️⚠️⚠️\nUser ${currentProject?.sdr_name} launched '${currentProject?.name}' campaign.\n⚠️⚠️⚠️`,
                                 webhook_key: "selix-sessions",
                               }),
                             });
@@ -1193,7 +1125,7 @@ export default function CampaignLandingV2(props: PropsType) {
               {!window.location.href.includes("selix") && (
                 <Flex gap={"sm"} w={"100%"} justify={"center"} p={"lg"}>
                   <Paper w={"100%"} withBorder>
-                    {loadingStats || !statsData ? (
+                    {loadingStats || !currentProject ? (
                       <Flex direction="row" align="center" w="100%" my="md">
                         <Flex direction="column" align="center" w="100%" my="md">
                           <Skeleton height={50} width="80%" />
@@ -1510,7 +1442,6 @@ export default function CampaignLandingV2(props: PropsType) {
               <SequencesV2
                 // checkCanToggleEmail={checkCanToggleEmail}
                 togglePersonaChannel={togglePersonaChannel}
-                statsData={statsData}
                 // checkCanToggleLinkedin={checkCanToggleLinkedin}
                 updateConnectionType={updateConnectionType}
               />
@@ -1526,7 +1457,7 @@ export default function CampaignLandingV2(props: PropsType) {
               {/*   linkedinInitialMessages={linkedinInitialMessages} */}
               {/* /> */}
               <Personalizers
-                ai_researcher_id={statsData?.ai_researcher_id}
+                ai_researcher_id={currentProject?.ai_researcher_id}
                 sequences={emailSequenceData || []}
                 setPersonalizers={setPersonalizers}
                 personalizers={personalizers}

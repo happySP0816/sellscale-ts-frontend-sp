@@ -41,6 +41,7 @@ import {
   Loader,
   Group,
   Input,
+  NativeSelect,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -145,7 +146,6 @@ export default function CampaignTemplateEditModal({
   campaignId: number;
   cType?: string;
   prospectId?: number;
-  statsData: any;
   // checkCanToggleEmail: any;
   togglePersonaChannel: any;
   updateConnectionType: any;
@@ -160,11 +160,14 @@ export default function CampaignTemplateEditModal({
   const [emailSubjectLines, setEmailSubjectLines] = useRecoilState(
     emailSubjectLinesState
   );
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const [alteredLinkedinActive, setAlteredLinkedinActive] = useState(
-    innerProps.statsData.linkedin_active
+    currentProject?.linkedin_active
   );
   const [alteredEmailActive, setAlteredEmailActive] = useState(
-    innerProps.statsData.email_active
+    currentProject?.email_active
   );
   const [
     isEditingInitialMessageBumpDelayDays,
@@ -193,6 +196,9 @@ export default function CampaignTemplateEditModal({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [templateType, setTemplateType] = useState("template" || "generate");
+
+  const [currentConnectionType, setCurrentConnectionType] = useState<string>(currentProject?.email_to_linkedin_connection || "RANDOM");
+
   const [sequenceType, setSequenceType]: any = useState<string>(
     innerProps.sequenceType || "email"
   );
@@ -315,9 +321,6 @@ export default function CampaignTemplateEditModal({
 
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
   const campaignId = innerProps.campaignId;
   const [openTrackingEnabled, setOpenTrackingEnabled] = useState(
     !currentProject?.email_open_tracking_enabled
@@ -547,34 +550,25 @@ export default function CampaignTemplateEditModal({
                   labelPosition="center"
                   label={<Hook linkedLeft={false} linkedRight={false} />}
                 />
-                <Select
-                  onChange={(value) => {
+                <NativeSelect
+                  onChange={(e) => {
+                    const value = e.currentTarget.value;
+                    console.log('args are ', value, currentProject?.id);
                     if (typeof value === "string") {
-                      innerProps?.updateConnectionType(value, id);
+                      innerProps?.updateConnectionType(value, currentProject?.id);
+                      setCurrentConnectionType(value); // Set the currentConnectionType
                     }
                   }}
-                  size="sm"
-                  value={innerProps?.statsData?.email_to_linkedin_connection}
-                  w={"100%"}
+                  value={currentProject?.email_to_linkedin_connection || ""}
                   data={[
-                    {
-                      label: "Parallel",
-                      value: "RANDOM",
-                    },
-                    {
-                      label: "📧 Sent-Only",
-                      value: "ALL_PROSPECTS",
-                    },
-                    {
-                      label: "👀 Open-Only",
-                      value: "OPENED_EMAIL_PROSPECTS_ONLY",
-                    },
-                    {
-                      label: "⚡️ Click-Only",
-                      value: "CLICKED_LINK_PROSPECTS_ONLY",
-                    },
+                    { label: "Parallel", value: "RANDOM" },
+                    { label: "📧 Sent-Only", value: "ALL_PROSPECTS" },
+                    { label: "👀 Open-Only", value: "OPENED_EMAIL_PROSPECTS_ONLY" },
+                    { label: "⚡️ Click-Only", value: "CLICKED_LINK_PROSPECTS_ONLY" },
+                    { label: "🔗 Linkedin Sent", value: "ACCEPTED_THEN_SHOULD_EMAIL" },
+                    { label: "⏳ Linkedin Accepted, 3 days No reply", value: "ACCEPTED_BUT_NO_REPLY_3_DAYS" },
                   ]}
-                  placeholder="Select an event"
+                  style={{ width: "100%" }}
                 />
                 <Divider
                   variant="dashed"

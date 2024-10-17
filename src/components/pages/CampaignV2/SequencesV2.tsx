@@ -190,7 +190,6 @@ export const SequencesV2 = React.forwardRef((props: any, ref) => {
   const {
     // checkCanToggleEmail,
     togglePersonaChannel,
-    statsData,
     // checkCanToggleLinkedin,
     updateConnectionType,
   } = props;
@@ -648,6 +647,7 @@ const emailSteps = useMemo(() => {
             <Button
               leftIcon={<IconPlus size={"0.9rem"} />}
               onClick={() => {
+                if (!currentProject) return;
                 openContextModal({
                   modal: "campaignTemplateEditModal",
                   withCloseButton: false,
@@ -667,7 +667,6 @@ const emailSteps = useMemo(() => {
                     prospectId: selectedProspect?.id,
                     // checkCanToggleEmail: checkCanToggleEmail,
                     togglePersonaChannel: togglePersonaChannel,
-                    statsData: statsData,
                     // checkCanToggleLinkedin: checkCanToggleLinkedin,
                     updateConnectionType: updateConnectionType,
                     currentStepNum: 0,

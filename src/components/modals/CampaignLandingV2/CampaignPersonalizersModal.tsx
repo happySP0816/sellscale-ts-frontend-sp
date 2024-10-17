@@ -1083,38 +1083,6 @@ export default function CampaignPersonalizersModal({
                               </Popover>
                             </Flex>
                           </Paper>
-                          <Flex align={"center"} gap={"md"} mt={"lg"}>
-                            <Button
-                              fullWidth
-                              disabled={!selectedProspect}
-                              color="grape"
-                              leftIcon={<IconSparkles size={"0.9rem"} />}
-                              onClick={() =>
-                                openContextModal({
-                                  modal: "simulatepersonalizerModal",
-                                  title: (
-                                    <Title order={3}>
-                                      <span className=" text-gray-500"></span>{" "}
-                                      Personalizers
-                                    </Title>
-                                  ),
-                                  innerProps: {
-                                    prospectId: selectedProspect,
-                                    sequences: sequences,
-                                  },
-                                  centered: true,
-                                  styles: {
-                                    content: {
-                                      minWidth: "700px",
-                                    },
-                                  },
-                                })
-                              }
-                              style={{ margin: "0 8px 8px 8px" }} // Added margins to make the button smaller
-                            >
-                              Personalize
-                            </Button>
-                          </Flex>
                         </>
                       );
                     })}

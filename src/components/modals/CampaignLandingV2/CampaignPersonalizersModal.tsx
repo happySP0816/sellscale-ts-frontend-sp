@@ -223,7 +223,10 @@ export default function CampaignPersonalizersModal({
     });
 
     if (response.status === 200) {
-      await queryClient.invalidateQueries(["archetypeProspects", innerProps.id]);
+      await queryClient.invalidateQueries([
+        "archetypeProspects",
+        innerProps.id,
+      ]);
       await queryClient.invalidateQueries(["icpScoringRuleset", innerProps.id]);
       showNotification({
         title: "Success",
@@ -418,308 +421,290 @@ export default function CampaignPersonalizersModal({
           {/*   </Text> */}
           {/* )} */}
           <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
-            {individual_ai_filters?.map(
-              (filter, index) => {
-                return (
-                  <Paper
-                    key={index}
-                    withBorder
-                    radius={"sm"}
-                    p={"sm"}
-                    mt={"xs"}
-                  >
-                    <Flex direction={"column"} gap="4px" align={"center"}>
-                      <Flex justify={"space-between"} align="center">
-                        <Badge variant={"filled"} color={"grape"}>
-                          Individual
-                        </Badge>
-                        <ActionIcon
-                          onClick={async () => {
-                            let newIndividualAIFilters: AIFilters[] = [];
-                            let newDealbreaker: string[] = [];
-                            let newIndividualAIPersonalizer: string[] = [];
+            {individual_ai_filters?.map((filter, index) => {
+              return (
+                <Paper key={index} withBorder radius={"sm"} p={"sm"} mt={"xs"}>
+                  <Flex direction={"column"} gap="4px" align={"center"}>
+                    <Flex justify={"space-between"} align="center">
+                      <Badge variant={"filled"} color={"grape"}>
+                        Individual
+                      </Badge>
+                      <ActionIcon
+                        onClick={async () => {
+                          let newIndividualAIFilters: AIFilters[] = [];
+                          let newDealbreaker: string[] = [];
+                          let newIndividualAIPersonalizer: string[] = [];
 
-                            setDealBreakers((prevState) => {
-                              newDealbreaker = prevState.filter(
-                                (x) => x !== filter.key
-                              );
-                              return prevState.filter((x) => x !== filter.key);
-                            });
-                            setIndividualPersonalizers((prevState) => {
-                              newIndividualAIPersonalizer = prevState.filter(
-                                (x) => x !== filter.key
-                              );
-                              return prevState.filter((x) => x !== filter.key);
-                            });
-                            setIndividualAIFilters((prevState) => {
-                              newIndividualAIFilters = prevState.filter(
-                                (item) => item.key !== filter.key
-                              );
-                              return prevState.filter(
-                                (item) => item.key !== filter.key
-                              );
-                            });
-
-                            await addAIFilter(
-                              company_ai_filters,
-                              newIndividualAIFilters,
-                              newDealbreaker,
-                              company_personalizers,
-                              newIndividualAIPersonalizer
+                          setDealBreakers((prevState) => {
+                            newDealbreaker = prevState.filter(
+                              (x) => x !== filter.key
                             );
-                          }}
-                        >
-                          <IconTrash color={"red"} size={"1rem"} />
-                        </ActionIcon>
-                      </Flex>
-
-                      <Text fw={600} size={"md"} mt={4}>
-                        {filter.title}
-                      </Text>
-                      <Textarea
-                        fw={500}
-                        label={"prompt"}
-                        value={filter.prompt}
-                        onChange={(event) => {
-                          setIndividualAIFilters((prevState) => {
-                            return prevState.map((previousAI) => {
-                              if (previousAI.key === filter.key) {
-                                return {
-                                  ...filter,
-                                  prompt: event.currentTarget.value,
-                                };
-                              }
-
-                              return previousAI;
-                            });
+                            return prevState.filter((x) => x !== filter.key);
                           });
-                        }}
-                        autosize
-                        minRows={4}
-                        maxRows={8}
-                      >
-                        {filter.prompt}
-                      </Textarea>
-                      <Textarea
-                        fw={500}
-                        label={"relevancy"}
-                        value={filter.relevancy}
-                        onChange={(event) => {
-                          setIndividualAIFilters((prevState) => {
-                            return prevState.map((previousAI) => {
-                              if (previousAI.key === filter.key) {
-                                return {
-                                  ...filter,
-                                  relevancy: event.currentTarget.value,
-                                };
-                              }
-
-                              return previousAI;
-                            });
-                          });
-                        }}
-                        autosize
-                        minRows={4}
-                        maxRows={8}
-                      >
-                        {filter.relevancy}
-                      </Textarea>
-                      <Flex justify={"start"} align={"start"} gap={"4px"}>
-                        <Checkbox
-                          checked={dealbreakers.includes(filter.key)}
-                          onChange={(event) => {
-                            if (event.currentTarget.checked) {
-                              setDealBreakers([...dealbreakers, filter.key]);
-                            } else {
-                              setDealBreakers(
-                                dealbreakers.filter((x) => x !== filter.key)
-                              );
-                            }
-                          }}
-                          label={"Dealbreaker"}
-                          size={"xs"}
-                        />
-                        <Checkbox
-                          checked={individual_personalizers.includes(
-                            filter.key
-                          )}
-                          onChange={(event) => {
-                            if (event.currentTarget.checked) {
-                              setIndividualPersonalizers([
-                                ...individual_personalizers,
-                                filter.key,
-                              ]);
-                            } else {
-                              setIndividualPersonalizers(
-                                individual_personalizers.filter(
-                                  (x) => x !== filter.key
-                                )
-                              );
-                            }
-                          }}
-                          label={"Personalizer"}
-                          size={"xs"}
-                        />
-                      </Flex>
-                    </Flex>
-                  </Paper>
-                );
-              }
-            )}
-            {company_ai_filters?.map(
-              (filter, index) => {
-                return (
-                  <Paper
-                    key={index}
-                    withBorder
-                    radius={"sm"}
-                    p={"sm"}
-                    mt={"xs"}
-                  >
-                    <Flex direction={"column"} gap="4px" align={"center"}>
-                      <Flex justify={"space-between"} align="center">
-                        <Badge variant={"filled"} color={"blue"}>
-                          Company
-                        </Badge>
-                        <ActionIcon
-                          onClick={async () => {
-                            let newCompanyAIFilters: AIFilters[] = [];
-                            let newDealbreaker: string[] = [];
-                            let newCompanyAIPersonalizer: string[] = [];
-
-                            setDealBreakers((prevState) => {
-                              newDealbreaker = prevState.filter(
-                                (x) => x !== filter.key
-                              );
-                              return prevState.filter((x) => x !== filter.key);
-                            });
-                            setCompanyPersonalizers((prevState) => {
-                              newCompanyAIPersonalizer = prevState.filter(
-                                (x) => x !== filter.key
-                              );
-                              return prevState.filter((x) => x !== filter.key);
-                            });
-                            setCompanyAIFilters((prevState) => {
-                              newCompanyAIFilters = prevState.filter(
-                                (item) => item.key !== filter.key
-                              );
-
-                              return prevState.filter(
-                                (item) => item.key !== filter.key
-                              );
-                            });
-
-                            await addAIFilter(
-                              newCompanyAIFilters,
-                              individual_ai_filters,
-                              newDealbreaker,
-                              newCompanyAIPersonalizer,
-                              individual_personalizers
+                          setIndividualPersonalizers((prevState) => {
+                            newIndividualAIPersonalizer = prevState.filter(
+                              (x) => x !== filter.key
                             );
-                          }}
-                        >
-                          <IconTrash color={"red"} size={"1rem"} />
-                        </ActionIcon>
-                      </Flex>
-
-                      <Text fw={600} size={"md"} mt={4}>
-                        {filter.title}
-                      </Text>
-                      <Textarea
-                        fw={500}
-                        label={"prompt"}
-                        value={filter.prompt}
-                        onChange={(event) => {
-                          setCompanyAIFilters((prevState) => {
-                            return prevState.map((previousAI) => {
-                              if (previousAI.key === filter.key) {
-                                return {
-                                  ...filter,
-                                  prompt: event.currentTarget.value,
-                                };
-                              }
-
-                              return previousAI;
-                            });
+                            return prevState.filter((x) => x !== filter.key);
                           });
-                        }}
-                        autosize
-                        minRows={4}
-                        maxRows={8}
-                      >
-                        {filter.prompt}
-                      </Textarea>
-                      <Textarea
-                        fw={500}
-                        label={"relevancy"}
-                        value={filter.relevancy}
-                        onChange={(event) => {
-                          setCompanyAIFilters((prevState) => {
-                            return prevState.map((previousAI) => {
-                              if (previousAI.key === filter.key) {
-                                return {
-                                  ...filter,
-                                  relevancy: event.currentTarget.value,
-                                };
-                              }
-
-                              return previousAI;
-                            });
+                          setIndividualAIFilters((prevState) => {
+                            newIndividualAIFilters = prevState.filter(
+                              (item) => item.key !== filter.key
+                            );
+                            return prevState.filter(
+                              (item) => item.key !== filter.key
+                            );
                           });
+
+                          await addAIFilter(
+                            company_ai_filters,
+                            newIndividualAIFilters,
+                            newDealbreaker,
+                            company_personalizers,
+                            newIndividualAIPersonalizer
+                          );
                         }}
-                        autosize
-                        minRows={4}
-                        maxRows={8}
                       >
-                        {filter.relevancy}
-                      </Textarea>
-                      <Flex
-                        direction={"column"}
-                        justify={"start"}
-                        align={"start"}
-                        gap={"4px"}
-                      >
-                        <Checkbox
-                          checked={dealbreakers.includes(filter.key)}
-                          onChange={(event) => {
-                            if (event.currentTarget.checked) {
-                              setDealBreakers([...dealbreakers, filter.key]);
-                            } else {
-                              setDealBreakers(
-                                dealbreakers.filter((x) => x !== filter.key)
-                              );
-                            }
-                          }}
-                          label={"Dealbreaker"}
-                          size={"xs"}
-                          mb={"4px"}
-                        />
-                        <Checkbox
-                          checked={company_personalizers.includes(filter.key)}
-                          onChange={(event) => {
-                            if (event.currentTarget.checked) {
-                              setCompanyPersonalizers([
-                                ...company_personalizers,
-                                filter.key,
-                              ]);
-                            } else {
-                              setCompanyPersonalizers(
-                                company_personalizers.filter(
-                                  (x) => x !== filter.key
-                                )
-                              );
-                            }
-                          }}
-                          label={"Personalizer"}
-                          size={"xs"}
-                          mb={"4px"}
-                        />
-                      </Flex>
+                        <IconTrash color={"red"} size={"1rem"} />
+                      </ActionIcon>
                     </Flex>
-                  </Paper>
-                );
-              }
-            )}
+
+                    <Text fw={600} size={"md"} mt={4}>
+                      {filter.title}
+                    </Text>
+                    <Textarea
+                      fw={500}
+                      label={"prompt"}
+                      value={filter.prompt}
+                      onChange={(event) => {
+                        setIndividualAIFilters((prevState) => {
+                          return prevState.map((previousAI) => {
+                            if (previousAI.key === filter.key) {
+                              return {
+                                ...filter,
+                                prompt: event.currentTarget.value,
+                              };
+                            }
+
+                            return previousAI;
+                          });
+                        });
+                      }}
+                      autosize
+                      minRows={4}
+                      maxRows={8}
+                    >
+                      {filter.prompt}
+                    </Textarea>
+                    <Textarea
+                      fw={500}
+                      label={"relevancy"}
+                      value={filter.relevancy}
+                      onChange={(event) => {
+                        setIndividualAIFilters((prevState) => {
+                          return prevState.map((previousAI) => {
+                            if (previousAI.key === filter.key) {
+                              return {
+                                ...filter,
+                                relevancy: event.currentTarget.value,
+                              };
+                            }
+
+                            return previousAI;
+                          });
+                        });
+                      }}
+                      autosize
+                      minRows={4}
+                      maxRows={8}
+                    >
+                      {filter.relevancy}
+                    </Textarea>
+                    <Flex justify={"start"} align={"start"} gap={"4px"}>
+                      <Checkbox
+                        checked={dealbreakers.includes(filter.key)}
+                        onChange={(event) => {
+                          if (event.currentTarget.checked) {
+                            setDealBreakers([...dealbreakers, filter.key]);
+                          } else {
+                            setDealBreakers(
+                              dealbreakers.filter((x) => x !== filter.key)
+                            );
+                          }
+                        }}
+                        label={"Dealbreaker"}
+                        size={"xs"}
+                      />
+                      <Checkbox
+                        checked={individual_personalizers.includes(filter.key)}
+                        onChange={(event) => {
+                          if (event.currentTarget.checked) {
+                            setIndividualPersonalizers([
+                              ...individual_personalizers,
+                              filter.key,
+                            ]);
+                          } else {
+                            setIndividualPersonalizers(
+                              individual_personalizers.filter(
+                                (x) => x !== filter.key
+                              )
+                            );
+                          }
+                        }}
+                        label={"Personalizer"}
+                        size={"xs"}
+                      />
+                    </Flex>
+                  </Flex>
+                </Paper>
+              );
+            })}
+            {company_ai_filters?.map((filter, index) => {
+              return (
+                <Paper key={index} withBorder radius={"sm"} p={"sm"} mt={"xs"}>
+                  <Flex direction={"column"} gap="4px" align={"center"}>
+                    <Flex justify={"space-between"} align="center">
+                      <Badge variant={"filled"} color={"blue"}>
+                        Company
+                      </Badge>
+                      <ActionIcon
+                        onClick={async () => {
+                          let newCompanyAIFilters: AIFilters[] = [];
+                          let newDealbreaker: string[] = [];
+                          let newCompanyAIPersonalizer: string[] = [];
+
+                          setDealBreakers((prevState) => {
+                            newDealbreaker = prevState.filter(
+                              (x) => x !== filter.key
+                            );
+                            return prevState.filter((x) => x !== filter.key);
+                          });
+                          setCompanyPersonalizers((prevState) => {
+                            newCompanyAIPersonalizer = prevState.filter(
+                              (x) => x !== filter.key
+                            );
+                            return prevState.filter((x) => x !== filter.key);
+                          });
+                          setCompanyAIFilters((prevState) => {
+                            newCompanyAIFilters = prevState.filter(
+                              (item) => item.key !== filter.key
+                            );
+
+                            return prevState.filter(
+                              (item) => item.key !== filter.key
+                            );
+                          });
+
+                          await addAIFilter(
+                            newCompanyAIFilters,
+                            individual_ai_filters,
+                            newDealbreaker,
+                            newCompanyAIPersonalizer,
+                            individual_personalizers
+                          );
+                        }}
+                      >
+                        <IconTrash color={"red"} size={"1rem"} />
+                      </ActionIcon>
+                    </Flex>
+
+                    <Text fw={600} size={"md"} mt={4}>
+                      {filter.title}
+                    </Text>
+                    <Textarea
+                      fw={500}
+                      label={"prompt"}
+                      value={filter.prompt}
+                      onChange={(event) => {
+                        setCompanyAIFilters((prevState) => {
+                          return prevState.map((previousAI) => {
+                            if (previousAI.key === filter.key) {
+                              return {
+                                ...filter,
+                                prompt: event.currentTarget.value,
+                              };
+                            }
+
+                            return previousAI;
+                          });
+                        });
+                      }}
+                      autosize
+                      minRows={4}
+                      maxRows={8}
+                    >
+                      {filter.prompt}
+                    </Textarea>
+                    <Textarea
+                      fw={500}
+                      label={"relevancy"}
+                      value={filter.relevancy}
+                      onChange={(event) => {
+                        setCompanyAIFilters((prevState) => {
+                          return prevState.map((previousAI) => {
+                            if (previousAI.key === filter.key) {
+                              return {
+                                ...filter,
+                                relevancy: event.currentTarget.value,
+                              };
+                            }
+
+                            return previousAI;
+                          });
+                        });
+                      }}
+                      autosize
+                      minRows={4}
+                      maxRows={8}
+                    >
+                      {filter.relevancy}
+                    </Textarea>
+                    <Flex
+                      direction={"column"}
+                      justify={"start"}
+                      align={"start"}
+                      gap={"4px"}
+                    >
+                      <Checkbox
+                        checked={dealbreakers.includes(filter.key)}
+                        onChange={(event) => {
+                          if (event.currentTarget.checked) {
+                            setDealBreakers([...dealbreakers, filter.key]);
+                          } else {
+                            setDealBreakers(
+                              dealbreakers.filter((x) => x !== filter.key)
+                            );
+                          }
+                        }}
+                        label={"Dealbreaker"}
+                        size={"xs"}
+                        mb={"4px"}
+                      />
+                      <Checkbox
+                        checked={company_personalizers.includes(filter.key)}
+                        onChange={(event) => {
+                          if (event.currentTarget.checked) {
+                            setCompanyPersonalizers([
+                              ...company_personalizers,
+                              filter.key,
+                            ]);
+                          } else {
+                            setCompanyPersonalizers(
+                              company_personalizers.filter(
+                                (x) => x !== filter.key
+                              )
+                            );
+                          }
+                        }}
+                        label={"Personalizer"}
+                        size={"xs"}
+                        mb={"4px"}
+                      />
+                    </Flex>
+                  </Flex>
+                </Paper>
+              );
+            })}
             {/* {loadingResearchData ? ( */}
             {/*   <Center h={"100%"}> */}
             {/*     <Loader size="lg" /> */}
@@ -1083,38 +1068,6 @@ export default function CampaignPersonalizersModal({
                               </Popover>
                             </Flex>
                           </Paper>
-                          <Flex align={"center"} gap={"md"} mt={"lg"}>
-                            <Button
-                              fullWidth
-                              disabled={!selectedProspect}
-                              color="grape"
-                              leftIcon={<IconSparkles size={"0.9rem"} />}
-                              onClick={() =>
-                                openContextModal({
-                                  modal: "simulatepersonalizerModal",
-                                  title: (
-                                    <Title order={3}>
-                                      <span className=" text-gray-500"></span>{" "}
-                                      Personalizers
-                                    </Title>
-                                  ),
-                                  innerProps: {
-                                    prospectId: selectedProspect,
-                                    sequences: sequences,
-                                  },
-                                  centered: true,
-                                  styles: {
-                                    content: {
-                                      minWidth: "700px",
-                                    },
-                                  },
-                                })
-                              }
-                              style={{ margin: "0 8px 8px 8px" }} // Added margins to make the button smaller
-                            >
-                              Personalize
-                            </Button>
-                          </Flex>
                         </>
                       );
                     })}
@@ -1258,38 +1211,6 @@ export default function CampaignPersonalizersModal({
                               </Popover>
                             </Flex>
                           </Paper>
-                          <Flex align={"center"} gap={"md"} mt={"lg"}>
-                            <Button
-                              fullWidth
-                              disabled={!selectedProspect}
-                              color="grape"
-                              leftIcon={<IconSparkles size={"0.9rem"} />}
-                              onClick={() =>
-                                openContextModal({
-                                  modal: "simulatepersonalizerModal",
-                                  title: (
-                                    <Title order={3}>
-                                      <span className=" text-gray-500"></span>{" "}
-                                      Personalizers
-                                    </Title>
-                                  ),
-                                  innerProps: {
-                                    prospectId: selectedProspect,
-                                    sequences: sequences,
-                                  },
-                                  centered: true,
-                                  styles: {
-                                    content: {
-                                      minWidth: "700px",
-                                    },
-                                  },
-                                })
-                              }
-                              style={{ margin: "0 8px 8px 8px" }} // Added margins to make the button smaller
-                            >
-                              Personalize
-                            </Button>
-                          </Flex>
                         </>
                       );
                     })}

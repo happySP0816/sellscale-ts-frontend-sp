@@ -284,7 +284,6 @@ export default function Personalizers(props: any) {
           {icp_scoring_ruleset_typed && (
             <Button
               color="grape"
-              disabled={!currentProject?.is_ai_research_personalization_enabled}
               leftIcon={<IconSparkles size={"0.9rem"} />}
               onClick={() =>
                 openContextModal({

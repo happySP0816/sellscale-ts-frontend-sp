@@ -287,7 +287,7 @@ const MarketMapFilters = function ({
     const key = "aiind_" + title.toLowerCase().split(" ").join("_");
     const newIndividualAIFilters = [
       ...individual_ai_filters,
-      { key: key, title: title, prompt: prompt, use_linkedin: use_linkedin },
+      { key: key, title: title, prompt: prompt, use_linkedin: use_linkedin, relevancy: "" },
     ];
     let newDealbreaker = [...dealbreakers];
     let newIndividualAIPersonalizer = [...individual_personalizers];
@@ -325,7 +325,7 @@ const MarketMapFilters = function ({
     const key = "aicomp_" + title.toLowerCase().split(" ").join("_");
     const newCompanyAIFilters = [
       ...company_ai_filters,
-      { key: key, title: title, prompt: prompt, use_linkedin: use_linkedin },
+      { key: key, title: title, prompt: prompt, use_linkedin: use_linkedin, relevancy: "" },
     ];
 
     let newDealbreaker = [...dealbreakers];

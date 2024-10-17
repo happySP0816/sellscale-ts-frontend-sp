@@ -21,6 +21,7 @@ import {
   TextInput,
   Popover,
   LoadingOverlay,
+  HoverCard,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import {
@@ -44,13 +45,20 @@ import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { fetchCampaignContacts } from "@utils/requests/campaignOverview";
 import { modals } from "@mantine/modals";
 import * as researchers from "@utils/requests/researchers";
-import { useState, useEffect, useRef, Key, JSXElementConstructor, ReactElement, ReactNode } from "react";
-import { deterministicMantineColor } from "@utils/requests/utils";
+import { useState, useEffect } from "react";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { getFreshCurrentProject } from "@auth/core";
 import { showNotification } from "@mantine/notifications";
 import useGenerativeRequest from "@utils/requests/GenerativeRequest";
-import { CloneBumpFrameworkContextModal } from "@modals/CloneBumpFrameworkModal";
+import {
+  AIFilters,
+  ICPScoringRuleset,
+} from "@modals/ContactAccountFilterModal";
+import { getResearchPoint } from "@utils/requests/getResearchPointTypes";
+import { ResearchPoint } from "@common/sequence/LinkedInSequenceSection";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { API_URL } from "@constants/data";
+import { Prospect } from "src";
 
 export default function CampaignPersonalizersModal({
   innerProps,
@@ -61,6 +69,7 @@ export default function CampaignPersonalizersModal({
   sequences: any;
   ai_researcher_id: number;
   setPersonalizers: Function;
+  icp_scoring_ruleset_typed: ICPScoringRuleset;
 }>) {
   const generateTextWithBadges = (text: string) => {
     const parts = text?.split(/(\[\[.*?\]\])/)?.filter(Boolean);
@@ -83,211 +92,230 @@ export default function CampaignPersonalizersModal({
     });
   };
 
-  const [loadingProspects, setLoadingProspects] = useState(false);
-  const [loadingResearchData, setLoadingResearchData] = useState(false);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
-  const [aiResearcherLoading, setAiResearcherLoading] = useState(false);
-  const [prospectData, setProspectData] = useState([]);
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const [selectedProspect, setSelectedProspect] = useState<any>(null);
   // const [researching, setResearching] = useState(false);
-  const [aiResearchers, setAiResearchers] = useState<any>([]);
-  const [currentAiResearcherId, setCurrentAiResearcherId] = useState("");
   //deep copy
-  const sequences = Array.isArray(innerProps?.sequences) ? [...innerProps.sequences] : [];
+  const sequences = Array.isArray(innerProps?.sequences)
+    ? [...innerProps.sequences]
+    : [];
+
+  const [individual_personalizers, setIndividualPersonalizers] = useState<
+    string[]
+  >(innerProps.icp_scoring_ruleset_typed.individual_personalizers ?? []);
+
+  const [company_personalizers, setCompanyPersonalizers] = useState<string[]>(
+    innerProps.icp_scoring_ruleset_typed.company_personalizers ?? []
+  );
+
+  const [dealbreakers, setDealBreakers] = useState<string[]>(
+    innerProps.icp_scoring_ruleset_typed.dealbreakers ?? []
+  );
+
+  const [individual_ai_filters, setIndividualAIFilters] = useState<AIFilters[]>(
+    innerProps.icp_scoring_ruleset_typed.individual_ai_filters ?? []
+  );
+
+  const [company_ai_filters, setCompanyAIFilters] = useState<AIFilters[]>(
+    innerProps.icp_scoring_ruleset_typed.company_ai_filters ?? []
+  );
 
   //this function provides a state from the generative request, and the ability to override the data with the setter.
-  const {
-    data: simulateData,
-    setData: setSimulateData,
-    loading: loadingAnswers,
-    setLoading: setResearching,
-    triggerGenerativeRequest: createAnswers,
-  } = useGenerativeRequest({
-    endpoint: "/ml/researchers/answers/create",
-  });
-
-  const {
-    data: generatedResearchData,
-    setData: setGeneratedResearchData,
-    loading: generatingResearchPoints,
-    setLoading: setGeneratingResearchPoints,
-    triggerGenerativeRequest: generateResearchPoints,
-  } = useGenerativeRequest({
-    endpoint: "/ml/researchers/questions/generate",
-  });
 
   const userToken = useRecoilValue(userTokenState);
 
   const fetchCurrentProject = async () => {
     const project = await getFreshCurrentProject(userToken, +innerProps.id);
     setCurrentProject(project);
-    setCurrentAiResearcherId(project?.ai_researcher_id + "");
   };
 
-  const fetchProspects = async () => {
-    try {
-      setLoadingProspects(true);
-      const data = await fetchCampaignContacts(
-        userToken,
-        Number(innerProps.id),
-        0,
-        10,
-        "",
-        false
-      );
-      const newProspectData = data.sample_contacts.map(
-        (contact: {
-          id: any;
-          full_name: any;
-          email: any;
-          phone: any;
-          company: any;
-        }) => ({
-          value: contact.id,
-          label: contact.full_name,
-          ...contact,
-        })
-      );
-      setProspectData(newProspectData);
-      if (newProspectData[0]?.value) {
-        setSelectedProspect(newProspectData[0].value);
-        fetchResearcherAnswers(newProspectData[0].value);
+  const queryClient = useQueryClient();
+
+  // const fetchProspects = async () => {
+  //   try {
+  //     setLoadingProspects(true);
+  //     const data = await fetchCampaignContacts(
+  //       userToken,
+  //       Number(innerProps.id),
+  //       0,
+  //       10,
+  //       "",
+  //       false
+  //     );
+  //     const newProspectData = data.sample_contacts.map(
+  //       (contact: {
+  //         id: any;
+  //         full_name: any;
+  //         email: any;
+  //         phone: any;
+  //         company: any;
+  //       }) => ({
+  //         value: contact.id,
+  //         label: contact.full_name,
+  //         ...contact,
+  //       })
+  //     );
+  //     setProspectData(newProspectData);
+  //     if (newProspectData[0]?.value) {
+  //       setSelectedProspect(newProspectData[0].value);
+  //     }
+  //   } finally {
+  //   }
+  // };
+
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["archetypeProspects", currentProject?.id],
+    queryFn: async () => {
+      if (currentProject) {
+        // Fetch Prospects from the campaign Id
+        const response = await fetch(
+          `${API_URL}/client/archetype/${currentProject.id}/prospects`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          }
+        );
+
+        const jsonResponse = await response.json();
+
+        return jsonResponse.prospects;
+      } else {
+        return null;
       }
-    } finally {
-      setLoadingProspects(false);
-    }
-  };
+    },
+    enabled: !!currentProject,
+  });
 
-  const fetchResearchData = async () => {
-    setLoadingResearchData(true);
-    try {
-      const data = (await researchers.getArchetypeQuestions(
-        userToken,
-        Number(innerProps.id)
-      )) as any;
-      const newResearchData = data.questions.map(
-        (item: { id: any; key: any; type: any; relevancy: any }) => ({
-          id: item.id,
-          title: item.key,
-          type: item.type,
-          content: item.relevancy,
-          ai_response: "",
-          status: "",
-        })
-      );
-      setResearchData(newResearchData);
-    } finally {
-      setLoadingResearchData(false);
-    }
-  };
+  const prospects = data as Prospect[];
 
-  const addGeneratedResearchPoint = async (item: any) => {
-    try {
-      setLoadingResearchData(true);
-      const response = await researchers.createResearcherQuestion(
-        userToken,
-        "QUESTION",
-        item.Question,
-        item.RelevanceReason,
-        Number(currentAiResearcherId)
-      );
-      if (!response) {
-        throw new Error(`Error creating researcher question}`);
-      }
-      await fetchResearchData();
-    } catch (error) {
-      console.error("Error creating researcher question:", error);
-    } finally {
-      setLoadingResearchData(false);
-      // Call useEffect logic again
-      fetchProspects();
-      fetchResearchData();
-    }
-  };
-
-  const createAiResearcher = async (name: string) => {
-    setAiResearcherLoading(true);
-    researchers
-      .createResearcher(userToken, name, Number(innerProps.id))
-      .then((res) => {
-        getAiResearchers().then(() => {
-          showNotification({
-            title: "AI Researcher Created",
-            message: "You need to connect it to this campaign.",
-            color: "blue",
-          });
-        });
-      })
-      .finally(() => {
-        setAiResearcherLoading(false);
-      });
-
-    return currentProject?.ai_researcher_id;
-  };
-
-  const connectAiResearcher = async (researcherId: number) => {
-    setAiResearcherLoading(true);
-    researchers
-      .connectResearcher(userToken, Number(innerProps.id), researcherId)
-      .finally(() => {
-        showNotification({
-          title: "AI Researcher Connected",
-          message:
-            "AI Researcher has been successfully connected to this campaign",
-          color: "blue",
-          icon: "🎉",
-        });
-        fetchResearchData();
-        fetchCurrentProject().finally(() => {
-          setAiResearcherLoading(false);
-        });
-      });
-  };
+  const [scoreLoading, setScoreLoading] = useState(false);
 
   useEffect(() => {
-    fetchProspects();
-    fetchResearchData();
-    getAiResearchers();
+    if (prospects && prospects.length > 0 && !selectedProspect) {
+      setSelectedProspect(prospects[0].id);
+    }
+  }, [prospects]);
+
+  const addAIFilter = async (
+    companyAIFilters: AIFilters[],
+    individualAIFilters: AIFilters[],
+    dealbreakers: string[],
+    companyPersonalizers: string[],
+    individualPersonalizers: string[]
+  ) => {
+    const response = await fetch(`${API_URL}/icp_scoring/add_ai_filter`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        archetype_id: id,
+        individual_personalizers: individualPersonalizers,
+        company_personalizers: companyPersonalizers,
+        dealbreakers: dealbreakers,
+        individual_ai_filters: individualAIFilters,
+        company_ai_filters: companyAIFilters,
+      }),
+    });
+
+    if (response.status === 200) {
+      await queryClient.invalidateQueries(["archetypeProspects", id]);
+      await queryClient.invalidateQueries(["icpScoringRuleset", id]);
+      showNotification({
+        title: "Success",
+        message: "Successfully added AI Filter to the ICP ruleset.",
+        color: "blue",
+      });
+
+      await queryClient.invalidateQueries([
+        `query-get-research-point-types`,
+        id,
+      ]);
+    } else {
+      showNotification({
+        title: "Error",
+        message: "Failed to add AI filters to the ICP ruleset",
+        color: "red",
+      });
+    }
+  };
+
+  // get research points for selected prospect
+  // Reserved here in the future for linkedin research
+  const { data: researchPoints, refetch: refetchResearchPoints } = useQuery({
+    queryKey: [`query-get-research-points`, +selectedProspect],
+    queryFn: async () => {
+      const response = await getResearchPoint(userToken, +selectedProspect);
+
+      return response.status === "success"
+        ? (response.data as ResearchPoint[])
+        : [];
+    },
+    enabled: !!selectedProspect,
+  });
+
+  useEffect(() => {
     fetchCurrentProject();
   }, [innerProps.id]);
 
-  const getAiResearchers = async () => {
-    const data: any = await researchers.getAiResearchers(userToken);
-    setAiResearchers(data ? data["researchers"] : []);
-  };
+  const scoreCampaignFilters = async () => {
+    setScoreLoading(true);
 
-  const fetchResearcherAnswers = async (prospectId: Number) => {
-    setResearching(true);
-    const data = await researchers.getResearcherAnswers(
-      userToken,
-      Number(prospectId)
+    const response = await fetch(
+      `${API_URL}/client/archetype/${innerProps.id}/score`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          individual_personalizers,
+          company_personalizers,
+          dealbreakers,
+          individual_ai_filters,
+          company_ai_filters,
+          selectedContacts: Array.from([+selectedProspect]),
+          score_ai: true,
+        }),
+      }
     );
-    const newSimulateData = data.answers
-      .map((item: any) => ({
-        citations: item.citations,
-        // images: item.images,
-        title: item.question.key,
-        type: item.question.type,
-        content: item.short_summary,
-        raw_response: item.raw_response,
-        ai_response: item.relevancy_explanation,
-        status: item.is_yes_response,
-      }))
-      .sort(
-        (a: { status: number }, b: { status: number }) => b.status - a.status
-      ); //sort by status true first.
-    setSimulateData(newSimulateData);
-    setResearching(false);
-  };
 
-  const simulateResearch = async (prospectId: Number) => {
-    setResearching(true);
-    createAnswers({ prospect_id: Number(prospectId) });
-  };
+    if (response.status === 200) {
+      const data = await response.json();
 
-  const [researchData, setResearchData] = useState<any>([]);
+      await queryClient.invalidateQueries([
+        "archetypeProspects",
+        innerProps.id,
+      ]);
+      await queryClient.invalidateQueries(["icpScoringRuleset", innerProps.id]);
+      setScoreLoading(false);
+      showNotification({
+        title: "Success",
+        message:
+          "Successfully scored the Campaign Prospects with the ICP ruleset. AI Filters will take a while to show up.",
+        color: "blue",
+      });
+
+      await queryClient.invalidateQueries([
+        `query-get-research-point-types`,
+        innerProps.id,
+      ]);
+
+      refetch();
+    } else {
+      setScoreLoading(false);
+      showNotification({
+        title: "Error",
+        message: "Failed to score the Campaign Prospects with the ICP ruleset",
+        color: "red",
+      });
+    }
+  };
 
   return (
     <>
@@ -303,240 +331,545 @@ export default function CampaignPersonalizersModal({
           style={{ gap: "16px", flexDirection: "column" }}
         >
           <Flex align={"center"} justify={"space-between"}>
-            <Text fw={600}>Researcher Questions</Text>
+            <Text fw={600}>Research Questions</Text>
             <Tooltip
               multiline
               position="right"
-              label="SellScale AI Researcher will answer these questions by scouring the web, LinkedIn, and other sources to develop a better understanding for each prospect you reach out to for the most relevant and personalized messaging."
+              label="SellScale AI will answer these questions by scouring the web, LinkedIn, and other sources to develop a better understanding for each prospect you reach out to for the most relevant and personalized messaging. You can add questions to be asked here."
             >
               <ActionIcon>
                 <IconQuestionMark size={"1rem"} />
               </ActionIcon>
             </Tooltip>
           </Flex>
+          {/* <Flex> */}
+          {/*   {aiResearcherLoading && <Loader size="xs" color="grape" mr="sm" />} */}
+          {/*   <Select */}
+          {/*     w="100%" */}
+          {/*     label="AI Researcher:" */}
+          {/*     value={currentAiResearcherId} */}
+          {/*     placeholder="+ add researcher name" */}
+          {/*     data={aiResearchers.map((x: any) => { */}
+          {/*       return { */}
+          {/*         value: "" + x.id, */}
+          {/*         label: `${x.name}`, */}
+          {/*       }; */}
+          {/*     })} */}
+          {/*     onChange={(value) => { */}
+          {/*       connectAiResearcher(Number(value)); */}
+          {/*     }} */}
+          {/*     creatable */}
+          {/*     searchable */}
+          {/*     getCreateLabel={(query) => `+ Create ${query}`} */}
+          {/*     onCreate={(query) => { */}
+          {/*       createAiResearcher(query); */}
+          {/*       window.location.reload(); */}
+          {/*       return currentAiResearcherId; */}
+          {/*     }} */}
+          {/*   /> */}
+          {/* </Flex> */}
           <Flex>
-            {aiResearcherLoading && <Loader size="xs" color="grape" mr="sm" />}
-            <Select
-              w="100%"
-              label="AI Researcher:"
-              value={currentAiResearcherId}
-              placeholder="+ add researcher name"
-              data={aiResearchers.map((x: any) => {
-                return {
-                  value: "" + x.id,
-                  label: `${x.name}`,
-                };
-              })}
-              onChange={(value) => {
-                connectAiResearcher(Number(value));
-              }}
-              creatable
-              searchable
-              getCreateLabel={(query) => `+ Create ${query}`}
-              onCreate={(query) => {
-                createAiResearcher(query);
-                window.location.reload();
-                return currentAiResearcherId;
-              }}
-            />
-          </Flex>
-          <Flex>
-            <Button
-              fullWidth
-              leftIcon={<IconPlus size={"0.9rem"} />}
-              mr={"md"}
-              onClick={() => {
-                modals.openContextModal({
-                  modal: "addQuestionModal",
-                  title: (
-                    <Title order={3}>
-                      <span className=" text-gray-500">Add</span> Research Point
-                    </Title>
-                  ),
-                  innerProps: {
-                    edit: false,
-                    sequences: sequences,
-                    ai_researcher_id: currentAiResearcherId,
-                    campaign_id: innerProps.id,
-                    setPersonalizers: innerProps.setPersonalizers,
-                  },
-                });
-              }}
-            >
-              Research point
-            </Button>
-            <Button
-              color="grape"
-              fullWidth
-              leftIcon={<IconSparkles size={"0.9rem"} />}
-              mr={"md"}
-              onClick={() => {
-                generateResearchPoints({
-                  researcher_id: currentAiResearcherId,
-                  campaign_id: currentProject?.id,
-                });
-              }}
-            >
-              AI Suggest
-            </Button>
-          </Flex>
-          {generatingResearchPoints && (
-            <Text size={"sm"} color="grape" mt={"sm"} align="center">
-              <Loader size="xs" color="grape" mr="sm" /> Generating research
-              points
-            </Text>
-          )}
-          <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
-            {loadingResearchData ? (
-              <Center h={"100%"}>
-                <Loader size="lg" />
-              </Center>
-            ) : (
-              <>
-                <Flex h={"100%"} gap={"xs"} direction={"column"}>
-                  {researchData.length === 0 ? (
-                    <Paper
-                      withBorder
-                      px={"lg"}
-                      py={"xl"}
-                      mt={"lg"}
-                      style={{ borderStyle: "dashed" }}
-                    >
-                      <Text size={"sm"} color="gray" fw={500} align="center">
-                        No research points added yet!
-                      </Text>
-                    </Paper>
-                  ) : (
-                    researchData.map(
-                      (item: any, index: Key | null | undefined) => {
-                        return (
-                          <Paper withBorder p={"md"} key={index}>
-                            <Flex align={"start"} justify={"space-between"}>
-                              <Text size={"sm"} fw={600} pt={4}>
-                                {generateTextWithBadges(item.title)}
-                              </Text>
-                              <Flex gap={3} align={"center"}>
-                                <ActionIcon
-                                  onClick={() => {
-                                    openContextModal({
-                                      modal: "addQuestionModal",
-                                      title: (
-                                        <Title order={3}>
-                                          <span className=" text-gray-500">
-                                            Edit
-                                          </span>{" "}
-                                          Research Point
-                                        </Title>
-                                      ),
-                                      innerProps: {
-                                        edit: true,
-                                        sequences: sequences,
-                                        question_id: item.id,
-                                        currentTab: item.type,
-                                        relevancy: item.content,
-                                        question: item.title,
-                                        ai_researcher_id: currentAiResearcherId,
-                                        campaign_id: innerProps.id,
-                                        setPersonalizers:
-                                          innerProps.setPersonalizers,
-                                      },
-                                      centered: true,
-                                      styles: {
-                                        content: {
-                                          minWidth: "500px",
-                                        },
-                                      },
-                                    });
-                                  }}
-                                >
-                                  <IconEdit color="gray" size={"0.9rem"} />
-                                </ActionIcon>
-                                <ActionIcon
-                                  onClick={async () => {
-                                    researchers.deleteResearcherQuestion(
-                                      userToken,
-                                      Number(item.id)
-                                    );
-                                    setResearchData((prevData: any[]) =>
-                                      prevData.filter(
-                                        (researchItem) =>
-                                          researchItem.id !== item.id
-                                      )
-                                    );
-                                  }}
-                                >
-                                  <IconTrash color="gray" size={"0.9rem"} />
-                                </ActionIcon>
-                                <Badge
-                                  size="sm"
-                                  radius={"sm"}
-                                  color={deterministicMantineColor(item.type)}
-                                >
-                                  {item.type}
-                                </Badge>
-                              </Flex>
-                            </Flex>
-                            <Text size={"sm"} mt={2}>
-                              {item.content}
-                            </Text>
-                          </Paper>
-                        );
-                      }
-                    )
-                  )}
-                </Flex>
-                {generatedResearchData.length > 0 && (
-                  <Divider
-                    my="sm"
-                    label="AI Generated Research Points"
-                    labelPosition="center"
-                    color="salmon"
-                  />
-                )}
-                <Flex
-                  h="100%"
-                  gap="xs"
-                  direction="column"
-                  style={{ color: "salmon" }}
-                >
-                  {generatedResearchData.map(
-                    (item: any, index: Key | null | undefined) => {
-                      return (
-                        <Paper withBorder p={"md"} key={index}>
-                          <Flex align={"start"} justify={"space-between"}>
-                            <Text size={"sm"} fw={600} pt={4}>
-                              {generateTextWithBadges(item.Question)}
-                            </Text>
-                            <Flex gap={3} align={"center"}>
-                              <Badge size="sm" radius={"sm"} color="blue">
-                                AI Generated
-                              </Badge>
-                              <Button
-                                size="xs"
-                                color="grape"
-                                onClick={() => {
-                                  setGeneratedResearchData((prevData) =>
-                                    prevData.filter(
-                                      (researchItem) => researchItem !== item
-                                    )
-                                  );
-                                  addGeneratedResearchPoint(item);
-                                }}
-                              >
-                                Add
-                              </Button>
-                            </Flex>
-                          </Flex>
-                          <Text size={"sm"} mt={2}>
-                            {item.RelevanceReason}
-                          </Text>
-                        </Paper>
-                      );
-                    }
-                  )}
-                </Flex>
-              </>
+            {innerProps.icp_scoring_ruleset_typed && (
+              <Button
+                fullWidth
+                leftIcon={<IconPlus size={"0.9rem"} />}
+                mr={"md"}
+                onClick={() => {
+                  modals.openContextModal({
+                    modal: "addQuestionModal",
+                    title: (
+                      <Title order={3}>
+                        <span className=" text-gray-500">Add</span> Research
+                        Point
+                      </Title>
+                    ),
+                    innerProps: {
+                      edit: false,
+                      campaign_id: innerProps.id,
+                      icp_scoring_ruleset_typed:
+                        innerProps.icp_scoring_ruleset_typed,
+                    },
+                  });
+                }}
+              >
+                Research point
+              </Button>
             )}
+
+            <Tooltip position="bottom" label="Coming Soon!">
+              <Flex>
+                <Button
+                  color="gray"
+                  fullWidth
+                  leftIcon={<IconSparkles size={"0.9rem"} />}
+                  mr={"md"}
+                  onClick={() => {}}
+                  disabled
+                >
+                  AI Suggest
+                </Button>
+              </Flex>
+            </Tooltip>
+          </Flex>
+          {/* {generatingResearchPoints && ( */}
+          {/*   <Text size={"sm"} color="grape" mt={"sm"} align="center"> */}
+          {/*     <Loader size="xs" color="grape" mr="sm" /> Generating research */}
+          {/*     points */}
+          {/*   </Text> */}
+          {/* )} */}
+          <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
+            {innerProps.icp_scoring_ruleset_typed.individual_ai_filters?.map(
+              (filter, index) => {
+                return (
+                  <Paper
+                    key={index}
+                    withBorder
+                    radius={"sm"}
+                    p={"sm"}
+                    mt={"xs"}
+                  >
+                    <Flex direction={"column"} gap="4px" align={"center"}>
+                      <Flex justify={"space-between"} align="center">
+                        <Badge variant={"filled"} color={"grape"}>
+                          Individual
+                        </Badge>
+                        <ActionIcon
+                          onClick={async () => {
+                            let newIndividualAIFilters: AIFilters[] = [];
+                            let newDealbreaker: string[] = [];
+                            let newIndividualAIPersonalizer: string[] = [];
+
+                            setDealBreakers((prevState) => {
+                              newDealbreaker = prevState.filter(
+                                (x) => x !== filter.key
+                              );
+                              return prevState.filter((x) => x !== filter.key);
+                            });
+                            setIndividualPersonalizers((prevState) => {
+                              newIndividualAIPersonalizer = prevState.filter(
+                                (x) => x !== filter.key
+                              );
+                              return prevState.filter((x) => x !== filter.key);
+                            });
+                            setIndividualAIFilters((prevState) => {
+                              newIndividualAIFilters = prevState.filter(
+                                (item) => item.key !== filter.key
+                              );
+                              return prevState.filter(
+                                (item) => item.key !== filter.key
+                              );
+                            });
+
+                            await addAIFilter(
+                              company_ai_filters,
+                              newIndividualAIFilters,
+                              newDealbreaker,
+                              company_personalizers,
+                              newIndividualAIPersonalizer
+                            );
+                          }}
+                        >
+                          <IconTrash color={"red"} size={"1rem"} />
+                        </ActionIcon>
+                      </Flex>
+
+                      <Text fw={600} size={"md"} mt={4}>
+                        {filter.title}
+                      </Text>
+                      <Textarea
+                        fw={500}
+                        label={"prompt"}
+                        value={filter.prompt}
+                        onChange={(event) => {
+                          setIndividualAIFilters((prevState) => {
+                            return prevState.map((previousAI) => {
+                              if (previousAI.key === filter.key) {
+                                return {
+                                  ...filter,
+                                  prompt: event.currentTarget.value,
+                                };
+                              }
+
+                              return previousAI;
+                            });
+                          });
+                        }}
+                        autosize
+                        minRows={4}
+                        maxRows={8}
+                      >
+                        {filter.prompt}
+                      </Textarea>
+                      <Textarea
+                        fw={500}
+                        label={"relevancy"}
+                        value={filter.relevancy}
+                        onChange={(event) => {
+                          setIndividualAIFilters((prevState) => {
+                            return prevState.map((previousAI) => {
+                              if (previousAI.key === filter.key) {
+                                return {
+                                  ...filter,
+                                  relevancy: event.currentTarget.value,
+                                };
+                              }
+
+                              return previousAI;
+                            });
+                          });
+                        }}
+                        autosize
+                        minRows={4}
+                        maxRows={8}
+                      >
+                        {filter.relevancy}
+                      </Textarea>
+                      <Flex justify={"start"} align={"start"} gap={"4px"}>
+                        <Checkbox
+                          checked={dealbreakers.includes(filter.key)}
+                          onChange={(event) => {
+                            if (event.currentTarget.checked) {
+                              setDealBreakers([...dealbreakers, filter.key]);
+                            } else {
+                              setDealBreakers(
+                                dealbreakers.filter((x) => x !== filter.key)
+                              );
+                            }
+                          }}
+                          label={"Dealbreaker"}
+                          size={"xs"}
+                        />
+                        <Checkbox
+                          checked={individual_personalizers.includes(
+                            filter.key
+                          )}
+                          onChange={(event) => {
+                            if (event.currentTarget.checked) {
+                              setIndividualPersonalizers([
+                                ...individual_personalizers,
+                                filter.key,
+                              ]);
+                            } else {
+                              setIndividualPersonalizers(
+                                individual_personalizers.filter(
+                                  (x) => x !== filter.key
+                                )
+                              );
+                            }
+                          }}
+                          label={"Personalizer"}
+                          size={"xs"}
+                        />
+                      </Flex>
+                    </Flex>
+                  </Paper>
+                );
+              }
+            )}
+            {innerProps.icp_scoring_ruleset_typed.company_ai_filters?.map(
+              (filter, index) => {
+                return (
+                  <Paper
+                    key={index}
+                    withBorder
+                    radius={"sm"}
+                    p={"sm"}
+                    mt={"xs"}
+                  >
+                    <Flex direction={"column"} gap="4px" align={"center"}>
+                      <Flex justify={"space-between"} align="center">
+                        <Badge variant={"filled"} color={"blue"}>
+                          Company
+                        </Badge>
+                        <ActionIcon
+                          onClick={async () => {
+                            let newCompanyAIFilters: AIFilters[] = [];
+                            let newDealbreaker: string[] = [];
+                            let newCompanyAIPersonalizer: string[] = [];
+
+                            setDealBreakers((prevState) => {
+                              newDealbreaker = prevState.filter(
+                                (x) => x !== filter.key
+                              );
+                              return prevState.filter((x) => x !== filter.key);
+                            });
+                            setCompanyPersonalizers((prevState) => {
+                              newCompanyAIPersonalizer = prevState.filter(
+                                (x) => x !== filter.key
+                              );
+                              return prevState.filter((x) => x !== filter.key);
+                            });
+                            setCompanyAIFilters((prevState) => {
+                              newCompanyAIFilters = prevState.filter(
+                                (item) => item.key !== filter.key
+                              );
+
+                              return prevState.filter(
+                                (item) => item.key !== filter.key
+                              );
+                            });
+
+                            await addAIFilter(
+                              newCompanyAIFilters,
+                              individual_ai_filters,
+                              newDealbreaker,
+                              newCompanyAIPersonalizer,
+                              individual_personalizers
+                            );
+                          }}
+                        >
+                          <IconTrash color={"red"} size={"1rem"} />
+                        </ActionIcon>
+                      </Flex>
+
+                      <Text fw={600} size={"md"} mt={4}>
+                        {filter.title}
+                      </Text>
+                      <Textarea
+                        fw={500}
+                        label={"prompt"}
+                        value={filter.prompt}
+                        onChange={(event) => {
+                          setCompanyAIFilters((prevState) => {
+                            return prevState.map((previousAI) => {
+                              if (previousAI.key === filter.key) {
+                                return {
+                                  ...filter,
+                                  prompt: event.currentTarget.value,
+                                };
+                              }
+
+                              return previousAI;
+                            });
+                          });
+                        }}
+                        autosize
+                        minRows={4}
+                        maxRows={8}
+                      >
+                        {filter.prompt}
+                      </Textarea>
+                      <Textarea
+                        fw={500}
+                        label={"relevancy"}
+                        value={filter.relevancy}
+                        onChange={(event) => {
+                          setCompanyAIFilters((prevState) => {
+                            return prevState.map((previousAI) => {
+                              if (previousAI.key === filter.key) {
+                                return {
+                                  ...filter,
+                                  relevancy: event.currentTarget.value,
+                                };
+                              }
+
+                              return previousAI;
+                            });
+                          });
+                        }}
+                        autosize
+                        minRows={4}
+                        maxRows={8}
+                      >
+                        {filter.relevancy}
+                      </Textarea>
+                      <Flex
+                        direction={"column"}
+                        justify={"start"}
+                        align={"start"}
+                        gap={"4px"}
+                      >
+                        <Checkbox
+                          checked={dealbreakers.includes(filter.key)}
+                          onChange={(event) => {
+                            if (event.currentTarget.checked) {
+                              setDealBreakers([...dealbreakers, filter.key]);
+                            } else {
+                              setDealBreakers(
+                                dealbreakers.filter((x) => x !== filter.key)
+                              );
+                            }
+                          }}
+                          label={"Dealbreaker"}
+                          size={"xs"}
+                          mb={"4px"}
+                        />
+                        <Checkbox
+                          checked={company_personalizers.includes(filter.key)}
+                          onChange={(event) => {
+                            if (event.currentTarget.checked) {
+                              setCompanyPersonalizers([
+                                ...company_personalizers,
+                                filter.key,
+                              ]);
+                            } else {
+                              setCompanyPersonalizers(
+                                company_personalizers.filter(
+                                  (x) => x !== filter.key
+                                )
+                              );
+                            }
+                          }}
+                          label={"Personalizer"}
+                          size={"xs"}
+                          mb={"4px"}
+                        />
+                      </Flex>
+                    </Flex>
+                  </Paper>
+                );
+              }
+            )}
+            {/* {loadingResearchData ? ( */}
+            {/*   <Center h={"100%"}> */}
+            {/*     <Loader size="lg" /> */}
+            {/*   </Center> */}
+            {/* ) : ( */}
+            {/*   <> */}
+            {/*     <Flex h={"100%"} gap={"xs"} direction={"column"}> */}
+            {/*       {researchData.length === 0 ? ( */}
+            {/*         <Paper */}
+            {/*           withBorder */}
+            {/*           px={"lg"} */}
+            {/*           py={"xl"} */}
+            {/*           mt={"lg"} */}
+            {/*           style={{ borderStyle: "dashed" }} */}
+            {/*         > */}
+            {/*           <Text size={"sm"} color="gray" fw={500} align="center"> */}
+            {/*             No research points added yet! */}
+            {/*           </Text> */}
+            {/*         </Paper> */}
+            {/*       ) : ( */}
+            {/*         researchData.map( */}
+            {/*           (item: any, index: Key | null | undefined) => { */}
+            {/*             return ( */}
+            {/*               <Paper withBorder p={"md"} key={index}> */}
+            {/*                 <Flex align={"start"} justify={"space-between"}> */}
+            {/*                   <Text size={"sm"} fw={600} pt={4}> */}
+            {/*                     {generateTextWithBadges(item.title)} */}
+            {/*                   </Text> */}
+            {/*                   <Flex gap={3} align={"center"}> */}
+            {/*                     <ActionIcon */}
+            {/*                       onClick={() => { */}
+            {/*                         openContextModal({ */}
+            {/*                           modal: "addQuestionModal", */}
+            {/*                           title: ( */}
+            {/*                             <Title order={3}> */}
+            {/*                               <span className=" text-gray-500"> */}
+            {/*                                 Edit */}
+            {/*                               </span>{" "} */}
+            {/*                               Research Point */}
+            {/*                             </Title> */}
+            {/*                           ), */}
+            {/*                           innerProps: { */}
+            {/*                             edit: true, */}
+            {/*                             sequences: sequences, */}
+            {/*                             question_id: item.id, */}
+            {/*                             currentTab: item.type, */}
+            {/*                             relevancy: item.content, */}
+            {/*                             question: item.title, */}
+            {/*                             ai_researcher_id: currentAiResearcherId, */}
+            {/*                             campaign_id: innerProps.id, */}
+            {/*                             setPersonalizers: */}
+            {/*                               innerProps.setPersonalizers, */}
+            {/*                           }, */}
+            {/*                           centered: true, */}
+            {/*                           styles: { */}
+            {/*                             content: { */}
+            {/*                               minWidth: "500px", */}
+            {/*                             }, */}
+            {/*                           }, */}
+            {/*                         }); */}
+            {/*                       }} */}
+            {/*                     > */}
+            {/*                       <IconEdit color="gray" size={"0.9rem"} /> */}
+            {/*                     </ActionIcon> */}
+            {/*                     <ActionIcon */}
+            {/*                       onClick={async () => { */}
+            {/*                         researchers.deleteResearcherQuestion( */}
+            {/*                           userToken, */}
+            {/*                           Number(item.id) */}
+            {/*                         ); */}
+            {/*                         setResearchData((prevData: any[]) => */}
+            {/*                           prevData.filter( */}
+            {/*                             (researchItem) => */}
+            {/*                               researchItem.id !== item.id */}
+            {/*                           ) */}
+            {/*                         ); */}
+            {/*                       }} */}
+            {/*                     > */}
+            {/*                       <IconTrash color="gray" size={"0.9rem"} /> */}
+            {/*                     </ActionIcon> */}
+            {/*                     <Badge */}
+            {/*                       size="sm" */}
+            {/*                       radius={"sm"} */}
+            {/*                       color={deterministicMantineColor(item.type)} */}
+            {/*                     > */}
+            {/*                       {item.type} */}
+            {/*                     </Badge> */}
+            {/*                   </Flex> */}
+            {/*                 </Flex> */}
+            {/*                 <Text size={"sm"} mt={2}> */}
+            {/*                   {item.content} */}
+            {/*                 </Text> */}
+            {/*               </Paper> */}
+            {/*             ); */}
+            {/*           } */}
+            {/*         ) */}
+            {/*       )} */}
+            {/*     </Flex> */}
+            {/*     {generatedResearchData.length > 0 && ( */}
+            {/*       <Divider */}
+            {/*         my="sm" */}
+            {/*         label="AI Generated Research Points" */}
+            {/*         labelPosition="center" */}
+            {/*         color="salmon" */}
+            {/*       /> */}
+            {/*     )} */}
+            {/*     <Flex */}
+            {/*       h="100%" */}
+            {/*       gap="xs" */}
+            {/*       direction="column" */}
+            {/*       style={{ color: "salmon" }} */}
+            {/*     > */}
+            {/*       {generatedResearchData.map( */}
+            {/*         (item: any, index: Key | null | undefined) => { */}
+            {/*           return ( */}
+            {/*             <Paper withBorder p={"md"} key={index}> */}
+            {/*               <Flex align={"start"} justify={"space-between"}> */}
+            {/*                 <Text size={"sm"} fw={600} pt={4}> */}
+            {/*                   {generateTextWithBadges(item.Question)} */}
+            {/*                 </Text> */}
+            {/*                 <Flex gap={3} align={"center"}> */}
+            {/*                   <Badge size="sm" radius={"sm"} color="blue"> */}
+            {/*                     AI Generated */}
+            {/*                   </Badge> */}
+            {/*                   <Button */}
+            {/*                     size="xs" */}
+            {/*                     color="grape" */}
+            {/*                     onClick={() => { */}
+            {/*                       setGeneratedResearchData((prevData) => */}
+            {/*                         prevData.filter( */}
+            {/*                           (researchItem) => researchItem !== item */}
+            {/*                         ) */}
+            {/*                       ); */}
+            {/*                       addGeneratedResearchPoint(item); */}
+            {/*                     }} */}
+            {/*                   > */}
+            {/*                     Add */}
+            {/*                   </Button> */}
+            {/*                 </Flex> */}
+            {/*               </Flex> */}
+            {/*               <Text size={"sm"} mt={2}> */}
+            {/*                 {item.RelevanceReason} */}
+            {/*               </Text> */}
+            {/*             </Paper> */}
+            {/*           ); */}
+            {/*         } */}
+            {/*       )} */}
+            {/*     </Flex> */}
+            {/*   </> */}
+            {/* )} */}
           </ScrollArea>
         </Paper>
         <Divider orientation="vertical" color="#dee2e6" />
@@ -549,7 +882,7 @@ export default function CampaignPersonalizersModal({
             style={{ borderBottom: "1px solid #dee2e6" }}
           >
             <Text fw={600}>Simulate Research</Text>
-            {loadingProspects ? (
+            {isLoading ? (
               <Loader size="sm" />
             ) : (
               <Flex gap={"sm"} align={"center"}>
@@ -560,24 +893,32 @@ export default function CampaignPersonalizersModal({
                   placeholder="-"
                   onChange={(value) => {
                     setSelectedProspect(value);
-                    value && fetchResearcherAnswers(Number(value));
                   }}
-                  data={prospectData}
+                  data={prospects.map((p) => {
+                    return {
+                      value: "" + p.id,
+                      label: p.full_name,
+                      ...p,
+                    };
+                  })}
                   defaultValue={
-                    prospectData.length > 0
-                      ? (prospectData[0] as { value: string }).value
+                    prospects.length > 0
+                      ? {
+                          value: "" + prospects[0].id,
+                          label: prospects[0].full_name,
+                        }.value
                       : null
                   }
                 ></Select>
                 {selectedProspect &&
-                  (loadingAnswers ? (
+                  (scoreLoading ? (
                     <Loader size="sm" />
                   ) : (
                     <Button
                       color="grape"
-                      onClick={() => simulateResearch(selectedProspect)}
+                      onClick={async () => await scoreCampaignFilters()}
                     >
-                      Simulate
+                      {scoreLoading ? <Loader /> : "Simulate"}
                     </Button>
                   ))}
               </Flex>
@@ -587,183 +928,371 @@ export default function CampaignPersonalizersModal({
             h={640}
             scrollbarSize={8}
             px={"md"}
-            bg={simulateData.length === 0 ? "#f7f8fa" : ""}
+            bg={prospects.length === 0 ? "#f7f8fa" : ""}
           >
-            {false ? (
+            {!prospects ? (
               <Loader size="sm" />
             ) : (
               <Flex gap={"xs"} direction={"column"}>
-                {simulateData.length === 0 ? (
-                  <Paper
-                    withBorder
-                    px={"lg"}
-                    py={"xl"}
-                    mt={"lg"}
-                    style={{ borderStyle: "dashed" }}
-                    bg={"transparent"}
-                  >
-                    <Text size={"sm"} color="gray" fw={500} align="center">
-                      Add research points to simulate research here
-                    </Text>
-                  </Paper>
-                ) : (
-                  simulateData.map((item: any, index) => {
-                    return (
-                      <>
-                        <Paper withBorder p={"lg"} key={index}>
-                          <Flex justify={"space-between"}>
-                            <Flex>
-                              <IconPoint
-                                size={"2rem"}
-                                fill={item.status ? "#17B26A" : "red"}
-                                color="white"
-                                className="mt-[-6px] ml-[-12px]"
-                              />
-                              <Text fw={600} size={"sm"}>
-                                {generateTextWithBadges(item.title)}
+                {!prospects ||
+                  (!prospects.find((p) => p.id === +selectedProspect) && (
+                    <Paper
+                      withBorder
+                      px={"lg"}
+                      py={"xl"}
+                      mt={"lg"}
+                      style={{ borderStyle: "dashed" }}
+                      bg={"transparent"}
+                    >
+                      <Text size={"sm"} color="gray" fw={500} align="center">
+                        Add research points to simulate research here
+                      </Text>
+                    </Paper>
+                  ))}
+                {prospects.find((p) => p.id === +selectedProspect)
+                  ?.icp_fit_reason_v2 &&
+                  Object.keys(
+                    prospects.find((p) => p.id === +selectedProspect)!
+                      .icp_fit_reason_v2
+                  )
+                    .filter((key) => {
+                      return innerProps.icp_scoring_ruleset_typed.individual_ai_filters
+                        .map((v) => v.key)
+                        .includes(key);
+                    })
+                    .map((item, index) => {
+                      const title = item
+                        .replace("_individual_", "_")
+                        .replace("_company_", "_")
+                        .replace("aicomp_", "")
+                        .replace("aiind_", "")
+                        .replace("keywords", "")
+                        .split("_")
+                        .join(" ");
+
+                      const section = prospects.find(
+                        (p) => p.id === +selectedProspect
+                      )!.icp_fit_reason_v2[item];
+
+                      return (
+                        <>
+                          <Paper withBorder p={"lg"} key={index}>
+                            <Flex justify={"space-between"}>
+                              <Flex>
+                                <IconPoint
+                                  size={"2rem"}
+                                  fill={
+                                    section.answer === "YES" ? "#17B26A" : "red"
+                                  }
+                                  color="white"
+                                  className="mt-[-6px] ml-[-12px]"
+                                />
+                                <Text fw={600} size={"sm"}>
+                                  {generateTextWithBadges(
+                                    title.toLowerCase().split("_").join(" ")
+                                  )}
+                                </Text>
+                              </Flex>
+                              <Badge radius={"sm"} size="sm" color={"green"}>
+                                {"LinkedIn"}
+                              </Badge>
+                            </Flex>
+                            <Text size={"sm"} fw={500}>
+                              {section.reasoning}
+                            </Text>
+                            <Flex
+                              p={"sm"}
+                              className="bg-[#D444F1]/5"
+                              gap={4}
+                              align={"start"}
+                            >
+                              <Flex>
+                                <IconBulb size={"0.9rem"} color="#D444F1" />
+                              </Flex>
+                              <Text color="#D444F1" size={"xs"}>
+                                {"relevancy coming soon!"}
                               </Text>
                             </Flex>
-                            <Badge
-                              radius={"sm"}
-                              size="sm"
-                              color={
-                                item.type === "GENERAL"
-                                  ? "orange"
-                                  : item.type === "LINKEDIN"
-                                  ? ""
-                                  : "green"
-                              }
-                            >
-                              {item.type}
-                            </Badge>
-                          </Flex>
-                          <Text size={"sm"} fw={500}>
-                            {item.content}
-                          </Text>
-                          <Flex
-                            p={"sm"}
-                            className="bg-[#D444F1]/5"
-                            gap={4}
-                            align={"start"}
-                          >
-                            <Flex>
-                              <IconBulb size={"0.9rem"} color="#D444F1" />
+                            <Flex justify="space-between" align="center">
+                              <Popover
+                                arrowPosition="center"
+                                zIndex={40000000}
+                                width={300}
+                                position="bottom"
+                                withArrow
+                                shadow="md"
+                              >
+                                <Popover.Target>
+                                  <Flex
+                                    align="center"
+                                    style={{ cursor: "pointer" }}
+                                  >
+                                    <IconEye
+                                      size={"1rem"}
+                                      style={{ marginRight: "4px" }}
+                                    />
+                                    <Text size={"xs"} fw={400}>
+                                      See Raw Information
+                                    </Text>
+                                  </Flex>
+                                </Popover.Target>
+
+                                <Popover.Dropdown maw={"300px"}>
+                                  <Flex direction={"column"} gap={"4px"}>
+                                    <Text size="sm">
+                                      <span
+                                        style={{ fontWeight: "bold" }}
+                                      >{`Reason: `}</span>
+                                      {section.reasoning}
+                                    </Text>
+                                    <Divider />
+                                    <Text size={"xs"}>
+                                      <span style={{ fontWeight: "bold" }}>
+                                        {`Source:  `}
+                                      </span>
+                                      {section.source}
+                                    </Text>
+                                    {section.question && (
+                                      <Text size={"xs"}>
+                                        <span style={{ fontWeight: "bold" }}>
+                                          {`Question:  `}
+                                        </span>
+                                        {section.question}
+                                      </Text>
+                                    )}
+                                    {section.last_run && (
+                                      <Text size={"xs"}>
+                                        <span style={{ fontWeight: "bold" }}>
+                                          {`Last Updated:  `}
+                                        </span>
+                                        {new Date(
+                                          section.last_run + " UTC"
+                                        ).toLocaleString("en-US", {
+                                          year: "numeric",
+                                          month: "2-digit",
+                                          day: "2-digit",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                          second: "2-digit",
+                                          hour12: true,
+                                        })}
+                                      </Text>
+                                    )}
+                                  </Flex>
+                                </Popover.Dropdown>
+                              </Popover>
                             </Flex>
-                            <Text color="#D444F1" size={"xs"}>
-                              {item.ai_response}
-                            </Text>
-                          </Flex>
-                          <Flex justify="space-between" align="center">
-                            <Popover
-                              arrowPosition="center"
-                              zIndex={40000000}
-                              width={300}
-                              position="bottom"
-                              withArrow
-                              shadow="md"
-                            >
-                              <Popover.Target>
-                                <Flex
-                                  align="center"
-                                  style={{ cursor: "pointer" }}
-                                >
-                                  <IconEye
-                                    size={"1rem"}
-                                    style={{ marginRight: "4px" }}
-                                  />
-                                  <Text size={"xs"} fw={400}>
-                                    See raw content
-                                  </Text>
-                                </Flex>
-                              </Popover.Target>
-                              <Popover.Dropdown>
-                                <Text size="xs">{item.raw_response}</Text>
-                              </Popover.Dropdown>
-                            </Popover>
-                            <Popover
-                              arrowPosition="center"
-                              zIndex={40000000}
-                              width={300}
-                              position="bottom"
-                              withArrow
-                              shadow="md"
-                            >
-                              <Popover.Target>
-                                <Flex
-                                  align="center"
-                                  style={{ cursor: "pointer" }}
-                                >
-                                  <Text size={"xs"} fw={400}>
-                                    View Citations
-                                  </Text>
-                                </Flex>
-                              </Popover.Target>
-                              <Popover.Dropdown>
-                                <Text size="xs">
-                                  <strong>Citations:</strong>
-                                  <ul>
-                                    {item?.citations?.map((citation: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined, idx: Key | null | undefined) => (
-                                      <li key={idx}>
-                                        <a href={typeof citation === 'string' ? citation : undefined} target="_blank" rel="noopener noreferrer">
-                                          {citation}
-                                        </a>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                  {/* {item?.images?.length > 0 && (
-                                    <>
-                                      <strong>Images:</strong>
-                                      <ul>
-                                        {item.images.map((image, idx) => (
-                                          console.log('image is', image),
-                                          <li key={idx}>
-                                            <img src={image} alt={`Image ${idx}`} style={{ maxWidth: "100%" }} />
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </>
-                                  )} */}
-                                </Text>
-                              </Popover.Dropdown>
-                            </Popover>
-                          </Flex>
-                        </Paper>
-                        <Flex align={"center"} gap={"md"} mt={"lg"}>
-                          <Button
-                            fullWidth
-                            disabled={!selectedProspect}
-                            color="grape"
-                            leftIcon={<IconSparkles size={"0.9rem"} />}
-                            onClick={() =>
-                              openContextModal({
-                                modal: "simulatepersonalizerModal",
-                                title: (
-                                  <Title order={3}>
-                                    <span className=" text-gray-500"></span>{" "}
-                                    Personalizers
-                                  </Title>
-                                ),
-                                innerProps: {
-                                  prospectId: selectedProspect,
-                                  sequences: sequences,
-                                },
-                                centered: true,
-                                styles: {
-                                  content: {
-                                    minWidth: "700px",
+                          </Paper>
+                          <Flex align={"center"} gap={"md"} mt={"lg"}>
+                            <Button
+                              fullWidth
+                              disabled={!selectedProspect}
+                              color="grape"
+                              leftIcon={<IconSparkles size={"0.9rem"} />}
+                              onClick={() =>
+                                openContextModal({
+                                  modal: "simulatepersonalizerModal",
+                                  title: (
+                                    <Title order={3}>
+                                      <span className=" text-gray-500"></span>{" "}
+                                      Personalizers
+                                    </Title>
+                                  ),
+                                  innerProps: {
+                                    prospectId: selectedProspect,
+                                    sequences: sequences,
                                   },
-                                },
-                              })
-                            }
-                            style={{ margin: "0 8px 8px 8px" }} // Added margins to make the button smaller
-                          >
-                            Personalize
-                          </Button>
-                        </Flex>
-                      </>
-                    );
-                  })
-                )}
+                                  centered: true,
+                                  styles: {
+                                    content: {
+                                      minWidth: "700px",
+                                    },
+                                  },
+                                })
+                              }
+                              style={{ margin: "0 8px 8px 8px" }} // Added margins to make the button smaller
+                            >
+                              Personalize
+                            </Button>
+                          </Flex>
+                        </>
+                      );
+                    })}
+                {prospects.find((p) => p.id === +selectedProspect)
+                  ?.icp_company_fit_reason &&
+                  Object.keys(
+                    prospects.find((p) => p.id === +selectedProspect)!
+                      .icp_company_fit_reason
+                  )
+                    .filter((key) => {
+                      if (
+                        !innerProps.icp_scoring_ruleset_typed.company_ai_filters
+                      ) {
+                        return false;
+                      }
+
+                      return innerProps.icp_scoring_ruleset_typed.company_ai_filters
+                        .map((v: AIFilters) => v.key)
+                        .includes(key);
+                    })
+                    .map((item, index) => {
+                      const title = item
+                        .replace("_individual_", "_")
+                        .replace("_company_", "_")
+                        .replace("aicomp_", "")
+                        .replace("aiind_", "")
+                        .replace("keywords", "")
+                        .split("_")
+                        .join(" ");
+
+                      const section = prospects.find(
+                        (p) => p.id === +selectedProspect
+                      )!.icp_company_fit_reason[item];
+
+                      return (
+                        <>
+                          <Paper withBorder p={"lg"} key={index}>
+                            <Flex justify={"space-between"}>
+                              <Flex>
+                                <IconPoint
+                                  size={"2rem"}
+                                  fill={
+                                    section.answer === "YES" ? "#17B26A" : "red"
+                                  }
+                                  color="white"
+                                  className="mt-[-6px] ml-[-12px]"
+                                />
+                                <Text fw={600} size={"sm"}>
+                                  {generateTextWithBadges(
+                                    title.toLowerCase().split("_").join(" ")
+                                  )}
+                                </Text>
+                              </Flex>
+                              <Badge radius={"sm"} size="sm" color={"green"}>
+                                {"LinkedIn"}
+                              </Badge>
+                            </Flex>
+                            <Text size={"sm"} fw={500}>
+                              {section.reasoning}
+                            </Text>
+                            <Flex
+                              p={"sm"}
+                              className="bg-[#D444F1]/5"
+                              gap={4}
+                              align={"start"}
+                            >
+                              <Flex>
+                                <IconBulb size={"0.9rem"} color="#D444F1" />
+                              </Flex>
+                              <Text color="#D444F1" size={"xs"}>
+                                {"relevancy coming soon!"}
+                              </Text>
+                            </Flex>
+                            <Flex justify="space-between" align="center">
+                              <Popover
+                                arrowPosition="center"
+                                zIndex={40000000}
+                                width={300}
+                                position="bottom"
+                                withArrow
+                                shadow="md"
+                              >
+                                <Popover.Target>
+                                  <Flex
+                                    align="center"
+                                    style={{ cursor: "pointer" }}
+                                  >
+                                    <IconEye
+                                      size={"1rem"}
+                                      style={{ marginRight: "4px" }}
+                                    />
+                                    <Text size={"xs"} fw={400}>
+                                      See Raw Information
+                                    </Text>
+                                  </Flex>
+                                </Popover.Target>
+
+                                <Popover.Dropdown maw={"300px"}>
+                                  <Flex direction={"column"} gap={"4px"}>
+                                    <Text size="sm">
+                                      <span
+                                        style={{ fontWeight: "bold" }}
+                                      >{`Reason: `}</span>
+                                      {section.reasoning}
+                                    </Text>
+                                    <Divider />
+                                    <Text size={"xs"}>
+                                      <span style={{ fontWeight: "bold" }}>
+                                        {`Source:  `}
+                                      </span>
+                                      {section.source}
+                                    </Text>
+                                    {section.question && (
+                                      <Text size={"xs"}>
+                                        <span style={{ fontWeight: "bold" }}>
+                                          {`Question:  `}
+                                        </span>
+                                        {section.question}
+                                      </Text>
+                                    )}
+                                    {section.last_run && (
+                                      <Text size={"xs"}>
+                                        <span style={{ fontWeight: "bold" }}>
+                                          {`Last Updated:  `}
+                                        </span>
+                                        {new Date(
+                                          section.last_run + " UTC"
+                                        ).toLocaleString("en-US", {
+                                          year: "numeric",
+                                          month: "2-digit",
+                                          day: "2-digit",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                          second: "2-digit",
+                                          hour12: true,
+                                        })}
+                                      </Text>
+                                    )}
+                                  </Flex>
+                                </Popover.Dropdown>
+                              </Popover>
+                            </Flex>
+                          </Paper>
+                          <Flex align={"center"} gap={"md"} mt={"lg"}>
+                            <Button
+                              fullWidth
+                              disabled={!selectedProspect}
+                              color="grape"
+                              leftIcon={<IconSparkles size={"0.9rem"} />}
+                              onClick={() =>
+                                openContextModal({
+                                  modal: "simulatepersonalizerModal",
+                                  title: (
+                                    <Title order={3}>
+                                      <span className=" text-gray-500"></span>{" "}
+                                      Personalizers
+                                    </Title>
+                                  ),
+                                  innerProps: {
+                                    prospectId: selectedProspect,
+                                    sequences: sequences,
+                                  },
+                                  centered: true,
+                                  styles: {
+                                    content: {
+                                      minWidth: "700px",
+                                    },
+                                  },
+                                })
+                              }
+                              style={{ margin: "0 8px 8px 8px" }} // Added margins to make the button smaller
+                            >
+                              Personalize
+                            </Button>
+                          </Flex>
+                        </>
+                      );
+                    })}
               </Flex>
             )}
           </ScrollArea>
@@ -778,7 +1307,19 @@ export default function CampaignPersonalizersModal({
         >
           Go Back
         </Button>
-        <Button onClick={() => modals.closeAll()} fullWidth>
+        <Button
+          onClick={() => {
+            modals.closeAll();
+            addAIFilter(
+              company_ai_filters,
+              individual_ai_filters,
+              dealbreakers,
+              company_personalizers,
+              individual_personalizers
+            );
+          }}
+          fullWidth
+        >
           Save
         </Button>
       </Flex>

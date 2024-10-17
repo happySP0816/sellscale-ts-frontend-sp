@@ -75,6 +75,7 @@ export interface AIFilters {
   title: string;
   prompt: string;
   use_linkedin: boolean;
+  relevancy: string;
 }
 
 export interface ICPScoringRuleset extends ICPScoringRulesetKeys {

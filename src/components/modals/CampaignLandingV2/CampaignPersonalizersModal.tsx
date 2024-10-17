@@ -213,7 +213,7 @@ export default function CampaignPersonalizersModal({
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
-        archetype_id: id,
+        archetype_id: innerProps.id,
         individual_personalizers: individualPersonalizers,
         company_personalizers: companyPersonalizers,
         dealbreakers: dealbreakers,
@@ -223,8 +223,8 @@ export default function CampaignPersonalizersModal({
     });
 
     if (response.status === 200) {
-      await queryClient.invalidateQueries(["archetypeProspects", id]);
-      await queryClient.invalidateQueries(["icpScoringRuleset", id]);
+      await queryClient.invalidateQueries(["archetypeProspects", innerProps.id]);
+      await queryClient.invalidateQueries(["icpScoringRuleset", innerProps.id]);
       showNotification({
         title: "Success",
         message: "Successfully added AI Filter to the ICP ruleset.",
@@ -418,7 +418,7 @@ export default function CampaignPersonalizersModal({
           {/*   </Text> */}
           {/* )} */}
           <ScrollArea h={500} scrollbarSize={8} pr={"md"}>
-            {innerProps.icp_scoring_ruleset_typed.individual_ai_filters?.map(
+            {individual_ai_filters?.map(
               (filter, index) => {
                 return (
                   <Paper
@@ -566,7 +566,7 @@ export default function CampaignPersonalizersModal({
                 );
               }
             )}
-            {innerProps.icp_scoring_ruleset_typed.company_ai_filters?.map(
+            {company_ai_filters?.map(
               (filter, index) => {
                 return (
                   <Paper

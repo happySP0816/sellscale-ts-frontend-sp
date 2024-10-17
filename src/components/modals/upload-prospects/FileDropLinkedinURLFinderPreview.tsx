@@ -50,13 +50,18 @@ import _ from "lodash";
 import { DataTable } from "mantine-datatable";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { QueryCache } from "@tanstack/react-query";
 import { MaxHeap } from "@datastructures-js/heap";
 import { DataGrid } from "mantine-data-grid";
 import { a } from "react-spring";
 import { FilterVariant } from "@modals/ContactAccountFilterModal";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
+import {
+  prospectUploadDrawerIdState,
+  prospectUploadDrawerOpenState,
+} from "@atoms/uploadAtoms";
+import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
 
 const MAX_FILE_SIZE_MB = 2;
 const PREVIEW_FIRST_N_ROWS = 5;
@@ -210,6 +215,9 @@ export default function FileDropLinkedinURLFinderPreview(
   const [duplicateProspects, setDuplicateProspects] = useState<
     DuplicateProspects[] | null
   >(null);
+
+  const [_, setOpened] = useRecoilState(prospectUploadDrawerOpenState);
+  const [uploadID, setUploadID] = useRecoilState(prospectUploadDrawerIdState);
 
   const [prospectDBColumns, setProspectDBColumns] = useState<string[]>([
     "company",
@@ -454,6 +462,11 @@ export default function FileDropLinkedinURLFinderPreview(
 
     close();
     setPreUploading(false);
+
+    if (result.data?.uploadId) {
+      setUploadID(+result.data?.uploadId);
+      setOpened(true);
+    }
     // Invalidates the query for the personas data so that the new persona will be fetched
     queryClient.invalidateQueries({ queryKey: ["query-personas-data"] });
     queryCache.clear();
@@ -1215,6 +1228,7 @@ export default function FileDropLinkedinURLFinderPreview(
           </Center>
         </Stack>
       )}
+      <UploadDetailsDrawer />
     </>
   );
 }

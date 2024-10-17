@@ -663,6 +663,13 @@ export interface PersonaOverview {
   email_active?: boolean;
   email_open_tracking_enabled: boolean;
   email_link_tracking_enabled: boolean;
+  email_to_linkedin_connection?: string;
+  archetype?: string;
+  setup_status: string;
+  sdr_name?: string;
+  created_at: Date;
+  updated_at: Date;
+  testing_volume?: number;
   is_ai_research_personalization_enabled: boolean;
 }
 

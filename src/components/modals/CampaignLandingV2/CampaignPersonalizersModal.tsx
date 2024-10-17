@@ -928,7 +928,7 @@ export default function CampaignPersonalizersModal({
             h={640}
             scrollbarSize={8}
             px={"md"}
-            bg={prospects.length === 0 ? "#f7f8fa" : ""}
+            bg={prospects?.length === 0 ? "#f7f8fa" : ""}
           >
             {!prospects ? (
               <Loader size="sm" />

@@ -49,6 +49,7 @@ import { debounce } from "lodash";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import CreateSegmentModal from "./CreateSegmentModal";
+import { TransformedSegment } from "@pages/SegmentV3/SegmentV3";
 
 interface AccordionItemProps {
   value: string;
@@ -166,6 +167,8 @@ export default function PreFiltersV2EditModal({
 
   const [newContacts, setNewContacts] = useState<NewContacts[]>([]);
   const [duplicateContacts, setDuplicateContacts] = useState<any[]>([]);
+  const [loadingSegments, setLoadingSegments] = useState<boolean>(false);
+  const [segmentData, setSegmentData] = useState<TransformedSegment[]>([]);
 
   const [uploadLoading, setUploadLoading] = useState<boolean>(false);
 
@@ -273,6 +276,7 @@ export default function PreFiltersV2EditModal({
 
   useEffect(() => {
     fetchSavedQueries();
+    getAllSegments(true);
   }, [userToken]);
 
   const mergeSavedQueries = async (saved_query_id: number) => {
@@ -1017,6 +1021,102 @@ export default function PreFiltersV2EditModal({
       setSomethingWasAltered(false);
     }
     setLoadingProsepcts(false);
+  };
+
+  const getAllSegments = async (showLoader: boolean, tagFilter?: Number) => {
+
+    function transformData(segments: any[]): TransformedSegment[] {
+      return segments.map((segment, index) => {
+        // Assume progress, campaign, contacts, filters, assets are derived somehow
+        return {
+          id: segment.id,
+          person_name: segment.segment_title,
+          segment_title: segment.segment_title,
+          progress: isNaN(
+            segment.num_contacted / (segment.num_prospected || 0.0001)
+          )
+            ? "0"
+            : Math.max(
+                0,
+                parseInt(
+                  (
+                    (segment.num_contacted * 100) /
+                    (segment.num_prospected || 1)
+                  ).toString()
+                )
+              ).toString(),
+          campaign: segment.id.toString(),
+          contacts: segment.num_prospected,
+          filters: Object.keys(segment.filters).length, // Count of filter types
+          // assets: Math.floor(Math.random() * 100), // Fake random asset count or null
+          sub_segments: [], // This needs to be populated based on more complex logic or additional data
+          client_archetype: segment.client_archetype,
+          parent_segment_id: segment.parent_segment_id,
+          client_sdr: segment.client_sdr,
+          num_prospected: segment.num_prospected,
+          num_contacted: segment.num_contacted,
+          apollo_query: segment.apollo_query,
+          segment_tags: segment.attached_segments,
+          autoscrape_enabled: segment.autoscrape_enabled,
+          current_scrape_page: segment.current_scrape_page,
+          is_market_map: segment.is_market_map ?? false,
+          is_company_segment: segment.is_company_segment ?? false,
+          unique_companies_in_company_map:
+            segment.unique_companies_in_company_map,
+        };
+      });
+    }
+    if (showLoader) {
+      setLoadingSegments(true);
+    }
+    fetch(
+      `${API_URL}/segment/all?include_all_in_client=true` +
+        (tagFilter !== -1 ? `&tag_filter=${tagFilter}` : ""),
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        const segments = data.segments;
+        const totalProspected = segments.reduce(
+          (acc: number, segment: any) => acc + (segment.num_prospected || 0),
+          0
+        );
+        const totalUniqueCompanies = segments.reduce(
+          (acc: number, segment: any) => acc + (segment.unique_companies || 0),
+          0
+        );
+        const totalContacted = segments.reduce(
+          (acc: number, segment: any) => acc + (segment.num_contacted || 0),
+          0
+        );
+        const totalProspectsInPreFilters = segments.reduce(
+          (acc: number, segment: any) =>
+            acc + (segment.apollo_query?.num_results || 0),
+          0
+        );
+        // setTotalProspected(totalProspected);
+        // setTotalContacted(totalContacted);
+        // setTotalUniqueCompanies(totalUniqueCompanies);
+
+        const transformedSegments = transformData(data.segments);
+
+        // setTotalInFilters(totalProspectsInPreFilters);
+
+        setSegmentData(
+          transformedSegments.filter(
+            (segment) => segment.is_company_segment
+          )
+        );
+      })
+      .finally(() => {
+        setLoadingSegments(false);
+      });
   };
 
   const fetchCompanyNameOptions = async (query: string) => {
@@ -1897,6 +1997,56 @@ export default function PreFiltersV2EditModal({
                       autosize
                       minRows={1}
                       mb="xl"
+                    />
+                    <Select
+                      label="Apply Company Segment"
+                      placeholder="Choose an option"
+                      data={segmentData.map((segment) => ({
+                        value: segment.id.toString(),
+                        label: segment.segment_title,
+                      }))}
+                      value={null}
+                      onChange={async (value) => {
+                        console.log("Selected Segment ID:", value);
+                        try {
+                          const response = await fetch(`${API_URL}/segment/get_companies_from_segment_id`, {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              Authorization: `Bearer ${userToken}`,
+                            },
+                            body: JSON.stringify({
+                              segment_id: value,
+                            }),
+                          });
+
+                          if (response.ok) {
+                            const companies = await response.json();
+                            setselectedCompanies(companies.map((company: any) => company.apollo_uuid));
+                            setCompanyOptions(companies.map((company: any) => ({
+                              value: company.apollo_uuid,
+                              label: company.name,
+                              domain: company.domain,
+                              logo_url: company.logo_url,
+                              website_url: company.website_url,
+                            })));
+                          
+                            console.log("Companies from Segment:", companies);
+                          } else {
+                            console.error("Failed to fetch companies from segment");
+                          }
+                        } catch (error) {
+                          console.error("Error fetching companies from segment:", error);
+                        }
+                      }}
+                      styles={{
+                        rightSection: { pointerEvents: "none" },
+                        label: { width: "100%" },
+
+                        input: {
+                          minHeight: "",
+                        },
+                      }}
                     />
                     <Button
                       loading={fetchingCompanyOptions}

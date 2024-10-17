@@ -18,15 +18,25 @@ import {
 } from "@mantine/core";
 import { modals, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { ICPScoringRuleset } from "@modals/ContactAccountFilterModal";
+import {
+  AIFilters,
+  ICPScoringRuleset,
+} from "@modals/ContactAccountFilterModal";
 import {
   IconChevronLeft,
   IconChevronRight,
   IconPlus,
   IconQuestionMark,
 } from "@tabler/icons";
-import { IconBrain, IconGlobe, IconRobot, IconRobotFace, IconSparkles, IconWorld } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
+import {
+  IconBrain,
+  IconGlobe,
+  IconRobot,
+  IconRobotFace,
+  IconSparkles,
+  IconWorld,
+} from "@tabler/icons-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchCampaignPersonalizers } from "@utils/requests/campaignOverview";
 import { getICPRuleSet } from "@utils/requests/icpScoring";
 import { useEffect, useState } from "react";
@@ -57,6 +67,8 @@ export default function Personalizers(props: any) {
 
   const icp_scoring_ruleset_typed = icp_scoring_ruleset as ICPScoringRuleset;
 
+  const queryClient = useQueryClient();
+
   const id = props.forcedCampaignId || currentProject?.id || -1;
 
   const [loadingPersonalizers, setLoadingPersonalizers] = useState(false);
@@ -75,6 +87,51 @@ export default function Personalizers(props: any) {
       props.setPersonalizers(response.questions);
     }
     setLoadingPersonalizers(false);
+  };
+
+  const addAIFilter = async (
+    companyAIFilters: AIFilters[],
+    individualAIFilters: AIFilters[],
+    dealbreakers: string[],
+    companyPersonalizers: string[],
+    individualPersonalizers: string[]
+  ) => {
+    const response = await fetch(`${API_URL}/icp_scoring/add_ai_filter`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        archetype_id: id,
+        individual_personalizers: individualPersonalizers,
+        company_personalizers: companyPersonalizers,
+        dealbreakers: dealbreakers,
+        individual_ai_filters: individualAIFilters,
+        company_ai_filters: companyAIFilters,
+      }),
+    });
+
+    if (response.status === 200) {
+      await queryClient.invalidateQueries(["archetypeProspects", id]);
+      await queryClient.invalidateQueries(["icpScoringRuleset", id]);
+      showNotification({
+        title: "Success",
+        message: "Successfully added AI Filter to the ICP ruleset.",
+        color: "blue",
+      });
+
+      await queryClient.invalidateQueries([
+        `query-get-research-point-types`,
+        id,
+      ]);
+    } else {
+      showNotification({
+        title: "Error",
+        message: "Failed to add AI filters to the ICP ruleset",
+        color: "red",
+      });
+    }
   };
 
   const updatePersonalizersEnabled = (enabled: boolean) => {
@@ -224,34 +281,37 @@ export default function Personalizers(props: any) {
               updatePersonalizersEnabled(e.target.checked);
             }}
           />
-          <Button
-            color="grape"
-            disabled={!currentProject?.is_ai_research_personalization_enabled}
-            leftIcon={<IconSparkles size={"0.9rem"} />}
-            onClick={() =>
-              openContextModal({
-                modal: "campaignPersonalizersModal",
-                title: <Title order={3}>Personalizers</Title>,
-                innerProps: {
-                  sequences: props.sequences || [],
-                  ai_researcher_id: ai_researcher_id,
-                  id,
-                  setPersonalizers: props.setPersonalizers,
-                },
-                centered: true,
-                styles: {
-                  content: {
-                    minWidth: "1100px",
+          {icp_scoring_ruleset_typed && (
+            <Button
+              color="grape"
+              disabled={!currentProject?.is_ai_research_personalization_enabled}
+              leftIcon={<IconSparkles size={"0.9rem"} />}
+              onClick={() =>
+                openContextModal({
+                  modal: "campaignPersonalizersModal",
+                  title: <Title order={3}>Personalizers</Title>,
+                  innerProps: {
+                    sequences: props.sequences || [],
+                    ai_researcher_id: ai_researcher_id,
+                    id,
+                    setPersonalizers: props.setPersonalizers,
+                    icp_scoring_ruleset_typed: icp_scoring_ruleset_typed,
                   },
-                },
-                onClose: () => {
-                  getPersonalizers();
-                },
-              })
-            }
-          >
-            Edit & Simulate
-          </Button>
+                  centered: true,
+                  styles: {
+                    content: {
+                      minWidth: "1100px",
+                    },
+                  },
+                  onClose: () => {
+                    getPersonalizers();
+                  },
+                })
+              }
+            >
+              Edit & Simulate
+            </Button>
+          )}
         </Flex>
       </Flex>
       <Flex>
@@ -286,92 +346,6 @@ export default function Personalizers(props: any) {
               direction="column"
               sx={{ overflowY: "auto" }}
             >
-              {props.personalizers &&
-                props.personalizers.length > 0 &&
-                props.personalizers.map((item: any, index: number) => {
-                  return (
-                    <Flex
-                      w="100%"
-                      justify="space-between"
-                      key={index}
-                      style={{
-                        border: "1px solid #D9DEE5",
-                        padding: "7px",
-                        borderRadius: "4px",
-                        background: "white",
-                      }}
-                    >
-                      <Flex align={"center"}>
-                        <Tooltip
-                          label={
-                            <Flex direction={"column"}>
-                              <Text fw={600}>AI Research</Text>
-                              <Text>
-                                This personalizer is generated by the AI Researcher. 
-                              </Text>
-                            </Flex>
-                          }
-                        >
-                          <IconBrain size={"16px"} />
-                        </Tooltip>
-                        <Text fw={600} size="12px" miw="200px">
-                          <BracketGradientWrapper>
-                            {item.key}
-                          </BracketGradientWrapper>
-                        </Text>
-                      </Flex>
-                      <Button
-                        size="compact-sm"
-                        fw={600}
-                        fz="12px"
-                        color="red"
-                        variant="outline"
-                        onClick={() =>
-                          modals.openConfirmModal({
-                            title: <Title order={4}>Delete Personalizer</Title>,
-                            children: (
-                              <>
-                                <Text>
-                                  Deleting this personalizer will remove it from
-                                  all sequences and templates. Are you sure you
-                                  want to delete it?
-                                </Text>
-                                <Flex
-                                  style={{
-                                    fontFamily: "monospace, monospace", // Monospaced font
-                                    backgroundColor: "#f5f5f5", // Light grey background
-                                    padding: "10px", // Padding inside the block
-                                    border: "1px solid #ddd", // Light border
-                                    borderRadius: "4px", // Rounded corners
-                                    display: "inline-block", // Make sure it wraps content properly
-                                    whiteSpace: "pre-wrap", // Preserve whitespace and wrapping
-                                    overflowX: "auto", // Horizontal scroll for long lines
-                                  }}
-                                  mt="md"
-                                >
-                                  <Text color="red" fz="sm">
-                                    {item.key}
-                                  </Text>
-                                </Flex>
-                              </>
-                            ),
-                            labels: {
-                              confirm: "Delete",
-                              cancel: "Cancel",
-                            },
-                            confirmProps: { color: "red" },
-                            onCancel: () => {},
-                            onConfirm: async () => {
-                              await deletePersonalizer(item.id);
-                            },
-                          })
-                        }
-                      >
-                        Delete
-                      </Button>
-                    </Flex>
-                  );
-                })}
               {icp_scoring_ruleset_typed &&
                 icp_scoring_ruleset_typed.individual_ai_filters &&
                 Array.isArray(
@@ -392,7 +366,7 @@ export default function Personalizers(props: any) {
                         }}
                         align={"center"}
                       >
-                        <Flex align={"center"}>
+                        <Flex gap={"md"} align={"center"}>
                           <Tooltip
                             label={
                               <Flex direction={"column"}>
@@ -441,7 +415,32 @@ export default function Personalizers(props: any) {
                             fz="12px"
                             color="red"
                             variant="outline"
-                            disabled
+                            onClick={async () => {
+                              const individual_ai_filters =
+                                icp_scoring_ruleset_typed.individual_ai_filters?.filter(
+                                  (item: any) => item.key !== filter.key
+                                );
+
+                              const dealbreakers =
+                                icp_scoring_ruleset_typed.dealbreakers?.filter(
+                                  (value) => value !== filter.key
+                                );
+
+                              const individual_personalizers =
+                                icp_scoring_ruleset_typed.individual_personalizers?.filter(
+                                  (item) => item !== filter.key
+                                );
+
+                              await addAIFilter(
+                                icp_scoring_ruleset_typed.company_ai_filters ??
+                                  [],
+                                individual_ai_filters,
+                                dealbreakers ?? [],
+                                icp_scoring_ruleset_typed.company_personalizers ??
+                                  [],
+                                individual_personalizers ?? []
+                              );
+                            }}
                           >
                             Delete
                           </Button>
@@ -450,7 +449,8 @@ export default function Personalizers(props: any) {
                     );
                   }
                 )}
-              {icp_scoring_ruleset_typed && icp_scoring_ruleset_typed.company_ai_filters &&
+              {icp_scoring_ruleset_typed &&
+                icp_scoring_ruleset_typed.company_ai_filters &&
                 Array.isArray(icp_scoring_ruleset_typed.company_ai_filters) &&
                 icp_scoring_ruleset_typed.company_ai_filters.map(
                   (filter, index) => {
@@ -516,7 +516,30 @@ export default function Personalizers(props: any) {
                             fz="12px"
                             color="red"
                             variant="outline"
-                            disabled
+                            onClick={async () => {
+                              const company_ai_filters =
+                                icp_scoring_ruleset_typed.company_ai_filters?.filter(
+                                  (item: any) => item.key !== filter.key
+                                );
+
+                              const dealbreakers =
+                                icp_scoring_ruleset_typed.dealbreakers?.filter(
+                                  (value) => value !== filter.key
+                                );
+
+                              const company_personalizers =
+                                icp_scoring_ruleset_typed.company_personalizers?.filter(
+                                  (item) => item !== filter.key
+                                );
+
+                              await addAIFilter(
+                                company_ai_filters ?? [],
+                                icp_scoring_ruleset_typed.individual_ai_filters,
+                                dealbreakers ?? [],
+                                company_personalizers ?? [],
+                                icp_scoring_ruleset_typed.individual_personalizers
+                              );
+                            }}
                           >
                             Delete
                           </Button>
@@ -525,6 +548,94 @@ export default function Personalizers(props: any) {
                     );
                   }
                 )}
+              <Divider label={"Deprecated"} labelPosition={"center"} />
+              {props.personalizers &&
+                props.personalizers.length > 0 &&
+                props.personalizers.map((item: any, index: number) => {
+                  return (
+                    <Flex
+                      w="100%"
+                      justify="space-between"
+                      key={index}
+                      style={{
+                        border: "1px solid #D9DEE5",
+                        padding: "7px",
+                        borderRadius: "4px",
+                        background: "white",
+                      }}
+                    >
+                      <Flex align={"center"}>
+                        <Tooltip
+                          label={
+                            <Flex direction={"column"}>
+                              <Text fw={600}>AI Research</Text>
+                              <Text>
+                                This personalizer is generated by the AI
+                                Researcher.
+                              </Text>
+                            </Flex>
+                          }
+                        >
+                          <IconBrain size={"16px"} />
+                        </Tooltip>
+                        <Text fw={600} size="12px" miw="200px">
+                          <BracketGradientWrapper>
+                            {item.key}
+                          </BracketGradientWrapper>
+                        </Text>
+                      </Flex>
+                      <Button
+                        size="compact-sm"
+                        fw={600}
+                        fz="12px"
+                        color="red"
+                        variant="outline"
+                        onClick={() =>
+                          modals.openConfirmModal({
+                            title: <Title order={4}>Delete Personalizer</Title>,
+                            children: (
+                              <>
+                                <Text>
+                                  Deleting this personalizer will remove it from
+                                  all sequences and templates. Are you sure you
+                                  want to delete it?
+                                </Text>
+                                <Flex
+                                  style={{
+                                    fontFamily: "monospace, monospace", // Monospaced font
+                                    backgroundColor: "#f5f5f5", // Light grey background
+                                    padding: "10px", // Padding inside the block
+                                    border: "1px solid #ddd", // Light border
+                                    borderRadius: "4px", // Rounded corners
+                                    display: "inline-block", // Make sure it wraps content properly
+                                    whiteSpace: "pre-wrap", // Preserve whitespace and wrapping
+                                    overflowX: "auto", // Horizontal scroll for long lines
+                                  }}
+                                  mt="md"
+                                >
+                                  <Text color="red" fz="sm">
+                                    {item.key}
+                                  </Text>
+                                </Flex>
+                              </>
+                            ),
+                            labels: {
+                              confirm: "Delete",
+                              cancel: "Cancel",
+                            },
+                            confirmProps: { color: "red" },
+                            onCancel: () => {},
+                            onConfirm: async () => {
+                              await deletePersonalizer(item.id);
+                            },
+                          })
+                        }
+                      >
+                        Delete
+                      </Button>
+                    </Flex>
+                  );
+                })}
             </Flex>
             {/* <Flex */}
             {/*   align={"center"} */}

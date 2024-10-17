@@ -255,25 +255,14 @@ const CampaignFilters = function ({
     icp_scoring_ruleset.company_ai_filters ?? []
   );
 
-  const [individual_ai_title, setIndividualAITitle] = useState<string>("");
+  const [ai_title, setAITitle] = useState<string>("");
   const [prefilters, setPrefilters] = useState<any[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
-  const [individual_ai_prompt, setIndividualAIPrompt] = useState<string>("");
-  const [individual_ai_dealbreaker, setIndividualAIDealbreaker] =
-    useState<boolean>(false);
-  const [individual_ai_personalizer, setIndividualAIPersonalizer] =
-    useState<boolean>(false);
-  const [individual_ai_use_linkedin, setIndividualAIUseLinkedin] =
-    useState<boolean>(false);
-
-  const [company_ai_title, setCompanyAITitle] = useState<string>("");
-  const [company_ai_prompt, setCompanyAIPrompt] = useState<string>("");
-  const [company_ai_dealbreaker, setCompanyAIDealbreaker] =
-    useState<boolean>(false);
-  const [company_ai_personalizer, setCompanyAIPersonalizer] =
-    useState<boolean>(false);
-  const [company_ai_use_linkedin, setCompanyAIUseLinkedin] =
-    useState<boolean>(false);
+  const [ai_prompt, setAIPrompt] = useState<string>("");
+  const [ai_relevancy, setAIRelevancy] = useState<string>("");
+  const [ai_dealbreaker, setAIDealbreaker] = useState<boolean>(false);
+  const [ai_personalizer, setAIPersonalizer] = useState<boolean>(false);
+  const [ai_use_linkedin, setAIUseLinkedin] = useState<boolean>(false);
 
   const [scoreLoading, setScoreLoading] = useState(false);
 
@@ -282,31 +271,38 @@ const CampaignFilters = function ({
   const onAddIndividualAIFilters = async (
     title: string,
     prompt: string,
-    use_linkedin: boolean
+    use_linkedin: boolean,
+    relevancy: string
   ) => {
     const key = "aiind_" + title.toLowerCase().split(" ").join("_");
     const newIndividualAIFilters = [
       ...individual_ai_filters,
-      { key: key, title: title, prompt: prompt, use_linkedin: use_linkedin },
+      {
+        key: key,
+        title: title,
+        prompt: prompt,
+        use_linkedin: use_linkedin,
+        relevancy: relevancy,
+      },
     ];
     let newDealbreaker = [...dealbreakers];
     let newIndividualAIPersonalizer = [...individual_personalizers];
 
     setIndividualAIFilters(newIndividualAIFilters);
 
-    if (individual_ai_dealbreaker) {
+    if (ai_dealbreaker) {
       newDealbreaker = [...dealbreakers, key];
       setDealBreakers([...dealbreakers, key]);
     }
-    if (individual_ai_personalizer) {
+    if (ai_personalizer) {
       newIndividualAIPersonalizer = [...individual_personalizers, key];
       setIndividualPersonalizers([...individual_personalizers, key]);
     }
 
-    setIndividualAITitle("");
-    setIndividualAIPrompt("");
-    setIndividualAIDealbreaker(false);
-    setIndividualAIPersonalizer(false);
+    setAITitle("");
+    setAIPrompt("");
+    setAIDealbreaker(false);
+    setAIPersonalizer(false);
 
     await addAIFilter(
       company_ai_filters,
@@ -320,32 +316,40 @@ const CampaignFilters = function ({
   const onAddCompanyAIFilters = async (
     title: string,
     prompt: string,
-    use_linkedin: boolean
+    use_linkedin: boolean,
+    relevancy: string
   ) => {
     const key = "aicomp_" + title.toLowerCase().split(" ").join("_");
     const newCompanyAIFilters = [
       ...company_ai_filters,
-      { key: key, title: title, prompt: prompt, use_linkedin: use_linkedin },
+      {
+        key: key,
+        title: title,
+        prompt: prompt,
+        use_linkedin: use_linkedin,
+        relevancy: relevancy,
+      },
     ];
 
     let newDealbreaker = [...dealbreakers];
-    let newCompanyAIPersonalizer = [...individual_personalizers];
+    let newCompanyAIPersonalizer = [...company_personalizers];
 
     setCompanyAIFilters(newCompanyAIFilters);
 
-    if (company_ai_dealbreaker) {
+    if (ai_dealbreaker) {
       newDealbreaker = [...dealbreakers, key];
       setDealBreakers([...dealbreakers, key]);
     }
-    if (company_ai_personalizer) {
+    if (ai_personalizer) {
       newCompanyAIPersonalizer = [...company_personalizers, key];
       setCompanyPersonalizers([...company_personalizers, key]);
     }
 
-    setCompanyAITitle("");
-    setCompanyAIPrompt("");
-    setCompanyAIDealbreaker(false);
-    setCompanyAIPersonalizer(false);
+    setAITitle("");
+    setAIPrompt("");
+    setAIRelevancy("");
+    setAIDealbreaker(false);
+    setAIPersonalizer(false);
 
     await addAIFilter(
       newCompanyAIFilters,
@@ -603,7 +607,7 @@ const CampaignFilters = function ({
         company_personalizers: companyPersonalizers,
         dealbreakers: dealbreakers,
         individual_ai_filters: individualAIFilters,
-        compay_ai_filters: companyAIFilters,
+        company_ai_filters: companyAIFilters,
       }),
     });
 
@@ -797,191 +801,101 @@ const CampaignFilters = function ({
                 AI Filter
               </Accordion.Control>
               <Accordion.Panel>
-                {viewIndividualAIFilters ? (
-                  <Flex direction={"column"} gap={"4px"}>
-                    <Flex justify={"space-between"} align={"center"}>
-                      <Text fz="md">Add AI Filters</Text>
-                      <Switch
-                        onLabel="Individual"
-                        offLabel="Company"
-                        checked={viewIndividualAIFilters}
-                        onChange={(event) =>
-                          setViewIndividualAIFilters(
-                            event.currentTarget.checked
-                          )
-                        }
-                        size={"lg"}
-                      />
-                    </Flex>
-                    <TextInput
-                      placeholder="Enter Title"
-                      value={individual_ai_title}
-                      label="Title"
-                      description="This will be the title that is displayed as a column"
-                      withAsterisk
-                      onChange={(event) =>
-                        setIndividualAITitle(event.currentTarget.value)
-                      }
-                    />
-                    <Textarea
-                      placeholder="Enter AI prompt here. A question to score your list. You must include [[prospect]] into your list."
-                      value={individual_ai_prompt}
-                      label="AI Filter"
-                      withAsterisk
-                      minRows={8}
-                      maxRows={8}
-                      onChange={(event) =>
-                        setIndividualAIPrompt(event.currentTarget.value)
-                      }
-                    />
-                    <Checkbox
-                      label="Is Dealbreaker"
-                      checked={individual_ai_dealbreaker}
-                      onChange={(event) =>
-                        setIndividualAIDealbreaker(event.currentTarget.checked)
-                      }
-                    />
-                    <Checkbox
-                      label="Personalizer"
-                      checked={individual_ai_personalizer}
-                      onChange={(event) =>
-                        setIndividualAIPersonalizer(event.currentTarget.checked)
-                      }
-                    />
-                    <Switch
-                      onLabel="Use Linkedin"
-                      offLabel="Use Search"
-                      size={"lg"}
-                      onChange={(event) =>
-                        setIndividualAIUseLinkedin(event.currentTarget.checked)
-                      }
-                    />
-                    <Button
-                      disabled={
-                        !individual_ai_title ||
-                        !individual_ai_prompt ||
-                        !individual_ai_prompt.includes("[[prospect]]")
-                      }
-                      onClick={async () => {
-                        const key =
-                          "aiind_" +
-                          individual_ai_title
-                            .toLowerCase()
-                            .split(" ")
-                            .join("_");
+                <Flex direction={"column"} gap={"4px"}>
+                  <Flex justify={"space-between"} align={"center"}>
+                    <Text fz="md">Add AI Filters</Text>
+                  </Flex>
+                  <TextInput
+                    placeholder="Enter Title"
+                    value={ai_title}
+                    label="Title"
+                    description="This will be the title that is displayed as a column"
+                    withAsterisk
+                    onChange={(event) => setAITitle(event.currentTarget.value)}
+                  />
+                  <Textarea
+                    placeholder="Enter AI prompt here. A question to score your list. You must include only either [[prospect]] or [[company]] into your list."
+                    value={ai_prompt}
+                    label="AI Filter"
+                    withAsterisk
+                    minRows={8}
+                    maxRows={8}
+                    onChange={(event) => setAIPrompt(event.currentTarget.value)}
+                  />
+                  <Textarea
+                    placeholder="Enter Relevancy here."
+                    value={ai_relevancy}
+                    label="Relevancy"
+                    withAsterisk
+                    minRows={8}
+                    maxRows={8}
+                    onChange={(event) =>
+                      setAIRelevancy(event.currentTarget.value)
+                    }
+                  />
+                  <Checkbox
+                    label="Is Dealbreaker"
+                    checked={ai_dealbreaker}
+                    onChange={(event) =>
+                      setAIDealbreaker(event.currentTarget.checked)
+                    }
+                  />
+                  <Checkbox
+                    label="Personalizer"
+                    checked={ai_personalizer}
+                    onChange={(event) =>
+                      setAIPersonalizer(event.currentTarget.checked)
+                    }
+                  />
+                  <Switch
+                    onLabel="Use Linkedin"
+                    offLabel="Use Search"
+                    size={"lg"}
+                    onChange={(event) =>
+                      setAIUseLinkedin(event.currentTarget.checked)
+                    }
+                  />
+                  <Button
+                    disabled={
+                      !ai_title ||
+                      !ai_prompt ||
+                      (!ai_prompt.includes("[[prospect]]") &&
+                        !ai_prompt.includes("[[company]]")) ||
+                      !ai_relevancy
+                    }
+                    onClick={async () => {
+                      const key =
+                        "aiind_" + ai_title.toLowerCase().split(" ").join("_");
 
-                        setHeaderSet(
-                          (prevState) => new Set([...prevState, key])
-                        );
-                        setContactTableHeaders((prevState) => {
-                          const set = new Set([
-                            ...prevState,
-                            { key: key, title: individual_ai_title },
-                          ]);
-                          return [...set];
-                        });
+                      setHeaderSet((prevState) => new Set([...prevState, key]));
+                      setContactTableHeaders((prevState) => {
+                        const set = new Set([
+                          ...prevState,
+                          { key: key, title: ai_title },
+                        ]);
+                        return [...set];
+                      });
+
+                      if (ai_prompt.includes("[[prospect]]")) {
                         await onAddIndividualAIFilters(
-                          individual_ai_title,
-                          individual_ai_prompt,
-                          individual_ai_use_linkedin
+                          ai_title,
+                          ai_prompt,
+                          ai_use_linkedin,
+                          ai_relevancy
                         );
-                      }}
-                    >
-                      Add AI Filter
-                    </Button>
-                  </Flex>
-                ) : (
-                  <Flex direction={"column"} gap={"4px"}>
-                    <Flex justify={"space-between"} align={"center"}>
-                      <Text fz="md">Add AI Filters</Text>
-                      <Switch
-                        onLabel="Individual"
-                        offLabel="Company"
-                        checked={viewIndividualAIFilters}
-                        onChange={(event) =>
-                          setViewIndividualAIFilters(
-                            event.currentTarget.checked
-                          )
-                        }
-                        size={"lg"}
-                      />
-                    </Flex>
-                    <TextInput
-                      placeholder="Enter Title"
-                      value={company_ai_title}
-                      label="Title"
-                      description="This will be the title that is displayed as a column"
-                      withAsterisk
-                      onChange={(event) =>
-                        setCompanyAITitle(event.currentTarget.value)
-                      }
-                    />
-                    <Textarea
-                      placeholder="Enter AI prompt here. A question to score your list. You must include [[company]] into your prompt."
-                      value={company_ai_prompt}
-                      label="AI Filter"
-                      withAsterisk
-                      minRows={8}
-                      maxRows={8}
-                      onChange={(event) =>
-                        setCompanyAIPrompt(event.currentTarget.value)
-                      }
-                    />
-                    <Checkbox
-                      label="Is Dealbreaker"
-                      checked={company_ai_dealbreaker}
-                      onChange={(event) =>
-                        setCompanyAIDealbreaker(event.currentTarget.checked)
-                      }
-                    />
-                    <Checkbox
-                      label="Personalizer"
-                      checked={company_ai_personalizer}
-                      onChange={(event) =>
-                        setCompanyAIPersonalizer(event.currentTarget.checked)
-                      }
-                    />
-                    <Switch
-                      onLabel="Use Linkedin"
-                      offLabel="Use Search"
-                      size={"lg"}
-                      onChange={(event) =>
-                        setCompanyAIUseLinkedin(event.currentTarget.checked)
-                      }
-                    />
-                    <Button
-                      disabled={
-                        !company_ai_title ||
-                        !company_ai_prompt ||
-                        !company_ai_prompt.includes("[[company]]")
-                      }
-                      onClick={async () => {
-                        const key =
-                          "aicomp_" +
-                          company_ai_title.toLowerCase().split(" ").join("_");
-
-                        setHeaderSet(
-                          (prevState) => new Set([...prevState, key])
-                        );
-                        setContactTableHeaders((prevState) => {
-                          const set = new Set([
-                            ...prevState,
-                            { key: key, title: company_ai_title },
-                          ]);
-                          return [...set];
-                        });
+                      } else {
                         await onAddCompanyAIFilters(
-                          company_ai_title,
-                          company_ai_prompt,
-                          company_ai_use_linkedin
+                          ai_title,
+                          ai_prompt,
+                          ai_use_linkedin,
+                          ai_relevancy
                         );
-                      }}
-                    >
-                      Add AI Filter
-                    </Button>
-                  </Flex>
-                )}
-
+                      }
+                    }}
+                  >
+                    Add AI Filter
+                  </Button>
+                </Flex>
                 <Accordion
                   styles={{ content: { padding: "2px" } }}
                   variant={"filled"}
@@ -1074,6 +988,7 @@ const CampaignFilters = function ({
                               </Text>
                               <Textarea
                                 fw={500}
+                                label={"prompt"}
                                 value={aiFilter.prompt}
                                 onChange={(event) => {
                                   setIndividualAIFilters((prevState) => {
@@ -1094,6 +1009,30 @@ const CampaignFilters = function ({
                                 maxRows={8}
                               >
                                 {aiFilter.prompt}
+                              </Textarea>
+                              <Textarea
+                                fw={500}
+                                label={"relevancy"}
+                                value={aiFilter.relevancy}
+                                onChange={(event) => {
+                                  setIndividualAIFilters((prevState) => {
+                                    return prevState.map((previousAI) => {
+                                      if (previousAI.key === aiFilter.key) {
+                                        return {
+                                          ...aiFilter,
+                                          relevancy: event.currentTarget.value,
+                                        };
+                                      }
+
+                                      return previousAI;
+                                    });
+                                  });
+                                }}
+                                autosize
+                                minRows={4}
+                                maxRows={8}
+                              >
+                                {aiFilter.relevancy}
                               </Textarea>
                               <Flex
                                 direction={"column"}
@@ -1249,6 +1188,29 @@ const CampaignFilters = function ({
                                 maxRows={8}
                               >
                                 {aiFilter.prompt}
+                              </Textarea>
+                              <Textarea
+                                fw={500}
+                                value={aiFilter.relevancy}
+                                onChange={(event) => {
+                                  setCompanyAIFilters((prevState) => {
+                                    return prevState.map((previousAI) => {
+                                      if (previousAI.key === aiFilter.key) {
+                                        return {
+                                          ...aiFilter,
+                                          relevancy: event.currentTarget.value,
+                                        };
+                                      }
+
+                                      return previousAI;
+                                    });
+                                  });
+                                }}
+                                autosize
+                                minRows={4}
+                                maxRows={8}
+                              >
+                                {aiFilter.relevancy}
                               </Textarea>
                               <Flex
                                 direction={"column"}

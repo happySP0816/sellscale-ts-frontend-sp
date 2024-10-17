@@ -664,6 +664,7 @@ export interface PersonaOverview {
   email_open_tracking_enabled: boolean;
   email_link_tracking_enabled: boolean;
   email_to_linkedin_connection?: string;
+  linkedin_to_email_connection?: string;
   archetype?: string;
   setup_status: string;
   sdr_name?: string;

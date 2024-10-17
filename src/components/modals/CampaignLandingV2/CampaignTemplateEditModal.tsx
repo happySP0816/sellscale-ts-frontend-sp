@@ -163,6 +163,9 @@ export default function CampaignTemplateEditModal({
   const [currentProject, setCurrentProject] = useRecoilState(
     currentProjectState
   );
+
+  console.log('current prokect is ', currentProject);
+
   const [alteredLinkedinActive, setAlteredLinkedinActive] = useState(
     currentProject?.linkedin_active
   );
@@ -198,6 +201,8 @@ export default function CampaignTemplateEditModal({
   const [templateType, setTemplateType] = useState("template" || "generate");
 
   const [currentConnectionType, setCurrentConnectionType] = useState<string>(currentProject?.email_to_linkedin_connection || "RANDOM");
+
+  const [emailToLinkedin, setEmailToLinkedin] = useState(currentProject?.email_to_linkedin_connection || false) 
 
   const [sequenceType, setSequenceType]: any = useState<string>(
     innerProps.sequenceType || "email"
@@ -548,9 +553,10 @@ export default function CampaignTemplateEditModal({
                 <Divider
                   variant="dashed"
                   labelPosition="center"
-                  label={<Hook linkedLeft={false} linkedRight={false} />}
+                  label={<Hook linkedLeft={currentConnectionType !== 'RANDOM'} linkedRight={currentConnectionType !== 'RANDOM'} />}
+                  style={{ transform: !emailToLinkedin ? "rotate(180deg)" : '' }}
                 />
-                <NativeSelect
+                {emailToLinkedin ? <NativeSelect
                   onChange={(e) => {
                     const value = e.currentTarget.value;
                     console.log('args are ', value, currentProject?.id);
@@ -565,15 +571,31 @@ export default function CampaignTemplateEditModal({
                     { label: "📧 Sent-Only", value: "ALL_PROSPECTS" },
                     { label: "👀 Open-Only", value: "OPENED_EMAIL_PROSPECTS_ONLY" },
                     { label: "⚡️ Click-Only", value: "CLICKED_LINK_PROSPECTS_ONLY" },
-                    { label: "🔗 Linkedin Sent", value: "ACCEPTED_THEN_SHOULD_EMAIL" },
-                    { label: "⏳ Linkedin Accepted, 3 days No reply", value: "ACCEPTED_BUT_NO_REPLY_3_DAYS" },
+                  ]}
+                  style={{ width: "100%" }}
+                />: (
+                  <NativeSelect
+                  onChange={(e) => {
+                    const value = e.currentTarget.value;
+                    console.log('args are ', value, currentProject?.id);
+                    if (typeof value === "string") {
+                      innerProps?.updateConnectionType(value, currentProject?.id);
+                      setCurrentConnectionType(value); // Set the currentConnectionType
+                    }
+                  }}
+                  value={currentProject?.linkedin_to_email_connection || ""}
+                  data={[
+                    { label: "🔗 Linkedin Accepted", value: "ACCEPTED_THEN_SHOULD_EMAIL" },
+                    { label: "⏳ Linkedin Sent, 3 days No reply", value: "SENT_OUTREACH_BUT_NO_REPLY_3_DAYS" },
                   ]}
                   style={{ width: "100%" }}
                 />
+                )}
                 <Divider
                   variant="dashed"
                   labelPosition="center"
-                  label={<Hook linkedLeft={false} linkedRight={false} />}
+                  label={<Hook linkedLeft={currentConnectionType !== 'RANDOM'} linkedRight={currentConnectionType !== 'RANDOM'} />}
+                  style={{ transform: !emailToLinkedin ? "rotate(180deg)" : '' }}
                 />
               </>
               <Switch
@@ -629,12 +651,59 @@ export default function CampaignTemplateEditModal({
                   variant="outline"
                   color="gray"
                   onClick={() =>
-                    showNotification({
-                      title: "",
-                      message: "Coming soon!",
-                      color: "blue",
-                      autoClose: 5000,
+
+                    
+
+                    {
+                      const newStatus = !emailToLinkedin;
+                      setEmailToLinkedin(newStatus);
+
+
+                    fetch(`${API_URL}/client/archetype/${currentProject?.id}/toggle_omnichannel`, {
+                      method: "PATCH",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${userToken}`,
+                      },
+                      body: JSON.stringify({
+                        emailToLinkedin: newStatus,
+                      }),
                     })
+                      .then((response) => {
+                        if (!response.ok) {
+                          throw new Error("Network response was not ok");
+                        }
+                        return response.json();
+                      })
+                      .then((data) => {
+                        console.log("Connection altered successfully", data);
+                      })
+                      .catch((error) => {
+                        console.error("Failed to alter connection", error);
+                      });
+
+                      if (newStatus) { //meaning email linkedin connection true, nullify linkedin email conenction and set this one to RANDOM
+                        setCurrentProject((prev) => {
+                          if (!prev) return null;
+                          return {
+                            ...prev,
+                            linkedin_to_email_connection: undefined,
+                            email_to_linkedin_connection: "RANDOM",
+                          };
+                        });
+                        setCurrentConnectionType("RANDOM");
+                      } else {
+                        setCurrentProject((prev) => {
+                          if (!prev) return null;
+                          return {
+                            ...prev,
+                            email_to_linkedin_connection: undefined,
+                            linkedin_to_email_connection: "ACCEPTED_THEN_SHOULD_EMAIL",
+                          };
+                        });
+                        setCurrentConnectionType("ACCEPTED_THEN_SHOULD_EMAIL");
+                      }
+                    }
                   }
                   className=" min-w-[37px] min-h-[37px] border-[#D9DEE5]"
                 >

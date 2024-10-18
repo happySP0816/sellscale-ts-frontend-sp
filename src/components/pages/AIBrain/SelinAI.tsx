@@ -353,7 +353,7 @@ export interface ThreadType {
   memory: MemoryType;
   tasks: TaskType[];
   thread_id: string;
-  is_brainstorm_session: boolean;
+  is_supervisor_session: boolean;
 }
 
 interface SuggestedMessage {
@@ -1489,8 +1489,8 @@ export default function SelinAI() {
   const [needOpened, { toggle: NeedToggle }] = useDisclosure(true);
   const [completedOpened, { toggle: CompleteToggle }] = useDisclosure(false);
 
-  const brainstorm_thread = threads.find(
-    (thread) => thread.is_brainstorm_session
+  const supervisor_thread = threads.find(
+    (thread) => thread.is_supervisor_session
   );
 
   return (
@@ -1570,7 +1570,7 @@ export default function SelinAI() {
                     <>
                       <Stack spacing={"xs"} mt={"xl"}>
                         <Stack spacing={"xs"}>
-                          {brainstorm_thread && (
+                          {supervisor_thread && (
                             <Paper
                               withBorder
                               radius={"sm"}
@@ -1581,28 +1581,28 @@ export default function SelinAI() {
                                 display: "inline-block",
                                 // minWidth: "350px",
                                 backgroundColor:
-                                  sessionIDRef.current === brainstorm_thread.id
+                                  sessionIDRef.current === supervisor_thread.id
                                     ? "#d0f0c0"
                                     : "white", // Highlight if current thread
                                 borderColor:
-                                  sessionIDRef.current === brainstorm_thread.id
+                                  sessionIDRef.current === supervisor_thread.id
                                     ? "#00796b"
                                     : "#e6ebf0", // Change border color if current thread
                               }}
                               className={`transition duration-300 ease-in-out transform ${
-                                sessionIDRef.current === brainstorm_thread.id
+                                sessionIDRef.current === supervisor_thread.id
                                   ? "scale-105 shadow-2xl"
                                   : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
                               }`}
                               onClick={() => {
                                 getMessages(
-                                  brainstorm_thread.thread_id,
-                                  brainstorm_thread.id
+                                  supervisor_thread.thread_id,
+                                  supervisor_thread.id
                                 );
                                 toggle();
                               }}
                               onMouseEnter={() =>
-                                setHoverChat(brainstorm_thread.id)
+                                setHoverChat(supervisor_thread.id)
                               }
                               onMouseLeave={() => setHoverChat(undefined)}
                             >
@@ -1618,15 +1618,15 @@ export default function SelinAI() {
                                     // style={{ cursor: "text" }}
                                     size={"sm"}
                                   >
-                                    {brainstorm_thread.session_name ||
-                                      "Brainstorm Session"}
+                                    {supervisor_thread.session_name ||
+                                      "Supervisor Session"}
                                   </Text>
                                 </Flex>
                               </Flex>
                             </Paper>
                           )}
                           {activeThreads
-                            .filter((thread) => !thread.is_brainstorm_session)
+                            .filter((thread) => !thread.is_supervisor_session)
                             .map((thread: any, index) => {
                               return (
                                 <Paper
@@ -1862,7 +1862,7 @@ export default function SelinAI() {
                         </Stack>
                         <Stack spacing={"xs"}>
                           {needInputThreads
-                            .filter((thread) => !thread.is_brainstorm_session)
+                            .filter((thread) => !thread.is_supervisor_session)
                             .map((thread: ThreadType, index) => {
                               return (
                                 <Paper

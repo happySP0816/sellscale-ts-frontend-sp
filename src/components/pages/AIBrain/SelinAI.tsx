@@ -6047,6 +6047,43 @@ const TaskRenderer = ({
     (thread) => thread.id === currentSessionId
   );
 
+  const updateConnectionType = (newConnectionType: string, campaignId: number) => {
+    fetch(`${API_URL}/client/archetype/${campaignId}/update_email_to_linkedin_connection`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        email_to_linkedin_connection: newConnectionType,
+      }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          console.log("Connection type updated");
+        }
+        showNotification({
+          title: "Connection Type Updated",
+          message: "Connection type has been updated.",
+        });
+      })
+      .catch((error) => {
+        console.error("Error updating connection type", error);
+      })
+      .finally(() => {
+        setCurrentProject((prevProject) => {
+          if (!prevProject) return null;
+          return {
+            ...prevProject,
+            email_to_linkedin_connection: newConnectionType,
+          };
+        });
+        // if (currentProject && currentProject.testing_volume) {
+        //   setTestingVolume(currentProject.testing_volume);
+        // }
+      });
+  };
+
   useEffect(() => {
     if (currentProject?.id && currentProject?.id !== lastLoadedProjectId) {
       setLastLoadedProjectId(currentProject?.id);
@@ -6139,6 +6176,7 @@ const TaskRenderer = ({
         <SequencesV2
           ref={sequencesV2Ref}
           showComponent={true}
+          updateConnectionType={updateConnectionType}
           forcedCampaignId={currentProject?.id}
         />
       );

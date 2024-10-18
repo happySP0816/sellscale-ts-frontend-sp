@@ -40,7 +40,11 @@ type SlackNotificationSubscription = {
   subscribed: boolean;
 };
 
-export const CustomizeSlackNotifications = () => {
+type PropsType = {
+  microsoftTeams?: boolean;
+};
+
+export const CustomizeSlackNotifications = (props: PropsType) => {
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
 
@@ -73,6 +77,33 @@ export const CustomizeSlackNotifications = () => {
           subscription.notification_outbound_channel === "all"
       );
 
+      if (props.microsoftTeams) {
+        linkedinSubscriptions.forEach(
+          (subscription: SlackNotificationSubscription) => {
+            subscription.notification_description = subscription.notification_description.replace(
+              "Slack",
+              "Microsoft Teams"
+            );
+          }
+        );
+        emailSubscriptions.forEach(
+          (subscription: SlackNotificationSubscription) => {
+            subscription.notification_description = subscription.notification_description.replace(
+              "Slack",
+              "Microsoft Teams"
+            );
+          }
+        );
+        generalSubscriptions.forEach(
+          (subscription: SlackNotificationSubscription) => {
+            subscription.notification_description = subscription.notification_description.replace(
+              "Slack",
+              "Microsoft Teams"
+            );
+          }
+        );
+      }
+
       setLinkedinSubscriptions(linkedinSubscriptions);
       setEmailSubscriptions(emailSubscriptions);
       setGeneralSubscriptions(generalSubscriptions);
@@ -84,13 +115,16 @@ export const CustomizeSlackNotifications = () => {
   useEffect(() => {
     triggerGetSubscriptions();
   }, []);
+
+  const PLATFORM_NAME = props.microsoftTeams ? "Microsoft Teams" : "Slack";
   return (
     <>
       <Flex align={"center"} gap={"sm"}>
         <Flex direction={"column"}>
           <Text fw={600}>Customize Notifications</Text>
           <Text size={"sm"}>
-            Subscribed to Slack alerts for the business activities listed below.
+            Subscribed to {PLATFORM_NAME} alerts for the business activities
+            listed below.
           </Text>
         </Flex>
       </Flex>

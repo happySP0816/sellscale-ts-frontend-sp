@@ -21,10 +21,10 @@ import { sendTestSlackWebhook } from "@utils/requests/sendTestSlackWebhook";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import SlackLogo from "@assets/images/slack-logo.png";
-import { CustomizeSlackNotifications } from "./SlackNotifications";
+import MicrosoftTeamsLogo from "@assets/images/microsoft-teams-logo.png";
+import { CustomizeSlackNotifications } from "../slack/SlackNotifications";
 
-export default function SlackbotSection(props: {
+export default function MicrosoftTeamsWebhookSection(props: {
   setActiveTab: (value: string) => void;
   setPageLoading: (value: boolean) => void;
 }) {
@@ -55,14 +55,14 @@ export default function SlackbotSection(props: {
     if (result.status === "success") {
       showNotification({
         title: "Success",
-        message: "Slack Webhook updated",
+        message: "Microsoft Teams Webhook updated",
         color: "green",
         autoClose: 5000,
       });
     } else {
       showNotification({
         title: "Error",
-        message: "Slack Webhook not updated",
+        message: "Microsoft Teams Webhook not updated",
         color: "red",
         autoClose: 5000,
       });
@@ -79,14 +79,14 @@ export default function SlackbotSection(props: {
     if (result.status === "success") {
       showNotification({
         title: "Success",
-        message: "Sent notification to Slack",
+        message: "Sent notification to Microsoft Teams",
         color: "green",
         autoClose: 5000,
       });
     } else {
       showNotification({
         title: "Error",
-        message: "Failed to send notification to Slack",
+        message: "Failed to send notification to Microsoft Teams",
         color: "red",
         autoClose: 5000,
       });
@@ -100,25 +100,20 @@ export default function SlackbotSection(props: {
       <Paper withBorder m="xs" p="lg" radius="md" bg={"#fcfcfd"}>
         <Flex justify={"space-between"} align="center">
           <Flex align={"center"} gap={"sm"}>
-            <Image src={SlackLogo} alt="slack" width={25} height={25} />
+            <Image
+              src={MicrosoftTeamsLogo}
+              alt="slack"
+              width={25}
+              height={25}
+            />
             <Flex direction={"column"}>
-              <Text fw={600}>Use Custom Slack Webhook</Text>
+              <Text fw={600}>Use Custom Microsoft Teams Webhook</Text>
             </Flex>
           </Flex>
-          <Box>
-            <Text size="sm">Connected to: </Text>
-            {userData.client.channel_name ? (
-              <Badge variant="filled" color="teal" size="lg">
-                #{userData.client.channel_name}
-              </Badge>
-            ) : (
-              <Badge variant="outline" color="gray" size="lg">
-                No Channel
-              </Badge>
-            )}
-          </Box>
+
           <Button
             disabled={
+              true ||
               webhook === userData.client.pipeline_notifications_webhook_url
             }
             onClick={() => triggerPatchSlackWebhook()}
@@ -136,20 +131,22 @@ export default function SlackbotSection(props: {
             <TextInput
               mt="sm"
               value={webhook}
-              placeholder="https://hooks.slack.com/services/..."
+              placeholder="https://hooks.microsoftteams.com/services/..."
               onChange={(event) => setWebhook(event.currentTarget.value)}
               error={
                 webhook &&
-                (webhook?.startsWith("https://hooks.slack.com/services/")
+                (webhook?.startsWith(
+                  "https://hooks.microsoftteams.com/services/"
+                )
                   ? false
-                  : "Please enter a valid Slack Webhook URL")
+                  : "Please enter a valid Microsoft Teams Webhook URL")
               }
             />
           )}
 
           {userData.client.pipeline_notifications_webhook_url && (
             <Box my="md">
-              <Button onClick={triggerSendSlackWebhook}>
+              <Button onClick={triggerSendSlackWebhook} disabled={true}>
                 Send Test Notification
               </Button>
             </Box>
@@ -157,12 +154,8 @@ export default function SlackbotSection(props: {
         </Flex>
 
         <Text color="gray" size="xs" fw={500}>
-          Access Slack Webhooks by{" "}
-          <a
-            href="https://api.slack.com/apps/A046N8QCQUA/incoming-webhooks?success=1"
-            target="_blank"
-            className="text-[#468af0]"
-          >
+          Access Microsoft Teams Webhooks by{" "}
+          <a href="" target="_blank" className="text-[#468af0]">
             visiting this link.
           </a>
         </Text>
@@ -170,7 +163,7 @@ export default function SlackbotSection(props: {
         {userData.client.pipeline_notifications_webhook_url && (
           <>
             <Divider my="lg" />
-            <CustomizeSlackNotifications />
+            <CustomizeSlackNotifications microsoftTeams={true} />
           </>
         )}
       </Paper>

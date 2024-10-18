@@ -480,6 +480,11 @@ export default function SalesNavigatorComponent(props: { showPersonaSelect?: boo
             )}
           </Flex>
         </Flex>
+        {salesNavigatorForm.values.url.length > 2000 && (
+          <Text color="red" mt="sm">
+            URL is too long! Please reduce your filter count {Math.ceil(salesNavigatorForm.values.url.length - 2000)}/ 2000 characters.
+          </Text>
+        )}
         <Flex mt='md' align='center'>
           {props.showPersonaSelect && (
             <PersonaSelect
@@ -504,6 +509,7 @@ export default function SalesNavigatorComponent(props: { showPersonaSelect?: boo
               !salesNavigatorForm.values.url.startsWith(
                 'https://www.linkedin.com/sales/search/people'
               )
+              || salesNavigatorForm.values.url.length > 2000 
             }
             loading={loading}
             onClick={() => {

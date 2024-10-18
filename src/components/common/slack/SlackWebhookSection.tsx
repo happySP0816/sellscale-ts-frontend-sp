@@ -102,7 +102,7 @@ export default function SlackbotSection(props: {
           <Flex align={"center"} gap={"sm"}>
             <Image src={SlackLogo} alt="slack" width={25} height={25} />
             <Flex direction={"column"}>
-              <Text fw={600}>Use Custom Webhook</Text>
+              <Text fw={600}>Use Custom Slack Webhook</Text>
             </Flex>
           </Flex>
           <Box>

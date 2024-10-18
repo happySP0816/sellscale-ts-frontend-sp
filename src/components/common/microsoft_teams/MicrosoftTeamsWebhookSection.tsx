@@ -107,7 +107,7 @@ export default function MicrosoftTeamsWebhookSection(props: {
               height={25}
             />
             <Flex direction={"column"}>
-              <Text fw={600}>Use Custom Webhook</Text>
+              <Text fw={600}>Use Custom Microsoft Teams Webhook</Text>
             </Flex>
           </Flex>
 
@@ -163,7 +163,7 @@ export default function MicrosoftTeamsWebhookSection(props: {
         {userData.client.pipeline_notifications_webhook_url && (
           <>
             <Divider my="lg" />
-            <CustomizeSlackNotifications />
+            <CustomizeSlackNotifications microsoftTeams={true} />
           </>
         )}
       </Paper>

@@ -319,7 +319,13 @@ export interface MemoryType {
   strategy_id: number;
   campaign_id: number;
   memory_state: string;
+  session_mode?: string;
+  memory_line_time_updated?: string;
+  old_memory_line?: string;
+  old_memory_line_time_updated?: string;
   company_segment_id?: number;
+  session_current_goal?: string;
+  memory_line?: string;
   tab: "STRATEGY_CREATOR" | "PLANNER" | "BROWSER" | "ICP" | "ASSETS";
   search?: {
     query: string;
@@ -1492,635 +1498,968 @@ export default function SelinAI() {
   const supervisor_thread = threads.find(
     (thread) => thread.is_supervisor_session
   );
+  const [clientMemoryState, setClientMemoryState] = useState<
+    string | undefined
+  >(
+    threads.find((thread) => thread.id === sessionIDRef.current)?.memory
+      ?.memory_line
+  );
+
+  const [memoryPopupOpen, setMemoryPopupOpen] = useState(false);
+  const [fetchingMemoryState, setFetchingMemoryState] = useState(false);
+  const [openEventLogs, setOpenEventLogs] = useState(false);
+  const [memoryLineEditMode, setMemoryLineEditMode] = useState(false);
+
+  const [memoryStateChanged, setMemoryStateChanged] = useState(false);
+  const [memoryLineHoverData, setMemoryLineHoverData]: any = useState<
+    string | null
+  >();
+
+  const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
+
+  const [memoryState, setMemoryState] = useState<any>(
+    threads.find((thread) => thread.id === sessionIDRef.current)?.memory
+      .memory_state
+  );
+
+  const [showMemoryForKey, setShowMemoryForKey] = useState("");
+
+  const addMemory = async (
+    memoryTitle: string,
+    memoryContent: string,
+    requiresUserInput: boolean = false
+  ) => {
+    try {
+      const response = await fetch(`${API_URL}/selix/add_memory`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          selix_session_id: sessionIDRef.current as number,
+          memory_title: memoryTitle,
+          memory_content: memoryContent,
+          requires_user_input: requiresUserInput,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showNotification({
+          title: "Memory Added",
+          message: "Memory added successfully",
+          color: "green",
+          icon: <IconCircleCheck />,
+        });
+      } else {
+        showNotification({
+          title: "Error Adding Memory",
+          message: result.message || "Failed to add memory",
+          color: "red",
+          icon: <IconX />,
+        });
+      }
+    } catch (error) {
+      console.error("Error adding memory:", error);
+    } finally {
+      getMemoryState(sessionIDRef.current as number);
+    }
+  };
+
+  const getMemoryState = async (sessionId: number) => {
+    setFetchingMemoryState(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/selix/get_memory_state?session_id=${sessionId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMemoryState(result.memory_state);
+      } else {
+        showNotification({
+          title: "Error Fetching Memory State",
+          message: result.message || "Failed to fetch memory state",
+          color: "red",
+          icon: <IconX />,
+        });
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching memory state:", error);
+      return null;
+    } finally {
+      setFetchingMemoryState(false);
+    }
+  };
+
+  const generateNewDraftMemoryLine = async () => {
+    setGeneratingNewMemoryLine(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/selix/generate_new_draft_memory_line`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+      const memory_line = result.memory_line;
+
+      setClientMemoryState(memory_line);
+      setMemoryStateChanged(true);
+      setClientMemoryStateUpdatedTime(new Date().toLocaleString());
+      getMemoryState(sessionIDRef.current as number);
+
+      if (response.ok) {
+        showNotification({
+          title: "New Draft Memory Line Generated",
+          message: "Save the new memory line to all sessions",
+          color: "blue",
+          icon: <IconCircleCheck />,
+        });
+      } else {
+        showNotification({
+          title: "Error Generating New Draft Memory Line",
+          message: result.error || "Failed to generate new draft memory line",
+          color: "red",
+          icon: <IconX />,
+        });
+      }
+    } catch (error) {
+      console.error("Error generating new draft memory line:", error);
+    } finally {
+      setGeneratingNewMemoryLine(false);
+    }
+  };
+
+  const createSelixSupervisorLog = async () => {
+    try {
+      setGeneratingNewMemoryLine(true);
+      const response = await fetch(`${API_URL}/selix/add_supervisor_log`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create log");
+      }
+
+      const result = await response.json();
+      console.log("Log created successfully:", result);
+    } catch (error) {
+      console.error("Error creating log:", error);
+    } finally {
+      setGeneratingNewMemoryLine(false);
+    }
+  };
+
+  const changeMemoryStatus = async (memoryId: number, status: string) => {
+    try {
+      const response = await fetch(`${API_URL}/selix/change_memory_status`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          memory_id: memoryId,
+          new_status: status,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showNotification({
+          title: "Memory Status Changed",
+          message: result.message,
+          color: "green",
+          icon: <IconCircleCheck />,
+        });
+      } else {
+        showNotification({
+          title: "Error Changing Memory Status",
+          message: result.error || "Failed to change memory status",
+          color: "red",
+          icon: <IconX />,
+        });
+      }
+    } catch (error) {
+      console.error("Error changing memory status:", error);
+    } finally {
+      getMemoryState(sessionIDRef.current as number);
+    }
+  };
+
+  const updateMemoryLineAllSessions = async (
+    newMemoryLine: string | undefined
+  ) => {
+    if (!newMemoryLine) {
+      return;
+    }
+    setMemoryLineUpdating(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/selix/update_memory_line_all_sessions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            new_memory_line: newMemoryLine,
+            session_id: sessionIDRef.current as number,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      await createSelixSupervisorLog();
+
+      if (response.ok) {
+        showNotification({
+          title: "Memory Line Updated",
+          message: result.message,
+          color: "green",
+          icon: <IconCircleCheck />,
+        });
+      } else {
+        showNotification({
+          title: "Error Updating Memory Line",
+          message: result.error || "Failed to update memory line",
+          color: "red",
+          icon: <IconX />,
+        });
+      }
+    } catch (error) {
+      console.error("Error updating memory line:", error);
+    } finally {
+      setMemoryLineUpdating(false);
+    }
+  };
+
+  const hoverHandler = (session: any) => {
+    setMemoryLineHoverData(session.memory);
+  };
+
+  useEffect(() => {
+    const handleSpanHover = (event: any) => {
+      if (event.target && event.target.dataset.title) {
+        const session = memoryState?.sessions.find(
+          (s: any) =>
+            s.title === event.target.dataset.title ||
+            "@" + s.title === event.target.dataset.title
+        );
+        if (session) {
+          hoverHandler(session);
+        }
+      }
+    };
+
+    const handleSpanMouseLeave = (event: any) => {
+      if (event.target && event.target.dataset.title) {
+        setMemoryLineHoverData(null);
+      }
+    };
+
+    document.addEventListener("mouseover", handleSpanHover);
+    document.addEventListener("mouseout", handleSpanMouseLeave);
+
+    return () => {
+      document.removeEventListener("mouseover", handleSpanHover);
+      document.removeEventListener("mouseout", handleSpanMouseLeave);
+    };
+  }, [memoryState?.sessions]);
+
+  const [newMemoryTitle, setNewMemoryTitle] = useState("");
+  const [showAddMemoryInput, setShowAddMemoryInput] = useState(false);
+
+  const selixMemoryTitleTranslations: { [key: string]: string } = {
+    campaigns: "Currently working on: ",
+    sessions: "Currently working on: ",
+    needs_user_input: "Need your input: ",
+    needs_ai_input: "Other to-do's: ",
+  };
+
+  const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
+
+  const memory = threads.find(
+    (thread) => thread.id === sessionIDRef.current
+  )?.memory;
+
+  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
+    useState<any>(memory?.memory_line_time_updated);
 
   return (
-    <DropzoneWrapper
-      setPrompt={setPrompt}
-      prompt={prompt}
-      setAttachedFile={setAttachedFile}
-      ref={dropzoneRef}
-      handleSubmit={handleSubmit}
-    >
-      <Card maw={"100%"} style={{ backgroundColor: "transparent" }} p={0}>
-        {currentSessionId && (
-          <Flex gap={"xl"}>
-            {window.location.hostname !== "localhost" && (
-              <LoadingOverlay visible={loadingNewChat} />
-            )}
+    <>
+      <DropzoneWrapper
+        setPrompt={setPrompt}
+        prompt={prompt}
+        setAttachedFile={setAttachedFile}
+        ref={dropzoneRef}
+        handleSubmit={handleSubmit}
+      >
+        <Card maw={"100%"} style={{ backgroundColor: "transparent" }} p={0}>
+          {currentSessionId && (
+            <Flex gap={"xl"}>
+              {window.location.hostname !== "localhost" && (
+                <LoadingOverlay visible={loadingNewChat} />
+              )}
 
-            <Paper withBorder w={showSidebar ? "30%" : "5%"} h={"100%"}>
-              <Flex
-                align={"center"}
-                justify={showSidebar ? "space-between" : "center"}
-                p={"sm"}
-              >
-                {showSidebar && (
-                  <Text fw={500} size={"lg"}>
-                    Sessions
-                  </Text>
-                )}
-
-                <ActionIcon onClick={() => setShowSidebar(!showSidebar)}>
-                  {showSidebar ? (
-                    <IconChevronLeft size={"1rem"} />
-                  ) : (
-                    <IconChevronRight size={"1rem"} />
-                  )}
-                </ActionIcon>
-              </Flex>
-              <Divider />
-              <Box p={"sm"}>
-                {showSidebar ? (
-                  <Button
-                    leftIcon={<IconPlus color={"white"} size={"1.3rem"} />}
-                    // className="bg-[#D444F1]/10 hover:bg-[#D444F1]/80 text-[#D444F1] hover:text-white"
-                    onClick={
-                      !loadingNewChat
-                        ? () => handleCreateNewSession()
-                        : undefined
-                    }
-                    loading={loadingNewChat}
-                    onMouseEnter={() => setNewButtonHover(true)}
-                    onMouseLeave={() => setNewButtonHover(false)}
-                    fullWidth
-                    color="grape"
-                  >
-                    New Chat
-                  </Button>
-                ) : (
-                  <ActionIcon
-                    variant="filled"
-                    color="grape"
-                    size={"lg"}
-                    onClick={
-                      !loadingNewChat
-                        ? () => handleCreateNewSession()
-                        : undefined
-                    }
-                    loading={loadingNewChat}
-                    onMouseEnter={() => setNewButtonHover(true)}
-                    onMouseLeave={() => setNewButtonHover(false)}
-                  >
-                    <IconPlus size={"1.3rem"} color="white" />
-                  </ActionIcon>
-                )}
-
-                <ScrollArea h={770} offsetScrollbars>
+              <Paper withBorder w={showSidebar ? "30%" : "5%"} h={"100%"}>
+                <Flex
+                  align={"center"}
+                  justify={showSidebar ? "space-between" : "center"}
+                  p={"sm"}
+                >
                   {showSidebar && (
-                    <>
-                      <Stack spacing={"xs"} mt={"xl"}>
-                        <Stack spacing={"xs"}>
-                          {supervisor_thread && (
-                            <Paper
-                              withBorder
-                              radius={"sm"}
-                              p={"sm"}
-                              w={"100%"}
-                              style={{
-                                // cursor: "grab",
-                                display: "inline-block",
-                                // minWidth: "350px",
-                                backgroundColor:
-                                  sessionIDRef.current === supervisor_thread.id
-                                    ? "#d0f0c0"
-                                    : "white", // Highlight if current thread
-                                borderColor:
-                                  sessionIDRef.current === supervisor_thread.id
-                                    ? "#00796b"
-                                    : "#e6ebf0", // Change border color if current thread
-                              }}
-                              className={`transition duration-300 ease-in-out transform ${
-                                sessionIDRef.current === supervisor_thread.id
-                                  ? "scale-105 shadow-2xl"
-                                  : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
-                              }`}
-                              onClick={() => {
-                                getMessages(
-                                  supervisor_thread.thread_id,
-                                  supervisor_thread.id
-                                );
-                                toggle();
-                              }}
-                              onMouseEnter={() =>
-                                setHoverChat(supervisor_thread.id)
-                              }
-                              onMouseLeave={() => setHoverChat(undefined)}
-                            >
-                              <Flex align={"center"} justify={"space-between"}>
-                                <Flex align={"left"} w={"100%"}>
-                                  <Text
-                                    fw={600}
-                                    onClick={(e) => {
-                                      // e.stopPropagation();
-                                      // setEditingIndex(index);
-                                      // setEditingSessionName(thread.session_name);
-                                    }}
-                                    // style={{ cursor: "text" }}
-                                    size={"sm"}
-                                  >
-                                    {supervisor_thread.session_name ||
-                                      "Supervisor Session"}
-                                  </Text>
-                                </Flex>
-                              </Flex>
-                            </Paper>
-                          )}
-                          {activeThreads
-                            .filter((thread) => !thread.is_supervisor_session)
-                            .map((thread: any, index) => {
-                              return (
-                                <Paper
-                                  key={index}
-                                  withBorder
-                                  radius={"sm"}
-                                  p={"sm"}
-                                  w={"100%"}
-                                  style={{
-                                    // cursor: "grab",
-                                    display: "inline-block",
-                                    // minWidth: "350px",
-                                    backgroundColor:
-                                      sessionIDRef.current === thread.id
-                                        ? "#d0f0c0"
-                                        : "white", // Highlight if current thread
-                                    borderColor:
-                                      sessionIDRef.current === thread.id
-                                        ? "#00796b"
-                                        : "#e6ebf0", // Change border color if current thread
-                                  }}
-                                  className={`transition duration-300 ease-in-out transform ${
-                                    sessionIDRef.current === thread.id
-                                      ? "scale-105 shadow-2xl"
-                                      : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
-                                  }`}
-                                  onClick={() => {
-                                    getMessages(thread.thread_id, thread.id);
-                                    toggle();
-                                  }}
-                                  onMouseEnter={() => setHoverChat(thread.id)}
-                                  onMouseLeave={() => setHoverChat(undefined)}
-                                >
-                                  <Flex
-                                    align={"center"}
-                                    justify={"space-between"}
-                                  >
-                                    {editingIndex === index ? (
-                                      <Flex
-                                        align={"center"}
-                                        gap={"sm"}
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        <TextInput
-                                          value={editingSessionName}
-                                          onChange={(e) =>
-                                            setEditingSessionName(
-                                              e.currentTarget.value
-                                            )
-                                          }
-                                          onBlur={() =>
-                                            editSession(
-                                              thread.id,
-                                              editingSessionName
-                                            )
-                                          }
-                                          onKeyDown={(e) => {
-                                            if (e.key === "Enter") {
-                                              editSession(
-                                                thread.id,
-                                                editingSessionName
-                                              );
-                                            }
-                                          }}
-                                          style={{
-                                            width: `${
-                                              editingSessionName.length + 2
-                                            }ch`,
-                                          }}
-                                          rightSection={
-                                            <ActionIcon
-                                              variant="transparent"
-                                              color="green"
-                                              size={"sm"}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                editSession(
-                                                  thread.id,
-                                                  editingSessionName
-                                                );
-                                              }}
-                                            >
-                                              <IconCircleCheck size={"xl"} />
-                                            </ActionIcon>
-                                          }
-                                        />
-                                      </Flex>
-                                    ) : (
-                                      <Flex
-                                        align={"center"}
-                                        justify={"space-between"}
-                                        w={"100%"}
-                                      >
-                                        <Tooltip
-                                          label="Needs more input"
-                                          withArrow
-                                          position="top"
-                                        >
-                                          <Box mr="xs">
-                                            <IconInfoCircle
-                                              fill="orange"
-                                              color="white"
-                                              size={"1.2rem"}
-                                              className="mt-1"
-                                            />
-                                          </Box>
-                                        </Tooltip>
-                                        <Flex align={"center"} gap={"xs"}>
-                                          <Tooltip label={thread.session_name}>
-                                            <Text
-                                              fw={600}
-                                              onClick={(e) => {
-                                                // e.stopPropagation();
-                                                // setEditingIndex(index);
-                                                // setEditingSessionName(thread.session_name);
-                                              }}
-                                              // style={{ cursor: "text" }}
-                                              size={"sm"}
-                                            >
-                                              {thread.session_name.substring(
-                                                0,
-                                                27
-                                              ) +
-                                                (thread.session_name.length > 27
-                                                  ? "..."
-                                                  : "") || "Untitled Session"}
-                                            </Text>
-                                          </Tooltip>
-                                        </Flex>
-                                        <Tooltip
-                                          label="Edit session name"
-                                          withArrow
-                                          position="top"
-                                        >
-                                          <ActionIcon
-                                            variant="transparent"
-                                            // color="blue"
-                                            size={"sm"}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setEditingIndex(index);
-                                              setEditingSessionName(
-                                                thread.session_name
-                                              );
-                                            }}
-                                            style={{ marginLeft: "auto" }}
-                                          >
-                                            <IconEdit size={"1rem"} />
-                                          </ActionIcon>
-                                        </Tooltip>
-                                      </Flex>
-                                    )}
-                                    {thread.status !== "COMPLETE" &&
-                                      thread.status !== "CANCELLED" && (
-                                        <>
-                                          <Tooltip
-                                            label="Archive session"
-                                            withArrow
-                                            position="top"
-                                          >
-                                            <ActionIcon
-                                              variant="transparent"
-                                              color="red"
-                                              size={"sm"}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                setThreads((prevThreads) =>
-                                                  prevThreads.map(
-                                                    (prevThread) =>
-                                                      prevThread.id ===
-                                                      thread.id
-                                                        ? {
-                                                            ...prevThread,
-                                                            status: "CANCELLED",
-                                                          }
-                                                        : prevThread
-                                                  )
-                                                );
-                                                fetch(
-                                                  `${API_URL}/selix/delete_session`,
-                                                  {
-                                                    method: "DELETE",
-                                                    headers: {
-                                                      "Content-Type":
-                                                        "application/json",
-                                                      Authorization: `Bearer ${userToken}`,
-                                                    },
-                                                    body: JSON.stringify({
-                                                      session_id: thread.id,
-                                                    }),
-                                                  }
-                                                )
-                                                  .then((response) => {
-                                                    if (!response.ok) {
-                                                      return response
-                                                        .json()
-                                                        .then((data) => {
-                                                          throw new Error(
-                                                            data.error ||
-                                                              "Failed to delete session"
-                                                          );
-                                                        });
-                                                    }
-                                                    return response.json();
-                                                  })
-                                                  .then((data) => {
-                                                    console.log(
-                                                      "Session deleted:",
-                                                      data.message
-                                                    );
-                                                  })
-                                                  .catch((error) => {
-                                                    console.error(
-                                                      "Error deleting session:",
-                                                      error
-                                                    );
-                                                  });
-                                              }}
-                                            >
-                                              {thread.status !== "CANCELLED" &&
-                                                thread.status !==
-                                                  "COMPLETE" && (
-                                                  <IconArchive size={"1rem"} />
-                                                )}
-                                            </ActionIcon>
-                                          </Tooltip>
-                                        </>
-                                      )}
-                                  </Flex>
-                                </Paper>
-                              );
-                            })}
-                        </Stack>
-                        <Stack spacing={"xs"}>
-                          {needInputThreads
-                            .filter((thread) => !thread.is_supervisor_session)
-                            .map((thread: ThreadType, index) => {
-                              return (
-                                <Paper
-                                  key={index}
-                                  withBorder
-                                  radius={"sm"}
-                                  p={"sm"}
-                                  w={"100%"}
-                                  style={{
-                                    // cursor: "grab",
-                                    // display: "inline-block",
-                                    // minWidth: "350px",
-                                    backgroundColor:
-                                      sessionIDRef.current === thread.id
-                                        ? "#d0f0c0"
-                                        : "white", // Highlight if current thread
-                                    borderColor:
-                                      sessionIDRef.current === thread.id
-                                        ? "#00796b"
-                                        : "#e6ebf0", // Change border color if current thread
-                                  }}
-                                  className={`transition duration-300 ease-in-out transform ${
-                                    sessionIDRef.current === thread.id
-                                      ? "scale-105 shadow-2xl"
-                                      : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
-                                  }`}
-                                  onClick={() => {
-                                    getMessages(thread.thread_id, thread.id);
-                                    toggle();
-                                  }}
-                                  onMouseEnter={() => setHoverChat(thread.id)}
-                                  onMouseLeave={() => setHoverChat(undefined)}
-                                >
-                                  <Flex
-                                    align={"center"}
-                                    justify={"space-between"}
-                                  >
-                                    {editingIndex === index ? (
-                                      <Flex
-                                        align={"center"}
-                                        gap={"sm"}
-                                        onClick={(e) => e.stopPropagation()}
-                                        w={"100%"}
-                                      >
-                                        <TextInput
-                                          value={editingSessionName}
-                                          onChange={(e) =>
-                                            setEditingSessionName(
-                                              e.currentTarget.value
-                                            )
-                                          }
-                                          onBlur={() =>
-                                            editSession(
-                                              thread.id,
-                                              editingSessionName
-                                            )
-                                          }
-                                          onKeyDown={(e) => {
-                                            if (e.key === "Enter") {
-                                              editSession(
-                                                thread.id,
-                                                editingSessionName
-                                              );
-                                            }
-                                          }}
-                                          style={{
-                                            width: `${
-                                              editingSessionName.length + 2
-                                            }ch`,
-                                          }}
-                                          rightSection={
-                                            <ActionIcon
-                                              variant="transparent"
-                                              color="green"
-                                              size={"sm"}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                editSession(
-                                                  thread.id,
-                                                  editingSessionName
-                                                );
-                                              }}
-                                            >
-                                              <IconCircleCheck size={"xl"} />
-                                            </ActionIcon>
-                                          }
-                                        />
-                                      </Flex>
-                                    ) : (
-                                      <Flex
-                                        align={"center"}
-                                        justify={"space-between"}
-                                        w={"100%"}
-                                      >
-                                        <Tooltip
-                                          label="X more inputs"
-                                          withArrow
-                                          position="top"
-                                        >
-                                          <Box mr="xs">
-                                            <IconHourglassLow
-                                              fill="purple"
-                                              color="white"
-                                              size={"1.2rem"}
-                                              className="mt-1"
-                                            />
-                                          </Box>
-                                        </Tooltip>
-                                        <Flex align={"center"} gap={"xs"}>
-                                          <Tooltip label={thread.session_name}>
-                                            <Text
-                                              fw={600}
-                                              onClick={(e) => {
-                                                // e.stopPropagation();
-                                                // setEditingIndex(index);
-                                                // setEditingSessionName(thread.session_name);
-                                              }}
-                                              // style={{ cursor: "text" }}
-                                              size={"sm"}
-                                            >
-                                              {thread.session_name.substring(
-                                                0,
-                                                27
-                                              ) +
-                                                (thread.session_name.length > 27
-                                                  ? "..."
-                                                  : "") || "Untitled Session"}
-                                            </Text>
-                                          </Tooltip>
-                                        </Flex>
-                                        <Tooltip
-                                          label="Edit session name"
-                                          withArrow
-                                          position="top"
-                                        >
-                                          <ActionIcon
-                                            variant="transparent"
-                                            // color="blue"
-                                            size={"sm"}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setEditingIndex(index);
-                                              setEditingSessionName(
-                                                thread.session_name
-                                              );
-                                            }}
-                                            style={{ marginLeft: "auto" }}
-                                          >
-                                            <IconEdit size={"1rem"} />
-                                          </ActionIcon>
-                                        </Tooltip>
-                                      </Flex>
-                                    )}
-                                    {
-                                      <>
-                                        <Tooltip
-                                          label="Archive session"
-                                          withArrow
-                                          position="top"
-                                        >
-                                          <ActionIcon
-                                            variant="transparent"
-                                            color="red"
-                                            size={"sm"}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setThreads((prevThreads) =>
-                                                prevThreads.map((prevThread) =>
-                                                  prevThread.id === thread.id
-                                                    ? {
-                                                        ...prevThread,
-                                                        status: "CANCELLED",
-                                                      }
-                                                    : prevThread
-                                                )
-                                              );
-                                              fetch(
-                                                `${API_URL}/selix/delete_session`,
-                                                {
-                                                  method: "DELETE",
-                                                  headers: {
-                                                    "Content-Type":
-                                                      "application/json",
-                                                    Authorization: `Bearer ${userToken}`,
-                                                  },
-                                                  body: JSON.stringify({
-                                                    session_id: thread.id,
-                                                  }),
-                                                }
-                                              )
-                                                .then((response) => {
-                                                  if (!response.ok) {
-                                                    return response
-                                                      .json()
-                                                      .then((data) => {
-                                                        throw new Error(
-                                                          data.error ||
-                                                            "Failed to delete session"
-                                                        );
-                                                      });
-                                                  }
-                                                  return response.json();
-                                                })
-                                                .then((data) => {
-                                                  console.log(
-                                                    "Session deleted:",
-                                                    data.message
-                                                  );
-                                                })
-                                                .catch((error) => {
-                                                  console.error(
-                                                    "Error deleting session:",
-                                                    error
-                                                  );
-                                                });
-                                            }}
-                                          >
-                                            {thread.status !== "CANCELLED" &&
-                                              thread.status !== "COMPLETE" && (
-                                                <IconArchive size={"1rem"} />
-                                              )}
-                                          </ActionIcon>
-                                        </Tooltip>
-                                      </>
-                                    }
-                                  </Flex>
-                                </Paper>
-                              );
-                            })}
-                        </Stack>
-                      </Stack>
-
-                      <Stack spacing={"xs"} mt={"xl"}>
-                        <Flex align={"center"} justify={"space-between"}>
-                          <Flex align={"center"} gap={"sm"}>
-                            <IconCircleCheck color="green" size={"1.4rem"} />
-                            <Text size={"md"} fw={600}>
-                              Completed Sessions
-                            </Text>
-                            <Badge color="green" size="sm">
-                              {completedThreads.length}
-                            </Badge>
-                          </Flex>
-                          <ActionIcon onClick={CompleteToggle}>
-                            {!completedOpened ? (
-                              <IconChevronDown size={"1rem"} />
-                            ) : (
-                              <IconChevronUp size={"1rem"} />
-                            )}
-                          </ActionIcon>
-                        </Flex>
-                        <Collapse
-                          in={completedOpened}
-                          transitionTimingFunction="linear"
+                    <Text fw={500} size={"lg"}>
+                      Sessions
+                    </Text>
+                  )}
+                  <Flex align={"center"} gap={"8px"}>
+                    <Popover
+                      width={360}
+                      shadow="md"
+                      position="left"
+                      withinPortal
+                      opened={memoryPopupOpen}
+                      onClose={() => setMemoryPopupOpen(false)}
+                      closeOnClickOutside={false}
+                    >
+                      <Popover.Target>
+                        <Text
+                          ml={"auto"}
+                          size={"xs"}
+                          color="gray"
+                          sx={{ pointer: "cursor" }}
+                          onClick={() => setMemoryPopupOpen((prev) => !prev)}
                         >
+                          <Badge color="pink" variant="outline">
+                            🧠
+                          </Badge>
+                        </Text>
+                      </Popover.Target>
+                      <Popover.Dropdown>
+                        <Flex justify="space-between" align="center" mb="xs">
+                          <LoadingOverlay visible={fetchingMemoryState} />
+                          <Title order={5}>🧠 Selix Memory</Title>
+
+                          {memory?.session_mode && (
+                            <Tooltip
+                              label={
+                                "Current Goal: " + memory.session_current_goal
+                              }
+                              withArrow
+                            >
+                              <Badge
+                                color="gray"
+                                variant="outline"
+                                radius={4}
+                                ml="auto"
+                              >
+                                ⚙️ {memory.session_mode?.replace("_", " ")}
+                              </Badge>
+                            </Tooltip>
+                          )}
+
+                          <Button
+                            variant="subtle"
+                            color="red"
+                            size="xs"
+                            onClick={() => setMemoryPopupOpen(false)}
+                            ml="auto"
+                          >
+                            x
+                          </Button>
+                        </Flex>
+                        <Card
+                          withBorder
+                          mah={700}
+                          p="md"
+                          sx={{ overflow: "auto" }}
+                        >
+                          <Flex>
+                            <Text size="sm" color="gray" fw="500">
+                              Currently working on:
+                            </Text>
+                            <Button
+                              onClick={() => {
+                                setMemoryPopupOpen(false);
+                                setOpenEventLogs(true);
+                              }}
+                              size="xs"
+                              color="teal"
+                              ml="auto"
+                              variant="outline"
+                              pt="2px"
+                              pb="2px"
+                              mb="4px"
+                              leftIcon={<IconHistory size={16} />}
+                            >
+                              Event Logs
+                            </Button>
+                          </Flex>
+
+                          {memoryLineEditMode ? (
+                            <Textarea
+                              placeholder="Type your notes here..."
+                              autosize
+                              minRows={3}
+                              value={clientMemoryState}
+                              onChange={(e) => {
+                                setClientMemoryState(e.target.value);
+                                setMemoryStateChanged(true);
+                              }}
+                              size="xs"
+                              mb="0px"
+                            />
+                          ) : (
+                            <HoverCard
+                              position="right"
+                              width={200}
+                              shadow="md"
+                              withinPortal
+                            >
+                              <HoverCard.Target>
+                                <Text
+                                  size="xs"
+                                  p="xs"
+                                  onClick={() => {
+                                    setMemoryLineEditMode(true);
+                                    setMemoryStateChanged(true);
+                                  }}
+                                  sx={{ cursor: "pointer" }}
+                                  dangerouslySetInnerHTML={{
+                                    __html: (
+                                      clientMemoryState ||
+                                      "Click to add notes..."
+                                    )?.replace(/\n/g, "<br>"),
+                                  }}
+                                />
+                              </HoverCard.Target>
+                              <HoverCard.Dropdown
+                                miw={memoryLineHoverData ? 500 : 0}
+                                display={memoryLineHoverData ? "block" : "none"}
+                              >
+                                <Text
+                                  size="xs"
+                                  dangerouslySetInnerHTML={{
+                                    __html: memoryLineHoverData,
+                                  }}
+                                />
+                              </HoverCard.Dropdown>
+                            </HoverCard>
+                          )}
+
+                          <Text
+                            align="right"
+                            size="12px"
+                            color="gray"
+                            mt="2px"
+                            ml="auto"
+                          >
+                            Last updated:{" "}
+                            {memory?.memory_line_time_updated
+                              ? moment
+                                  .utc(memory?.memory_line_time_updated)
+                                  .local()
+                                  .fromNow()
+                              : "N/A"}
+                          </Text>
+                          <Flex mt="4px" mb="md">
+                            <Tooltip
+                              label="Rewind to previous version"
+                              withArrow
+                            >
+                              <Button
+                                color="gray"
+                                size="xs"
+                                opacity={!memory?.old_memory_line ? 0.5 : 1}
+                                disabled={!memory?.old_memory_line}
+                                onClick={() => {
+                                  setClientMemoryState(memory?.old_memory_line);
+                                  setClientMemoryStateUpdatedTime(
+                                    memory?.old_memory_line_time_updated
+                                  );
+                                  setMemoryStateChanged(true);
+                                }}
+                              >
+                                ⏮
+                              </Button>
+                            </Tooltip>
+                            <Tooltip
+                              label="Generate a new memory line"
+                              withArrow
+                            >
+                              <Button
+                                color="yellow"
+                                size="xs"
+                                ml="4px"
+                                loading={generatingNewMemoryLine}
+                                onClick={() => generateNewDraftMemoryLine()}
+                              >
+                                ♺
+                              </Button>
+                            </Tooltip>
+                            <Flex
+                              ml="auto"
+                              justify="flex-end"
+                              style={{
+                                display:
+                                  memoryStateChanged || memoryLineUpdating
+                                    ? "flex"
+                                    : "none",
+                              }}
+                            >
+                              {memoryLineUpdating && (
+                                <Flex mr="md" mt="4px">
+                                  <Loader size="sm"></Loader>
+                                </Flex>
+                              )}
+                              <Button
+                                size="xs"
+                                color="green"
+                                disabled={
+                                  !memoryStateChanged || memoryLineUpdating
+                                }
+                                onClick={() => {
+                                  updateMemoryLineAllSessions(
+                                    clientMemoryState
+                                  );
+                                  setClientMemoryStateUpdatedTime(
+                                    new Date().toLocaleString()
+                                  );
+                                  setMemoryStateChanged(false);
+                                  setMemoryLineEditMode(false);
+                                }}
+                              >
+                                ✓
+                              </Button>
+                              <Button
+                                size="xs"
+                                color="red"
+                                disabled={
+                                  !memoryStateChanged || memoryLineUpdating
+                                }
+                                ml="xs"
+                                onClick={() => {
+                                  setClientMemoryState(memory?.memory_line);
+                                  setClientMemoryStateUpdatedTime(
+                                    memory?.memory_line_time_updated
+                                  );
+                                  setMemoryStateChanged(false);
+                                  setMemoryLineEditMode(false);
+                                }}
+                              >
+                                ✗
+                              </Button>
+                            </Flex>
+                          </Flex>
+
+                          {memoryState &&
+                            [
+                              "campaigns",
+                              "sessions",
+                              ...Object.keys(memoryState).filter(
+                                (x) => x !== "campaigns" && x !== "sessions"
+                              ),
+                            ].map((x: string) => {
+                              return (
+                                <Box mb="md">
+                                  {x !== "campaigns" && x !== "sessions" && (
+                                    <Divider mb="md" />
+                                  )}
+                                  {x !== "campaigns" && x !== "sessions" && (
+                                    <Text size="sm" color="gray" fw="500">
+                                      {selixMemoryTitleTranslations[x]}
+                                    </Text>
+                                  )}
+
+                                  {Array.isArray(memoryState[x]) &&
+                                    memoryState[x]
+                                      .filter(
+                                        (y: any) =>
+                                          !clientMemoryState?.includes(y.title)
+                                      )
+                                      .map((y: any) => (
+                                        <>
+                                          <Box id={`memory-${y.memory}`}>
+                                            <HoverCard
+                                              width={500}
+                                              shadow="md"
+                                              withinPortal
+                                              position="right"
+                                            >
+                                              <HoverCard.Target>
+                                                <Flex>
+                                                  <Box
+                                                    ml="4px"
+                                                    sx={{
+                                                      border: "1px solid",
+                                                      borderColor: "gray",
+                                                      borderRadius: "8px",
+                                                      position: "relative",
+                                                      display: "inline-block",
+                                                      cursor: "pointer",
+                                                      fontSize: "10px",
+                                                      padding: "2px",
+                                                      marginBottom: "4px",
+                                                      marginRight: "4px",
+                                                      paddingLeft: "8px",
+                                                      paddingRight: "8px",
+                                                      paddingTop: "2px",
+                                                      paddingBottom: "2px",
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                      const target: any =
+                                                        e.currentTarget;
+                                                      if (
+                                                        x === "campaigns" ||
+                                                        x === "sessions"
+                                                      ) {
+                                                        return;
+                                                      }
+                                                      target.querySelector(
+                                                        ".hover-icons"
+                                                      )!.style.display = "flex";
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                      const target: any =
+                                                        e.currentTarget;
+                                                      if (
+                                                        x === "campaigns" ||
+                                                        x === "sessions"
+                                                      ) {
+                                                        return;
+                                                      }
+                                                      target.querySelector(
+                                                        ".hover-icons"
+                                                      )!.style.display = "none";
+                                                    }}
+                                                  >
+                                                    <Text
+                                                      p="0"
+                                                      m="0"
+                                                      size="xs"
+                                                      color="black"
+                                                    >
+                                                      {y["title"].substring(
+                                                        0,
+                                                        36
+                                                      ) +
+                                                        (y["title"].length > 36
+                                                          ? "..."
+                                                          : "")}
+                                                    </Text>
+                                                    <Flex
+                                                      className="hover-icons"
+                                                      sx={{
+                                                        display: "none",
+                                                        position: "absolute",
+                                                        top: "4px",
+                                                        right: "4px",
+                                                        gap: "4px",
+                                                        backgroundColor:
+                                                          "white",
+                                                      }}
+                                                    >
+                                                      <Tooltip
+                                                        label="Mark as Cancelled"
+                                                        withArrow
+                                                      >
+                                                        <ActionIcon
+                                                          size="xs"
+                                                          color="red"
+                                                          onClick={() => {
+                                                            const id = y.id;
+                                                            changeMemoryStatus(
+                                                              id,
+                                                              "CANCELLED"
+                                                            );
+                                                          }}
+                                                        >
+                                                          <IconX size={12} />
+                                                        </ActionIcon>
+                                                      </Tooltip>
+                                                      <Tooltip
+                                                        label="Mark as Complete"
+                                                        withArrow
+                                                      >
+                                                        <ActionIcon
+                                                          size="xs"
+                                                          color="green"
+                                                          onClick={() => {
+                                                            const id = y.id;
+                                                            changeMemoryStatus(
+                                                              id,
+                                                              "COMPLETE"
+                                                            );
+                                                          }}
+                                                        >
+                                                          <IconCheck
+                                                            size={12}
+                                                          />
+                                                        </ActionIcon>
+                                                      </Tooltip>
+                                                    </Flex>
+                                                  </Box>
+                                                  {(x === "campaigns" ||
+                                                    x === "sessions") && (
+                                                    <Box ml="4px" pt="2px">
+                                                      <IconCloud
+                                                        size="0.9rem"
+                                                        color="gray"
+                                                      />
+                                                    </Box>
+                                                  )}
+                                                </Flex>
+                                              </HoverCard.Target>
+                                              <HoverCard.Dropdown maw={500}>
+                                                <Text
+                                                  size="xs"
+                                                  color="black"
+                                                  fw={400}
+                                                  dangerouslySetInnerHTML={{
+                                                    __html:
+                                                      y["memory"] &&
+                                                      y["memory"].replaceAll(
+                                                        "\n",
+                                                        "<br>"
+                                                      ),
+                                                  }}
+                                                />
+                                              </HoverCard.Dropdown>
+                                            </HoverCard>
+                                          </Box>
+                                        </>
+                                      ))}
+
+                                  <Box mt="sm">
+                                    {(x == "needs_user_input" ||
+                                      x == "needs_ai_input") && (
+                                      <>
+                                        {!showAddMemoryInput && (
+                                          <Button
+                                            variant="outline"
+                                            ml="auto"
+                                            size="xs"
+                                            color="gray"
+                                            onClick={() => {
+                                              if (showAddMemoryInput) {
+                                                setShowAddMemoryInput(false);
+                                                setShowMemoryForKey("");
+                                              } else {
+                                                setShowAddMemoryInput(true);
+                                                setShowMemoryForKey(x);
+                                              }
+                                            }}
+                                          >
+                                            +
+                                          </Button>
+                                        )}
+                                        {showAddMemoryInput &&
+                                          showMemoryForKey === x && (
+                                            <Flex mt="xs" align="center">
+                                              <TextInput
+                                                placeholder="Enter memory title"
+                                                value={newMemoryTitle}
+                                                onChange={(event) =>
+                                                  setNewMemoryTitle(
+                                                    event.currentTarget.value
+                                                  )
+                                                }
+                                                onKeyDown={(event) => {
+                                                  if (event.key === "Enter") {
+                                                    addMemory(
+                                                      newMemoryTitle,
+                                                      newMemoryTitle,
+                                                      x == "needs_user_input"
+                                                        ? true
+                                                        : false
+                                                    );
+                                                    setNewMemoryTitle("");
+                                                    setShowAddMemoryInput(
+                                                      false
+                                                    );
+                                                  }
+                                                }}
+                                                width="100%"
+                                                mr="xs"
+                                              />
+                                              <Button
+                                                size="xs"
+                                                color="green"
+                                                onClick={() => {
+                                                  addMemory(
+                                                    newMemoryTitle,
+                                                    newMemoryTitle,
+                                                    x == "needs_user_input"
+                                                      ? true
+                                                      : false
+                                                  );
+                                                  setNewMemoryTitle("");
+                                                  setShowAddMemoryInput(false);
+                                                }}
+                                              >
+                                                Add
+                                              </Button>
+                                              <Button
+                                                size="xs"
+                                                color="red"
+                                                onClick={() => {
+                                                  setNewMemoryTitle("");
+                                                  setShowAddMemoryInput(false);
+                                                }}
+                                                ml="xs"
+                                              >
+                                                Cancel
+                                              </Button>
+                                            </Flex>
+                                          )}
+                                      </>
+                                    )}
+                                  </Box>
+                                </Box>
+                              );
+                            })}
+                        </Card>
+                      </Popover.Dropdown>
+                    </Popover>
+                    <ActionIcon onClick={() => setShowSidebar(!showSidebar)}>
+                      {showSidebar ? (
+                        <IconChevronLeft size={"1rem"} />
+                      ) : (
+                        <IconChevronRight size={"1rem"} />
+                      )}
+                    </ActionIcon>
+                  </Flex>
+                </Flex>
+                <Divider />
+                <Box p={"sm"}>
+                  {showSidebar ? (
+                    <Button
+                      leftIcon={<IconPlus color={"white"} size={"1.3rem"} />}
+                      // className="bg-[#D444F1]/10 hover:bg-[#D444F1]/80 text-[#D444F1] hover:text-white"
+                      onClick={
+                        !loadingNewChat
+                          ? () => handleCreateNewSession()
+                          : undefined
+                      }
+                      loading={loadingNewChat}
+                      onMouseEnter={() => setNewButtonHover(true)}
+                      onMouseLeave={() => setNewButtonHover(false)}
+                      fullWidth
+                      color="grape"
+                    >
+                      New Chat
+                    </Button>
+                  ) : (
+                    <ActionIcon
+                      variant="filled"
+                      color="grape"
+                      size={"lg"}
+                      onClick={
+                        !loadingNewChat
+                          ? () => handleCreateNewSession()
+                          : undefined
+                      }
+                      loading={loadingNewChat}
+                      onMouseEnter={() => setNewButtonHover(true)}
+                      onMouseLeave={() => setNewButtonHover(false)}
+                    >
+                      <IconPlus size={"1.3rem"} color="white" />
+                    </ActionIcon>
+                  )}
+
+                  <ScrollArea h={770} offsetScrollbars>
+                    {showSidebar && (
+                      <>
+                        <Stack spacing={"xs"} mt={"xl"}>
                           <Stack spacing={"xs"}>
-                            {completedThreads.map(
-                              (thread: ThreadType, index) => {
+                            {supervisor_thread && (
+                              <Paper
+                                withBorder
+                                radius={"sm"}
+                                p={"sm"}
+                                w={"100%"}
+                                style={{
+                                  // cursor: "grab",
+                                  display: "inline-block",
+                                  // minWidth: "350px",
+                                  backgroundColor:
+                                    sessionIDRef.current ===
+                                    supervisor_thread.id
+                                      ? "#d0f0c0"
+                                      : "white", // Highlight if current thread
+                                  borderColor:
+                                    sessionIDRef.current ===
+                                    supervisor_thread.id
+                                      ? "#00796b"
+                                      : "#e6ebf0", // Change border color if current thread
+                                }}
+                                className={`transition duration-300 ease-in-out transform ${
+                                  sessionIDRef.current === supervisor_thread.id
+                                    ? "scale-105 shadow-2xl"
+                                    : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
+                                }`}
+                                onClick={() => {
+                                  getMessages(
+                                    supervisor_thread.thread_id,
+                                    supervisor_thread.id
+                                  );
+                                  toggle();
+                                }}
+                                onMouseEnter={() =>
+                                  setHoverChat(supervisor_thread.id)
+                                }
+                                onMouseLeave={() => setHoverChat(undefined)}
+                              >
+                                <Flex
+                                  align={"center"}
+                                  justify={"space-between"}
+                                >
+                                  <Flex align={"left"} w={"100%"}>
+                                    <Text
+                                      fw={600}
+                                      onClick={(e) => {
+                                        // e.stopPropagation();
+                                        // setEditingIndex(index);
+                                        // setEditingSessionName(thread.session_name);
+                                      }}
+                                      // style={{ cursor: "text" }}
+                                      size={"sm"}
+                                    >
+                                      {supervisor_thread.session_name ||
+                                        "Supervisor Session"}
+                                    </Text>
+                                  </Flex>
+                                </Flex>
+                              </Paper>
+                            )}
+                            {activeThreads
+                              .filter((thread) => !thread.is_supervisor_session)
+                              .map((thread: any, index) => {
                                 return (
                                   <Paper
                                     key={index}
@@ -2130,7 +2469,7 @@ export default function SelinAI() {
                                     w={"100%"}
                                     style={{
                                       // cursor: "grab",
-                                      // display: "inline-block",
+                                      display: "inline-block",
                                       // minWidth: "350px",
                                       backgroundColor:
                                         sessionIDRef.current === thread.id
@@ -2208,56 +2547,317 @@ export default function SelinAI() {
                                           />
                                         </Flex>
                                       ) : (
-                                        <Flex align={"center"}>
+                                        <Flex
+                                          align={"center"}
+                                          justify={"space-between"}
+                                          w={"100%"}
+                                        >
                                           <Tooltip
                                             label="Needs more input"
                                             withArrow
                                             position="top"
                                           >
                                             <Box mr="xs">
-                                              <IconCircleCheck
-                                                color="green"
+                                              <IconInfoCircle
+                                                fill="orange"
+                                                color="white"
                                                 size={"1.2rem"}
+                                                className="mt-1"
                                               />
                                             </Box>
                                           </Tooltip>
-                                          <Tooltip label={thread.session_name}>
-                                            <Text
-                                              fw={600}
-                                              onClick={(e) => {
-                                                // e.stopPropagation();
-                                                // setEditingIndex(index);
-                                                // setEditingSessionName(thread.session_name);
-                                              }}
-                                              // style={{ cursor: "text" }}
-                                              size={"sm"}
+                                          <Flex align={"center"} gap={"xs"}>
+                                            <Tooltip
+                                              label={thread.session_name}
                                             >
-                                              {thread.session_name.substring(
-                                                0,
-                                                27
-                                              ) +
-                                                (thread.session_name.length > 27
-                                                  ? "..."
-                                                  : "") || "Untitled Session"}
-                                            </Text>
+                                              <Text
+                                                fw={600}
+                                                onClick={(e) => {
+                                                  // e.stopPropagation();
+                                                  // setEditingIndex(index);
+                                                  // setEditingSessionName(thread.session_name);
+                                                }}
+                                                // style={{ cursor: "text" }}
+                                                size={"sm"}
+                                              >
+                                                {thread.session_name.substring(
+                                                  0,
+                                                  27
+                                                ) +
+                                                  (thread.session_name.length >
+                                                  27
+                                                    ? "..."
+                                                    : "") || "Untitled Session"}
+                                              </Text>
+                                            </Tooltip>
+                                          </Flex>
+                                          <Tooltip
+                                            label="Edit session name"
+                                            withArrow
+                                            position="top"
+                                          >
+                                            <ActionIcon
+                                              variant="transparent"
+                                              // color="blue"
+                                              size={"sm"}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEditingIndex(index);
+                                                setEditingSessionName(
+                                                  thread.session_name
+                                                );
+                                              }}
+                                              style={{ marginLeft: "auto" }}
+                                            >
+                                              <IconEdit size={"1rem"} />
+                                            </ActionIcon>
                                           </Tooltip>
                                         </Flex>
                                       )}
-                                      <ActionIcon
-                                        variant="transparent"
-                                        ml={"auto"}
-                                        size={"sm"}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setEditingIndex(index);
-                                          setEditingSessionName(
-                                            thread.session_name
-                                          );
-                                        }}
-                                        style={{ marginLeft: "auto" }}
-                                      >
-                                        <IconEdit size={"1rem"} />
-                                      </ActionIcon>
+                                      {thread.status !== "COMPLETE" &&
+                                        thread.status !== "CANCELLED" && (
+                                          <>
+                                            <Tooltip
+                                              label="Archive session"
+                                              withArrow
+                                              position="top"
+                                            >
+                                              <ActionIcon
+                                                variant="transparent"
+                                                color="red"
+                                                size={"sm"}
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  setThreads((prevThreads) =>
+                                                    prevThreads.map(
+                                                      (prevThread) =>
+                                                        prevThread.id ===
+                                                        thread.id
+                                                          ? {
+                                                              ...prevThread,
+                                                              status:
+                                                                "CANCELLED",
+                                                            }
+                                                          : prevThread
+                                                    )
+                                                  );
+                                                  fetch(
+                                                    `${API_URL}/selix/delete_session`,
+                                                    {
+                                                      method: "DELETE",
+                                                      headers: {
+                                                        "Content-Type":
+                                                          "application/json",
+                                                        Authorization: `Bearer ${userToken}`,
+                                                      },
+                                                      body: JSON.stringify({
+                                                        session_id: thread.id,
+                                                      }),
+                                                    }
+                                                  )
+                                                    .then((response) => {
+                                                      if (!response.ok) {
+                                                        return response
+                                                          .json()
+                                                          .then((data) => {
+                                                            throw new Error(
+                                                              data.error ||
+                                                                "Failed to delete session"
+                                                            );
+                                                          });
+                                                      }
+                                                      return response.json();
+                                                    })
+                                                    .then((data) => {
+                                                      console.log(
+                                                        "Session deleted:",
+                                                        data.message
+                                                      );
+                                                    })
+                                                    .catch((error) => {
+                                                      console.error(
+                                                        "Error deleting session:",
+                                                        error
+                                                      );
+                                                    });
+                                                }}
+                                              >
+                                                {thread.status !==
+                                                  "CANCELLED" &&
+                                                  thread.status !==
+                                                    "COMPLETE" && (
+                                                    <IconArchive
+                                                      size={"1rem"}
+                                                    />
+                                                  )}
+                                              </ActionIcon>
+                                            </Tooltip>
+                                          </>
+                                        )}
+                                    </Flex>
+                                  </Paper>
+                                );
+                              })}
+                          </Stack>
+                          <Stack spacing={"xs"}>
+                            {needInputThreads
+                              .filter((thread) => !thread.is_supervisor_session)
+                              .map((thread: ThreadType, index) => {
+                                return (
+                                  <Paper
+                                    key={index}
+                                    withBorder
+                                    radius={"sm"}
+                                    p={"sm"}
+                                    w={"100%"}
+                                    style={{
+                                      // cursor: "grab",
+                                      // display: "inline-block",
+                                      // minWidth: "350px",
+                                      backgroundColor:
+                                        sessionIDRef.current === thread.id
+                                          ? "#d0f0c0"
+                                          : "white", // Highlight if current thread
+                                      borderColor:
+                                        sessionIDRef.current === thread.id
+                                          ? "#00796b"
+                                          : "#e6ebf0", // Change border color if current thread
+                                    }}
+                                    className={`transition duration-300 ease-in-out transform ${
+                                      sessionIDRef.current === thread.id
+                                        ? "scale-105 shadow-2xl"
+                                        : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
+                                    }`}
+                                    onClick={() => {
+                                      getMessages(thread.thread_id, thread.id);
+                                      toggle();
+                                    }}
+                                    onMouseEnter={() => setHoverChat(thread.id)}
+                                    onMouseLeave={() => setHoverChat(undefined)}
+                                  >
+                                    <Flex
+                                      align={"center"}
+                                      justify={"space-between"}
+                                    >
+                                      {editingIndex === index ? (
+                                        <Flex
+                                          align={"center"}
+                                          gap={"sm"}
+                                          onClick={(e) => e.stopPropagation()}
+                                          w={"100%"}
+                                        >
+                                          <TextInput
+                                            value={editingSessionName}
+                                            onChange={(e) =>
+                                              setEditingSessionName(
+                                                e.currentTarget.value
+                                              )
+                                            }
+                                            onBlur={() =>
+                                              editSession(
+                                                thread.id,
+                                                editingSessionName
+                                              )
+                                            }
+                                            onKeyDown={(e) => {
+                                              if (e.key === "Enter") {
+                                                editSession(
+                                                  thread.id,
+                                                  editingSessionName
+                                                );
+                                              }
+                                            }}
+                                            style={{
+                                              width: `${
+                                                editingSessionName.length + 2
+                                              }ch`,
+                                            }}
+                                            rightSection={
+                                              <ActionIcon
+                                                variant="transparent"
+                                                color="green"
+                                                size={"sm"}
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  editSession(
+                                                    thread.id,
+                                                    editingSessionName
+                                                  );
+                                                }}
+                                              >
+                                                <IconCircleCheck size={"xl"} />
+                                              </ActionIcon>
+                                            }
+                                          />
+                                        </Flex>
+                                      ) : (
+                                        <Flex
+                                          align={"center"}
+                                          justify={"space-between"}
+                                          w={"100%"}
+                                        >
+                                          <Tooltip
+                                            label="X more inputs"
+                                            withArrow
+                                            position="top"
+                                          >
+                                            <Box mr="xs">
+                                              <IconHourglassLow
+                                                fill="purple"
+                                                color="white"
+                                                size={"1.2rem"}
+                                                className="mt-1"
+                                              />
+                                            </Box>
+                                          </Tooltip>
+                                          <Flex align={"center"} gap={"xs"}>
+                                            <Tooltip
+                                              label={thread.session_name}
+                                            >
+                                              <Text
+                                                fw={600}
+                                                onClick={(e) => {
+                                                  // e.stopPropagation();
+                                                  // setEditingIndex(index);
+                                                  // setEditingSessionName(thread.session_name);
+                                                }}
+                                                // style={{ cursor: "text" }}
+                                                size={"sm"}
+                                              >
+                                                {thread.session_name.substring(
+                                                  0,
+                                                  27
+                                                ) +
+                                                  (thread.session_name.length >
+                                                  27
+                                                    ? "..."
+                                                    : "") || "Untitled Session"}
+                                              </Text>
+                                            </Tooltip>
+                                          </Flex>
+                                          <Tooltip
+                                            label="Edit session name"
+                                            withArrow
+                                            position="top"
+                                          >
+                                            <ActionIcon
+                                              variant="transparent"
+                                              // color="blue"
+                                              size={"sm"}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEditingIndex(index);
+                                                setEditingSessionName(
+                                                  thread.session_name
+                                                );
+                                              }}
+                                              style={{ marginLeft: "auto" }}
+                                            >
+                                              <IconEdit size={"1rem"} />
+                                            </ActionIcon>
+                                          </Tooltip>
+                                        </Flex>
+                                      )}
                                       {
                                         <>
                                           <Tooltip
@@ -2334,206 +2934,481 @@ export default function SelinAI() {
                                         </>
                                       }
                                     </Flex>
-                                    <Flex align={"center"} gap={"xs"}>
-                                      {thread.status === "ACTIVE" && (
-                                        <Flex align={"center"} gap={4}>
-                                          {/* <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
+                                  </Paper>
+                                );
+                              })}
+                          </Stack>
+                        </Stack>
+
+                        <Stack spacing={"xs"} mt={"xl"}>
+                          <Flex align={"center"} justify={"space-between"}>
+                            <Flex align={"center"} gap={"sm"}>
+                              <IconCircleCheck color="green" size={"1.4rem"} />
+                              <Text size={"md"} fw={600}>
+                                Completed Sessions
+                              </Text>
+                              <Badge color="green" size="sm">
+                                {completedThreads.length}
+                              </Badge>
+                            </Flex>
+                            <ActionIcon onClick={CompleteToggle}>
+                              {!completedOpened ? (
+                                <IconChevronDown size={"1rem"} />
+                              ) : (
+                                <IconChevronUp size={"1rem"} />
+                              )}
+                            </ActionIcon>
+                          </Flex>
+                          <Collapse
+                            in={completedOpened}
+                            transitionTimingFunction="linear"
+                          >
+                            <Stack spacing={"xs"}>
+                              {completedThreads.map(
+                                (thread: ThreadType, index) => {
+                                  return (
+                                    <Paper
+                                      key={index}
+                                      withBorder
+                                      radius={"sm"}
+                                      p={"sm"}
+                                      w={"100%"}
+                                      style={{
+                                        // cursor: "grab",
+                                        // display: "inline-block",
+                                        // minWidth: "350px",
+                                        backgroundColor:
+                                          sessionIDRef.current === thread.id
+                                            ? "#d0f0c0"
+                                            : "white", // Highlight if current thread
+                                        borderColor:
+                                          sessionIDRef.current === thread.id
+                                            ? "#00796b"
+                                            : "#e6ebf0", // Change border color if current thread
+                                      }}
+                                      className={`transition duration-300 ease-in-out transform ${
+                                        sessionIDRef.current === thread.id
+                                          ? "scale-105 shadow-2xl"
+                                          : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
+                                      }`}
+                                      onClick={() => {
+                                        getMessages(
+                                          thread.thread_id,
+                                          thread.id
+                                        );
+                                        toggle();
+                                      }}
+                                      onMouseEnter={() =>
+                                        setHoverChat(thread.id)
+                                      }
+                                      onMouseLeave={() =>
+                                        setHoverChat(undefined)
+                                      }
+                                    >
+                                      <Flex
+                                        align={"center"}
+                                        justify={"space-between"}
+                                      >
+                                        {editingIndex === index ? (
+                                          <Flex
+                                            align={"center"}
+                                            gap={"sm"}
+                                            onClick={(e) => e.stopPropagation()}
+                                          >
+                                            <TextInput
+                                              value={editingSessionName}
+                                              onChange={(e) =>
+                                                setEditingSessionName(
+                                                  e.currentTarget.value
+                                                )
+                                              }
+                                              onBlur={() =>
+                                                editSession(
+                                                  thread.id,
+                                                  editingSessionName
+                                                )
+                                              }
+                                              onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                  editSession(
+                                                    thread.id,
+                                                    editingSessionName
+                                                  );
+                                                }
+                                              }}
+                                              style={{
+                                                width: `${
+                                                  editingSessionName.length + 2
+                                                }ch`,
+                                              }}
+                                              rightSection={
+                                                <ActionIcon
+                                                  variant="transparent"
+                                                  color="green"
+                                                  size={"sm"}
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    editSession(
+                                                      thread.id,
+                                                      editingSessionName
+                                                    );
+                                                  }}
+                                                >
+                                                  <IconCircleCheck
+                                                    size={"xl"}
+                                                  />
+                                                </ActionIcon>
+                                              }
+                                            />
+                                          </Flex>
+                                        ) : (
+                                          <Flex align={"center"}>
+                                            <Tooltip
+                                              label="Needs more input"
+                                              withArrow
+                                              position="top"
+                                            >
+                                              <Box mr="xs">
+                                                <IconCircleCheck
+                                                  color="green"
+                                                  size={"1.2rem"}
+                                                />
+                                              </Box>
+                                            </Tooltip>
+                                            <Tooltip
+                                              label={thread.session_name}
+                                            >
+                                              <Text
+                                                fw={600}
+                                                onClick={(e) => {
+                                                  // e.stopPropagation();
+                                                  // setEditingIndex(index);
+                                                  // setEditingSessionName(thread.session_name);
+                                                }}
+                                                // style={{ cursor: "text" }}
+                                                size={"sm"}
+                                              >
+                                                {thread.session_name.substring(
+                                                  0,
+                                                  27
+                                                ) +
+                                                  (thread.session_name.length >
+                                                  27
+                                                    ? "..."
+                                                    : "") || "Untitled Session"}
+                                              </Text>
+                                            </Tooltip>
+                                          </Flex>
+                                        )}
+                                        <ActionIcon
+                                          variant="transparent"
+                                          ml={"auto"}
+                                          size={"sm"}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingIndex(index);
+                                            setEditingSessionName(
+                                              thread.session_name
+                                            );
+                                          }}
+                                          style={{ marginLeft: "auto" }}
+                                        >
+                                          <IconEdit size={"1rem"} />
+                                        </ActionIcon>
+                                        {
+                                          <>
+                                            <Tooltip
+                                              label="Archive session"
+                                              withArrow
+                                              position="top"
+                                            >
+                                              <ActionIcon
+                                                variant="transparent"
+                                                color="red"
+                                                size={"sm"}
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  setThreads((prevThreads) =>
+                                                    prevThreads.map(
+                                                      (prevThread) =>
+                                                        prevThread.id ===
+                                                        thread.id
+                                                          ? {
+                                                              ...prevThread,
+                                                              status:
+                                                                "CANCELLED",
+                                                            }
+                                                          : prevThread
+                                                    )
+                                                  );
+                                                  fetch(
+                                                    `${API_URL}/selix/delete_session`,
+                                                    {
+                                                      method: "DELETE",
+                                                      headers: {
+                                                        "Content-Type":
+                                                          "application/json",
+                                                        Authorization: `Bearer ${userToken}`,
+                                                      },
+                                                      body: JSON.stringify({
+                                                        session_id: thread.id,
+                                                      }),
+                                                    }
+                                                  )
+                                                    .then((response) => {
+                                                      if (!response.ok) {
+                                                        return response
+                                                          .json()
+                                                          .then((data) => {
+                                                            throw new Error(
+                                                              data.error ||
+                                                                "Failed to delete session"
+                                                            );
+                                                          });
+                                                      }
+                                                      return response.json();
+                                                    })
+                                                    .then((data) => {
+                                                      console.log(
+                                                        "Session deleted:",
+                                                        data.message
+                                                      );
+                                                    })
+                                                    .catch((error) => {
+                                                      console.error(
+                                                        "Error deleting session:",
+                                                        error
+                                                      );
+                                                    });
+                                                }}
+                                              >
+                                                {thread.status !==
+                                                  "CANCELLED" &&
+                                                  thread.status !==
+                                                    "COMPLETE" && (
+                                                    <IconArchive
+                                                      size={"1rem"}
+                                                    />
+                                                  )}
+                                              </ActionIcon>
+                                            </Tooltip>
+                                          </>
+                                        }
+                                      </Flex>
+                                      <Flex align={"center"} gap={"xs"}>
+                                        {thread.status === "ACTIVE" && (
+                                          <Flex align={"center"} gap={4}>
+                                            {/* <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-green-500 rounded-full"></div>
                                       </div>
                                       <Text color="green" fw={500} size={"sm"}>
                                         Live
                                       </Text> */}
-                                          <Text
-                                            size={"xs"}
-                                            fw={500}
-                                            color="gray"
-                                          >
-                                            Time remaining:
-                                          </Text>
-                                        </Flex>
-                                      )}
-                                      {thread.status === "PENDING_OPERATOR" && (
-                                        <Flex align={"center"} gap={4}>
-                                          {/* <div className="flex items-center justify-center bg-yellow-100 rounded-full p-1 border-yellow-300 border-[1px] border-solid">
+                                            <Text
+                                              size={"xs"}
+                                              fw={500}
+                                              color="gray"
+                                            >
+                                              Time remaining:
+                                            </Text>
+                                          </Flex>
+                                        )}
+                                        {thread.status ===
+                                          "PENDING_OPERATOR" && (
+                                          <Flex align={"center"} gap={4}>
+                                            {/* <div className="flex items-center justify-center bg-yellow-100 rounded-full p-1 border-yellow-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-yellow-500 rounded-full"></div>
                                       </div>
                                       <Text color="yellow" fw={500} size={"sm"}>
                                         In Progress
                                       </Text> */}
-                                          <Text
-                                            size={"xs"}
-                                            fw={500}
-                                            color="gray"
-                                          >
-                                            Time remaining:
-                                          </Text>
-                                        </Flex>
-                                      )}
-                                      {thread.status === "BLOCKED" && (
-                                        <Flex align={"center"} gap={4}>
-                                          {/* <div className="flex items-center justify-center bg-red-100 rounded-full p-1 border-red-300 border-[1px] border-solid">
+                                            <Text
+                                              size={"xs"}
+                                              fw={500}
+                                              color="gray"
+                                            >
+                                              Time remaining:
+                                            </Text>
+                                          </Flex>
+                                        )}
+                                        {thread.status === "BLOCKED" && (
+                                          <Flex align={"center"} gap={4}>
+                                            {/* <div className="flex items-center justify-center bg-red-100 rounded-full p-1 border-red-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-red-500 rounded-full"></div>
                                       </div>
                                       <Text color="red" fw={500} size={"sm"}>
                                         Blocked
                                       </Text> */}
-                                          <Text
-                                            size={"xs"}
-                                            fw={500}
-                                            color="gray"
-                                          >
-                                            Time remaining:
-                                          </Text>
-                                        </Flex>
-                                      )}
-                                      {thread.status === "COMPLETE" && (
-                                        <Flex align={"center"} gap={4}>
-                                          {/* <div className="flex items-center justify-center bg-blue-100 rounded-full p-1 border-blue-300 border-[1px] border-solid">
+                                            <Text
+                                              size={"xs"}
+                                              fw={500}
+                                              color="gray"
+                                            >
+                                              Time remaining:
+                                            </Text>
+                                          </Flex>
+                                        )}
+                                        {thread.status === "COMPLETE" && (
+                                          <Flex align={"center"} gap={4}>
+                                            {/* <div className="flex items-center justify-center bg-blue-100 rounded-full p-1 border-blue-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-blue-500 rounded-full"></div>
                                       </div>
                                       <Text color="blue" fw={500} size={"sm"}>
                                         Done
                                       </Text> */}
-                                          <Text
-                                            size={"xs"}
-                                            fw={500}
-                                            color="gray"
-                                          >
-                                            Finished in:
-                                          </Text>
-                                        </Flex>
-                                      )}
-                                      {thread.status === "CANCELLED" && (
-                                        <Flex align={"center"} gap={4}>
-                                          {/* <div className="flex items-center justify-center bg-gray-100 rounded-full p-1 border-gray-300 border-[1px] border-solid">
+                                            <Text
+                                              size={"xs"}
+                                              fw={500}
+                                              color="gray"
+                                            >
+                                              Finished in:
+                                            </Text>
+                                          </Flex>
+                                        )}
+                                        {thread.status === "CANCELLED" && (
+                                          <Flex align={"center"} gap={4}>
+                                            {/* <div className="flex items-center justify-center bg-gray-100 rounded-full p-1 border-gray-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-gray-500 rounded-full"></div>
                                       </div>
                                       <Text color="gray" fw={500} size={"sm"}>
                                         Cancelled
                                       </Text> */}
-                                          <Text
-                                            size={"xs"}
-                                            fw={500}
-                                            color="gray"
-                                          >
-                                            Finished in:
-                                          </Text>
-                                        </Flex>
-                                      )}
+                                            <Text
+                                              size={"xs"}
+                                              fw={500}
+                                              color="gray"
+                                            >
+                                              Finished in:
+                                            </Text>
+                                          </Flex>
+                                        )}
 
-                                      <Text color="gray" size={"xs"}>
-                                        {thread.estimated_completion_time
-                                          ? moment(
-                                              thread.estimated_completion_time
-                                            ).fromNow()
-                                          : "N/A"}{" "}
-                                        {(thread.status === "ACTIVE" ||
-                                          thread.status === "IN_PROGRESS") &&
-                                          "remaining"}
-                                      </Text>
-                                    </Flex>
-                                  </Paper>
-                                );
-                              }
-                            )}
-                          </Stack>
-                        </Collapse>
-                      </Stack>
-                    </>
-                  )}
-                </ScrollArea>
-              </Box>
-            </Paper>
-            <Flex w={"100%"} gap={"md"} p={"lg"}>
-              <DragDropContext
-                onDragEnd={(result) => {
-                  if (
-                    result &&
-                    result.destination &&
-                    result.destination.droppableId === "droppable-area"
-                  ) {
-                    if (!result.draggableId.includes("-")) {
+                                        <Text color="gray" size={"xs"}>
+                                          {thread.estimated_completion_time
+                                            ? moment(
+                                                thread.estimated_completion_time
+                                              ).fromNow()
+                                            : "N/A"}{" "}
+                                          {(thread.status === "ACTIVE" ||
+                                            thread.status === "IN_PROGRESS") &&
+                                            "remaining"}
+                                        </Text>
+                                      </Flex>
+                                    </Paper>
+                                  );
+                                }
+                              )}
+                            </Stack>
+                          </Collapse>
+                        </Stack>
+                      </>
+                    )}
+                  </ScrollArea>
+                </Box>
+              </Paper>
+              <Flex w={"100%"} gap={"md"} p={"lg"}>
+                <DragDropContext
+                  onDragEnd={(result) => {
+                    if (
+                      result &&
+                      result.destination &&
+                      result.destination.droppableId === "droppable-area"
+                    ) {
+                      if (!result.draggableId.includes("-")) {
+                        return;
+                      }
+                      const attachedTaskId = Number(
+                        result.draggableId.split("-")[1]
+                      );
+                      const task = tasks.find(
+                        (task) => task.id === attachedTaskId
+                      );
+                      setAttachedInternalTask(task);
                       return;
                     }
-                    const attachedTaskId = Number(
-                      result.draggableId.split("-")[1]
-                    );
-                    const task = tasks.find(
-                      (task) => task.id === attachedTaskId
-                    );
-                    setAttachedInternalTask(task);
-                    return;
-                  }
 
-                  if (!result.destination) {
-                    return;
-                  }
-                  onDragEnd({
-                    destination: { index: result.destination.index },
-                    source: { index: result.source.index },
-                  });
-                }}
-              >
-                <SegmentChat
-                  setIntendedTaskChange={setIntendedTaskChange}
-                  setAttachedFile={setAttachedFile}
-                  attachedFile={attachedFile}
-                  threads={threads}
-                  deviceIDRef={deviceIDRef}
-                  dropzoneRef={dropzoneRef}
-                  suggestedFirstMessage={suggestedFirstMessage}
-                  setSuggestionHidden={setSuggestionHidden}
-                  suggestionHidden={suggestionHidden}
-                  suggestion={suggestion}
-                  handleSubmit={handleSubmit}
-                  attachedInternalTask={attachedInternalTask}
-                  setAttachedInternalTask={setAttachedInternalTask}
-                  prompt={prompt}
-                  promptRef={promptRef}
-                  setPrompt={setPrompt}
-                  setSegment={setSegment}
-                  messages={messages}
-                  setMessages={setMessages}
-                  segment={segment}
-                  setAIType={setAIType}
-                  recording={recording}
-                  setRecording={setRecording}
-                  aiType={aiType}
-                  currentSessionId={sessionIDRef.current}
-                  memoryState={
-                    threads.find((thread) => thread.id === sessionIDRef.current)
-                      ?.memory.memory_state
-                  }
-                  memory={
-                    threads.find((thread) => thread.id === sessionIDRef.current)
-                      ?.memory
-                  }
-                  // generateResponse={generateResponse}
-                  // chatContent={chatContent}
-                  // setChatContent={setChatContent}
-                />
-                <SelixControlCenter
-                  setTasks={setTasks}
-                  refreshAssetLibrary={refreshAssetLibrary}
-                  attachedFile={attachedFile}
-                  counter={counter}
-                  recording={recording}
-                  tasks={tasks}
-                  setPrompt={setPrompt}
-                  handleSubmit={handleSubmit}
-                  setAIType={setAIType}
-                  aiType={aiType}
-                  threads={threads}
-                  messages={messages}
-                  setMessages={setMessages}
-                  currentSessionId={sessionIDRef.current}
-                />
-              </DragDropContext>
+                    if (!result.destination) {
+                      return;
+                    }
+                    onDragEnd({
+                      destination: { index: result.destination.index },
+                      source: { index: result.source.index },
+                    });
+                  }}
+                >
+                  <SegmentChat
+                    setIntendedTaskChange={setIntendedTaskChange}
+                    setAttachedFile={setAttachedFile}
+                    attachedFile={attachedFile}
+                    threads={threads}
+                    deviceIDRef={deviceIDRef}
+                    dropzoneRef={dropzoneRef}
+                    suggestedFirstMessage={suggestedFirstMessage}
+                    setSuggestionHidden={setSuggestionHidden}
+                    suggestionHidden={suggestionHidden}
+                    suggestion={suggestion}
+                    handleSubmit={handleSubmit}
+                    attachedInternalTask={attachedInternalTask}
+                    setAttachedInternalTask={setAttachedInternalTask}
+                    prompt={prompt}
+                    promptRef={promptRef}
+                    setPrompt={setPrompt}
+                    setSegment={setSegment}
+                    messages={messages}
+                    setMessages={setMessages}
+                    segment={segment}
+                    setAIType={setAIType}
+                    recording={recording}
+                    setRecording={setRecording}
+                    aiType={aiType}
+                    currentSessionId={sessionIDRef.current}
+                    memoryState={
+                      threads.find(
+                        (thread) => thread.id === sessionIDRef.current
+                      )?.memory.memory_state
+                    }
+                    memory={
+                      threads.find(
+                        (thread) => thread.id === sessionIDRef.current
+                      )?.memory
+                    }
+                    // generateResponse={generateResponse}
+                    // chatContent={chatContent}
+                    // setChatContent={setChatContent}
+                  />
+                  <SelixControlCenter
+                    setTasks={setTasks}
+                    refreshAssetLibrary={refreshAssetLibrary}
+                    attachedFile={attachedFile}
+                    counter={counter}
+                    recording={recording}
+                    tasks={tasks}
+                    setPrompt={setPrompt}
+                    handleSubmit={handleSubmit}
+                    setAIType={setAIType}
+                    aiType={aiType}
+                    threads={threads}
+                    messages={messages}
+                    setMessages={setMessages}
+                    currentSessionId={sessionIDRef.current}
+                  />
+                </DragDropContext>
+              </Flex>
             </Flex>
-          </Flex>
-        )}
-      </Card>
-    </DropzoneWrapper>
+          )}
+        </Card>
+      </DropzoneWrapper>
+      <SelixMemoryLogs
+        threads={threads}
+        onRevert={(oldLog: string) => {
+          setClientMemoryState(oldLog);
+          setMemoryStateChanged(true);
+        }}
+        opened={openEventLogs}
+        setOpen={(isOpen: boolean) => setOpenEventLogs(isOpen)}
+        sessionId={sessionIDRef.current as number}
+      ></SelixMemoryLogs>
+    </>
   );
 }
 
@@ -2568,15 +3443,12 @@ const SegmentChat = (props: any) => {
   const userToken = useRecoilValue(userTokenState);
   const [showLoader, setShowLoader] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [showAddMemoryInput, setShowAddMemoryInput] = useState(false);
-  const [showMemoryForKey, setShowMemoryForKey] = useState("");
   const [sendAsSelix, setSendAsSelix] = useState(false);
   const setIntendedTaskChange = props.setIntendedTaskChange;
   const [sendSlack, setSendSlack] = useState(false);
   const [scheduleDay, setScheduleDay] = useState<Date | undefined>(undefined);
   const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
-  const [newMemoryTitle, setNewMemoryTitle] = useState("");
   // const [recording, setRecording] = useState(false);
 
   const isInternal = window.location.href.includes("internal");
@@ -2586,30 +3458,6 @@ const SegmentChat = (props: any) => {
   const [normalInputMode, setNormalInputMode] = useState(true);
 
   const lastPromptRef = useRef<string>("");
-
-  const createSelixSupervisorLog = async () => {
-    try {
-      setGeneratingNewMemoryLine(true);
-      const response = await fetch(`${API_URL}/selix/add_supervisor_log`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create log");
-      }
-
-      const result = await response.json();
-      console.log("Log created successfully:", result);
-    } catch (error) {
-      console.error("Error creating log:", error);
-    } finally {
-      setGeneratingNewMemoryLine(false);
-    }
-  };
 
   const processTranscription = async () => {
     try {
@@ -2713,20 +3561,8 @@ const SegmentChat = (props: any) => {
   const [clientMemoryState, setClientMemoryState] = useState<
     string | undefined
   >(props.memory?.memory_line);
-  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
-    useState<any>(props.memory?.memory_line_time_updated);
-  const [memoryStateChanged, setMemoryStateChanged] = useState(false);
-  const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
-  const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
-  const [fetchingMemoryState, setFetchingMemoryState] = useState(false);
-  const [memoryLineEditMode, setMemoryLineEditMode] = useState(false);
+  useState<any>(props.memory?.memory_line_time_updated);
   const [memoryState, setMemoryState] = useState<any>(props.memoryState);
-  const [memoryLineHoverData, setMemoryLineHoverData]: any = useState<
-    string | null
-  >();
-  const [memoryPopupOpen, setMemoryPopupOpen] = useState(false);
-
-  const [openEventLogs, setOpenEventLogs] = useState(false);
 
   const handleListClick = async (prompt: string) => {
     handleSubmit(undefined, prompt);
@@ -2764,227 +3600,6 @@ const SegmentChat = (props: any) => {
     setRecording(false);
   }, [shouldSubmit]);
 
-  const changeMemoryStatus = async (memoryId: number, status: string) => {
-    try {
-      const response = await fetch(`${API_URL}/selix/change_memory_status`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          memory_id: memoryId,
-          new_status: status,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        showNotification({
-          title: "Memory Status Changed",
-          message: result.message,
-          color: "green",
-          icon: <IconCircleCheck />,
-        });
-      } else {
-        showNotification({
-          title: "Error Changing Memory Status",
-          message: result.error || "Failed to change memory status",
-          color: "red",
-          icon: <IconX />,
-        });
-      }
-    } catch (error) {
-      console.error("Error changing memory status:", error);
-    } finally {
-      getMemoryState(sessionId);
-    }
-  };
-
-  const updateMemoryLineAllSessions = async (
-    newMemoryLine: string | undefined
-  ) => {
-    if (!newMemoryLine) {
-      return;
-    }
-    setMemoryLineUpdating(true);
-    try {
-      const response = await fetch(
-        `${API_URL}/selix/update_memory_line_all_sessions`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-          body: JSON.stringify({
-            new_memory_line: newMemoryLine,
-            session_id: sessionId,
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      await createSelixSupervisorLog();
-
-      if (response.ok) {
-        showNotification({
-          title: "Memory Line Updated",
-          message: result.message,
-          color: "green",
-          icon: <IconCircleCheck />,
-        });
-      } else {
-        showNotification({
-          title: "Error Updating Memory Line",
-          message: result.error || "Failed to update memory line",
-          color: "red",
-          icon: <IconX />,
-        });
-      }
-    } catch (error) {
-      console.error("Error updating memory line:", error);
-    } finally {
-      setMemoryLineUpdating(false);
-    }
-  };
-
-  const generateNewDraftMemoryLine = async () => {
-    setGeneratingNewMemoryLine(true);
-    try {
-      const response = await fetch(
-        `${API_URL}/selix/generate_new_draft_memory_line`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-
-      const result = await response.json();
-      const memory_line = result.memory_line;
-
-      setClientMemoryState(memory_line);
-      setMemoryStateChanged(true);
-      setClientMemoryStateUpdatedTime(new Date().toLocaleString());
-      getMemoryState(sessionId);
-
-      if (response.ok) {
-        showNotification({
-          title: "New Draft Memory Line Generated",
-          message: "Save the new memory line to all sessions",
-          color: "blue",
-          icon: <IconCircleCheck />,
-        });
-      } else {
-        showNotification({
-          title: "Error Generating New Draft Memory Line",
-          message: result.error || "Failed to generate new draft memory line",
-          color: "red",
-          icon: <IconX />,
-        });
-      }
-    } catch (error) {
-      console.error("Error generating new draft memory line:", error);
-    } finally {
-      setGeneratingNewMemoryLine(false);
-    }
-  };
-
-  const getMemoryState = async (sessionId: number) => {
-    setFetchingMemoryState(true);
-    try {
-      const response = await fetch(
-        `${API_URL}/selix/get_memory_state?session_id=${sessionId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setMemoryState(result.memory_state);
-      } else {
-        showNotification({
-          title: "Error Fetching Memory State",
-          message: result.message || "Failed to fetch memory state",
-          color: "red",
-          icon: <IconX />,
-        });
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching memory state:", error);
-      return null;
-    } finally {
-      setFetchingMemoryState(false);
-    }
-  };
-
-  const addMemory = async (
-    memoryTitle: string,
-    memoryContent: string,
-    requiresUserInput: boolean = false
-  ) => {
-    try {
-      const response = await fetch(`${API_URL}/selix/add_memory`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          selix_session_id: sessionId,
-          memory_title: memoryTitle,
-          memory_content: memoryContent,
-          requires_user_input: requiresUserInput,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        showNotification({
-          title: "Memory Added",
-          message: "Memory added successfully",
-          color: "green",
-          icon: <IconCircleCheck />,
-        });
-      } else {
-        showNotification({
-          title: "Error Adding Memory",
-          message: result.message || "Failed to add memory",
-          color: "red",
-          icon: <IconX />,
-        });
-      }
-    } catch (error) {
-      console.error("Error adding memory:", error);
-    } finally {
-      getMemoryState(sessionId);
-    }
-  };
-
-  const selixMemoryTitleTranslations: { [key: string]: string } = {
-    campaigns: "Currently working on: ",
-    sessions: "Currently working on: ",
-    needs_user_input: "Need your input: ",
-    needs_ai_input: "Other to-do's: ",
-  };
-
-  useEffect(() => {
-    setMemoryLineEditMode(false);
-  }, []);
-
   let formattedMemoryLine = clientMemoryState;
   const sessions = memoryState?.sessions;
 
@@ -3003,39 +3618,6 @@ const SegmentChat = (props: any) => {
     }
   }
 
-  const hoverHandler = (session: any) => {
-    setMemoryLineHoverData(session.memory);
-  };
-
-  useEffect(() => {
-    const handleSpanHover = (event: any) => {
-      if (event.target && event.target.dataset.title) {
-        const session = sessions.find(
-          (s: any) =>
-            s.title === event.target.dataset.title ||
-            "@" + s.title === event.target.dataset.title
-        );
-        if (session) {
-          hoverHandler(session);
-        }
-      }
-    };
-
-    const handleSpanMouseLeave = (event: any) => {
-      if (event.target && event.target.dataset.title) {
-        setMemoryLineHoverData(null);
-      }
-    };
-
-    document.addEventListener("mouseover", handleSpanHover);
-    document.addEventListener("mouseout", handleSpanMouseLeave);
-
-    return () => {
-      document.removeEventListener("mouseover", handleSpanHover);
-      document.removeEventListener("mouseout", handleSpanMouseLeave);
-    };
-  }, [sessions]);
-
   console.log("Formatted memory state:", formattedMemoryLine);
   console.log("Sessions:", sessions);
 
@@ -3052,467 +3634,6 @@ const SegmentChat = (props: any) => {
         >
           <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
           <Text fw={600}>Chat with Selix</Text>
-          <Popover
-            width={360}
-            shadow="md"
-            position="left"
-            withinPortal
-            opened={memoryPopupOpen}
-            onClose={() => setMemoryPopupOpen(false)}
-            closeOnClickOutside={false}
-          >
-            <Popover.Target>
-              <Text
-                ml={"auto"}
-                size={"xs"}
-                color="gray"
-                sx={{ pointer: "cursor" }}
-                onClick={() => setMemoryPopupOpen((prev) => !prev)}
-              >
-                <Badge color="pink" variant="outline">
-                  🧠
-                </Badge>
-              </Text>
-            </Popover.Target>
-            <Popover.Dropdown>
-              <Flex justify="space-between" align="center" mb="xs">
-                <LoadingOverlay visible={fetchingMemoryState} />
-                <Title order={5}>🧠 Selix Memory</Title>
-
-                {props.memory?.session_mode && (
-                  <Tooltip
-                    label={"Current Goal: " + props.memory.session_current_goal}
-                    withArrow
-                  >
-                    <Badge color="gray" variant="outline" radius={4} ml="auto">
-                      ⚙️ {props.memory.session_mode?.replace("_", " ")}
-                    </Badge>
-                  </Tooltip>
-                )}
-
-                <Button
-                  variant="subtle"
-                  color="red"
-                  size="xs"
-                  onClick={() => setMemoryPopupOpen(false)}
-                  ml="auto"
-                >
-                  x
-                </Button>
-              </Flex>
-              <Card withBorder mah={700} p="md" sx={{ overflow: "auto" }}>
-                <Flex>
-                  <Text size="sm" color="gray" fw="500">
-                    Currently working on:
-                  </Text>
-                  <Button
-                    onClick={() => {
-                      setMemoryPopupOpen(false);
-                      setOpenEventLogs(true);
-                    }}
-                    size="xs"
-                    color="teal"
-                    ml="auto"
-                    variant="outline"
-                    pt="2px"
-                    pb="2px"
-                    mb="4px"
-                    leftIcon={<IconHistory size={16} />}
-                  >
-                    Event Logs
-                  </Button>
-                </Flex>
-
-                {memoryLineEditMode ? (
-                  <Textarea
-                    placeholder="Type your notes here..."
-                    autosize
-                    minRows={3}
-                    value={clientMemoryState}
-                    onChange={(e) => {
-                      setClientMemoryState(e.target.value);
-                      setMemoryStateChanged(true);
-                    }}
-                    size="xs"
-                    mb="0px"
-                  />
-                ) : (
-                  <HoverCard
-                    position="right"
-                    width={200}
-                    shadow="md"
-                    withinPortal
-                  >
-                    <HoverCard.Target>
-                      <Text
-                        size="xs"
-                        p="xs"
-                        onClick={() => {
-                          setMemoryLineEditMode(true);
-                          setMemoryStateChanged(true);
-                        }}
-                        sx={{ cursor: "pointer" }}
-                        dangerouslySetInnerHTML={{
-                          __html: (
-                            formattedMemoryLine || "Click to add notes..."
-                          )?.replace(/\n/g, "<br>"),
-                        }}
-                      />
-                    </HoverCard.Target>
-                    <HoverCard.Dropdown
-                      miw={memoryLineHoverData ? 500 : 0}
-                      display={memoryLineHoverData ? "block" : "none"}
-                    >
-                      <Text
-                        size="xs"
-                        dangerouslySetInnerHTML={{
-                          __html: memoryLineHoverData,
-                        }}
-                      />
-                    </HoverCard.Dropdown>
-                  </HoverCard>
-                )}
-
-                <Text align="right" size="12px" color="gray" mt="2px" ml="auto">
-                  Last updated:{" "}
-                  {props.memory?.memory_line_time_updated
-                    ? moment
-                        .utc(props.memory?.memory_line_time_updated)
-                        .local()
-                        .fromNow()
-                    : "N/A"}
-                </Text>
-                <Flex mt="4px" mb="md">
-                  <Tooltip label="Rewind to previous version" withArrow>
-                    <Button
-                      color="gray"
-                      size="xs"
-                      opacity={!props.memory?.old_memory_line ? 0.5 : 1}
-                      disabled={!props.memory?.old_memory_line}
-                      onClick={() => {
-                        setClientMemoryState(props.memory?.old_memory_line);
-                        setClientMemoryStateUpdatedTime(
-                          props.memory?.old_memory_line_time_updated
-                        );
-                        setMemoryStateChanged(true);
-                      }}
-                    >
-                      ⏮
-                    </Button>
-                  </Tooltip>
-                  <Tooltip label="Generate a new memory line" withArrow>
-                    <Button
-                      color="yellow"
-                      size="xs"
-                      ml="4px"
-                      loading={generatingNewMemoryLine}
-                      onClick={() => generateNewDraftMemoryLine()}
-                    >
-                      ♺
-                    </Button>
-                  </Tooltip>
-                  <Flex
-                    ml="auto"
-                    justify="flex-end"
-                    style={{
-                      display:
-                        memoryStateChanged || memoryLineUpdating
-                          ? "flex"
-                          : "none",
-                    }}
-                  >
-                    {memoryLineUpdating && (
-                      <Flex mr="md" mt="4px">
-                        <Loader size="sm"></Loader>
-                      </Flex>
-                    )}
-                    <Button
-                      size="xs"
-                      color="green"
-                      disabled={!memoryStateChanged || memoryLineUpdating}
-                      onClick={() => {
-                        updateMemoryLineAllSessions(clientMemoryState);
-                        setClientMemoryStateUpdatedTime(
-                          new Date().toLocaleString()
-                        );
-                        setMemoryStateChanged(false);
-                        setMemoryLineEditMode(false);
-                      }}
-                    >
-                      ✓
-                    </Button>
-                    <Button
-                      size="xs"
-                      color="red"
-                      disabled={!memoryStateChanged || memoryLineUpdating}
-                      ml="xs"
-                      onClick={() => {
-                        setClientMemoryState(props.memory?.memory_line);
-                        setClientMemoryStateUpdatedTime(
-                          props.memory?.memory_line_time_updated
-                        );
-                        setMemoryStateChanged(false);
-                        setMemoryLineEditMode(false);
-                      }}
-                    >
-                      ✗
-                    </Button>
-                  </Flex>
-                </Flex>
-
-                {memoryState &&
-                  [
-                    "campaigns",
-                    "sessions",
-                    ...Object.keys(memoryState).filter(
-                      (x) => x !== "campaigns" && x !== "sessions"
-                    ),
-                  ].map((x: string) => {
-                    return (
-                      <Box mb="md">
-                        {x !== "campaigns" && x !== "sessions" && (
-                          <Divider mb="md" />
-                        )}
-                        {x !== "campaigns" && x !== "sessions" && (
-                          <Text size="sm" color="gray" fw="500">
-                            {selixMemoryTitleTranslations[x]}
-                          </Text>
-                        )}
-
-                        {Array.isArray(memoryState[x]) &&
-                          memoryState[x]
-                            .filter(
-                              (y: any) => !clientMemoryState?.includes(y.title)
-                            )
-                            .map((y: any) => (
-                              <>
-                                <Box id={`memory-${y.memory}`}>
-                                  <HoverCard
-                                    width={500}
-                                    shadow="md"
-                                    withinPortal
-                                    position="right"
-                                  >
-                                    <HoverCard.Target>
-                                      <Flex>
-                                        <Box
-                                          ml="4px"
-                                          sx={{
-                                            border: "1px solid",
-                                            borderColor: "gray",
-                                            borderRadius: "8px",
-                                            position: "relative",
-                                            display: "inline-block",
-                                            cursor: "pointer",
-                                            fontSize: "10px",
-                                            padding: "2px",
-                                            marginBottom: "4px",
-                                            marginRight: "4px",
-                                            paddingLeft: "8px",
-                                            paddingRight: "8px",
-                                            paddingTop: "2px",
-                                            paddingBottom: "2px",
-                                          }}
-                                          onMouseEnter={(e) => {
-                                            const target: any = e.currentTarget;
-                                            if (
-                                              x === "campaigns" ||
-                                              x === "sessions"
-                                            ) {
-                                              return;
-                                            }
-                                            target.querySelector(
-                                              ".hover-icons"
-                                            )!.style.display = "flex";
-                                          }}
-                                          onMouseLeave={(e) => {
-                                            const target: any = e.currentTarget;
-                                            if (
-                                              x === "campaigns" ||
-                                              x === "sessions"
-                                            ) {
-                                              return;
-                                            }
-                                            target.querySelector(
-                                              ".hover-icons"
-                                            )!.style.display = "none";
-                                          }}
-                                        >
-                                          <Text
-                                            p="0"
-                                            m="0"
-                                            size="xs"
-                                            color="black"
-                                          >
-                                            {y["title"].substring(0, 36) +
-                                              (y["title"].length > 36
-                                                ? "..."
-                                                : "")}
-                                          </Text>
-                                          <Flex
-                                            className="hover-icons"
-                                            sx={{
-                                              display: "none",
-                                              position: "absolute",
-                                              top: "4px",
-                                              right: "4px",
-                                              gap: "4px",
-                                              backgroundColor: "white",
-                                            }}
-                                          >
-                                            <Tooltip
-                                              label="Mark as Cancelled"
-                                              withArrow
-                                            >
-                                              <ActionIcon
-                                                size="xs"
-                                                color="red"
-                                                onClick={() => {
-                                                  const id = y.id;
-                                                  changeMemoryStatus(
-                                                    id,
-                                                    "CANCELLED"
-                                                  );
-                                                }}
-                                              >
-                                                <IconX size={12} />
-                                              </ActionIcon>
-                                            </Tooltip>
-                                            <Tooltip
-                                              label="Mark as Complete"
-                                              withArrow
-                                            >
-                                              <ActionIcon
-                                                size="xs"
-                                                color="green"
-                                                onClick={() => {
-                                                  const id = y.id;
-                                                  changeMemoryStatus(
-                                                    id,
-                                                    "COMPLETE"
-                                                  );
-                                                }}
-                                              >
-                                                <IconCheck size={12} />
-                                              </ActionIcon>
-                                            </Tooltip>
-                                          </Flex>
-                                        </Box>
-                                        {(x === "campaigns" ||
-                                          x === "sessions") && (
-                                          <Box ml="4px" pt="2px">
-                                            <IconCloud
-                                              size="0.9rem"
-                                              color="gray"
-                                            />
-                                          </Box>
-                                        )}
-                                      </Flex>
-                                    </HoverCard.Target>
-                                    <HoverCard.Dropdown maw={500}>
-                                      <Text
-                                        size="xs"
-                                        color="black"
-                                        fw={400}
-                                        dangerouslySetInnerHTML={{
-                                          __html:
-                                            y["memory"] &&
-                                            y["memory"].replaceAll(
-                                              "\n",
-                                              "<br>"
-                                            ),
-                                        }}
-                                      />
-                                    </HoverCard.Dropdown>
-                                  </HoverCard>
-                                </Box>
-                              </>
-                            ))}
-
-                        <Box mt="sm">
-                          {(x == "needs_user_input" ||
-                            x == "needs_ai_input") && (
-                            <>
-                              {!showAddMemoryInput && (
-                                <Button
-                                  variant="outline"
-                                  ml="auto"
-                                  size="xs"
-                                  color="gray"
-                                  onClick={() => {
-                                    if (showAddMemoryInput) {
-                                      setShowAddMemoryInput(false);
-                                      setShowMemoryForKey("");
-                                    } else {
-                                      setShowAddMemoryInput(true);
-                                      setShowMemoryForKey(x);
-                                    }
-                                  }}
-                                >
-                                  +
-                                </Button>
-                              )}
-                              {showAddMemoryInput && showMemoryForKey === x && (
-                                <Flex mt="xs" align="center">
-                                  <TextInput
-                                    placeholder="Enter memory title"
-                                    value={newMemoryTitle}
-                                    onChange={(event) =>
-                                      setNewMemoryTitle(
-                                        event.currentTarget.value
-                                      )
-                                    }
-                                    onKeyDown={(event) => {
-                                      if (event.key === "Enter") {
-                                        addMemory(
-                                          newMemoryTitle,
-                                          newMemoryTitle,
-                                          x == "needs_user_input" ? true : false
-                                        );
-                                        setNewMemoryTitle("");
-                                        setShowAddMemoryInput(false);
-                                      }
-                                    }}
-                                    width="100%"
-                                    mr="xs"
-                                  />
-                                  <Button
-                                    size="xs"
-                                    color="green"
-                                    onClick={() => {
-                                      addMemory(
-                                        newMemoryTitle,
-                                        newMemoryTitle,
-                                        x == "needs_user_input" ? true : false
-                                      );
-                                      setNewMemoryTitle("");
-                                      setShowAddMemoryInput(false);
-                                    }}
-                                  >
-                                    Add
-                                  </Button>
-                                  <Button
-                                    size="xs"
-                                    color="red"
-                                    onClick={() => {
-                                      setNewMemoryTitle("");
-                                      setShowAddMemoryInput(false);
-                                    }}
-                                    ml="xs"
-                                  >
-                                    Cancel
-                                  </Button>
-                                </Flex>
-                              )}
-                            </>
-                          )}
-                        </Box>
-                      </Box>
-                    );
-                  })}
-              </Card>
-            </Popover.Dropdown>
-          </Popover>
         </Flex>
         <Divider bg="gray" />
         <div style={{ position: "relative", height: "48vh" }}>
@@ -4554,16 +4675,6 @@ const SegmentChat = (props: any) => {
           </Flex>
         </div>
       </Paper>
-      <SelixMemoryLogs
-        threads={props.threads}
-        onRevert={(oldLog: string) => {
-          setClientMemoryState(oldLog);
-          setMemoryStateChanged(true);
-        }}
-        opened={openEventLogs}
-        setOpen={(isOpen: boolean) => setOpenEventLogs(isOpen)}
-        sessionId={sessionId}
-      ></SelixMemoryLogs>
     </>
   );
 };
@@ -5426,22 +5537,23 @@ export const PlannerComponent = ({
         style={{ borderColor: "#fadafc" }}
       >
         <Flex align={"center"} gap={"xs"} justify={"space-between"}>
-          {currentProject && currentThread?.memory.campaign_id === currentProject?.id && (
-            <Text size={"xs"} color="#E25DEE" fw={600}>
-              Selix Tasks:{" "}
-              <span className="font-medium text-gray-500">
-                {currentProject.name}{" "}
-                <a
-                  href={`/campaign_v2/${currentProject.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ marginLeft: "5px" }}
-                >
-                  <IconExternalLink size="0.8rem" />
-                </a>
-              </span>
-            </Text>
-          )}
+          {currentProject &&
+            currentThread?.memory.campaign_id === currentProject?.id && (
+              <Text size={"xs"} color="#E25DEE" fw={600}>
+                Selix Tasks:{" "}
+                <span className="font-medium text-gray-500">
+                  {currentProject.name}{" "}
+                  <a
+                    href={`/campaign_v2/${currentProject.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ marginLeft: "5px" }}
+                  >
+                    <IconExternalLink size="0.8rem" />
+                  </a>
+                </span>
+              </Text>
+            )}
           {threads.find((thread) => thread.id === currentSessionId)
             ?.estimated_completion_time && (
             <Flex gap={5} align={"center"}>
@@ -6047,17 +6159,23 @@ const TaskRenderer = ({
     (thread) => thread.id === currentSessionId
   );
 
-  const updateConnectionType = (newConnectionType: string, campaignId: number) => {
-    fetch(`${API_URL}/client/archetype/${campaignId}/update_email_to_linkedin_connection`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userToken}`,
-      },
-      body: JSON.stringify({
-        email_to_linkedin_connection: newConnectionType,
-      }),
-    })
+  const updateConnectionType = (
+    newConnectionType: string,
+    campaignId: number
+  ) => {
+    fetch(
+      `${API_URL}/client/archetype/${campaignId}/update_email_to_linkedin_connection`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          email_to_linkedin_connection: newConnectionType,
+        }),
+      }
+    )
       .then((response) => {
         if (response.ok) {
           console.log("Connection type updated");

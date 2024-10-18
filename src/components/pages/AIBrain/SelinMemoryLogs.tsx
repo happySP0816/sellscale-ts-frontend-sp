@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState, useRef, useContext, useMemo } from "react";
 import {
   Drawer,
   Button,
@@ -74,7 +74,7 @@ interface MemoryLog {
   processing_status_description?: string;
   parent_log_id?: number;
   is_sub_event?: boolean;
-  is_supervisor: boolean;
+  show_in_session_memory: boolean;
 }
 
 interface MemoryLogsProps {
@@ -112,10 +112,6 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
   const [roomId, setRoomId] = useState("");
 
   const [isShortTerm, setIsShortTerm] = useState<boolean>(false);
-
-  const [selectedSessionView, setSelectedSessionView] = useState<string | null>(
-    "0: View All Sessions"
-  );
 
   const updateMemoryLogSessionId = async (
     selixLogId: number,
@@ -177,15 +173,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
           result.logs.find((log: MemoryLog) => log.id === selixLogId) || null
         );
       } else {
-        setSelectedLog(
-          result.logs.reverse().find((log: MemoryLog) => {
-            if (isShortTerm) {
-              return !log.is_supervisor;
-            }
-
-            return log.is_supervisor;
-          }) || null
-        );
+        setSelectedLog(result.logs.reverse()[0]);
       }
 
       setLoading(false);
@@ -204,19 +192,8 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
     queryFn: async () => {
       return await fetchSelixLogs();
     },
+    refetchOnWindowFocus: false,
   });
-
-  useEffect(() => {
-    setSelectedLog(
-      logs?.reverse().find((log: MemoryLog) => {
-        if (isShortTerm) {
-          return !log.is_supervisor;
-        }
-
-        return log.is_supervisor;
-      }) || null
-    );
-  }, [isShortTerm]);
 
   const [selectedLog, setSelectedLog]: any = useState<MemoryLog | null>(
     logs?.reverse().find((log) => true) || null
@@ -453,22 +430,51 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
     }
   }, [userToken]);
 
-  const reversedLogsByLogDate =
-    logs
-      ?.filter((log) => {
-        if (selectedSessionView) {
-          const id = selectedSessionView.split(":")[0];
+  const reversedLogsByLogDate = useMemo(() => {
+    const logsByLogDate =
+      logs?.sort(
+        (a: MemoryLog, b: MemoryLog) =>
+          new Date(b.created_date).getTime() -
+          new Date(a.created_date).getTime()
+      ) ?? [];
 
-          if (id === "0") {
-            return true;
-          }
+    if (logsByLogDate.length === 0) {
+      return [];
+    }
 
-          return log.session_id ? +log.session_id === +id : false;
-        }
+    // have an array, and push to that array from the beginning until we hit a memory metadata updated event
+    // Get index of first tag == MEMORY_METADATA_SAVED
 
-        return true;
-      })
-      .sort((a: MemoryLog, b: MemoryLog) => -(a.id - b.id)) ?? [];
+    const index = logsByLogDate?.findIndex(
+      (log) => log.tag === "MEMORY_METADATA_SAVED"
+    );
+
+    const arrayLog: MemoryLog[] =
+      index === -1 ? [] : logsByLogDate.slice(0, index);
+    const remaining: MemoryLog[] =
+      index === -1 ? logsByLogDate.slice() : logsByLogDate.slice(index);
+
+    const tempQueueMemoryLog = {
+      id: -1,
+      created_date: moment
+        .utc(logsByLogDate[0].created_date, "YYYY-MM-DD HH:mm:ss")
+        .tz("America/Los_Angeles")
+        .format("YYYY-MM-DD HH:mm:ss"),
+      tag: "PROCESS_QUEUE",
+      title: "Processing Queue",
+      description: "Events to be processed and updated.",
+      client_sdr_id: logsByLogDate[0].client_sdr_id,
+      client_id: logsByLogDate[0].client_id,
+    } as MemoryLog;
+
+    arrayLog.forEach((log) => {
+      if (!log.parent_log_id) {
+        log.parent_log_id = -1;
+      }
+    });
+
+    return [tempQueueMemoryLog, ...arrayLog, ...remaining];
+  }, [logs]);
 
   const tagToIconAndColorMap: Record<
     string,
@@ -848,7 +854,11 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                         .tz("America/Los_Angeles")
                         .format("YYYY-MM-DD HH:mm:ss")}
                       {log.tag !== "SUPPORT_THREAD_SLACK" &&
-                        ` | ${tagToIconAndColorMap[log.tag]?.sub}`}
+                        ` | ${
+                          log.tag === "PROCESS_QUEUE"
+                            ? ""
+                            : tagToIconAndColorMap[log.tag]?.sub
+                        }`}
                     </Text>
                   </Box>
                   <Button
@@ -864,14 +874,19 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                   </Button>
                 </Flex>
                 {(() => {
-                  const childEvents = reversedLogsByLogDate.filter(
-                    (item) => item.parent_log_id === log.id
-                  );
+                  const childEvents = reversedLogsByLogDate.filter((item) => {
+                    if (log.id === -1) {
+                      return item.parent_log_id === -1;
+                    } else {
+                      return item.parent_log_id === log.id;
+                    }
+                  });
 
                   return childEvents.length > 0 &&
                     (isSelected || !log.parent_log_id) &&
                     !isSelected &&
-                    log.tag === "MEMORY_METADATA_SAVED" ? (
+                    (log.tag === "MEMORY_METADATA_SAVED" ||
+                      log.tag === "PROCESS_QUEUE") ? (
                     <>
                       <Divider
                         size={"xl"}
@@ -971,7 +986,10 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                       .utc(draggedItem.created_date, "YYYY-MM-DD HH:mm:ss")
                       .tz("America/Los_Angeles")
                       .format("YYYY-MM-DD HH:mm:ss")}{" "}
-                    | {tagToIconAndColorMap[draggedItem.tag]?.sub}
+                    |{" "}
+                    {draggedItem.tag === "PROCESS_QUEUE"
+                      ? ""
+                      : tagToIconAndColorMap[draggedItem.tag]?.sub}
                   </Text>
                 </Box>
               </Flex>
@@ -992,39 +1010,13 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
       <Flex>
         <Box>
           <Flex gap={"16px"} align={"center"}>
-            <Title order={3}>
-              {isShortTerm ? "Session Memory" : "Supervisor Memory"}
-            </Title>
-            <Switch
-              size={"lg"}
-              checked={isShortTerm}
-              onChange={(event) => setIsShortTerm(event.currentTarget.checked)}
-              fw={600}
-            />
+            <Title order={3}>Supervisor Memory</Title>
           </Flex>
-          {isShortTerm ? (
-            <Text style={{ marginBottom: "1rem" }}>
-              View the history of events for each session below.
-            </Text>
-          ) : (
-            <Text style={{ marginBottom: "1rem" }}>
-              View the history of long term memory updates for each session
-              below, as well as the events that triggered it.
-            </Text>
-          )}
-          {isShortTerm && (
-            <Select
-              data={[
-                "0: View All Sessions",
-                ...threads
-                  .filter((item) => item.status !== "COMPLETE")
-                  .map((item) => `${item.id}: ${item.session_name}`),
-              ]}
-              onChange={setSelectedSessionView}
-              value={selectedSessionView}
-              style={{ width: "40%" }}
-            ></Select>
-          )}
+
+          <Text style={{ marginBottom: "1rem" }}>
+            View the history of long term memory updates for each session below,
+            as well as the events that triggered it.
+          </Text>
         </Box>
         <ActionIcon
           onClick={() => fetchSelixLogs()}
@@ -1063,15 +1055,9 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
           >
             <LoadingOverlay visible={loading || loadingSelixLogs} zIndex={2} />
             {RenderTimeline(
-              reversedLogsByLogDate
-                .filter((log) => !log.is_sub_event && !log.parent_log_id)
-                .filter((log) => {
-                  if (isShortTerm) {
-                    return !log.is_supervisor;
-                  } else {
-                    return log.is_supervisor;
-                  }
-                })
+              reversedLogsByLogDate.filter(
+                (log) => !log.is_sub_event && !log.parent_log_id
+              )
             )}
           </Card>
           <Button
@@ -1183,7 +1169,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                     </Text>
                   </Box>
                   <Flex>
-                    {selectedLog.session_name && isShortTerm && (
+                    {selectedLog.session_name && (
                       <Box>
                         <Flex align="center">
                           <Text size="10px" color="gray">
@@ -1298,39 +1284,8 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                         )}
                       </Box>
                     )}
-                    {selectedLog.processing_status && isShortTerm ? (
-                      <HoverCard width={400} shadow="md">
-                        <HoverCard.Target>
-                          <Box>
-                            <Text size="10px" color="gray">
-                              Processing status:
-                            </Text>
-                            <Badge
-                              color={deterministicMantineColor(
-                                selectedLog.processing_status
-                              )}
-                              variant="filled"
-                              size="md"
-                              mb="md"
-                            >
-                              {selectedLog.processing_status.replace(/_/g, " ")}
-                            </Badge>
-                          </Box>
-                        </HoverCard.Target>
-                        <HoverCard.Dropdown>
-                          <Text
-                            size="sm"
-                            dangerouslySetInnerHTML={{
-                              __html: selectedLog.processing_status_description
-                                ? selectedLog.processing_status_description
-                                    .replaceAll("**", "")
-                                    .replaceAll("\n", "<br />")
-                                : "",
-                            }}
-                          />
-                        </HoverCard.Dropdown>
-                      </HoverCard>
-                    ) : selectedLog.tag != "MEMORY_METADATA_SAVED" ? (
+                    {selectedLog.tag != "MEMORY_METADATA_SAVED" &&
+                    selectedLog.tag != "PROCESS_QUEUE" ? (
                       <Button
                         onClick={() => updateProcessingType(selectedLog.id)}
                         size="xs"
@@ -1351,34 +1306,28 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                   </Flex>
                 </Box>
                 <Box w="30%">
-                  {isShortTerm && (
-                    <Badge
-                      color={deterministicMantineColor(selectedLog.tag)}
-                      variant="filled"
-                      size="sm"
-                      ml="auto"
-                    >
-                      {tagToIconAndColorMap[selectedLog.tag]?.sub ||
-                        selectedLog.tag}
-                    </Badge>
+                  {selectedLog.tag !== "PROCESS_QUEUE" && (
+                    <Text size="10px" color="gray">
+                      {selectedLog.json_data &&
+                      JSON.parse(selectedLog.json_data)?.email_source
+                        ? "Sent by: " +
+                          JSON.parse(selectedLog.json_data)?.email_source
+                        : ""}
+                    </Text>
                   )}
-                  <Text size="10px" color="gray">
-                    {selectedLog.json_data &&
-                    JSON.parse(selectedLog.json_data)?.email_source
-                      ? "Sent by: " +
-                        JSON.parse(selectedLog.json_data)?.email_source
-                      : ""}
-                  </Text>
                 </Box>
               </Box>
-              <Text
-                size="10px"
-                mb="4px"
-                color="gray"
-                dangerouslySetInnerHTML={{
-                  __html: selectedLog.metadata.replaceAll("\n", "<br />"),
-                }}
-              />
+              {selectedLog.tag !== "PROCESS_QUEUE" && (
+                <Text
+                  size="10px"
+                  mb="4px"
+                  color="gray"
+                  dangerouslySetInnerHTML={{
+                    __html: selectedLog.metadata.replaceAll("\n", "<br />"),
+                  }}
+                />
+              )}
+
               {/* {selectedLog.tag === "MEMORY_METADATA_SAVED" && */}
               {/*   logs && */}
               {/*   !selectedLog.is_supervisor && ( */}
@@ -1386,7 +1335,8 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
               {selectedLog.tag !== "SUPPORT_THREAD_SLACK" &&
                 selectedLog.tag !== "SUPPORT_THREAD_EMAIL" &&
                 selectedLog.tag !==
-                  "SUPPORT_THREAD_EMAIL_FORWARDED_BY_OPERATOR" && (
+                  "SUPPORT_THREAD_EMAIL_FORWARDED_BY_OPERATOR" &&
+                selectedLog.tag !== "PROCESS_QUEUE" && (
                   <Textarea
                     value={editedDescription}
                     autosize
@@ -1520,23 +1470,6 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                           </Text>
                         </Card>
                       ))}
-                  </Box>
-                  <Box w="100%">
-                    {isShortTerm && (
-                      <Button
-                        leftIcon={<IconHistory size={16} />}
-                        color="red"
-                        variant="outline"
-                        size="xs"
-                        mt="lg"
-                        onClick={() => {
-                          onRevert(selectedLog.description);
-                          setOpen(false);
-                        }}
-                      >
-                        Revert to this Memory
-                      </Button>
-                    )}
                   </Box>
                 </>
               )}

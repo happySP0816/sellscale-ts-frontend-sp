@@ -200,9 +200,11 @@ export default function CampaignTemplateEditModal({
 
   const [templateType, setTemplateType] = useState("template" || "generate");
 
-  const [currentConnectionType, setCurrentConnectionType] = useState<string>(currentProject?.email_to_linkedin_connection || "RANDOM");
+  const [currentConnectionType, setCurrentConnectionType] = useState<string>( currentProject?.linkedin_to_email_connection  || currentProject?.email_to_linkedin_connection || '');
 
-  const [emailToLinkedin, setEmailToLinkedin] = useState(currentProject?.email_to_linkedin_connection || false) 
+  const [emailToLinkedin, setEmailToLinkedin] = useState(!!!currentProject?.linkedin_to_email_connection || false)  //what have i done here
+
+  console.log('emailtolinkedin is ', currentProject?.linkedin_to_email_connection)
 
   const [sequenceType, setSequenceType]: any = useState<string>(
     innerProps.sequenceType || "email"
@@ -560,12 +562,20 @@ export default function CampaignTemplateEditModal({
                   onChange={(e) => {
                     const value = e.currentTarget.value;
                     console.log('args are ', value, currentProject?.id);
-                    if (typeof value === "string") {
-                      innerProps?.updateConnectionType(value, currentProject?.id);
-                      setCurrentConnectionType(value); // Set the currentConnectionType
+                    setCurrentConnectionType(value);
+                    if (typeof value === "string" && innerProps?.updateConnectionType) {
+                      innerProps.updateConnectionType(value, currentProject?.id)
+                      setCurrentProject((prev) => {
+                        if (!prev) return null;
+                        return {
+                          ...prev,
+                          email_to_linkedin_connection: value,
+                          linkedin_to_email_connection: undefined,
+                        };
+                      });
                     }
                   }}
-                  value={currentProject?.email_to_linkedin_connection || ""}
+                  value={currentConnectionType}
                   data={[
                     { label: "Parallel", value: "RANDOM" },
                     { label: "📧 Sent-Only", value: "ALL_PROSPECTS" },
@@ -577,13 +587,21 @@ export default function CampaignTemplateEditModal({
                   <NativeSelect
                   onChange={(e) => {
                     const value = e.currentTarget.value;
+                    setCurrentConnectionType(value); // Set the currentConnectionType
                     console.log('args are ', value, currentProject?.id);
                     if (typeof value === "string") {
-                      innerProps?.updateConnectionType(value, currentProject?.id);
-                      setCurrentConnectionType(value); // Set the currentConnectionType
+                      innerProps?.updateConnectionType(value, currentProject?.id)
+                      setCurrentProject((prev) => {
+                        if (!prev) return null;
+                        return {
+                          ...prev,
+                          linkedin_to_email_connection: value,
+                          email_to_linkedin_connection: undefined,
+                        };
+                      });
                     }
                   }}
-                  value={currentProject?.linkedin_to_email_connection || ""}
+                  value={currentConnectionType}
                   data={[
                     { label: "🔗 Linkedin Accepted", value: "ACCEPTED_THEN_SHOULD_EMAIL" },
                     { label: "⏳ Linkedin Sent, 3 days No reply", value: "SENT_OUTREACH_BUT_NO_REPLY_3_DAYS" },
@@ -650,58 +668,52 @@ export default function CampaignTemplateEditModal({
                 <ActionIcon
                   variant="outline"
                   color="gray"
-                  onClick={() =>
-
-                    
-
-                    {
+                  onClick={async () => {
                       const newStatus = !emailToLinkedin;
                       setEmailToLinkedin(newStatus);
 
+                      try {
+                        const response = await fetch(`${API_URL}/client/archetype/${currentProject?.id}/toggle_omnichannel`, {
+                          method: "PATCH",
+                          headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${userToken}`,
+                          },
+                          body: JSON.stringify({
+                            emailToLinkedin: newStatus,
+                          }),
+                        });
 
-                    fetch(`${API_URL}/client/archetype/${currentProject?.id}/toggle_omnichannel`, {
-                      method: "PATCH",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${userToken}`,
-                      },
-                      body: JSON.stringify({
-                        emailToLinkedin: newStatus,
-                      }),
-                    })
-                      .then((response) => {
                         if (!response.ok) {
                           throw new Error("Network response was not ok");
                         }
-                        return response.json();
-                      })
-                      .then((data) => {
-                        console.log("Connection altered successfully", data);
-                      })
-                      .catch((error) => {
-                        console.error("Failed to alter connection", error);
-                      });
 
-                      if (newStatus) { //meaning email linkedin connection true, nullify linkedin email conenction and set this one to RANDOM
-                        setCurrentProject((prev) => {
-                          if (!prev) return null;
-                          return {
-                            ...prev,
-                            linkedin_to_email_connection: undefined,
-                            email_to_linkedin_connection: "RANDOM",
-                          };
-                        });
-                        setCurrentConnectionType("RANDOM");
-                      } else {
-                        setCurrentProject((prev) => {
-                          if (!prev) return null;
-                          return {
-                            ...prev,
-                            email_to_linkedin_connection: undefined,
-                            linkedin_to_email_connection: "ACCEPTED_THEN_SHOULD_EMAIL",
-                          };
-                        });
-                        setCurrentConnectionType("ACCEPTED_THEN_SHOULD_EMAIL");
+                        const data = await response.json();
+                        console.log("Connection altered successfully", data);
+
+                        if (newStatus) { //meaning email linkedin connection true, nullify linkedin email connection and set this one to RANDOM
+                          setCurrentProject((prev) => {
+                            if (!prev) return null;
+                            return {
+                              ...prev,
+                              linkedin_to_email_connection: undefined,
+                              email_to_linkedin_connection: "RANDOM",
+                            };
+                          });
+                          setCurrentConnectionType("RANDOM");
+                        } else {
+                          setCurrentProject((prev) => {
+                            if (!prev) return null;
+                            return {
+                              ...prev,
+                              email_to_linkedin_connection: undefined,
+                              linkedin_to_email_connection: "ACCEPTED_THEN_SHOULD_EMAIL",
+                            };
+                          });
+                          setCurrentConnectionType("ACCEPTED_THEN_SHOULD_EMAIL");
+                        }
+                      } catch (error) {
+                        console.error("Failed to alter connection", error);
                       }
                     }
                   }

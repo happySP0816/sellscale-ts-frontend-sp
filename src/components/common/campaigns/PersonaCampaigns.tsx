@@ -109,7 +109,7 @@ import {
   getPersonasCampaignView,
   getPersonasOverview,
 } from "@utils/requests/getPersonas";
-import _ from "lodash";
+import _, { set } from "lodash";
 import moment from "moment";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -178,6 +178,7 @@ export type CampaignPersona = {
   selix_session_id?: number;
   latest_selix_task?: any;
   email_to_linkedin_connection?: string;
+  loadingQuickCampaign?: boolean;
   cycle?: number;
   setup_status?: string;
 };
@@ -305,6 +306,126 @@ export default function PersonaCampaigns() {
       setAiActivityData(activity_data);
     }
   };
+
+
+  const createQuickCampaign = () => {
+
+    const temp_id = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+
+    const newCampaign: CampaignPersona = {
+        id: temp_id, // Generate a large random integer for the ID
+        loadingQuickCampaign: true,
+        name: "Quick Campaign",
+        email_eligible: 100,
+        email_used: 0,
+        email_queued: 0,
+        email_sent: 0,
+        email_opened: 0,
+        email_replied: 0,
+        email_demo: 0,
+        email_bounced: 0,
+        email_removed: 0,
+        li_eligible: 100,
+        li_used: 0,
+        li_queued: 0,
+        li_sent: 0,
+        li_opened: 0,
+        li_replied: 0,
+        li_demo: 0,
+        li_failed: 0,
+        li_removed: 0,
+        active: true,
+        linkedin_active: true,
+        email_active: true,
+        created_at: new Date().toISOString(),
+        emoji: "🚀",
+        total_sent: 0,
+        total_opened: 0,
+        total_replied: 0,
+        total_pos_replied: 0,
+        total_demo: 0,
+        total_prospects: 0,
+        total_prospects_left_linkedin: 100,
+        total_prospects_left_email: 100,
+        total_used: 0,
+        sdr_name: userData?.sdr_name || "Unknown SDR",
+        sdr_img_url: userData?.img_url || "",
+        sdr_id: userData?.id || 0,
+        smartlead_campaign_id: undefined,
+        meta_data: {},
+        first_message_delay_days: 1,
+        selix_session_id: undefined,
+        latest_selix_task: undefined,
+        email_to_linkedin_connection: undefined,
+        cycle: 1,
+        setup_status: "ACTIVE",
+    };
+
+    setProjects((prevProjects) => [
+        ...prevProjects,
+        {
+            ...newCampaign,
+            num_prospects: 0,
+            num_unused_email_prospects: 0,
+            num_unused_li_prospects: 0,
+            icp_matching_prompt: "",
+            icp_matching_option_filters: [],
+            is_unassigned_contact_archetype: false,
+            persona_fit_reason: "",
+            persona_contact_objective: "",
+            contract_size: 0, // Add default value for missing property
+            avg_icp_fit_score: 0, // Add default value for missing property
+            li_bump_amount: 0, // Add default value for missing property
+            cta_framework_company: "", // Add default value for missing property
+            // Add other missing properties with default values here
+        } as unknown as PersonaOverview
+    ]);
+    setPersonas((prevPersonas) => [...prevPersonas, newCampaign]);
+    setTimeout(() => setShowActiveCampaigns(false), 300);
+    setTimeout(() => setShowActiveCampaigns(true), 500);
+
+  // INSERT_YOUR_CODE
+  const fetchQuickCampaignInfo = async () => {
+      try {
+          const response = await fetch(`${API_URL}/client/archetype/quickCampaign`, {
+              method: 'GET',
+              headers: {
+                  'Authorization': `Bearer ${userToken}`,
+                  'Content-Type': 'application/json',
+              },
+          });
+
+          if (!response.ok) {
+              throw new Error('Failed to fetch quick campaign info');
+          }
+          const data = await response.json();
+
+          showNotification({
+              title: "Quick Campaign Created",
+              message: `A quick campaign has been created for ${data.prospect_name}.`,
+              color: "green",
+              icon: <IconCheck />,
+          });
+
+          window.location.href = `/campaign_v2/${data.campaign.id}`;
+
+          setPersonas((prevPersonas) =>
+              prevPersonas.map((persona) =>
+                  persona.id === temp_id
+                      ? { ...persona, ...data.campaign, id: data.campaign.id, loadingQuickCampaign: false }
+                      : persona
+              )
+          );
+      } catch (error) {
+          console.error('Error fetching quick campaign info:', error);
+      }
+  };
+
+  fetchQuickCampaignInfo();
+
+
+};
+
 
   useEffect(() => {
     fetchCampaignPersonas();
@@ -510,6 +631,11 @@ export default function PersonaCampaigns() {
               </Menu.Dropdown>
             </Menu>
           </Button.Group>
+          {window.location.href.includes("internal") && (
+            <Button color="green" onClick={createQuickCampaign}>
+              Quick Campaign
+            </Button>
+          )}
         </Group>
       </Group>
     </>
@@ -1706,7 +1832,6 @@ export function PersonCampaignCard(props: {
     );
   }, [campaignList]);
 
-  console.log('campaign list is', campaignList);
 
   const unusedProspects =
     (props.project?.num_unused_email_prospects ?? 0) +
@@ -3492,18 +3617,35 @@ export const PersonCampaignTable = (props: {
         ))}
       {!props.showCycles &&
         data.map((persona, index) => (
-          <PersonCampaignCard
-            showAvatar={props.showAvatar}
-            key={index}
-            persona={persona}
-            project={props.projects?.find(
-              (project) => project.id == persona.id
+          <Box key={index}>
+            <PersonCampaignCard
+              showAvatar={props.showAvatar}
+              persona={persona}
+              project={props.projects?.find(
+                (project) => project.id == persona.id
+              )}
+              viewMode={props.campaignViewMode}
+              onPersonaActiveStatusUpdate={props.onPersonaActiveStatusUpdate}
+              showCycles={props.showCycles}
+            />
+            {persona.loadingQuickCampaign && (
+              <div
+                style={{
+                  top: "50%",
+                  left: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+               {'Gathering Info'} <Loader variant="dots"/>
+              </div>
             )}
-            viewMode={props.campaignViewMode}
-            onPersonaActiveStatusUpdate={props.onPersonaActiveStatusUpdate}
-            showCycles={props.showCycles}
-          />
-        ))}
+          </Box>
+        ))
+
+      }
+
     </Box>
   );
 };

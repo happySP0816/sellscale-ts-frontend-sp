@@ -192,7 +192,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
     queryFn: async () => {
       return await fetchSelixLogs();
     },
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
   });
 
   const [selectedLog, setSelectedLog]: any = useState<MemoryLog | null>(

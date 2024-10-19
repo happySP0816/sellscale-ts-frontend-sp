@@ -165,6 +165,7 @@ import { isInt } from "@fullcalendar/core/internal";
 import { Calendar, TimeInput } from "@mantine/dates";
 import AssetLibraryV2 from "@pages/AssetLibrary/AssetLibraryV2";
 import CompanySegmentReview from "@pages/SegmentV2/CompanySegmentReview";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
@@ -1117,6 +1118,7 @@ export default function SelinAI() {
     action: MessageType;
     thread_id: string;
   }) => {
+    queryClient.invalidateQueries(['selix_event_logs']);
     console.log("adding action to session", data);
     if (data.thread_id === roomIDref.current) {
       setMessages((chatContent: MessageType[]) => [
@@ -1135,6 +1137,8 @@ export default function SelinAI() {
     }
   };
 
+  const queryClient = useQueryClient();
+
   const handleUpdateTaskAndAction = (
     data: {
       task: TaskType;
@@ -1143,6 +1147,7 @@ export default function SelinAI() {
     },
     setMessages: any
   ) => {
+    queryClient.invalidateQueries(['selix_event_logs']);
     if (data.thread_id === roomIDref.current) {
       // Update the task
       if (data.task) {

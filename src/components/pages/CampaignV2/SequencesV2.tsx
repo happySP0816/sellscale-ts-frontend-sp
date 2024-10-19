@@ -1546,6 +1546,7 @@ function EmailSequencingV2(props: {
   const emailSequenceData = useRecoilValue(emailSequenceState);
 
   const triggerGetEmailSubjectLineTemplates = async () => {
+    console.log('getting for campaign at id ')
     const result = await getEmailSubjectLineTemplates(
       props.userToken,
       props.currentProject?.id as number,

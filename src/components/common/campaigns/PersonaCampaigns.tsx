@@ -54,6 +54,7 @@ import {
   Checkbox,
   Alert,
   Accordion,
+  HoverCard,
 } from "@mantine/core";
 import { useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
@@ -308,7 +309,7 @@ export default function PersonaCampaigns() {
   };
 
 
-  const createQuickCampaign = () => {
+  const createQuickCampaign = (sendOnAccept?: boolean, sendAfter3Days?: boolean) => {
 
     const temp_id = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
 
@@ -388,11 +389,15 @@ export default function PersonaCampaigns() {
   const fetchQuickCampaignInfo = async () => {
       try {
           const response = await fetch(`${API_URL}/client/archetype/quickCampaign`, {
-              method: 'GET',
+              method: 'POST',
               headers: {
                   'Authorization': `Bearer ${userToken}`,
                   'Content-Type': 'application/json',
               },
+              body: JSON.stringify({
+                  send_on_accept: sendOnAccept,
+                  send_email_after_3_days_sent_linkedin: sendAfter3Days,
+              }),
           });
 
           if (!response.ok) {
@@ -632,9 +637,53 @@ export default function PersonaCampaigns() {
             </Menu>
           </Button.Group>
           {window.location.href.includes("internal") && (
-            <Button color="green" onClick={createQuickCampaign}>
-              Quick Campaign
-            </Button>
+            <HoverCard width={500} shadow="md">
+              <HoverCard.Target>
+                <Button color="green" onClick={()=>{createQuickCampaign(undefined)}}>
+                  Quick Campaign
+                </Button>
+              </HoverCard.Target>
+              <HoverCard.Dropdown w={500}>
+                <Group spacing="xs">
+                  <Title order={4}>Immediate Activation</Title>
+                  <Button disabled color="blue" fullWidth mb="xs">Email Templates Only</Button>
+                  <Button disabled color="red" fullWidth mb="xs">Linkedin Templates Only</Button>
+                  <Button disabled color="yellow" fullWidth mb="xs">Email & Linkedin Templates Only</Button>
+                  <Button disabled color="teal" fullWidth mb="xs">Both Channels OmniChannel</Button>
+                </Group>
+                <Group spacing="xs" mt="md">
+                  <Title order={4}>No Activation</Title>
+                  {/*  */}
+                  <HoverCard width={300} shadow="md">
+                    <HoverCard.Target>
+                      <Button onClick={() => createQuickCampaign(undefined, true)} color="violet" fullWidth>Omnichannel Linkedin to Email (Send After No reply 3 days)</Button>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown>
+                      <Text size="sm">
+                        This option will generate a placeholder linkedin conversation entry for the prospect, and move the prospect to `SENT_OUTREACH`, with this record 4 days ago.
+                        Allows us to test generation of the omnichannel parameter
+                      </Text>
+                    </HoverCard.Dropdown>
+                  </HoverCard>
+                  {/*  */}
+                  <HoverCard width={300} shadow="md">
+                    <HoverCard.Target>
+                      <Button color="lime" fullWidth onClick={() => createQuickCampaign(true)}>Omnichannel Linkedin to Email Send on Acceptance</Button>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown>
+                      <Text size="sm">
+                        This option will generate a placeholder linkedin conversation entry for the prospect, and move the prospect to `ACCEPTED`.
+                        Allows us to test generation of the omnichannel parameter
+                      </Text>
+                    </HoverCard.Dropdown>
+                  </HoverCard>
+                  {/*  */}
+                  <Button disabled color="gray" fullWidth mb="xs">Omnichannel Email to Linkedin</Button>
+                  <Button disabled color="lime" fullWidth mb="xs">10 Prospects Both Templates</Button>
+                  <Button disabled color="cyan" fullWidth mb="xs">50 Prospects Both Templates</Button>
+                </Group>
+              </HoverCard.Dropdown>
+            </HoverCard>
           )}
         </Group>
       </Group>

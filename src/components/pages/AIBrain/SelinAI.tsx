@@ -1,9 +1,4 @@
-import {
-  emailSequenceState,
-  emailSubjectLinesState,
-  userDataState,
-  userTokenState,
-} from "@atoms/userAtoms";
+import { emailSequenceState, emailSubjectLinesState, userDataState, userTokenState } from "@atoms/userAtoms";
 import posthog from "posthog-js";
 import { TransformedSegment } from "@pages/SegmentV3/SegmentV3";
 import { JSONContent } from "@tiptap/react";
@@ -48,6 +43,8 @@ import {
 import {
   IconAdjustments,
   IconArchive,
+  IconArrowBarToLeft,
+  IconArrowBarToRight,
   IconArrowsMaximize,
   IconArrowsMinimize,
   IconArrowsMove,
@@ -96,18 +93,7 @@ import {
 import SlackLogo from "@assets/images/slack-logo.png";
 import { IconClock24, IconSparkles, IconUserShare } from "@tabler/icons-react";
 import moment from "moment";
-import {
-  createContext,
-  Dispatch,
-  Fragment,
-  Key,
-  memo,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-} from "react";
+import { createContext, Dispatch, Fragment, Key, memo, SetStateAction, useEffect, useRef, useState, useMemo } from "react";
 import React, { forwardRef, useImperativeHandle } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { proxyURL } from "@utils/general";
@@ -135,21 +121,13 @@ interface CustomCursorWrapperProps {
   setPrompt: Dispatch<SetStateAction<string>>;
   prompt: string;
   setAttachedFile: (file: File) => void;
-  handleSubmit: (file: {
-    name: string;
-    base64: string;
-    description: string;
-  }) => void;
+  handleSubmit: (file: { name: string; base64: string; description: string }) => void;
 }
 
 import { Dropzone, DropzoneProps } from "@mantine/dropzone";
 import { Modal, Overlay } from "@mantine/core";
 import { currentProjectState } from "@atoms/personaAtoms";
-import {
-  getFreshCurrentProject,
-  isFreeUser,
-  saveCurrentPersonaId,
-} from "@auth/core";
+import { getFreshCurrentProject, isFreeUser, saveCurrentPersonaId } from "@auth/core";
 import Tour from "reactour";
 import { useNavigate } from "react-router-dom";
 import Sequences from "@pages/CampaignV2/Sequences";
@@ -171,129 +149,117 @@ import CompanySegmentReview from "@pages/SegmentV2/CompanySegmentReview";
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PopoverTarget } from "@mantine/core/lib/Popover/PopoverTarget/PopoverTarget";
 
-const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
-  ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
-    const [isDragging, setIsDragging] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [file, setFile] = useState<File | null>(null);
-    const [fileDescription, setFileDescription] = useState("");
+const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [fileDescription, setFileDescription] = useState("");
 
-    const handleDrop = (event: DragEvent) => {
-      event.preventDefault();
-      const files = event.dataTransfer?.files;
-      if (files && files.length > 0) {
-        setAttachedFile(files[0]);
-        setFile(files[0]);
+  const handleDrop = (event: DragEvent) => {
+    event.preventDefault();
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      setAttachedFile(files[0]);
+      setFile(files[0]);
 
-        showNotification({
-          title: "File dropped",
-          message: `File: ${files[0].name} has been attached`,
-          color: "blue",
-          icon: <IconCircleCheck />,
-        });
+      showNotification({
+        title: "File dropped",
+        message: `File: ${files[0].name} has been attached`,
+        color: "blue",
+        icon: <IconCircleCheck />,
+      });
 
-        // setIsModalOpen(true);
-      }
-      setIsDragging(false);
+      // setIsModalOpen(true);
+    }
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (event: DragEvent) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleConfirm = () => {
+    console.log("File confirmed:", file);
+    setIsModalOpen(false);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result?.toString().split(",")[1] || "";
+      handleSubmit({
+        name: file?.name || "",
+        base64: base64String,
+        description: fileDescription,
+      });
     };
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  };
 
-    const handleDragOver = (event: DragEvent) => {
-      event.preventDefault();
-      setIsDragging(true);
+  useImperativeHandle(ref, () => ({
+    handleDrop: (file: File) => {
+      setFile(file);
+      setAttachedFile(file);
+      // setIsModalOpen(true);
+    },
+    handleConfirm,
+  }));
+
+  useEffect(() => {
+    const dropArea = document.getElementById("drop-area");
+    dropArea?.addEventListener("dragover", handleDragOver);
+    dropArea?.addEventListener("dragleave", handleDragLeave);
+    dropArea?.addEventListener("drop", handleDrop);
+
+    return () => {
+      dropArea?.removeEventListener("dragover", handleDragOver);
+      dropArea?.removeEventListener("dragleave", handleDragLeave);
+      dropArea?.removeEventListener("drop", handleDrop);
     };
+  }, []);
 
-    const handleDragLeave = () => {
-      setIsDragging(false);
-    };
-
-    const handleConfirm = () => {
-      console.log("File confirmed:", file);
-      setIsModalOpen(false);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result?.toString().split(",")[1] || "";
-        handleSubmit({
-          name: file?.name || "",
-          base64: base64String,
-          description: fileDescription,
-        });
-      };
-      if (file) {
-        reader.readAsDataURL(file);
-      }
-    };
-
-    useImperativeHandle(ref, () => ({
-      handleDrop: (file: File) => {
-        setFile(file);
-        setAttachedFile(file);
-        // setIsModalOpen(true);
-      },
-      handleConfirm,
-    }));
-
-    useEffect(() => {
-      const dropArea = document.getElementById("drop-area");
-      dropArea?.addEventListener("dragover", handleDragOver);
-      dropArea?.addEventListener("dragleave", handleDragLeave);
-      dropArea?.addEventListener("drop", handleDrop);
-
-      return () => {
-        dropArea?.removeEventListener("dragover", handleDragOver);
-        dropArea?.removeEventListener("dragleave", handleDragLeave);
-        dropArea?.removeEventListener("drop", handleDrop);
-      };
-    }, []);
-
-    return (
-      <div id="drop-area">
-        {isDragging && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-              zIndex: 1000,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(5px)",
-              color: "white",
-              fontSize: "2rem",
-              fontWeight: "bold",
-            }}
-          >
-            Drop files here
-          </div>
-        )}
-        {children}
-        <Modal
-          opened={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          title="Add File to Chat"
+  return (
+    <div id="drop-area">
+      {isDragging && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(5px)",
+            color: "white",
+            fontSize: "2rem",
+            fontWeight: "bold",
+          }}
         >
-          <Flex align="center" mt="md">
-            <IconFile size={20} />
-            <Text ml="xs">{file?.name}</Text>
-          </Flex>
-          <Textarea
-            placeholder="Enter file description..."
-            value={fileDescription}
-            onChange={(e) => setFileDescription(e.target.value)}
-            minRows={3}
-            mt="md"
-          />
-          <Group position="right" mt="md">
-            <Button onClick={handleConfirm}>Confirm</Button>
-          </Group>
-        </Modal>
-      </div>
-    );
-  }
-);
+          Drop files here
+        </div>
+      )}
+      {children}
+      <Modal opened={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add File to Chat">
+        <Flex align="center" mt="md">
+          <IconFile size={20} />
+          <Text ml="xs">{file?.name}</Text>
+        </Flex>
+        <Textarea placeholder="Enter file description..." value={fileDescription} onChange={(e) => setFileDescription(e.target.value)} minRows={3} mt="md" />
+        <Group position="right" mt="md">
+          <Button onClick={handleConfirm}>Confirm</Button>
+        </Group>
+      </Modal>
+    </div>
+  );
+});
 
 DropzoneWrapper.displayName = "DropzoneWrapper";
 
@@ -303,13 +269,7 @@ interface TaskType {
   id: number;
   title: string;
   description?: string;
-  status:
-    | "QUEUED"
-    | "IN_PROGRESS"
-    | "IN_PROGRESS_REVIEW_NEEDED"
-    | "COMPLETE"
-    | "CANCELLED"
-    | "BLOCKED";
+  status: "QUEUED" | "IN_PROGRESS" | "IN_PROGRESS_REVIEW_NEEDED" | "COMPLETE" | "CANCELLED" | "BLOCKED";
   created_at: string;
   updated_at: string;
   selix_session_id: number;
@@ -348,13 +308,7 @@ export interface MemoryType {
 export interface ThreadType {
   id: number;
   session_name: string;
-  status:
-    | "ACTIVE"
-    | "COMPLETE"
-    | "CANCELLED"
-    | "PENDING_OPERATOR"
-    | "BLOCKED"
-    | "IN_PROGRESS";
+  status: "ACTIVE" | "COMPLETE" | "CANCELLED" | "PENDING_OPERATOR" | "BLOCKED" | "IN_PROGRESS";
   assistant_id: string;
   client_sdr_id: number;
   created_at: string;
@@ -402,9 +356,7 @@ export default function SelinAI() {
   const [counter, setCounter] = useState<number>(0);
   const [messages, setMessages] = useState<MessageType[]>([]);
   const roomIDref = useRef<string>("");
-  const deviceIDRef = useRef<string>(
-    Math.random().toString(36).substring(2, 15)
-  );
+  const deviceIDRef = useRef<string>(Math.random().toString(36).substring(2, 15));
   const [currentSessionId, setCurrentSessionId] = useState<Number | null>(null);
   const sessionIDRef = useRef<Number>(-1);
   const [loadingNewChat, setLoadingNewChat] = useState(false);
@@ -414,13 +366,9 @@ export default function SelinAI() {
   const promptLengthRef = useRef<number>(0);
   const [suggestion, setSuggestion] = useState("");
   const [suggestionHidden, setSuggestionHidden] = useState(true);
-  const [suggestedFirstMessage, setSuggestedFirstMessage] = useState<
-    (string | SuggestedMessage)[]
-  >([]);
+  const [suggestedFirstMessage, setSuggestedFirstMessage] = useState<(string | SuggestedMessage)[]>([]);
   const [recording, setRecording] = useState(false);
-  const [attachedInternalTask, setAttachedInternalTask] = useState<
-    TaskType | undefined
-  >(undefined);
+  const [attachedInternalTask, setAttachedInternalTask] = useState<TaskType | undefined>(undefined);
   const prevPromptLengthRef = useRef<number>(0);
   const prevSlideUpTime = useRef<number>(0);
   const dropzoneRef = useRef<{
@@ -442,20 +390,14 @@ export default function SelinAI() {
         thread.status &&
         thread.status !== "COMPLETE" &&
         thread.status !== "CANCELLED" &&
-        !(
-          thread.tasks && thread.tasks.some((task) => task.status === "BLOCKED")
-        )
+        !(thread.tasks && thread.tasks.some((task) => task.status === "BLOCKED"))
     )
     .sort((a, b) => b.id - a.id);
   // Blocked threads in 'Need Input'
   const needInputThreads = threads
     .filter(
       (thread) =>
-        thread.status &&
-        thread.status !== "COMPLETE" &&
-        thread.status !== "CANCELLED" &&
-        thread.tasks &&
-        thread.tasks.some((task) => task.status === "BLOCKED")
+        thread.status && thread.status !== "COMPLETE" && thread.status !== "CANCELLED" && thread.tasks && thread.tasks.some((task) => task.status === "BLOCKED")
     )
     .sort((a, b) => b.id - a.id);
 
@@ -463,22 +405,12 @@ export default function SelinAI() {
 
   // Completed threads
   const completedThreads = threads
-    .filter(
-      (thread) =>
-        thread.status &&
-        (thread.status === "COMPLETE" || thread.status === "CANCELLED")
-    )
+    .filter((thread) => thread.status && (thread.status === "COMPLETE" || thread.status === "CANCELLED"))
     .sort((a, b) => b.id - a.id);
 
   const editSession = (sessionId: number, newName: string) => {
     setEditingIndex(null);
-    setThreads((prevThreads) =>
-      prevThreads.map((prevThread) =>
-        prevThread.id === sessionId
-          ? { ...prevThread, session_name: newName }
-          : prevThread
-      )
-    );
+    setThreads((prevThreads) => prevThreads.map((prevThread) => (prevThread.id === sessionId ? { ...prevThread, session_name: newName } : prevThread)));
     fetch(`${API_URL}/selix/edit_session`, {
       method: "PATCH",
       headers: {
@@ -493,10 +425,7 @@ export default function SelinAI() {
   };
 
   const isInternal = window.location.href.includes("internal");
-  const onDragEnd = async (result: {
-    destination: { index: number };
-    source: { index: number };
-  }) => {
+  const onDragEnd = async (result: { destination: { index: number }; source: { index: number } }) => {
     if (!isInternal) {
       return;
     }
@@ -625,8 +554,7 @@ export default function SelinAI() {
       if (response.status === 429) {
         showNotification({
           title: "File upload failed",
-          message:
-            "You have reached the maximum file upload count! Please reach out to csm@sellscale.com",
+          message: "You have reached the maximum file upload count! Please reach out to csm@sellscale.com",
           color: "red",
           icon: <IconCircleCheck />,
         });
@@ -644,10 +572,7 @@ export default function SelinAI() {
         role: sendAsSelix ? "assistant" : "user",
         type: "message",
       };
-      setMessages((chatContent: MessageType[]) => [
-        ...chatContent,
-        newChatPrompt,
-      ]);
+      setMessages((chatContent: MessageType[]) => [...chatContent, newChatPrompt]);
 
       setPrompt("");
       setSuggestion("");
@@ -664,10 +589,7 @@ export default function SelinAI() {
           type: "message",
         };
 
-        setMessages((chatContent: MessageType[]) => [
-          ...chatContent,
-          loadingMessage,
-        ]);
+        setMessages((chatContent: MessageType[]) => [...chatContent, loadingMessage]);
       }
 
       try {
@@ -725,20 +647,17 @@ export default function SelinAI() {
       return;
     }
     try {
-      const response = await fetch(
-        `${API_URL}/selix/get_one_suggested_first_message`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-          body: JSON.stringify({
-            device_id: deviceIDRef.current,
-            room_id: roomIDref.current,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/selix/get_one_suggested_first_message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          device_id: deviceIDRef.current,
+          room_id: roomIDref.current,
+        }),
+      });
       const data = await response.json();
       console.log("data is", data);
       setSuggestedFirstMessage(data.messages);
@@ -784,12 +703,7 @@ export default function SelinAI() {
       console.error("Error fetching chat history:", error);
     }
   };
-  const getMessages = async (
-    thread_id: string,
-    session_id: Number,
-    threads_passed?: ThreadType[],
-    tab_override?: string
-  ) => {
+  const getMessages = async (thread_id: string, session_id: Number, threads_passed?: ThreadType[], tab_override?: string) => {
     setLoadingNewChat(true);
     try {
       // create new room_id
@@ -825,57 +739,44 @@ export default function SelinAI() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      const filteredMessages = data.filter(
-        (message: MessageType) => message.message !== "Acknowledged."
-      );
+      const filteredMessages = data.filter((message: MessageType) => message.message !== "Acknowledged.");
       setMessages(filteredMessages);
-      const currentThread =
-        threads_passed?.find((thread) => thread.id === session_id) ||
-        threads.find((thread) => thread.id === session_id);
+      const currentThread = threads_passed?.find((thread) => thread.id === session_id) || threads.find((thread) => thread.id === session_id);
 
       // SPECIAL PARSING FOR SLACK MESSAGES
-      const transformedMessages = filteredMessages.map(
-        (message: MessageType) => {
-          if (
-            message.message?.includes("SLACK MESSAGE") ||
-            message.message?.includes("SUPPORT THREAD SLACK")
-          ) {
-            try {
-              const parsedMessage = JSON.parse(message.message);
+      const transformedMessages = filteredMessages.map((message: MessageType) => {
+        if (message.message?.includes("SLACK MESSAGE") || message.message?.includes("SUPPORT THREAD SLACK")) {
+          try {
+            const parsedMessage = JSON.parse(message.message);
 
-              const sender_name = parsedMessage.title.split(" sent to ")[0];
-              const is_from_me = sender_name === userData.sdr_name;
+            const sender_name = parsedMessage.title.split(" sent to ")[0];
+            const is_from_me = sender_name === userData.sdr_name;
 
-              // console.log("parsed message is", parsedMessage);
-              return {
-                ...message,
-                type: "slack",
-                hidden_until: message.hidden_until,
-                role: is_from_me ? "user" : "assistant",
-                sender_name,
-                slack_channel: parsedMessage.title
-                  .split(" sent to ")[1]
-                  .split(" at ")[0],
-                message: parsedMessage.data,
-                title: parsedMessage.title,
-                timestamp: parsedMessage.timestamp,
-              };
-            } catch (error) {
-              console.error("Error parsing SLACK MESSAGE:", error);
-              return message;
-            }
+            // console.log("parsed message is", parsedMessage);
+            return {
+              ...message,
+              type: "slack",
+              hidden_until: message.hidden_until,
+              role: is_from_me ? "user" : "assistant",
+              sender_name,
+              slack_channel: parsedMessage.title.split(" sent to ")[1].split(" at ")[0],
+              message: parsedMessage.data,
+              title: parsedMessage.title,
+              timestamp: parsedMessage.timestamp,
+            };
+          } catch (error) {
+            console.error("Error parsing SLACK MESSAGE:", error);
+            return message;
           }
-          return message;
         }
-      );
+        return message;
+      });
       setMessages(transformedMessages);
 
       const memory: MemoryType | undefined = currentThread?.memory;
       console.log("current thread is", currentThread);
       if (currentThread?.tasks) {
-        const orderedTasks = currentThread.tasks.sort(
-          (a, b) => a.order_number - b.order_number
-        );
+        const orderedTasks = currentThread.tasks.sort((a, b) => a.order_number - b.order_number);
         setTasks(orderedTasks || []);
       }
       if (memory) {
@@ -896,10 +797,7 @@ export default function SelinAI() {
   const handleCreateNewSession = async () => {
     setLoadingNewChat(true);
     try {
-      const room_id = Array.from(
-        { length: 16 },
-        () => Math.random().toString(36)[2]
-      ).join("");
+      const room_id = Array.from({ length: 16 }, () => Math.random().toString(36)[2]).join("");
       roomIDref.current = room_id;
       socket.emit("join-room", {
         payload: { room_id: room_id },
@@ -925,13 +823,7 @@ export default function SelinAI() {
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
 
-  const handleNewMessage = (data: {
-    message?: string;
-    action?: any;
-    device_id?: string;
-    role: "user" | "assistant" | "system";
-    thread_id: string;
-  }) => {
+  const handleNewMessage = (data: { message?: string; action?: any; device_id?: string; role: "user" | "assistant" | "system"; thread_id: string }) => {
     console.log("new message is", data);
     // if the message is not for the current device, ignore it
     if (data?.device_id === deviceIDRef.current) {
@@ -947,10 +839,7 @@ export default function SelinAI() {
         };
 
         // Handle slack message
-        if (
-          data.message.includes("SLACK MESSAGE") ||
-          data.message.includes("SUPPORT THREAD SLACK")
-        ) {
+        if (data.message.includes("SLACK MESSAGE") || data.message.includes("SUPPORT THREAD SLACK")) {
           try {
             const parsedMessage = JSON.parse(data.message);
             const sender_name = parsedMessage.title.split(" sent to ")[0];
@@ -961,9 +850,7 @@ export default function SelinAI() {
               type: "slack",
               role: is_from_me ? "user" : "assistant",
               sender_name,
-              slack_channel: parsedMessage.title
-                .split(" sent to ")[1]
-                .split(" at ")[0],
+              slack_channel: parsedMessage.title.split(" sent to ")[1].split(" at ")[0],
               message: parsedMessage.data,
               // title: parsedMessage.title,
               created_time: parsedMessage.timestamp,
@@ -973,15 +860,10 @@ export default function SelinAI() {
           }
         }
 
-        setMessages((chatContent: MessageType[]) => [
-          ...chatContent,
-          newMessage,
-        ]);
+        setMessages((chatContent: MessageType[]) => [...chatContent, newMessage]);
 
         if (data.role === "assistant") {
-          setMessages((chatContent: MessageType[]) =>
-            chatContent.filter((message) => message.message !== "loading")
-          );
+          setMessages((chatContent: MessageType[]) => chatContent.filter((message) => message.message !== "loading"));
         }
       } else if (data.action) {
         setMessages((chatContent: MessageType[]) => [
@@ -1019,30 +901,16 @@ export default function SelinAI() {
     }
   };
 
-  const handleUpdateTranscript = (data: {
-    message: string;
-    device_id: string;
-    original_sentnece: string;
-  }) => {
-    console.log(
-      "comparing promps: ",
-      promptRef.current,
-      data.original_sentnece
-    );
-    if (
-      data.device_id === deviceIDRef.current &&
-      promptRef.current === data.original_sentnece
-    ) {
+  const handleUpdateTranscript = (data: { message: string; device_id: string; original_sentnece: string }) => {
+    console.log("comparing promps: ", promptRef.current, data.original_sentnece);
+    if (data.device_id === deviceIDRef.current && promptRef.current === data.original_sentnece) {
       setPrompt(data.message);
       promptRef.current = data.message;
       promptLengthRef.current = data.message.length;
     }
   };
 
-  const handleAddTaskToSession = async (data: {
-    task: TaskType;
-    thread_id: string;
-  }) => {
+  const handleAddTaskToSession = async (data: { task: TaskType; thread_id: string }) => {
     if (data.thread_id === roomIDref.current) {
       console.log("adding task to session", data);
 
@@ -1060,31 +928,20 @@ export default function SelinAI() {
       setThreads((prevThreads) => {
         const updatedThreads = prevThreads.map((thread) => {
           if (thread.id === sessionIDRef.current) {
-            const updatedTasks = Array.isArray(thread.tasks)
-              ? thread.tasks.map((t) => (t.id === task.id ? task : t))
-              : [task];
+            const updatedTasks = Array.isArray(thread.tasks) ? thread.tasks.map((t) => (t.id === task.id ? task : t)) : [task];
             if (!updatedTasks.some((t) => t.id === task.id)) {
               updatedTasks.push(task);
             }
             return { ...thread, tasks: updatedTasks };
           } else {
-            console.log(
-              "found no match for the current session. we compared",
-              task.selix_session_id,
-              "and",
-              sessionIDRef.current
-            );
+            console.log("found no match for the current session. we compared", task.selix_session_id, "and", sessionIDRef.current);
           }
           return thread;
         });
 
         // Ensure the updated threads object is correctly reflected for children components
-        const currentThread = updatedThreads.find(
-          (thread) => thread.id === sessionIDRef.current
-        );
-        const orderedTasks = currentThread?.tasks?.sort(
-          (a, b) => a.order_number - b.order_number
-        );
+        const currentThread = updatedThreads.find((thread) => thread.id === sessionIDRef.current);
+        const orderedTasks = currentThread?.tasks?.sort((a, b) => a.order_number - b.order_number);
         setTasks(orderedTasks || []);
 
         return updatedThreads;
@@ -1092,10 +949,7 @@ export default function SelinAI() {
     }
   };
 
-  const handleNewSession = async (data: {
-    session: ThreadType;
-    thread_id: string;
-  }) => {
+  const handleNewSession = async (data: { session: ThreadType; thread_id: string }) => {
     //only create new sessions if they were meant for the current user
     if (data.session.client_sdr_id !== userData.id) {
       return;
@@ -1118,10 +972,7 @@ export default function SelinAI() {
     // }
   };
 
-  const addActionToSession = (data: {
-    action: MessageType;
-    thread_id: string;
-  }) => {
+  const addActionToSession = (data: { action: MessageType; thread_id: string }) => {
     queryClient.invalidateQueries(["selix_event_logs"]);
     console.log("adding action to session", data);
     if (data.thread_id === roomIDref.current) {
@@ -1160,29 +1011,17 @@ export default function SelinAI() {
             data.task.selix_session_id === sessionIDRef.current
               ? {
                   ...thread,
-                  tasks: Array.isArray(thread.tasks)
-                    ? thread.tasks.map((task) =>
-                        task.id === data.task.id ? data.task : task
-                      )
-                    : [data.task],
+                  tasks: Array.isArray(thread.tasks) ? thread.tasks.map((task) => (task.id === data.task.id ? data.task : task)) : [data.task],
                 }
               : thread
           )
         );
-        setTasks((prevTasks) =>
-          prevTasks.map((task) => (task.id === data.task.id ? data.task : task))
-        );
+        setTasks((prevTasks) => prevTasks.map((task) => (task.id === data.task.id ? data.task : task)));
       }
 
       // Update the action
       if (data.action) {
-        setMessages((prevMessages: MessageType[]) =>
-          prevMessages.map((message) =>
-            message?.id === data.action?.id
-              ? (data.action as MessageType)
-              : message
-          )
-        );
+        setMessages((prevMessages: MessageType[]) => prevMessages.map((message) => (message?.id === data.action?.id ? (data.action as MessageType) : message)));
       }
 
       // Force update the tasks
@@ -1190,10 +1029,7 @@ export default function SelinAI() {
     }
   };
 
-  const handleUpdateSession = async (data: {
-    session: ThreadType;
-    thread_id: string;
-  }) => {
+  const handleUpdateSession = async (data: { session: ThreadType; thread_id: string }) => {
     if (roomIDref.current === data.thread_id) {
       // showNotification({
       //   key: "session_updated",
@@ -1204,13 +1040,7 @@ export default function SelinAI() {
       // });
 
       // just update the local state
-      setThreads((prevThreads) =>
-        prevThreads.map((thread) =>
-          thread.id === sessionIDRef.current
-            ? { ...thread, ...data.session }
-            : thread
-        )
-      );
+      setThreads((prevThreads) => prevThreads.map((thread) => (thread.id === sessionIDRef.current ? { ...thread, ...data.session } : thread)));
     }
   };
 
@@ -1235,16 +1065,9 @@ export default function SelinAI() {
       div.style.animation = "slideDown 0.5s forwards";
     }
   };
-  const handleSuggestion = async (data: {
-    message: string;
-    thread_id: string;
-    device_id: string;
-  }) => {
+  const handleSuggestion = async (data: { message: string; thread_id: string; device_id: string }) => {
     //only show the suggestion if the message is for the current device
-    if (
-      data.thread_id === roomIDref.current &&
-      data.device_id === deviceIDRef.current
-    ) {
+    if (data.thread_id === roomIDref.current && data.device_id === deviceIDRef.current) {
       const currentTime = Date.now();
       setSuggestion(data.message);
 
@@ -1313,13 +1136,8 @@ export default function SelinAI() {
 
     if (recording) {
       intervalId = setInterval(() => {
-        const memory = threads.find(
-          (thread) => thread.id === currentSessionId
-        )?.memory;
-        if (
-          memory?.strategy_id &&
-          promptLengthRef.current > prevPromptLengthRef.current + 80
-        ) {
+        const memory = threads.find((thread) => thread.id === currentSessionId)?.memory;
+        if (memory?.strategy_id && promptLengthRef.current > prevPromptLengthRef.current + 80) {
           handleEditStrategy(promptRef.current);
           prevPromptLengthRef.current = promptLengthRef.current;
         }
@@ -1350,27 +1168,16 @@ export default function SelinAI() {
         // if (threadIdFromUrl) {
         //   urlParams.set("thread_id", threadIdFromUrl);
         // }
-        const threadId = threads_loaded.find(
-          (thread: ThreadType) => thread.id === Number(sessionIdFromUrl)
-        )?.thread_id;
+        const threadId = threads_loaded.find((thread: ThreadType) => thread.id === Number(sessionIdFromUrl))?.thread_id;
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
         window.history.replaceState({}, document.title, newUrl);
-        getMessages(
-          threadId || "",
-          parseInt(sessionIdFromUrl),
-          threads_loaded,
-          "PLANNER"
-        );
+        getMessages(threadId || "", parseInt(sessionIdFromUrl), threads_loaded, "PLANNER");
         setCurrentSessionId(Number(sessionIdFromUrl));
         // console.log("meowww", data.session.id);
         sessionIDRef.current = Number(sessionIdFromUrl);
         roomIDref.current = threadId || "";
-        const currentThread = threads_loaded.find(
-          (thread: ThreadType) => thread.id === Number(sessionIdFromUrl)
-        );
-        const orderedTasks = currentThread?.tasks?.sort(
-          (a: TaskType, b: TaskType) => a.order_number - b.order_number
-        );
+        const currentThread = threads_loaded.find((thread: ThreadType) => thread.id === Number(sessionIdFromUrl));
+        const orderedTasks = currentThread?.tasks?.sort((a: TaskType, b: TaskType) => a.order_number - b.order_number);
         setTasks(orderedTasks || []);
         setAIType("PLANNER");
       }
@@ -1440,13 +1247,7 @@ export default function SelinAI() {
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
 
   const [intendedTaskChange, setIntendedTaskChange] = useState<
-    | "ACTIVE"
-    | "COMPLETE"
-    | "CANCELLED"
-    | "PENDING_OPERATOR"
-    | "BLOCKED"
-    | "IN_PROGRESS"
-    | undefined
+    "ACTIVE" | "COMPLETE" | "CANCELLED" | "PENDING_OPERATOR" | "BLOCKED" | "IN_PROGRESS" | undefined
   >(undefined);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1504,14 +1305,9 @@ export default function SelinAI() {
   const [needOpened, { toggle: NeedToggle }] = useDisclosure(true);
   const [completedOpened, { toggle: CompleteToggle }] = useDisclosure(false);
 
-  const supervisor_thread = threads.find(
-    (thread) => thread.is_supervisor_session
-  );
-  const [clientMemoryState, setClientMemoryState] = useState<
-    string | undefined
-  >(
-    threads.find((thread) => thread.id === sessionIDRef.current)?.memory
-      ?.memory_line
+  const supervisor_thread = threads.find((thread) => thread.is_supervisor_session);
+  const [clientMemoryState, setClientMemoryState] = useState<string | undefined>(
+    threads.find((thread) => thread.id === sessionIDRef.current)?.memory?.memory_line
   );
 
   const [memoryPopupOpen, setMemoryPopupOpen] = useState(false);
@@ -1520,24 +1316,15 @@ export default function SelinAI() {
   const [memoryLineEditMode, setMemoryLineEditMode] = useState(false);
 
   const [memoryStateChanged, setMemoryStateChanged] = useState(false);
-  const [memoryLineHoverData, setMemoryLineHoverData]: any = useState<
-    string | null
-  >();
+  const [memoryLineHoverData, setMemoryLineHoverData]: any = useState<string | null>();
 
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
 
-  const [memoryState, setMemoryState] = useState<any>(
-    threads.find((thread) => thread.id === sessionIDRef.current)?.memory
-      .memory_state
-  );
+  const [memoryState, setMemoryState] = useState<any>(threads.find((thread) => thread.id === sessionIDRef.current)?.memory.memory_state);
 
   const [showMemoryForKey, setShowMemoryForKey] = useState("");
 
-  const addMemory = async (
-    memoryTitle: string,
-    memoryContent: string,
-    requiresUserInput: boolean = false
-  ) => {
+  const addMemory = async (memoryTitle: string, memoryContent: string, requiresUserInput: boolean = false) => {
     try {
       const response = await fetch(`${API_URL}/selix/add_memory`, {
         method: "POST",
@@ -1580,16 +1367,13 @@ export default function SelinAI() {
   const getMemoryState = async (sessionId: number) => {
     setFetchingMemoryState(true);
     try {
-      const response = await fetch(
-        `${API_URL}/selix/get_memory_state?session_id=${sessionId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/selix/get_memory_state?session_id=${sessionId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
 
       const result = await response.json();
 
@@ -1615,16 +1399,13 @@ export default function SelinAI() {
   const generateNewDraftMemoryLine = async () => {
     setGeneratingNewMemoryLine(true);
     try {
-      const response = await fetch(
-        `${API_URL}/selix/generate_new_draft_memory_line`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/selix/generate_new_draft_memory_line`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
 
       const result = await response.json();
       const memory_line = result.memory_line;
@@ -1718,28 +1499,23 @@ export default function SelinAI() {
     }
   };
 
-  const updateMemoryLineAllSessions = async (
-    newMemoryLine: string | undefined
-  ) => {
+  const updateMemoryLineAllSessions = async (newMemoryLine: string | undefined) => {
     if (!newMemoryLine) {
       return;
     }
     setMemoryLineUpdating(true);
     try {
-      const response = await fetch(
-        `${API_URL}/selix/update_memory_line_all_sessions`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-          body: JSON.stringify({
-            new_memory_line: newMemoryLine,
-            session_id: sessionIDRef.current as number,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/selix/update_memory_line_all_sessions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          new_memory_line: newMemoryLine,
+          session_id: sessionIDRef.current as number,
+        }),
+      });
 
       const result = await response.json();
 
@@ -1774,11 +1550,7 @@ export default function SelinAI() {
   useEffect(() => {
     const handleSpanHover = (event: any) => {
       if (event.target && event.target.dataset.title) {
-        const session = memoryState?.sessions.find(
-          (s: any) =>
-            s.title === event.target.dataset.title ||
-            "@" + s.title === event.target.dataset.title
-        );
+        const session = memoryState?.sessions.find((s: any) => s.title === event.target.dataset.title || "@" + s.title === event.target.dataset.title);
         if (session) {
           hoverHandler(session);
         }
@@ -1812,35 +1584,22 @@ export default function SelinAI() {
 
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
 
-  const memory = threads.find(
-    (thread) => thread.id === sessionIDRef.current
-  )?.memory;
+  const memory = threads.find((thread) => thread.id === sessionIDRef.current)?.memory;
 
-  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
-    useState<any>(memory?.memory_line_time_updated);
+  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] = useState<any>(memory?.memory_line_time_updated);
+
+  const [chatfullSize, setChatfullSize] = useState(true);
 
   return (
     <>
-      <DropzoneWrapper
-        setPrompt={setPrompt}
-        prompt={prompt}
-        setAttachedFile={setAttachedFile}
-        ref={dropzoneRef}
-        handleSubmit={handleSubmit}
-      >
+      <DropzoneWrapper setPrompt={setPrompt} prompt={prompt} setAttachedFile={setAttachedFile} ref={dropzoneRef} handleSubmit={handleSubmit}>
         <Card maw={"100%"} style={{ backgroundColor: "transparent" }} p={0}>
           {currentSessionId && (
             <Flex gap={"xl"}>
-              {window.location.hostname !== "localhost" && (
-                <LoadingOverlay visible={loadingNewChat} />
-              )}
+              {window.location.hostname !== "localhost" && <LoadingOverlay visible={loadingNewChat} />}
 
-              <Paper withBorder w={showSidebar ? "30%" : "5%"} h={"100%"}>
-                <Flex
-                  align={"center"}
-                  justify={showSidebar ? "space-between" : "center"}
-                  p={"sm"}
-                >
+              <Paper withBorder h={"100%"} className={`transition-all duration-300 ${showSidebar ? "w-[380px]" : "w-[90px]"}`}>
+                <Flex align={"center"} justify={showSidebar ? "space-between" : "center"} p={"sm"}>
                   {showSidebar && (
                     <Text fw={500} size={"lg"}>
                       Sessions
@@ -1857,13 +1616,7 @@ export default function SelinAI() {
                       closeOnClickOutside={false}
                     >
                       <Popover.Target>
-                        <Text
-                          ml={"auto"}
-                          size={"xs"}
-                          color="gray"
-                          sx={{ pointer: "cursor" }}
-                          onClick={() => setMemoryPopupOpen((prev) => !prev)}
-                        >
+                        <Text ml={"auto"} size={"xs"} color="gray" sx={{ pointer: "cursor" }} onClick={() => setMemoryPopupOpen((prev) => !prev)}>
                           <Badge color="pink" variant="outline">
                             🧠
                           </Badge>
@@ -1875,39 +1628,18 @@ export default function SelinAI() {
                           <Title order={5}>🧠 Selix Memory</Title>
 
                           {memory?.session_mode && (
-                            <Tooltip
-                              label={
-                                "Current Goal: " + memory.session_current_goal
-                              }
-                              withArrow
-                            >
-                              <Badge
-                                color="gray"
-                                variant="outline"
-                                radius={4}
-                                ml="auto"
-                              >
+                            <Tooltip label={"Current Goal: " + memory.session_current_goal} withArrow>
+                              <Badge color="gray" variant="outline" radius={4} ml="auto">
                                 ⚙️ {memory.session_mode?.replace("_", " ")}
                               </Badge>
                             </Tooltip>
                           )}
 
-                          <Button
-                            variant="subtle"
-                            color="red"
-                            size="xs"
-                            onClick={() => setMemoryPopupOpen(false)}
-                            ml="auto"
-                          >
+                          <Button variant="subtle" color="red" size="xs" onClick={() => setMemoryPopupOpen(false)} ml="auto">
                             x
                           </Button>
                         </Flex>
-                        <Card
-                          withBorder
-                          mah={700}
-                          p="md"
-                          sx={{ overflow: "auto" }}
-                        >
+                        <Card withBorder mah={700} p="md" sx={{ overflow: "auto" }}>
                           <Flex>
                             <Text size="sm" color="gray" fw="500">
                               Currently working on:
@@ -1944,12 +1676,7 @@ export default function SelinAI() {
                               mb="0px"
                             />
                           ) : (
-                            <HoverCard
-                              position="right"
-                              width={200}
-                              shadow="md"
-                              withinPortal
-                            >
+                            <HoverCard position="right" width={200} shadow="md" withinPortal>
                               <HoverCard.Target>
                                 <Text
                                   size="xs"
@@ -1960,17 +1687,11 @@ export default function SelinAI() {
                                   }}
                                   sx={{ cursor: "pointer" }}
                                   dangerouslySetInnerHTML={{
-                                    __html: (
-                                      clientMemoryState ||
-                                      "Click to add notes..."
-                                    )?.replace(/\n/g, "<br>"),
+                                    __html: (clientMemoryState || "Click to add notes...")?.replace(/\n/g, "<br>"),
                                   }}
                                 />
                               </HoverCard.Target>
-                              <HoverCard.Dropdown
-                                miw={memoryLineHoverData ? 500 : 0}
-                                display={memoryLineHoverData ? "block" : "none"}
-                              >
+                              <HoverCard.Dropdown miw={memoryLineHoverData ? 500 : 0} display={memoryLineHoverData ? "block" : "none"}>
                                 <Text
                                   size="xs"
                                   dangerouslySetInnerHTML={{
@@ -1981,26 +1702,11 @@ export default function SelinAI() {
                             </HoverCard>
                           )}
 
-                          <Text
-                            align="right"
-                            size="12px"
-                            color="gray"
-                            mt="2px"
-                            ml="auto"
-                          >
-                            Last updated:{" "}
-                            {memory?.memory_line_time_updated
-                              ? moment
-                                  .utc(memory?.memory_line_time_updated)
-                                  .local()
-                                  .fromNow()
-                              : "N/A"}
+                          <Text align="right" size="12px" color="gray" mt="2px" ml="auto">
+                            Last updated: {memory?.memory_line_time_updated ? moment.utc(memory?.memory_line_time_updated).local().fromNow() : "N/A"}
                           </Text>
                           <Flex mt="4px" mb="md">
-                            <Tooltip
-                              label="Rewind to previous version"
-                              withArrow
-                            >
+                            <Tooltip label="Rewind to previous version" withArrow>
                               <Button
                                 color="gray"
                                 size="xs"
@@ -2008,26 +1714,15 @@ export default function SelinAI() {
                                 disabled={!memory?.old_memory_line}
                                 onClick={() => {
                                   setClientMemoryState(memory?.old_memory_line);
-                                  setClientMemoryStateUpdatedTime(
-                                    memory?.old_memory_line_time_updated
-                                  );
+                                  setClientMemoryStateUpdatedTime(memory?.old_memory_line_time_updated);
                                   setMemoryStateChanged(true);
                                 }}
                               >
                                 ⏮
                               </Button>
                             </Tooltip>
-                            <Tooltip
-                              label="Generate a new memory line"
-                              withArrow
-                            >
-                              <Button
-                                color="yellow"
-                                size="xs"
-                                ml="4px"
-                                loading={generatingNewMemoryLine}
-                                onClick={() => generateNewDraftMemoryLine()}
-                              >
+                            <Tooltip label="Generate a new memory line" withArrow>
+                              <Button color="yellow" size="xs" ml="4px" loading={generatingNewMemoryLine} onClick={() => generateNewDraftMemoryLine()}>
                                 ♺
                               </Button>
                             </Tooltip>
@@ -2035,10 +1730,7 @@ export default function SelinAI() {
                               ml="auto"
                               justify="flex-end"
                               style={{
-                                display:
-                                  memoryStateChanged || memoryLineUpdating
-                                    ? "flex"
-                                    : "none",
+                                display: memoryStateChanged || memoryLineUpdating ? "flex" : "none",
                               }}
                             >
                               {memoryLineUpdating && (
@@ -2049,16 +1741,10 @@ export default function SelinAI() {
                               <Button
                                 size="xs"
                                 color="green"
-                                disabled={
-                                  !memoryStateChanged || memoryLineUpdating
-                                }
+                                disabled={!memoryStateChanged || memoryLineUpdating}
                                 onClick={() => {
-                                  updateMemoryLineAllSessions(
-                                    clientMemoryState
-                                  );
-                                  setClientMemoryStateUpdatedTime(
-                                    new Date().toLocaleString()
-                                  );
+                                  updateMemoryLineAllSessions(clientMemoryState);
+                                  setClientMemoryStateUpdatedTime(new Date().toLocaleString());
                                   setMemoryStateChanged(false);
                                   setMemoryLineEditMode(false);
                                 }}
@@ -2068,15 +1754,11 @@ export default function SelinAI() {
                               <Button
                                 size="xs"
                                 color="red"
-                                disabled={
-                                  !memoryStateChanged || memoryLineUpdating
-                                }
+                                disabled={!memoryStateChanged || memoryLineUpdating}
                                 ml="xs"
                                 onClick={() => {
                                   setClientMemoryState(memory?.memory_line);
-                                  setClientMemoryStateUpdatedTime(
-                                    memory?.memory_line_time_updated
-                                  );
+                                  setClientMemoryStateUpdatedTime(memory?.memory_line_time_updated);
                                   setMemoryStateChanged(false);
                                   setMemoryLineEditMode(false);
                                 }}
@@ -2087,18 +1769,10 @@ export default function SelinAI() {
                           </Flex>
 
                           {memoryState &&
-                            [
-                              "campaigns",
-                              "sessions",
-                              ...Object.keys(memoryState).filter(
-                                (x) => x !== "campaigns" && x !== "sessions"
-                              ),
-                            ].map((x: string) => {
+                            ["campaigns", "sessions", ...Object.keys(memoryState).filter((x) => x !== "campaigns" && x !== "sessions")].map((x: string) => {
                               return (
                                 <Box mb="md">
-                                  {x !== "campaigns" && x !== "sessions" && (
-                                    <Divider mb="md" />
-                                  )}
+                                  {x !== "campaigns" && x !== "sessions" && <Divider mb="md" />}
                                   {x !== "campaigns" && x !== "sessions" && (
                                     <Text size="sm" color="gray" fw="500">
                                       {selixMemoryTitleTranslations[x]}
@@ -2107,19 +1781,11 @@ export default function SelinAI() {
 
                                   {Array.isArray(memoryState[x]) &&
                                     memoryState[x]
-                                      .filter(
-                                        (y: any) =>
-                                          !clientMemoryState?.includes(y.title)
-                                      )
+                                      .filter((y: any) => !clientMemoryState?.includes(y.title))
                                       .map((y: any) => (
                                         <>
                                           <Box id={`memory-${y.memory}`}>
-                                            <HoverCard
-                                              width={500}
-                                              shadow="md"
-                                              withinPortal
-                                              position="right"
-                                            >
+                                            <HoverCard width={500} shadow="md" withinPortal position="right">
                                               <HoverCard.Target>
                                                 <Flex>
                                                   <Box
@@ -2141,45 +1807,22 @@ export default function SelinAI() {
                                                       paddingBottom: "2px",
                                                     }}
                                                     onMouseEnter={(e) => {
-                                                      const target: any =
-                                                        e.currentTarget;
-                                                      if (
-                                                        x === "campaigns" ||
-                                                        x === "sessions"
-                                                      ) {
+                                                      const target: any = e.currentTarget;
+                                                      if (x === "campaigns" || x === "sessions") {
                                                         return;
                                                       }
-                                                      target.querySelector(
-                                                        ".hover-icons"
-                                                      )!.style.display = "flex";
+                                                      target.querySelector(".hover-icons")!.style.display = "flex";
                                                     }}
                                                     onMouseLeave={(e) => {
-                                                      const target: any =
-                                                        e.currentTarget;
-                                                      if (
-                                                        x === "campaigns" ||
-                                                        x === "sessions"
-                                                      ) {
+                                                      const target: any = e.currentTarget;
+                                                      if (x === "campaigns" || x === "sessions") {
                                                         return;
                                                       }
-                                                      target.querySelector(
-                                                        ".hover-icons"
-                                                      )!.style.display = "none";
+                                                      target.querySelector(".hover-icons")!.style.display = "none";
                                                     }}
                                                   >
-                                                    <Text
-                                                      p="0"
-                                                      m="0"
-                                                      size="xs"
-                                                      color="black"
-                                                    >
-                                                      {y["title"].substring(
-                                                        0,
-                                                        36
-                                                      ) +
-                                                        (y["title"].length > 36
-                                                          ? "..."
-                                                          : "")}
+                                                    <Text p="0" m="0" size="xs" color="black">
+                                                      {y["title"].substring(0, 36) + (y["title"].length > 36 ? "..." : "")}
                                                     </Text>
                                                     <Flex
                                                       className="hover-icons"
@@ -2189,57 +1832,38 @@ export default function SelinAI() {
                                                         top: "4px",
                                                         right: "4px",
                                                         gap: "4px",
-                                                        backgroundColor:
-                                                          "white",
+                                                        backgroundColor: "white",
                                                       }}
                                                     >
-                                                      <Tooltip
-                                                        label="Mark as Cancelled"
-                                                        withArrow
-                                                      >
+                                                      <Tooltip label="Mark as Cancelled" withArrow>
                                                         <ActionIcon
                                                           size="xs"
                                                           color="red"
                                                           onClick={() => {
                                                             const id = y.id;
-                                                            changeMemoryStatus(
-                                                              id,
-                                                              "CANCELLED"
-                                                            );
+                                                            changeMemoryStatus(id, "CANCELLED");
                                                           }}
                                                         >
                                                           <IconX size={12} />
                                                         </ActionIcon>
                                                       </Tooltip>
-                                                      <Tooltip
-                                                        label="Mark as Complete"
-                                                        withArrow
-                                                      >
+                                                      <Tooltip label="Mark as Complete" withArrow>
                                                         <ActionIcon
                                                           size="xs"
                                                           color="green"
                                                           onClick={() => {
                                                             const id = y.id;
-                                                            changeMemoryStatus(
-                                                              id,
-                                                              "COMPLETE"
-                                                            );
+                                                            changeMemoryStatus(id, "COMPLETE");
                                                           }}
                                                         >
-                                                          <IconCheck
-                                                            size={12}
-                                                          />
+                                                          <IconCheck size={12} />
                                                         </ActionIcon>
                                                       </Tooltip>
                                                     </Flex>
                                                   </Box>
-                                                  {(x === "campaigns" ||
-                                                    x === "sessions") && (
+                                                  {(x === "campaigns" || x === "sessions") && (
                                                     <Box ml="4px" pt="2px">
-                                                      <IconCloud
-                                                        size="0.9rem"
-                                                        color="gray"
-                                                      />
+                                                      <IconCloud size="0.9rem" color="gray" />
                                                     </Box>
                                                   )}
                                                 </Flex>
@@ -2250,12 +1874,7 @@ export default function SelinAI() {
                                                   color="black"
                                                   fw={400}
                                                   dangerouslySetInnerHTML={{
-                                                    __html:
-                                                      y["memory"] &&
-                                                      y["memory"].replaceAll(
-                                                        "\n",
-                                                        "<br>"
-                                                      ),
+                                                    __html: y["memory"] && y["memory"].replaceAll("\n", "<br>"),
                                                   }}
                                                 />
                                               </HoverCard.Dropdown>
@@ -2265,8 +1884,7 @@ export default function SelinAI() {
                                       ))}
 
                                   <Box mt="sm">
-                                    {(x == "needs_user_input" ||
-                                      x == "needs_ai_input") && (
+                                    {(x == "needs_user_input" || x == "needs_ai_input") && (
                                       <>
                                         {!showAddMemoryInput && (
                                           <Button
@@ -2287,65 +1905,46 @@ export default function SelinAI() {
                                             +
                                           </Button>
                                         )}
-                                        {showAddMemoryInput &&
-                                          showMemoryForKey === x && (
-                                            <Flex mt="xs" align="center">
-                                              <TextInput
-                                                placeholder="Enter memory title"
-                                                value={newMemoryTitle}
-                                                onChange={(event) =>
-                                                  setNewMemoryTitle(
-                                                    event.currentTarget.value
-                                                  )
+                                        {showAddMemoryInput && showMemoryForKey === x && (
+                                          <Flex mt="xs" align="center">
+                                            <TextInput
+                                              placeholder="Enter memory title"
+                                              value={newMemoryTitle}
+                                              onChange={(event) => setNewMemoryTitle(event.currentTarget.value)}
+                                              onKeyDown={(event) => {
+                                                if (event.key === "Enter") {
+                                                  addMemory(newMemoryTitle, newMemoryTitle, x == "needs_user_input" ? true : false);
+                                                  setNewMemoryTitle("");
+                                                  setShowAddMemoryInput(false);
                                                 }
-                                                onKeyDown={(event) => {
-                                                  if (event.key === "Enter") {
-                                                    addMemory(
-                                                      newMemoryTitle,
-                                                      newMemoryTitle,
-                                                      x == "needs_user_input"
-                                                        ? true
-                                                        : false
-                                                    );
-                                                    setNewMemoryTitle("");
-                                                    setShowAddMemoryInput(
-                                                      false
-                                                    );
-                                                  }
-                                                }}
-                                                width="100%"
-                                                mr="xs"
-                                              />
-                                              <Button
-                                                size="xs"
-                                                color="green"
-                                                onClick={() => {
-                                                  addMemory(
-                                                    newMemoryTitle,
-                                                    newMemoryTitle,
-                                                    x == "needs_user_input"
-                                                      ? true
-                                                      : false
-                                                  );
-                                                  setNewMemoryTitle("");
-                                                  setShowAddMemoryInput(false);
-                                                }}
-                                              >
-                                                Add
-                                              </Button>
-                                              <Button
-                                                size="xs"
-                                                color="red"
-                                                onClick={() => {
-                                                  setNewMemoryTitle("");
-                                                  setShowAddMemoryInput(false);
-                                                }}
-                                                ml="xs"
-                                              >
-                                                Cancel
-                                              </Button>
-                                            </Flex>
-                                          )}
+                                              }}
+                                              width="100%"
+                                              mr="xs"
+                                            />
+                                            <Button
+                                              size="xs"
+                                              color="green"
+                                              onClick={() => {
+                                                addMemory(newMemoryTitle, newMemoryTitle, x == "needs_user_input" ? true : false);
+                                                setNewMemoryTitle("");
+                                                setShowAddMemoryInput(false);
+                                              }}
+                                            >
+                                              Add
+                                            </Button>
+                                            <Button
+                                              size="xs"
+                                              color="red"
+                                              onClick={() => {
+                                                setNewMemoryTitle("");
+                                                setShowAddMemoryInput(false);
+                                              }}
+                                              ml="xs"
+                                            >
+                                              Cancel
+                                            </Button>
+                                          </Flex>
+                                        )}
                                       </>
                                     )}
                                   </Box>
@@ -2356,11 +1955,7 @@ export default function SelinAI() {
                       </Popover.Dropdown>
                     </Popover>
                     <ActionIcon onClick={() => setShowSidebar(!showSidebar)}>
-                      {showSidebar ? (
-                        <IconChevronLeft size={"1rem"} />
-                      ) : (
-                        <IconChevronRight size={"1rem"} />
-                      )}
+                      {showSidebar ? <IconChevronLeft size={"1rem"} /> : <IconChevronRight size={"1rem"} />}
                     </ActionIcon>
                   </Flex>
                 </Flex>
@@ -2370,11 +1965,7 @@ export default function SelinAI() {
                     <Button
                       leftIcon={<IconPlus color={"white"} size={"1.3rem"} />}
                       // className="bg-[#D444F1]/10 hover:bg-[#D444F1]/80 text-[#D444F1] hover:text-white"
-                      onClick={
-                        !loadingNewChat
-                          ? () => handleCreateNewSession()
-                          : undefined
-                      }
+                      onClick={!loadingNewChat ? () => handleCreateNewSession() : undefined}
                       loading={loadingNewChat}
                       onMouseEnter={() => setNewButtonHover(true)}
                       onMouseLeave={() => setNewButtonHover(false)}
@@ -2388,11 +1979,7 @@ export default function SelinAI() {
                       variant="filled"
                       color="grape"
                       size={"lg"}
-                      onClick={
-                        !loadingNewChat
-                          ? () => handleCreateNewSession()
-                          : undefined
-                      }
+                      onClick={!loadingNewChat ? () => handleCreateNewSession() : undefined}
                       loading={loadingNewChat}
                       onMouseEnter={() => setNewButtonHover(true)}
                       onMouseLeave={() => setNewButtonHover(false)}
@@ -2416,16 +2003,8 @@ export default function SelinAI() {
                                   // cursor: "grab",
                                   display: "inline-block",
                                   // minWidth: "350px",
-                                  backgroundColor:
-                                    sessionIDRef.current ===
-                                    supervisor_thread.id
-                                      ? "#d0f0c0"
-                                      : "white", // Highlight if current thread
-                                  borderColor:
-                                    sessionIDRef.current ===
-                                    supervisor_thread.id
-                                      ? "#00796b"
-                                      : "#e6ebf0", // Change border color if current thread
+                                  backgroundColor: sessionIDRef.current === supervisor_thread.id ? "#d0f0c0" : "white", // Highlight if current thread
+                                  borderColor: sessionIDRef.current === supervisor_thread.id ? "#00796b" : "#e6ebf0", // Change border color if current thread
                                 }}
                                 className={`transition duration-300 ease-in-out transform ${
                                   sessionIDRef.current === supervisor_thread.id
@@ -2433,21 +2012,13 @@ export default function SelinAI() {
                                     : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
                                 }`}
                                 onClick={() => {
-                                  getMessages(
-                                    supervisor_thread.thread_id,
-                                    supervisor_thread.id
-                                  );
+                                  getMessages(supervisor_thread.thread_id, supervisor_thread.id);
                                   toggle();
                                 }}
-                                onMouseEnter={() =>
-                                  setHoverChat(supervisor_thread.id)
-                                }
+                                onMouseEnter={() => setHoverChat(supervisor_thread.id)}
                                 onMouseLeave={() => setHoverChat(undefined)}
                               >
-                                <Flex
-                                  align={"center"}
-                                  justify={"space-between"}
-                                >
+                                <Flex align={"center"} justify={"space-between"}>
                                   <Flex align={"left"} w={"100%"}>
                                     <Text
                                       fw={600}
@@ -2459,8 +2030,7 @@ export default function SelinAI() {
                                       // style={{ cursor: "text" }}
                                       size={"sm"}
                                     >
-                                      {supervisor_thread.session_name ||
-                                        "Supervisor Session"}
+                                      {supervisor_thread.session_name || "Supervisor Session"}
                                     </Text>
                                   </Flex>
                                 </Flex>
@@ -2480,14 +2050,8 @@ export default function SelinAI() {
                                       // cursor: "grab",
                                       display: "inline-block",
                                       // minWidth: "350px",
-                                      backgroundColor:
-                                        sessionIDRef.current === thread.id
-                                          ? "#d0f0c0"
-                                          : "white", // Highlight if current thread
-                                      borderColor:
-                                        sessionIDRef.current === thread.id
-                                          ? "#00796b"
-                                          : "#e6ebf0", // Change border color if current thread
+                                      backgroundColor: sessionIDRef.current === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
+                                      borderColor: sessionIDRef.current === thread.id ? "#00796b" : "#e6ebf0", // Change border color if current thread
                                     }}
                                     className={`transition duration-300 ease-in-out transform ${
                                       sessionIDRef.current === thread.id
@@ -2501,41 +2065,20 @@ export default function SelinAI() {
                                     onMouseEnter={() => setHoverChat(thread.id)}
                                     onMouseLeave={() => setHoverChat(undefined)}
                                   >
-                                    <Flex
-                                      align={"center"}
-                                      justify={"space-between"}
-                                    >
+                                    <Flex align={"center"} justify={"space-between"}>
                                       {editingIndex === index ? (
-                                        <Flex
-                                          align={"center"}
-                                          gap={"sm"}
-                                          onClick={(e) => e.stopPropagation()}
-                                        >
+                                        <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()}>
                                           <TextInput
                                             value={editingSessionName}
-                                            onChange={(e) =>
-                                              setEditingSessionName(
-                                                e.currentTarget.value
-                                              )
-                                            }
-                                            onBlur={() =>
-                                              editSession(
-                                                thread.id,
-                                                editingSessionName
-                                              )
-                                            }
+                                            onChange={(e) => setEditingSessionName(e.currentTarget.value)}
+                                            onBlur={() => editSession(thread.id, editingSessionName)}
                                             onKeyDown={(e) => {
                                               if (e.key === "Enter") {
-                                                editSession(
-                                                  thread.id,
-                                                  editingSessionName
-                                                );
+                                                editSession(thread.id, editingSessionName);
                                               }
                                             }}
                                             style={{
-                                              width: `${
-                                                editingSessionName.length + 2
-                                              }ch`,
+                                              width: `${editingSessionName.length + 2}ch`,
                                             }}
                                             rightSection={
                                               <ActionIcon
@@ -2544,10 +2087,7 @@ export default function SelinAI() {
                                                 size={"sm"}
                                                 onClick={(e) => {
                                                   e.stopPropagation();
-                                                  editSession(
-                                                    thread.id,
-                                                    editingSessionName
-                                                  );
+                                                  editSession(thread.id, editingSessionName);
                                                 }}
                                               >
                                                 <IconCircleCheck size={"xl"} />
@@ -2556,29 +2096,14 @@ export default function SelinAI() {
                                           />
                                         </Flex>
                                       ) : (
-                                        <Flex
-                                          align={"center"}
-                                          justify={"space-between"}
-                                          w={"100%"}
-                                        >
-                                          <Tooltip
-                                            label="Needs more input"
-                                            withArrow
-                                            position="top"
-                                          >
+                                        <Flex align={"center"} justify={"space-between"} w={"100%"}>
+                                          <Tooltip label="Needs more input" withArrow position="top">
                                             <Box mr="xs">
-                                              <IconInfoCircle
-                                                fill="orange"
-                                                color="white"
-                                                size={"1.2rem"}
-                                                className="mt-1"
-                                              />
+                                              <IconInfoCircle fill="orange" color="white" size={"1.2rem"} className="mt-1" />
                                             </Box>
                                           </Tooltip>
                                           <Flex align={"center"} gap={"xs"}>
-                                            <Tooltip
-                                              label={thread.session_name}
-                                            >
+                                            <Tooltip label={thread.session_name}>
                                               <Text
                                                 fw={600}
                                                 onClick={(e) => {
@@ -2589,22 +2114,11 @@ export default function SelinAI() {
                                                 // style={{ cursor: "text" }}
                                                 size={"sm"}
                                               >
-                                                {thread.session_name.substring(
-                                                  0,
-                                                  27
-                                                ) +
-                                                  (thread.session_name.length >
-                                                  27
-                                                    ? "..."
-                                                    : "") || "Untitled Session"}
+                                                {thread.session_name.substring(0, 27) + (thread.session_name.length > 27 ? "..." : "") || "Untitled Session"}
                                               </Text>
                                             </Tooltip>
                                           </Flex>
-                                          <Tooltip
-                                            label="Edit session name"
-                                            withArrow
-                                            position="top"
-                                          >
+                                          <Tooltip label="Edit session name" withArrow position="top">
                                             <ActionIcon
                                               variant="transparent"
                                               // color="blue"
@@ -2612,9 +2126,7 @@ export default function SelinAI() {
                                               onClick={(e) => {
                                                 e.stopPropagation();
                                                 setEditingIndex(index);
-                                                setEditingSessionName(
-                                                  thread.session_name
-                                                );
+                                                setEditingSessionName(thread.session_name);
                                               }}
                                               style={{ marginLeft: "auto" }}
                                             >
@@ -2623,86 +2135,56 @@ export default function SelinAI() {
                                           </Tooltip>
                                         </Flex>
                                       )}
-                                      {thread.status !== "COMPLETE" &&
-                                        thread.status !== "CANCELLED" && (
-                                          <>
-                                            <Tooltip
-                                              label="Archive session"
-                                              withArrow
-                                              position="top"
-                                            >
-                                              <ActionIcon
-                                                variant="transparent"
-                                                color="red"
-                                                size={"sm"}
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setThreads((prevThreads) =>
-                                                    prevThreads.map(
-                                                      (prevThread) =>
-                                                        prevThread.id ===
-                                                        thread.id
-                                                          ? {
-                                                              ...prevThread,
-                                                              status:
-                                                                "CANCELLED",
-                                                            }
-                                                          : prevThread
-                                                    )
-                                                  );
-                                                  fetch(
-                                                    `${API_URL}/selix/delete_session`,
-                                                    {
-                                                      method: "DELETE",
-                                                      headers: {
-                                                        "Content-Type":
-                                                          "application/json",
-                                                        Authorization: `Bearer ${userToken}`,
-                                                      },
-                                                      body: JSON.stringify({
-                                                        session_id: thread.id,
-                                                      }),
-                                                    }
+                                      {thread.status !== "COMPLETE" && thread.status !== "CANCELLED" && (
+                                        <>
+                                          <Tooltip label="Archive session" withArrow position="top">
+                                            <ActionIcon
+                                              variant="transparent"
+                                              color="red"
+                                              size={"sm"}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setThreads((prevThreads) =>
+                                                  prevThreads.map((prevThread) =>
+                                                    prevThread.id === thread.id
+                                                      ? {
+                                                          ...prevThread,
+                                                          status: "CANCELLED",
+                                                        }
+                                                      : prevThread
                                                   )
-                                                    .then((response) => {
-                                                      if (!response.ok) {
-                                                        return response
-                                                          .json()
-                                                          .then((data) => {
-                                                            throw new Error(
-                                                              data.error ||
-                                                                "Failed to delete session"
-                                                            );
-                                                          });
-                                                      }
-                                                      return response.json();
-                                                    })
-                                                    .then((data) => {
-                                                      console.log(
-                                                        "Session deleted:",
-                                                        data.message
-                                                      );
-                                                    })
-                                                    .catch((error) => {
-                                                      console.error(
-                                                        "Error deleting session:",
-                                                        error
-                                                      );
-                                                    });
-                                                }}
-                                              >
-                                                {thread.status !==
-                                                  "CANCELLED" &&
-                                                  thread.status !==
-                                                    "COMPLETE" && (
-                                                    <IconArchive
-                                                      size={"1rem"}
-                                                    />
-                                                  )}
-                                              </ActionIcon>
-                                            </Tooltip>
-                                          </>
-                                        )}
+                                                );
+                                                fetch(`${API_URL}/selix/delete_session`, {
+                                                  method: "DELETE",
+                                                  headers: {
+                                                    "Content-Type": "application/json",
+                                                    Authorization: `Bearer ${userToken}`,
+                                                  },
+                                                  body: JSON.stringify({
+                                                    session_id: thread.id,
+                                                  }),
+                                                })
+                                                  .then((response) => {
+                                                    if (!response.ok) {
+                                                      return response.json().then((data) => {
+                                                        throw new Error(data.error || "Failed to delete session");
+                                                      });
+                                                    }
+                                                    return response.json();
+                                                  })
+                                                  .then((data) => {
+                                                    console.log("Session deleted:", data.message);
+                                                  })
+                                                  .catch((error) => {
+                                                    console.error("Error deleting session:", error);
+                                                  });
+                                              }}
+                                            >
+                                              {thread.status !== "CANCELLED" && thread.status !== "COMPLETE" && <IconArchive size={"1rem"} />}
+                                            </ActionIcon>
+                                          </Tooltip>
+                                        </>
+                                      )}
                                     </Flex>
                                   </Paper>
                                 );
@@ -2723,14 +2205,8 @@ export default function SelinAI() {
                                       // cursor: "grab",
                                       // display: "inline-block",
                                       // minWidth: "350px",
-                                      backgroundColor:
-                                        sessionIDRef.current === thread.id
-                                          ? "#d0f0c0"
-                                          : "white", // Highlight if current thread
-                                      borderColor:
-                                        sessionIDRef.current === thread.id
-                                          ? "#00796b"
-                                          : "#e6ebf0", // Change border color if current thread
+                                      backgroundColor: sessionIDRef.current === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
+                                      borderColor: sessionIDRef.current === thread.id ? "#00796b" : "#e6ebf0", // Change border color if current thread
                                     }}
                                     className={`transition duration-300 ease-in-out transform ${
                                       sessionIDRef.current === thread.id
@@ -2744,42 +2220,20 @@ export default function SelinAI() {
                                     onMouseEnter={() => setHoverChat(thread.id)}
                                     onMouseLeave={() => setHoverChat(undefined)}
                                   >
-                                    <Flex
-                                      align={"center"}
-                                      justify={"space-between"}
-                                    >
+                                    <Flex align={"center"} justify={"space-between"}>
                                       {editingIndex === index ? (
-                                        <Flex
-                                          align={"center"}
-                                          gap={"sm"}
-                                          onClick={(e) => e.stopPropagation()}
-                                          w={"100%"}
-                                        >
+                                        <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()} w={"100%"}>
                                           <TextInput
                                             value={editingSessionName}
-                                            onChange={(e) =>
-                                              setEditingSessionName(
-                                                e.currentTarget.value
-                                              )
-                                            }
-                                            onBlur={() =>
-                                              editSession(
-                                                thread.id,
-                                                editingSessionName
-                                              )
-                                            }
+                                            onChange={(e) => setEditingSessionName(e.currentTarget.value)}
+                                            onBlur={() => editSession(thread.id, editingSessionName)}
                                             onKeyDown={(e) => {
                                               if (e.key === "Enter") {
-                                                editSession(
-                                                  thread.id,
-                                                  editingSessionName
-                                                );
+                                                editSession(thread.id, editingSessionName);
                                               }
                                             }}
                                             style={{
-                                              width: `${
-                                                editingSessionName.length + 2
-                                              }ch`,
+                                              width: `${editingSessionName.length + 2}ch`,
                                             }}
                                             rightSection={
                                               <ActionIcon
@@ -2788,10 +2242,7 @@ export default function SelinAI() {
                                                 size={"sm"}
                                                 onClick={(e) => {
                                                   e.stopPropagation();
-                                                  editSession(
-                                                    thread.id,
-                                                    editingSessionName
-                                                  );
+                                                  editSession(thread.id, editingSessionName);
                                                 }}
                                               >
                                                 <IconCircleCheck size={"xl"} />
@@ -2800,29 +2251,14 @@ export default function SelinAI() {
                                           />
                                         </Flex>
                                       ) : (
-                                        <Flex
-                                          align={"center"}
-                                          justify={"space-between"}
-                                          w={"100%"}
-                                        >
-                                          <Tooltip
-                                            label="X more inputs"
-                                            withArrow
-                                            position="top"
-                                          >
+                                        <Flex align={"center"} justify={"space-between"} w={"100%"}>
+                                          <Tooltip label="X more inputs" withArrow position="top">
                                             <Box mr="xs">
-                                              <IconHourglassLow
-                                                fill="purple"
-                                                color="white"
-                                                size={"1.2rem"}
-                                                className="mt-1"
-                                              />
+                                              <IconHourglassLow fill="purple" color="white" size={"1.2rem"} className="mt-1" />
                                             </Box>
                                           </Tooltip>
                                           <Flex align={"center"} gap={"xs"}>
-                                            <Tooltip
-                                              label={thread.session_name}
-                                            >
+                                            <Tooltip label={thread.session_name}>
                                               <Text
                                                 fw={600}
                                                 onClick={(e) => {
@@ -2833,22 +2269,11 @@ export default function SelinAI() {
                                                 // style={{ cursor: "text" }}
                                                 size={"sm"}
                                               >
-                                                {thread.session_name.substring(
-                                                  0,
-                                                  27
-                                                ) +
-                                                  (thread.session_name.length >
-                                                  27
-                                                    ? "..."
-                                                    : "") || "Untitled Session"}
+                                                {thread.session_name.substring(0, 27) + (thread.session_name.length > 27 ? "..." : "") || "Untitled Session"}
                                               </Text>
                                             </Tooltip>
                                           </Flex>
-                                          <Tooltip
-                                            label="Edit session name"
-                                            withArrow
-                                            position="top"
-                                          >
+                                          <Tooltip label="Edit session name" withArrow position="top">
                                             <ActionIcon
                                               variant="transparent"
                                               // color="blue"
@@ -2856,9 +2281,7 @@ export default function SelinAI() {
                                               onClick={(e) => {
                                                 e.stopPropagation();
                                                 setEditingIndex(index);
-                                                setEditingSessionName(
-                                                  thread.session_name
-                                                );
+                                                setEditingSessionName(thread.session_name);
                                               }}
                                               style={{ marginLeft: "auto" }}
                                             >
@@ -2869,11 +2292,7 @@ export default function SelinAI() {
                                       )}
                                       {
                                         <>
-                                          <Tooltip
-                                            label="Archive session"
-                                            withArrow
-                                            position="top"
-                                          >
+                                          <Tooltip label="Archive session" withArrow position="top">
                                             <ActionIcon
                                               variant="transparent"
                                               color="red"
@@ -2881,63 +2300,42 @@ export default function SelinAI() {
                                               onClick={(e) => {
                                                 e.stopPropagation();
                                                 setThreads((prevThreads) =>
-                                                  prevThreads.map(
-                                                    (prevThread) =>
-                                                      prevThread.id ===
-                                                      thread.id
-                                                        ? {
-                                                            ...prevThread,
-                                                            status: "CANCELLED",
-                                                          }
-                                                        : prevThread
+                                                  prevThreads.map((prevThread) =>
+                                                    prevThread.id === thread.id
+                                                      ? {
+                                                          ...prevThread,
+                                                          status: "CANCELLED",
+                                                        }
+                                                      : prevThread
                                                   )
                                                 );
-                                                fetch(
-                                                  `${API_URL}/selix/delete_session`,
-                                                  {
-                                                    method: "DELETE",
-                                                    headers: {
-                                                      "Content-Type":
-                                                        "application/json",
-                                                      Authorization: `Bearer ${userToken}`,
-                                                    },
-                                                    body: JSON.stringify({
-                                                      session_id: thread.id,
-                                                    }),
-                                                  }
-                                                )
+                                                fetch(`${API_URL}/selix/delete_session`, {
+                                                  method: "DELETE",
+                                                  headers: {
+                                                    "Content-Type": "application/json",
+                                                    Authorization: `Bearer ${userToken}`,
+                                                  },
+                                                  body: JSON.stringify({
+                                                    session_id: thread.id,
+                                                  }),
+                                                })
                                                   .then((response) => {
                                                     if (!response.ok) {
-                                                      return response
-                                                        .json()
-                                                        .then((data) => {
-                                                          throw new Error(
-                                                            data.error ||
-                                                              "Failed to delete session"
-                                                          );
-                                                        });
+                                                      return response.json().then((data) => {
+                                                        throw new Error(data.error || "Failed to delete session");
+                                                      });
                                                     }
                                                     return response.json();
                                                   })
                                                   .then((data) => {
-                                                    console.log(
-                                                      "Session deleted:",
-                                                      data.message
-                                                    );
+                                                    console.log("Session deleted:", data.message);
                                                   })
                                                   .catch((error) => {
-                                                    console.error(
-                                                      "Error deleting session:",
-                                                      error
-                                                    );
+                                                    console.error("Error deleting session:", error);
                                                   });
                                               }}
                                             >
-                                              {thread.status !== "CANCELLED" &&
-                                                thread.status !==
-                                                  "COMPLETE" && (
-                                                  <IconArchive size={"1rem"} />
-                                                )}
+                                              {thread.status !== "CANCELLED" && thread.status !== "COMPLETE" && <IconArchive size={"1rem"} />}
                                             </ActionIcon>
                                           </Tooltip>
                                         </>
@@ -2961,352 +2359,230 @@ export default function SelinAI() {
                               </Badge>
                             </Flex>
                             <ActionIcon onClick={CompleteToggle}>
-                              {!completedOpened ? (
-                                <IconChevronDown size={"1rem"} />
-                              ) : (
-                                <IconChevronUp size={"1rem"} />
-                              )}
+                              {!completedOpened ? <IconChevronDown size={"1rem"} /> : <IconChevronUp size={"1rem"} />}
                             </ActionIcon>
                           </Flex>
-                          <Collapse
-                            in={completedOpened}
-                            transitionTimingFunction="linear"
-                          >
+                          <Collapse in={completedOpened} transitionTimingFunction="linear">
                             <Stack spacing={"xs"}>
-                              {completedThreads.map(
-                                (thread: ThreadType, index) => {
-                                  return (
-                                    <Paper
-                                      key={index}
-                                      withBorder
-                                      radius={"sm"}
-                                      p={"sm"}
-                                      w={"100%"}
-                                      style={{
-                                        // cursor: "grab",
-                                        // display: "inline-block",
-                                        // minWidth: "350px",
-                                        backgroundColor:
-                                          sessionIDRef.current === thread.id
-                                            ? "#d0f0c0"
-                                            : "white", // Highlight if current thread
-                                        borderColor:
-                                          sessionIDRef.current === thread.id
-                                            ? "#00796b"
-                                            : "#e6ebf0", // Change border color if current thread
-                                      }}
-                                      className={`transition duration-300 ease-in-out transform ${
-                                        sessionIDRef.current === thread.id
-                                          ? "scale-105 shadow-2xl"
-                                          : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
-                                      }`}
-                                      onClick={() => {
-                                        getMessages(
-                                          thread.thread_id,
-                                          thread.id
-                                        );
-                                        toggle();
-                                      }}
-                                      onMouseEnter={() =>
-                                        setHoverChat(thread.id)
-                                      }
-                                      onMouseLeave={() =>
-                                        setHoverChat(undefined)
-                                      }
-                                    >
-                                      <Flex
-                                        align={"center"}
-                                        justify={"space-between"}
-                                      >
-                                        {editingIndex === index ? (
-                                          <Flex
-                                            align={"center"}
-                                            gap={"sm"}
-                                            onClick={(e) => e.stopPropagation()}
-                                          >
-                                            <TextInput
-                                              value={editingSessionName}
-                                              onChange={(e) =>
-                                                setEditingSessionName(
-                                                  e.currentTarget.value
-                                                )
+                              {completedThreads.map((thread: ThreadType, index) => {
+                                return (
+                                  <Paper
+                                    key={index}
+                                    withBorder
+                                    radius={"sm"}
+                                    p={"sm"}
+                                    w={"100%"}
+                                    style={{
+                                      // cursor: "grab",
+                                      // display: "inline-block",
+                                      // minWidth: "350px",
+                                      backgroundColor: sessionIDRef.current === thread.id ? "#d0f0c0" : "white", // Highlight if current thread
+                                      borderColor: sessionIDRef.current === thread.id ? "#00796b" : "#e6ebf0", // Change border color if current thread
+                                    }}
+                                    className={`transition duration-300 ease-in-out transform ${
+                                      sessionIDRef.current === thread.id
+                                        ? "scale-105 shadow-2xl"
+                                        : "hover:-translate-y-1 hover:scale-105 hover:shadow-2xl hover:border-[1px] hover:!border-[#228be6] hover:!bg-[#228be6]/5"
+                                    }`}
+                                    onClick={() => {
+                                      getMessages(thread.thread_id, thread.id);
+                                      toggle();
+                                    }}
+                                    onMouseEnter={() => setHoverChat(thread.id)}
+                                    onMouseLeave={() => setHoverChat(undefined)}
+                                  >
+                                    <Flex align={"center"} justify={"space-between"}>
+                                      {editingIndex === index ? (
+                                        <Flex align={"center"} gap={"sm"} onClick={(e) => e.stopPropagation()}>
+                                          <TextInput
+                                            value={editingSessionName}
+                                            onChange={(e) => setEditingSessionName(e.currentTarget.value)}
+                                            onBlur={() => editSession(thread.id, editingSessionName)}
+                                            onKeyDown={(e) => {
+                                              if (e.key === "Enter") {
+                                                editSession(thread.id, editingSessionName);
                                               }
-                                              onBlur={() =>
-                                                editSession(
-                                                  thread.id,
-                                                  editingSessionName
-                                                )
-                                              }
-                                              onKeyDown={(e) => {
-                                                if (e.key === "Enter") {
-                                                  editSession(
-                                                    thread.id,
-                                                    editingSessionName
-                                                  );
-                                                }
-                                              }}
-                                              style={{
-                                                width: `${
-                                                  editingSessionName.length + 2
-                                                }ch`,
-                                              }}
-                                              rightSection={
-                                                <ActionIcon
-                                                  variant="transparent"
-                                                  color="green"
-                                                  size={"sm"}
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    editSession(
-                                                      thread.id,
-                                                      editingSessionName
-                                                    );
-                                                  }}
-                                                >
-                                                  <IconCircleCheck
-                                                    size={"xl"}
-                                                  />
-                                                </ActionIcon>
-                                              }
-                                            />
-                                          </Flex>
-                                        ) : (
-                                          <Flex align={"center"}>
-                                            <Tooltip
-                                              label="Needs more input"
-                                              withArrow
-                                              position="top"
-                                            >
-                                              <Box mr="xs">
-                                                <IconCircleCheck
-                                                  color="green"
-                                                  size={"1.2rem"}
-                                                />
-                                              </Box>
-                                            </Tooltip>
-                                            <Tooltip
-                                              label={thread.session_name}
-                                            >
-                                              <Text
-                                                fw={600}
-                                                onClick={(e) => {
-                                                  // e.stopPropagation();
-                                                  // setEditingIndex(index);
-                                                  // setEditingSessionName(thread.session_name);
-                                                }}
-                                                // style={{ cursor: "text" }}
-                                                size={"sm"}
-                                              >
-                                                {thread.session_name.substring(
-                                                  0,
-                                                  27
-                                                ) +
-                                                  (thread.session_name.length >
-                                                  27
-                                                    ? "..."
-                                                    : "") || "Untitled Session"}
-                                              </Text>
-                                            </Tooltip>
-                                          </Flex>
-                                        )}
-                                        <ActionIcon
-                                          variant="transparent"
-                                          ml={"auto"}
-                                          size={"sm"}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingIndex(index);
-                                            setEditingSessionName(
-                                              thread.session_name
-                                            );
-                                          }}
-                                          style={{ marginLeft: "auto" }}
-                                        >
-                                          <IconEdit size={"1rem"} />
-                                        </ActionIcon>
-                                        {
-                                          <>
-                                            <Tooltip
-                                              label="Archive session"
-                                              withArrow
-                                              position="top"
-                                            >
+                                            }}
+                                            style={{
+                                              width: `${editingSessionName.length + 2}ch`,
+                                            }}
+                                            rightSection={
                                               <ActionIcon
                                                 variant="transparent"
-                                                color="red"
+                                                color="green"
                                                 size={"sm"}
                                                 onClick={(e) => {
                                                   e.stopPropagation();
-                                                  setThreads((prevThreads) =>
-                                                    prevThreads.map(
-                                                      (prevThread) =>
-                                                        prevThread.id ===
-                                                        thread.id
-                                                          ? {
-                                                              ...prevThread,
-                                                              status:
-                                                                "CANCELLED",
-                                                            }
-                                                          : prevThread
-                                                    )
-                                                  );
-                                                  fetch(
-                                                    `${API_URL}/selix/delete_session`,
-                                                    {
-                                                      method: "DELETE",
-                                                      headers: {
-                                                        "Content-Type":
-                                                          "application/json",
-                                                        Authorization: `Bearer ${userToken}`,
-                                                      },
-                                                      body: JSON.stringify({
-                                                        session_id: thread.id,
-                                                      }),
-                                                    }
-                                                  )
-                                                    .then((response) => {
-                                                      if (!response.ok) {
-                                                        return response
-                                                          .json()
-                                                          .then((data) => {
-                                                            throw new Error(
-                                                              data.error ||
-                                                                "Failed to delete session"
-                                                            );
-                                                          });
-                                                      }
-                                                      return response.json();
-                                                    })
-                                                    .then((data) => {
-                                                      console.log(
-                                                        "Session deleted:",
-                                                        data.message
-                                                      );
-                                                    })
-                                                    .catch((error) => {
-                                                      console.error(
-                                                        "Error deleting session:",
-                                                        error
-                                                      );
-                                                    });
+                                                  editSession(thread.id, editingSessionName);
                                                 }}
                                               >
-                                                {thread.status !==
-                                                  "CANCELLED" &&
-                                                  thread.status !==
-                                                    "COMPLETE" && (
-                                                    <IconArchive
-                                                      size={"1rem"}
-                                                    />
-                                                  )}
+                                                <IconCircleCheck size={"xl"} />
                                               </ActionIcon>
-                                            </Tooltip>
-                                          </>
-                                        }
-                                      </Flex>
-                                      <Flex align={"center"} gap={"xs"}>
-                                        {thread.status === "ACTIVE" && (
-                                          <Flex align={"center"} gap={4}>
-                                            {/* <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
+                                            }
+                                          />
+                                        </Flex>
+                                      ) : (
+                                        <Flex align={"center"}>
+                                          <Tooltip label="Needs more input" withArrow position="top">
+                                            <Box mr="xs">
+                                              <IconCircleCheck color="green" size={"1.2rem"} />
+                                            </Box>
+                                          </Tooltip>
+                                          <Tooltip label={thread.session_name}>
+                                            <Text
+                                              fw={600}
+                                              onClick={(e) => {
+                                                // e.stopPropagation();
+                                                // setEditingIndex(index);
+                                                // setEditingSessionName(thread.session_name);
+                                              }}
+                                              // style={{ cursor: "text" }}
+                                              size={"sm"}
+                                            >
+                                              {thread.session_name.substring(0, 27) + (thread.session_name.length > 27 ? "..." : "") || "Untitled Session"}
+                                            </Text>
+                                          </Tooltip>
+                                        </Flex>
+                                      )}
+                                      <ActionIcon
+                                        variant="transparent"
+                                        ml={"auto"}
+                                        size={"sm"}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingIndex(index);
+                                          setEditingSessionName(thread.session_name);
+                                        }}
+                                        style={{ marginLeft: "auto" }}
+                                      >
+                                        <IconEdit size={"1rem"} />
+                                      </ActionIcon>
+                                      {
+                                        <>
+                                          <Tooltip label="Archive session" withArrow position="top">
+                                            <ActionIcon
+                                              variant="transparent"
+                                              color="red"
+                                              size={"sm"}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setThreads((prevThreads) =>
+                                                  prevThreads.map((prevThread) =>
+                                                    prevThread.id === thread.id
+                                                      ? {
+                                                          ...prevThread,
+                                                          status: "CANCELLED",
+                                                        }
+                                                      : prevThread
+                                                  )
+                                                );
+                                                fetch(`${API_URL}/selix/delete_session`, {
+                                                  method: "DELETE",
+                                                  headers: {
+                                                    "Content-Type": "application/json",
+                                                    Authorization: `Bearer ${userToken}`,
+                                                  },
+                                                  body: JSON.stringify({
+                                                    session_id: thread.id,
+                                                  }),
+                                                })
+                                                  .then((response) => {
+                                                    if (!response.ok) {
+                                                      return response.json().then((data) => {
+                                                        throw new Error(data.error || "Failed to delete session");
+                                                      });
+                                                    }
+                                                    return response.json();
+                                                  })
+                                                  .then((data) => {
+                                                    console.log("Session deleted:", data.message);
+                                                  })
+                                                  .catch((error) => {
+                                                    console.error("Error deleting session:", error);
+                                                  });
+                                              }}
+                                            >
+                                              {thread.status !== "CANCELLED" && thread.status !== "COMPLETE" && <IconArchive size={"1rem"} />}
+                                            </ActionIcon>
+                                          </Tooltip>
+                                        </>
+                                      }
+                                    </Flex>
+                                    <Flex align={"center"} gap={"xs"}>
+                                      {thread.status === "ACTIVE" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-green-100 rounded-full p-1 border-green-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-green-500 rounded-full"></div>
                                       </div>
                                       <Text color="green" fw={500} size={"sm"}>
                                         Live
                                       </Text> */}
-                                            <Text
-                                              size={"xs"}
-                                              fw={500}
-                                              color="gray"
-                                            >
-                                              Time remaining:
-                                            </Text>
-                                          </Flex>
-                                        )}
-                                        {thread.status ===
-                                          "PENDING_OPERATOR" && (
-                                          <Flex align={"center"} gap={4}>
-                                            {/* <div className="flex items-center justify-center bg-yellow-100 rounded-full p-1 border-yellow-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "PENDING_OPERATOR" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-yellow-100 rounded-full p-1 border-yellow-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-yellow-500 rounded-full"></div>
                                       </div>
                                       <Text color="yellow" fw={500} size={"sm"}>
                                         In Progress
                                       </Text> */}
-                                            <Text
-                                              size={"xs"}
-                                              fw={500}
-                                              color="gray"
-                                            >
-                                              Time remaining:
-                                            </Text>
-                                          </Flex>
-                                        )}
-                                        {thread.status === "BLOCKED" && (
-                                          <Flex align={"center"} gap={4}>
-                                            {/* <div className="flex items-center justify-center bg-red-100 rounded-full p-1 border-red-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "BLOCKED" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-red-100 rounded-full p-1 border-red-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-red-500 rounded-full"></div>
                                       </div>
                                       <Text color="red" fw={500} size={"sm"}>
                                         Blocked
                                       </Text> */}
-                                            <Text
-                                              size={"xs"}
-                                              fw={500}
-                                              color="gray"
-                                            >
-                                              Time remaining:
-                                            </Text>
-                                          </Flex>
-                                        )}
-                                        {thread.status === "COMPLETE" && (
-                                          <Flex align={"center"} gap={4}>
-                                            {/* <div className="flex items-center justify-center bg-blue-100 rounded-full p-1 border-blue-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Time remaining:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "COMPLETE" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-blue-100 rounded-full p-1 border-blue-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-blue-500 rounded-full"></div>
                                       </div>
                                       <Text color="blue" fw={500} size={"sm"}>
                                         Done
                                       </Text> */}
-                                            <Text
-                                              size={"xs"}
-                                              fw={500}
-                                              color="gray"
-                                            >
-                                              Finished in:
-                                            </Text>
-                                          </Flex>
-                                        )}
-                                        {thread.status === "CANCELLED" && (
-                                          <Flex align={"center"} gap={4}>
-                                            {/* <div className="flex items-center justify-center bg-gray-100 rounded-full p-1 border-gray-300 border-[1px] border-solid">
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Finished in:
+                                          </Text>
+                                        </Flex>
+                                      )}
+                                      {thread.status === "CANCELLED" && (
+                                        <Flex align={"center"} gap={4}>
+                                          {/* <div className="flex items-center justify-center bg-gray-100 rounded-full p-1 border-gray-300 border-[1px] border-solid">
                                         <div className="w-[6px] h-[6px] bg-gray-500 rounded-full"></div>
                                       </div>
                                       <Text color="gray" fw={500} size={"sm"}>
                                         Cancelled
                                       </Text> */}
-                                            <Text
-                                              size={"xs"}
-                                              fw={500}
-                                              color="gray"
-                                            >
-                                              Finished in:
-                                            </Text>
-                                          </Flex>
-                                        )}
+                                          <Text size={"xs"} fw={500} color="gray">
+                                            Finished in:
+                                          </Text>
+                                        </Flex>
+                                      )}
 
-                                        <Text color="gray" size={"xs"}>
-                                          {thread.estimated_completion_time
-                                            ? moment(
-                                                thread.estimated_completion_time
-                                              ).fromNow()
-                                            : "N/A"}{" "}
-                                          {(thread.status === "ACTIVE" ||
-                                            thread.status === "IN_PROGRESS") &&
-                                            "remaining"}
-                                        </Text>
-                                      </Flex>
-                                    </Paper>
-                                  );
-                                }
-                              )}
+                                      <Text color="gray" size={"xs"}>
+                                        {thread.estimated_completion_time ? moment(thread.estimated_completion_time).fromNow() : "N/A"}{" "}
+                                        {(thread.status === "ACTIVE" || thread.status === "IN_PROGRESS") && "remaining"}
+                                      </Text>
+                                    </Flex>
+                                  </Paper>
+                                );
+                              })}
                             </Stack>
                           </Collapse>
                         </Stack>
@@ -3315,23 +2591,15 @@ export default function SelinAI() {
                   </ScrollArea>
                 </Box>
               </Paper>
-              <Flex w={"100%"} gap={"md"} p={"lg"}>
+              <Flex gap="md" p="lg" className={`${showSidebar ? "w-[calc(100%-380px)]" : "w-[calc(100%-90px)]"}`}>
                 <DragDropContext
                   onDragEnd={(result) => {
-                    if (
-                      result &&
-                      result.destination &&
-                      result.destination.droppableId === "droppable-area"
-                    ) {
+                    if (result && result.destination && result.destination.droppableId === "droppable-area") {
                       if (!result.draggableId.includes("-")) {
                         return;
                       }
-                      const attachedTaskId = Number(
-                        result.draggableId.split("-")[1]
-                      );
-                      const task = tasks.find(
-                        (task) => task.id === attachedTaskId
-                      );
+                      const attachedTaskId = Number(result.draggableId.split("-")[1]);
+                      const task = tasks.find((task) => task.id === attachedTaskId);
                       setAttachedInternalTask(task);
                       return;
                     }
@@ -3371,36 +2639,47 @@ export default function SelinAI() {
                     setRecording={setRecording}
                     aiType={aiType}
                     currentSessionId={sessionIDRef.current}
-                    memoryState={
-                      threads.find(
-                        (thread) => thread.id === sessionIDRef.current
-                      )?.memory.memory_state
-                    }
-                    memory={
-                      threads.find(
-                        (thread) => thread.id === sessionIDRef.current
-                      )?.memory
-                    }
+                    memoryState={threads.find((thread) => thread.id === sessionIDRef.current)?.memory.memory_state}
+                    memory={threads.find((thread) => thread.id === sessionIDRef.current)?.memory}
                     // generateResponse={generateResponse}
                     // chatContent={chatContent}
                     // setChatContent={setChatContent}
+                    chatfullSize={chatfullSize}
                   />
-                  <SelixControlCenter
-                    setTasks={setTasks}
-                    refreshAssetLibrary={refreshAssetLibrary}
-                    attachedFile={attachedFile}
-                    counter={counter}
-                    recording={recording}
-                    tasks={tasks}
-                    setPrompt={setPrompt}
-                    handleSubmit={handleSubmit}
-                    setAIType={setAIType}
-                    aiType={aiType}
-                    threads={threads}
-                    messages={messages}
-                    setMessages={setMessages}
-                    currentSessionId={sessionIDRef.current}
-                  />
+                  {chatfullSize && (
+                    <SelixControlCenter
+                      setTasks={setTasks}
+                      refreshAssetLibrary={refreshAssetLibrary}
+                      attachedFile={attachedFile}
+                      counter={counter}
+                      recording={recording}
+                      tasks={tasks}
+                      setPrompt={setPrompt}
+                      handleSubmit={handleSubmit}
+                      setAIType={setAIType}
+                      aiType={aiType}
+                      threads={threads}
+                      messages={messages}
+                      setMessages={setMessages}
+                      currentSessionId={sessionIDRef.current}
+                      setChatfullSize={setChatfullSize}
+                      chatfullSize={chatfullSize}
+                    />
+                  )}
+
+                  {!chatfullSize && (
+                    <Paper withBorder shadow="sm" radius={"md"}>
+                      <ActionIcon
+                        variant="filled"
+                        className="rounded-t-lg rounded-b-none bg-[#E25DEE] hover:bg-[#E25DEE]"
+                        w={45}
+                        h={48}
+                        onClick={() => setChatfullSize(true)}
+                      >
+                        <IconArrowBarToLeft color="white" size={"1rem"} />
+                      </ActionIcon>
+                    </Paper>
+                  )}
                 </DragDropContext>
               </Flex>
             </Flex>
@@ -3424,8 +2703,7 @@ export default function SelinAI() {
 const SegmentChat = (props: any) => {
   const attachedFile = props.attachedFile;
   const setAttachedFile = props.setAttachedFile;
-  const suggestedFirstMessage: (string | SuggestedMessage)[] =
-    props.suggestedFirstMessage;
+  const suggestedFirstMessage: (string | SuggestedMessage)[] = props.suggestedFirstMessage;
   const handleSubmit: (
     file?: { name: string; description: string; base64: string },
     forcePrompt?: string,
@@ -3470,21 +2748,18 @@ const SegmentChat = (props: any) => {
 
   const processTranscription = async () => {
     try {
-      const response = await fetch(
-        `${API_URL}/selix/post_process_transcription`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-          body: JSON.stringify({
-            session_id: sessionId,
-            device_id: deviceIDRef.current,
-            sentence_to_correct: promptRef.current,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/selix/post_process_transcription`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          device_id: deviceIDRef.current,
+          sentence_to_correct: promptRef.current,
+        }),
+      });
     } catch (error) {
       console.error("Error processing transcription:", error);
     }
@@ -3549,14 +2824,7 @@ const SegmentChat = (props: any) => {
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       setRecording(false);
-      handleSubmit(
-        undefined,
-        undefined,
-        sendAsSelix,
-        sendSlack,
-        sendEmail,
-        scheduleDay
-      );
+      handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail, scheduleDay);
       setScheduleDay(undefined);
       setIntendedTaskChange(undefined);
       props.setAttachedInternalTask(undefined);
@@ -3567,9 +2835,7 @@ const SegmentChat = (props: any) => {
   const [uncollapsedCards, setUncollapsedCards] = useState<{
     [key: number]: boolean;
   }>({});
-  const [clientMemoryState, setClientMemoryState] = useState<
-    string | undefined
-  >(props.memory?.memory_line);
+  const [clientMemoryState, setClientMemoryState] = useState<string | undefined>(props.memory?.memory_line);
   useState<any>(props.memory?.memory_line_time_updated);
   const [memoryState, setMemoryState] = useState<any>(props.memoryState);
 
@@ -3593,10 +2859,7 @@ const SegmentChat = (props: any) => {
       if (textareaRef.current) {
         textareaRef.current!.style.height = "auto";
       }
-    } else if (
-      normalInputMode &&
-      (prompt.length > 120 || promptRef.current.length > 120)
-    ) {
+    } else if (normalInputMode && (prompt.length > 120 || promptRef.current.length > 120)) {
       setNormalInputMode(false);
       if (textareaRef.current) {
         textareaRef.current.style.height = "500px";
@@ -3632,15 +2895,8 @@ const SegmentChat = (props: any) => {
 
   return (
     <>
-      <Paper withBorder shadow="sm" radius={"md"} w={"40%"} h={"100%"}>
-        <Flex
-          px={"md"}
-          py={"xs"}
-          align={"center"}
-          gap={5}
-          bg={"white"}
-          className=" rounded-t-md"
-        >
+      <Paper withBorder shadow="sm" radius={"md"} w={props.chatfullSize ? "40%" : "100%"} h={"100%"} className=" transition-all duration-300">
+        <Flex px={"md"} py={"xs"} align={"center"} gap={5} bg={"white"} className=" rounded-t-md">
           <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
           <Text fw={600}>Chat with Selix</Text>
         </Flex>
@@ -3657,18 +2913,11 @@ const SegmentChat = (props: any) => {
             }}
           >
             {messages.length > 1 ? (
-              <Flex
-                direction={"column"}
-                gap={"sm"}
-                p={"md"}
-                h={"100%"}
-                className=" overflow-auto"
-              >
+              <Flex direction={"column"} gap={"sm"} p={"md"} h={"100%"} className=" overflow-auto">
                 {messages.map((message: MessageType, index: number) => {
                   return (
                     <>
-                      {message.type === "message" ||
-                      message.type === "slack" ? (
+                      {message.type === "message" || message.type === "slack" ? (
                         <>
                           {/* name section */}
                           <Flex
@@ -3676,71 +2925,39 @@ const SegmentChat = (props: any) => {
                             align={"center"}
                             ml={message.role === "user" ? "auto" : "0"}
                             style={{
-                              width:
-                                messageRefs.current[index]?.offsetWidth ||
-                                "85%",
+                              width: messageRefs.current[index]?.offsetWidth || "85%",
                               marginBottom: "-10px",
                             }}
                           >
-                            <Avatar
-                              src={
-                                message.sender_name
-                                  ? null
-                                  : message.role === "user"
-                                  ? userData.img_url
-                                  : Logo
-                              }
-                              size={"xs"}
-                              radius={"xl"}
-                            />
+                            <Avatar src={message.sender_name ? null : message.role === "user" ? userData.img_url : Logo} size={"xs"} radius={"xl"} />
                             <Text fw={600} size={"xs"}>
-                              {message.sender_name
-                                ? message.sender_name
-                                : message.role !== "assistant"
-                                ? userData.sdr_name
-                                : "Selix AI"}
-                              {message.type === "slack" &&
-                                message.slack_channel && (
-                                  <Text component="span" fw={700}>
-                                    {" via "}
-                                    <img
-                                      src={SlackLogo}
-                                      alt="slack"
-                                      width={10}
-                                      height={10}
-                                      style={{ margin: "0 4px" }}
-                                    />
-                                    {" Slack"}
-                                    <Text
-                                      component="a"
-                                      href={`https://slack.com/app_redirect?channel=${message.slack_channel}`}
-                                      style={{
-                                        color: "#1E90FF",
-                                        textDecoration: "underline",
-                                        marginLeft: "4px",
-                                      }}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      #{message.slack_channel}
-                                    </Text>
+                              {message.sender_name ? message.sender_name : message.role !== "assistant" ? userData.sdr_name : "Selix AI"}
+                              {message.type === "slack" && message.slack_channel && (
+                                <Text component="span" fw={700}>
+                                  {" via "}
+                                  <img src={SlackLogo} alt="slack" width={10} height={10} style={{ margin: "0 4px" }} />
+                                  {" Slack"}
+                                  <Text
+                                    component="a"
+                                    href={`https://slack.com/app_redirect?channel=${message.slack_channel}`}
+                                    style={{
+                                      color: "#1E90FF",
+                                      textDecoration: "underline",
+                                      marginLeft: "4px",
+                                    }}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    #{message.slack_channel}
                                   </Text>
-                                )}
-                            </Text>
-                            {message.role !== "user" &&
-                              message.message !== "loading" &&
-                              index === messages.length - 1 && (
-                                <Flex align="center" gap="xs">
-                                  {showLoader && (
-                                    <Loader
-                                      variant="bars"
-                                      color="grape"
-                                      size="xs"
-                                      ml={10}
-                                    />
-                                  )}
-                                </Flex>
+                                </Text>
                               )}
+                            </Text>
+                            {message.role !== "user" && message.message !== "loading" && index === messages.length - 1 && (
+                              <Flex align="center" gap="xs">
+                                {showLoader && <Loader variant="bars" color="grape" size="xs" ml={10} />}
+                              </Flex>
+                            )}
                           </Flex>
                           {/* rest of message */}
                           <Flex
@@ -3750,31 +2967,19 @@ const SegmentChat = (props: any) => {
                             key={index}
                             ml={message.role === "user" ? "auto" : "0"}
                             style={{
-                              backgroundColor: message.hidden_until
-                                ? "#ADD8E6"
-                                : message.role === "user"
-                                ? "#f7ffff"
-                                : "#fafafa",
+                              backgroundColor: message.hidden_until ? "#ADD8E6" : message.role === "user" ? "#f7ffff" : "#fafafa",
                               borderRadius: "10px",
                               border: "1px solid #e7ebef",
                               padding: "10px",
                             }}
                             ref={(el) => (messageRefs.current[index] = el)}
                           >
-                            <Flex
-                              className=" rounded-lg rounded-br-none"
-                              px={"sm"}
-                              py={7}
-                            >
+                            <Flex className=" rounded-lg rounded-br-none" px={"sm"} py={7}>
                               <Text size={"xs"} fw={500}>
                                 {message.role === "user" ? (
                                   message.message
                                     .split(" ")
-                                    .map(
-                                      (x) =>
-                                        x.substring(0, 40) +
-                                        (x.length > 40 ? "..." : "")
-                                    )
+                                    .map((x) => x.substring(0, 40) + (x.length > 40 ? "..." : ""))
                                     .join(" ")
                                 ) : message.message === "loading" ? (
                                   <Flex align="center" gap="xs">
@@ -3784,11 +2989,7 @@ const SegmentChat = (props: any) => {
                                   <Text>
                                     {message.message
                                       .split(" ")
-                                      .map(
-                                        (x) =>
-                                          x.substring(0, 40) +
-                                          (x.length > 40 ? "..." : "")
-                                      )
+                                      .map((x) => x.substring(0, 40) + (x.length > 40 ? "..." : ""))
                                       .join(" ")
                                       .split("\n")
                                       .map((line, index) => (
@@ -3801,16 +3002,8 @@ const SegmentChat = (props: any) => {
                                 )}
                               </Text>
                             </Flex>
-                            <Text
-                              color="gray"
-                              size={"xs"}
-                              ml={message.role === "user" ? "auto" : "0"}
-                            >
-                              <Text
-                                color={message.hidden_until ? "white" : "gray"}
-                                size="xs"
-                                ml={message.role === "user" ? "auto" : "0"}
-                              >
+                            <Text color="gray" size={"xs"} ml={message.role === "user" ? "auto" : "0"}>
+                              <Text color={message.hidden_until ? "white" : "gray"} size="xs" ml={message.role === "user" ? "auto" : "0"}>
                                 {message.hidden_until ? (
                                   <>
                                     <style>
@@ -3827,14 +3020,10 @@ const SegmentChat = (props: any) => {
                                         animation: "spin 2s linear infinite",
                                       }}
                                     />{" "}
-                                    {moment(message.hidden_until).format(
-                                      "MMMM D, h:mm A"
-                                    )}
+                                    {moment(message.hidden_until).format("MMMM D, h:mm A")}
                                   </>
                                 ) : (
-                                  moment(message.created_time).format(
-                                    "MMMM D, h:mm A"
-                                  )
+                                  moment(message.created_time).format("MMMM D, h:mm A")
                                 )}
                               </Text>
                             </Text>
@@ -3856,23 +3045,15 @@ const SegmentChat = (props: any) => {
                               className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
                               onClick={() => toggleCardCollapse(index)}
                             >
-                              {!messages[index + 1] && (
-                                <Loader size="sm" color="white" />
-                              )}
+                              {!messages[index + 1] && <Loader size="sm" color="white" />}
 
                               <Text fw={600} size="xs">
                                 ✨ {message.action_title}
                               </Text>
                               {!uncollapsedCards[index] ? (
-                                <IconChevronDown
-                                  size={16}
-                                  className="transition-transform"
-                                />
+                                <IconChevronDown size={16} className="transition-transform" />
                               ) : (
-                                <IconChevronUp
-                                  size={16}
-                                  className="transition-transform"
-                                />
+                                <IconChevronUp size={16} className="transition-transform" />
                               )}
                             </Flex>
                           </Card.Section>
@@ -3880,11 +3061,7 @@ const SegmentChat = (props: any) => {
                             <Text size="xs" fw={400} color="gray" mt="xs">
                               <div
                                 dangerouslySetInnerHTML={{
-                                  __html:
-                                    message.action_description?.replaceAll(
-                                      "\n",
-                                      "<br/><br/>"
-                                    ) || "",
+                                  __html: message.action_description?.replaceAll("\n", "<br/><br/>") || "",
                                 }}
                               />
                             </Text>
@@ -3898,26 +3075,12 @@ const SegmentChat = (props: any) => {
               </Flex>
             ) : (
               <>
-                <Flex
-                  direction={"column"}
-                  gap={"sm"}
-                  p={"md"}
-                  h={"100%"}
-                  className=" overflow-auto"
-                >
+                <Flex direction={"column"} gap={"sm"} p={"md"} h={"100%"} className=" overflow-auto">
                   {messages.map((message: MessageType, index: number) => {
                     return (
                       <>
                         {message.type === "message" ? (
-                          <Flex
-                            direction={"column"}
-                            w={"50%"}
-                            gap={4}
-                            key={index}
-                            align="center"
-                            justify="center"
-                            mx="auto"
-                          >
+                          <Flex direction={"column"} w={"50%"} gap={4} key={index} align="center" justify="center" mx="auto">
                             {/* <Flex gap={4} align={"center"}>
                           <Avatar
                             src={
@@ -3999,15 +3162,9 @@ const SegmentChat = (props: any) => {
                                   ✨ Executing: {message.action_title}
                                 </Text>
                                 {uncollapsedCards[index] ? (
-                                  <IconChevronDown
-                                    size={16}
-                                    className="transition-transform"
-                                  />
+                                  <IconChevronDown size={16} className="transition-transform" />
                                 ) : (
-                                  <IconChevronUp
-                                    size={16}
-                                    className="transition-transform"
-                                  />
+                                  <IconChevronUp size={16} className="transition-transform" />
                                 )}
                               </Flex>
                             </Card.Section>
@@ -4015,11 +3172,7 @@ const SegmentChat = (props: any) => {
                               <Text size="xs" fw={400} color="gray" mt="xs">
                                 <div
                                   dangerouslySetInnerHTML={{
-                                    __html:
-                                      message.action_description?.replaceAll(
-                                        "\n",
-                                        "<br/><br/>"
-                                      ) || "",
+                                    __html: message.action_description?.replaceAll("\n", "<br/><br/>") || "",
                                   }}
                                 />
                               </Text>
@@ -4056,28 +3209,22 @@ const SegmentChat = (props: any) => {
                           }`}
                           style={{
                             boxShadow: "0 6px 12px rgba(226, 93, 238, 0.3)",
-                            transition:
-                              "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+                            transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.boxShadow =
-                              "0 12px 24px rgba(226, 93, 238, 0.5)";
-                            e.currentTarget.style.transform =
-                              "translateY(-4px) scale(1.05)";
+                            e.currentTarget.style.boxShadow = "0 12px 24px rgba(226, 93, 238, 0.5)";
+                            e.currentTarget.style.transform = "translateY(-4px) scale(1.05)";
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.boxShadow =
-                              "0 6px 12px rgba(226, 93, 238, 0.3)";
-                            e.currentTarget.style.transform =
-                              "translateY(0) scale(1)";
+                            e.currentTarget.style.boxShadow = "0 6px 12px rgba(226, 93, 238, 0.3)";
+                            e.currentTarget.style.transform = "translateY(0) scale(1)";
                           }}
                           onClick={(e) => {
                             if (e.currentTarget) {
                               e.currentTarget.style.backgroundColor = "#F3E8FF";
                               setTimeout(() => {
                                 if (e.currentTarget) {
-                                  e.currentTarget.style.backgroundColor =
-                                    "white";
+                                  e.currentTarget.style.backgroundColor = "white";
                                 }
                               }, 300);
                             }
@@ -4089,37 +3236,20 @@ const SegmentChat = (props: any) => {
                             }
                           }}
                         >
-                          <Flex
-                            align={"center"}
-                            gap={"xs"}
-                            className="transition-transform duration-300 transform hover:translate-x-2"
-                          >
-                            <ThemeIcon
-                              color={
-                                typeof message === "string" ? "grape" : "blue"
-                              }
-                              size={"xl"}
-                            >
+                          <Flex align={"center"} gap={"xs"} className="transition-transform duration-300 transform hover:translate-x-2">
+                            <ThemeIcon color={typeof message === "string" ? "grape" : "blue"} size={"xl"}>
                               <IconBrain size={"1.4rem"} />
                             </ThemeIcon>
                             <Text
-                              color={
-                                typeof message === "string" ? "#E25DEE" : "blue"
-                              }
+                              color={typeof message === "string" ? "#E25DEE" : "blue"}
                               fw={600}
                               size={"sm"}
                               className="transition-colors duration-300 hover:text-[#49494]"
                             >
-                              {typeof message === "string"
-                                ? message
-                                : message.name}
+                              {typeof message === "string" ? message : message.name}
                             </Text>
                             {typeof message !== "string" && (
-                              <ThemeIcon
-                                color="blue"
-                                size={"sm"}
-                                className="ml-auto"
-                              >
+                              <ThemeIcon color="blue" size={"sm"} className="ml-auto">
                                 <IconChevronRight size={"1rem"} />
                               </ThemeIcon>
                             )}
@@ -4158,8 +3288,7 @@ const SegmentChat = (props: any) => {
                   fontWeight: "bold",
                   textAlign: "center",
                   fontSize: "0.9rem",
-                  animation:
-                    suggestion !== "" ? "slideUp 0.5s forwards" : "none",
+                  animation: suggestion !== "" ? "slideUp 0.5s forwards" : "none",
                 }}
               >
                 {"💡 " + suggestion}
@@ -4222,11 +3351,7 @@ const SegmentChat = (props: any) => {
                 textarea.style.height = normalInputMode ? "500px" : "500px";
               }}
               variant="unstyled"
-              inputContainer={(children) => (
-                <div style={{ minHeight: "0px", cursor: "default" }}>
-                  {children}
-                </div>
-              )}
+              inputContainer={(children) => <div style={{ minHeight: "0px", cursor: "default" }}>{children}</div>}
               maxRows={10}
               style={{
                 height: normalInputMode ? "70%" : "87%",
@@ -4235,17 +3360,10 @@ const SegmentChat = (props: any) => {
                 cursor: "default",
                 fontSize: "1rem",
                 padding: "10px",
-                border:
-                  prompt.trim().length === 0
-                    ? "2px solid #D8BFD8"
-                    : "1px solid #ccc",
+                border: prompt.trim().length === 0 ? "2px solid #D8BFD8" : "1px solid #ccc",
                 borderRadius: "8px",
-                boxShadow:
-                  prompt.trim().length === 0 ? "0 0 10px #D8BFD8" : "none",
-                animation:
-                  prompt.trim().length === 0
-                    ? "glow 1.5s infinite alternate"
-                    : "none",
+                boxShadow: prompt.trim().length === 0 ? "0 0 10px #D8BFD8" : "none",
+                animation: prompt.trim().length === 0 ? "glow 1.5s infinite alternate" : "none",
               }}
             />
             <style>
@@ -4275,11 +3393,7 @@ const SegmentChat = (props: any) => {
                     setNormalInputMode(!normalInputMode);
                   }}
                 >
-                  {normalInputMode ? (
-                    <IconArrowsMaximize size={"1rem"} />
-                  ) : (
-                    <IconArrowsMinimize size={"1rem"} />
-                  )}
+                  {normalInputMode ? <IconArrowsMaximize size={"1rem"} /> : <IconArrowsMinimize size={"1rem"} />}
                 </ActionIcon>
                 {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
                 <IconPlus size={"1rem"} />
@@ -4324,14 +3438,9 @@ const SegmentChat = (props: any) => {
                       boxShadow: "0 0 5px rgba(0, 0, 0, 0.1)",
                     }}
                   >
-                    <IconFile
-                      size={"1rem"}
-                      style={{ marginRight: "8px", color: "#6c757d" }}
-                    />
+                    <IconFile size={"1rem"} style={{ marginRight: "8px", color: "#6c757d" }} />
                     <Text fw={500} size={"xs"} style={{ marginRight: "8px" }}>
-                      {attachedFile.name.length > 30
-                        ? attachedFile.name.substring(0, 30) + "..."
-                        : attachedFile.name}
+                      {attachedFile.name.length > 30 ? attachedFile.name.substring(0, 30) + "..." : attachedFile.name}
                     </Text>
                     <ActionIcon
                       variant="outline"
@@ -4376,14 +3485,7 @@ const SegmentChat = (props: any) => {
                   variant="filled"
                   className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
                   onClick={() => {
-                    handleSubmit(
-                      undefined,
-                      undefined,
-                      sendAsSelix,
-                      sendSlack,
-                      sendEmail,
-                      scheduleDay
-                    );
+                    handleSubmit(undefined, undefined, sendAsSelix, sendSlack, sendEmail, scheduleDay);
                     setRecording(false);
                     setScheduleDay(undefined);
                     setIntendedTaskChange(undefined);
@@ -4450,35 +3552,15 @@ const SegmentChat = (props: any) => {
                     <Checkbox
                       checked={sendSlack}
                       onChange={() => setSendSlack(!sendSlack)}
-                      label={
-                        <img
-                          src={SlackLogo}
-                          alt="slack"
-                          width={20}
-                          height={20}
-                        />
-                      }
+                      label={<img src={SlackLogo} alt="slack" width={20} height={20} />}
                       size="sm"
                       color="grape"
                     />
-                    <Popover
-                      position="bottom"
-                      withArrow
-                      shadow="md"
-                      trapFocus
-                      opened={showSchedulePopup}
-                    >
+                    <Popover position="bottom" withArrow shadow="md" trapFocus opened={showSchedulePopup}>
                       <Popover.Target>
-                        <Tooltip
-                          label="Schedule a send time into the future"
-                          withArrow
-                          withinPortal
-                        >
+                        <Tooltip label="Schedule a send time into the future" withArrow withinPortal>
                           <Flex>
-                            <Button
-                              onClick={() => setShowSchedulePopup((v) => !v)}
-                              size="xs"
-                            >
+                            <Button onClick={() => setShowSchedulePopup((v) => !v)} size="xs">
                               <IconClock24 size={"1rem"} />
                             </Button>
                           </Flex>
@@ -4495,22 +3577,14 @@ const SegmentChat = (props: any) => {
                               // Preserve the time
                               const hour = moment(scheduleDay).hour();
                               const minute = moment(scheduleDay).minute();
-                              const newDate = moment(date)
-                                .set("hour", hour)
-                                .set("minute", minute)
-                                .toDate();
+                              const newDate = moment(date).set("hour", hour).set("minute", minute).toDate();
                               setScheduleDay(newDate);
                             },
                           })}
                           onPointerEnterCapture={() => {}}
                           onPointerLeaveCapture={() => {}}
                         />
-                        <Flex
-                          mt="xs"
-                          direction="row"
-                          justify={"space-between"}
-                          align="flex-end"
-                        >
+                        <Flex mt="xs" direction="row" justify={"space-between"} align="flex-end">
                           <TimeInput
                             w="100%"
                             label="Custom Time"
@@ -4520,18 +3594,11 @@ const SegmentChat = (props: any) => {
                               const value = event.currentTarget.value; // Format is HH:MM
                               const hour = parseInt(value.split(":")[0]);
                               const minute = parseInt(value.split(":")[1]);
-                              const newDate = moment(scheduleDay)
-                                .set("hour", hour)
-                                .set("minute", minute)
-                                .toDate();
+                              const newDate = moment(scheduleDay).set("hour", hour).set("minute", minute).toDate();
                               setScheduleDay(newDate);
                             }}
                           />
-                          <Tooltip
-                            label="Schedule for now"
-                            withArrow
-                            withinPortal
-                          >
+                          <Tooltip label="Schedule for now" withArrow withinPortal>
                             <Flex>
                               <Button
                                 size="xs"
@@ -4557,18 +3624,14 @@ const SegmentChat = (props: any) => {
                           <div
                             ref={provided.innerRef}
                             style={{
-                              border: snapshot.isDraggingOver
-                                ? "1px solid #4caf50"
-                                : "1px dashed #ccc",
+                              border: snapshot.isDraggingOver ? "1px solid #4caf50" : "1px dashed #ccc",
                               padding: "10px",
                               marginLeft: "5px",
                               height: "10px",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              backgroundColor: snapshot.isDraggingOver
-                                ? "#f0fff0"
-                                : "transparent",
+                              backgroundColor: snapshot.isDraggingOver ? "#f0fff0" : "transparent",
                               overflow: "hidden", // Changed from "auto" to "hidden" to prevent expansion
                             }}
                             onDragEnter={(event) => {
@@ -4595,11 +3658,7 @@ const SegmentChat = (props: any) => {
                               console.log("Mouse left droppable area");
                             }}
                           >
-                            <Tooltip
-                              label="Drag task here to attach"
-                              withArrow
-                              withinPortal
-                            >
+                            <Tooltip label="Drag task here to attach" withArrow withinPortal>
                               <Flex>
                                 <IconChecklist size="1rem" />
                                 {provided.placeholder}
@@ -4641,16 +3700,10 @@ const SegmentChat = (props: any) => {
                           }}
                         >
                           <option value="QUEUED">New Status: Queued</option>
-                          <option value="IN_PROGRESS">
-                            New Status: In Progress
-                          </option>
-                          <option value="IN_PROGRESS_REVIEW_NEEDED">
-                            New Status: In Progress Review Needed
-                          </option>
+                          <option value="IN_PROGRESS">New Status: In Progress</option>
+                          <option value="IN_PROGRESS_REVIEW_NEEDED">New Status: In Progress Review Needed</option>
                           <option value="COMPLETE">New Status: Complete</option>
-                          <option value="CANCELLED">
-                            New Status: Cancelled
-                          </option>
+                          <option value="CANCELLED">New Status: Cancelled</option>
                           <option value="BLOCKED">New Status: Blocked</option>
                         </select>
                         <div
@@ -4703,6 +3756,8 @@ const SelixControlCenter = ({
   handleSubmit,
   threads,
   currentSessionId,
+  chatfullSize,
+  setChatfullSize,
 }: {
   setAIType: React.Dispatch<React.SetStateAction<string>>;
   attachedFile: File | null;
@@ -4718,14 +3773,12 @@ const SelixControlCenter = ({
   currentSessionId: Number | null;
   setPrompt: React.Dispatch<React.SetStateAction<string>>;
   handleSubmit: () => void;
+  chatfullSize: boolean;
+  setChatfullSize: any;
 }) => {
   const [selectedCitation, setSelectedCitation] = useState<string | null>(null);
-  const currentThreadMemory = threads.find(
-    (thread) => thread.id === currentSessionId
-  )?.memory;
-  const [popoverOpenedArray, setPopoverOpenedArray] = useState<boolean[]>(
-    [1, 1, 1, 1]?.map(() => false)
-  );
+  const currentThreadMemory = threads.find((thread) => thread.id === currentSessionId)?.memory;
+  const [popoverOpenedArray, setPopoverOpenedArray] = useState<boolean[]>([1, 1, 1, 1]?.map(() => false));
   const userToken = useRecoilValue(userTokenState);
 
   const [showICPModal, setShowICPModal] = useState(false);
@@ -4742,9 +3795,7 @@ const SelixControlCenter = ({
 
   useEffect(() => {
     if (currentThreadMemory?.search) {
-      const citations = currentThreadMemory.search.flatMap(
-        (searchItem) => searchItem.citations
-      );
+      const citations = currentThreadMemory.search.flatMap((searchItem) => searchItem.citations);
       if (JSON.stringify(citations) !== JSON.stringify(availableCitations)) {
         setAvailableCitations(citations);
         setSelectedCitation(citations[0]);
@@ -4753,7 +3804,7 @@ const SelixControlCenter = ({
   }, [{ ...threads }]);
 
   return (
-    <Paper withBorder shadow="sm" w={"60%"} radius={"md"}>
+    <Paper withBorder shadow="sm" w={!chatfullSize ? "60%" : "100%"} radius={"md"}>
       <Modal
         opened={showICPModal}
         onClose={() => {
@@ -4778,26 +3829,26 @@ const SelixControlCenter = ({
           }}
         />
       </Modal>
-      <Flex
-        px={"md"}
-        py={"xs"}
-        align={"center"}
-        gap={5}
-        bg={"#E25DEE"}
-        className=" rounded-t-md"
-      >
-        <IconSparkles size={"1rem"} color="white" />
-        <Text fw={600} color="white">
-          Selix AI Workspace
-        </Text>
-        {recording && aiType === "STRATEGY_CREATOR" && (
-          <IconEar
-            size={"1rem"}
-            color="white"
-            style={{
-              animation: "scale 1s infinite",
-            }}
-          />
+      <Flex px={"md"} py={"xs"} align={"center"} justify={"space-between"} gap={5} bg={"#E25DEE"} className=" rounded-t-md">
+        <Flex align={"center"} gap={5}>
+          <IconSparkles size={"1rem"} color="white" />
+          <Text fw={600} color="white">
+            Selix AI Workspace
+          </Text>
+          {recording && aiType === "STRATEGY_CREATOR" && (
+            <IconEar
+              size={"1rem"}
+              color="white"
+              style={{
+                animation: "scale 1s infinite",
+              }}
+            />
+          )}
+        </Flex>
+        {chatfullSize && (
+          <ActionIcon variant="transparent" onClick={() => setChatfullSize(false)}>
+            <IconArrowBarToRight size={"1rem"} color="white" />
+          </ActionIcon>
         )}
       </Flex>
       <Divider bg="gray" />
@@ -4857,10 +3908,7 @@ const SelixControlCenter = ({
                   opened={popoverOpenedArray[1]}
                 >
                   <Popover.Target>
-                    <div
-                      onMouseEnter={() => handlePopoverOpen(1)}
-                      onMouseLeave={handlePopoverClose}
-                    >
+                    <div onMouseEnter={() => handlePopoverOpen(1)} onMouseLeave={handlePopoverClose}>
                       <Center style={{ gap: 10 }}>
                         <IconList size={"1rem"} />
                         <span>Tasks</span>
@@ -4868,9 +3916,7 @@ const SelixControlCenter = ({
                     </div>
                   </Popover.Target>
                   <Popover.Dropdown sx={{ pointerEvents: "none" }}>
-                    <Text size="sm">
-                      This section allows you to view your tasks.
-                    </Text>
+                    <Text size="sm">This section allows you to view your tasks.</Text>
                   </Popover.Dropdown>
                 </Popover>
               ),
@@ -4898,10 +3944,7 @@ const SelixControlCenter = ({
                   opened={popoverOpenedArray[0]}
                 >
                   <Popover.Target>
-                    <div
-                      onMouseEnter={() => handlePopoverOpen(0)}
-                      onMouseLeave={handlePopoverClose}
-                    >
+                    <div onMouseEnter={() => handlePopoverOpen(0)} onMouseLeave={handlePopoverClose}>
                       <Center style={{ gap: 10 }}>
                         <IconHammer size={"1rem"} />
                         <span>Task Plan</span>
@@ -4909,10 +3952,7 @@ const SelixControlCenter = ({
                     </div>
                   </Popover.Target>
                   <Popover.Dropdown sx={{ pointerEvents: "none" }}>
-                    <Text size="sm">
-                      This section allows you to manage your project's task
-                      plan.
-                    </Text>
+                    <Text size="sm">This section allows you to manage your project's task plan.</Text>
                   </Popover.Dropdown>
                 </Popover>
               ),
@@ -4940,10 +3980,7 @@ const SelixControlCenter = ({
                   opened={popoverOpenedArray[4]}
                 >
                   <Popover.Target>
-                    <div
-                      onMouseEnter={() => handlePopoverOpen(4)}
-                      onMouseLeave={handlePopoverClose}
-                    >
+                    <div onMouseEnter={() => handlePopoverOpen(4)} onMouseLeave={handlePopoverClose}>
                       <Center style={{ gap: 10 }}>
                         <IconFile size={"1rem"} />
                         <span>Files</span>
@@ -4966,9 +4003,7 @@ const SelixControlCenter = ({
                   shadow="md"
                   opened={popoverOpenedArray[2]} // Assuming this is the second popover
                   offset={10}
-                  onPositionChange={(position) =>
-                    console.log("Popover position:", position)
-                  }
+                  onPositionChange={(position) => console.log("Popover position:", position)}
                   // positionDependencies={[selectedSubject]}
                   onClose={handlePopoverClose}
                   onOpen={() => handlePopoverOpen(2)}
@@ -4984,10 +4019,7 @@ const SelixControlCenter = ({
                   radius="md"
                 >
                   <Popover.Target>
-                    <div
-                      onMouseEnter={() => handlePopoverOpen(2)}
-                      onMouseLeave={handlePopoverClose}
-                    >
+                    <div onMouseEnter={() => handlePopoverOpen(2)} onMouseLeave={handlePopoverClose}>
                       <Center style={{ gap: 10 }}>
                         <IconBrowser size={"1rem"} />
                         <span>Browser</span>
@@ -4995,9 +4027,7 @@ const SelixControlCenter = ({
                     </div>
                   </Popover.Target>
                   <Popover.Dropdown sx={{ pointerEvents: "none" }}>
-                    <Text size="sm">
-                      Controlled by chat, view for Selix AI research.
-                    </Text>
+                    <Text size="sm">Controlled by chat, view for Selix AI research.</Text>
                   </Popover.Dropdown>
                 </Popover>
               ),
@@ -5070,12 +4100,7 @@ const SelixControlCenter = ({
           </Box>
         ) : aiType === "BROWSER" ? (
           <Box maw="100%">
-            <Select
-              value={selectedCitation}
-              data={availableCitations}
-              placeholder="Select a citation"
-              onChange={(value) => setSelectedCitation(value)}
-            />
+            <Select value={selectedCitation} data={availableCitations} placeholder="Select a citation" onChange={(value) => setSelectedCitation(value)} />
 
             <iframe
               src={selectedCitation || undefined}
@@ -5091,50 +4116,30 @@ const SelixControlCenter = ({
           </Box>
         ) : aiType === "NOT_AVAILABLE" ? (
           <Center style={{ height: "100%" }}>
-            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
-              Not Currently Available.
-            </Text>
+            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>Not Currently Available.</Text>
           </Center>
         ) : aiType === "NOT_AVAILABLE2" || aiType === "NOT_AVAILABLE3" ? (
           <Center style={{ height: "100%" }}>
-            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
-              Not Currently Available.
-            </Text>
+            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>Not Currently Available.</Text>
           </Center>
         ) : aiType === "ICP" ? (
           <SellScaleAssistant showChat={false} refresh={refreshIcp} />
         ) : aiType === "FILES" ? (
-          <FilesComponent
-            attachedFile={attachedFile}
-            currentSessionId={currentSessionId}
-          />
+          <FilesComponent attachedFile={attachedFile} currentSessionId={currentSessionId} />
         ) : aiType === "ASSETS" ? (
           <AssetLibraryV2 key={refreshAssetLibrary} />
         ) : (
           <Center style={{ height: "100%" }}>
-            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
-              No Tasks Created. Please create one via the chat.
-            </Text>
+            <Text style={{ fontFamily: "Arial, sans-serif", fontSize: "16px" }}>No Tasks Created. Please create one via the chat.</Text>
           </Center>
         )}
 
         {aiType === "STRATEGY_CREATOR" ? (
-          <Paper
-            withBorder
-            bg={"#fffaea"}
-            mt={"sm"}
-            px={"sm"}
-            py={"xs"}
-            style={{ borderColor: "#fdb93a" }}
-          >
+          <Paper withBorder bg={"#fffaea"} mt={"sm"} px={"sm"} py={"xs"} style={{ borderColor: "#fdb93a" }}>
             <Flex align={"center"} gap={"xs"}>
               <IconInfoCircle color="orange" size={"1rem"} />
               <Text size={"xs"} color="orange" fw={600}>
-                Disclaimer:{" "}
-                <span className="font-medium">
-                  Once executed, I will draft the campaign. You can review your
-                  campaign prior to any outreach.
-                </span>
+                Disclaimer: <span className="font-medium">Once executed, I will draft the campaign. You can review your campaign prior to any outreach.</span>
               </Text>
             </Flex>
           </Paper>
@@ -5330,8 +4335,7 @@ export const PlannerComponent = ({
   const [opened, { toggle }] = useDisclosure(true);
   const taskContainerRef = useRef<HTMLDivElement>(null);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
   const [editingTask, setEditingTask] = useState<Number | null>(null);
@@ -5341,24 +4345,17 @@ export const PlannerComponent = ({
   const taskDraftDescription = useRef<string>("");
 
   const [selectedRewindImage, setSelectedRewindImage] = useState<string>("");
-  const [segment, setSegment] = useState<TransformedSegment | undefined>(
-    undefined
-  );
+  const [segment, setSegment] = useState<TransformedSegment | undefined>(undefined);
 
   const queryClient = useQueryClient();
 
   const isInternal = window.location.href.includes("internal");
 
-  const campaignId = threads.find((thread) => thread.id === currentSessionId)
-    ?.memory?.campaign_id;
+  const campaignId = threads.find((thread) => thread.id === currentSessionId)?.memory?.campaign_id;
 
-  const currentThread = threads.find(
-    (thread) => thread.id === currentSessionId
-  );
+  const currentThread = threads.find((thread) => thread.id === currentSessionId);
 
-  const fetchSelixLogs = async (
-    selixLogId: number | null = null
-  ): Promise<MemoryLog[]> => {
+  const fetchSelixLogs = async (selixLogId: number | null = null): Promise<MemoryLog[]> => {
     try {
       const response = await fetch(`${API_URL}/selix/get_selix_logs`, {
         method: "GET",
@@ -5394,10 +4391,7 @@ export const PlannerComponent = ({
               return false;
             }
 
-            return (
-              log.show_in_session_memory &&
-              +log.session_id === +currentSessionId
-            );
+            return log.show_in_session_memory && +log.session_id === +currentSessionId;
           } else {
             return log.show_in_session_memory;
           }
@@ -5412,13 +4406,7 @@ export const PlannerComponent = ({
 
   const [selectedLog, setSelectedLog] = useState<MemoryLog | null>(null);
 
-  const updateTask = async (
-    taskId: number,
-    title: string,
-    description: string,
-    status: string,
-    widget_type: string | undefined
-  ) => {
+  const updateTask = async (taskId: number, title: string, description: string, status: string, widget_type: string | undefined) => {
     if (widget_type === "") widget_type = undefined;
 
     try {
@@ -5475,10 +4463,7 @@ export const PlannerComponent = ({
   useEffect(() => {
     (async () => {
       if (campaignId) {
-        const [project, res] = await Promise.all([
-          getFreshCurrentProject(userToken, campaignId),
-          getSegments(true, false, campaignId),
-        ]);
+        const [project, res] = await Promise.all([getFreshCurrentProject(userToken, campaignId), getSegments(true, false, campaignId)]);
 
         setSegment(res[0] || undefined);
         setCurrentProject(project);
@@ -5512,11 +4497,7 @@ export const PlannerComponent = ({
     return () => clearTimeout(timeoutId);
   }, [tasks.length]);
 
-  const getSegments = async (
-    includeAllInClient: boolean = true,
-    tagFilter: boolean = false,
-    forceCampaignId: number
-  ) => {
+  const getSegments = async (includeAllInClient: boolean = true, tagFilter: boolean = false, forceCampaignId: number) => {
     const url = new URL(`${API_URL}/segment/all`);
     if (includeAllInClient) {
       if (currentProject?.id !== undefined) {
@@ -5539,10 +4520,7 @@ export const PlannerComponent = ({
     return data.segments;
   };
 
-  const onDragEnd = async (result: {
-    destination: { index: number };
-    source: { index: number };
-  }) => {
+  const onDragEnd = async (result: { destination: { index: number }; source: { index: number } }) => {
     if (!isInternal) {
       return;
     }
@@ -5586,46 +4564,27 @@ export const PlannerComponent = ({
         {/* <Divider label="Next in line" labelPosition="left" w={"100%"} color="gray" fw={500} />
         <ActionIcon onClick={toggle}>{opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}</ActionIcon> */}
       </Flex>
-      <Paper
-        bg={"#fefafe"}
-        my={"sm"}
-        px={"sm"}
-        py={8}
-        style={{ borderColor: "#fadafc" }}
-      >
+      <Paper bg={"#fefafe"} my={"sm"} px={"sm"} py={8} style={{ borderColor: "#fadafc" }}>
         <Flex align={"center"} gap={"xs"} justify={"space-between"}>
-          {currentProject &&
-            currentThread?.memory.campaign_id === currentProject?.id && (
-              <Text size={"xs"} color="#E25DEE" fw={600}>
-                Selix Tasks:{" "}
-                <span className="font-medium text-gray-500">
-                  {currentProject.name}{" "}
-                  <a
-                    href={`/campaign_v2/${currentProject.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ marginLeft: "5px" }}
-                  >
-                    <IconExternalLink size="0.8rem" />
-                  </a>
-                </span>
-              </Text>
-            )}
-          {threads.find((thread) => thread.id === currentSessionId)
-            ?.estimated_completion_time && (
+          {currentProject && currentThread?.memory.campaign_id === currentProject?.id && (
+            <Text size={"xs"} color="#E25DEE" fw={600}>
+              Selix Tasks:{" "}
+              <span className="font-medium text-gray-500">
+                {currentProject.name}{" "}
+                <a href={`/campaign_v2/${currentProject.id}`} target="_blank" rel="noopener noreferrer" style={{ marginLeft: "5px" }}>
+                  <IconExternalLink size="0.8rem" />
+                </a>
+              </span>
+            </Text>
+          )}
+          {threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time && (
             <Flex gap={5} align={"center"}>
               <Divider orientation="vertical" color={"#fceafe"} />
-              {threads.find((thread) => thread.id === currentSessionId)
-                ?.estimated_completion_time ? (
+              {threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time ? (
                 (() => {
                   const now = moment();
-                  const estimatedCompletion = moment(
-                    threads.find((thread) => thread.id === currentSessionId)
-                      ?.estimated_completion_time
-                  );
-                  const duration = moment.duration(
-                    estimatedCompletion.diff(now)
-                  );
+                  const estimatedCompletion = moment(threads.find((thread) => thread.id === currentSessionId)?.estimated_completion_time);
+                  const duration = moment.duration(estimatedCompletion.diff(now));
                   const hours = Math.floor(duration.asHours());
                   const minutes = duration.minutes();
 
@@ -5642,19 +4601,11 @@ export const PlannerComponent = ({
                       <Text size={"xs"} className="text-gray-500">
                         Estimated completion time:
                       </Text>
-                      <ThemeIcon
-                        bg="#fceafe"
-                        variant="light"
-                        className="text-[#E25DEE]"
-                      >
+                      <ThemeIcon bg="#fceafe" variant="light" className="text-[#E25DEE]">
                         {hours}
                       </ThemeIcon>
                       <Text color="#E25DEE"> hours, </Text>
-                      <ThemeIcon
-                        bg="#fceafe"
-                        variant="light"
-                        className="text-[#E25DEE]"
-                      >
+                      <ThemeIcon bg="#fceafe" variant="light" className="text-[#E25DEE]">
                         {minutes}
                       </ThemeIcon>
                       <Text color="#E25DEE"> minutes</Text>
@@ -5670,18 +4621,8 @@ export const PlannerComponent = ({
           )}
         </Flex>
       </Paper>
-      <Modal
-        opened={showRewindImage}
-        onClose={() => setShowRewindImage(false)}
-        title="Rewind Image"
-      >
-        <img
-          src={selectedRewindImage}
-          alt="Rewind"
-          width={"100%"}
-          height={"100%"}
-          style={{ marginTop: "10px" }}
-        />
+      <Modal opened={showRewindImage} onClose={() => setShowRewindImage(false)} title="Rewind Image">
+        <img src={selectedRewindImage} alt="Rewind" width={"100%"} height={"100%"} style={{ marginTop: "10px" }} />
       </Modal>
       <Flex align={"center"} justify={"space-between"}>
         {logs && logs.length > 0 && (
@@ -5693,10 +4634,7 @@ export const PlannerComponent = ({
               } else {
                 return {
                   value: "" + value.id,
-                  label: moment
-                    .utc(value.created_date, "YYYY-MM-DD HH:mm:ss")
-                    .tz("America/Los_Angeles")
-                    .format("YYYY-MM-DD HH:mm:ss"),
+                  label: moment.utc(value.created_date, "YYYY-MM-DD HH:mm:ss").tz("America/Los_Angeles").format("YYYY-MM-DD HH:mm:ss"),
                 };
               }
             })}
@@ -5727,12 +4665,7 @@ export const PlannerComponent = ({
         {selectedLog && (
           <Popover width={500} shadow={"md"} position={"bottom"} withinPortal>
             <Popover.Target>
-              <Text
-                ml={"auto"}
-                size={"xs"}
-                color="gray"
-                sx={{ pointer: "cursor" }}
-              >
+              <Text ml={"auto"} size={"xs"} color="gray" sx={{ pointer: "cursor" }}>
                 <Badge color="pink" variant="outline">
                   🧠
                 </Badge>
@@ -5788,27 +4721,14 @@ export const PlannerComponent = ({
             return (
               <Paper withBorder p={"sm"} mb={"xs"} radius={"md"}>
                 <Flex justify={"space-between"} align={"center"} p={"4px"}>
-                  <Text
-                    className="flex gap-1 items-center"
-                    fw={600}
-                    size={"sm"}
-                  >
-                    <ThemeIcon
-                      color="gray"
-                      radius={"xl"}
-                      variant="light"
-                      size={18}
-                    >
+                  <Text className="flex gap-1 items-center" fw={600} size={"sm"}>
+                    <ThemeIcon color="gray" radius={"xl"} variant="light" size={18}>
                       {index + 1}
                     </ThemeIcon>
                     {task.title}
                   </Text>
                   <Flex align={"center"} gap={"xs"}>
-                    <Tooltip
-                      label={
-                        !task.rewind_img ? "No rewind available" : "View rewind"
-                      }
-                    >
+                    <Tooltip label={!task.rewind_img ? "No rewind available" : "View rewind"}>
                       <Button
                         size={"xs"}
                         variant="outline"
@@ -5832,34 +4752,16 @@ export const PlannerComponent = ({
                     </Text>
 
                     <Flex align={"center"} gap={"xs"} w={100}>
-                      <ThemeIcon
-                        color={statusColors[task.status]}
-                        radius={"xl"}
-                        size={10}
-                      >
+                      <ThemeIcon color={statusColors[task.status]} radius={"xl"} size={10}>
                         <span />
                       </ThemeIcon>
-                      <Text
-                        color={statusColors[task.status]}
-                        size={"sm"}
-                        fw={500}
-                      >
+                      <Text color={statusColors[task.status]} size={"sm"} fw={500}>
                         {humanReadableStatus[task.status]}
                       </Text>
                     </Flex>
 
-                    <ActionIcon
-                      onClick={() =>
-                        setOpenedTaskIndex(
-                          openedTaskIndex === index ? null : index
-                        )
-                      }
-                    >
-                      {openedTaskIndex === index ? (
-                        <IconChevronUp size={"1rem"} />
-                      ) : (
-                        <IconChevronDown size={"1rem"} />
-                      )}
+                    <ActionIcon onClick={() => setOpenedTaskIndex(openedTaskIndex === index ? null : index)}>
+                      {openedTaskIndex === index ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}
                     </ActionIcon>
                   </Flex>
                 </Flex>
@@ -5867,8 +4769,7 @@ export const PlannerComponent = ({
                   <Text p={"xs"} mt={"sm"} size="xs">
                     <div
                       dangerouslySetInnerHTML={{
-                        __html:
-                          task.description?.replaceAll("\n", "<br />") || "",
+                        __html: task.description?.replaceAll("\n", "<br />") || "",
                       }}
                     />
                   </Text>
@@ -5882,10 +4783,7 @@ export const PlannerComponent = ({
               {(provided) => (
                 <div ref={provided.innerRef} {...provided.droppableProps}>
                   {tasks
-                    ?.filter(
-                      (task: TaskType, index: number, self: any) =>
-                        task.selix_session_id === currentSessionId
-                    )
+                    ?.filter((task: TaskType, index: number, self: any) => task.selix_session_id === currentSessionId)
                     .map((task: TaskType, index: number, array) => {
                       // index = array.length - 1 - index;
                       const SelixSessionTaskStatus = {
@@ -5900,8 +4798,7 @@ export const PlannerComponent = ({
                       const statusColors = {
                         [SelixSessionTaskStatus.QUEUED]: "blue",
                         [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
-                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
-                          "orange",
+                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "orange",
                         [SelixSessionTaskStatus.COMPLETE]: "green",
                         [SelixSessionTaskStatus.CANCELLED]: "gray",
                         [SelixSessionTaskStatus.BLOCKED]: "red",
@@ -5910,20 +4807,14 @@ export const PlannerComponent = ({
                       const humanReadableStatus = {
                         [SelixSessionTaskStatus.QUEUED]: "Queued",
                         [SelixSessionTaskStatus.IN_PROGRESS]: "In Progress",
-                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
-                          "In Progress",
+                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "In Progress",
                         [SelixSessionTaskStatus.COMPLETE]: "Complete",
                         [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
                         [SelixSessionTaskStatus.BLOCKED]: "⚠️ Blocked",
                       };
 
                       return (
-                        <Draggable
-                          key={task.id}
-                          index={index}
-                          draggableId={`task-${task.id}`}
-                          isDragDisabled={!isInternal}
-                        >
+                        <Draggable key={task.id} index={index} draggableId={`task-${task.id}`} isDragDisabled={!isInternal}>
                           {(provided) => (
                             <Paper
                               withBorder
@@ -5934,11 +4825,7 @@ export const PlannerComponent = ({
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                             >
-                              <Flex
-                                justify={"space-between"}
-                                align={"center"}
-                                p={"4px"}
-                              >
+                              <Flex justify={"space-between"} align={"center"} p={"4px"}>
                                 {editingTask === index ? (
                                   <Flex align="center" gap="xs" w={"60%"}>
                                     <Flex w="80%" gap="xs">
@@ -5992,8 +4879,7 @@ export const PlannerComponent = ({
                                         ]}
                                         onChange={(e) => {
                                           const updatedTasks = [...tasks];
-                                          updatedTasks[index].widget_type =
-                                            e.currentTarget.value;
+                                          updatedTasks[index].widget_type = e.currentTarget.value;
                                           setTasks(updatedTasks);
                                         }}
                                         style={{ width: "40%" }}
@@ -6013,8 +4899,7 @@ export const PlannerComponent = ({
                                               ? {
                                                   ...t,
                                                   title: editingTaskText,
-                                                  description:
-                                                    taskDraftDescription.current,
+                                                  description: taskDraftDescription.current,
                                                 }
                                               : t
                                           )
@@ -6032,28 +4917,13 @@ export const PlannerComponent = ({
                                     </Badge>
                                   </Flex>
                                 ) : (
-                                  <Text
-                                    className="flex gap-1 items-center"
-                                    fw={600}
-                                    size={"sm"}
-                                  >
-                                    <ThemeIcon
-                                      color="gray"
-                                      radius={"xl"}
-                                      variant="light"
-                                      size={18}
-                                    >
+                                  <Text className="flex gap-1 items-center" fw={600} size={"sm"}>
+                                    <ThemeIcon color="gray" radius={"xl"} variant="light" size={18}>
                                       {index + 1}
                                     </ThemeIcon>
                                     {isInternal && (
                                       <Tooltip label="Drag to reorder">
-                                        <ThemeIcon
-                                          color="gray"
-                                          radius={"xl"}
-                                          variant="light"
-                                          size={18}
-                                          style={{ cursor: "grab" }}
-                                        >
+                                        <ThemeIcon color="gray" radius={"xl"} variant="light" size={18} style={{ cursor: "grab" }}>
                                           <IconGripVertical size={14} />
                                         </ThemeIcon>
                                       </Tooltip>
@@ -6070,10 +4940,8 @@ export const PlannerComponent = ({
                                             setEditingTask(index);
                                             setOpenedTaskIndex(index);
                                             setEditingTaskText(task.title);
-                                            taskDraftDescription.current =
-                                              task?.description || "";
-                                            taskDraftDescriptionRaw.current =
-                                              task?.description || "";
+                                            taskDraftDescription.current = task?.description || "";
+                                            taskDraftDescriptionRaw.current = task?.description || "";
                                           }}
                                           // onBlur={() => setEditingTask(null)}
                                         >
@@ -6085,13 +4953,7 @@ export const PlannerComponent = ({
                                   </Text>
                                 )}
                                 <Flex align={"center"} gap={"xs"}>
-                                  <Tooltip
-                                    label={
-                                      !task.rewind_img
-                                        ? "No rewind available"
-                                        : "View rewind"
-                                    }
-                                  >
+                                  <Tooltip label={!task.rewind_img ? "No rewind available" : "View rewind"}>
                                     <Button
                                       size={"xs"}
                                       variant="outline"
@@ -6103,9 +4965,7 @@ export const PlannerComponent = ({
                                       onClick={() => {
                                         if (task.rewind_img) {
                                           setShowRewindImage(true);
-                                          setSelectedRewindImage(
-                                            task.rewind_img
-                                          );
+                                          setSelectedRewindImage(task.rewind_img);
                                         }
                                       }}
                                     >
@@ -6132,94 +4992,55 @@ export const PlannerComponent = ({
                                           setTasks(updatedTasks);
                                         }
                                       }}
-                                      data={Object.keys(
-                                        humanReadableStatus
-                                      ).map((status) => ({
+                                      data={Object.keys(humanReadableStatus).map((status) => ({
                                         value: status,
                                         label: humanReadableStatus[status],
                                         customLabel: (
                                           <Flex align={"center"} gap={"xs"}>
-                                            <ThemeIcon
-                                              color={statusColors[status]}
-                                              radius={"xl"}
-                                              size={10}
-                                            >
+                                            <ThemeIcon color={statusColors[status]} radius={"xl"} size={10}>
                                               <span />
                                             </ThemeIcon>
-                                            <Text
-                                              color={statusColors[status]}
-                                              size={"sm"}
-                                              fw={500}
-                                            >
+                                            <Text color={statusColors[status]} size={"sm"} fw={500}>
                                               {humanReadableStatus[status]}
                                             </Text>
                                           </Flex>
                                         ),
                                       }))}
-                                      itemComponent={({
-                                        value,
-                                        label,
-                                        ...others
-                                      }) => <div {...others}>{label}</div>}
+                                      itemComponent={({ value, label, ...others }) => <div {...others}>{label}</div>}
                                     />
                                   ) : (
                                     <Flex align={"center"} gap={"xs"} w={100}>
-                                      <ThemeIcon
-                                        color={statusColors[task.status]}
-                                        radius={"xl"}
-                                        size={10}
-                                      >
+                                      <ThemeIcon color={statusColors[task.status]} radius={"xl"} size={10}>
                                         <span />
                                       </ThemeIcon>
-                                      <Text
-                                        color={statusColors[task.status]}
-                                        size={"sm"}
-                                        fw={500}
-                                      >
+                                      <Text color={statusColors[task.status]} size={"sm"} fw={500}>
                                         {humanReadableStatus[task.status]}
                                       </Text>
                                     </Flex>
                                   )}
 
-                                  <ActionIcon
-                                    onClick={() =>
-                                      setOpenedTaskIndex(
-                                        openedTaskIndex === index ? null : index
-                                      )
-                                    }
-                                  >
-                                    {openedTaskIndex === index ? (
-                                      <IconChevronUp size={"1rem"} />
-                                    ) : (
-                                      <IconChevronDown size={"1rem"} />
-                                    )}
+                                  <ActionIcon onClick={() => setOpenedTaskIndex(openedTaskIndex === index ? null : index)}>
+                                    {openedTaskIndex === index ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}
                                   </ActionIcon>
                                   {isInternal && (
                                     <ActionIcon
                                       onClick={async () => {
                                         try {
-                                          const response = await fetch(
-                                            `${API_URL}/selix/task`,
-                                            {
-                                              method: "DELETE",
-                                              headers: {
-                                                "Content-Type":
-                                                  "application/json",
-                                                Authorization: `Bearer ${userToken}`,
-                                              },
-                                              body: JSON.stringify({
-                                                task_id: task.id,
-                                              }),
-                                            }
-                                          );
+                                          const response = await fetch(`${API_URL}/selix/task`, {
+                                            method: "DELETE",
+                                            headers: {
+                                              "Content-Type": "application/json",
+                                              Authorization: `Bearer ${userToken}`,
+                                            },
+                                            body: JSON.stringify({
+                                              task_id: task.id,
+                                            }),
+                                          });
 
                                           const data = await response.json();
 
                                           if (!response.ok) {
-                                            throw new Error(
-                                              data.error ||
-                                                "Failed to delete task"
-                                            );
+                                            throw new Error(data.error || "Failed to delete task");
                                           }
 
                                           showNotification({
@@ -6227,14 +5048,9 @@ export const PlannerComponent = ({
                                             title: "Success",
                                             message: data.message,
                                           });
-                                          setTasks(
-                                            tasks.filter((t, i) => i !== index)
-                                          );
+                                          setTasks(tasks.filter((t, i) => i !== index));
                                         } catch (error) {
-                                          console.error(
-                                            "Error deleting task:",
-                                            error
-                                          );
+                                          console.error("Error deleting task:", error);
                                           showNotification({
                                             color: "red",
                                             title: "Error",
@@ -6255,8 +5071,7 @@ export const PlannerComponent = ({
                                     <RichTextArea
                                       overrideSticky={true}
                                       onChange={(value, rawValue) => {
-                                        taskDraftDescriptionRaw.current =
-                                          rawValue;
+                                        taskDraftDescriptionRaw.current = rawValue;
                                         taskDraftDescription.current = value;
                                       }}
                                       value={taskDraftDescriptionRaw.current}
@@ -6265,31 +5080,24 @@ export const PlannerComponent = ({
                                   ) : (
                                     <div
                                       dangerouslySetInnerHTML={{
-                                        __html:
-                                          task.description?.replaceAll(
-                                            "\n",
-                                            "<br />"
-                                          ) || "",
+                                        __html: task.description?.replaceAll("\n", "<br />") || "",
                                       }}
                                     />
                                   )}
                                 </Text>
                                 {/* eventually delete this */}
-                                {currentThread?.memory.campaign_id &&
-                                  openedTaskIndex === index && (
-                                    <TaskRenderer
-                                      // key={currentProject?.id}
-                                      task={task}
-                                      counter={counter}
-                                      segment={segment}
-                                      // messages={messages}
-                                      threads={threads}
-                                      currentSessionId={currentSessionId}
-                                      handleStrategySubmit={
-                                        handleStrategySubmit
-                                      }
-                                    />
-                                  )}
+                                {currentThread?.memory.campaign_id && openedTaskIndex === index && (
+                                  <TaskRenderer
+                                    // key={currentProject?.id}
+                                    task={task}
+                                    counter={counter}
+                                    segment={segment}
+                                    // messages={messages}
+                                    threads={threads}
+                                    currentSessionId={currentSessionId}
+                                    handleStrategySubmit={handleStrategySubmit}
+                                  />
+                                )}
                               </Collapse>
                             </Paper>
                           )}
@@ -6313,19 +5121,16 @@ export const PlannerComponent = ({
                     onClick={async () => {
                       try {
                         setCreatingNewTask(true);
-                        const response = await fetch(
-                          `${API_URL}/selix/create-task-id`,
-                          {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                              Authorization: `Bearer ${userToken}`,
-                            },
-                            body: JSON.stringify({
-                              selix_session_id: currentSessionId,
-                            }),
-                          }
-                        );
+                        const response = await fetch(`${API_URL}/selix/create-task-id`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${userToken}`,
+                          },
+                          body: JSON.stringify({
+                            selix_session_id: currentSessionId,
+                          }),
+                        });
 
                         if (!response.ok) {
                           showNotification({
@@ -6341,8 +5146,7 @@ export const PlannerComponent = ({
                         setTasks([...tasks, newTask]);
                         setEditingTask(tasks.length);
                         setEditingTaskText(newTask.title);
-                        taskDraftDescription.current =
-                          newTask.description || "";
+                        taskDraftDescription.current = newTask.description || "";
                         taskDraftDescriptionRaw.current = newTask.description;
 
                         setTimeout(() => {
@@ -6394,44 +5198,31 @@ const TaskRenderer = ({
   segment?: TransformedSegment | undefined;
   handleStrategySubmit: () => void;
 }) => {
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const sequencesV2Ref = useRef(null);
   const [lastLoadedProjectId, setLastLoadedProjectId] = useState<number>(-1);
   const [sequences, setSequences] = useState<any[]>([]);
-  const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>(
-    []
-  );
+  const [linkedinInitialMessages, setLinkedinInitialMessages] = useState<any[]>([]);
 
-  const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<
-    SubjectLineTemplate[]
-  >(emailSubjectLinesState);
+  const [emailSubjectLines, setEmailSubjectLines] = useRecoilState<SubjectLineTemplate[]>(emailSubjectLinesState);
 
   const [personalizers, setPersonalizers] = useState([]);
   const userToken = useRecoilValue(userTokenState);
   const emailSequenceData = useRecoilValue(emailSequenceState);
 
-  const currentThread = threads.find(
-    (thread) => thread.id === currentSessionId
-  );
+  const currentThread = threads.find((thread) => thread.id === currentSessionId);
 
-  const updateConnectionType = (
-    newConnectionType: string,
-    campaignId: number
-  ) => {
-    fetch(
-      `${API_URL}/client/archetype/${campaignId}/update_email_to_linkedin_connection`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          email_to_linkedin_connection: newConnectionType,
-        }),
-      }
-    )
+  const updateConnectionType = (newConnectionType: string, campaignId: number) => {
+    fetch(`${API_URL}/client/archetype/${campaignId}/update_email_to_linkedin_connection`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        email_to_linkedin_connection: newConnectionType,
+      }),
+    })
       .then((response) => {
         if (response.ok) {
           console.log("Connection type updated");
@@ -6471,13 +5262,7 @@ const TaskRenderer = ({
 
   switch (task.widget_type) {
     case "LAUNCH_CAMPAIGN":
-      return (
-        <CampaignLandingV2
-          showOnlyHeader
-          showLaunchButton
-          forcedCampaignId={currentThread?.memory.campaign_id}
-        />
-      );
+      return <CampaignLandingV2 showOnlyHeader showLaunchButton forcedCampaignId={currentThread?.memory.campaign_id} />;
     case "VIEW_PERSONALIZERS":
       return (
         <Personalizers
@@ -6521,12 +5306,7 @@ const TaskRenderer = ({
         />
       );
     case "COMPANY_SEGMENT":
-      return (
-        <CompanySegmentReview
-          selixSessionId={currentSessionId}
-          connectedCompanySegmentId={currentThread?.memory?.company_segment_id}
-        />
-      );
+      return <CompanySegmentReview selixSessionId={currentSessionId} connectedCompanySegmentId={currentThread?.memory?.company_segment_id} />;
     case "REVIEW_COMPANIES":
       if (!segment) {
         return (
@@ -6546,41 +5326,16 @@ const TaskRenderer = ({
         );
       }
     case "VIEW_SEQUENCE":
-      return (
-        <SequencesV2
-          ref={sequencesV2Ref}
-          showComponent={true}
-          updateConnectionType={updateConnectionType}
-          forcedCampaignId={currentProject?.id}
-        />
-      );
+      return <SequencesV2 ref={sequencesV2Ref} showComponent={true} updateConnectionType={updateConnectionType} forcedCampaignId={currentProject?.id} />;
     default:
       return (
-        <>
-          {task.proof_of_work_img && (
-            <img
-              src={task.proof_of_work_img}
-              alt="Proof of Work"
-              width={"100%"}
-              height={"100%"}
-              style={{ marginTop: "10px" }}
-            />
-          )}
-        </>
+        <>{task.proof_of_work_img && <img src={task.proof_of_work_img} alt="Proof of Work" width={"100%"} height={"100%"} style={{ marginTop: "10px" }} />}</>
       );
   }
 };
 
-const FilesComponent = ({
-  currentSessionId,
-  attachedFile,
-}: {
-  currentSessionId: Number | null;
-  attachedFile: File | null;
-}) => {
-  const [files, setFiles] = useState<
-    { name: string; description: string; uploadDate: string; base64: string }[]
-  >([]);
+const FilesComponent = ({ currentSessionId, attachedFile }: { currentSessionId: Number | null; attachedFile: File | null }) => {
+  const [files, setFiles] = useState<{ name: string; description: string; uploadDate: string; base64: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const userToken = useRecoilValue(userTokenState);
   const [editingTextIndex, setEditingTextIndex] = useState<number | null>(null);
@@ -6684,20 +5439,14 @@ const FilesComponent = ({
       </thead>
       <tbody>
         {files.map((file, index) => (
-          <tr
-            key={index}
-            style={{ cursor: "pointer" }}
-            onClick={() => setEditingTextIndex(index)}
-          >
+          <tr key={index} style={{ cursor: "pointer" }} onClick={() => setEditingTextIndex(index)}>
             <td style={{ position: "relative" }}>{file.name}</td>
             <td style={{ position: "relative" }}>
               {editingTextIndex === index ? (
                 <Textarea
                   w={"100%"}
                   value={file.description}
-                  onChange={(e) =>
-                    handleDescriptionChange(index, e.target.value)
-                  }
+                  onChange={(e) => handleDescriptionChange(index, e.target.value)}
                   onBlur={() => saveDescription(index)}
                   autoFocus
                 />
@@ -6737,13 +5486,7 @@ const FilesComponent = ({
             </td>
             <td>{file.uploadDate}</td>
             <td>
-              <Button
-                component="a"
-                href={`data:application/octet-stream;base64,${file.base64}`}
-                download={file.name}
-                variant="outline"
-                color="blue"
-              >
+              <Button component="a" href={`data:application/octet-stream;base64,${file.base64}`} download={file.name} variant="outline" color="blue">
                 Download
               </Button>
             </td>
@@ -6769,16 +5512,10 @@ const SelinStrategy = ({
   currentSessionId: Number | null;
   counter: Number;
 }) => {
-  const memory = threads.find(
-    (thread) => thread.id === currentSessionId
-  )?.memory;
+  const memory = threads.find((thread) => thread.id === currentSessionId)?.memory;
 
   const hackedSubmit = () => {
-    handleSubmit &&
-      handleSubmit(
-        undefined,
-        "Let's do it - create the task list and start executing."
-      );
+    handleSubmit && handleSubmit(undefined, "Let's do it - create the task list and start executing.");
   };
 
   // console.log('memory is', memory);
@@ -6819,26 +5556,16 @@ const SelinStrategy = ({
     <Paper withBorder radius={"sm"}>
       <Flex bg={"#1E90FF"} p={"sm"}>
         <Text tt={"uppercase"} fw={600} color="white">
-          Task Plan:{" "}
-          <span className="text-gray-200">
-            {strategy?.title.replace(/['"]/g, "")}
-          </span>
+          Task Plan: <span className="text-gray-200">{strategy?.title.replace(/['"]/g, "")}</span>
         </Text>
       </Flex>
       <Stack p={"sm"}>
         {handleSubmit && (
-          <Paper
-            withBorder
-            bg={"#F0FFF0"}
-            px={"sm"}
-            py={"xs"}
-            style={{ borderColor: "#32CD32" }}
-          >
+          <Paper withBorder bg={"#F0FFF0"} px={"sm"} py={"xs"} style={{ borderColor: "#32CD32" }}>
             <Flex align={"center"} gap={"xs"}>
               <IconInfoCircle color="green" size={"1rem"} />
               <Text size={"sm"} color="#228B22" fw={600}>
-                This Task Plan summarizes the angle for your campaign. Review
-                then press 'Save Draft'
+                This Task Plan summarizes the angle for your campaign. Review then press 'Save Draft'
               </Text>
             </Flex>
           </Paper>
@@ -6897,15 +5624,12 @@ const SelinStrategy = ({
                 Attached Campaigns:
               </Text>
             </div>
-            {strategy?.tagged_campaigns &&
-            strategy.tagged_campaigns.length > 0 ? (
-              strategy.tagged_campaigns.map(
-                (campaign: number, index: number) => (
-                  <Badge key={index} color="green">
-                    {campaign.toString()}
-                  </Badge>
-                )
-              )
+            {strategy?.tagged_campaigns && strategy.tagged_campaigns.length > 0 ? (
+              strategy.tagged_campaigns.map((campaign: number, index: number) => (
+                <Badge key={index} color="green">
+                  {campaign.toString()}
+                </Badge>
+              ))
             ) : (
               <Badge color="gray">None</Badge>
             )}
@@ -6917,13 +5641,8 @@ const SelinStrategy = ({
               </Text>
             </div>
             <Text size={"xs"} color="blue" fw={600}>
-              {strategy?.start_date
-                ? moment(strategy.start_date).format("MMMM Do, YYYY")
-                : "N/A"}{" "}
-              -{" "}
-              {strategy?.end_date
-                ? moment(strategy.end_date).format("MMMM Do, YYYY")
-                : "N/A"}
+              {strategy?.start_date ? moment(strategy.start_date).format("MMMM Do, YYYY") : "N/A"} -{" "}
+              {strategy?.end_date ? moment(strategy.end_date).format("MMMM Do, YYYY") : "N/A"}
             </Text>
           </Flex>
         </ScrollArea>
@@ -6955,33 +5674,12 @@ const SelinStrategy = ({
                     description: strategy?.description,
                     archetypes: [],
                     status: strategy?.status,
-                    startDate: strategy?.start_date
-                      ? new Date(strategy.start_date)
-                      : null,
-                    endDate: strategy?.end_date
-                      ? new Date(strategy.end_date)
-                      : null,
-                    onSubmit: async (
-                      title: string,
-                      description: string,
-                      archetypes: number[],
-                      status: string,
-                      startDate: Date,
-                      endDate: Date
-                    ) => {
-                      const response = await patchUpdateStrategy(
-                        memory?.strategy_id || -1,
-                        title,
-                        description,
-                        archetypes,
-                        status,
-                        startDate,
-                        endDate
-                      );
+                    startDate: strategy?.start_date ? new Date(strategy.start_date) : null,
+                    endDate: strategy?.end_date ? new Date(strategy.end_date) : null,
+                    onSubmit: async (title: string, description: string, archetypes: number[], status: string, startDate: Date, endDate: Date) => {
+                      const response = await patchUpdateStrategy(memory?.strategy_id || -1, title, description, archetypes, status, startDate, endDate);
                       //yolo
-                      const updatedStrategy = await getStrategy(
-                        memory?.strategy_id || -1
-                      );
+                      const updatedStrategy = await getStrategy(memory?.strategy_id || -1);
                       setStrategy(updatedStrategy);
                       showNotification({
                         title: "Success",

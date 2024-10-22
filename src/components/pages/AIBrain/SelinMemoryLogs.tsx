@@ -60,7 +60,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ex } from "@fullcalendar/core/internal-common";
 import { isHtmlElement } from "react-router-dom/dist/dom";
 
-interface MemoryLog {
+export interface MemoryLog {
   id: number;
   created_date: string;
   tag: string;
@@ -68,7 +68,7 @@ interface MemoryLog {
   description: string;
   client_sdr_id: string;
   client_id: string;
-  json_data?: string;
+  json_data?: any;
   session_id?: string;
   processing_status?: string;
   processing_status_description?: string;
@@ -1309,9 +1309,9 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                   {selectedLog.tag !== "PROCESS_QUEUE" && (
                     <Text size="10px" color="gray">
                       {selectedLog.json_data &&
-                      JSON.parse(selectedLog.json_data)?.email_source
+                      selectedLog.json_data.email_source
                         ? "Sent by: " +
-                          JSON.parse(selectedLog.json_data)?.email_source
+                          selectedLog.json_data.email_source
                         : ""}
                     </Text>
                   )}
@@ -1411,7 +1411,7 @@ const SelixMemoryLogs: React.FC<MemoryLogsProps> = ({
                   </Text>
                   <Text mb="md">
                     {selectedLog.json_data
-                      ? JSON.parse(selectedLog.json_data).updated_from
+                      ? selectedLog.json_data.updated_from
                       : "No update information available"}
                   </Text>
                   <Text fw={600} mb="2px">

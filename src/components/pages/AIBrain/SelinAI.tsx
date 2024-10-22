@@ -5345,6 +5345,8 @@ export const PlannerComponent = ({
     undefined
   );
 
+  const queryClient = useQueryClient();
+
   const isInternal = window.location.href.includes("internal");
 
   const campaignId = threads.find((thread) => thread.id === currentSessionId)
@@ -5410,8 +5412,6 @@ export const PlannerComponent = ({
 
   const [selectedLog, setSelectedLog] = useState<MemoryLog | null>(null);
 
-  console.log("selected log: ", selectedLog);
-
   const updateTask = async (
     taskId: number,
     title: string,
@@ -5448,6 +5448,8 @@ export const PlannerComponent = ({
 
       const data = await response.json();
       console.log("Task updated successfully:", data);
+
+      queryClient.invalidateQueries(["selix_event_logs_planner_component"]);
 
       showNotification({
         color: "green",

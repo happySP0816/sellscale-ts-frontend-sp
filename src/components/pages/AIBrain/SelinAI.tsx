@@ -365,6 +365,7 @@ export interface ThreadType {
   tasks: TaskType[];
   thread_id: string;
   is_supervisor_session: boolean;
+  is_ingestion_session: boolean;
 }
 
 interface SuggestedMessage {
@@ -801,6 +802,12 @@ export default function SelinAI() {
         urlParams.delete("internal");
       }
       const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+
+      navigate(
+        { pathname: location.pathname, search: urlParams.toString() },
+        { replace: true }
+      );
+
       window.history.replaceState({}, "", newUrl);
 
       setCurrentSessionId(session_id);
@@ -2081,7 +2088,7 @@ export default function SelinAI() {
                                   setMemoryLineEditMode(false);
                                 }}
                               >
-                                ✗
+                                ��
                               </Button>
                             </Flex>
                           </Flex>

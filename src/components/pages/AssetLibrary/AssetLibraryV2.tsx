@@ -246,52 +246,58 @@ export default function AssetLibraryV2() {
       }
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get("session_id");
-      const response = await fetch(
-        `${API_URL}/client/all_assets_in_client${
-          sessionId ? `?session_id=${sessionId}` : ""
-        }`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/client/all_assets_in_client`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
       const result = await response.json();
       if (result.message === "Success") {
         const assets: AssetType[] = result.data;
+
         const usedData = assets.filter(
           (asset: AssetType) =>
             asset.client_archetype_ids &&
             asset.client_archetype_ids.some((id) => id !== null)
         );
-        setUsedData(usedData);
         const unusedData = assets.filter(
           (asset: AssetType) =>
             !asset.client_archetype_ids ||
             asset.client_archetype_ids.every((id) => id === null)
         );
+        setUsedData(usedData);
+
+        // const unusedData = assets.filter(
+        //   (asset: AssetType) =>
+        //     !asset.client_archetype_ids ||
+        //     asset.client_archetype_ids.every((id) => id === null)
+        // );
         setUnUsedData(unusedData);
-        const urlParams = new URLSearchParams(window.location.search);
-        const isSelix = urlParams.toString().includes("selix");
+        const isSelix = window.location.toString().includes("selix");
 
         if (isSelix) {
+          console.log(isSelix);
           const dataOrderedByMostRecent = assets.sort((a, b) => {
             return (
               new Date(b.created_at).getTime() -
               new Date(a.created_at).getTime()
             );
           });
-          const usedData = dataOrderedByMostRecent.filter(
-            (asset: AssetType) =>
-              asset.client_archetype_ids &&
-              asset.client_archetype_ids.some((id) => id !== null)
-          );
-          const unusedData = dataOrderedByMostRecent.filter(
-            (asset: AssetType) =>
-              !asset.client_archetype_ids ||
-              asset.client_archetype_ids.every((id) => id === null)
-          );
+
+          const usedData = dataOrderedByMostRecent.slice(0, 11);
+          const unusedData: AssetType[] = [];
+
+          // const usedData = dataOrderedByMostRecent.filter(
+          //   (asset: AssetType) =>
+          //     asset.client_archetype_ids &&
+          //     asset.client_archetype_ids.some((id) => id !== null)
+          // );
+          // const unusedData = dataOrderedByMostRecent.filter(
+          //   (asset: AssetType) =>
+          //     !asset.client_archetype_ids ||
+          //     asset.client_archetype_ids.every((id) => id === null)
+          // );
           setUsedData(usedData);
           setUnUsedData(unusedData);
         }
@@ -333,34 +339,34 @@ export default function AssetLibraryV2() {
           )}
         </Flex>
         <Flex gap={"sm"}>
-          <Flex>
-            <Button
-              color={viewType === "list" ? "blue" : "gray"}
-              variant={viewType === "list" ? "light" : "outline"}
-              leftIcon={<IconList size={"1rem"} />}
-              onClick={() => setViewType("list")}
-              style={{
-                borderTopRightRadius: "0px",
-                borderBottomRightRadius: "0px",
-                border: "1px solid",
-              }}
-            >
-              List View
-            </Button>
-            <Button
-              color={viewType === "card" ? "blue" : "gray"}
-              variant={viewType === "card" ? "light" : "outline"}
-              leftIcon={<IconLayoutBoard size={"1rem"} />}
-              onClick={() => setViewType("card")}
-              style={{
-                borderTopLeftRadius: "0px",
-                borderBottomLeftRadius: "0px",
-                border: "1px solid",
-              }}
-            >
-              Card View
-            </Button>
-          </Flex>
+          {/* <Flex> */}
+          {/*   <Button */}
+          {/*     color={viewType === "list" ? "blue" : "gray"} */}
+          {/*     variant={viewType === "list" ? "light" : "outline"} */}
+          {/*     leftIcon={<IconList size={"1rem"} />} */}
+          {/*     onClick={() => setViewType("list")} */}
+          {/*     style={{ */}
+          {/*       borderTopRightRadius: "0px", */}
+          {/*       borderBottomRightRadius: "0px", */}
+          {/*       border: "1px solid", */}
+          {/*     }} */}
+          {/*   > */}
+          {/*     List View */}
+          {/*   </Button> */}
+          {/*   <Button */}
+          {/*     color={viewType === "card" ? "blue" : "gray"} */}
+          {/*     variant={viewType === "card" ? "light" : "outline"} */}
+          {/*     leftIcon={<IconLayoutBoard size={"1rem"} />} */}
+          {/*     onClick={() => setViewType("card")} */}
+          {/*     style={{ */}
+          {/*       borderTopLeftRadius: "0px", */}
+          {/*       borderBottomLeftRadius: "0px", */}
+          {/*       border: "1px solid", */}
+          {/*     }} */}
+          {/*   > */}
+          {/*     Card View */}
+          {/*   </Button> */}
+          {/* </Flex> */}
           <Button leftIcon={<IconPlus size={"1rem"} />} onClick={open}>
             Add New Asset
           </Button>
@@ -930,71 +936,71 @@ export default function AssetLibraryV2() {
           </Flex>
         </Flex>
       </Modal>
-      <Flex
-        sx={{
-          border: "1px solid #cfcfcf",
-          borderStyle: "dashed",
-          borderRadius: "8px",
-        }}
-        bg={"#f3f4f6"}
-        p={"lg"}
-        mt={"lg"}
-        mb={140}
-      >
-        <List spacing="1px" size="sm" center>
-          <List.Item icon={<IconBulb size={"1.2rem"} color="#228be6" />}>
-            <Text fw={600} size={13}>
-              These are the assets that have been imported into the system for
-              SellScale.
-            </Text>
-          </List.Item>
-          <List.Item icon={<IconArrowRight size={"1.2rem"} color="#228be6" />}>
-            <Text
-              size={"xs"}
-              color="gray"
-              fw={500}
-              style={{ display: "flex", gap: "4px", alignItems: "center" }}
-            >
-              Click on <span style={{ color: "#228be6" }}>Add New Asset</span>{" "}
-              to add a new asset to the library
-            </Text>
-          </List.Item>
-          <List.Item icon={<IconArrowRight size={"1.2rem"} color="#228be6" />}>
-            <Text
-              size={"xs"}
-              color="gray"
-              fw={500}
-              style={{ display: "flex", gap: "4px", alignContent: "center" }}
-            >
-              To use assets in this campaign, click on the{" "}
-              <span style={{ color: "#228be6   " }}>Toggle</span>{" "}
-              <IconToggleRight
-                color="#228be6"
-                size={"1.1rem"}
-                style={{ marginTop: "1px" }}
-              />{" "}
-              button
-            </Text>
-          </List.Item>
-          <List.Item icon={<IconArrowRight size={"1.2rem"} color="#228be6" />}>
-            <Text
-              size={"xs"}
-              color="gray"
-              fw={500}
-              style={{ display: "flex", gap: "4px", alignContent: "center" }}
-            >
-              To remove an asset from the library, click on the{" "}
-              <span style={{ color: "red" }}>Delete</span>
-              <IconTrash
-                color="red"
-                size={"0.9rem"}
-                style={{ marginTop: "1px" }}
-              />{" "}
-              button
-            </Text>
-          </List.Item>
-        </List>
-      </Flex>
+      {/* <Flex */}
+      {/*   sx={{ */}
+      {/*     border: "1px solid #cfcfcf", */}
+      {/*     borderStyle: "dashed", */}
+      {/*     borderRadius: "8px", */}
+      {/*   }} */}
+      {/*   bg={"#f3f4f6"} */}
+      {/*   p={"lg"} */}
+      {/*   mt={"lg"} */}
+      {/*   mb={140} */}
+      {/* > */}
+      {/*   <List spacing="1px" size="sm" center> */}
+      {/*     <List.Item icon={<IconBulb size={"1.2rem"} color="#228be6" />}> */}
+      {/*       <Text fw={600} size={13}> */}
+      {/*         These are the assets that have been imported into the system for */}
+      {/*         SellScale. */}
+      {/*       </Text> */}
+      {/*     </List.Item> */}
+      {/*     <List.Item icon={<IconArrowRight size={"1.2rem"} color="#228be6" />}> */}
+      {/*       <Text */}
+      {/*         size={"xs"} */}
+      {/*         color="gray" */}
+      {/*         fw={500} */}
+      {/*         style={{ display: "flex", gap: "4px", alignItems: "center" }} */}
+      {/*       > */}
+      {/*         Click on <span style={{ color: "#228be6" }}>Add New Asset</span>{" "} */}
+      {/*         to add a new asset to the library */}
+      {/*       </Text> */}
+      {/*     </List.Item> */}
+      {/*     <List.Item icon={<IconArrowRight size={"1.2rem"} color="#228be6" />}> */}
+      {/*       <Text */}
+      {/*         size={"xs"} */}
+      {/*         color="gray" */}
+      {/*         fw={500} */}
+      {/*         style={{ display: "flex", gap: "4px", alignContent: "center" }} */}
+      {/*       > */}
+      {/*         To use assets in this campaign, click on the{" "} */}
+      {/*         <span style={{ color: "#228be6   " }}>Toggle</span>{" "} */}
+      {/*         <IconToggleRight */}
+      {/*           color="#228be6" */}
+      {/*           size={"1.1rem"} */}
+      {/*           style={{ marginTop: "1px" }} */}
+      {/*         />{" "} */}
+      {/*         button */}
+      {/*       </Text> */}
+      {/*     </List.Item> */}
+      {/*     <List.Item icon={<IconArrowRight size={"1.2rem"} color="#228be6" />}> */}
+      {/*       <Text */}
+      {/*         size={"xs"} */}
+      {/*         color="gray" */}
+      {/*         fw={500} */}
+      {/*         style={{ display: "flex", gap: "4px", alignContent: "center" }} */}
+      {/*       > */}
+      {/*         To remove an asset from the library, click on the{" "} */}
+      {/*         <span style={{ color: "red" }}>Delete</span> */}
+      {/*         <IconTrash */}
+      {/*           color="red" */}
+      {/*           size={"0.9rem"} */}
+      {/*           style={{ marginTop: "1px" }} */}
+      {/*         />{" "} */}
+      {/*         button */}
+      {/*       </Text> */}
+      {/*     </List.Item> */}
+      {/*   </List> */}
+      {/* </Flex> */}
     </Flex>
   );
 }

@@ -174,7 +174,9 @@ export default function AssetLibraryV2() {
 
   const location = useLocation();
 
-  const [queryParams, setQueryParams] = useState(new URLSearchParams(location.search));
+  const [queryParams, setQueryParams] = useState(
+    new URLSearchParams(location.search)
+  );
 
   useEffect(() => {
     // Update the queryParams state when the location changes
@@ -211,6 +213,7 @@ export default function AssetLibraryV2() {
   }, []);
 
   const toggleIngestionMode = async () => {
+    setLoading(true);
     const response = await fetch(`${API_URL}/selix/toggle_ingestion_mode`, {
       method: "POST",
       headers: {
@@ -218,7 +221,9 @@ export default function AssetLibraryV2() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        session_id: queryParams.get("session_id") ? +queryParams.get("session_id")! : -1,
+        session_id: queryParams.get("session_id")
+          ? +queryParams.get("session_id")!
+          : -1,
         is_ingestion_mode: !session?.is_ingestion_session,
       }),
     });
@@ -228,6 +233,7 @@ export default function AssetLibraryV2() {
     }
 
     refetch();
+    setLoading(false);
   };
 
   const fetchAllAssets = async () => {
@@ -317,12 +323,13 @@ export default function AssetLibraryV2() {
             {isSelix ? "Session Asset Library" : "SellScale's Asset Library"}
           </Text>
           {isSelix && session && (
-            <Button
-              color={session.is_ingestion_session ? "red" : "green"}
-              onClick={async () => await toggleIngestionMode()}
-            >
-              {session.is_ingestion_session ? "Ingestion Off" : "Ingestion On"}
-            </Button>
+            <Switch
+              checked={session.is_ingestion_session}
+              onChange={async () => await toggleIngestionMode()}
+              label={
+                session.is_ingestion_session ? "Ingestion On" : "Ingestion Off"
+              }
+            />
           )}
         </Flex>
         <Flex gap={"sm"}>

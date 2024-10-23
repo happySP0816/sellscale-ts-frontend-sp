@@ -182,7 +182,7 @@ export default function CardView(props: any) {
       <Stack mt={'lg'}>
         <Flex gap={'sm'} align={'center'} w={'100%'}>
           <Text sx={{ whiteSpace: 'nowrap' }} color='gray' fw={500}>
-            Used Assets
+            RAG Database
           </Text>
           <Divider w={'100%'} />
           <ActionIcon onClick={usedToggle}>
@@ -392,214 +392,214 @@ export default function CardView(props: any) {
             })}
           </Grid>
         </Collapse>
-        <Flex gap={'sm'} align={'center'} w={'100%'}>
-          <Text sx={{ whiteSpace: 'nowrap' }} color='gray' fw={500}>
-            Un-used Assets
-          </Text>
-          <Divider w={'100%'} />
-          <ActionIcon onClick={unusedToggle}>
-            {openedUnUsed ? <IconChevronUp /> : <IconChevronDown />}
-          </ActionIcon>
-        </Flex>
-        <Collapse in={openedUnUsed}>
-          <Grid>
-            {unUseData?.map((item: AssetType, index: number) => {
-              return (
-                <Grid.Col span={window.location.href.includes('selix') ? 6 : 4} key={index}>
-                  <Flex
-                    style={{ border: '1px solid #ced4da', borderRadius: '8px' }}
-                    p={'xl'}
-                    direction={'column'}
-                    gap={'sm'}
-                  >
-                    <Flex align={'center'} justify={'space-between'}>
-                      <Badge
-                        leftSection={
-                          item?.client_archetype_ids && item.client_archetype_ids.length > 0 ? (
-                            <IconCircleCheck size={'1rem'} style={{ marginTop: '7px' }} />
-                          ) : (
-                            ''
-                          )
-                        }
-                        variant='filled'
-                        size='lg'
-                        color={item?.client_archetype_ids && item.client_archetype_ids.length > 0 ? 'blue' : 'gray'}
-                      >
-                        {item?.client_archetype_ids && item.client_archetype_ids.length > 0 ? 'used in campaign' : 'not used'}
-                      </Badge>
-                      {item.asset_type === 'PDF' && <Button
-                        radius={'xl'}
-                        size='xs'
-                        variant='light'
-                        rightIcon={<IconChevronRight size={'1rem'} />}
-                        onClick={assetOpen}
-                      >
-                        View PDF
-                      </Button>}
-                    </Flex>
-                    <Flex gap={'5px'}>
-                      <Badge
-                        size='lg'
-                        color={
-                          item?.asset_type === 'PDF'
-                            ? 'pink'
-                            : item?.asset_type === 'URL'
-                            ? 'orange'
-                            : 'green'
-                        }
-                      >
-                        {item?.asset_type}
-                      </Badge>
-                      <Badge variant='outline' color='gray' size='lg'>
-                        ingestion type: {item?.asset_type}
-                      </Badge>
-                    </Flex>
-                    <Flex align={'center'} w={'fit-content'}>
-                      <Text fw={700} lineClamp={1} w={'100%'} size={'xl'}>
-                        {item?.asset_key}
-                      </Text>
-                    </Flex>
-                    <Flex
-                      p={'md'}
-                      direction={'column'}
-                      gap={'xs'}
-                      // ai response?
-                      bg={false ? '#fff5ff' : '#f4f9ff'} 
-                      style={{ borderRadius: '8px' }}
-                    >
-                      {/* {item?.ai_reponse && (
-                        <Flex align={'center'} justify={'space-between'}>
-                          <Text
-                            color='#ec58fb'
-                            size={'lg'}
-                            fw={700}
-                            style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
-                          >
-                            <IconSparkles size={'1.4rem'} fill='pink' /> AI Summary
-                          </Text>
-                          <IconEdit color='gray' size={'1.2rem'} />
-                        </Flex>
-                      )} */}
-                      <Flex align={'end'}>
-                        <Text lineClamp={2} size={'sm'} color='gray' fw={600}>
-                          {
-                            item?.asset_raw_value || item?.asset_value
-                            }
-                        </Text>
-                        {true &&(
-                          <Flex ml='sm' onClick={() => {
-                            setEditAsset(item);
-                          }}>
-                            <IconEdit color='gray'/>
-                          </Flex>
-                        )}
-                      </Flex>
-                    </Flex>
-                    <Tooltip
-                      w={400}
-                      withArrow
-                      label={`${'Northrop Gruman is a defense company and so are all the people in this campaign. They would find this case study very relevant.'}`}
-                      styles={{
-                        tooltip: {
-                          whiteSpace: 'normal',
-                        },
-                      }}
-                    >
-                      <div className='w-fit'>
-                        <Text
-                          color='gray'
-                          variant='transparent'
-                          size={'sm'}
-                          fw={500}
-                          style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
-                        >
-                          <IconInfoCircle size={'1rem'} />
-                          See why this is relevant
-                        </Text>
-                      </div>
-                    </Tooltip>
-                    <Group>
-                      <Text
-                        style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
-                        fw={500}
-                        color='gray'
-                        size={'sm'}
-                      >
-                        Open Rate:{' '}
-                        <Text fw={500} color={item?.num_opens > 50 ? 'green' : 'orange'}>
-                          {item?.num_sends ? (item?.num_opens / item?.num_sends) : 0}%
-                        </Text>
-                      </Text>
-                      <Divider orientation='vertical' />
-                      <Text
-                        style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
-                        fw={500}
-                        color='gray'
-                        size={'sm'}
-                      >
-                        Reply Rate:{' '}
-                        <Text fw={500} color={item?.num_replies > 50 ? 'green' : 'orange'}>
-                          {item?.num_sends ? (item?.num_replies / item?.num_sends) : 0}%
-                        </Text>
-                      </Text>
-                    </Group>
-
-                    <Flex gap={'xl'}>
-                      <Button
-                        w={'100%'}
-                        size='md'
-                        variant='outline'
-                        onClick={() => {
-                          fetch(`${API_URL}/client/toggle_archetype_id_in_asset_ids`, {
-                            method: 'POST',
-                            headers: {
-                              Authorization: `Bearer ${userToken}`,
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                              asset_id: item.id,
-                              client_archetype_id: -1,
-                              reason: reason || null,
-                              step_number: item.asset_tags.includes('Linkedin CTA') ? 1 : null,
-                            }),
-                          }).then(() => {
-                            useOpen();
-                            props.fetchAssets();
-                          });
-                        }}
-                        leftIcon={<IconCircleCheck size={'1rem'} />}
-                      >
-                        Click to Use
-                      </Button>
-                      <Button
-                        w={'100%'}
-                        size='md'
-                        color='red'
-                        variant='outline'
-                        leftIcon={<IconTrash color='red' size={'1rem'} />}
-                        onClick={() => {
-                          fetch(`${API_URL}/client/asset`, {
-                            method: 'DELETE',
-                            headers: {
-                              Authorization: `Bearer ${userToken}`,
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ asset_id: item.id }),
-                          }).then(() => {
-                            props.fetchAssets();
-                            showNotification({ title: 'Asset Deleted', message: 'The asset has been successfully deleted.' });
-                          });
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </Flex>
-                  </Flex>
-                </Grid.Col>
-              );
-            })}
-          </Grid>
-        </Collapse>
+        {/* <Flex gap={'sm'} align={'center'} w={'100%'}> */}
+        {/*   <Text sx={{ whiteSpace: 'nowrap' }} color='gray' fw={500}> */}
+        {/*     Un-used Assets */}
+        {/*   </Text> */}
+        {/*   <Divider w={'100%'} /> */}
+        {/*   <ActionIcon onClick={unusedToggle}> */}
+        {/*     {openedUnUsed ? <IconChevronUp /> : <IconChevronDown />} */}
+        {/*   </ActionIcon> */}
+        {/* </Flex> */}
+        {/* <Collapse in={openedUnUsed}> */}
+        {/*   <Grid> */}
+        {/*     {unUseData?.map((item: AssetType, index: number) => { */}
+        {/*       return ( */}
+        {/*         <Grid.Col span={window.location.href.includes('selix') ? 6 : 4} key={index}> */}
+        {/*           <Flex */}
+        {/*             style={{ border: '1px solid #ced4da', borderRadius: '8px' }} */}
+        {/*             p={'xl'} */}
+        {/*             direction={'column'} */}
+        {/*             gap={'sm'} */}
+        {/*           > */}
+        {/*             <Flex align={'center'} justify={'space-between'}> */}
+        {/*               <Badge */}
+        {/*                 leftSection={ */}
+        {/*                   item?.client_archetype_ids && item.client_archetype_ids.length > 0 ? ( */}
+        {/*                     <IconCircleCheck size={'1rem'} style={{ marginTop: '7px' }} /> */}
+        {/*                   ) : ( */}
+        {/*                     '' */}
+        {/*                   ) */}
+        {/*                 } */}
+        {/*                 variant='filled' */}
+        {/*                 size='lg' */}
+        {/*                 color={item?.client_archetype_ids && item.client_archetype_ids.length > 0 ? 'blue' : 'gray'} */}
+        {/*               > */}
+        {/*                 {item?.client_archetype_ids && item.client_archetype_ids.length > 0 ? 'used in campaign' : 'not used'} */}
+        {/*               </Badge> */}
+        {/*               {item.asset_type === 'PDF' && <Button */}
+        {/*                 radius={'xl'} */}
+        {/*                 size='xs' */}
+        {/*                 variant='light' */}
+        {/*                 rightIcon={<IconChevronRight size={'1rem'} />} */}
+        {/*                 onClick={assetOpen} */}
+        {/*               > */}
+        {/*                 View PDF */}
+        {/*               </Button>} */}
+        {/*             </Flex> */}
+        {/*             <Flex gap={'5px'}> */}
+        {/*               <Badge */}
+        {/*                 size='lg' */}
+        {/*                 color={ */}
+        {/*                   item?.asset_type === 'PDF' */}
+        {/*                     ? 'pink' */}
+        {/*                     : item?.asset_type === 'URL' */}
+        {/*                     ? 'orange' */}
+        {/*                     : 'green' */}
+        {/*                 } */}
+        {/*               > */}
+        {/*                 {item?.asset_type} */}
+        {/*               </Badge> */}
+        {/*               <Badge variant='outline' color='gray' size='lg'> */}
+        {/*                 ingestion type: {item?.asset_type} */}
+        {/*               </Badge> */}
+        {/*             </Flex> */}
+        {/*             <Flex align={'center'} w={'fit-content'}> */}
+        {/*               <Text fw={700} lineClamp={1} w={'100%'} size={'xl'}> */}
+        {/*                 {item?.asset_key} */}
+        {/*               </Text> */}
+        {/*             </Flex> */}
+        {/*             <Flex */}
+        {/*               p={'md'} */}
+        {/*               direction={'column'} */}
+        {/*               gap={'xs'} */}
+        {/*               // ai response? */}
+        {/*               bg={false ? '#fff5ff' : '#f4f9ff'}  */}
+        {/*               style={{ borderRadius: '8px' }} */}
+        {/*             > */}
+        {/*               {/* {item?.ai_reponse && ( */}
+        {/*                 <Flex align={'center'} justify={'space-between'}> */}
+        {/*                   <Text */}
+        {/*                     color='#ec58fb' */}
+        {/*                     size={'lg'} */}
+        {/*                     fw={700} */}
+        {/*                     style={{ display: 'flex', alignItems: 'center', gap: '3px' }} */}
+        {/*                   > */}
+        {/*                     <IconSparkles size={'1.4rem'} fill='pink' /> AI Summary */}
+        {/*                   </Text> */}
+        {/*                   <IconEdit color='gray' size={'1.2rem'} /> */}
+        {/*                 </Flex> */}
+        {/*               )} */}
+        {/*               <Flex align={'end'}> */}
+        {/*                 <Text lineClamp={2} size={'sm'} color='gray' fw={600}> */}
+        {/*                   { */}
+        {/*                     item?.asset_raw_value || item?.asset_value */}
+        {/*                     } */}
+        {/*                 </Text> */}
+        {/*                 {true &&( */}
+        {/*                   <Flex ml='sm' onClick={() => { */}
+        {/*                     setEditAsset(item); */}
+        {/*                   }}> */}
+        {/*                     <IconEdit color='gray'/> */}
+        {/*                   </Flex> */}
+        {/*                 )} */}
+        {/*               </Flex> */}
+        {/*             </Flex> */}
+        {/*             <Tooltip */}
+        {/*               w={400} */}
+        {/*               withArrow */}
+        {/*               label={`${'Northrop Gruman is a defense company and so are all the people in this campaign. They would find this case study very relevant.'}`} */}
+        {/*               styles={{ */}
+        {/*                 tooltip: { */}
+        {/*                   whiteSpace: 'normal', */}
+        {/*                 }, */}
+        {/*               }} */}
+        {/*             > */}
+        {/*               <div className='w-fit'> */}
+        {/*                 <Text */}
+        {/*                   color='gray' */}
+        {/*                   variant='transparent' */}
+        {/*                   size={'sm'} */}
+        {/*                   fw={500} */}
+        {/*                   style={{ display: 'flex', alignItems: 'center', gap: '5px' }} */}
+        {/*                 > */}
+        {/*                   <IconInfoCircle size={'1rem'} /> */}
+        {/*                   See why this is relevant */}
+        {/*                 </Text> */}
+        {/*               </div> */}
+        {/*             </Tooltip> */}
+        {/*             <Group> */}
+        {/*               <Text */}
+        {/*                 style={{ display: 'flex', gap: '8px', alignItems: 'center' }} */}
+        {/*                 fw={500} */}
+        {/*                 color='gray' */}
+        {/*                 size={'sm'} */}
+        {/*               > */}
+        {/*                 Open Rate:{' '} */}
+        {/*                 <Text fw={500} color={item?.num_opens > 50 ? 'green' : 'orange'}> */}
+        {/*                   {item?.num_sends ? (item?.num_opens / item?.num_sends) : 0}% */}
+        {/*                 </Text> */}
+        {/*               </Text> */}
+        {/*               <Divider orientation='vertical' /> */}
+        {/*               <Text */}
+        {/*                 style={{ display: 'flex', gap: '8px', alignItems: 'center' }} */}
+        {/*                 fw={500} */}
+        {/*                 color='gray' */}
+        {/*                 size={'sm'} */}
+        {/*               > */}
+        {/*                 Reply Rate:{' '} */}
+        {/*                 <Text fw={500} color={item?.num_replies > 50 ? 'green' : 'orange'}> */}
+        {/*                   {item?.num_sends ? (item?.num_replies / item?.num_sends) : 0}% */}
+        {/*                 </Text> */}
+        {/*               </Text> */}
+        {/*             </Group> */}
+        {/**/}
+        {/*             <Flex gap={'xl'}> */}
+        {/*               <Button */}
+        {/*                 w={'100%'} */}
+        {/*                 size='md' */}
+        {/*                 variant='outline' */}
+        {/*                 onClick={() => { */}
+        {/*                   fetch(`${API_URL}/client/toggle_archetype_id_in_asset_ids`, { */}
+        {/*                     method: 'POST', */}
+        {/*                     headers: { */}
+        {/*                       Authorization: `Bearer ${userToken}`, */}
+        {/*                       'Content-Type': 'application/json', */}
+        {/*                     }, */}
+        {/*                     body: JSON.stringify({ */}
+        {/*                       asset_id: item.id, */}
+        {/*                       client_archetype_id: -1, */}
+        {/*                       reason: reason || null, */}
+        {/*                       step_number: item.asset_tags.includes('Linkedin CTA') ? 1 : null, */}
+        {/*                     }), */}
+        {/*                   }).then(() => { */}
+        {/*                     useOpen(); */}
+        {/*                     props.fetchAssets(); */}
+        {/*                   }); */}
+        {/*                 }} */}
+        {/*                 leftIcon={<IconCircleCheck size={'1rem'} />} */}
+        {/*               > */}
+        {/*                 Click to Use */}
+        {/*               </Button> */}
+        {/*               <Button */}
+        {/*                 w={'100%'} */}
+        {/*                 size='md' */}
+        {/*                 color='red' */}
+        {/*                 variant='outline' */}
+        {/*                 leftIcon={<IconTrash color='red' size={'1rem'} />} */}
+        {/*                 onClick={() => { */}
+        {/*                   fetch(`${API_URL}/client/asset`, { */}
+        {/*                     method: 'DELETE', */}
+        {/*                     headers: { */}
+        {/*                       Authorization: `Bearer ${userToken}`, */}
+        {/*                       'Content-Type': 'application/json', */}
+        {/*                     }, */}
+        {/*                     body: JSON.stringify({ asset_id: item.id }), */}
+        {/*                   }).then(() => { */}
+        {/*                     props.fetchAssets(); */}
+        {/*                     showNotification({ title: 'Asset Deleted', message: 'The asset has been successfully deleted.' }); */}
+        {/*                   }); */}
+        {/*                 }} */}
+        {/*               > */}
+        {/*                 Delete */}
+        {/*               </Button> */}
+        {/*             </Flex> */}
+        {/*           </Flex> */}
+        {/*         </Grid.Col> */}
+        {/*       ); */}
+        {/*     })} */}
+        {/*   </Grid> */}
+        {/* </Collapse> */}
       </Stack>
       <Modal
         size={700}

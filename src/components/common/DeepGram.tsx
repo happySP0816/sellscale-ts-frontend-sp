@@ -42,7 +42,7 @@ export default function DeepGram({
   const liveRef = useRef<any>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
-  const [showAnimation, setShowAnimation] = useState(true);
+  const [showAnimation, setShowAnimation] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {

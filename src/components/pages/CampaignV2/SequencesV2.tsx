@@ -2080,7 +2080,7 @@ const EmailPreviewHeaderV2 = function (props: {
                 Authorization: `Bearer ${userToken}`,
               },
               body: JSON.stringify({
-                sequence_id: props.template.step.id,
+                sequence_id: props.template?.step.id,
                 prospect_id: Number(prospectId),
                 archetype_id: currentProject?.id,
                 subject_line_id: subjectLine.id,

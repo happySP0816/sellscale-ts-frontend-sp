@@ -2035,7 +2035,7 @@ const EmailPreviewHeaderV2 = function (props: {
       const [_key, { prospectId, currentTab, template, subjectLine }]: any =
         queryKey;
 
-      if (!props.subjectLine?.id) {
+      if (!props.subjectLine?.id && props.template) {
         showNotification({
           title: "Error",
           message: "Please create a subject line.",
@@ -2043,7 +2043,7 @@ const EmailPreviewHeaderV2 = function (props: {
         });
         return null;
       }
-      if (!props.template?.step.id) {
+      if (!props.template?.step.id && props.currentTab === "EMAIL") {
         showNotification({
           title: "Error",
           message: "Please create an email template.",

@@ -326,7 +326,7 @@ export default function AssetLibraryV2() {
       <Flex mt="md" align={"center"} justify={"space-between"}>
         <Flex align={"center"} gap={"4px"}>
           <Text size={"25px"} fw={700}>
-            {isSelix ? "Session Asset Library" : "SellScale's Asset Library"}
+            {isSelix ? "" : "SellScale's Asset Library"}
           </Text>
           {isSelix && session && (
             <Switch

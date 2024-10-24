@@ -4141,50 +4141,50 @@ const SegmentChat = (props: any) => {
           </ScrollArea>
         </div>
         <div style={{ position: "relative" }}>
-          <div
-            style={{
-              width: "80%",
-              position: "absolute",
-              top: suggestion !== "" ? "-75px" : "0",
-              left: "50%",
-              transform: "translateX(-50%)",
-              overflow: "hidden",
-              height: suggestion !== "" ? "auto" : "0",
-              visibility: suggestion !== "" ? "visible" : "hidden",
-              zIndex: 1,
-            }}
-          >
-            {
-              <div
-                id="slidingDiv"
-                style={{
-                  backgroundColor: suggestionHidden ? "transparent" : "#E25DEE",
-                  padding: "13px",
-                  borderRadius: "8px",
-                  color: "white",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  fontSize: "0.9rem",
-                  animation:
-                    suggestion !== "" ? "slideUp 0.5s forwards" : "none",
-                }}
-              >
-                {"💡 " + suggestion}
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "5px",
-                    right: "10px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                  }}
-                  onClick={() => slideDown()}
-                >
-                  X
-                </span>
-              </div>
-            }
-          </div>
+          {/* <div */}
+          {/*   style={{ */}
+          {/*     width: "80%", */}
+          {/*     position: "absolute", */}
+          {/*     top: suggestion !== "" ? "-75px" : "0", */}
+          {/*     left: "50%", */}
+          {/*     transform: "translateX(-50%)", */}
+          {/*     overflow: "hidden", */}
+          {/*     height: suggestion !== "" ? "auto" : "0", */}
+          {/*     visibility: suggestion !== "" ? "visible" : "hidden", */}
+          {/*     zIndex: 1, */}
+          {/*   }} */}
+          {/* > */}
+          {/*   { */}
+          {/*     <div */}
+          {/*       id="slidingDiv" */}
+          {/*       style={{ */}
+          {/*         backgroundColor: suggestionHidden ? "transparent" : "#E25DEE", */}
+          {/*         padding: "13px", */}
+          {/*         borderRadius: "8px", */}
+          {/*         color: "white", */}
+          {/*         fontWeight: "bold", */}
+          {/*         textAlign: "center", */}
+          {/*         fontSize: "0.9rem", */}
+          {/*         animation: */}
+          {/*           suggestion !== "" ? "slideUp 0.5s forwards" : "none", */}
+          {/*       }} */}
+          {/*     > */}
+          {/*       {"💡 " + suggestion} */}
+          {/*       <span */}
+          {/*         style={{ */}
+          {/*           position: "absolute", */}
+          {/*           top: "5px", */}
+          {/*           right: "10px", */}
+          {/*           cursor: "pointer", */}
+          {/*           fontWeight: "bold", */}
+          {/*         }} */}
+          {/*         onClick={() => slideDown()} */}
+          {/*       > */}
+          {/*         X */}
+          {/*       </span> */}
+          {/*     </div> */}
+          {/*   } */}
+          {/* </div> */}
           <Paper
             p={"sm"}
             withBorder

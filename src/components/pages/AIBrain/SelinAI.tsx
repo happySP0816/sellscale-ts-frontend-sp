@@ -4037,105 +4037,105 @@ const SegmentChat = (props: any) => {
                     );
                   })}
                 </Flex>
-                <div className="absolute bottom-2 right-0 w-5/6 pr-4">
-                  <Paper
-                    withBorder
-                    p={"md"}
-                    radius={"lg"}
-                    className="bg-white shadow-lg"
-                    style={{
-                      border: "2px solid #E25DEE",
-                      boxShadow: "0 8px 16px rgba(226, 93, 238, 0.2)",
-                    }}
-                  >
-                    <Text fw={700} size={"md"} color="#E25DEE" mb={"sm"}>
-                      💡 Suggestions
-                    </Text>
-                    <div className="flex flex-col gap-2">
-                      {suggestedFirstMessage.map((message, index) => (
-                        <Paper
-                          key={index}
-                          withBorder
-                          p={"xs"}
-                          radius={"md"}
-                          className={`hover:border-[#E25DEE] cursor-pointer transition-all duration-300 transform hover:scale-110 ${
-                            typeof message !== "string" ? "bg-blue-100" : ""
-                          }`}
-                          style={{
-                            boxShadow: "0 6px 12px rgba(226, 93, 238, 0.3)",
-                            transition:
-                              "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.boxShadow =
-                              "0 12px 24px rgba(226, 93, 238, 0.5)";
-                            e.currentTarget.style.transform =
-                              "translateY(-4px) scale(1.05)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.boxShadow =
-                              "0 6px 12px rgba(226, 93, 238, 0.3)";
-                            e.currentTarget.style.transform =
-                              "translateY(0) scale(1)";
-                          }}
-                          onClick={(e) => {
-                            if (e.currentTarget) {
-                              e.currentTarget.style.backgroundColor = "#F3E8FF";
-                              setTimeout(() => {
-                                if (e.currentTarget) {
-                                  e.currentTarget.style.backgroundColor =
-                                    "white";
-                                }
-                              }, 300);
-                            }
-                            if (typeof message === "string") {
-                              handleListClick(message);
-                            } else if (typeof message === "object") {
-                              //attach the strategy here.
-                              handleListClick(message.transcript);
-                            }
-                          }}
-                        >
-                          <Flex
-                            align={"center"}
-                            gap={"xs"}
-                            className="transition-transform duration-300 transform hover:translate-x-2"
-                          >
-                            <ThemeIcon
-                              color={
-                                typeof message === "string" ? "grape" : "blue"
-                              }
-                              size={"xl"}
-                            >
-                              <IconBrain size={"1.4rem"} />
-                            </ThemeIcon>
-                            <Text
-                              color={
-                                typeof message === "string" ? "#E25DEE" : "blue"
-                              }
-                              fw={600}
-                              size={"sm"}
-                              className="transition-colors duration-300 hover:text-[#49494]"
-                            >
-                              {typeof message === "string"
-                                ? message
-                                : message.name}
-                            </Text>
-                            {typeof message !== "string" && (
-                              <ThemeIcon
-                                color="blue"
-                                size={"sm"}
-                                className="ml-auto"
-                              >
-                                <IconChevronRight size={"1rem"} />
-                              </ThemeIcon>
-                            )}
-                          </Flex>
-                        </Paper>
-                      ))}
-                    </div>
-                  </Paper>
-                </div>
+                {/* <div className="absolute bottom-2 right-0 w-5/6 pr-4"> */}
+                {/*   <Paper */}
+                {/*     withBorder */}
+                {/*     p={"md"} */}
+                {/*     radius={"lg"} */}
+                {/*     className="bg-white shadow-lg" */}
+                {/*     style={{ */}
+                {/*       border: "2px solid #E25DEE", */}
+                {/*       boxShadow: "0 8px 16px rgba(226, 93, 238, 0.2)", */}
+                {/*     }} */}
+                {/*   > */}
+                {/*     <Text fw={700} size={"md"} color="#E25DEE" mb={"sm"}> */}
+                {/*       💡 Suggestions */}
+                {/*     </Text> */}
+                {/*     <div className="flex flex-col gap-2"> */}
+                {/*       {suggestedFirstMessage.map((message, index) => ( */}
+                {/*         <Paper */}
+                {/*           key={index} */}
+                {/*           withBorder */}
+                {/*           p={"xs"} */}
+                {/*           radius={"md"} */}
+                {/*           className={`hover:border-[#E25DEE] cursor-pointer transition-all duration-300 transform hover:scale-110 ${ */}
+                {/*             typeof message !== "string" ? "bg-blue-100" : "" */}
+                {/*           }`} */}
+                {/*           style={{ */}
+                {/*             boxShadow: "0 6px 12px rgba(226, 93, 238, 0.3)", */}
+                {/*             transition: */}
+                {/*               "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out", */}
+                {/*           }} */}
+                {/*           onMouseEnter={(e) => { */}
+                {/*             e.currentTarget.style.boxShadow = */}
+                {/*               "0 12px 24px rgba(226, 93, 238, 0.5)"; */}
+                {/*             e.currentTarget.style.transform = */}
+                {/*               "translateY(-4px) scale(1.05)"; */}
+                {/*           }} */}
+                {/*           onMouseLeave={(e) => { */}
+                {/*             e.currentTarget.style.boxShadow = */}
+                {/*               "0 6px 12px rgba(226, 93, 238, 0.3)"; */}
+                {/*             e.currentTarget.style.transform = */}
+                {/*               "translateY(0) scale(1)"; */}
+                {/*           }} */}
+                {/*           onClick={(e) => { */}
+                {/*             if (e.currentTarget) { */}
+                {/*               e.currentTarget.style.backgroundColor = "#F3E8FF"; */}
+                {/*               setTimeout(() => { */}
+                {/*                 if (e.currentTarget) { */}
+                {/*                   e.currentTarget.style.backgroundColor = */}
+                {/*                     "white"; */}
+                {/*                 } */}
+                {/*               }, 300); */}
+                {/*             } */}
+                {/*             if (typeof message === "string") { */}
+                {/*               handleListClick(message); */}
+                {/*             } else if (typeof message === "object") { */}
+                {/*               //attach the strategy here. */}
+                {/*               handleListClick(message.transcript); */}
+                {/*             } */}
+                {/*           }} */}
+                {/*         > */}
+                {/*           <Flex */}
+                {/*             align={"center"} */}
+                {/*             gap={"xs"} */}
+                {/*             className="transition-transform duration-300 transform hover:translate-x-2" */}
+                {/*           > */}
+                {/*             <ThemeIcon */}
+                {/*               color={ */}
+                {/*                 typeof message === "string" ? "grape" : "blue" */}
+                {/*               } */}
+                {/*               size={"xl"} */}
+                {/*             > */}
+                {/*               <IconBrain size={"1.4rem"} /> */}
+                {/*             </ThemeIcon> */}
+                {/*             <Text */}
+                {/*               color={ */}
+                {/*                 typeof message === "string" ? "#E25DEE" : "blue" */}
+                {/*               } */}
+                {/*               fw={600} */}
+                {/*               size={"sm"} */}
+                {/*               className="transition-colors duration-300 hover:text-[#49494]" */}
+                {/*             > */}
+                {/*               {typeof message === "string" */}
+                {/*                 ? message */}
+                {/*                 : message.name} */}
+                {/*             </Text> */}
+                {/*             {typeof message !== "string" && ( */}
+                {/*               <ThemeIcon */}
+                {/*                 color="blue" */}
+                {/*                 size={"sm"} */}
+                {/*                 className="ml-auto" */}
+                {/*               > */}
+                {/*                 <IconChevronRight size={"1rem"} /> */}
+                {/*               </ThemeIcon> */}
+                {/*             )} */}
+                {/*           </Flex> */}
+                {/*         </Paper> */}
+                {/*       ))} */}
+                {/*     </div> */}
+                {/*   </Paper> */}
+                {/* </div> */}
               </>
             )}
           </ScrollArea>

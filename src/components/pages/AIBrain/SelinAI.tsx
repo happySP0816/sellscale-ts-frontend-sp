@@ -6780,7 +6780,7 @@ const SelinStrategy = ({
   threads: ThreadType[];
   currentSessionId: Number | null;
   counter: Number;
-  setOpenedTaskIndex: React.Dispatch<React.SetStateAction<number | null>>;
+  setOpenedTaskIndex?: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
   const memory = threads.find(
     (thread) => thread.id === currentSessionId
@@ -7022,7 +7022,9 @@ const SelinStrategy = ({
                   return;
                 }
                 hackedSubmit();
-                setOpenedTaskIndex(null);
+                if (setOpenedTaskIndex) {
+                  setOpenedTaskIndex(null);
+                }
               }}
             >
               Save Draft

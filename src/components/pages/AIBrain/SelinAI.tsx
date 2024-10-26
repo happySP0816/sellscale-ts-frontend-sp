@@ -918,7 +918,11 @@ export default function SelinAI() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
         },
-        body: JSON.stringify({ additional_context: "", room_id: room_id }), // Placeholder for the body
+        body: JSON.stringify({
+          additional_context: "",
+          room_id: room_id,
+          device_id: deviceIDRef.current,
+        }), // Placeholder for the body
       });
       const data = await response;
       console.log("data is", data);
@@ -1514,11 +1518,10 @@ export default function SelinAI() {
   const supervisor_thread = threads.find(
     (thread) => thread.is_supervisor_session
   );
-  const [clientMemoryState, setClientMemoryState] = useState<
+  const [supervisorMemoryLine, setSupervisorMemoryLine] = useState<
     string | undefined
   >(
-    threads.find((thread) => thread.id === sessionIDRef.current)?.memory
-      ?.memory_line
+    threads.find((thread) => thread.is_supervisor_session)?.memory?.memory_line
   );
 
   const [memoryPopupOpen, setMemoryPopupOpen] = useState(false);
@@ -1533,9 +1536,8 @@ export default function SelinAI() {
 
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
 
-  const [memoryState, setMemoryState] = useState<any>(
-    threads.find((thread) => thread.id === sessionIDRef.current)?.memory
-      .memory_state
+  const [supervisorMemoryState, setSupervisorMemoryState] = useState<any>(
+    threads.find((thread) => thread.is_supervisor_session)?.memory.memory_state
   );
 
   const [showMemoryForKey, setShowMemoryForKey] = useState("");
@@ -1601,7 +1603,7 @@ export default function SelinAI() {
       const result = await response.json();
 
       if (response.ok) {
-        setMemoryState(result.memory_state);
+        setSupervisorMemoryState(result.memory_state);
       } else {
         showNotification({
           title: "Error Fetching Memory State",
@@ -1636,7 +1638,7 @@ export default function SelinAI() {
       const result = await response.json();
       const memory_line = result.memory_line;
 
-      setClientMemoryState(memory_line);
+      setSupervisorMemoryLine(memory_line);
       setMemoryStateChanged(true);
       setClientMemoryStateUpdatedTime(new Date().toLocaleString());
       getMemoryState(sessionIDRef.current as number);
@@ -1781,7 +1783,7 @@ export default function SelinAI() {
   useEffect(() => {
     const handleSpanHover = (event: any) => {
       if (event.target && event.target.dataset.title) {
-        const session = memoryState?.sessions.find(
+        const session = supervisorMemoryState?.sessions.find(
           (s: any) =>
             s.title === event.target.dataset.title ||
             "@" + s.title === event.target.dataset.title
@@ -1805,7 +1807,7 @@ export default function SelinAI() {
       document.removeEventListener("mouseover", handleSpanHover);
       document.removeEventListener("mouseout", handleSpanMouseLeave);
     };
-  }, [memoryState?.sessions]);
+  }, [supervisorMemoryState?.sessions]);
 
   const [newMemoryTitle, setNewMemoryTitle] = useState("");
   const [showAddMemoryInput, setShowAddMemoryInput] = useState(false);
@@ -1821,6 +1823,10 @@ export default function SelinAI() {
 
   const memory = threads.find(
     (thread) => thread.id === sessionIDRef.current
+  )?.memory;
+
+  const supervisorMemory = threads.find(
+    (thread) => thread.is_supervisor_session
   )?.memory;
 
   const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
@@ -1872,19 +1878,20 @@ export default function SelinAI() {
                           onClick={() => setMemoryPopupOpen((prev) => !prev)}
                         >
                           <Badge color="pink" variant="outline">
-                            🧠
+                            👤
                           </Badge>
                         </Text>
                       </Popover.Target>
                       <Popover.Dropdown>
                         <Flex justify="space-between" align="center" mb="xs">
                           <LoadingOverlay visible={fetchingMemoryState} />
-                          <Title order={5}>🧠 Selix Memory</Title>
+                          <Title order={5}>🧑 Supervisor Memory</Title>
 
-                          {memory?.session_mode && (
+                          {supervisorMemory?.session_mode && (
                             <Tooltip
                               label={
-                                "Current Goal: " + memory.session_current_goal
+                                "Current Goal: " +
+                                supervisorMemory.session_current_goal
                               }
                               withArrow
                             >
@@ -1894,7 +1901,11 @@ export default function SelinAI() {
                                 radius={4}
                                 ml="auto"
                               >
-                                ⚙️ {memory.session_mode?.replace("_", " ")}
+                                🧑{" "}
+                                {supervisorMemory.session_mode?.replace(
+                                  "_",
+                                  " "
+                                )}
                               </Badge>
                             </Tooltip>
                           )}
@@ -1942,9 +1953,9 @@ export default function SelinAI() {
                               placeholder="Type your notes here..."
                               autosize
                               minRows={3}
-                              value={clientMemoryState}
+                              value={supervisorMemoryLine}
                               onChange={(e) => {
-                                setClientMemoryState(e.target.value);
+                                setSupervisorMemoryLine(e.target.value);
                                 setMemoryStateChanged(true);
                               }}
                               size="xs"
@@ -1968,7 +1979,7 @@ export default function SelinAI() {
                                   sx={{ cursor: "pointer" }}
                                   dangerouslySetInnerHTML={{
                                     __html: (
-                                      clientMemoryState ||
+                                      supervisorMemoryLine ||
                                       "Click to add notes..."
                                     )?.replace(/\n/g, "<br>"),
                                   }}
@@ -1996,9 +2007,11 @@ export default function SelinAI() {
                             ml="auto"
                           >
                             Last updated:{" "}
-                            {memory?.memory_line_time_updated
+                            {supervisorMemory?.memory_line_time_updated
                               ? moment
-                                  .utc(memory?.memory_line_time_updated)
+                                  .utc(
+                                    supervisorMemory?.memory_line_time_updated
+                                  )
                                   .local()
                                   .fromNow()
                               : "N/A"}
@@ -2011,12 +2024,16 @@ export default function SelinAI() {
                               <Button
                                 color="gray"
                                 size="xs"
-                                opacity={!memory?.old_memory_line ? 0.5 : 1}
-                                disabled={!memory?.old_memory_line}
+                                opacity={
+                                  !supervisorMemory?.old_memory_line ? 0.5 : 1
+                                }
+                                disabled={!supervisorMemory?.old_memory_line}
                                 onClick={() => {
-                                  setClientMemoryState(memory?.old_memory_line);
+                                  setSupervisorMemoryLine(
+                                    supervisorMemory?.old_memory_line
+                                  );
                                   setClientMemoryStateUpdatedTime(
-                                    memory?.old_memory_line_time_updated
+                                    supervisorMemory?.old_memory_line_time_updated
                                   );
                                   setMemoryStateChanged(true);
                                 }}
@@ -2061,7 +2078,7 @@ export default function SelinAI() {
                                 }
                                 onClick={() => {
                                   updateMemoryLineAllSessions(
-                                    clientMemoryState
+                                    supervisorMemoryLine
                                   );
                                   setClientMemoryStateUpdatedTime(
                                     new Date().toLocaleString()
@@ -2080,9 +2097,11 @@ export default function SelinAI() {
                                 }
                                 ml="xs"
                                 onClick={() => {
-                                  setClientMemoryState(memory?.memory_line);
+                                  setSupervisorMemoryLine(
+                                    supervisorMemory?.memory_line
+                                  );
                                   setClientMemoryStateUpdatedTime(
-                                    memory?.memory_line_time_updated
+                                    supervisorMemory?.memory_line_time_updated
                                   );
                                   setMemoryStateChanged(false);
                                   setMemoryLineEditMode(false);
@@ -2093,11 +2112,11 @@ export default function SelinAI() {
                             </Flex>
                           </Flex>
 
-                          {memoryState &&
+                          {supervisorMemoryState &&
                             [
                               "campaigns",
                               "sessions",
-                              ...Object.keys(memoryState).filter(
+                              ...Object.keys(supervisorMemoryState).filter(
                                 (x) => x !== "campaigns" && x !== "sessions"
                               ),
                             ].map((x: string) => {
@@ -2112,11 +2131,13 @@ export default function SelinAI() {
                                     </Text>
                                   )}
 
-                                  {Array.isArray(memoryState[x]) &&
-                                    memoryState[x]
+                                  {Array.isArray(supervisorMemoryState[x]) &&
+                                    supervisorMemoryState[x]
                                       .filter(
                                         (y: any) =>
-                                          !clientMemoryState?.includes(y.title)
+                                          !supervisorMemoryLine?.includes(
+                                            y.title
+                                          )
                                       )
                                       .map((y: any) => (
                                         <>
@@ -2455,7 +2476,7 @@ export default function SelinAI() {
                                   align={"center"}
                                   justify={"space-between"}
                                 >
-                                  <Flex align={"left"} w={"100%"}>
+                                  <Flex align={"center"} w={"100%"}>
                                     <Text
                                       fw={600}
                                       onClick={(e) => {
@@ -2466,10 +2487,41 @@ export default function SelinAI() {
                                       // style={{ cursor: "text" }}
                                       size={"sm"}
                                     >
-                                      {supervisor_thread.session_name ||
-                                        "Supervisor Session"}
+                                      Chat With Supervisor
                                     </Text>
                                   </Flex>
+                                  <Tooltip
+                                    label={
+                                      <Flex
+                                        direction={"column"}
+                                        style={{
+                                          maxWidth: "400px",
+                                          textWrap: "wrap",
+                                        }}
+                                      >
+                                        <Text>
+                                          Selix Supervisor is a manager for all
+                                          the worker sessions. You can ask it
+                                          question that you'd ask a "supervisor"
+                                          for your outbound:
+                                        </Text>
+                                        <Text>
+                                          - "What's my top priority right now?"
+                                        </Text>
+                                        <Text>
+                                          - "Can you make a new session?"
+                                        </Text>
+                                        <Text>
+                                          - "What happened last week" (coming
+                                          soon)
+                                        </Text>
+                                      </Flex>
+                                    }
+                                  >
+                                    <ActionIcon>
+                                      <IconInfoCircle />
+                                    </ActionIcon>
+                                  </Tooltip>
                                 </Flex>
                               </Paper>
                             )}
@@ -3417,7 +3469,7 @@ export default function SelinAI() {
       <SelixMemoryLogs
         threads={threads}
         onRevert={(oldLog: string) => {
-          setClientMemoryState(oldLog);
+          setSupervisorMemoryLine(oldLog);
           setMemoryStateChanged(true);
         }}
         opened={openEventLogs}
@@ -3634,9 +3686,6 @@ const SegmentChat = (props: any) => {
     }
   }
 
-  console.log("Formatted memory state:", formattedMemoryLine);
-  console.log("Sessions:", sessions);
-
   return (
     <>
       <Paper withBorder shadow="sm" radius={"md"} w={"40%"} h={"100%"}>
@@ -3646,10 +3695,37 @@ const SegmentChat = (props: any) => {
           align={"center"}
           gap={5}
           bg={"white"}
-          className=" rounded-t-md"
+          className={" rounded-t-md"}
+          justify={"space-between"}
         >
-          <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
-          <Text fw={600}>Chat with Selix</Text>
+          <Flex align={"center"}>
+            <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
+            <Text fw={600}>Chat with Selix</Text>
+          </Flex>
+          <Badge color="gray" variant="outline" radius={4} ml="auto">
+            {(() => {
+              let emoji = "🧠";
+
+              switch (props.memory?.session_mode) {
+                case "campaign_builder":
+                  emoji = "⚙️";
+                  break;
+                case "ingestion_mode":
+                  emoji = "🍗";
+                  break;
+                case "supervisor_mode":
+                  emoji = "🧑";
+                  break;
+                default:
+                  emoji = "🧠";
+              }
+
+              return `${emoji} ${props.memory?.session_mode?.replace(
+                "_",
+                " "
+              )}`;
+            })()}
+          </Badge>
         </Flex>
         <Divider bg="gray" />
         <div style={{ position: "relative", height: "48vh" }}>

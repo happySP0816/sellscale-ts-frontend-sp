@@ -3739,7 +3739,7 @@ const SegmentChat = (props: any) => {
               transition: "transform 0.3s ease",
             }}
           >
-            {messages.length > 1 ? (
+            {messages.length > 0 ? (
               <Flex
                 direction={"column"}
                 gap={"sm"}

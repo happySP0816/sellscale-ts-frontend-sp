@@ -3521,6 +3521,8 @@ const SegmentChat = (props: any) => {
 
   const isInternal = window.location.href.includes("internal");
 
+  console.log("messages: ", messages);
+
   const messageRefs = useRef<any>([]);
 
   const [normalInputMode, setNormalInputMode] = useState(true);
@@ -3739,7 +3741,7 @@ const SegmentChat = (props: any) => {
               transition: "transform 0.3s ease",
             }}
           >
-            {messages.length > 1 ? (
+            {messages.length > 0 ? (
               <Flex
                 direction={"column"}
                 gap={"sm"}

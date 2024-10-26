@@ -15,6 +15,7 @@ import {
   ThemeIcon,
   Image,
   Card,
+  Badge,
 } from "@mantine/core";
 import {
   IconCalendarEvent,
@@ -546,7 +547,7 @@ const FinalReview = ({
   description: string;
 }) => {
   return (
-    <Stack spacing={"sm"}>
+    <Flex align={"left"} gap={"sm"} direction={"column"}>
       <Text size={"sm"} fw={500}>
         Review your inputs and press the launch button to get started with Selix
         AI!
@@ -557,6 +558,7 @@ const FinalReview = ({
         p={"md"}
         bg={"#f5f9ff"}
         style={{ border: "1px dashed #228be6" }}
+        w={"100%"}
       >
         <Stack spacing={"sm"}>
           <Flex align={"start"} gap={"sm"}>
@@ -591,6 +593,9 @@ const FinalReview = ({
           </Flex> */}
         </Stack>
       </Paper>
-    </Stack>
+      <Badge color={"orange"} size={"xl"} radius={"xs"} variant={"outline"}>
+        Don't Worry! You can come back and edit this later!
+      </Badge>
+    </Flex>
   );
 };

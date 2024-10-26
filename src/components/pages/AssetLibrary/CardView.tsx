@@ -360,12 +360,12 @@ export default function CardView(props: any) {
                           color="gray"
                           size={"sm"}
                         >
-                          Open Rate:{" "}
+                          # Sends:{" "}
                           <Text
                             fw={500}
-                            color={item?.num_opens > 50 ? "green" : "orange"}
+                            color={item?.num_sends > 50 ? "green" : "orange"}
                           >
-                            {item?.num_opens}%
+                            {item?.num_sends}
                           </Text>
                         </Text>
                         <Divider orientation="vertical" />
@@ -379,12 +379,12 @@ export default function CardView(props: any) {
                           color="gray"
                           size={"sm"}
                         >
-                          Reply Rate:{" "}
+                          # Replies:{" "}
                           <Text
                             fw={500}
                             color={item?.num_replies > 50 ? "green" : "orange"}
                           >
-                            {item?.num_replies}%
+                            {item?.num_replies}
                           </Text>
                         </Text>
                       </Group>
@@ -532,15 +532,12 @@ export default function CardView(props: any) {
                         color="gray"
                         size={"sm"}
                       >
-                        Open Rate:{" "}
+                        # Sends:{" "}
                         <Text
                           fw={500}
-                          color={item?.num_opens > 50 ? "green" : "orange"}
+                          color={item?.num_sends > 50 ? "green" : "orange"}
                         >
-                          {item?.num_sends
-                            ? item?.num_opens / item?.num_sends
-                            : 0}
-                          %
+                          {item?.num_sends}
                         </Text>
                       </Text>
                       <Divider orientation="vertical" />
@@ -554,15 +551,12 @@ export default function CardView(props: any) {
                         color="gray"
                         size={"sm"}
                       >
-                        Reply Rate:{" "}
+                        # Repliies:{" "}
                         <Text
                           fw={500}
                           color={item?.num_replies > 50 ? "green" : "orange"}
                         >
-                          {item?.num_sends
-                            ? item?.num_replies / item?.num_sends
-                            : 0}
-                          %
+                          {item?.num_replies}
                         </Text>
                       </Text>
                     </Group>

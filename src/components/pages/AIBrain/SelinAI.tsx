@@ -3521,8 +3521,6 @@ const SegmentChat = (props: any) => {
 
   const isInternal = window.location.href.includes("internal");
 
-  console.log("messages: ", messages);
-
   const messageRefs = useRef<any>([]);
 
   const [normalInputMode, setNormalInputMode] = useState(true);

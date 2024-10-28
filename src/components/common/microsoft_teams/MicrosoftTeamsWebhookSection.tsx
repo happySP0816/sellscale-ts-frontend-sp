@@ -16,7 +16,10 @@ import {
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { getSDR } from "@utils/requests/getClientSDR";
-import { patchSlackWebhook } from "@utils/requests/patchSlackWebhook";
+import {
+  patchMicrosoftTeamsWebhook,
+  patchSlackWebhook,
+} from "@utils/requests/patchSlackWebhook";
 import { sendTestSlackWebhook } from "@utils/requests/sendTestSlackWebhook";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -37,21 +40,20 @@ export default function MicrosoftTeamsWebhookSection(props: {
   useEffect(() => {
     props.setPageLoading(true); // Trigger loading overlay
     syncLocalStorage(userToken, setUserData).then(() => {
-      setWebhook(userData.client.pipeline_notifications_webhook_url);
-      if (
-        userData.client.pipeline_notifications_webhook_url &&
-        !userData.client.slack_bot_connected
-      ) {
+      setWebhook(
+        userData.client.pipeline_microsoft_teams_notifications_webhook_url
+      );
+      if (userData.client.pipeline_microsoft_teams_notifications_webhook_url) {
         props.setActiveTab("advanced_setup");
       }
       props.setPageLoading(false); // Remove loading overlay
     });
   }, []);
 
-  const triggerPatchSlackWebhook = async () => {
+  const triggerPatchMicrosoftTeamsWebhook = async () => {
     setLoading(true);
 
-    const result = await patchSlackWebhook(userToken, webhook);
+    const result = await patchMicrosoftTeamsWebhook(userToken, webhook);
     if (result.status === "success") {
       showNotification({
         title: "Success",
@@ -113,10 +115,10 @@ export default function MicrosoftTeamsWebhookSection(props: {
 
           <Button
             disabled={
-              true ||
-              webhook === userData.client.pipeline_notifications_webhook_url
+              webhook ===
+              userData.client.pipeline_microsoft_teams_notifications_webhook_url
             }
-            onClick={() => triggerPatchSlackWebhook()}
+            onClick={() => triggerPatchMicrosoftTeamsWebhook()}
             loading={loading}
           >
             Save
@@ -133,18 +135,19 @@ export default function MicrosoftTeamsWebhookSection(props: {
               value={webhook}
               placeholder="https://hooks.microsoftteams.com/services/..."
               onChange={(event) => setWebhook(event.currentTarget.value)}
-              error={
-                webhook &&
-                (webhook?.startsWith(
-                  "https://hooks.microsoftteams.com/services/"
-                )
-                  ? false
-                  : "Please enter a valid Microsoft Teams Webhook URL")
-              }
+              // error={
+              //   webhook &&
+              //   (webhook?.startsWith(
+              //     "https://hooks.microsoftteams.com/services/"
+              //   )
+              //     ? false
+              //     : "Please enter a valid Microsoft Teams Webhook URL")
+              // }
             />
           )}
 
-          {userData.client.pipeline_notifications_webhook_url && (
+          {userData.client
+            .pipeline_microsoft_teams_notifications_webhook_url && (
             <Box my="md">
               <Button onClick={triggerSendSlackWebhook} disabled={true}>
                 Send Test Notification
@@ -160,7 +163,7 @@ export default function MicrosoftTeamsWebhookSection(props: {
           </a>
         </Text>
 
-        {userData.client.pipeline_notifications_webhook_url && (
+        {userData.client.pipeline_microsoft_teams_notifications_webhook_url && (
           <>
             <Divider my="lg" />
             <CustomizeSlackNotifications microsoftTeams={true} />

@@ -52,6 +52,7 @@ import {
   IconArrowsMaximize,
   IconArrowsMinimize,
   IconArrowsMove,
+  IconBolt,
   IconBrain,
   IconBrowser,
   IconBulb,
@@ -171,6 +172,7 @@ import AssetLibraryV2 from "@pages/AssetLibrary/AssetLibraryV2";
 import CompanySegmentReview from "@pages/SegmentV2/CompanySegmentReview";
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PopoverTarget } from "@mantine/core/lib/Popover/PopoverTarget/PopoverTarget";
+import { SelixAutoExecuteModal } from "./SelixAutoExecuteModal";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
@@ -1325,9 +1327,8 @@ export default function SelinAI() {
 
     if (recording) {
       intervalId = setInterval(() => {
-        const memory = threads.find(
-          (thread) => thread.id === currentSessionId
-        )?.memory;
+        const memory = threads.find((thread) => thread.id === currentSessionId)
+          ?.memory;
         if (
           memory?.strategy_id &&
           promptLengthRef.current > prevPromptLengthRef.current + 80
@@ -1822,16 +1823,17 @@ export default function SelinAI() {
 
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
 
-  const memory = threads.find(
-    (thread) => thread.id === sessionIDRef.current
-  )?.memory;
+  const memory = threads.find((thread) => thread.id === sessionIDRef.current)
+    ?.memory;
 
   const supervisorMemory = threads.find(
     (thread) => thread.is_supervisor_session
   )?.memory;
 
-  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
-    useState<any>(memory?.memory_line_time_updated);
+  const [
+    clientMemoryStateUpdatedTime,
+    setClientMemoryStateUpdatedTime,
+  ] = useState<any>(memory?.memory_line_time_updated);
 
   return (
     <>
@@ -5414,10 +5416,12 @@ export const PlannerComponent = ({
   const [opened, { toggle }] = useDisclosure(true);
   const taskContainerRef = useRef<HTMLDivElement>(null);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
+  const [showAutoExecutionModal, setShowAutoExecutionModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Number | null>(null);
   const [creatingNewTask, setCreatingNewTask] = useState(false);
   const [editingTaskText, setEditingTaskText] = useState<string>(""); // title
@@ -5770,6 +5774,12 @@ export const PlannerComponent = ({
             )}
           </Flex>
         </Paper>
+
+        <SelixAutoExecuteModal
+          onClose={() => setShowAutoExecutionModal(false)}
+          opened={showAutoExecutionModal}
+        />
+
         <Modal
           opened={showRewindImage}
           onClose={() => setShowRewindImage(false)}
@@ -5866,7 +5876,7 @@ export const PlannerComponent = ({
                             }
                           }}
                         >
-                          Show Rewind
+                          Rewind
                         </Button>
                       </Tooltip>
                       <Text color="gray" size={"sm"} fw={500}>
@@ -6128,35 +6138,64 @@ export const PlannerComponent = ({
                                     </Text>
                                   )}
                                   <Flex align={"center"} gap={"xs"}>
-                                    <Tooltip
-                                      label={
-                                        !task.rewind_img
-                                          ? "No rewind available"
-                                          : "View rewind"
-                                      }
-                                    >
-                                      <Button
-                                        size={"xs"}
-                                        variant="outline"
-                                        color={
-                                          task.rewind_img ? "blue" : "gray"
+                                    <Box w={"130px"}>
+                                      <Tooltip
+                                        label={
+                                          "Attempt automatic execution of task."
                                         }
-                                        leftIcon={<IconHistory size={14} />}
-                                        sx={{
-                                          opacity: task.rewind_img ? 1 : 0.3,
-                                        }}
-                                        onClick={() => {
-                                          if (task.rewind_img) {
-                                            setShowRewindImage(true);
-                                            setSelectedRewindImage(
-                                              task.rewind_img
-                                            );
-                                          }
-                                        }}
                                       >
-                                        Show Rewind
-                                      </Button>
-                                    </Tooltip>
+                                        <Button
+                                          size={"xs"}
+                                          w={"100%"}
+                                          variant="outline"
+                                          compact
+                                          disabled={
+                                            task.status !== "QUEUED" &&
+                                            task.status !==
+                                              "IN_PROGRESS_REVIEW_NEEDED" &&
+                                            task.status !== "IN_PROGRESS"
+                                          }
+                                          color={"teal"}
+                                          leftIcon={<IconBolt size={14} />}
+                                          onClick={() => {
+                                            setShowAutoExecutionModal(true);
+                                          }}
+                                        >
+                                          Auto Execute
+                                        </Button>
+                                      </Tooltip>
+                                      <Tooltip
+                                        label={
+                                          !task.rewind_img
+                                            ? "No rewind available"
+                                            : "View rewind"
+                                        }
+                                      >
+                                        <Button
+                                          size={"xs"}
+                                          compact
+                                          w={"100%"}
+                                          variant="outline"
+                                          color={
+                                            task.rewind_img ? "blue" : "gray"
+                                          }
+                                          leftIcon={<IconHistory size={14} />}
+                                          sx={{
+                                            opacity: task.rewind_img ? 1 : 0.3,
+                                          }}
+                                          onClick={() => {
+                                            if (task.rewind_img) {
+                                              setShowRewindImage(true);
+                                              setSelectedRewindImage(
+                                                task.rewind_img
+                                              );
+                                            }
+                                          }}
+                                        >
+                                          Rewind
+                                        </Button>
+                                      </Tooltip>
+                                    </Box>
                                     <Text color="gray" size={"sm"} fw={500}>
                                       {/* {moment(task.created_at).format("MM/DD/YY, h:mm a")} */}
                                     </Text>
@@ -6167,14 +6206,15 @@ export const PlannerComponent = ({
                                         onChange={(value) => {
                                           if (value !== null) {
                                             const updatedTasks = [...tasks];
-                                            updatedTasks[index].status =
-                                              value as
-                                                | "QUEUED"
-                                                | "IN_PROGRESS"
-                                                | "IN_PROGRESS_REVIEW_NEEDED"
-                                                | "COMPLETE"
-                                                | "CANCELLED"
-                                                | "BLOCKED";
+                                            updatedTasks[
+                                              index
+                                            ].status = value as
+                                              | "QUEUED"
+                                              | "IN_PROGRESS"
+                                              | "IN_PROGRESS_REVIEW_NEEDED"
+                                              | "COMPLETE"
+                                              | "CANCELLED"
+                                              | "BLOCKED";
                                             setTasks(updatedTasks);
                                           }
                                         }}
@@ -6305,8 +6345,7 @@ export const PlannerComponent = ({
                                       <RichTextArea
                                         overrideSticky={true}
                                         onChange={(value, rawValue) => {
-                                          taskDraftDescriptionRaw.current =
-                                            rawValue;
+                                          taskDraftDescriptionRaw.current = rawValue;
                                           taskDraftDescription.current = value;
                                         }}
                                         value={taskDraftDescriptionRaw.current}
@@ -6553,8 +6592,9 @@ const TaskRenderer = ({
   handleStrategySubmit: () => void;
   setOpenedTaskIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const sequencesV2Ref = useRef(null);
   const [lastLoadedProjectId, setLastLoadedProjectId] = useState<number>(-1);
   const [sequences, setSequences] = useState<any[]>([]);
@@ -6931,9 +6971,8 @@ const SelinStrategy = ({
   counter: Number;
   setOpenedTaskIndex?: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
-  const memory = threads.find(
-    (thread) => thread.id === currentSessionId
-  )?.memory;
+  const memory = threads.find((thread) => thread.id === currentSessionId)
+    ?.memory;
 
   const hackedSubmit = () => {
     handleSubmit &&

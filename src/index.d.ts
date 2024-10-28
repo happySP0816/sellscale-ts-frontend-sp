@@ -97,6 +97,7 @@ export interface Client {
   linkedin_outbound_enabled: boolean;
   mission: string;
   pipeline_notifications_webhook_url: string;
+  pipeline_microsoft_teams_notifications_webhook_url: string;
   slack_bot_connected: boolean;
   slack_bot_connecting_user_name: string;
   tagline: string;

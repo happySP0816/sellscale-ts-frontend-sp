@@ -1327,8 +1327,9 @@ export default function SelinAI() {
 
     if (recording) {
       intervalId = setInterval(() => {
-        const memory = threads.find((thread) => thread.id === currentSessionId)
-          ?.memory;
+        const memory = threads.find(
+          (thread) => thread.id === currentSessionId
+        )?.memory;
         if (
           memory?.strategy_id &&
           promptLengthRef.current > prevPromptLengthRef.current + 80
@@ -1823,17 +1824,16 @@ export default function SelinAI() {
 
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
 
-  const memory = threads.find((thread) => thread.id === sessionIDRef.current)
-    ?.memory;
+  const memory = threads.find(
+    (thread) => thread.id === sessionIDRef.current
+  )?.memory;
 
   const supervisorMemory = threads.find(
     (thread) => thread.is_supervisor_session
   )?.memory;
 
-  const [
-    clientMemoryStateUpdatedTime,
-    setClientMemoryStateUpdatedTime,
-  ] = useState<any>(memory?.memory_line_time_updated);
+  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
+    useState<any>(memory?.memory_line_time_updated);
 
   return (
     <>
@@ -5416,9 +5416,8 @@ export const PlannerComponent = ({
   const [opened, { toggle }] = useDisclosure(true);
   const taskContainerRef = useRef<HTMLDivElement>(null);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
   const [showAutoExecutionModal, setShowAutoExecutionModal] = useState(false);
@@ -6139,31 +6138,33 @@ export const PlannerComponent = ({
                                   )}
                                   <Flex align={"center"} gap={"xs"}>
                                     <Box w={"130px"}>
-                                      <Tooltip
-                                        label={
-                                          "Attempt automatic execution of task."
-                                        }
-                                      >
-                                        <Button
-                                          size={"xs"}
-                                          w={"100%"}
-                                          variant="outline"
-                                          compact
-                                          disabled={
-                                            task.status !== "QUEUED" &&
-                                            task.status !==
-                                              "IN_PROGRESS_REVIEW_NEEDED" &&
-                                            task.status !== "IN_PROGRESS"
+                                      {isInternal && (
+                                        <Tooltip
+                                          label={
+                                            "Attempt automatic execution of task."
                                           }
-                                          color={"teal"}
-                                          leftIcon={<IconBolt size={14} />}
-                                          onClick={() => {
-                                            setShowAutoExecutionModal(true);
-                                          }}
                                         >
-                                          Auto Execute
-                                        </Button>
-                                      </Tooltip>
+                                          <Button
+                                            size={"xs"}
+                                            w={"100%"}
+                                            variant="outline"
+                                            compact
+                                            disabled={
+                                              task.status !== "QUEUED" &&
+                                              task.status !==
+                                                "IN_PROGRESS_REVIEW_NEEDED" &&
+                                              task.status !== "IN_PROGRESS"
+                                            }
+                                            color={"teal"}
+                                            leftIcon={<IconBolt size={14} />}
+                                            onClick={() => {
+                                              setShowAutoExecutionModal(true);
+                                            }}
+                                          >
+                                            Auto Execute
+                                          </Button>
+                                        </Tooltip>
+                                      )}
                                       <Tooltip
                                         label={
                                           !task.rewind_img
@@ -6206,15 +6207,14 @@ export const PlannerComponent = ({
                                         onChange={(value) => {
                                           if (value !== null) {
                                             const updatedTasks = [...tasks];
-                                            updatedTasks[
-                                              index
-                                            ].status = value as
-                                              | "QUEUED"
-                                              | "IN_PROGRESS"
-                                              | "IN_PROGRESS_REVIEW_NEEDED"
-                                              | "COMPLETE"
-                                              | "CANCELLED"
-                                              | "BLOCKED";
+                                            updatedTasks[index].status =
+                                              value as
+                                                | "QUEUED"
+                                                | "IN_PROGRESS"
+                                                | "IN_PROGRESS_REVIEW_NEEDED"
+                                                | "COMPLETE"
+                                                | "CANCELLED"
+                                                | "BLOCKED";
                                             setTasks(updatedTasks);
                                           }
                                         }}
@@ -6345,7 +6345,8 @@ export const PlannerComponent = ({
                                       <RichTextArea
                                         overrideSticky={true}
                                         onChange={(value, rawValue) => {
-                                          taskDraftDescriptionRaw.current = rawValue;
+                                          taskDraftDescriptionRaw.current =
+                                            rawValue;
                                           taskDraftDescription.current = value;
                                         }}
                                         value={taskDraftDescriptionRaw.current}
@@ -6463,7 +6464,7 @@ export const PlannerComponent = ({
             </>
           )}
         </ScrollArea>
-        {logs && (
+        {logs && logs.length > 0 && (
           <Slider
             showLabelOnHover={false}
             defaultValue={100}
@@ -6537,38 +6538,40 @@ export const PlannerComponent = ({
           />
         )}
       </Flex>
-      <Tooltip
-        width={500}
-        label={
-          !selectedLog ? (
-            "No Memories"
+      {logs && logs.length > 0 && (
+        <Tooltip
+          width={500}
+          label={
+            !selectedLog ? (
+              "No Memories"
+            ) : (
+              <Flex direction={"column"} align={"center"}>
+                <Text>Last Event:</Text>
+                <Text style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
+                  Title: {selectedLog.title}
+                </Text>
+                <Text style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
+                  {selectedLog.created_date}
+                </Text>
+                <Text style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
+                  {selectedLog.json_data?.memory}
+                </Text>
+              </Flex>
+            )
+          }
+        >
+          {valueMapping.findIndex((item) => item.id === selectedLog?.id) ===
+          valueMapping.length - 1 ? (
+            <Badge color="green" size={"lg"}>
+              Live
+            </Badge>
           ) : (
-            <Flex direction={"column"} align={"center"}>
-              <Text>Last Event:</Text>
-              <Text style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
-                Title: {selectedLog.title}
-              </Text>
-              <Text style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
-                {selectedLog.created_date}
-              </Text>
-              <Text style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
-                {selectedLog.json_data?.memory}
-              </Text>
-            </Flex>
-          )
-        }
-      >
-        {valueMapping.findIndex((item) => item.id === selectedLog?.id) ===
-        valueMapping.length - 1 ? (
-          <Badge color="green" size={"lg"}>
-            Live
-          </Badge>
-        ) : (
-          <Badge color="red" size={"lg"}>
-            Snapshot
-          </Badge>
-        )}
-      </Tooltip>
+            <Badge color="red" size={"lg"}>
+              Snapshot
+            </Badge>
+          )}
+        </Tooltip>
+      )}
     </Paper>
   );
 };
@@ -6592,9 +6595,8 @@ const TaskRenderer = ({
   handleStrategySubmit: () => void;
   setOpenedTaskIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
-  const [currentProject, setCurrentProject] = useRecoilState(
-    currentProjectState
-  );
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const sequencesV2Ref = useRef(null);
   const [lastLoadedProjectId, setLastLoadedProjectId] = useState<number>(-1);
   const [sequences, setSequences] = useState<any[]>([]);
@@ -6971,8 +6973,9 @@ const SelinStrategy = ({
   counter: Number;
   setOpenedTaskIndex?: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
-  const memory = threads.find((thread) => thread.id === currentSessionId)
-    ?.memory;
+  const memory = threads.find(
+    (thread) => thread.id === currentSessionId
+  )?.memory;
 
   const hackedSubmit = () => {
     handleSubmit &&

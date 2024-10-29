@@ -41,6 +41,7 @@ import { useRecoilValue } from "recoil";
 import { API_URL } from "@constants/data";
 import { userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
+import { useQueryClient } from "@tanstack/react-query";
 
 function LineClampText({ content }: { content: string }) {
   const [clamp, setClamp] = useState<number | undefined>(6);
@@ -62,10 +63,13 @@ function LineClampText({ content }: { content: string }) {
 }
 
 export default function CardView(props: any) {
-  const [tabs, setTabs] = useState("all");
+  const sessionAssets = props.sessionAssets as AssetType[];
+  const baselineAssets = props.baselineAssets as AssetType[];
+  const otherAssets = props.otherAssets as AssetType[];
 
-  const [openedUsed, { toggle: usedToggle }] = useDisclosure(true);
-  const [openedUnUsed, { toggle: unusedToggle }] = useDisclosure(true);
+  const [openedSession, { toggle: sessionToggle }] = useDisclosure(true);
+  const [openedBaseline, { toggle: baselineToggle }] = useDisclosure(false);
+  const [openedOther, { toggle: otherToggle }] = useDisclosure(false);
 
   const [stepModalOpened, { open: stepOpen, close: stepClose }] =
     useDisclosure(false);
@@ -78,12 +82,134 @@ export default function CardView(props: any) {
   const userToken = useRecoilValue(userTokenState);
 
   const [stepData, setStepData] = useState("Use in Any Step");
-  const [stepValue, setStepValue] = useState("Use in Any Step");
-  const [stepStatus, setStepStatus] = useState(false);
-  const [stepKey, setStepKey] = useState();
 
-  const useData = props.useData as AssetType[];
-  const unUseData = props.unUseData as AssetType[];
+  const isSelix = window.location.href.includes("selix");
+
+  const queryClient = useQueryClient();
+
+  const moveToOtherAssets = async function (assetId: number) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session_id");
+
+    const response = await fetch(`${API_URL}/client/move_to_other_assets`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        asset_id: assetId,
+        session_id: sessionId,
+      }),
+    });
+
+    if (response.ok) {
+      queryClient.invalidateQueries(["get-assets"]);
+      showNotification({
+        title: "Success!",
+        message: "Successfully Moved Asset to other Assets",
+        color: "green",
+      });
+    } else {
+      showNotification({
+        title: "Failed!",
+        message: "Failed to Move asset to other assets",
+        color: "red",
+      });
+    }
+  };
+
+  const moveToBaselineAssets = async function (assetId: number) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session_id");
+
+    const response = await fetch(`${API_URL}/client/move_to_baseline_assets`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        asset_id: assetId,
+        session_id: sessionId,
+      }),
+    });
+
+    if (response.ok) {
+      queryClient.invalidateQueries(["get-assets"]);
+      showNotification({
+        title: "Success!",
+        message: "Successfully Moved Asset to baseline Assets",
+        color: "green",
+      });
+    } else {
+      showNotification({
+        title: "Failed!",
+        message: "Failed to Move asset to baseline assets",
+        color: "red",
+      });
+    }
+  };
+
+  const moveToSessionAssets = async function (assetId: number) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session_id");
+
+    const response = await fetch(`${API_URL}/client/move_to_session_assets`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        asset_id: assetId,
+        session_id: sessionId,
+      }),
+    });
+
+    if (response.ok) {
+      queryClient.invalidateQueries(["get-assets"]);
+      showNotification({
+        title: "Success!",
+        message: "Successfully Moved Asset to Session Assets",
+        color: "green",
+      });
+    } else {
+      showNotification({
+        title: "Failed!",
+        message: "Failed to Move asset to session assets",
+        color: "red",
+      });
+    }
+  };
+
+  const deleteAssets = async function (assetId: number) {
+    const response = await fetch(`${API_URL}/client/asset`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        asset_id: assetId,
+      }),
+    });
+
+    if (response.ok) {
+      queryClient.invalidateQueries(["get-assets"]);
+      showNotification({
+        title: "Success!",
+        message: "Successfully deleted asset",
+        color: "green",
+      });
+    } else {
+      showNotification({
+        title: "Failed!",
+        message: "Failed to delete asset",
+        color: "red",
+      });
+    }
+  };
 
   return (
     <>
@@ -168,7 +294,7 @@ export default function CardView(props: any) {
             value={editAsset.client_id.toString()}
             onChange={(e) => setEditAsset({ ...editAsset, client_id: Number(e.target.value) })}
           /> */}
-            <MultiSelect
+            <Select
               label="Asset Tags"
               data={[
                 { value: "Offer", label: "Offer" },
@@ -181,9 +307,9 @@ export default function CardView(props: any) {
                 { value: "email template", label: "email template" },
                 { value: "linkedin template", label: "linkedin template" },
               ]}
-              value={editAsset.asset_tags}
-              onChange={(values) =>
-                setEditAsset({ ...editAsset, asset_tags: values })
+              value={editAsset.asset_tag}
+              onChange={(value) =>
+                setEditAsset({ ...editAsset, asset_tag: value ?? "" })
               }
               placeholder="Select or create tags"
               creatable
@@ -258,17 +384,17 @@ export default function CardView(props: any) {
       <Stack mt={"lg"}>
         <Flex gap={"sm"} align={"center"} w={"100%"}>
           <Text sx={{ whiteSpace: "nowrap" }} color="gray" fw={500}>
-            RAG Database
+            Session Assets
           </Text>
           <Divider w={"100%"} />
-          <ActionIcon onClick={usedToggle}>
-            {openedUsed ? <IconChevronUp /> : <IconChevronDown />}
+          <ActionIcon onClick={sessionToggle}>
+            {openedSession ? <IconChevronUp /> : <IconChevronDown />}
           </ActionIcon>
         </Flex>
-        <Collapse in={openedUsed}>
+        <Collapse in={openedSession && sessionAssets.length > 0}>
           <ScrollArea h={700}>
             <Grid>
-              {useData?.map((item: AssetType, index: number) => {
+              {sessionAssets?.map((item: AssetType, index: number) => {
                 return (
                   <Grid.Col
                     span={window.location.href.includes("selix") ? 6 : 4}
@@ -307,7 +433,7 @@ export default function CardView(props: any) {
                               : "green"
                           }
                         >
-                          {item?.asset_tags.join(", ")}
+                          {item?.asset_tag}
                         </Badge>
                         {/* <Badge variant="outline" color="gray" size="lg"> */}
                         {/*   type: {item?.asset_type} */}
@@ -369,6 +495,166 @@ export default function CardView(props: any) {
                           </Text>
                         </Text>
                         <Divider orientation="vertical" />
+                        <ActionIcon
+                          onClick={async () => {
+                            await moveToBaselineAssets(item.id);
+                          }}
+                        >
+                          <IconChevronDown size={"sm"} />
+                        </ActionIcon>
+                        <ActionIcon
+                          onClick={async () => {
+                            await deleteAssets(item.id);
+                          }}
+                        >
+                          <IconTrash size={"sm"} color={"red"} />
+                        </ActionIcon>
+                      </Group>
+
+                      <Flex gap={"xl"}>
+                        {/* <Button */}
+                        {/*   w={"100%"} */}
+                        {/*   size="md" */}
+                        {/*   variant="outline" */}
+                        {/*   onClick={() => { */}
+                        {/*     setStepStatus(false); */}
+                        {/*     stepOpen(); */}
+                        {/*     //   setStepKey(index); */}
+                        {/*   }} */}
+                        {/* > */}
+                        {/*   {index === stepKey ? stepValue : "Use in Any Step"} */}
+                        {/* </Button> */}
+                        {/* <Button */}
+                        {/*   w={"100%"} */}
+                        {/*   size="md" */}
+                        {/*   color="gray" */}
+                        {/*   variant="outline" */}
+                        {/*   leftIcon={<IconCircleX size={"1.2rem"} />} */}
+                        {/*   onClick={() => { */}
+                        {/*     fetch(`${API_URL}/client/update_asset`, { */}
+                        {/*       method: "POST", */}
+                        {/*       headers: { */}
+                        {/*         Authorization: `Bearer ${userToken}`, */}
+                        {/*         "Content-Type": "application/json", */}
+                        {/*       }, */}
+                        {/*       body: JSON.stringify({ */}
+                        {/*         ...item, */}
+                        {/*         client_archetype_ids: [], */}
+                        {/*         asset_id: item.id, */}
+                        {/*       }), */}
+                        {/*     }).then(() => { */}
+                        {/*       props.fetchAssets(); */}
+                        {/*       showNotification({ */}
+                        {/*         title: "Asset removed from campaigns", */}
+                        {/*         message: "Asset removed from campaigns", */}
+                        {/*       }); */}
+                        {/*     }); */}
+                        {/*   }} */}
+                        {/* > */}
+                        {/*   Stop Using */}
+                        {/* </Button> */}
+                      </Flex>
+                    </Flex>
+                  </Grid.Col>
+                );
+              })}
+            </Grid>
+          </ScrollArea>
+        </Collapse>
+        <Flex gap={"sm"} align={"center"} w={"100%"}>
+          <Text sx={{ whiteSpace: "nowrap" }} color="gray" fw={500}>
+            Baseline Assets
+          </Text>
+          <Divider w={"100%"} />
+          <ActionIcon onClick={baselineToggle}>
+            {openedBaseline ? <IconChevronUp /> : <IconChevronDown />}
+          </ActionIcon>
+        </Flex>
+        <Collapse in={openedBaseline && baselineAssets.length > 0}>
+          <ScrollArea h={700}>
+            <Grid>
+              {baselineAssets?.map((item: AssetType, index: number) => {
+                return (
+                  <Grid.Col
+                    span={window.location.href.includes("selix") ? 6 : 4}
+                    key={index}
+                  >
+                    <Flex
+                      style={{
+                        border: "1px solid #ced4da",
+                        borderRadius: "8px",
+                      }}
+                      p={"sm"}
+                      direction={"column"}
+                      gap={"sm"}
+                    >
+                      <Flex align={"center"} justify={"space-between"}>
+                        {item.asset_type === "PDF" && (
+                          <Button
+                            radius={"xl"}
+                            size="xs"
+                            variant="light"
+                            rightIcon={<IconChevronRight size={"1rem"} />}
+                            onClick={assetOpen}
+                          >
+                            View PDF
+                          </Button>
+                        )}
+                      </Flex>
+                      <Flex gap={"5px"}>
+                        <Badge
+                          size="sm"
+                          color={
+                            item.asset_type === "PDF"
+                              ? "pink"
+                              : item?.asset_type === "URL"
+                              ? "orange"
+                              : "green"
+                          }
+                        >
+                          {item?.asset_tag}
+                        </Badge>
+                        {/* <Badge variant="outline" color="gray" size="lg"> */}
+                        {/*   type: {item?.asset_type} */}
+                        {/* </Badge> */}
+                      </Flex>
+                      <Flex align={"center"} w={"fit-content"}>
+                        <Text fw={700} lineClamp={1} w={"100%"} size={"md"}>
+                          {item?.asset_key}
+                        </Text>
+                      </Flex>
+                      <Flex
+                        p={"md"}
+                        direction={"column"}
+                        gap={"xs"}
+                        bg={item?.asset_raw_value ? "#fff5ff" : "#f4f9ff"}
+                        style={{ borderRadius: "8px" }}
+                      >
+                        {/* {!item?.asset_raw_value && (
+                        <Flex align={'center'} justify={'space-between'}>
+                          <Text
+                            color='#ec58fb'
+                            size={'lg'}
+                            fw={700}
+                            style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <IconSparkles size={'1.4rem'} fill='pink' /> AI Summary
+                          </Text>
+                          <IconEdit color='gray' size={'1.2rem'} />
+                        </Flex>
+                      )} */}
+                        <Flex align={"end"}>
+                          <LineClampText
+                            content={item?.asset_raw_value || item?.asset_value}
+                          />
+                          {true && (
+                            <Flex onClick={() => setEditAsset(item)}>
+                              <IconEdit color="gray" size={"1.2rem"} />
+                            </Flex>
+                          )}
+                        </Flex>
+                      </Flex>
+                      <Group>
                         <Text
                           style={{
                             display: "flex",
@@ -379,14 +665,41 @@ export default function CardView(props: any) {
                           color="gray"
                           size={"sm"}
                         >
-                          # Replies:{" "}
+                          # Sends:{" "}
                           <Text
                             fw={500}
-                            color={item?.num_replies > 50 ? "green" : "orange"}
+                            color={item?.num_sends > 50 ? "green" : "orange"}
                           >
-                            {item?.num_replies}
+                            {item?.num_sends}
                           </Text>
                         </Text>
+                        <Divider orientation="vertical" />
+
+                        <Tooltip label={"Move to Session Assets"}>
+                          <ActionIcon
+                            onClick={async () => {
+                              await moveToSessionAssets(item.id);
+                            }}
+                          >
+                            <IconChevronUp size={"sm"} />
+                          </ActionIcon>
+                        </Tooltip>
+                        <Tooltip label={"Move to other Assets"}>
+                          <ActionIcon
+                            onClick={async () => {
+                              await moveToOtherAssets(item.id);
+                            }}
+                          >
+                            <IconChevronDown size={"sm"} />
+                          </ActionIcon>
+                        </Tooltip>
+                        <ActionIcon
+                          onClick={async () => {
+                            await deleteAssets(item.id);
+                          }}
+                        >
+                          <IconTrash size={"sm"} color={"red"} />
+                        </ActionIcon>
                       </Group>
 
                       <Flex gap={"xl"}>
@@ -444,189 +757,181 @@ export default function CardView(props: any) {
             Other Assets
           </Text>
           <Divider w={"100%"} />
-          <ActionIcon onClick={unusedToggle}>
-            {openedUnUsed ? <IconChevronUp /> : <IconChevronDown />}
+          <ActionIcon onClick={otherToggle}>
+            {openedOther ? <IconChevronUp /> : <IconChevronDown />}
           </ActionIcon>
         </Flex>
-        <Collapse in={openedUnUsed}>
-          <Grid>
-            {unUseData?.map((item: AssetType, index: number) => {
-              return (
-                <Grid.Col
-                  span={window.location.href.includes("selix") ? 6 : 4}
-                  key={index}
-                >
-                  <Flex
-                    style={{ border: "1px solid #ced4da", borderRadius: "8px" }}
-                    p={"sm"}
-                    direction={"column"}
-                    gap={"sm"}
+        <Collapse in={openedOther && otherAssets.length > 0}>
+          <ScrollArea h={700}>
+            <Grid>
+              {otherAssets?.map((item: AssetType, index: number) => {
+                return (
+                  <Grid.Col
+                    span={window.location.href.includes("selix") ? 6 : 4}
+                    key={index}
                   >
-                    <Flex align={"center"} justify={"space-between"}>
-                      {item.asset_type === "PDF" && (
-                        <Button
-                          radius={"xl"}
-                          size="xs"
-                          variant="light"
-                          rightIcon={<IconChevronRight size={"1rem"} />}
-                          onClick={assetOpen}
-                        >
-                          View PDF
-                        </Button>
-                      )}
-                    </Flex>
-                    <Flex gap={"5px"}>
-                      <Badge
-                        size="sm"
-                        color={
-                          item?.asset_type === "PDF"
-                            ? "pink"
-                            : item?.asset_type === "URL"
-                            ? "orange"
-                            : "green"
-                        }
-                      >
-                        {item?.asset_type}
-                      </Badge>
-                      <Badge variant="outline" color="gray" size="lg">
-                        type: {item?.asset_type}
-                      </Badge>
-                    </Flex>
-                    <Flex align={"center"} w={"fit-content"}>
-                      <Text fw={700} lineClamp={1} w={"100%"} size={"md"}>
-                        {item?.asset_key}
-                      </Text>
-                    </Flex>
                     <Flex
-                      p={"md"}
+                      style={{
+                        border: "1px solid #ced4da",
+                        borderRadius: "8px",
+                      }}
+                      p={"sm"}
                       direction={"column"}
-                      gap={"xs"}
-                      // ai response?
-                      bg={false ? "#fff5ff" : "#f4f9ff"}
-                      style={{ borderRadius: "8px" }}
+                      gap={"sm"}
                     >
-                      <Flex align={"end"}>
-                        <LineClampText
-                          content={item?.asset_raw_value || item?.asset_value}
-                        />
-                        {true && (
-                          <Flex
-                            ml="sm"
-                            onClick={() => {
-                              setEditAsset(item);
-                            }}
+                      <Flex align={"center"} justify={"space-between"}>
+                        {item.asset_type === "PDF" && (
+                          <Button
+                            radius={"xl"}
+                            size="xs"
+                            variant="light"
+                            rightIcon={<IconChevronRight size={"1rem"} />}
+                            onClick={assetOpen}
                           >
-                            <IconEdit color="gray" />
-                          </Flex>
+                            View PDF
+                          </Button>
                         )}
                       </Flex>
-                    </Flex>
-                    <Group>
-                      <Text
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          alignItems: "center",
-                        }}
-                        fw={500}
-                        color="gray"
-                        size={"sm"}
-                      >
-                        # Sends:{" "}
-                        <Text
-                          fw={500}
-                          color={item?.num_sends > 50 ? "green" : "orange"}
+                      <Flex gap={"5px"}>
+                        <Badge
+                          size="sm"
+                          color={
+                            item.asset_type === "PDF"
+                              ? "pink"
+                              : item?.asset_type === "URL"
+                              ? "orange"
+                              : "green"
+                          }
                         >
-                          {item?.num_sends}
+                          {item?.asset_tag}
+                        </Badge>
+                        {/* <Badge variant="outline" color="gray" size="lg"> */}
+                        {/*   type: {item?.asset_type} */}
+                        {/* </Badge> */}
+                      </Flex>
+                      <Flex align={"center"} w={"fit-content"}>
+                        <Text fw={700} lineClamp={1} w={"100%"} size={"md"}>
+                          {item?.asset_key}
                         </Text>
-                      </Text>
-                      <Divider orientation="vertical" />
-                      <Text
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          alignItems: "center",
-                        }}
-                        fw={500}
-                        color="gray"
-                        size={"sm"}
+                      </Flex>
+                      <Flex
+                        p={"md"}
+                        direction={"column"}
+                        gap={"xs"}
+                        bg={item?.asset_raw_value ? "#fff5ff" : "#f4f9ff"}
+                        style={{ borderRadius: "8px" }}
                       >
-                        # Repliies:{" "}
+                        {/* {!item?.asset_raw_value && (
+                        <Flex align={'center'} justify={'space-between'}>
+                          <Text
+                            color='#ec58fb'
+                            size={'lg'}
+                            fw={700}
+                            style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <IconSparkles size={'1.4rem'} fill='pink' /> AI Summary
+                          </Text>
+                          <IconEdit color='gray' size={'1.2rem'} />
+                        </Flex>
+                      )} */}
+                        <Flex align={"end"}>
+                          <LineClampText
+                            content={item?.asset_raw_value || item?.asset_value}
+                          />
+                          {true && (
+                            <Flex onClick={() => setEditAsset(item)}>
+                              <IconEdit color="gray" size={"1.2rem"} />
+                            </Flex>
+                          )}
+                        </Flex>
+                      </Flex>
+                      <Group>
                         <Text
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            alignItems: "center",
+                          }}
                           fw={500}
-                          color={item?.num_replies > 50 ? "green" : "orange"}
+                          color="gray"
+                          size={"sm"}
                         >
-                          {item?.num_replies}
+                          # Sends:{" "}
+                          <Text
+                            fw={500}
+                            color={item?.num_sends > 50 ? "green" : "orange"}
+                          >
+                            {item?.num_sends}
+                          </Text>
                         </Text>
-                      </Text>
-                    </Group>
+                        <Divider orientation="vertical" />
+                        <Tooltip label={"Move to Baseline Assets"}>
+                          <ActionIcon
+                            onClick={async () => {
+                              await moveToBaselineAssets(item.id);
+                            }}
+                          >
+                            <IconChevronUp size={"sm"} />
+                          </ActionIcon>
+                        </Tooltip>
+                        <ActionIcon
+                          onClick={async () => {
+                            await deleteAssets(item.id);
+                          }}
+                        >
+                          <IconTrash size={"sm"} color={"red"} />
+                        </ActionIcon>
+                      </Group>
 
-                    <Flex gap={"xl"}>
-                      <Button
-                        w={"100%"}
-                        size="md"
-                        variant="outline"
-                        onClick={() => {
-                          fetch(
-                            `${API_URL}/client/toggle_archetype_id_in_asset_ids`,
-                            {
-                              method: "POST",
-                              headers: {
-                                Authorization: `Bearer ${userToken}`,
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify({
-                                asset_id: item.id,
-                                client_archetype_id: -1,
-                                reason: reason || null,
-                                step_number: item.asset_tags.includes(
-                                  "Linkedin CTA"
-                                )
-                                  ? 1
-                                  : null,
-                              }),
-                            }
-                          ).then(() => {
-                            useOpen();
-                            props.fetchAssets();
-                          });
-                        }}
-                        leftIcon={<IconCircleCheck size={"1rem"} />}
-                      >
-                        Click to Use
-                      </Button>
-                      <Button
-                        w={"100%"}
-                        size="md"
-                        color="red"
-                        variant="outline"
-                        leftIcon={<IconTrash color="red" size={"1rem"} />}
-                        onClick={() => {
-                          fetch(`${API_URL}/client/asset`, {
-                            method: "DELETE",
-                            headers: {
-                              Authorization: `Bearer ${userToken}`,
-                              "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({ asset_id: item.id }),
-                          }).then(() => {
-                            props.fetchAssets();
-                            showNotification({
-                              title: "Asset Deleted",
-                              message:
-                                "The asset has been successfully deleted.",
-                            });
-                          });
-                        }}
-                      >
-                        Delete
-                      </Button>
+                      <Flex gap={"xl"}>
+                        {/* <Button */}
+                        {/*   w={"100%"} */}
+                        {/*   size="md" */}
+                        {/*   variant="outline" */}
+                        {/*   onClick={() => { */}
+                        {/*     setStepStatus(false); */}
+                        {/*     stepOpen(); */}
+                        {/*     //   setStepKey(index); */}
+                        {/*   }} */}
+                        {/* > */}
+                        {/*   {index === stepKey ? stepValue : "Use in Any Step"} */}
+                        {/* </Button> */}
+                        {/* <Button */}
+                        {/*   w={"100%"} */}
+                        {/*   size="md" */}
+                        {/*   color="gray" */}
+                        {/*   variant="outline" */}
+                        {/*   leftIcon={<IconCircleX size={"1.2rem"} />} */}
+                        {/*   onClick={() => { */}
+                        {/*     fetch(`${API_URL}/client/update_asset`, { */}
+                        {/*       method: "POST", */}
+                        {/*       headers: { */}
+                        {/*         Authorization: `Bearer ${userToken}`, */}
+                        {/*         "Content-Type": "application/json", */}
+                        {/*       }, */}
+                        {/*       body: JSON.stringify({ */}
+                        {/*         ...item, */}
+                        {/*         client_archetype_ids: [], */}
+                        {/*         asset_id: item.id, */}
+                        {/*       }), */}
+                        {/*     }).then(() => { */}
+                        {/*       props.fetchAssets(); */}
+                        {/*       showNotification({ */}
+                        {/*         title: "Asset removed from campaigns", */}
+                        {/*         message: "Asset removed from campaigns", */}
+                        {/*       }); */}
+                        {/*     }); */}
+                        {/*   }} */}
+                        {/* > */}
+                        {/*   Stop Using */}
+                        {/* </Button> */}
+                      </Flex>
                     </Flex>
-                  </Flex>
-                </Grid.Col>
-              );
-            })}
-          </Grid>
+                  </Grid.Col>
+                );
+              })}
+            </Grid>
+          </ScrollArea>
         </Collapse>
       </Stack>
       <Modal
@@ -755,28 +1060,28 @@ export default function CardView(props: any) {
             setStepData(value);
           }}
         />
-        <Flex gap={"xl"} mt={"xl"}>
-          <Button
-            variant="outline"
-            color="gray"
-            size="md"
-            fullWidth
-            onClick={stepClose}
-          >
-            Go Back
-          </Button>
-          <Button
-            size="md"
-            fullWidth
-            onClick={() => {
-              setStepStatus(true);
-              useClose();
-              setStepValue(stepData);
-            }}
-          >
-            Use
-          </Button>
-        </Flex>
+        {/* <Flex gap={"xl"} mt={"xl"}> */}
+        {/*   <Button */}
+        {/*     variant="outline" */}
+        {/*     color="gray" */}
+        {/*     size="md" */}
+        {/*     fullWidth */}
+        {/*     onClick={stepClose} */}
+        {/*   > */}
+        {/*     Go Back */}
+        {/*   </Button> */}
+        {/*   <Button */}
+        {/*     size="md" */}
+        {/*     fullWidth */}
+        {/*     onClick={() => { */}
+        {/*       setStepStatus(true); */}
+        {/*       useClose(); */}
+        {/*       setStepValue(stepData); */}
+        {/*     }} */}
+        {/*   > */}
+        {/*     Use */}
+        {/*   </Button> */}
+        {/* </Flex> */}
       </Modal>
       <Modal
         size={700}

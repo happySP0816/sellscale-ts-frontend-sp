@@ -46,7 +46,7 @@ export type AssetType = {
   asset_key: string;
   asset_raw_value: string | null;
   created_at: Date;
-  asset_tags: string[];
+  asset_tag: string;
   asset_type: "PDF" | "URL" | "TEXT";
   asset_value: string;
   client_archetype_ids: number[] | null;
@@ -55,6 +55,9 @@ export type AssetType = {
   num_opens: number;
   num_replies: number;
   num_sends: number;
+  is_baseline_asset: boolean;
+  is_new_asset: boolean;
+  selix_sessions_in_use: number[];
 };
 
 export default function AssetLibraryV2() {
@@ -134,43 +137,42 @@ export default function AssetLibraryV2() {
   const [summary, setSummary] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
-  const [usedData, setUsedData] = useState<AssetType[]>([]);
-  const [unusedData, setUnUsedData] = useState<AssetType[]>([]);
+  const [sessionAssets, setSessionAssets] = useState<AssetType[]>([]);
+  const [baselineAssets, setBaselineAssets] = useState<AssetType[]>([]);
+  const [otherAssets, setOtherAssets] = useState<AssetType[]>([]);
+
   const filterData = (data: AssetType[]) => {
     switch (semiTabs) {
       case "offers":
-        return data.filter((asset) => asset.asset_tags.includes("Offer"));
+        return data.filter((asset) => asset.asset_tag.includes("Offer"));
       case "phrases":
-        return data.filter((asset) => asset.asset_tags.includes("Phrase"));
+        return data.filter((asset) => asset.asset_tag.includes("Phrase"));
       case "study":
-        return data.filter((asset) => asset.asset_tags.includes("Case Study"));
+        return data.filter((asset) => asset.asset_tag.includes("Case Study"));
       case "research":
-        return data.filter((asset) => asset.asset_tags.includes("Research"));
+        return data.filter((asset) => asset.asset_tag.includes("Research"));
       case "email_subject_lines":
-        return data.filter((asset) =>
-          asset.asset_tags.includes("subject line")
-        );
+        return data.filter((asset) => asset.asset_tag.includes("subject line"));
       case "linkedin_cta":
-        return data.filter((asset) =>
-          asset.asset_tags.includes("LinkedIn CTA")
-        );
+        return data.filter((asset) => asset.asset_tag.includes("LinkedIn CTA"));
       case "cta":
-        return data.filter((asset) => asset.asset_tags.includes("CTA"));
+        return data.filter((asset) => asset.asset_tag.includes("CTA"));
       case "email_templates":
         return data.filter((asset) =>
-          asset.asset_tags.includes("email template")
+          asset.asset_tag.includes("email template")
         );
       case "linkedin_templates":
         return data.filter((asset) =>
-          asset.asset_tags.includes("linkedin template")
+          asset.asset_tag.includes("linkedin template")
         );
       default:
         return data;
     }
   };
 
-  const filteredUsedData = filterData(usedData);
-  const filteredUnusedData = filterData(unusedData);
+  const filteredSessionAssets = filterData(sessionAssets);
+  const filteredBaselineAssets = filterData(baselineAssets);
+  const filteredOtherAssets = filterData(otherAssets);
 
   const location = useLocation();
 
@@ -211,7 +213,6 @@ export default function AssetLibraryV2() {
   useEffect(() => {
     fetchAllAssets();
   }, []);
-
   const toggleIngestionMode = async () => {
     setLoading(true);
     const response = await fetch(`${API_URL}/selix/toggle_ingestion_mode`, {
@@ -235,7 +236,7 @@ export default function AssetLibraryV2() {
     refetch();
     setLoading(false);
   };
-
+ 
   const fetchAllAssets = async () => {
     try {
       setLoading(true);
@@ -266,14 +267,14 @@ export default function AssetLibraryV2() {
             !asset.client_archetype_ids ||
             asset.client_archetype_ids.every((id) => id === null)
         );
-        setUsedData(usedData);
+        // setSessionAssets(usedData);
 
         // const unusedData = assets.filter(
         //   (asset: AssetType) =>
         //     !asset.client_archetype_ids ||
         //     asset.client_archetype_ids.every((id) => id === null)
         // );
-        setUnUsedData(unusedData);
+        setOtherAssets(assets);
         const isSelix = window.location.toString().includes("selix");
 
         if (isSelix) {
@@ -285,8 +286,22 @@ export default function AssetLibraryV2() {
             );
           });
 
-          const usedData = dataOrderedByMostRecent.slice(0, 11);
-          const unusedData: AssetType[] = [];
+          const sessionData = dataOrderedByMostRecent.filter((item) => {
+            return item.selix_sessions_in_use.includes(
+              sessionId ? +sessionId : -1
+            );
+          });
+
+          const baselineData = dataOrderedByMostRecent.filter((item) => {
+            return item.is_baseline_asset;
+          });
+
+          const otherData = dataOrderedByMostRecent.filter((item) => {
+            return (
+              !item.is_baseline_asset &&
+              !item.selix_sessions_in_use.includes(sessionId ? +sessionId : -1)
+            );
+          });
 
           // const usedData = dataOrderedByMostRecent.filter(
           //   (asset: AssetType) =>
@@ -298,8 +313,9 @@ export default function AssetLibraryV2() {
           //     !asset.client_archetype_ids ||
           //     asset.client_archetype_ids.every((id) => id === null)
           // );
-          setUsedData(usedData);
-          setUnUsedData(unusedData);
+          setSessionAssets(sessionData);
+          setBaselineAssets(baselineData);
+          setOtherAssets(otherData);
         }
       } else {
         showNotification({
@@ -319,6 +335,11 @@ export default function AssetLibraryV2() {
       setLoading(false);
     }
   };
+
+  const { data: assets, refetch: refetchAssets } = useQuery({
+    queryKey: [`get-assets`],
+    queryFn: fetchAllAssets,
+  });
 
   return (
     <Flex direction={"column"} px={"5%"} gap={"sm"} bg={"white"}>
@@ -520,8 +541,9 @@ export default function AssetLibraryV2() {
             type={tabs}
             view={viewType}
             semiTabs={semiTabs}
-            useData={filteredUsedData}
-            unUseData={filteredUnusedData}
+            sessionAssets={filteredSessionAssets}
+            baselineAssets={filteredBaselineAssets}
+            otherAssets={filteredOtherAssets}
           />
         ) : (
           <ListView
@@ -529,8 +551,8 @@ export default function AssetLibraryV2() {
             type={tabs}
             view={viewType}
             semiTabs={semiTabs}
-            useData={filteredUsedData}
-            unUseData={filteredUnusedData}
+            ragAssets={filteredSessionAssets}
+            otherAssets={filteredOtherAssets}
           />
         )}
       </Box>

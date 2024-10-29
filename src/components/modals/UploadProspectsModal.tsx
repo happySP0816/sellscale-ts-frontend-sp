@@ -904,7 +904,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                                     </td>
                                     <td>
                                       <Badge>{asset.asset_type}</Badge>
-                                      {asset.asset_tags.length > 0 && asset.asset_tags.some(tag => tag?.trim() !== '') && <Badge color="grape">{asset.asset_tags.join(', ')}</Badge>}
+                                      {asset.asset_tag.length > 0 && asset.asset_tag && <Badge color="grape">{asset.asset_tag}</Badge>}
                                     </td>
                                   </tr>
                                 ))}

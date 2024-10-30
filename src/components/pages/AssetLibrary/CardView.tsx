@@ -23,6 +23,7 @@ import {
 } from "@mantine/core";
 import {
   IconChevronDown,
+  IconChevronLeft,
   IconChevronRight,
   IconChevronUp,
   IconCircleCheck,
@@ -88,6 +89,8 @@ export default function CardView(props: any) {
   const queryClient = useQueryClient();
 
   const [textFilterOther, setTextFilterOther] = useState<string>("");
+
+  const [otherAssetPagination, setOtherAssetPagination] = useState<number>(0);
 
   const moveToOtherAssets = async function (assetId: number) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -780,13 +783,41 @@ export default function CardView(props: any) {
             onChange={(e) => setTextFilterOther(e.currentTarget.value ?? "")}
           />
           <ScrollArea h={otherAssets?.length < 2 ? 350 : 700}>
+            <Flex align={"center"} justify={"space-between"} my={"8px"}>
+              <ActionIcon
+                disabled={otherAssetPagination === 0}
+                onClick={() => {
+                  setOtherAssetPagination((prevState) => prevState - 1);
+                }}
+              >
+                <IconChevronLeft />
+              </ActionIcon>
+              <Text>{`Showing ${otherAssetPagination * 10}-${Math.min(
+                (otherAssetPagination + 1) * 10,
+                otherAssets.length
+              )} of ${otherAssets.length}`}</Text>
+              <ActionIcon
+                disabled={
+                  otherAssetPagination > Math.floor(otherAssets.length / 10)
+                }
+                onClick={() => {
+                  setOtherAssetPagination((prevState) => prevState + 1);
+                }}
+              >
+                <IconChevronRight />
+              </ActionIcon>
+            </Flex>
             <Grid>
               {otherAssets
-                ?.filter((item) => {
-                  return item.asset_key
+                .filter((item: AssetType) =>
+                  item.asset_key
                     .toLowerCase()
-                    .includes(textFilterOther.toLowerCase());
-                })
+                    .includes(textFilterOther.toLowerCase())
+                )
+                .slice(
+                  otherAssetPagination * 10,
+                  (otherAssetPagination + 1) * 10
+                )
                 .map((item: AssetType, index: number) => {
                   return (
                     <Grid.Col

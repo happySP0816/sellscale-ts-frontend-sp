@@ -87,6 +87,8 @@ export default function CardView(props: any) {
 
   const queryClient = useQueryClient();
 
+  const [textFilterOther, setTextFilterOther] = useState<string>("");
+
   const moveToOtherAssets = async function (assetId: number) {
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get("session_id");
@@ -231,8 +233,13 @@ export default function CardView(props: any) {
               label="Asset Raw Value"
               value={editAsset.asset_raw_value || ""}
               onChange={(e) =>
-                setEditAsset({ ...editAsset, asset_raw_value: e.target.value })
+                setEditAsset({
+                  ...editAsset,
+                  asset_raw_value: e.target.value,
+                  asset_value: e.target.value,
+                })
               }
+              minRows={8}
             />
             <Select
               label="Asset Type"
@@ -250,6 +257,7 @@ export default function CardView(props: any) {
               ]}
             />
             <TextInput
+              disabled
               label="Asset Value"
               value={editAsset.asset_value}
               onChange={(e) =>
@@ -297,31 +305,31 @@ export default function CardView(props: any) {
             <Select
               label="Asset Tags"
               data={[
-                { value: "Offer", label: "Offer" },
-                { value: "Phrase", label: "Phrase" },
-                { value: "Case Study", label: "Case Study" },
-                { value: "Research", label: "Research" },
-                { value: "subject line", label: "subject line" },
-                { value: "LinkedIn CTA", label: "LinkedIn CTA" },
-                { value: "CTA", label: "CTA" },
-                { value: "email template", label: "email template" },
-                { value: "linkedin template", label: "linkedin template" },
+                { value: "CTA", label: "CTAs" },
+                {
+                  value: "Linkedin Initial Template",
+                  label: "Li Initial Template",
+                },
+                {
+                  value: "Email Initial Template",
+                  label: "Email Initial Template",
+                },
+                {
+                  value: "Linkedin Bump Framework",
+                  label: "Li Bump Framework",
+                },
+                { value: "Email Followup", label: "Email Followup" },
+                { value: "Copy / research", label: "Copy / research" },
+                { value: "Value Props", label: "Value Props" },
+                { value: "Phrases", label: "Phrases" },
+                { value: "Social Proof", label: "Social Proof" },
               ]}
               value={editAsset.asset_tag}
               onChange={(value) =>
                 setEditAsset({ ...editAsset, asset_tag: value ?? "" })
               }
-              placeholder="Select or create tags"
-              creatable
+              placeholder="Select Tags"
               searchable
-              getCreateLabel={(query) => `+ Create ${query}`}
-              onCreate={(query) => {
-                setEditAsset((prev: any) => ({
-                  ...prev,
-                  asset_tags: [...prev.asset_tags, query],
-                }));
-                return { value: query, label: query };
-              }}
             />
             <TextInput
               disabled
@@ -762,66 +770,77 @@ export default function CardView(props: any) {
           </ActionIcon>
         </Flex>
         <Collapse in={openedOther && otherAssets.length > 0}>
+          <TextInput
+            style={{ margin: "0px 0px 8px 0px" }}
+            placeholder={"Search for Assets..."}
+            onChange={(e) => setTextFilterOther(e.currentTarget.value ?? "")}
+          />
           <ScrollArea h={700}>
             <Grid>
-              {otherAssets?.map((item: AssetType, index: number) => {
-                return (
-                  <Grid.Col
-                    span={window.location.href.includes("selix") ? 6 : 4}
-                    key={index}
-                  >
-                    <Flex
-                      style={{
-                        border: "1px solid #ced4da",
-                        borderRadius: "8px",
-                      }}
-                      p={"sm"}
-                      direction={"column"}
-                      gap={"sm"}
+              {otherAssets
+                ?.filter((item) => {
+                  return item.asset_key
+                    .toLowerCase()
+                    .includes(textFilterOther.toLowerCase());
+                })
+                .map((item: AssetType, index: number) => {
+                  return (
+                    <Grid.Col
+                      span={window.location.href.includes("selix") ? 6 : 4}
+                      key={index}
                     >
-                      <Flex align={"center"} justify={"space-between"}>
-                        {item.asset_type === "PDF" && (
-                          <Button
-                            radius={"xl"}
-                            size="xs"
-                            variant="light"
-                            rightIcon={<IconChevronRight size={"1rem"} />}
-                            onClick={assetOpen}
-                          >
-                            View PDF
-                          </Button>
-                        )}
-                      </Flex>
-                      <Flex gap={"5px"}>
-                        <Badge
-                          size="sm"
-                          color={
-                            item.asset_type === "PDF"
-                              ? "pink"
-                              : item?.asset_type === "URL"
-                              ? "orange"
-                              : "green"
-                          }
-                        >
-                          {item?.asset_tag}
-                        </Badge>
-                        {/* <Badge variant="outline" color="gray" size="lg"> */}
-                        {/*   type: {item?.asset_type} */}
-                        {/* </Badge> */}
-                      </Flex>
-                      <Flex align={"center"} w={"fit-content"}>
-                        <Text fw={700} lineClamp={1} w={"100%"} size={"md"}>
-                          {item?.asset_key}
-                        </Text>
-                      </Flex>
                       <Flex
-                        p={"md"}
+                        style={{
+                          border: "1px solid #ced4da",
+                          borderRadius: "8px",
+                        }}
+                        p={"sm"}
                         direction={"column"}
-                        gap={"xs"}
-                        bg={item?.asset_raw_value ? "#fff5ff" : "#f4f9ff"}
-                        style={{ borderRadius: "8px" }}
+                        gap={"sm"}
                       >
-                        {/* {!item?.asset_raw_value && (
+                        <Flex align={"center"} justify={"space-between"}>
+                          {item.asset_type === "PDF" && (
+                            <Button
+                              radius={"xl"}
+                              size="xs"
+                              variant="light"
+                              rightIcon={<IconChevronRight size={"1rem"} />}
+                              onClick={assetOpen}
+                            >
+                              View PDF
+                            </Button>
+                          )}
+                        </Flex>
+                        <Flex gap={"5px"}>
+                          <Badge
+                            size="sm"
+                            color={
+                              item.asset_type === "PDF"
+                                ? "pink"
+                                : item?.asset_type === "URL"
+                                ? "orange"
+                                : "green"
+                            }
+                          >
+                            {item?.asset_tag}
+                          </Badge>
+                          {/* <Badge variant="outline" color="gray" size="lg"> */}
+                          {/*   type: {item?.asset_type} */}
+                          {/* </Badge> */}
+                        </Flex>
+                        <Flex align={"center"} w={"fit-content"}>
+                          <Text fw={700} lineClamp={1} w={"100%"} size={"md"}>
+                            {item?.asset_key}
+                          </Text>
+                        </Flex>
+                        <Flex
+                          p={"md"}
+                          direction={"column"}
+                          gap={"xs"}
+                          bg={item?.asset_raw_value ? "#fff5ff" : "#f4f9ff"}
+                          style={{ borderRadius: "8px" }}
+                        >
+                          {/* {!item?.asset_raw_value && (
                         <Flex align={'center'} justify={'space-between'}>
                           <Text
                             color='#ec58fb'
@@ -834,102 +853,104 @@ export default function CardView(props: any) {
                           <IconEdit color='gray' size={'1.2rem'} />
                         </Flex>
                       )} */}
-                        <Flex align={"end"}>
-                          <LineClampText
-                            content={item?.asset_raw_value || item?.asset_value}
-                          />
-                          {true && (
-                            <Flex onClick={() => setEditAsset(item)}>
-                              <IconEdit color="gray" size={"1.2rem"} />
-                            </Flex>
-                          )}
+                          <Flex align={"end"}>
+                            <LineClampText
+                              content={
+                                item?.asset_raw_value || item?.asset_value
+                              }
+                            />
+                            {true && (
+                              <Flex onClick={() => setEditAsset(item)}>
+                                <IconEdit color="gray" size={"1.2rem"} />
+                              </Flex>
+                            )}
+                          </Flex>
                         </Flex>
-                      </Flex>
-                      <Group>
-                        <Text
-                          style={{
-                            display: "flex",
-                            gap: "8px",
-                            alignItems: "center",
-                          }}
-                          fw={500}
-                          color="gray"
-                          size={"sm"}
-                        >
-                          # Sends:{" "}
+                        <Group>
                           <Text
+                            style={{
+                              display: "flex",
+                              gap: "8px",
+                              alignItems: "center",
+                            }}
                             fw={500}
-                            color={item?.num_sends > 50 ? "green" : "orange"}
+                            color="gray"
+                            size={"sm"}
                           >
-                            {item?.num_sends}
+                            # Sends:{" "}
+                            <Text
+                              fw={500}
+                              color={item?.num_sends > 50 ? "green" : "orange"}
+                            >
+                              {item?.num_sends}
+                            </Text>
                           </Text>
-                        </Text>
-                        <Divider orientation="vertical" />
-                        <Tooltip label={"Move to Baseline Assets"}>
+                          <Divider orientation="vertical" />
+                          <Tooltip label={"Move to Baseline Assets"}>
+                            <ActionIcon
+                              onClick={async () => {
+                                await moveToBaselineAssets(item.id);
+                              }}
+                            >
+                              <IconChevronUp size={"sm"} />
+                            </ActionIcon>
+                          </Tooltip>
                           <ActionIcon
                             onClick={async () => {
-                              await moveToBaselineAssets(item.id);
+                              await deleteAssets(item.id);
                             }}
                           >
-                            <IconChevronUp size={"sm"} />
+                            <IconTrash size={"sm"} color={"red"} />
                           </ActionIcon>
-                        </Tooltip>
-                        <ActionIcon
-                          onClick={async () => {
-                            await deleteAssets(item.id);
-                          }}
-                        >
-                          <IconTrash size={"sm"} color={"red"} />
-                        </ActionIcon>
-                      </Group>
+                        </Group>
 
-                      <Flex gap={"xl"}>
-                        {/* <Button */}
-                        {/*   w={"100%"} */}
-                        {/*   size="md" */}
-                        {/*   variant="outline" */}
-                        {/*   onClick={() => { */}
-                        {/*     setStepStatus(false); */}
-                        {/*     stepOpen(); */}
-                        {/*     //   setStepKey(index); */}
-                        {/*   }} */}
-                        {/* > */}
-                        {/*   {index === stepKey ? stepValue : "Use in Any Step"} */}
-                        {/* </Button> */}
-                        {/* <Button */}
-                        {/*   w={"100%"} */}
-                        {/*   size="md" */}
-                        {/*   color="gray" */}
-                        {/*   variant="outline" */}
-                        {/*   leftIcon={<IconCircleX size={"1.2rem"} />} */}
-                        {/*   onClick={() => { */}
-                        {/*     fetch(`${API_URL}/client/update_asset`, { */}
-                        {/*       method: "POST", */}
-                        {/*       headers: { */}
-                        {/*         Authorization: `Bearer ${userToken}`, */}
-                        {/*         "Content-Type": "application/json", */}
-                        {/*       }, */}
-                        {/*       body: JSON.stringify({ */}
-                        {/*         ...item, */}
-                        {/*         client_archetype_ids: [], */}
-                        {/*         asset_id: item.id, */}
-                        {/*       }), */}
-                        {/*     }).then(() => { */}
-                        {/*       props.fetchAssets(); */}
-                        {/*       showNotification({ */}
-                        {/*         title: "Asset removed from campaigns", */}
-                        {/*         message: "Asset removed from campaigns", */}
-                        {/*       }); */}
-                        {/*     }); */}
-                        {/*   }} */}
-                        {/* > */}
-                        {/*   Stop Using */}
-                        {/* </Button> */}
+                        <Flex gap={"xl"}>
+                          {/* <Button */}
+                          {/*   w={"100%"} */}
+                          {/*   size="md" */}
+                          {/*   variant="outline" */}
+                          {/*   onClick={() => { */}
+                          {/*     setStepStatus(false); */}
+                          {/*     stepOpen(); */}
+                          {/*     //   setStepKey(index); */}
+                          {/*   }} */}
+                          {/* > */}
+                          {/*   {index === stepKey ? stepValue : "Use in Any Step"} */}
+                          {/* </Button> */}
+                          {/* <Button */}
+                          {/*   w={"100%"} */}
+                          {/*   size="md" */}
+                          {/*   color="gray" */}
+                          {/*   variant="outline" */}
+                          {/*   leftIcon={<IconCircleX size={"1.2rem"} />} */}
+                          {/*   onClick={() => { */}
+                          {/*     fetch(`${API_URL}/client/update_asset`, { */}
+                          {/*       method: "POST", */}
+                          {/*       headers: { */}
+                          {/*         Authorization: `Bearer ${userToken}`, */}
+                          {/*         "Content-Type": "application/json", */}
+                          {/*       }, */}
+                          {/*       body: JSON.stringify({ */}
+                          {/*         ...item, */}
+                          {/*         client_archetype_ids: [], */}
+                          {/*         asset_id: item.id, */}
+                          {/*       }), */}
+                          {/*     }).then(() => { */}
+                          {/*       props.fetchAssets(); */}
+                          {/*       showNotification({ */}
+                          {/*         title: "Asset removed from campaigns", */}
+                          {/*         message: "Asset removed from campaigns", */}
+                          {/*       }); */}
+                          {/*     }); */}
+                          {/*   }} */}
+                          {/* > */}
+                          {/*   Stop Using */}
+                          {/* </Button> */}
+                        </Flex>
                       </Flex>
-                    </Flex>
-                  </Grid.Col>
-                );
-              })}
+                    </Grid.Col>
+                  );
+                })}
             </Grid>
           </ScrollArea>
         </Collapse>

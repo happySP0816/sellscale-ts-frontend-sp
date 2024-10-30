@@ -343,7 +343,7 @@ export default function AssetLibraryV2() {
 
   return (
     <Flex direction={"column"} px={"5%"} gap={"sm"} bg={"white"}>
-      <LoadingOverlay visible={loading} />
+      <LoadingOverlay visible={loading} zIndex={3}/>
       <Flex mt="md" align={"center"} justify={"space-between"}>
         <Flex align={"center"} gap={"4px"}>
           <Text size={"25px"} fw={700}>
@@ -589,10 +589,15 @@ export default function AssetLibraryV2() {
             >
               <Group mt="xs">
                 <Radio value="CTA" label="CTAs" size="sm" />
-                <Radio value="Offer" label="Offers" size="sm" />
-                <Radio value="Value Prop" label="Value Prop" size="sm" />
-                <Radio value="Case Study" label="Case Studies" size="sm" />
-                <Radio value="Research" label="Research Points" size="sm" />
+                <Radio value="Linkedin Initial Template" label={"Li Initial Template"} size="sm"/>
+                
+                <Radio value="Email Initial Template" label="Email Initial Template" size="sm" />
+                <Radio value="Linkedin Bump Framework" label="Li Bump Framework" size="sm" />
+                <Radio value="Email Followup" label="Email Followup" size="sm" />
+                <Radio value="Copy / research" label="Copy / research" size="sm" />
+                <Radio value="Value Props" label="Value Props" size="sm" />
+                <Radio value="Phrases" label="Phrases" size="sm" />
+                <Radio value="Social Proof" label="Social Proof" size="sm" />
               </Group>
             </Radio.Group>
           </Flex>
@@ -793,7 +798,7 @@ export default function AssetLibraryV2() {
                         : file
                         ? fileAsB64Raw
                         : null,
-                    asset_tags: [assetType],
+                    asset_tag: assetType,
                     asset_type: ingestionType,
                     asset_value:
                       ingestionType === "TEXT" || ingestionType === "URL"

@@ -400,7 +400,7 @@ export default function CardView(props: any) {
           </ActionIcon>
         </Flex>
         <Collapse in={openedSession && sessionAssets.length > 0}>
-          <ScrollArea h={700}>
+          <ScrollArea h={sessionAssets?.length < 2 ? 350 : 700}>
             <Grid>
               {sessionAssets?.map((item: AssetType, index: number) => {
                 return (
@@ -443,9 +443,11 @@ export default function CardView(props: any) {
                         >
                           {item?.asset_tag}
                         </Badge>
-                        {/* <Badge variant="outline" color="gray" size="lg"> */}
-                        {/*   type: {item?.asset_type} */}
-                        {/* </Badge> */}
+                        {item.is_new_asset && (
+                          <Badge size="sm" color="green">
+                            New!
+                          </Badge>
+                        )}
                       </Flex>
                       <Flex align={"center"} w={"fit-content"}>
                         <Text fw={700} lineClamp={1} w={"100%"} size={"md"}>
@@ -579,7 +581,7 @@ export default function CardView(props: any) {
           </ActionIcon>
         </Flex>
         <Collapse in={openedBaseline && baselineAssets.length > 0}>
-          <ScrollArea h={700}>
+          <ScrollArea h={baselineAssets?.length < 2 ? 350 : 700}>
             <Grid>
               {baselineAssets?.map((item: AssetType, index: number) => {
                 return (
@@ -622,9 +624,11 @@ export default function CardView(props: any) {
                         >
                           {item?.asset_tag}
                         </Badge>
-                        {/* <Badge variant="outline" color="gray" size="lg"> */}
-                        {/*   type: {item?.asset_type} */}
-                        {/* </Badge> */}
+                        {item.is_new_asset && (
+                          <Badge size="sm" color="green">
+                            New!
+                          </Badge>
+                        )}
                       </Flex>
                       <Flex align={"center"} w={"fit-content"}>
                         <Text fw={700} lineClamp={1} w={"100%"} size={"md"}>
@@ -775,7 +779,7 @@ export default function CardView(props: any) {
             placeholder={"Search for Assets..."}
             onChange={(e) => setTextFilterOther(e.currentTarget.value ?? "")}
           />
-          <ScrollArea h={700}>
+          <ScrollArea h={otherAssets?.length < 2 ? 350 : 700}>
             <Grid>
               {otherAssets
                 ?.filter((item) => {
@@ -824,9 +828,11 @@ export default function CardView(props: any) {
                           >
                             {item?.asset_tag}
                           </Badge>
-                          {/* <Badge variant="outline" color="gray" size="lg"> */}
-                          {/*   type: {item?.asset_type} */}
-                          {/* </Badge> */}
+                          {item.is_new_asset && (
+                            <Badge size="sm" color="green">
+                              New!
+                            </Badge>
+                          )}
                         </Flex>
                         <Flex align={"center"} w={"fit-content"}>
                           <Text fw={700} lineClamp={1} w={"100%"} size={"md"}>

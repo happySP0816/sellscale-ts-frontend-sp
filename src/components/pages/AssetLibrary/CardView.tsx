@@ -326,6 +326,7 @@ export default function CardView(props: any) {
                 { value: "Value Props", label: "Value Props" },
                 { value: "Phrases", label: "Phrases" },
                 { value: "Social Proof", label: "Social Proof" },
+                { value: "Paint Points", label: "Paint Points"}
               ]}
               value={editAsset.asset_tag}
               onChange={(value) =>

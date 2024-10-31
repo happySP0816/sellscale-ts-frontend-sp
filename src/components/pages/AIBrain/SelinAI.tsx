@@ -155,7 +155,7 @@ import {
 import Tour from "reactour";
 import { useNavigate } from "react-router-dom";
 import Sequences from "@pages/CampaignV2/Sequences";
-import { SubjectLineTemplate } from "src";
+import { PersonaOverview, SubjectLineTemplate } from "src";
 import { ArchetypeFilters } from "@pages/CampaignV2/ArchetypeFilterModal";
 import SellScaleAssistant from "./SellScaleAssistant";
 import Personalizers from "@pages/CampaignV2/Personalizers";
@@ -173,6 +173,7 @@ import CompanySegmentReview from "@pages/SegmentV2/CompanySegmentReview";
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PopoverTarget } from "@mantine/core/lib/Popover/PopoverTarget/PopoverTarget";
 import { SelixAutoExecuteModal } from "./SelixAutoExecuteModal";
+import { getPersonasOverview } from "@utils/requests/getPersonas";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
@@ -5499,6 +5500,21 @@ export const PlannerComponent = ({
 
   const [selectedLog, setSelectedLog] = useState<MemoryLog | null>(null);
 
+  const { data: personas, refetch: refetchPersonas } = useQuery({
+    queryKey: ["overview-personas"],
+    queryFn: async () => {
+      const response = await getPersonasOverview(userToken);
+
+      if (response.status === "success") {
+        const data = response.data as PersonaOverview[];
+
+        return data;
+      } else {
+        return [];
+      }
+    },
+  });
+
   const updateTask = async (
     taskId: number,
     title: string,
@@ -5568,7 +5584,9 @@ export const PlannerComponent = ({
         ]);
 
         setSegment(res[0] || undefined);
+
         setCurrentProject(project);
+        setSelectedPersona(project);
 
         if (currentThread?.tasks.length) {
           setOpenedTaskIndex(currentThread?.tasks.length - 1);
@@ -5643,6 +5661,20 @@ export const PlannerComponent = ({
     });
   }, [logs]);
 
+  const editSession = (sessionId: number, newCampaignId: number) => {
+    fetch(`${API_URL}/selix/edit_session`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        new_campaign_id: newCampaignId,
+      }),
+    });
+  };
+
   console.log(valueMapping);
 
   const onDragEnd = async (result: {
@@ -5686,6 +5718,11 @@ export const PlannerComponent = ({
     }
   };
 
+  const [selectedPersona, setSelectedPersona] =
+    useState<PersonaOverview | null>(currentProject);
+
+  console.log("selected persona", selectedPersona);
+
   return (
     <Paper p={"sm"} radius={"sm"}>
       <Flex direction={"column"} gap={"4px"}>
@@ -5701,8 +5738,29 @@ export const PlannerComponent = ({
               currentThread?.memory.campaign_id === currentProject?.id && (
                 <Text size={"xs"} color="#E25DEE" fw={600}>
                   Selix Tasks:{" "}
+                  <Select
+                    value={"" + selectedPersona?.id}
+                    data={
+                      personas
+                        ? personas.map((p) => {
+                            return {
+                              value: "" + p.id,
+                              label: `${p.id}: ${p.name}`,
+                            };
+                          })
+                        : []
+                    }
+                    placeholder={"select your archetypes"}
+                    onChange={async (value) => {
+                      if (value) {
+                        await editSession(currentThread.id, +value);
+                        setSelectedPersona(
+                          personas?.find((p) => p.id === +value) ?? null
+                        );
+                      }
+                    }}
+                  />
                   <span className="font-medium text-gray-500">
-                    {currentProject.name}{" "}
                     <a
                       href={`/campaign_v2/${currentProject.id}`}
                       target="_blank"

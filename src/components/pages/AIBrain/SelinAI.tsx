@@ -49,6 +49,8 @@ import {
 import {
   IconAdjustments,
   IconArchive,
+  IconArrowBarToLeft,
+  IconArrowBarToRight,
   IconArrowsMaximize,
   IconArrowsMinimize,
   IconArrowsMove,
@@ -1836,6 +1838,8 @@ export default function SelinAI() {
   const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
     useState<any>(memory?.memory_line_time_updated);
 
+  const [chatfullSize, setChatfullSize] = useState(true);
+
   return (
     <>
       <DropzoneWrapper
@@ -1856,7 +1860,13 @@ export default function SelinAI() {
                 <LoadingOverlay visible={loadingNewChat} />
               )}
 
-              <Paper withBorder w={showSidebar ? "30%" : "5%"} h={"100%"}>
+              <Paper
+                withBorder
+                h={"100%"}
+                className={`transition-all duration-300 ${
+                  showSidebar ? "w-[380px]" : "w-[90px]"
+                }`}
+              >
                 <Flex
                   align={"center"}
                   justify={showSidebar ? "space-between" : "center"}
@@ -3502,7 +3512,13 @@ export default function SelinAI() {
                   </ScrollArea>
                 </Box>
               </Paper>
-              <Flex w={"100%"} gap={"md"} p={"lg"}>
+              <Flex
+                gap="md"
+                p="lg"
+                className={`${
+                  showSidebar ? "w-[calc(100%-380px)]" : "w-[calc(100%-90px)]"
+                }`}
+              >
                 <DragDropContext
                   onDragEnd={(result) => {
                     if (
@@ -3571,23 +3587,42 @@ export default function SelinAI() {
                     // generateResponse={generateResponse}
                     // chatContent={chatContent}
                     // setChatContent={setChatContent}
+                    chatfullSize={chatfullSize}
                   />
-                  <SelixControlCenter
-                    setTasks={setTasks}
-                    refreshAssetLibrary={refreshAssetLibrary}
-                    attachedFile={attachedFile}
-                    counter={counter}
-                    recording={recording}
-                    tasks={tasks}
-                    setPrompt={setPrompt}
-                    handleSubmit={handleSubmit}
-                    setAIType={setAIType}
-                    aiType={aiType}
-                    threads={threads}
-                    messages={messages}
-                    setMessages={setMessages}
-                    currentSessionId={sessionIDRef.current}
-                  />
+                  {chatfullSize && (
+                    <SelixControlCenter
+                      setTasks={setTasks}
+                      refreshAssetLibrary={refreshAssetLibrary}
+                      attachedFile={attachedFile}
+                      counter={counter}
+                      recording={recording}
+                      tasks={tasks}
+                      setPrompt={setPrompt}
+                      handleSubmit={handleSubmit}
+                      setAIType={setAIType}
+                      aiType={aiType}
+                      threads={threads}
+                      messages={messages}
+                      setMessages={setMessages}
+                      currentSessionId={sessionIDRef.current}
+                      setChatfullSize={setChatfullSize}
+                      chatfullSize={chatfullSize}
+                    />
+                  )}
+
+                  {!chatfullSize && (
+                    <Paper withBorder shadow="sm" radius={"md"}>
+                      <ActionIcon
+                        variant="filled"
+                        className="rounded-t-lg rounded-b-none bg-[#E25DEE] hover:bg-[#E25DEE]"
+                        w={45}
+                        h={48}
+                        onClick={() => setChatfullSize(true)}
+                      >
+                        <IconArrowBarToLeft color="white" size={"1rem"} />
+                      </ActionIcon>
+                    </Paper>
+                  )}
                 </DragDropContext>
               </Flex>
             </Flex>
@@ -3863,7 +3898,14 @@ const SegmentChat = (props: any) => {
 
   return (
     <>
-      <Paper withBorder shadow="sm" radius={"md"} w={"40%"} h={"90vh"}>
+      <Paper
+        withBorder
+        shadow="sm"
+        radius={"md"}
+        w={props.chatfullSize ? "40%" : "100%"}
+        h={"90vh"}
+        className=" transition-all duration-300"
+      >
         <Flex
           px={"md"}
           py={"xs"}
@@ -5034,6 +5076,8 @@ const SelixControlCenter = ({
   handleSubmit,
   threads,
   currentSessionId,
+  chatfullSize,
+  setChatfullSize,
 }: {
   setAIType: React.Dispatch<React.SetStateAction<string>>;
   attachedFile: File | null;
@@ -5049,6 +5093,8 @@ const SelixControlCenter = ({
   currentSessionId: Number | null;
   setPrompt: React.Dispatch<React.SetStateAction<string>>;
   handleSubmit: () => void;
+  chatfullSize: boolean;
+  setChatfullSize: any;
 }) => {
   const [selectedCitation, setSelectedCitation] = useState<string | null>(null);
   const currentThreadMemory = threads.find(
@@ -5084,7 +5130,13 @@ const SelixControlCenter = ({
   }, [{ ...threads }]);
 
   return (
-    <Paper withBorder shadow="sm" w={"60%"} radius={"md"} h={"89vh"}>
+    <Paper
+      withBorder
+      shadow="sm"
+      w={!chatfullSize ? "60%" : "100%"}
+      radius={"md"}
+      h={"89vh"}
+    >
       <Modal
         opened={showICPModal}
         onClose={() => {
@@ -5113,22 +5165,33 @@ const SelixControlCenter = ({
         px={"md"}
         py={"xs"}
         align={"center"}
+        justify={"space-between"}
         gap={5}
         bg={"#E25DEE"}
         className=" rounded-t-md"
       >
-        <IconSparkles size={"1rem"} color="white" />
-        <Text fw={600} color="white">
-          Selix AI Workspace
-        </Text>
-        {recording && aiType === "STRATEGY_CREATOR" && (
-          <IconEar
-            size={"1rem"}
-            color="white"
-            style={{
-              animation: "scale 1s infinite",
-            }}
-          />
+        <Flex align={"center"} gap={5}>
+          <IconSparkles size={"1rem"} color="white" />
+          <Text fw={600} color="white">
+            Selix AI Workspace
+          </Text>
+          {recording && aiType === "STRATEGY_CREATOR" && (
+            <IconEar
+              size={"1rem"}
+              color="white"
+              style={{
+                animation: "scale 1s infinite",
+              }}
+            />
+          )}
+        </Flex>
+        {chatfullSize && (
+          <ActionIcon
+            variant="transparent"
+            onClick={() => setChatfullSize(false)}
+          >
+            <IconArrowBarToRight size={"1rem"} color="white" />
+          </ActionIcon>
         )}
       </Flex>
       <Divider bg="gray" />

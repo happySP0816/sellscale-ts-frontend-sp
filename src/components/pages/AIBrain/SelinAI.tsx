@@ -1855,7 +1855,7 @@ export default function SelinAI() {
           p={0}
         >
           {currentSessionId && (
-            <Flex gap={"xl"}>
+            <Flex gap={"xs"}>
               {window.location.hostname !== "localhost" && (
                 <LoadingOverlay visible={loadingNewChat} />
               )}
@@ -1864,7 +1864,7 @@ export default function SelinAI() {
                 withBorder
                 h={"100%"}
                 className={`transition-all duration-300 ${
-                  showSidebar ? "w-[380px]" : "w-[90px]"
+                  showSidebar ? "w-[300px]" : "w-[70px]"
                 }`}
               >
                 <Flex
@@ -3512,13 +3512,7 @@ export default function SelinAI() {
                   </ScrollArea>
                 </Box>
               </Paper>
-              <Flex
-                gap="md"
-                p="lg"
-                className={`${
-                  showSidebar ? "w-[calc(100%-380px)]" : "w-[calc(100%-90px)]"
-                }`}
-              >
+              <Flex gap="md" p="sm" className={`${"w-[calc(100%-90px)]"}`}>
                 <DragDropContext
                   onDragEnd={(result) => {
                     if (
@@ -3902,7 +3896,7 @@ const SegmentChat = (props: any) => {
         withBorder
         shadow="sm"
         radius={"md"}
-        w={props.chatfullSize ? "40%" : "100%"}
+        w={props.chatfullSize ? "48%" : "100%"}
         h={"90vh"}
         className=" transition-all duration-300"
       >
@@ -5133,9 +5127,9 @@ const SelixControlCenter = ({
     <Paper
       withBorder
       shadow="sm"
-      w={!chatfullSize ? "60%" : "100%"}
+      w={!chatfullSize ? "52%" : "100%"}
       radius={"md"}
-      h={"89vh"}
+      h={"90vh"}
     >
       <Modal
         opened={showICPModal}
@@ -5429,7 +5423,7 @@ const SelixControlCenter = ({
           ]}
         />
       </Paper>
-      <ScrollArea h={"87%"} scrollHideDelay={4000}>
+      <ScrollArea h={"100%"} scrollHideDelay={4000}>
         {aiType === "STRATEGY_CREATOR" ? (
           <SelinStrategy
             counter={counter}
@@ -5909,7 +5903,18 @@ export const PlannerComponent = ({
             }
           }
 
-          setOpenedTaskIndex(index);
+          if (index === 0) {
+            if (
+              currentThread.tasks[0].status === "COMPLETE" ||
+              currentThread.tasks[0].status === "CANCELLED"
+            ) {
+              setOpenedTaskIndex(null);
+            } else {
+              setOpenedTaskIndex(0);
+            }
+          } else {
+            setOpenedTaskIndex(index);
+          }
         }
         setTimeout(() => {
           if (taskContainerRef.current) {
@@ -6052,7 +6057,7 @@ export const PlannerComponent = ({
   console.log("selected persona", selectedPersona);
 
   return (
-    <Paper p={"sm"} radius={"sm"}>
+    <Paper p={"sm"} radius={"sm"} h={"90%"}>
       <Flex direction={"column"} gap={"4px"}>
         <Paper
           bg={"#fefafe"}
@@ -6091,6 +6096,7 @@ export const PlannerComponent = ({
                     />
                   )}
                   <span className="font-medium text-gray-500">
+                    {!isInternal && currentProject.name}{" "}
                     <a
                       href={`/campaign_v2/${currentProject.id}`}
                       target="_blank"
@@ -6181,7 +6187,7 @@ export const PlannerComponent = ({
           />
         </Modal>
         <ScrollArea
-          h={isTimeline ? "200px" : "650px"}
+          h={isTimeline ? "200px" : "550px"}
           scrollHideDelay={4000}
           style={{
             overflow: "hidden",
@@ -6354,7 +6360,7 @@ export const PlannerComponent = ({
                             "In Progress",
                           [SelixSessionTaskStatus.COMPLETE]: "Complete",
                           [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
-                          [SelixSessionTaskStatus.BLOCKED]: "���️ Blocked",
+                          [SelixSessionTaskStatus.BLOCKED]: "⚠️ Blocked",
                         };
 
                         return (

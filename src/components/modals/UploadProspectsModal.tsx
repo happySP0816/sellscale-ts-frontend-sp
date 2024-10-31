@@ -500,6 +500,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
       },
       body: JSON.stringify({
         strategy_id: strategy.id,
+        session_id: innerProps?.selixSessionId
       }),
     });
 
@@ -508,8 +509,8 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
       setFindSampleProspects(true);
       setNumStepsEmail(3);
       setNumStepsLinkedin(3);
-      setNumVarianceEmail(3);
-      setNumVarianceLinkedin(3);
+      setNumVarianceEmail(2);
+      setNumVarianceLinkedin(2);
       setCreatedPersona(data.createdPersona || '');
       setFitReason(data.fitReason || '');
       setICPMatchingPrompt(data.icpMatchingPrompt || '');
@@ -550,8 +551,11 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
 
     setTab("scratch");
 
-    setLoadingStrategy(false);
+    // For now, lets only do Linkedin 
+    setWriteEmailSequenceDraft(false);
+    setEmailSequenceOpened(false);
 
+    setLoadingStrategy(false);
   }
 
   const currentProject = useRecoilValue(currentProjectState);
@@ -900,7 +904,7 @@ const [strategyOptions, setStrategyOptions] = useState<Strategy[]>([]);
                                     </td>
                                     <td>
                                       <Badge>{asset.asset_type}</Badge>
-                                      {asset.asset_tags.length > 0 && asset.asset_tags.some(tag => tag?.trim() !== '') && <Badge color="grape">{asset.asset_tags.join(', ')}</Badge>}
+                                      {asset.asset_tag.length > 0 && asset.asset_tag && <Badge color="grape">{asset.asset_tag}</Badge>}
                                     </td>
                                   </tr>
                                 ))}

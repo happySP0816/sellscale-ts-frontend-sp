@@ -229,7 +229,7 @@ export default function ListView(props: any) {
                   cell: (cell) => {
                     return (
                       <Flex gap={'sm'} w={'100%'} px={'sm'} h={'100%'} align={'center'}>
-                        <Badge>{cell.row.original.asset_tags}</Badge>
+                        <Badge>{cell.row.original.asset_tag}</Badge>
                       </Flex>
                     );
                   },
@@ -638,7 +638,7 @@ export default function ListView(props: any) {
 
                     return (
                       <Flex gap={'sm'} w={'100%'} px={'sm'} h={'100%'} align={'center'}>
-                        <Badge>{cell.row.original.asset_tags}</Badge>
+                        <Badge>{cell.row.original.asset_tag}</Badge>
                       </Flex>
                     );
                   },

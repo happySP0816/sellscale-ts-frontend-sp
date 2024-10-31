@@ -44,6 +44,7 @@ import {
   Checkbox,
   Slider,
   Stepper,
+  Progress,
 } from "@mantine/core";
 import {
   IconAdjustments,
@@ -53,6 +54,7 @@ import {
   IconArrowsMaximize,
   IconArrowsMinimize,
   IconArrowsMove,
+  IconBolt,
   IconBrain,
   IconBrowser,
   IconBulb,
@@ -155,7 +157,7 @@ import {
 import Tour from "reactour";
 import { useNavigate } from "react-router-dom";
 import Sequences from "@pages/CampaignV2/Sequences";
-import { SubjectLineTemplate } from "src";
+import { PersonaOverview, SubjectLineTemplate } from "src";
 import { ArchetypeFilters } from "@pages/CampaignV2/ArchetypeFilterModal";
 import SellScaleAssistant from "./SellScaleAssistant";
 import Personalizers from "@pages/CampaignV2/Personalizers";
@@ -172,6 +174,8 @@ import AssetLibraryV2 from "@pages/AssetLibrary/AssetLibraryV2";
 import CompanySegmentReview from "@pages/SegmentV2/CompanySegmentReview";
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PopoverTarget } from "@mantine/core/lib/Popover/PopoverTarget/PopoverTarget";
+import { SelixAutoExecuteModal } from "./SelixAutoExecuteModal";
+import { getPersonasOverview } from "@utils/requests/getPersonas";
 
 const DropzoneWrapper = forwardRef<unknown, CustomCursorWrapperProps>(
   ({ children, handleSubmit, setAttachedFile, setPrompt, prompt }, ref) => {
@@ -367,6 +371,7 @@ export interface ThreadType {
   tasks: TaskType[];
   thread_id: string;
   is_supervisor_session: boolean;
+  is_ingestion_session: boolean;
 }
 
 interface SuggestedMessage {
@@ -803,6 +808,12 @@ export default function SelinAI() {
         urlParams.delete("internal");
       }
       const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+
+      navigate(
+        { pathname: location.pathname, search: urlParams.toString() },
+        { replace: true }
+      );
+
       window.history.replaceState({}, "", newUrl);
 
       setCurrentSessionId(session_id);
@@ -913,7 +924,11 @@ export default function SelinAI() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
         },
-        body: JSON.stringify({ additional_context: "", room_id: room_id }), // Placeholder for the body
+        body: JSON.stringify({
+          additional_context: "",
+          room_id: room_id,
+          device_id: deviceIDRef.current,
+        }), // Placeholder for the body
       });
       const data = await response;
       console.log("data is", data);
@@ -1509,11 +1524,10 @@ export default function SelinAI() {
   const supervisor_thread = threads.find(
     (thread) => thread.is_supervisor_session
   );
-  const [clientMemoryState, setClientMemoryState] = useState<
+  const [supervisorMemoryLine, setSupervisorMemoryLine] = useState<
     string | undefined
   >(
-    threads.find((thread) => thread.id === sessionIDRef.current)?.memory
-      ?.memory_line
+    threads.find((thread) => thread.is_supervisor_session)?.memory?.memory_line
   );
 
   const [memoryPopupOpen, setMemoryPopupOpen] = useState(false);
@@ -1528,9 +1542,8 @@ export default function SelinAI() {
 
   const [generatingNewMemoryLine, setGeneratingNewMemoryLine] = useState(false);
 
-  const [memoryState, setMemoryState] = useState<any>(
-    threads.find((thread) => thread.id === sessionIDRef.current)?.memory
-      .memory_state
+  const [supervisorMemoryState, setSupervisorMemoryState] = useState<any>(
+    threads.find((thread) => thread.is_supervisor_session)?.memory.memory_state
   );
 
   const [showMemoryForKey, setShowMemoryForKey] = useState("");
@@ -1596,7 +1609,7 @@ export default function SelinAI() {
       const result = await response.json();
 
       if (response.ok) {
-        setMemoryState(result.memory_state);
+        setSupervisorMemoryState(result.memory_state);
       } else {
         showNotification({
           title: "Error Fetching Memory State",
@@ -1631,7 +1644,7 @@ export default function SelinAI() {
       const result = await response.json();
       const memory_line = result.memory_line;
 
-      setClientMemoryState(memory_line);
+      setSupervisorMemoryLine(memory_line);
       setMemoryStateChanged(true);
       setClientMemoryStateUpdatedTime(new Date().toLocaleString());
       getMemoryState(sessionIDRef.current as number);
@@ -1776,7 +1789,7 @@ export default function SelinAI() {
   useEffect(() => {
     const handleSpanHover = (event: any) => {
       if (event.target && event.target.dataset.title) {
-        const session = memoryState?.sessions.find(
+        const session = supervisorMemoryState?.sessions.find(
           (s: any) =>
             s.title === event.target.dataset.title ||
             "@" + s.title === event.target.dataset.title
@@ -1800,7 +1813,7 @@ export default function SelinAI() {
       document.removeEventListener("mouseover", handleSpanHover);
       document.removeEventListener("mouseout", handleSpanMouseLeave);
     };
-  }, [memoryState?.sessions]);
+  }, [supervisorMemoryState?.sessions]);
 
   const [newMemoryTitle, setNewMemoryTitle] = useState("");
   const [showAddMemoryInput, setShowAddMemoryInput] = useState(false);
@@ -1818,6 +1831,10 @@ export default function SelinAI() {
     (thread) => thread.id === sessionIDRef.current
   )?.memory;
 
+  const supervisorMemory = threads.find(
+    (thread) => thread.is_supervisor_session
+  )?.memory;
+
   const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
     useState<any>(memory?.memory_line_time_updated);
 
@@ -1832,7 +1849,11 @@ export default function SelinAI() {
         ref={dropzoneRef}
         handleSubmit={handleSubmit}
       >
-        <Card maw={"100%"} style={{ backgroundColor: "transparent" }} p={0}>
+        <Card
+          maw={"100%"}
+          style={{ backgroundColor: "transparent", overflow: "hidden" }}
+          p={0}
+        >
           {currentSessionId && (
             <Flex gap={"xl"}>
               {window.location.hostname !== "localhost" && (
@@ -1857,514 +1878,6 @@ export default function SelinAI() {
                     </Text>
                   )}
                   <Flex align={"center"} gap={"8px"}>
-                    <Popover
-                      width={360}
-                      shadow="md"
-                      position="left"
-                      withinPortal
-                      opened={memoryPopupOpen}
-                      onClose={() => setMemoryPopupOpen(false)}
-                      closeOnClickOutside={false}
-                    >
-                      <Popover.Target>
-                        <Text
-                          ml={"auto"}
-                          size={"xs"}
-                          color="gray"
-                          sx={{ pointer: "cursor" }}
-                          onClick={() => setMemoryPopupOpen((prev) => !prev)}
-                        >
-                          <Badge color="pink" variant="outline">
-                            🧠
-                          </Badge>
-                        </Text>
-                      </Popover.Target>
-                      <Popover.Dropdown>
-                        <Flex justify="space-between" align="center" mb="xs">
-                          <LoadingOverlay visible={fetchingMemoryState} />
-                          <Title order={5}>🧠 Selix Memory</Title>
-
-                          {memory?.session_mode && (
-                            <Tooltip
-                              label={
-                                "Current Goal: " + memory.session_current_goal
-                              }
-                              withArrow
-                            >
-                              <Badge
-                                color="gray"
-                                variant="outline"
-                                radius={4}
-                                ml="auto"
-                              >
-                                ⚙️ {memory.session_mode?.replace("_", " ")}
-                              </Badge>
-                            </Tooltip>
-                          )}
-
-                          <Button
-                            variant="subtle"
-                            color="red"
-                            size="xs"
-                            onClick={() => setMemoryPopupOpen(false)}
-                            ml="auto"
-                          >
-                            x
-                          </Button>
-                        </Flex>
-                        <Card
-                          withBorder
-                          mah={700}
-                          p="md"
-                          sx={{ overflow: "auto" }}
-                        >
-                          <Flex>
-                            <Text size="sm" color="gray" fw="500">
-                              Currently working on:
-                            </Text>
-                            <Button
-                              onClick={() => {
-                                setMemoryPopupOpen(false);
-                                setOpenEventLogs(true);
-                              }}
-                              size="xs"
-                              color="teal"
-                              ml="auto"
-                              variant="outline"
-                              pt="2px"
-                              pb="2px"
-                              mb="4px"
-                              leftIcon={<IconHistory size={16} />}
-                            >
-                              Event Logs
-                            </Button>
-                          </Flex>
-
-                          {memoryLineEditMode ? (
-                            <Textarea
-                              placeholder="Type your notes here..."
-                              autosize
-                              minRows={3}
-                              value={clientMemoryState}
-                              onChange={(e) => {
-                                setClientMemoryState(e.target.value);
-                                setMemoryStateChanged(true);
-                              }}
-                              size="xs"
-                              mb="0px"
-                            />
-                          ) : (
-                            <HoverCard
-                              position="right"
-                              width={200}
-                              shadow="md"
-                              withinPortal
-                            >
-                              <HoverCard.Target>
-                                <Text
-                                  size="xs"
-                                  p="xs"
-                                  onClick={() => {
-                                    setMemoryLineEditMode(true);
-                                    setMemoryStateChanged(true);
-                                  }}
-                                  sx={{ cursor: "pointer" }}
-                                  dangerouslySetInnerHTML={{
-                                    __html: (
-                                      clientMemoryState ||
-                                      "Click to add notes..."
-                                    )?.replace(/\n/g, "<br>"),
-                                  }}
-                                />
-                              </HoverCard.Target>
-                              <HoverCard.Dropdown
-                                miw={memoryLineHoverData ? 500 : 0}
-                                display={memoryLineHoverData ? "block" : "none"}
-                              >
-                                <Text
-                                  size="xs"
-                                  dangerouslySetInnerHTML={{
-                                    __html: memoryLineHoverData,
-                                  }}
-                                />
-                              </HoverCard.Dropdown>
-                            </HoverCard>
-                          )}
-
-                          <Text
-                            align="right"
-                            size="12px"
-                            color="gray"
-                            mt="2px"
-                            ml="auto"
-                          >
-                            Last updated:{" "}
-                            {memory?.memory_line_time_updated
-                              ? moment
-                                  .utc(memory?.memory_line_time_updated)
-                                  .local()
-                                  .fromNow()
-                              : "N/A"}
-                          </Text>
-                          <Flex mt="4px" mb="md">
-                            <Tooltip
-                              label="Rewind to previous version"
-                              withArrow
-                            >
-                              <Button
-                                color="gray"
-                                size="xs"
-                                opacity={!memory?.old_memory_line ? 0.5 : 1}
-                                disabled={!memory?.old_memory_line}
-                                onClick={() => {
-                                  setClientMemoryState(memory?.old_memory_line);
-                                  setClientMemoryStateUpdatedTime(
-                                    memory?.old_memory_line_time_updated
-                                  );
-                                  setMemoryStateChanged(true);
-                                }}
-                              >
-                                ⏮
-                              </Button>
-                            </Tooltip>
-                            <Tooltip
-                              label="Generate a new memory line"
-                              withArrow
-                            >
-                              <Button
-                                color="yellow"
-                                size="xs"
-                                ml="4px"
-                                loading={generatingNewMemoryLine}
-                                onClick={() => generateNewDraftMemoryLine()}
-                              >
-                                ♺
-                              </Button>
-                            </Tooltip>
-                            <Flex
-                              ml="auto"
-                              justify="flex-end"
-                              style={{
-                                display:
-                                  memoryStateChanged || memoryLineUpdating
-                                    ? "flex"
-                                    : "none",
-                              }}
-                            >
-                              {memoryLineUpdating && (
-                                <Flex mr="md" mt="4px">
-                                  <Loader size="sm"></Loader>
-                                </Flex>
-                              )}
-                              <Button
-                                size="xs"
-                                color="green"
-                                disabled={
-                                  !memoryStateChanged || memoryLineUpdating
-                                }
-                                onClick={() => {
-                                  updateMemoryLineAllSessions(
-                                    clientMemoryState
-                                  );
-                                  setClientMemoryStateUpdatedTime(
-                                    new Date().toLocaleString()
-                                  );
-                                  setMemoryStateChanged(false);
-                                  setMemoryLineEditMode(false);
-                                }}
-                              >
-                                ✓
-                              </Button>
-                              <Button
-                                size="xs"
-                                color="red"
-                                disabled={
-                                  !memoryStateChanged || memoryLineUpdating
-                                }
-                                ml="xs"
-                                onClick={() => {
-                                  setClientMemoryState(memory?.memory_line);
-                                  setClientMemoryStateUpdatedTime(
-                                    memory?.memory_line_time_updated
-                                  );
-                                  setMemoryStateChanged(false);
-                                  setMemoryLineEditMode(false);
-                                }}
-                              >
-                                ✗
-                              </Button>
-                            </Flex>
-                          </Flex>
-
-                          {memoryState &&
-                            [
-                              "campaigns",
-                              "sessions",
-                              ...Object.keys(memoryState).filter(
-                                (x) => x !== "campaigns" && x !== "sessions"
-                              ),
-                            ].map((x: string) => {
-                              return (
-                                <Box mb="md">
-                                  {x !== "campaigns" && x !== "sessions" && (
-                                    <Divider mb="md" />
-                                  )}
-                                  {x !== "campaigns" && x !== "sessions" && (
-                                    <Text size="sm" color="gray" fw="500">
-                                      {selixMemoryTitleTranslations[x]}
-                                    </Text>
-                                  )}
-
-                                  {Array.isArray(memoryState[x]) &&
-                                    memoryState[x]
-                                      .filter(
-                                        (y: any) =>
-                                          !clientMemoryState?.includes(y.title)
-                                      )
-                                      .map((y: any) => (
-                                        <>
-                                          <Box id={`memory-${y.memory}`}>
-                                            <HoverCard
-                                              width={500}
-                                              shadow="md"
-                                              withinPortal
-                                              position="right"
-                                            >
-                                              <HoverCard.Target>
-                                                <Flex>
-                                                  <Box
-                                                    ml="4px"
-                                                    sx={{
-                                                      border: "1px solid",
-                                                      borderColor: "gray",
-                                                      borderRadius: "8px",
-                                                      position: "relative",
-                                                      display: "inline-block",
-                                                      cursor: "pointer",
-                                                      fontSize: "10px",
-                                                      padding: "2px",
-                                                      marginBottom: "4px",
-                                                      marginRight: "4px",
-                                                      paddingLeft: "8px",
-                                                      paddingRight: "8px",
-                                                      paddingTop: "2px",
-                                                      paddingBottom: "2px",
-                                                    }}
-                                                    onMouseEnter={(e) => {
-                                                      const target: any =
-                                                        e.currentTarget;
-                                                      if (
-                                                        x === "campaigns" ||
-                                                        x === "sessions"
-                                                      ) {
-                                                        return;
-                                                      }
-                                                      target.querySelector(
-                                                        ".hover-icons"
-                                                      )!.style.display = "flex";
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                      const target: any =
-                                                        e.currentTarget;
-                                                      if (
-                                                        x === "campaigns" ||
-                                                        x === "sessions"
-                                                      ) {
-                                                        return;
-                                                      }
-                                                      target.querySelector(
-                                                        ".hover-icons"
-                                                      )!.style.display = "none";
-                                                    }}
-                                                  >
-                                                    <Text
-                                                      p="0"
-                                                      m="0"
-                                                      size="xs"
-                                                      color="black"
-                                                    >
-                                                      {y["title"].substring(
-                                                        0,
-                                                        36
-                                                      ) +
-                                                        (y["title"].length > 36
-                                                          ? "..."
-                                                          : "")}
-                                                    </Text>
-                                                    <Flex
-                                                      className="hover-icons"
-                                                      sx={{
-                                                        display: "none",
-                                                        position: "absolute",
-                                                        top: "4px",
-                                                        right: "4px",
-                                                        gap: "4px",
-                                                        backgroundColor:
-                                                          "white",
-                                                      }}
-                                                    >
-                                                      <Tooltip
-                                                        label="Mark as Cancelled"
-                                                        withArrow
-                                                      >
-                                                        <ActionIcon
-                                                          size="xs"
-                                                          color="red"
-                                                          onClick={() => {
-                                                            const id = y.id;
-                                                            changeMemoryStatus(
-                                                              id,
-                                                              "CANCELLED"
-                                                            );
-                                                          }}
-                                                        >
-                                                          <IconX size={12} />
-                                                        </ActionIcon>
-                                                      </Tooltip>
-                                                      <Tooltip
-                                                        label="Mark as Complete"
-                                                        withArrow
-                                                      >
-                                                        <ActionIcon
-                                                          size="xs"
-                                                          color="green"
-                                                          onClick={() => {
-                                                            const id = y.id;
-                                                            changeMemoryStatus(
-                                                              id,
-                                                              "COMPLETE"
-                                                            );
-                                                          }}
-                                                        >
-                                                          <IconCheck
-                                                            size={12}
-                                                          />
-                                                        </ActionIcon>
-                                                      </Tooltip>
-                                                    </Flex>
-                                                  </Box>
-                                                  {(x === "campaigns" ||
-                                                    x === "sessions") && (
-                                                    <Box ml="4px" pt="2px">
-                                                      <IconCloud
-                                                        size="0.9rem"
-                                                        color="gray"
-                                                      />
-                                                    </Box>
-                                                  )}
-                                                </Flex>
-                                              </HoverCard.Target>
-                                              <HoverCard.Dropdown maw={500}>
-                                                <Text
-                                                  size="xs"
-                                                  color="black"
-                                                  fw={400}
-                                                  dangerouslySetInnerHTML={{
-                                                    __html:
-                                                      y["memory"] &&
-                                                      y["memory"].replaceAll(
-                                                        "\n",
-                                                        "<br>"
-                                                      ),
-                                                  }}
-                                                />
-                                              </HoverCard.Dropdown>
-                                            </HoverCard>
-                                          </Box>
-                                        </>
-                                      ))}
-
-                                  <Box mt="sm">
-                                    {(x == "needs_user_input" ||
-                                      x == "needs_ai_input") && (
-                                      <>
-                                        {!showAddMemoryInput && (
-                                          <Button
-                                            variant="outline"
-                                            ml="auto"
-                                            size="xs"
-                                            color="gray"
-                                            onClick={() => {
-                                              if (showAddMemoryInput) {
-                                                setShowAddMemoryInput(false);
-                                                setShowMemoryForKey("");
-                                              } else {
-                                                setShowAddMemoryInput(true);
-                                                setShowMemoryForKey(x);
-                                              }
-                                            }}
-                                          >
-                                            +
-                                          </Button>
-                                        )}
-                                        {showAddMemoryInput &&
-                                          showMemoryForKey === x && (
-                                            <Flex mt="xs" align="center">
-                                              <TextInput
-                                                placeholder="Enter memory title"
-                                                value={newMemoryTitle}
-                                                onChange={(event) =>
-                                                  setNewMemoryTitle(
-                                                    event.currentTarget.value
-                                                  )
-                                                }
-                                                onKeyDown={(event) => {
-                                                  if (event.key === "Enter") {
-                                                    addMemory(
-                                                      newMemoryTitle,
-                                                      newMemoryTitle,
-                                                      x == "needs_user_input"
-                                                        ? true
-                                                        : false
-                                                    );
-                                                    setNewMemoryTitle("");
-                                                    setShowAddMemoryInput(
-                                                      false
-                                                    );
-                                                  }
-                                                }}
-                                                width="100%"
-                                                mr="xs"
-                                              />
-                                              <Button
-                                                size="xs"
-                                                color="green"
-                                                onClick={() => {
-                                                  addMemory(
-                                                    newMemoryTitle,
-                                                    newMemoryTitle,
-                                                    x == "needs_user_input"
-                                                      ? true
-                                                      : false
-                                                  );
-                                                  setNewMemoryTitle("");
-                                                  setShowAddMemoryInput(false);
-                                                }}
-                                              >
-                                                Add
-                                              </Button>
-                                              <Button
-                                                size="xs"
-                                                color="red"
-                                                onClick={() => {
-                                                  setNewMemoryTitle("");
-                                                  setShowAddMemoryInput(false);
-                                                }}
-                                                ml="xs"
-                                              >
-                                                Cancel
-                                              </Button>
-                                            </Flex>
-                                          )}
-                                      </>
-                                    )}
-                                  </Box>
-                                </Box>
-                              );
-                            })}
-                        </Card>
-                      </Popover.Dropdown>
-                    </Popover>
                     <ActionIcon onClick={() => setShowSidebar(!showSidebar)}>
                       {showSidebar ? (
                         <IconChevronLeft size={"1rem"} />
@@ -2458,7 +1971,7 @@ export default function SelinAI() {
                                   align={"center"}
                                   justify={"space-between"}
                                 >
-                                  <Flex align={"left"} w={"100%"}>
+                                  <Flex align={"center"} w={"100%"}>
                                     <Text
                                       fw={600}
                                       onClick={(e) => {
@@ -2469,10 +1982,684 @@ export default function SelinAI() {
                                       // style={{ cursor: "text" }}
                                       size={"sm"}
                                     >
-                                      {supervisor_thread.session_name ||
-                                        "Supervisor Session"}
+                                      Chat With Supervisor
                                     </Text>
                                   </Flex>
+                                  <Box
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                  >
+                                    <Popover
+                                      width={450}
+                                      shadow="md"
+                                      position="left"
+                                      withinPortal
+                                      opened={memoryPopupOpen}
+                                      onClose={() => setMemoryPopupOpen(false)}
+                                      closeOnClickOutside={false}
+                                    >
+                                      <Popover.Target>
+                                        <Text
+                                          ml={"auto"}
+                                          size={"xs"}
+                                          color="gray"
+                                          sx={{ pointer: "cursor" }}
+                                          onClick={() =>
+                                            setMemoryPopupOpen((prev) => !prev)
+                                          }
+                                        >
+                                          <Badge color="pink" variant="outline">
+                                            🧑
+                                          </Badge>
+                                        </Text>
+                                      </Popover.Target>
+                                      <Popover.Dropdown>
+                                        <Flex
+                                          justify="space-between"
+                                          align="center"
+                                          mb="xs"
+                                          gap={"4px"}
+                                        >
+                                          <LoadingOverlay
+                                            visible={fetchingMemoryState}
+                                          />
+                                          <Title order={5}>
+                                            🧑 Supervisor Memory
+                                          </Title>
+
+                                          {supervisorMemory?.session_mode && (
+                                            <Tooltip
+                                              label={
+                                                "Current Goal: " +
+                                                supervisorMemory.session_current_goal
+                                              }
+                                              withArrow
+                                            >
+                                              <Badge
+                                                color="gray"
+                                                variant="outline"
+                                                radius={4}
+                                                ml="auto"
+                                              >
+                                                🧑{" "}
+                                                {supervisorMemory.session_mode?.replace(
+                                                  "_",
+                                                  " "
+                                                )}
+                                              </Badge>
+                                            </Tooltip>
+                                          )}
+
+                                          <Button
+                                            variant="subtle"
+                                            color="red"
+                                            size="xs"
+                                            onClick={() =>
+                                              setMemoryPopupOpen(false)
+                                            }
+                                            ml="auto"
+                                          >
+                                            x
+                                          </Button>
+                                        </Flex>
+                                        <Card
+                                          withBorder
+                                          mah={700}
+                                          p="md"
+                                          sx={{ overflow: "auto" }}
+                                        >
+                                          <Flex>
+                                            <Text
+                                              size="sm"
+                                              color="gray"
+                                              fw="500"
+                                            >
+                                              Currently working on:
+                                            </Text>
+                                            <Button
+                                              onClick={() => {
+                                                setMemoryPopupOpen(false);
+                                                setOpenEventLogs(true);
+                                              }}
+                                              size="xs"
+                                              color="teal"
+                                              ml="auto"
+                                              variant="outline"
+                                              pt="2px"
+                                              pb="2px"
+                                              mb="4px"
+                                              leftIcon={
+                                                <IconHistory size={16} />
+                                              }
+                                            >
+                                              Event Logs
+                                            </Button>
+                                          </Flex>
+
+                                          {memoryLineEditMode ? (
+                                            <Textarea
+                                              placeholder="Type your notes here..."
+                                              autosize
+                                              minRows={3}
+                                              value={supervisorMemoryLine}
+                                              onChange={(e) => {
+                                                setSupervisorMemoryLine(
+                                                  e.target.value
+                                                );
+                                                setMemoryStateChanged(true);
+                                              }}
+                                              size="xs"
+                                              mb="0px"
+                                            />
+                                          ) : (
+                                            <HoverCard
+                                              position="right"
+                                              width={200}
+                                              shadow="md"
+                                              withinPortal
+                                            >
+                                              <HoverCard.Target>
+                                                <Text
+                                                  size="xs"
+                                                  p="xs"
+                                                  onClick={() => {
+                                                    setMemoryLineEditMode(true);
+                                                    setMemoryStateChanged(true);
+                                                  }}
+                                                  sx={{ cursor: "pointer" }}
+                                                  dangerouslySetInnerHTML={{
+                                                    __html: (
+                                                      supervisorMemoryLine ||
+                                                      "Click to add notes..."
+                                                    )?.replace(/\n/g, "<br>"),
+                                                  }}
+                                                />
+                                              </HoverCard.Target>
+                                              <HoverCard.Dropdown
+                                                miw={
+                                                  memoryLineHoverData ? 500 : 0
+                                                }
+                                                display={
+                                                  memoryLineHoverData
+                                                    ? "block"
+                                                    : "none"
+                                                }
+                                              >
+                                                <Text
+                                                  size="xs"
+                                                  dangerouslySetInnerHTML={{
+                                                    __html: memoryLineHoverData,
+                                                  }}
+                                                />
+                                              </HoverCard.Dropdown>
+                                            </HoverCard>
+                                          )}
+
+                                          <Text
+                                            align="right"
+                                            size="12px"
+                                            color="gray"
+                                            mt="2px"
+                                            ml="auto"
+                                          >
+                                            Last updated:{" "}
+                                            {supervisorMemory?.memory_line_time_updated
+                                              ? moment
+                                                  .utc(
+                                                    supervisorMemory?.memory_line_time_updated
+                                                  )
+                                                  .local()
+                                                  .fromNow()
+                                              : "N/A"}
+                                          </Text>
+                                          <Flex mt="4px" mb="md">
+                                            <Tooltip
+                                              label="Rewind to previous version"
+                                              withArrow
+                                            >
+                                              <Button
+                                                color="gray"
+                                                size="xs"
+                                                opacity={
+                                                  !supervisorMemory?.old_memory_line
+                                                    ? 0.5
+                                                    : 1
+                                                }
+                                                disabled={
+                                                  !supervisorMemory?.old_memory_line
+                                                }
+                                                onClick={() => {
+                                                  setSupervisorMemoryLine(
+                                                    supervisorMemory?.old_memory_line
+                                                  );
+                                                  setClientMemoryStateUpdatedTime(
+                                                    supervisorMemory?.old_memory_line_time_updated
+                                                  );
+                                                  setMemoryStateChanged(true);
+                                                }}
+                                              >
+                                                ⏮
+                                              </Button>
+                                            </Tooltip>
+                                            <Tooltip
+                                              label="Generate a new memory line"
+                                              withArrow
+                                            >
+                                              <Button
+                                                color="yellow"
+                                                size="xs"
+                                                ml="4px"
+                                                loading={
+                                                  generatingNewMemoryLine
+                                                }
+                                                onClick={() =>
+                                                  generateNewDraftMemoryLine()
+                                                }
+                                              >
+                                                ♺
+                                              </Button>
+                                            </Tooltip>
+                                            <Flex
+                                              ml="auto"
+                                              justify="flex-end"
+                                              style={{
+                                                display:
+                                                  memoryStateChanged ||
+                                                  memoryLineUpdating
+                                                    ? "flex"
+                                                    : "none",
+                                              }}
+                                            >
+                                              {memoryLineUpdating && (
+                                                <Flex mr="md" mt="4px">
+                                                  <Loader size="sm"></Loader>
+                                                </Flex>
+                                              )}
+                                              <Button
+                                                size="xs"
+                                                color="green"
+                                                disabled={
+                                                  !memoryStateChanged ||
+                                                  memoryLineUpdating
+                                                }
+                                                onClick={() => {
+                                                  updateMemoryLineAllSessions(
+                                                    supervisorMemoryLine
+                                                  );
+                                                  setClientMemoryStateUpdatedTime(
+                                                    new Date().toLocaleString()
+                                                  );
+                                                  setMemoryStateChanged(false);
+                                                  setMemoryLineEditMode(false);
+                                                }}
+                                              >
+                                                ✓
+                                              </Button>
+                                              <Button
+                                                size="xs"
+                                                color="red"
+                                                disabled={
+                                                  !memoryStateChanged ||
+                                                  memoryLineUpdating
+                                                }
+                                                ml="xs"
+                                                onClick={() => {
+                                                  setSupervisorMemoryLine(
+                                                    supervisorMemory?.memory_line
+                                                  );
+                                                  setClientMemoryStateUpdatedTime(
+                                                    supervisorMemory?.memory_line_time_updated
+                                                  );
+                                                  setMemoryStateChanged(false);
+                                                  setMemoryLineEditMode(false);
+                                                }}
+                                              >
+                                                ��
+                                              </Button>
+                                            </Flex>
+                                          </Flex>
+
+                                          {supervisorMemoryState &&
+                                            [
+                                              "campaigns",
+                                              "sessions",
+                                              ...Object.keys(
+                                                supervisorMemoryState
+                                              ).filter(
+                                                (x) =>
+                                                  x !== "campaigns" &&
+                                                  x !== "sessions"
+                                              ),
+                                            ].map((x: string) => {
+                                              return (
+                                                <Box mb="md">
+                                                  {x !== "campaigns" &&
+                                                    x !== "sessions" && (
+                                                      <Divider mb="md" />
+                                                    )}
+                                                  {x !== "campaigns" &&
+                                                    x !== "sessions" && (
+                                                      <Text
+                                                        size="sm"
+                                                        color="gray"
+                                                        fw="500"
+                                                      >
+                                                        {
+                                                          selixMemoryTitleTranslations[
+                                                            x
+                                                          ]
+                                                        }
+                                                      </Text>
+                                                    )}
+
+                                                  {Array.isArray(
+                                                    supervisorMemoryState[x]
+                                                  ) &&
+                                                    supervisorMemoryState[x]
+                                                      .filter(
+                                                        (y: any) =>
+                                                          !supervisorMemoryLine?.includes(
+                                                            y.title
+                                                          )
+                                                      )
+                                                      .map((y: any) => (
+                                                        <>
+                                                          <Box
+                                                            id={`memory-${y.memory}`}
+                                                          >
+                                                            <HoverCard
+                                                              width={500}
+                                                              shadow="md"
+                                                              withinPortal
+                                                              position="right"
+                                                            >
+                                                              <HoverCard.Target>
+                                                                <Flex>
+                                                                  <Box
+                                                                    ml="4px"
+                                                                    sx={{
+                                                                      border:
+                                                                        "1px solid",
+                                                                      borderColor:
+                                                                        "gray",
+                                                                      borderRadius:
+                                                                        "8px",
+                                                                      position:
+                                                                        "relative",
+                                                                      display:
+                                                                        "inline-block",
+                                                                      cursor:
+                                                                        "pointer",
+                                                                      fontSize:
+                                                                        "10px",
+                                                                      padding:
+                                                                        "2px",
+                                                                      marginBottom:
+                                                                        "4px",
+                                                                      marginRight:
+                                                                        "4px",
+                                                                      paddingLeft:
+                                                                        "8px",
+                                                                      paddingRight:
+                                                                        "8px",
+                                                                      paddingTop:
+                                                                        "2px",
+                                                                      paddingBottom:
+                                                                        "2px",
+                                                                    }}
+                                                                    onMouseEnter={(
+                                                                      e
+                                                                    ) => {
+                                                                      const target: any =
+                                                                        e.currentTarget;
+                                                                      if (
+                                                                        x ===
+                                                                          "campaigns" ||
+                                                                        x ===
+                                                                          "sessions"
+                                                                      ) {
+                                                                        return;
+                                                                      }
+                                                                      target.querySelector(
+                                                                        ".hover-icons"
+                                                                      )!.style.display =
+                                                                        "flex";
+                                                                    }}
+                                                                    onMouseLeave={(
+                                                                      e
+                                                                    ) => {
+                                                                      const target: any =
+                                                                        e.currentTarget;
+                                                                      if (
+                                                                        x ===
+                                                                          "campaigns" ||
+                                                                        x ===
+                                                                          "sessions"
+                                                                      ) {
+                                                                        return;
+                                                                      }
+                                                                      target.querySelector(
+                                                                        ".hover-icons"
+                                                                      )!.style.display =
+                                                                        "none";
+                                                                    }}
+                                                                  >
+                                                                    <Text
+                                                                      p="0"
+                                                                      m="0"
+                                                                      size="xs"
+                                                                      color="black"
+                                                                    >
+                                                                      {y[
+                                                                        "title"
+                                                                      ].substring(
+                                                                        0,
+                                                                        36
+                                                                      ) +
+                                                                        (y[
+                                                                          "title"
+                                                                        ]
+                                                                          .length >
+                                                                        36
+                                                                          ? "..."
+                                                                          : "")}
+                                                                    </Text>
+                                                                    <Flex
+                                                                      className="hover-icons"
+                                                                      sx={{
+                                                                        display:
+                                                                          "none",
+                                                                        position:
+                                                                          "absolute",
+                                                                        top: "4px",
+                                                                        right:
+                                                                          "4px",
+                                                                        gap: "4px",
+                                                                        backgroundColor:
+                                                                          "white",
+                                                                      }}
+                                                                    >
+                                                                      <Tooltip
+                                                                        label="Mark as Cancelled"
+                                                                        withArrow
+                                                                      >
+                                                                        <ActionIcon
+                                                                          size="xs"
+                                                                          color="red"
+                                                                          onClick={() => {
+                                                                            const id =
+                                                                              y.id;
+                                                                            changeMemoryStatus(
+                                                                              id,
+                                                                              "CANCELLED"
+                                                                            );
+                                                                          }}
+                                                                        >
+                                                                          <IconX
+                                                                            size={
+                                                                              12
+                                                                            }
+                                                                          />
+                                                                        </ActionIcon>
+                                                                      </Tooltip>
+                                                                      <Tooltip
+                                                                        label="Mark as Complete"
+                                                                        withArrow
+                                                                      >
+                                                                        <ActionIcon
+                                                                          size="xs"
+                                                                          color="green"
+                                                                          onClick={() => {
+                                                                            const id =
+                                                                              y.id;
+                                                                            changeMemoryStatus(
+                                                                              id,
+                                                                              "COMPLETE"
+                                                                            );
+                                                                          }}
+                                                                        >
+                                                                          <IconCheck
+                                                                            size={
+                                                                              12
+                                                                            }
+                                                                          />
+                                                                        </ActionIcon>
+                                                                      </Tooltip>
+                                                                    </Flex>
+                                                                  </Box>
+                                                                  {(x ===
+                                                                    "campaigns" ||
+                                                                    x ===
+                                                                      "sessions") && (
+                                                                    <Box
+                                                                      ml="4px"
+                                                                      pt="2px"
+                                                                    >
+                                                                      <IconCloud
+                                                                        size="0.9rem"
+                                                                        color="gray"
+                                                                      />
+                                                                    </Box>
+                                                                  )}
+                                                                </Flex>
+                                                              </HoverCard.Target>
+                                                              <HoverCard.Dropdown
+                                                                maw={500}
+                                                              >
+                                                                <Text
+                                                                  size="xs"
+                                                                  color="black"
+                                                                  fw={400}
+                                                                  dangerouslySetInnerHTML={{
+                                                                    __html:
+                                                                      y[
+                                                                        "memory"
+                                                                      ] &&
+                                                                      y[
+                                                                        "memory"
+                                                                      ].replaceAll(
+                                                                        "\n",
+                                                                        "<br>"
+                                                                      ),
+                                                                  }}
+                                                                />
+                                                              </HoverCard.Dropdown>
+                                                            </HoverCard>
+                                                          </Box>
+                                                        </>
+                                                      ))}
+
+                                                  <Box mt="sm">
+                                                    {(x == "needs_user_input" ||
+                                                      x ==
+                                                        "needs_ai_input") && (
+                                                      <>
+                                                        {!showAddMemoryInput && (
+                                                          <Button
+                                                            variant="outline"
+                                                            ml="auto"
+                                                            size="xs"
+                                                            color="gray"
+                                                            onClick={() => {
+                                                              if (
+                                                                showAddMemoryInput
+                                                              ) {
+                                                                setShowAddMemoryInput(
+                                                                  false
+                                                                );
+                                                                setShowMemoryForKey(
+                                                                  ""
+                                                                );
+                                                              } else {
+                                                                setShowAddMemoryInput(
+                                                                  true
+                                                                );
+                                                                setShowMemoryForKey(
+                                                                  x
+                                                                );
+                                                              }
+                                                            }}
+                                                          >
+                                                            +
+                                                          </Button>
+                                                        )}
+                                                        {showAddMemoryInput &&
+                                                          showMemoryForKey ===
+                                                            x && (
+                                                            <Flex
+                                                              mt="xs"
+                                                              align="center"
+                                                            >
+                                                              <TextInput
+                                                                placeholder="Enter memory title"
+                                                                value={
+                                                                  newMemoryTitle
+                                                                }
+                                                                onChange={(
+                                                                  event
+                                                                ) =>
+                                                                  setNewMemoryTitle(
+                                                                    event
+                                                                      .currentTarget
+                                                                      .value
+                                                                  )
+                                                                }
+                                                                onKeyDown={(
+                                                                  event
+                                                                ) => {
+                                                                  if (
+                                                                    event.key ===
+                                                                    "Enter"
+                                                                  ) {
+                                                                    addMemory(
+                                                                      newMemoryTitle,
+                                                                      newMemoryTitle,
+                                                                      x ==
+                                                                        "needs_user_input"
+                                                                        ? true
+                                                                        : false
+                                                                    );
+                                                                    setNewMemoryTitle(
+                                                                      ""
+                                                                    );
+                                                                    setShowAddMemoryInput(
+                                                                      false
+                                                                    );
+                                                                  }
+                                                                }}
+                                                                width="100%"
+                                                                mr="xs"
+                                                              />
+                                                              <Button
+                                                                size="xs"
+                                                                color="green"
+                                                                onClick={() => {
+                                                                  addMemory(
+                                                                    newMemoryTitle,
+                                                                    newMemoryTitle,
+                                                                    x ==
+                                                                      "needs_user_input"
+                                                                      ? true
+                                                                      : false
+                                                                  );
+                                                                  setNewMemoryTitle(
+                                                                    ""
+                                                                  );
+                                                                  setShowAddMemoryInput(
+                                                                    false
+                                                                  );
+                                                                }}
+                                                              >
+                                                                Add
+                                                              </Button>
+                                                              <Button
+                                                                size="xs"
+                                                                color="red"
+                                                                onClick={() => {
+                                                                  setNewMemoryTitle(
+                                                                    ""
+                                                                  );
+                                                                  setShowAddMemoryInput(
+                                                                    false
+                                                                  );
+                                                                }}
+                                                                ml="xs"
+                                                              >
+                                                                Cancel
+                                                              </Button>
+                                                            </Flex>
+                                                          )}
+                                                      </>
+                                                    )}
+                                                  </Box>
+                                                </Box>
+                                              );
+                                            })}
+                                        </Card>
+                                      </Popover.Dropdown>
+                                    </Popover>
+                                  </Box>
                                 </Flex>
                               </Paper>
                             )}
@@ -3445,7 +3632,7 @@ export default function SelinAI() {
       <SelixMemoryLogs
         threads={threads}
         onRevert={(oldLog: string) => {
-          setClientMemoryState(oldLog);
+          setSupervisorMemoryLine(oldLog);
           setMemoryStateChanged(true);
         }}
         opened={openEventLogs}
@@ -3644,6 +3831,53 @@ const SegmentChat = (props: any) => {
     setRecording(false);
   }, [shouldSubmit]);
 
+  const fetchSelixLogs = async (
+    selixLogId: number | null = null
+  ): Promise<MemoryLog[]> => {
+    try {
+      const response = await fetch(`${API_URL}/selix/get_selix_logs`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          ContentType: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch logs");
+      }
+
+      const result = await response.json();
+
+      console.log("Logs fetched successfully");
+
+      return result.logs;
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+      return [] as MemoryLog[];
+    }
+  };
+
+  const {
+    data: logs,
+    refetch,
+    isLoading,
+  } = useQuery({
+    queryKey: ["selix_event_logs_planner_component_segment_chat"],
+    queryFn: async () => {
+      let l: MemoryLog[] = await fetchSelixLogs();
+      l = l
+        .filter((log) => {
+          return log.show_in_session_memory;
+        })
+        .reverse();
+
+      return l;
+    },
+  });
+
+  console.log("logs: ", logs);
+
   let formattedMemoryLine = clientMemoryState;
   const sessions = memoryState?.sessions;
 
@@ -3662,9 +3896,6 @@ const SegmentChat = (props: any) => {
     }
   }
 
-  console.log("Formatted memory state:", formattedMemoryLine);
-  console.log("Sessions:", sessions);
-
   return (
     <>
       <Paper
@@ -3672,7 +3903,7 @@ const SegmentChat = (props: any) => {
         shadow="sm"
         radius={"md"}
         w={props.chatfullSize ? "40%" : "100%"}
-        h={"100%"}
+        h={"90vh"}
         className=" transition-all duration-300"
       >
         <Flex
@@ -3681,10 +3912,110 @@ const SegmentChat = (props: any) => {
           align={"center"}
           gap={5}
           bg={"white"}
-          className=" rounded-t-md"
+          className={" rounded-t-md"}
+          justify={"space-between"}
         >
-          <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
-          <Text fw={600}>Chat with Selix</Text>
+          <Flex align={"center"}>
+            <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
+            <Text fw={600}>Chat with Selix</Text>
+          </Flex>
+          <Popover width={360} shadow={"md"} position={"left"} withinPortal>
+            <LoadingOverlay visible={isLoading} zIndex={2} />
+            <Popover.Target>
+              <Badge color="gray" variant="outline" radius={4} ml="auto">
+                {(() => {
+                  let emoji = "🧠";
+
+                  switch (props.memory?.session_mode) {
+                    case "campaign_builder":
+                      emoji = "⚙️";
+                      break;
+                    case "ingestion_mode":
+                      emoji = "🍗";
+                      break;
+                    case "supervisor_mode":
+                      emoji = "🧑";
+                      break;
+                    default:
+                      emoji = "🧠";
+                  }
+
+                  return `${emoji}`;
+                })()}
+              </Badge>
+            </Popover.Target>
+            <Popover.Dropdown>
+              <Flex align={"center"} direction={"column"}>
+                <Flex
+                  justify="space-between"
+                  align="center"
+                  mb="xs"
+                  gap={"4px"}
+                >
+                  <Title order={5}>👷 Worker Memory</Title>
+
+                  {props.memory?.session_mode && (
+                    <Tooltip
+                      label={
+                        "Current Goal: " + props.memory?.session_current_goal
+                      }
+                      withArrow
+                    >
+                      <Badge
+                        color="gray"
+                        variant="outline"
+                        radius={4}
+                        ml="auto"
+                      >
+                        {(() => {
+                          let emoji = "🧠";
+
+                          switch (props.memory?.session_mode) {
+                            case "campaign_builder":
+                              emoji = "⚙️";
+                              break;
+                            case "ingestion_mode":
+                              emoji = "🍗";
+                              break;
+                            case "supervisor_mode":
+                              emoji = "🧑";
+                              break;
+                            default:
+                              emoji = "🧠";
+                          }
+
+                          return `${emoji} ${props.memory?.session_mode?.replace(
+                            "-",
+                            " "
+                          )}`;
+                        })()}
+                      </Badge>
+                    </Tooltip>
+                  )}
+                </Flex>
+                <Card withBorder>
+                  {logs && logs.length > 0 && (
+                    <Text
+                      size="sm"
+                      p="xs"
+                      sx={{
+                        cursor: "pointer",
+                        whiteSpace: "normal",
+                        wordWrap: "break-word",
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: (
+                          logs[0].json_data?.metadata ??
+                          logs[0].json_data?.memory ??
+                          "No memory"
+                        )?.replace(/\n/g, "<br>"),
+                      }}
+                    />
+                  )}
+                </Card>
+              </Flex>
+            </Popover.Dropdown>
+          </Popover>
         </Flex>
         <Divider bg="gray" />
         <div style={{ position: "relative", height: "48vh" }}>
@@ -3698,7 +4029,7 @@ const SegmentChat = (props: any) => {
               transition: "transform 0.3s ease",
             }}
           >
-            {messages.length > 1 ? (
+            {messages.length > 0 ? (
               <Flex
                 direction={"column"}
                 gap={"sm"}
@@ -4072,154 +4403,154 @@ const SegmentChat = (props: any) => {
                     );
                   })}
                 </Flex>
-                <div className="absolute bottom-2 right-0 w-5/6 pr-4">
-                  <Paper
-                    withBorder
-                    p={"md"}
-                    radius={"lg"}
-                    className="bg-white shadow-lg"
-                    style={{
-                      border: "2px solid #E25DEE",
-                      boxShadow: "0 8px 16px rgba(226, 93, 238, 0.2)",
-                    }}
-                  >
-                    <Text fw={700} size={"md"} color="#E25DEE" mb={"sm"}>
-                      💡 Suggestions
-                    </Text>
-                    <div className="flex flex-col gap-2">
-                      {suggestedFirstMessage.map((message, index) => (
-                        <Paper
-                          key={index}
-                          withBorder
-                          p={"xs"}
-                          radius={"md"}
-                          className={`hover:border-[#E25DEE] cursor-pointer transition-all duration-300 transform hover:scale-110 ${
-                            typeof message !== "string" ? "bg-blue-100" : ""
-                          }`}
-                          style={{
-                            boxShadow: "0 6px 12px rgba(226, 93, 238, 0.3)",
-                            transition:
-                              "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.boxShadow =
-                              "0 12px 24px rgba(226, 93, 238, 0.5)";
-                            e.currentTarget.style.transform =
-                              "translateY(-4px) scale(1.05)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.boxShadow =
-                              "0 6px 12px rgba(226, 93, 238, 0.3)";
-                            e.currentTarget.style.transform =
-                              "translateY(0) scale(1)";
-                          }}
-                          onClick={(e) => {
-                            if (e.currentTarget) {
-                              e.currentTarget.style.backgroundColor = "#F3E8FF";
-                              setTimeout(() => {
-                                if (e.currentTarget) {
-                                  e.currentTarget.style.backgroundColor =
-                                    "white";
-                                }
-                              }, 300);
-                            }
-                            if (typeof message === "string") {
-                              handleListClick(message);
-                            } else if (typeof message === "object") {
-                              //attach the strategy here.
-                              handleListClick(message.transcript);
-                            }
-                          }}
-                        >
-                          <Flex
-                            align={"center"}
-                            gap={"xs"}
-                            className="transition-transform duration-300 transform hover:translate-x-2"
-                          >
-                            <ThemeIcon
-                              color={
-                                typeof message === "string" ? "grape" : "blue"
-                              }
-                              size={"xl"}
-                            >
-                              <IconBrain size={"1.4rem"} />
-                            </ThemeIcon>
-                            <Text
-                              color={
-                                typeof message === "string" ? "#E25DEE" : "blue"
-                              }
-                              fw={600}
-                              size={"sm"}
-                              className="transition-colors duration-300 hover:text-[#49494]"
-                            >
-                              {typeof message === "string"
-                                ? message
-                                : message.name}
-                            </Text>
-                            {typeof message !== "string" && (
-                              <ThemeIcon
-                                color="blue"
-                                size={"sm"}
-                                className="ml-auto"
-                              >
-                                <IconChevronRight size={"1rem"} />
-                              </ThemeIcon>
-                            )}
-                          </Flex>
-                        </Paper>
-                      ))}
-                    </div>
-                  </Paper>
-                </div>
+                {/* <div className="absolute bottom-2 right-0 w-5/6 pr-4"> */}
+                {/*   <Paper */}
+                {/*     withBorder */}
+                {/*     p={"md"} */}
+                {/*     radius={"lg"} */}
+                {/*     className="bg-white shadow-lg" */}
+                {/*     style={{ */}
+                {/*       border: "2px solid #E25DEE", */}
+                {/*       boxShadow: "0 8px 16px rgba(226, 93, 238, 0.2)", */}
+                {/*     }} */}
+                {/*   > */}
+                {/*     <Text fw={700} size={"md"} color="#E25DEE" mb={"sm"}> */}
+                {/*       💡 Suggestions */}
+                {/*     </Text> */}
+                {/*     <div className="flex flex-col gap-2"> */}
+                {/*       {suggestedFirstMessage.map((message, index) => ( */}
+                {/*         <Paper */}
+                {/*           key={index} */}
+                {/*           withBorder */}
+                {/*           p={"xs"} */}
+                {/*           radius={"md"} */}
+                {/*           className={`hover:border-[#E25DEE] cursor-pointer transition-all duration-300 transform hover:scale-110 ${ */}
+                {/*             typeof message !== "string" ? "bg-blue-100" : "" */}
+                {/*           }`} */}
+                {/*           style={{ */}
+                {/*             boxShadow: "0 6px 12px rgba(226, 93, 238, 0.3)", */}
+                {/*             transition: */}
+                {/*               "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out", */}
+                {/*           }} */}
+                {/*           onMouseEnter={(e) => { */}
+                {/*             e.currentTarget.style.boxShadow = */}
+                {/*               "0 12px 24px rgba(226, 93, 238, 0.5)"; */}
+                {/*             e.currentTarget.style.transform = */}
+                {/*               "translateY(-4px) scale(1.05)"; */}
+                {/*           }} */}
+                {/*           onMouseLeave={(e) => { */}
+                {/*             e.currentTarget.style.boxShadow = */}
+                {/*               "0 6px 12px rgba(226, 93, 238, 0.3)"; */}
+                {/*             e.currentTarget.style.transform = */}
+                {/*               "translateY(0) scale(1)"; */}
+                {/*           }} */}
+                {/*           onClick={(e) => { */}
+                {/*             if (e.currentTarget) { */}
+                {/*               e.currentTarget.style.backgroundColor = "#F3E8FF"; */}
+                {/*               setTimeout(() => { */}
+                {/*                 if (e.currentTarget) { */}
+                {/*                   e.currentTarget.style.backgroundColor = */}
+                {/*                     "white"; */}
+                {/*                 } */}
+                {/*               }, 300); */}
+                {/*             } */}
+                {/*             if (typeof message === "string") { */}
+                {/*               handleListClick(message); */}
+                {/*             } else if (typeof message === "object") { */}
+                {/*               //attach the strategy here. */}
+                {/*               handleListClick(message.transcript); */}
+                {/*             } */}
+                {/*           }} */}
+                {/*         > */}
+                {/*           <Flex */}
+                {/*             align={"center"} */}
+                {/*             gap={"xs"} */}
+                {/*             className="transition-transform duration-300 transform hover:translate-x-2" */}
+                {/*           > */}
+                {/*             <ThemeIcon */}
+                {/*               color={ */}
+                {/*                 typeof message === "string" ? "grape" : "blue" */}
+                {/*               } */}
+                {/*               size={"xl"} */}
+                {/*             > */}
+                {/*               <IconBrain size={"1.4rem"} /> */}
+                {/*             </ThemeIcon> */}
+                {/*             <Text */}
+                {/*               color={ */}
+                {/*                 typeof message === "string" ? "#E25DEE" : "blue" */}
+                {/*               } */}
+                {/*               fw={600} */}
+                {/*               size={"sm"} */}
+                {/*               className="transition-colors duration-300 hover:text-[#49494]" */}
+                {/*             > */}
+                {/*               {typeof message === "string" */}
+                {/*                 ? message */}
+                {/*                 : message.name} */}
+                {/*             </Text> */}
+                {/*             {typeof message !== "string" && ( */}
+                {/*               <ThemeIcon */}
+                {/*                 color="blue" */}
+                {/*                 size={"sm"} */}
+                {/*                 className="ml-auto" */}
+                {/*               > */}
+                {/*                 <IconChevronRight size={"1rem"} /> */}
+                {/*               </ThemeIcon> */}
+                {/*             )} */}
+                {/*           </Flex> */}
+                {/*         </Paper> */}
+                {/*       ))} */}
+                {/*     </div> */}
+                {/*   </Paper> */}
+                {/* </div> */}
               </>
             )}
           </ScrollArea>
         </div>
         <div style={{ position: "relative" }}>
-          <div
-            style={{
-              width: "80%",
-              position: "absolute",
-              top: suggestion !== "" ? "-75px" : "0",
-              left: "50%",
-              transform: "translateX(-50%)",
-              overflow: "hidden",
-              height: suggestion !== "" ? "auto" : "0",
-              visibility: suggestion !== "" ? "visible" : "hidden",
-              zIndex: 1,
-            }}
-          >
-            {
-              <div
-                id="slidingDiv"
-                style={{
-                  backgroundColor: suggestionHidden ? "transparent" : "#E25DEE",
-                  padding: "13px",
-                  borderRadius: "8px",
-                  color: "white",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  fontSize: "0.9rem",
-                  animation:
-                    suggestion !== "" ? "slideUp 0.5s forwards" : "none",
-                }}
-              >
-                {"💡 " + suggestion}
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "5px",
-                    right: "10px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                  }}
-                  onClick={() => slideDown()}
-                >
-                  X
-                </span>
-              </div>
-            }
-          </div>
+          {/* <div */}
+          {/*   style={{ */}
+          {/*     width: "80%", */}
+          {/*     position: "absolute", */}
+          {/*     top: suggestion !== "" ? "-75px" : "0", */}
+          {/*     left: "50%", */}
+          {/*     transform: "translateX(-50%)", */}
+          {/*     overflow: "hidden", */}
+          {/*     height: suggestion !== "" ? "auto" : "0", */}
+          {/*     visibility: suggestion !== "" ? "visible" : "hidden", */}
+          {/*     zIndex: 1, */}
+          {/*   }} */}
+          {/* > */}
+          {/*   { */}
+          {/*     <div */}
+          {/*       id="slidingDiv" */}
+          {/*       style={{ */}
+          {/*         backgroundColor: suggestionHidden ? "transparent" : "#E25DEE", */}
+          {/*         padding: "13px", */}
+          {/*         borderRadius: "8px", */}
+          {/*         color: "white", */}
+          {/*         fontWeight: "bold", */}
+          {/*         textAlign: "center", */}
+          {/*         fontSize: "0.9rem", */}
+          {/*         animation: */}
+          {/*           suggestion !== "" ? "slideUp 0.5s forwards" : "none", */}
+          {/*       }} */}
+          {/*     > */}
+          {/*       {"💡 " + suggestion} */}
+          {/*       <span */}
+          {/*         style={{ */}
+          {/*           position: "absolute", */}
+          {/*           top: "5px", */}
+          {/*           right: "10px", */}
+          {/*           cursor: "pointer", */}
+          {/*           fontWeight: "bold", */}
+          {/*         }} */}
+          {/*         onClick={() => slideDown()} */}
+          {/*       > */}
+          {/*         X */}
+          {/*       </span> */}
+          {/*     </div> */}
+          {/*   } */}
+          {/* </div> */}
           <Paper
             p={"sm"}
             withBorder
@@ -4804,6 +5135,7 @@ const SelixControlCenter = ({
       shadow="sm"
       w={!chatfullSize ? "60%" : "100%"}
       radius={"md"}
+      h={"89vh"}
     >
       <Modal
         opened={showICPModal}
@@ -5396,6 +5728,7 @@ export const PlannerComponent = ({
     useRecoilState(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
+  const [showAutoExecutionModal, setShowAutoExecutionModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Number | null>(null);
   const [creatingNewTask, setCreatingNewTask] = useState(false);
   const [editingTaskText, setEditingTaskText] = useState<string>(""); // title
@@ -5474,6 +5807,21 @@ export const PlannerComponent = ({
 
   const [selectedLog, setSelectedLog] = useState<MemoryLog | null>(null);
 
+  const { data: personas, refetch: refetchPersonas } = useQuery({
+    queryKey: ["overview-personas"],
+    queryFn: async () => {
+      const response = await getPersonasOverview(userToken);
+
+      if (response.status === "success") {
+        const data = response.data as PersonaOverview[];
+
+        return data;
+      } else {
+        return [];
+      }
+    },
+  });
+
   const updateTask = async (
     taskId: number,
     title: string,
@@ -5512,6 +5860,7 @@ export const PlannerComponent = ({
       console.log("Task updated successfully:", data);
 
       queryClient.invalidateQueries(["selix_event_logs_planner_component"]);
+      refetch();
 
       showNotification({
         color: "green",
@@ -5543,10 +5892,24 @@ export const PlannerComponent = ({
         ]);
 
         setSegment(res[0] || undefined);
+
         setCurrentProject(project);
+        setSelectedPersona(project);
 
         if (currentThread?.tasks.length) {
-          setOpenedTaskIndex(currentThread?.tasks.length - 1);
+          let index = 0;
+
+          while (index < currentThread.tasks.length) {
+            const task = currentThread.tasks[index];
+
+            if (task.status === "COMPLETE" || task.status === "CANCELLED") {
+              index += 1;
+            } else {
+              break;
+            }
+          }
+
+          setOpenedTaskIndex(index);
         }
         setTimeout(() => {
           if (taskContainerRef.current) {
@@ -5559,7 +5922,7 @@ export const PlannerComponent = ({
         //show the 'launch campaign' task if a campaign is attached
       }
     })();
-  }, [campaignId]);
+  }, [campaignId, currentThread?.tasks]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -5600,6 +5963,47 @@ export const PlannerComponent = ({
     // setIsLoading(false);
     return data.segments;
   };
+
+  const valueMapping = useMemo(() => {
+    if (!logs || logs.length === 0) {
+      return [];
+    }
+
+    const step = Math.floor(100 / Math.max(logs.length - 1, 1));
+
+    let reversedLogs = [...logs].reverse();
+
+    return reversedLogs.map((item, index) => {
+      return {
+        id: item.id,
+        value: step * index,
+      };
+    });
+  }, [logs]);
+
+  const editSession = (sessionId: number, newCampaignId: number) => {
+    fetch(`${API_URL}/selix/edit_session`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        new_campaign_id: newCampaignId,
+      }),
+    });
+  };
+
+  const [logIndex, setLogIndex] = useState<number>(
+    logs?.findIndex((log) => log.id === selectedLog?.id) ?? 0
+  );
+
+  useEffect(() => {
+    if (logs) {
+      setSelectedLog(logs[logIndex]);
+    }
+  }, [logIndex, logs]);
 
   const onDragEnd = async (result: {
     destination: { index: number };
@@ -5642,799 +6046,968 @@ export const PlannerComponent = ({
     }
   };
 
+  const [selectedPersona, setSelectedPersona] =
+    useState<PersonaOverview | null>(currentProject);
+
+  console.log("selected persona", selectedPersona);
+
   return (
     <Paper p={"sm"} radius={"sm"}>
-      <Flex w={"100%"} align={"center"} gap={"sm"}>
-        {/* <Divider label="Next in line" labelPosition="left" w={"100%"} color="gray" fw={500} />
-        <ActionIcon onClick={toggle}>{opened ? <IconChevronUp size={"1rem"} /> : <IconChevronDown size={"1rem"} />}</ActionIcon> */}
-      </Flex>
-      <Paper
-        bg={"#fefafe"}
-        my={"sm"}
-        px={"sm"}
-        py={8}
-        style={{ borderColor: "#fadafc" }}
-      >
-        <Flex align={"center"} gap={"xs"} justify={"space-between"}>
-          {currentProject &&
-            currentThread?.memory.campaign_id === currentProject?.id && (
-              <Text size={"xs"} color="#E25DEE" fw={600}>
-                Selix Tasks:{" "}
-                <span className="font-medium text-gray-500">
-                  {currentProject.name}{" "}
-                  <a
-                    href={`/campaign_v2/${currentProject.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ marginLeft: "5px" }}
-                  >
-                    <IconExternalLink size="0.8rem" />
-                  </a>
-                </span>
-              </Text>
-            )}
-          {threads.find((thread) => thread.id === currentSessionId)
-            ?.estimated_completion_time && (
-            <Flex gap={5} align={"center"}>
-              <Divider orientation="vertical" color={"#fceafe"} />
-              {threads.find((thread) => thread.id === currentSessionId)
-                ?.estimated_completion_time ? (
-                (() => {
-                  const now = moment();
-                  const estimatedCompletion = moment(
-                    threads.find((thread) => thread.id === currentSessionId)
-                      ?.estimated_completion_time
-                  );
-                  const duration = moment.duration(
-                    estimatedCompletion.diff(now)
-                  );
-                  const hours = Math.floor(duration.asHours());
-                  const minutes = duration.minutes();
-
-                  if (hours < 0 || minutes < 0) {
-                    return (
-                      <Text size={"xs"} className="text-gray-500">
-                        --
-                      </Text>
-                    );
-                  }
-
-                  return (
-                    <>
-                      <Text size={"xs"} className="text-gray-500">
-                        Estimated completion time:
-                      </Text>
-                      <ThemeIcon
-                        bg="#fceafe"
-                        variant="light"
-                        className="text-[#E25DEE]"
-                      >
-                        {hours}
-                      </ThemeIcon>
-                      <Text color="#E25DEE"> hours, </Text>
-                      <ThemeIcon
-                        bg="#fceafe"
-                        variant="light"
-                        className="text-[#E25DEE]"
-                      >
-                        {minutes}
-                      </ThemeIcon>
-                      <Text color="#E25DEE"> minutes</Text>
-                    </>
-                  );
-                })()
-              ) : (
-                <Text size={"xs"} className="text-gray-500">
-                  Estimated completion time: --
-                </Text>
-              )}
-            </Flex>
-          )}
-        </Flex>
-      </Paper>
-      <Modal
-        opened={showRewindImage}
-        onClose={() => setShowRewindImage(false)}
-        title="Rewind Image"
-      >
-        <img
-          src={selectedRewindImage}
-          alt="Rewind"
-          width={"100%"}
-          height={"100%"}
-          style={{ marginTop: "10px" }}
-        />
-      </Modal>
-      <Flex align={"center"} justify={"space-between"}>
-        {logs && logs.length > 0 && (
-          <Select
-            style={{ width: "200px", marginBottom: "16px" }}
-            data={logs.map((value, index) => {
-              if (index === 0) {
-                return { value: "" + value.id, label: "Current" };
-              } else {
-                return {
-                  value: "" + value.id,
-                  label: moment
-                    .utc(value.created_date, "YYYY-MM-DD HH:mm:ss")
-                    .tz("America/Los_Angeles")
-                    .format("YYYY-MM-DD HH:mm:ss"),
-                };
-              }
-            })}
-            value={selectedLog ? "" + selectedLog.id : null}
-            onChange={(v) => {
-              if (!v) {
-                setSelectedLog(null);
-              }
-              const item = logs.find((item) => item.id === +v!);
-
-              if (item) {
-                setSelectedLog(item);
-              } else {
-                setSelectedLog(null);
-              }
-            }}
-            label={"Timeline"}
-          />
-        )}
-        {selectedLog &&
-          logs?.findIndex((value) => value.id === selectedLog.id) !== 0 &&
-          selectedLog.json_data?.tasks &&
-          selectedLog.json_data?.tasks.length > 0 && (
-            <Badge color="red" size={"md"}>
-              Task List Snapshot
-            </Badge>
-          )}
-        {selectedLog && (
-          <Popover width={500} shadow={"md"} position={"bottom"} withinPortal>
-            <Popover.Target>
-              <Text
-                ml={"auto"}
-                size={"xs"}
-                color="gray"
-                sx={{ pointer: "cursor" }}
-              >
-                <Badge color="pink" variant="outline">
-                  🧠
-                </Badge>
-              </Text>
-            </Popover.Target>
-            <Popover.Dropdown>
-              <Text>{selectedLog.json_data?.memory ?? "No Memory"}</Text>
-            </Popover.Dropdown>
-          </Popover>
-        )}
-      </Flex>
-      <ScrollArea
-        h={isTimeline ? "200px" : "70vh"}
-        scrollHideDelay={4000}
-        style={{
-          overflow: "hidden",
-        }}
-        viewportRef={taskContainerRef}
-      >
-        {selectedLog &&
-        logs?.findIndex((value) => value.id === selectedLog.id) !== 0 &&
-        selectedLog.json_data?.tasks &&
-        selectedLog.json_data.tasks.length > 0 ? (
-          selectedLog.json_data.tasks.map((task: TaskType, index: number) => {
-            // index = array.length - 1 - index;
-            const SelixSessionTaskStatus = {
-              QUEUED: "QUEUED",
-              IN_PROGRESS: "IN_PROGRESS",
-              IN_PROGRESS_REVIEW_NEEDED: "IN_PROGRESS_REVIEW_NEEDED",
-              COMPLETE: "COMPLETE",
-              CANCELLED: "CANCELLED",
-              BLOCKED: "BLOCKED",
-            };
-
-            const statusColors = {
-              [SelixSessionTaskStatus.QUEUED]: "blue",
-              [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
-              [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "orange",
-              [SelixSessionTaskStatus.COMPLETE]: "green",
-              [SelixSessionTaskStatus.CANCELLED]: "gray",
-              [SelixSessionTaskStatus.BLOCKED]: "red",
-            };
-
-            const humanReadableStatus = {
-              [SelixSessionTaskStatus.QUEUED]: "Queued",
-              [SelixSessionTaskStatus.IN_PROGRESS]: "In Progress",
-              [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "In Progress",
-              [SelixSessionTaskStatus.COMPLETE]: "Complete",
-              [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
-              [SelixSessionTaskStatus.BLOCKED]: "⚠️ Blocked",
-            };
-
-            return (
-              <Paper withBorder p={"sm"} mb={"xs"} radius={"md"}>
-                <Flex justify={"space-between"} align={"center"} p={"4px"}>
-                  <Text
-                    className="flex gap-1 items-center"
-                    fw={600}
-                    size={"sm"}
-                  >
-                    <ThemeIcon
-                      color="gray"
-                      radius={"xl"}
-                      variant="light"
-                      size={18}
-                    >
-                      {index + 1}
-                    </ThemeIcon>
-                    {task.title}
-                  </Text>
-                  <Flex align={"center"} gap={"xs"}>
-                    <Tooltip
-                      label={
-                        !task.rewind_img ? "No rewind available" : "View rewind"
+      <Flex direction={"column"} gap={"4px"}>
+        <Paper
+          bg={"#fefafe"}
+          my={"sm"}
+          px={"sm"}
+          py={8}
+          style={{ borderColor: "#fadafc" }}
+        >
+          <Flex align={"center"} gap={"xs"} justify={"space-between"}>
+            {currentProject &&
+              currentThread?.memory.campaign_id === currentProject?.id && (
+                <Text size={"xs"} color="#E25DEE" fw={600}>
+                  Selix Tasks:{" "}
+                  {isInternal && (
+                    <Select
+                      value={"" + selectedPersona?.id}
+                      data={
+                        personas
+                          ? personas.map((p) => {
+                              return {
+                                value: "" + p.id,
+                                label: `${p.id}: ${p.name}`,
+                              };
+                            })
+                          : []
                       }
-                    >
-                      <Button
-                        size={"xs"}
-                        variant="outline"
-                        color={task.rewind_img ? "blue" : "gray"}
-                        leftIcon={<IconHistory size={14} />}
-                        sx={{
-                          opacity: task.rewind_img ? 1 : 0.3,
-                        }}
-                        onClick={() => {
-                          if (task.rewind_img) {
-                            setShowRewindImage(true);
-                            setSelectedRewindImage(task.rewind_img);
-                          }
-                        }}
-                      >
-                        Show Rewind
-                      </Button>
-                    </Tooltip>
-                    <Text color="gray" size={"sm"} fw={500}>
-                      {/* {moment(task.created_at).format("MM/DD/YY, h:mm a")} */}
-                    </Text>
-
-                    <Flex align={"center"} gap={"xs"} w={100}>
-                      <ThemeIcon
-                        color={statusColors[task.status]}
-                        radius={"xl"}
-                        size={10}
-                      >
-                        <span />
-                      </ThemeIcon>
-                      <Text
-                        color={statusColors[task.status]}
-                        size={"sm"}
-                        fw={500}
-                      >
-                        {humanReadableStatus[task.status]}
-                      </Text>
-                    </Flex>
-
-                    <ActionIcon
-                      onClick={() =>
-                        setOpenedTaskIndex(
-                          openedTaskIndex === index ? null : index
-                        )
-                      }
-                    >
-                      {openedTaskIndex === index ? (
-                        <IconChevronUp size={"1rem"} />
-                      ) : (
-                        <IconChevronDown size={"1rem"} />
-                      )}
-                    </ActionIcon>
-                  </Flex>
-                </Flex>
-                <Collapse in={openedTaskIndex === index}>
-                  <Text p={"xs"} mt={"sm"} size="xs">
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html:
-                          task.description?.replaceAll("\n", "<br />") || "",
+                      placeholder={"select your archetypes"}
+                      onChange={async (value) => {
+                        if (value) {
+                          await editSession(currentThread.id, +value);
+                          setSelectedPersona(
+                            personas?.find((p) => p.id === +value) ?? null
+                          );
+                        }
                       }}
                     />
-                  </Text>
-                </Collapse>
-              </Paper>
-            );
-          })
-        ) : (
-          <>
-            <Droppable isDropDisabled={!isInternal} droppableId="tasks">
-              {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {tasks
-                    ?.filter(
-                      (task: TaskType, index: number, self: any) =>
-                        task.selix_session_id === currentSessionId
-                    )
-                    .map((task: TaskType, index: number, array) => {
-                      // index = array.length - 1 - index;
-                      const SelixSessionTaskStatus = {
-                        QUEUED: "QUEUED",
-                        IN_PROGRESS: "IN_PROGRESS",
-                        IN_PROGRESS_REVIEW_NEEDED: "IN_PROGRESS_REVIEW_NEEDED",
-                        COMPLETE: "COMPLETE",
-                        CANCELLED: "CANCELLED",
-                        BLOCKED: "BLOCKED",
-                      };
-
-                      const statusColors = {
-                        [SelixSessionTaskStatus.QUEUED]: "blue",
-                        [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
-                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
-                          "orange",
-                        [SelixSessionTaskStatus.COMPLETE]: "green",
-                        [SelixSessionTaskStatus.CANCELLED]: "gray",
-                        [SelixSessionTaskStatus.BLOCKED]: "red",
-                      };
-
-                      const humanReadableStatus = {
-                        [SelixSessionTaskStatus.QUEUED]: "Queued",
-                        [SelixSessionTaskStatus.IN_PROGRESS]: "In Progress",
-                        [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
-                          "In Progress",
-                        [SelixSessionTaskStatus.COMPLETE]: "Complete",
-                        [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
-                        [SelixSessionTaskStatus.BLOCKED]: "⚠️ Blocked",
-                      };
-
-                      return (
-                        <Draggable
-                          key={task.id}
-                          index={index}
-                          draggableId={`task-${task.id}`}
-                          isDragDisabled={!isInternal}
-                        >
-                          {(provided) => (
-                            <Paper
-                              withBorder
-                              p={"sm"}
-                              mb={"xs"}
-                              radius={"md"}
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                            >
-                              <Flex
-                                justify={"space-between"}
-                                align={"center"}
-                                p={"4px"}
-                              >
-                                {editingTask === index ? (
-                                  <Flex align="center" gap="xs" w={"60%"}>
-                                    <Flex w="80%" gap="xs">
-                                      <Input
-                                        value={editingTaskText}
-                                        onChange={(e) => {
-                                          setEditingTaskText(e.target.value);
-                                        }}
-                                        autoFocus
-                                        style={{ flexGrow: 1 }}
-                                      />
-                                      <NativeSelect
-                                        value={task.widget_type}
-                                        data={[
-                                          {
-                                            value: "",
-                                            label: "Proof of Work (image)",
-                                          },
-                                          {
-                                            value: "LAUNCH_CAMPAIGN",
-                                            label: "Launch Campaign",
-                                          },
-                                          {
-                                            value: "VIEW_STRATEGY",
-                                            label: "View Strategy",
-                                          },
-                                          {
-                                            value: "REVIEW_PROSPECTS",
-                                            label: "Review Prospects",
-                                          },
-                                          {
-                                            value: "VIEW_SEQUENCE",
-                                            label: "View Sequence",
-                                          },
-                                          {
-                                            value: "VIEW_PERSONALIZERS",
-                                            label: "Campaign Personalizers",
-                                          },
-                                          {
-                                            value: "REVIEW_COMPANIES",
-                                            label: "Review Companies",
-                                          },
-                                          {
-                                            value: "ONE_SHOT_GENERATOR",
-                                            label: "One Shot Generator",
-                                          },
-                                          {
-                                            value: "COMPANY_SEGMENT",
-                                            label: "Company Segment",
-                                          },
-                                        ]}
-                                        onChange={(e) => {
-                                          const updatedTasks = [...tasks];
-                                          updatedTasks[index].widget_type =
-                                            e.currentTarget.value;
-                                          setTasks(updatedTasks);
-                                        }}
-                                        style={{ width: "40%" }}
-                                      />
-                                    </Flex>
-                                    <Badge
-                                      color="green"
-                                      style={{
-                                        cursor: "pointer",
-                                        whiteSpace: "nowrap",
-                                      }}
-                                      onClick={() => {
-                                        setEditingTask(null);
-                                        setTasks(
-                                          tasks.map((t, i) =>
-                                            i === index
-                                              ? {
-                                                  ...t,
-                                                  title: editingTaskText,
-                                                  description:
-                                                    taskDraftDescription.current,
-                                                }
-                                              : t
-                                          )
-                                        );
-                                        updateTask(
-                                          tasks[index].id,
-                                          editingTaskText,
-                                          taskDraftDescription.current,
-                                          tasks[index].status,
-                                          tasks[index].widget_type
-                                        );
-                                      }}
-                                    >
-                                      Save
-                                    </Badge>
-                                  </Flex>
-                                ) : (
-                                  <Text
-                                    className="flex gap-1 items-center"
-                                    fw={600}
-                                    size={"sm"}
-                                  >
-                                    <ThemeIcon
-                                      color="gray"
-                                      radius={"xl"}
-                                      variant="light"
-                                      size={18}
-                                    >
-                                      {index + 1}
-                                    </ThemeIcon>
-                                    {isInternal && (
-                                      <Tooltip label="Drag to reorder">
-                                        <ThemeIcon
-                                          color="gray"
-                                          radius={"xl"}
-                                          variant="light"
-                                          size={18}
-                                          style={{ cursor: "grab" }}
-                                        >
-                                          <IconGripVertical size={14} />
-                                        </ThemeIcon>
-                                      </Tooltip>
-                                    )}
-                                    {isInternal && (
-                                      <Tooltip label="Edit task">
-                                        <ThemeIcon
-                                          color="gray"
-                                          radius={"xl"}
-                                          variant="light"
-                                          size={18}
-                                          style={{ cursor: "pointer" }}
-                                          onClick={() => {
-                                            setEditingTask(index);
-                                            setOpenedTaskIndex(index);
-                                            setEditingTaskText(task.title);
-                                            taskDraftDescription.current =
-                                              task?.description || "";
-                                            taskDraftDescriptionRaw.current =
-                                              task?.description || "";
-                                          }}
-                                          // onBlur={() => setEditingTask(null)}
-                                        >
-                                          <IconPencil size={14} />
-                                        </ThemeIcon>
-                                      </Tooltip>
-                                    )}
-                                    {task.title}
-                                  </Text>
-                                )}
-                                <Flex align={"center"} gap={"xs"}>
-                                  <Tooltip
-                                    label={
-                                      !task.rewind_img
-                                        ? "No rewind available"
-                                        : "View rewind"
-                                    }
-                                  >
-                                    <Button
-                                      size={"xs"}
-                                      variant="outline"
-                                      color={task.rewind_img ? "blue" : "gray"}
-                                      leftIcon={<IconHistory size={14} />}
-                                      sx={{
-                                        opacity: task.rewind_img ? 1 : 0.3,
-                                      }}
-                                      onClick={() => {
-                                        if (task.rewind_img) {
-                                          setShowRewindImage(true);
-                                          setSelectedRewindImage(
-                                            task.rewind_img
-                                          );
-                                        }
-                                      }}
-                                    >
-                                      Show Rewind
-                                    </Button>
-                                  </Tooltip>
-                                  <Text color="gray" size={"sm"} fw={500}>
-                                    {/* {moment(task.created_at).format("MM/DD/YY, h:mm a")} */}
-                                  </Text>
-                                  {editingTask === index ? (
-                                    <Select
-                                      w={"140px"}
-                                      value={task.status}
-                                      onChange={(value) => {
-                                        if (value !== null) {
-                                          const updatedTasks = [...tasks];
-                                          updatedTasks[index].status = value as
-                                            | "QUEUED"
-                                            | "IN_PROGRESS"
-                                            | "IN_PROGRESS_REVIEW_NEEDED"
-                                            | "COMPLETE"
-                                            | "CANCELLED"
-                                            | "BLOCKED";
-                                          setTasks(updatedTasks);
-                                        }
-                                      }}
-                                      data={Object.keys(
-                                        humanReadableStatus
-                                      ).map((status) => ({
-                                        value: status,
-                                        label: humanReadableStatus[status],
-                                        customLabel: (
-                                          <Flex align={"center"} gap={"xs"}>
-                                            <ThemeIcon
-                                              color={statusColors[status]}
-                                              radius={"xl"}
-                                              size={10}
-                                            >
-                                              <span />
-                                            </ThemeIcon>
-                                            <Text
-                                              color={statusColors[status]}
-                                              size={"sm"}
-                                              fw={500}
-                                            >
-                                              {humanReadableStatus[status]}
-                                            </Text>
-                                          </Flex>
-                                        ),
-                                      }))}
-                                      itemComponent={({
-                                        value,
-                                        label,
-                                        ...others
-                                      }) => <div {...others}>{label}</div>}
-                                    />
-                                  ) : (
-                                    <Flex align={"center"} gap={"xs"} w={100}>
-                                      <ThemeIcon
-                                        color={statusColors[task.status]}
-                                        radius={"xl"}
-                                        size={10}
-                                      >
-                                        <span />
-                                      </ThemeIcon>
-                                      <Text
-                                        color={statusColors[task.status]}
-                                        size={"sm"}
-                                        fw={500}
-                                      >
-                                        {humanReadableStatus[task.status]}
-                                      </Text>
-                                    </Flex>
-                                  )}
-
-                                  <ActionIcon
-                                    onClick={() =>
-                                      setOpenedTaskIndex(
-                                        openedTaskIndex === index ? null : index
-                                      )
-                                    }
-                                  >
-                                    {openedTaskIndex === index ? (
-                                      <IconChevronUp size={"1rem"} />
-                                    ) : (
-                                      <IconChevronDown size={"1rem"} />
-                                    )}
-                                  </ActionIcon>
-                                  {isInternal && (
-                                    <ActionIcon
-                                      onClick={async () => {
-                                        try {
-                                          const response = await fetch(
-                                            `${API_URL}/selix/task`,
-                                            {
-                                              method: "DELETE",
-                                              headers: {
-                                                "Content-Type":
-                                                  "application/json",
-                                                Authorization: `Bearer ${userToken}`,
-                                              },
-                                              body: JSON.stringify({
-                                                task_id: task.id,
-                                              }),
-                                            }
-                                          );
-
-                                          const data = await response.json();
-
-                                          if (!response.ok) {
-                                            throw new Error(
-                                              data.error ||
-                                                "Failed to delete task"
-                                            );
-                                          }
-
-                                          showNotification({
-                                            color: "green",
-                                            title: "Success",
-                                            message: data.message,
-                                          });
-                                          setTasks(
-                                            tasks.filter((t, i) => i !== index)
-                                          );
-                                        } catch (error) {
-                                          console.error(
-                                            "Error deleting task:",
-                                            error
-                                          );
-                                          showNotification({
-                                            color: "red",
-                                            title: "Error",
-                                            message: "Failed to delete task",
-                                          });
-                                        }
-                                      }}
-                                      color="red"
-                                    >
-                                      <IconTrash size={"1rem"} />
-                                    </ActionIcon>
-                                  )}
-                                </Flex>
-                              </Flex>
-                              <Collapse in={openedTaskIndex === index}>
-                                <Text p={"xs"} mt={"sm"} size="xs">
-                                  {editingTask === index ? (
-                                    <RichTextArea
-                                      overrideSticky={true}
-                                      onChange={(value, rawValue) => {
-                                        taskDraftDescriptionRaw.current =
-                                          rawValue;
-                                        taskDraftDescription.current = value;
-                                      }}
-                                      value={taskDraftDescriptionRaw.current}
-                                      height={110}
-                                    />
-                                  ) : (
-                                    <div
-                                      dangerouslySetInnerHTML={{
-                                        __html:
-                                          task.description?.replaceAll(
-                                            "\n",
-                                            "<br />"
-                                          ) || "",
-                                      }}
-                                    />
-                                  )}
-                                </Text>
-                                {/* eventually delete this */}
-                                {currentThread?.memory.campaign_id &&
-                                  openedTaskIndex === index && (
-                                    <TaskRenderer
-                                      // key={currentProject?.id}
-                                      task={task}
-                                      counter={counter}
-                                      segment={segment}
-                                      // messages={messages}
-                                      threads={threads}
-                                      currentSessionId={currentSessionId}
-                                      handleStrategySubmit={
-                                        handleStrategySubmit
-                                      }
-                                    />
-                                  )}
-                              </Collapse>
-                            </Paper>
-                          )}
-                        </Draggable>
-                      );
-                    })}
-                  {provided.placeholder}
-                </div>
+                  )}
+                  <span className="font-medium text-gray-500">
+                    <a
+                      href={`/campaign_v2/${currentProject.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ marginLeft: "5px" }}
+                    >
+                      <IconExternalLink size="0.8rem" />
+                    </a>
+                  </span>
+                </Text>
               )}
-            </Droppable>
-            {isInternal && (
-              <Flex justify="center" mt="md">
-                {creatingNewTask ? (
-                  <Loader size="md" color="blue" />
+            {threads.find((thread) => thread.id === currentSessionId)
+              ?.estimated_completion_time && (
+              <Flex gap={5} align={"center"}>
+                <Divider orientation="vertical" color={"#fceafe"} />
+                {threads.find((thread) => thread.id === currentSessionId)
+                  ?.estimated_completion_time ? (
+                  (() => {
+                    const now = moment();
+                    const estimatedCompletion = moment(
+                      threads.find((thread) => thread.id === currentSessionId)
+                        ?.estimated_completion_time
+                    );
+                    const duration = moment.duration(
+                      estimatedCompletion.diff(now)
+                    );
+                    const hours = Math.floor(duration.asHours());
+                    const minutes = duration.minutes();
+
+                    if (hours < 0 || minutes < 0) {
+                      return (
+                        <Text size={"xs"} className="text-gray-500">
+                          --
+                        </Text>
+                      );
+                    }
+
+                    return (
+                      <>
+                        <Text size={"xs"} className="text-gray-500">
+                          Estimated completion time:
+                        </Text>
+                        <ThemeIcon
+                          bg="#fceafe"
+                          variant="light"
+                          className="text-[#E25DEE]"
+                        >
+                          {hours}
+                        </ThemeIcon>
+                        <Text color="#E25DEE"> hours, </Text>
+                        <ThemeIcon
+                          bg="#fceafe"
+                          variant="light"
+                          className="text-[#E25DEE]"
+                        >
+                          {minutes}
+                        </ThemeIcon>
+                        <Text color="#E25DEE"> minutes</Text>
+                      </>
+                    );
+                  })()
                 ) : (
-                  <Button
-                    variant="light"
-                    color="blue"
-                    radius="md"
-                    size="md"
-                    onClick={async () => {
-                      try {
-                        setCreatingNewTask(true);
-                        const response = await fetch(
-                          `${API_URL}/selix/create-task-id`,
-                          {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                              Authorization: `Bearer ${userToken}`,
-                            },
-                            body: JSON.stringify({
-                              selix_session_id: currentSessionId,
-                            }),
-                          }
-                        );
-
-                        if (!response.ok) {
-                          showNotification({
-                            color: "red",
-                            title: "Error",
-                            message: "Failed to create new task",
-                          });
-                        }
-                        setCreatingNewTask(false);
-
-                        const newTask: TaskType = await response.json();
-
-                        setTasks([...tasks, newTask]);
-                        setEditingTask(tasks.length);
-                        setEditingTaskText(newTask.title);
-                        taskDraftDescription.current =
-                          newTask.description || "";
-                        taskDraftDescriptionRaw.current = newTask.description;
-
-                        setTimeout(() => {
-                          if (taskContainerRef.current) {
-                            taskContainerRef.current.scrollTo({
-                              top: taskContainerRef.current.scrollHeight,
-                              behavior: "smooth",
-                            });
-                          }
-                        }, 100);
-                      } catch (error) {
-                        console.error("Error creating new task:", error);
-                      }
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "scale(1.05)";
-                      e.currentTarget.style.transition = "transform 0.2s";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "scale(1)";
-                    }}
-                  >
-                    + Add Task
-                  </Button>
+                  <Text size={"xs"} className="text-gray-500">
+                    Estimated completion time: --
+                  </Text>
                 )}
               </Flex>
             )}
-          </>
+          </Flex>
+        </Paper>
+
+        <SelixAutoExecuteModal
+          onClose={() => setShowAutoExecutionModal(false)}
+          opened={showAutoExecutionModal}
+        />
+
+        <Modal
+          opened={showRewindImage}
+          onClose={() => setShowRewindImage(false)}
+          title="Rewind Image"
+        >
+          <img
+            src={selectedRewindImage}
+            alt="Rewind"
+            width={"100%"}
+            height={"100%"}
+            style={{ marginTop: "10px" }}
+          />
+        </Modal>
+        <ScrollArea
+          h={isTimeline ? "200px" : "650px"}
+          scrollHideDelay={4000}
+          style={{
+            overflow: "hidden",
+          }}
+          viewportRef={taskContainerRef}
+        >
+          {selectedLog &&
+          logs?.findIndex((value) => value.id === selectedLog.id) !== 0 &&
+          selectedLog.json_data?.tasks &&
+          selectedLog.json_data.tasks.length > 0 ? (
+            selectedLog.json_data.tasks.map((task: TaskType, index: number) => {
+              // index = array.length - 1 - index;
+              const SelixSessionTaskStatus = {
+                QUEUED: "QUEUED",
+                IN_PROGRESS: "IN_PROGRESS",
+                IN_PROGRESS_REVIEW_NEEDED: "IN_PROGRESS_REVIEW_NEEDED",
+                COMPLETE: "COMPLETE",
+                CANCELLED: "CANCELLED",
+                BLOCKED: "BLOCKED",
+              };
+
+              const statusColors = {
+                [SelixSessionTaskStatus.QUEUED]: "blue",
+                [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
+                [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]: "orange",
+                [SelixSessionTaskStatus.COMPLETE]: "green",
+                [SelixSessionTaskStatus.CANCELLED]: "gray",
+                [SelixSessionTaskStatus.BLOCKED]: "red",
+              };
+
+              const humanReadableStatus = {
+                [SelixSessionTaskStatus.QUEUED]: "Queued",
+                [SelixSessionTaskStatus.IN_PROGRESS]: "In Progress",
+                [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
+                  "In Progress",
+                [SelixSessionTaskStatus.COMPLETE]: "Complete",
+                [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
+                [SelixSessionTaskStatus.BLOCKED]: "⚠️ Blocked",
+              };
+
+              return (
+                <Paper withBorder p={"sm"} mb={"xs"} radius={"md"}>
+                  <Flex justify={"space-between"} align={"center"} p={"4px"}>
+                    <Text
+                      className="flex gap-1 items-center"
+                      fw={600}
+                      size={"sm"}
+                    >
+                      <ThemeIcon
+                        color="gray"
+                        radius={"xl"}
+                        variant="light"
+                        size={18}
+                      >
+                        {index + 1}
+                      </ThemeIcon>
+                      {task.title}
+                    </Text>
+                    <Flex align={"center"} gap={"xs"}>
+                      <Tooltip
+                        label={
+                          !task.rewind_img
+                            ? "No rewind available"
+                            : "View rewind"
+                        }
+                      >
+                        <Button
+                          size={"xs"}
+                          variant="outline"
+                          color={task.rewind_img ? "blue" : "gray"}
+                          leftIcon={<IconHistory size={14} />}
+                          sx={{
+                            opacity: task.rewind_img ? 1 : 0.3,
+                          }}
+                          onClick={() => {
+                            if (task.rewind_img) {
+                              setShowRewindImage(true);
+                              setSelectedRewindImage(task.rewind_img);
+                            }
+                          }}
+                        >
+                          Rewind
+                        </Button>
+                      </Tooltip>
+                      <Text color="gray" size={"sm"} fw={500}>
+                        {/* {moment(task.created_at).format("MM/DD/YY, h:mm a")} */}
+                      </Text>
+
+                      <Flex align={"center"} gap={"xs"} w={100}>
+                        <ThemeIcon
+                          color={statusColors[task.status]}
+                          radius={"xl"}
+                          size={10}
+                        >
+                          <span />
+                        </ThemeIcon>
+                        <Text
+                          color={statusColors[task.status]}
+                          size={"sm"}
+                          fw={500}
+                        >
+                          {humanReadableStatus[task.status]}
+                        </Text>
+                      </Flex>
+
+                      <ActionIcon
+                        onClick={() =>
+                          setOpenedTaskIndex(
+                            openedTaskIndex === index ? null : index
+                          )
+                        }
+                      >
+                        {openedTaskIndex === index ? (
+                          <IconChevronUp size={"1rem"} />
+                        ) : (
+                          <IconChevronDown size={"1rem"} />
+                        )}
+                      </ActionIcon>
+                    </Flex>
+                  </Flex>
+                  <Collapse in={openedTaskIndex === index}>
+                    <Text p={"xs"} mt={"sm"} size="xs">
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            task.description?.replaceAll("\n", "<br />") || "",
+                        }}
+                      />
+                    </Text>
+                  </Collapse>
+                </Paper>
+              );
+            })
+          ) : (
+            <>
+              <Droppable isDropDisabled={!isInternal} droppableId="tasks">
+                {(provided) => (
+                  <div ref={provided.innerRef} {...provided.droppableProps}>
+                    {tasks
+                      ?.filter(
+                        (task: TaskType, index: number, self: any) =>
+                          task.selix_session_id === currentSessionId
+                      )
+                      .map((task: TaskType, index: number, array) => {
+                        // index = array.length - 1 - index;
+                        const SelixSessionTaskStatus = {
+                          QUEUED: "QUEUED",
+                          IN_PROGRESS: "IN_PROGRESS",
+                          IN_PROGRESS_REVIEW_NEEDED:
+                            "IN_PROGRESS_REVIEW_NEEDED",
+                          COMPLETE: "COMPLETE",
+                          CANCELLED: "CANCELLED",
+                          BLOCKED: "BLOCKED",
+                        };
+
+                        const statusColors = {
+                          [SelixSessionTaskStatus.QUEUED]: "blue",
+                          [SelixSessionTaskStatus.IN_PROGRESS]: "orange",
+                          [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
+                            "orange",
+                          [SelixSessionTaskStatus.COMPLETE]: "green",
+                          [SelixSessionTaskStatus.CANCELLED]: "gray",
+                          [SelixSessionTaskStatus.BLOCKED]: "red",
+                        };
+
+                        const humanReadableStatus = {
+                          [SelixSessionTaskStatus.QUEUED]: "Queued",
+                          [SelixSessionTaskStatus.IN_PROGRESS]: "In Progress",
+                          [SelixSessionTaskStatus.IN_PROGRESS_REVIEW_NEEDED]:
+                            "In Progress",
+                          [SelixSessionTaskStatus.COMPLETE]: "Complete",
+                          [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
+                          [SelixSessionTaskStatus.BLOCKED]: "���️ Blocked",
+                        };
+
+                        return (
+                          <Draggable
+                            key={task.id}
+                            index={index}
+                            draggableId={`task-${task.id}`}
+                            isDragDisabled={!isInternal}
+                          >
+                            {(provided) => (
+                              <Paper
+                                withBorder
+                                p={"sm"}
+                                mb={"xs"}
+                                radius={"md"}
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                              >
+                                <Flex
+                                  justify={"space-between"}
+                                  align={"center"}
+                                  p={"4px"}
+                                >
+                                  {editingTask === index ? (
+                                    <Flex align="center" gap="xs" w={"60%"}>
+                                      <Flex w="80%" gap="xs">
+                                        <Input
+                                          value={editingTaskText}
+                                          onChange={(e) => {
+                                            setEditingTaskText(e.target.value);
+                                          }}
+                                          autoFocus
+                                          style={{ flexGrow: 1 }}
+                                        />
+                                        <NativeSelect
+                                          value={task.widget_type}
+                                          data={[
+                                            {
+                                              value: "",
+                                              label: "Proof of Work (image)",
+                                            },
+                                            {
+                                              value: "LAUNCH_CAMPAIGN",
+                                              label: "Launch Campaign",
+                                            },
+                                            {
+                                              value: "VIEW_STRATEGY",
+                                              label: "View Strategy",
+                                            },
+                                            {
+                                              value: "REVIEW_PROSPECTS",
+                                              label: "Review Prospects",
+                                            },
+                                            {
+                                              value: "VIEW_SEQUENCE",
+                                              label: "View Sequence",
+                                            },
+                                            {
+                                              value: "VIEW_PERSONALIZERS",
+                                              label: "Campaign Personalizers",
+                                            },
+                                            {
+                                              value: "REVIEW_COMPANIES",
+                                              label: "Review Companies",
+                                            },
+                                            {
+                                              value: "ONE_SHOT_GENERATOR",
+                                              label: "One Shot Generator",
+                                            },
+                                            {
+                                              value: "COMPANY_SEGMENT",
+                                              label: "Company Segment",
+                                            },
+                                          ]}
+                                          onChange={(e) => {
+                                            const updatedTasks = [...tasks];
+                                            updatedTasks[index].widget_type =
+                                              e.currentTarget.value;
+                                            setTasks(updatedTasks);
+                                          }}
+                                          style={{ width: "40%" }}
+                                        />
+                                      </Flex>
+                                      <Badge
+                                        color="green"
+                                        style={{
+                                          cursor: "pointer",
+                                          whiteSpace: "nowrap",
+                                        }}
+                                        onClick={() => {
+                                          setEditingTask(null);
+                                          setTasks(
+                                            tasks.map((t, i) =>
+                                              i === index
+                                                ? {
+                                                    ...t,
+                                                    title: editingTaskText,
+                                                    description:
+                                                      taskDraftDescription.current,
+                                                  }
+                                                : t
+                                            )
+                                          );
+                                          updateTask(
+                                            tasks[index].id,
+                                            editingTaskText,
+                                            taskDraftDescription.current,
+                                            tasks[index].status,
+                                            tasks[index].widget_type
+                                          );
+                                        }}
+                                      >
+                                        Save
+                                      </Badge>
+                                    </Flex>
+                                  ) : (
+                                    <Text
+                                      className="flex gap-1 items-center"
+                                      fw={600}
+                                      size={"sm"}
+                                    >
+                                      <ThemeIcon
+                                        color="gray"
+                                        radius={"xl"}
+                                        variant="light"
+                                        size={18}
+                                      >
+                                        {index + 1}
+                                      </ThemeIcon>
+                                      {isInternal && (
+                                        <Tooltip label="Drag to reorder">
+                                          <ThemeIcon
+                                            color="gray"
+                                            radius={"xl"}
+                                            variant="light"
+                                            size={18}
+                                            style={{ cursor: "grab" }}
+                                          >
+                                            <IconGripVertical size={14} />
+                                          </ThemeIcon>
+                                        </Tooltip>
+                                      )}
+                                      {isInternal && (
+                                        <Tooltip label="Edit task">
+                                          <ThemeIcon
+                                            color="gray"
+                                            radius={"xl"}
+                                            variant="light"
+                                            size={18}
+                                            style={{ cursor: "pointer" }}
+                                            onClick={() => {
+                                              setEditingTask(index);
+                                              setOpenedTaskIndex(index);
+                                              setEditingTaskText(task.title);
+                                              taskDraftDescription.current =
+                                                task?.description || "";
+                                              taskDraftDescriptionRaw.current =
+                                                task?.description || "";
+                                            }}
+                                            // onBlur={() => setEditingTask(null)}
+                                          >
+                                            <IconPencil size={14} />
+                                          </ThemeIcon>
+                                        </Tooltip>
+                                      )}
+                                      {task.title}
+                                    </Text>
+                                  )}
+                                  <Flex align={"center"} gap={"xs"}>
+                                    <Box w={"130px"}>
+                                      {isInternal && (
+                                        <Tooltip
+                                          label={
+                                            "Attempt automatic execution of task."
+                                          }
+                                        >
+                                          <Button
+                                            size={"xs"}
+                                            w={"100%"}
+                                            variant="outline"
+                                            compact
+                                            disabled={
+                                              task.status !== "QUEUED" &&
+                                              task.status !==
+                                                "IN_PROGRESS_REVIEW_NEEDED" &&
+                                              task.status !== "IN_PROGRESS"
+                                            }
+                                            color={"teal"}
+                                            leftIcon={<IconBolt size={14} />}
+                                            onClick={() => {
+                                              setShowAutoExecutionModal(true);
+                                            }}
+                                          >
+                                            Auto Execute
+                                          </Button>
+                                        </Tooltip>
+                                      )}
+                                      <Tooltip
+                                        label={
+                                          !task.rewind_img
+                                            ? "No rewind available"
+                                            : "View rewind"
+                                        }
+                                      >
+                                        <Button
+                                          size={"xs"}
+                                          compact
+                                          w={"100%"}
+                                          variant="outline"
+                                          color={
+                                            task.rewind_img ? "blue" : "gray"
+                                          }
+                                          leftIcon={<IconHistory size={14} />}
+                                          sx={{
+                                            opacity: task.rewind_img ? 1 : 0.3,
+                                          }}
+                                          onClick={() => {
+                                            if (task.rewind_img) {
+                                              setShowRewindImage(true);
+                                              setSelectedRewindImage(
+                                                task.rewind_img
+                                              );
+                                            }
+                                          }}
+                                        >
+                                          Rewind
+                                        </Button>
+                                      </Tooltip>
+                                    </Box>
+                                    <Text color="gray" size={"sm"} fw={500}>
+                                      {/* {moment(task.created_at).format("MM/DD/YY, h:mm a")} */}
+                                    </Text>
+                                    {editingTask === index ? (
+                                      <Select
+                                        w={"140px"}
+                                        value={task.status}
+                                        onChange={(value) => {
+                                          if (value !== null) {
+                                            const updatedTasks = [...tasks];
+                                            updatedTasks[index].status =
+                                              value as
+                                                | "QUEUED"
+                                                | "IN_PROGRESS"
+                                                | "IN_PROGRESS_REVIEW_NEEDED"
+                                                | "COMPLETE"
+                                                | "CANCELLED"
+                                                | "BLOCKED";
+                                            setTasks(updatedTasks);
+                                          }
+                                        }}
+                                        data={Object.keys(
+                                          humanReadableStatus
+                                        ).map((status) => ({
+                                          value: status,
+                                          label: humanReadableStatus[status],
+                                          customLabel: (
+                                            <Flex align={"center"} gap={"xs"}>
+                                              <ThemeIcon
+                                                color={statusColors[status]}
+                                                radius={"xl"}
+                                                size={10}
+                                              >
+                                                <span />
+                                              </ThemeIcon>
+                                              <Text
+                                                color={statusColors[status]}
+                                                size={"sm"}
+                                                fw={500}
+                                              >
+                                                {humanReadableStatus[status]}
+                                              </Text>
+                                            </Flex>
+                                          ),
+                                        }))}
+                                        itemComponent={({
+                                          value,
+                                          label,
+                                          ...others
+                                        }) => <div {...others}>{label}</div>}
+                                      />
+                                    ) : (
+                                      <Flex align={"center"} gap={"xs"} w={100}>
+                                        <ThemeIcon
+                                          color={statusColors[task.status]}
+                                          radius={"xl"}
+                                          size={10}
+                                        >
+                                          <span />
+                                        </ThemeIcon>
+                                        <Text
+                                          color={statusColors[task.status]}
+                                          size={"sm"}
+                                          fw={500}
+                                        >
+                                          {humanReadableStatus[task.status]}
+                                        </Text>
+                                      </Flex>
+                                    )}
+
+                                    <ActionIcon
+                                      onClick={() =>
+                                        setOpenedTaskIndex(
+                                          openedTaskIndex === index
+                                            ? null
+                                            : index
+                                        )
+                                      }
+                                    >
+                                      {openedTaskIndex === index ? (
+                                        <IconChevronUp size={"1rem"} />
+                                      ) : (
+                                        <IconChevronDown size={"1rem"} />
+                                      )}
+                                    </ActionIcon>
+                                    {isInternal && (
+                                      <ActionIcon
+                                        onClick={async () => {
+                                          try {
+                                            const response = await fetch(
+                                              `${API_URL}/selix/task`,
+                                              {
+                                                method: "DELETE",
+                                                headers: {
+                                                  "Content-Type":
+                                                    "application/json",
+                                                  Authorization: `Bearer ${userToken}`,
+                                                },
+                                                body: JSON.stringify({
+                                                  task_id: task.id,
+                                                }),
+                                              }
+                                            );
+
+                                            const data = await response.json();
+
+                                            if (!response.ok) {
+                                              throw new Error(
+                                                data.error ||
+                                                  "Failed to delete task"
+                                              );
+                                            }
+
+                                            showNotification({
+                                              color: "green",
+                                              title: "Success",
+                                              message: data.message,
+                                            });
+                                            setTasks(
+                                              tasks.filter(
+                                                (t, i) => i !== index
+                                              )
+                                            );
+                                          } catch (error) {
+                                            console.error(
+                                              "Error deleting task:",
+                                              error
+                                            );
+                                            showNotification({
+                                              color: "red",
+                                              title: "Error",
+                                              message: "Failed to delete task",
+                                            });
+                                          }
+                                        }}
+                                        color="red"
+                                      >
+                                        <IconTrash size={"1rem"} />
+                                      </ActionIcon>
+                                    )}
+                                  </Flex>
+                                </Flex>
+                                <Collapse in={openedTaskIndex === index}>
+                                  <Text p={"xs"} mt={"sm"} size="xs">
+                                    {editingTask === index ? (
+                                      <RichTextArea
+                                        overrideSticky={true}
+                                        onChange={(value, rawValue) => {
+                                          taskDraftDescriptionRaw.current =
+                                            rawValue;
+                                          taskDraftDescription.current = value;
+                                        }}
+                                        value={taskDraftDescriptionRaw.current}
+                                        height={110}
+                                      />
+                                    ) : (
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html:
+                                            task.description?.replaceAll(
+                                              "\n",
+                                              "<br />"
+                                            ) || "",
+                                        }}
+                                      />
+                                    )}
+                                  </Text>
+                                  {/* eventually delete this */}
+                                  {currentThread?.memory.campaign_id &&
+                                    openedTaskIndex === index && (
+                                      <TaskRenderer
+                                        // key={currentProject?.id}
+                                        task={task}
+                                        counter={counter}
+                                        segment={segment}
+                                        // messages={messages}
+                                        threads={threads}
+                                        currentSessionId={currentSessionId}
+                                        handleStrategySubmit={
+                                          handleStrategySubmit
+                                        }
+                                        setOpenedTaskIndex={setOpenedTaskIndex}
+                                      />
+                                    )}
+                                </Collapse>
+                              </Paper>
+                            )}
+                          </Draggable>
+                        );
+                      })}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+              {isInternal && (
+                <Flex justify="center" mt="md">
+                  {creatingNewTask ? (
+                    <Loader size="md" color="blue" />
+                  ) : (
+                    <Button
+                      variant="light"
+                      color="blue"
+                      radius="md"
+                      size="md"
+                      onClick={async () => {
+                        try {
+                          setCreatingNewTask(true);
+                          const response = await fetch(
+                            `${API_URL}/selix/create-task-id`,
+                            {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${userToken}`,
+                              },
+                              body: JSON.stringify({
+                                selix_session_id: currentSessionId,
+                              }),
+                            }
+                          );
+
+                          if (!response.ok) {
+                            showNotification({
+                              color: "red",
+                              title: "Error",
+                              message: "Failed to create new task",
+                            });
+                          }
+                          setCreatingNewTask(false);
+
+                          const newTask: TaskType = await response.json();
+
+                          setTasks([...tasks, newTask]);
+                          setEditingTask(tasks.length);
+                          setEditingTaskText(newTask.title);
+                          taskDraftDescription.current =
+                            newTask.description || "";
+                          taskDraftDescriptionRaw.current = newTask.description;
+
+                          setTimeout(() => {
+                            if (taskContainerRef.current) {
+                              taskContainerRef.current.scrollTo({
+                                top: taskContainerRef.current.scrollHeight,
+                                behavior: "smooth",
+                              });
+                            }
+                          }, 100);
+                        } catch (error) {
+                          console.error("Error creating new task:", error);
+                        }
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "scale(1.05)";
+                        e.currentTarget.style.transition = "transform 0.2s";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "scale(1)";
+                      }}
+                    >
+                      + Add Task
+                    </Button>
+                  )}
+                </Flex>
+              )}
+            </>
+          )}
+        </ScrollArea>
+        {logs && logs.length > 0 && (
+          <Slider
+            showLabelOnHover={false}
+            defaultValue={100}
+            style={{
+              width: "95%",
+            }}
+            styles={{
+              thumb: {
+                backgroundColor:
+                  valueMapping.findIndex(
+                    (item) => item.id === selectedLog?.id
+                  ) ===
+                  valueMapping.length - 1
+                    ? "red"
+                    : "",
+                borderColor:
+                  valueMapping.findIndex(
+                    (item) => item.id === selectedLog?.id
+                  ) ===
+                  valueMapping.length - 1
+                    ? "red"
+                    : "",
+              },
+              label: {
+                left:
+                  valueMapping.findIndex(
+                    (item) => item.id === selectedLog?.id
+                  ) === 0
+                    ? "0"
+                    : "auto",
+              },
+            }}
+            label={(value) => {
+              if (!selectedLog) {
+                return value;
+              }
+
+              if (
+                valueMapping.findIndex((item) => item.id === selectedLog.id) ===
+                valueMapping.length - 1
+              ) {
+                return "Current";
+              }
+
+              return selectedLog
+                ? moment
+                    .utc(selectedLog.created_date, "YYYY-MM-DD HH:mm:ss")
+                    .tz("America/Los_Angeles")
+                    .format("YYYY-MM-DD HH:mm:ss")
+                : value;
+            }}
+            onChange={(value) => {
+              let startIndex = 0;
+
+              while (startIndex < valueMapping.length) {
+                const item = valueMapping[startIndex];
+
+                if (value < item.value) {
+                  break;
+                }
+
+                startIndex += 1;
+              }
+
+              setSelectedLog(
+                logs?.find(
+                  (item) => item.id === valueMapping[startIndex - 1].id
+                ) ?? null
+              );
+            }}
+          />
         )}
-      </ScrollArea>
+      </Flex>
+      <Flex gap={"8px"} align={"center"}>
+        {logs && logs.length > 0 && (
+          <Tooltip
+            style={{
+              backgroundColor: "white",
+              color: "black",
+              border: "1px solid black",
+            }}
+            width={500}
+            label={
+              !selectedLog ? (
+                "No Memories"
+              ) : (
+                <Flex direction={"column"} align={"center"}>
+                  <Title order={5}>👷 Worker Memory</Title>
+                  <Text>Last Event:</Text>
+                  <Text
+                    style={{ whiteSpace: "normal", wordWrap: "break-word" }}
+                  >
+                    Title: {selectedLog.title}
+                  </Text>
+                  <Text
+                    style={{ whiteSpace: "normal", wordWrap: "break-word" }}
+                  >
+                    {selectedLog.created_date}
+                  </Text>
+                  <Text
+                    size="sm"
+                    p="xs"
+                    sx={{
+                      cursor: "pointer",
+                      whiteSpace: "normal",
+                      wordWrap: "break-word",
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: (
+                        selectedLog.json_data?.metadata ??
+                        selectedLog.json_data?.memory ??
+                        "No memory"
+                      )?.replace(/\n/g, "<br>"),
+                    }}
+                  />
+                  {/* <Text style={{ whiteSpace: "normal", wordWrap: "break-word" }}> */}
+                  {/*   {selectedLog.json_data?.memory} */}
+                  {/* </Text> */}
+                </Flex>
+              )
+            }
+          >
+            {valueMapping.findIndex((item) => item.id === selectedLog?.id) ===
+            valueMapping.length - 1 ? (
+              <Badge color="green" size={"lg"}>
+                Live
+              </Badge>
+            ) : (
+              <Badge color="red" size={"lg"}>
+                Snapshot
+              </Badge>
+            )}
+          </Tooltip>
+        )}
+        {/* {logs && ( */}
+        {/*   <ActionIcon */}
+        {/*     disabled={logIndex === 0} */}
+        {/*     onClick={() => { */}
+        {/*       setLogIndex((prevState) => prevState - 1); */}
+        {/*     }} */}
+        {/*   > */}
+        {/*     <IconChevronLeft size={"sm"} /> */}
+        {/*   </ActionIcon> */}
+        {/* )} */}
+        {/* {logs && ( */}
+        {/*   <ActionIcon */}
+        {/*     disabled={logIndex === logs.length - 1} */}
+        {/*     onClick={() => { */}
+        {/*       setLogIndex((prevState) => prevState + 1); */}
+        {/*     }} */}
+        {/*   > */}
+        {/*     <IconChevronRight size={"sm"} /> */}
+        {/*   </ActionIcon> */}
+        {/* )} */}
+      </Flex>
     </Paper>
   );
 };
@@ -6447,6 +7020,7 @@ const TaskRenderer = ({
   threads,
   currentSessionId,
   handleStrategySubmit,
+  setOpenedTaskIndex,
 }: {
   task: TaskType;
   counter: Number;
@@ -6455,6 +7029,7 @@ const TaskRenderer = ({
   currentSessionId: Number | null;
   segment?: TransformedSegment | undefined;
   handleStrategySubmit: () => void;
+  setOpenedTaskIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
   const [currentProject, setCurrentProject] =
     useRecoilState(currentProjectState);
@@ -6558,6 +7133,7 @@ const TaskRenderer = ({
           threads={threads}
           currentSessionId={currentSessionId}
           handleSubmit={handleStrategySubmit}
+          setOpenedTaskIndex={setOpenedTaskIndex}
         />
       );
     case "REVIEW_PROSPECTS":
@@ -6823,6 +7399,7 @@ const SelinStrategy = ({
   handleSubmit,
   threads,
   currentSessionId,
+  setOpenedTaskIndex,
 }: {
   messages?: any[];
   setPrompt?: React.Dispatch<React.SetStateAction<string>>;
@@ -6830,6 +7407,7 @@ const SelinStrategy = ({
   threads: ThreadType[];
   currentSessionId: Number | null;
   counter: Number;
+  setOpenedTaskIndex?: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
   const memory = threads.find(
     (thread) => thread.id === currentSessionId
@@ -7071,6 +7649,9 @@ const SelinStrategy = ({
                   return;
                 }
                 hackedSubmit();
+                if (setOpenedTaskIndex) {
+                  setOpenedTaskIndex(null);
+                }
               }}
             >
               Save Draft

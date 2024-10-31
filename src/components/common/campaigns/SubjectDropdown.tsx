@@ -12,7 +12,7 @@ const SubjectDropdown = ({ emailSubjectLines }: { emailSubjectLines: { subject_l
     popoverRefs.current.forEach((ref, index) => {
       if (ref && popoverOpenedArray[index]) {
         const rect = ref.getBoundingClientRect();
-        console.log(`Popover position for subject ${index}:`, rect);
+        console.log('Popover position for subject:', rect);
       }
     });
   }, [selectedSubject, popoverOpenedArray]);

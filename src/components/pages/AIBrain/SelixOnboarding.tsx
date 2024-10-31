@@ -15,6 +15,7 @@ import {
   ThemeIcon,
   Image,
   Card,
+  Badge,
 } from "@mantine/core";
 import {
   IconCalendarEvent,
@@ -43,7 +44,7 @@ export default function SelixOnboarding() {
   const [prefilter, setPreFilter] = useState<{ segment_description: string }>({
     segment_description: "",
   });
-  const [showInfoModal, setShowInfoModal] = useState(true);
+  // const [showInfoModal, setShowInfoModal] = useState(true);
   const prefilterIDref = useRef<number>(-1);
 
   const clientDomain = userData.client?.domain.split("/")[2].split(":")[0];
@@ -197,92 +198,92 @@ export default function SelixOnboarding() {
 
   return (
     <Center p={"lg"} className="flex-col">
-      <Modal
-        opened={showInfoModal}
-        onClose={() => setShowInfoModal(false)}
-        size="lg"
-        // title="Welcome to Selix AI"
-      >
-        <Card
-          withBorder
-          shadow="md"
-          p="lg"
-          radius="md"
-          style={{ backgroundColor: "#ffffff" }}
-        >
-          <Text size="lg" weight={700} mb="md" color="teal">
-            Welcome! 🚀
-          </Text>
-          <Text size="md" color="gray" mb="md">
-            {
-              "Selix AI is your automated assistant for creating AI outreach campaigns, specifically designed for B2B applications."
-            }
-          </Text>
-          <Text size="md" color="gray" mb="md">
-            {
-              "Provide your details to let Selix AI enhance your outreach. Here's how Selix AI can assist you:"
-            }
-          </Text>
-
-          <ul style={{ paddingLeft: "20px", color: "gray" }}>
-            <li style={{ marginBottom: "10px" }}>
-              <Text size="md" weight={500}>
-                Automate LinkedIn and Email Campaigns
-              </Text>
-              <Text size="sm">
-                Effortlessly draft and manage your outreach campaigns on
-                LinkedIn and via email.
-              </Text>
-            </li>
-            <li style={{ marginBottom: "10px" }}>
-              <Text size="md" weight={500}>
-                Create Effective Strategies
-              </Text>
-              <Text size="sm">
-                Leverage AI to develop strategies that maximize your campaign's
-                impact.
-              </Text>
-            </li>
-            <li style={{ marginBottom: "10px" }}>
-              <Text size="md" weight={500}>
-                Guided Campaign Creation
-              </Text>
-              <Text size="sm">
-                Follow step-by-step guidance to create a successful SellScale
-                campaign.
-              </Text>
-            </li>
-            <li style={{ marginBottom: "10px" }}>
-              <Text size="md" weight={500}>
-                Target Customer Insights
-              </Text>
-              <Text size="sm">
-                Describe your target customer and let Selix AI optimize your
-                outreach.
-              </Text>
-            </li>
-            <li style={{ marginBottom: "10px" }}>
-              <Text size="md" weight={500}>
-                Reach Out to an Accounts List
-              </Text>
-              <Text size="sm">
-                Upload your accounts list, and Selix AI will seamlessly direct
-                your outreach campaigns to the right contacts.
-              </Text>
-            </li>
-          </ul>
-          <Button
-            fullWidth
-            mt="md"
-            size="lg"
-            radius="md"
-            style={{ backgroundColor: "#1e90ff", color: "white" }}
-            onClick={() => setShowInfoModal(false)}
-          >
-            Get Started
-          </Button>
-        </Card>
-      </Modal>
+      {/* <Modal */}
+      {/*   opened={showInfoModal} */}
+      {/*   onClose={() => setShowInfoModal(false)} */}
+      {/*   size="lg" */}
+      {/*   // title="Welcome to Selix AI" */}
+      {/* > */}
+      {/*   <Card */}
+      {/*     withBorder */}
+      {/*     shadow="md" */}
+      {/*     p="lg" */}
+      {/*     radius="md" */}
+      {/*     style={{ backgroundColor: "#ffffff" }} */}
+      {/*   > */}
+      {/*     <Text size="lg" weight={700} mb="md" color="teal"> */}
+      {/*       Welcome! 🚀 */}
+      {/*     </Text> */}
+      {/*     <Text size="md" color="gray" mb="md"> */}
+      {/*       { */}
+      {/*         "Selix AI is your automated assistant for creating AI outreach campaigns, specifically designed for B2B applications." */}
+      {/*       } */}
+      {/*     </Text> */}
+      {/*     <Text size="md" color="gray" mb="md"> */}
+      {/*       { */}
+      {/*         "Provide your details to let Selix AI enhance your outreach. Here's how Selix AI can assist you:" */}
+      {/*       } */}
+      {/*     </Text> */}
+      {/**/}
+      {/*     <ul style={{ paddingLeft: "20px", color: "gray" }}> */}
+      {/*       <li style={{ marginBottom: "10px" }}> */}
+      {/*         <Text size="md" weight={500}> */}
+      {/*           Automate LinkedIn and Email Campaigns */}
+      {/*         </Text> */}
+      {/*         <Text size="sm"> */}
+      {/*           Effortlessly draft and manage your outreach campaigns on */}
+      {/*           LinkedIn and via email. */}
+      {/*         </Text> */}
+      {/*       </li> */}
+      {/*       <li style={{ marginBottom: "10px" }}> */}
+      {/*         <Text size="md" weight={500}> */}
+      {/*           Create Effective Strategies */}
+      {/*         </Text> */}
+      {/*         <Text size="sm"> */}
+      {/*           Leverage AI to develop strategies that maximize your campaign's */}
+      {/*           impact. */}
+      {/*         </Text> */}
+      {/*       </li> */}
+      {/*       <li style={{ marginBottom: "10px" }}> */}
+      {/*         <Text size="md" weight={500}> */}
+      {/*           Guided Campaign Creation */}
+      {/*         </Text> */}
+      {/*         <Text size="sm"> */}
+      {/*           Follow step-by-step guidance to create a successful SellScale */}
+      {/*           campaign. */}
+      {/*         </Text> */}
+      {/*       </li> */}
+      {/*       <li style={{ marginBottom: "10px" }}> */}
+      {/*         <Text size="md" weight={500}> */}
+      {/*           Target Customer Insights */}
+      {/*         </Text> */}
+      {/*         <Text size="sm"> */}
+      {/*           Describe your target customer and let Selix AI optimize your */}
+      {/*           outreach. */}
+      {/*         </Text> */}
+      {/*       </li> */}
+      {/*       <li style={{ marginBottom: "10px" }}> */}
+      {/*         <Text size="md" weight={500}> */}
+      {/*           Reach Out to an Accounts List */}
+      {/*         </Text> */}
+      {/*         <Text size="sm"> */}
+      {/*           Upload your accounts list, and Selix AI will seamlessly direct */}
+      {/*           your outreach campaigns to the right contacts. */}
+      {/*         </Text> */}
+      {/*       </li> */}
+      {/*     </ul> */}
+      {/*     <Button */}
+      {/*       fullWidth */}
+      {/*       mt="md" */}
+      {/*       size="lg" */}
+      {/*       radius="md" */}
+      {/*       style={{ backgroundColor: "#1e90ff", color: "white" }} */}
+      {/*       onClick={() => setShowInfoModal(false)} */}
+      {/*     > */}
+      {/*       Get Started */}
+      {/*     </Button> */}
+      {/*   </Card> */}
+      {/* </Modal> */}
       <Flex align={"center"} px={"md"} w={"100%"} justify={"space-between"}>
         <Text fw={600} size={"xl"}>
           Onboarding
@@ -546,7 +547,7 @@ const FinalReview = ({
   description: string;
 }) => {
   return (
-    <Stack spacing={"sm"}>
+    <Flex align={"left"} gap={"sm"} direction={"column"}>
       <Text size={"sm"} fw={500}>
         Review your inputs and press the launch button to get started with Selix
         AI!
@@ -557,6 +558,7 @@ const FinalReview = ({
         p={"md"}
         bg={"#f5f9ff"}
         style={{ border: "1px dashed #228be6" }}
+        w={"100%"}
       >
         <Stack spacing={"sm"}>
           <Flex align={"start"} gap={"sm"}>
@@ -591,6 +593,9 @@ const FinalReview = ({
           </Flex> */}
         </Stack>
       </Paper>
-    </Stack>
+      <Badge color={"orange"} size={"xl"} radius={"xs"} variant={"outline"}>
+        Don't Worry! You can come back and edit this later!
+      </Badge>
+    </Flex>
   );
 };

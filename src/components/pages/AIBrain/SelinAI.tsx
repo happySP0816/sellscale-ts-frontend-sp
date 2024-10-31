@@ -1845,7 +1845,11 @@ export default function SelinAI() {
         ref={dropzoneRef}
         handleSubmit={handleSubmit}
       >
-        <Card maw={"100%"} style={{ backgroundColor: "transparent" }} p={0}>
+        <Card
+          maw={"100%"}
+          style={{ backgroundColor: "transparent", overflow: "hidden" }}
+          p={0}
+        >
           {currentSessionId && (
             <Flex gap={"xl"}>
               {window.location.hostname !== "localhost" && (
@@ -1864,529 +1868,6 @@ export default function SelinAI() {
                     </Text>
                   )}
                   <Flex align={"center"} gap={"8px"}>
-                    <Popover
-                      width={360}
-                      shadow="md"
-                      position="left"
-                      withinPortal
-                      opened={memoryPopupOpen}
-                      onClose={() => setMemoryPopupOpen(false)}
-                      closeOnClickOutside={false}
-                    >
-                      <Popover.Target>
-                        <Text
-                          ml={"auto"}
-                          size={"xs"}
-                          color="gray"
-                          sx={{ pointer: "cursor" }}
-                          onClick={() => setMemoryPopupOpen((prev) => !prev)}
-                        >
-                          <Badge color="pink" variant="outline">
-                            👤
-                          </Badge>
-                        </Text>
-                      </Popover.Target>
-                      <Popover.Dropdown>
-                        <Flex justify="space-between" align="center" mb="xs">
-                          <LoadingOverlay visible={fetchingMemoryState} />
-                          <Title order={5}>🧑 Supervisor Memory</Title>
-
-                          {supervisorMemory?.session_mode && (
-                            <Tooltip
-                              label={
-                                "Current Goal: " +
-                                supervisorMemory.session_current_goal
-                              }
-                              withArrow
-                            >
-                              <Badge
-                                color="gray"
-                                variant="outline"
-                                radius={4}
-                                ml="auto"
-                              >
-                                🧑{" "}
-                                {supervisorMemory.session_mode?.replace(
-                                  "_",
-                                  " "
-                                )}
-                              </Badge>
-                            </Tooltip>
-                          )}
-
-                          <Button
-                            variant="subtle"
-                            color="red"
-                            size="xs"
-                            onClick={() => setMemoryPopupOpen(false)}
-                            ml="auto"
-                          >
-                            x
-                          </Button>
-                        </Flex>
-                        <Card
-                          withBorder
-                          mah={700}
-                          p="md"
-                          sx={{ overflow: "auto" }}
-                        >
-                          <Flex>
-                            <Text size="sm" color="gray" fw="500">
-                              Currently working on:
-                            </Text>
-                            <Button
-                              onClick={() => {
-                                setMemoryPopupOpen(false);
-                                setOpenEventLogs(true);
-                              }}
-                              size="xs"
-                              color="teal"
-                              ml="auto"
-                              variant="outline"
-                              pt="2px"
-                              pb="2px"
-                              mb="4px"
-                              leftIcon={<IconHistory size={16} />}
-                            >
-                              Event Logs
-                            </Button>
-                          </Flex>
-
-                          {memoryLineEditMode ? (
-                            <Textarea
-                              placeholder="Type your notes here..."
-                              autosize
-                              minRows={3}
-                              value={supervisorMemoryLine}
-                              onChange={(e) => {
-                                setSupervisorMemoryLine(e.target.value);
-                                setMemoryStateChanged(true);
-                              }}
-                              size="xs"
-                              mb="0px"
-                            />
-                          ) : (
-                            <HoverCard
-                              position="right"
-                              width={200}
-                              shadow="md"
-                              withinPortal
-                            >
-                              <HoverCard.Target>
-                                <Text
-                                  size="xs"
-                                  p="xs"
-                                  onClick={() => {
-                                    setMemoryLineEditMode(true);
-                                    setMemoryStateChanged(true);
-                                  }}
-                                  sx={{ cursor: "pointer" }}
-                                  dangerouslySetInnerHTML={{
-                                    __html: (
-                                      supervisorMemoryLine ||
-                                      "Click to add notes..."
-                                    )?.replace(/\n/g, "<br>"),
-                                  }}
-                                />
-                              </HoverCard.Target>
-                              <HoverCard.Dropdown
-                                miw={memoryLineHoverData ? 500 : 0}
-                                display={memoryLineHoverData ? "block" : "none"}
-                              >
-                                <Text
-                                  size="xs"
-                                  dangerouslySetInnerHTML={{
-                                    __html: memoryLineHoverData,
-                                  }}
-                                />
-                              </HoverCard.Dropdown>
-                            </HoverCard>
-                          )}
-
-                          <Text
-                            align="right"
-                            size="12px"
-                            color="gray"
-                            mt="2px"
-                            ml="auto"
-                          >
-                            Last updated:{" "}
-                            {supervisorMemory?.memory_line_time_updated
-                              ? moment
-                                  .utc(
-                                    supervisorMemory?.memory_line_time_updated
-                                  )
-                                  .local()
-                                  .fromNow()
-                              : "N/A"}
-                          </Text>
-                          <Flex mt="4px" mb="md">
-                            <Tooltip
-                              label="Rewind to previous version"
-                              withArrow
-                            >
-                              <Button
-                                color="gray"
-                                size="xs"
-                                opacity={
-                                  !supervisorMemory?.old_memory_line ? 0.5 : 1
-                                }
-                                disabled={!supervisorMemory?.old_memory_line}
-                                onClick={() => {
-                                  setSupervisorMemoryLine(
-                                    supervisorMemory?.old_memory_line
-                                  );
-                                  setClientMemoryStateUpdatedTime(
-                                    supervisorMemory?.old_memory_line_time_updated
-                                  );
-                                  setMemoryStateChanged(true);
-                                }}
-                              >
-                                ⏮
-                              </Button>
-                            </Tooltip>
-                            <Tooltip
-                              label="Generate a new memory line"
-                              withArrow
-                            >
-                              <Button
-                                color="yellow"
-                                size="xs"
-                                ml="4px"
-                                loading={generatingNewMemoryLine}
-                                onClick={() => generateNewDraftMemoryLine()}
-                              >
-                                ♺
-                              </Button>
-                            </Tooltip>
-                            <Flex
-                              ml="auto"
-                              justify="flex-end"
-                              style={{
-                                display:
-                                  memoryStateChanged || memoryLineUpdating
-                                    ? "flex"
-                                    : "none",
-                              }}
-                            >
-                              {memoryLineUpdating && (
-                                <Flex mr="md" mt="4px">
-                                  <Loader size="sm"></Loader>
-                                </Flex>
-                              )}
-                              <Button
-                                size="xs"
-                                color="green"
-                                disabled={
-                                  !memoryStateChanged || memoryLineUpdating
-                                }
-                                onClick={() => {
-                                  updateMemoryLineAllSessions(
-                                    supervisorMemoryLine
-                                  );
-                                  setClientMemoryStateUpdatedTime(
-                                    new Date().toLocaleString()
-                                  );
-                                  setMemoryStateChanged(false);
-                                  setMemoryLineEditMode(false);
-                                }}
-                              >
-                                ✓
-                              </Button>
-                              <Button
-                                size="xs"
-                                color="red"
-                                disabled={
-                                  !memoryStateChanged || memoryLineUpdating
-                                }
-                                ml="xs"
-                                onClick={() => {
-                                  setSupervisorMemoryLine(
-                                    supervisorMemory?.memory_line
-                                  );
-                                  setClientMemoryStateUpdatedTime(
-                                    supervisorMemory?.memory_line_time_updated
-                                  );
-                                  setMemoryStateChanged(false);
-                                  setMemoryLineEditMode(false);
-                                }}
-                              >
-                                ��
-                              </Button>
-                            </Flex>
-                          </Flex>
-
-                          {supervisorMemoryState &&
-                            [
-                              "campaigns",
-                              "sessions",
-                              ...Object.keys(supervisorMemoryState).filter(
-                                (x) => x !== "campaigns" && x !== "sessions"
-                              ),
-                            ].map((x: string) => {
-                              return (
-                                <Box mb="md">
-                                  {x !== "campaigns" && x !== "sessions" && (
-                                    <Divider mb="md" />
-                                  )}
-                                  {x !== "campaigns" && x !== "sessions" && (
-                                    <Text size="sm" color="gray" fw="500">
-                                      {selixMemoryTitleTranslations[x]}
-                                    </Text>
-                                  )}
-
-                                  {Array.isArray(supervisorMemoryState[x]) &&
-                                    supervisorMemoryState[x]
-                                      .filter(
-                                        (y: any) =>
-                                          !supervisorMemoryLine?.includes(
-                                            y.title
-                                          )
-                                      )
-                                      .map((y: any) => (
-                                        <>
-                                          <Box id={`memory-${y.memory}`}>
-                                            <HoverCard
-                                              width={500}
-                                              shadow="md"
-                                              withinPortal
-                                              position="right"
-                                            >
-                                              <HoverCard.Target>
-                                                <Flex>
-                                                  <Box
-                                                    ml="4px"
-                                                    sx={{
-                                                      border: "1px solid",
-                                                      borderColor: "gray",
-                                                      borderRadius: "8px",
-                                                      position: "relative",
-                                                      display: "inline-block",
-                                                      cursor: "pointer",
-                                                      fontSize: "10px",
-                                                      padding: "2px",
-                                                      marginBottom: "4px",
-                                                      marginRight: "4px",
-                                                      paddingLeft: "8px",
-                                                      paddingRight: "8px",
-                                                      paddingTop: "2px",
-                                                      paddingBottom: "2px",
-                                                    }}
-                                                    onMouseEnter={(e) => {
-                                                      const target: any =
-                                                        e.currentTarget;
-                                                      if (
-                                                        x === "campaigns" ||
-                                                        x === "sessions"
-                                                      ) {
-                                                        return;
-                                                      }
-                                                      target.querySelector(
-                                                        ".hover-icons"
-                                                      )!.style.display = "flex";
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                      const target: any =
-                                                        e.currentTarget;
-                                                      if (
-                                                        x === "campaigns" ||
-                                                        x === "sessions"
-                                                      ) {
-                                                        return;
-                                                      }
-                                                      target.querySelector(
-                                                        ".hover-icons"
-                                                      )!.style.display = "none";
-                                                    }}
-                                                  >
-                                                    <Text
-                                                      p="0"
-                                                      m="0"
-                                                      size="xs"
-                                                      color="black"
-                                                    >
-                                                      {y["title"].substring(
-                                                        0,
-                                                        36
-                                                      ) +
-                                                        (y["title"].length > 36
-                                                          ? "..."
-                                                          : "")}
-                                                    </Text>
-                                                    <Flex
-                                                      className="hover-icons"
-                                                      sx={{
-                                                        display: "none",
-                                                        position: "absolute",
-                                                        top: "4px",
-                                                        right: "4px",
-                                                        gap: "4px",
-                                                        backgroundColor:
-                                                          "white",
-                                                      }}
-                                                    >
-                                                      <Tooltip
-                                                        label="Mark as Cancelled"
-                                                        withArrow
-                                                      >
-                                                        <ActionIcon
-                                                          size="xs"
-                                                          color="red"
-                                                          onClick={() => {
-                                                            const id = y.id;
-                                                            changeMemoryStatus(
-                                                              id,
-                                                              "CANCELLED"
-                                                            );
-                                                          }}
-                                                        >
-                                                          <IconX size={12} />
-                                                        </ActionIcon>
-                                                      </Tooltip>
-                                                      <Tooltip
-                                                        label="Mark as Complete"
-                                                        withArrow
-                                                      >
-                                                        <ActionIcon
-                                                          size="xs"
-                                                          color="green"
-                                                          onClick={() => {
-                                                            const id = y.id;
-                                                            changeMemoryStatus(
-                                                              id,
-                                                              "COMPLETE"
-                                                            );
-                                                          }}
-                                                        >
-                                                          <IconCheck
-                                                            size={12}
-                                                          />
-                                                        </ActionIcon>
-                                                      </Tooltip>
-                                                    </Flex>
-                                                  </Box>
-                                                  {(x === "campaigns" ||
-                                                    x === "sessions") && (
-                                                    <Box ml="4px" pt="2px">
-                                                      <IconCloud
-                                                        size="0.9rem"
-                                                        color="gray"
-                                                      />
-                                                    </Box>
-                                                  )}
-                                                </Flex>
-                                              </HoverCard.Target>
-                                              <HoverCard.Dropdown maw={500}>
-                                                <Text
-                                                  size="xs"
-                                                  color="black"
-                                                  fw={400}
-                                                  dangerouslySetInnerHTML={{
-                                                    __html:
-                                                      y["memory"] &&
-                                                      y["memory"].replaceAll(
-                                                        "\n",
-                                                        "<br>"
-                                                      ),
-                                                  }}
-                                                />
-                                              </HoverCard.Dropdown>
-                                            </HoverCard>
-                                          </Box>
-                                        </>
-                                      ))}
-
-                                  <Box mt="sm">
-                                    {(x == "needs_user_input" ||
-                                      x == "needs_ai_input") && (
-                                      <>
-                                        {!showAddMemoryInput && (
-                                          <Button
-                                            variant="outline"
-                                            ml="auto"
-                                            size="xs"
-                                            color="gray"
-                                            onClick={() => {
-                                              if (showAddMemoryInput) {
-                                                setShowAddMemoryInput(false);
-                                                setShowMemoryForKey("");
-                                              } else {
-                                                setShowAddMemoryInput(true);
-                                                setShowMemoryForKey(x);
-                                              }
-                                            }}
-                                          >
-                                            +
-                                          </Button>
-                                        )}
-                                        {showAddMemoryInput &&
-                                          showMemoryForKey === x && (
-                                            <Flex mt="xs" align="center">
-                                              <TextInput
-                                                placeholder="Enter memory title"
-                                                value={newMemoryTitle}
-                                                onChange={(event) =>
-                                                  setNewMemoryTitle(
-                                                    event.currentTarget.value
-                                                  )
-                                                }
-                                                onKeyDown={(event) => {
-                                                  if (event.key === "Enter") {
-                                                    addMemory(
-                                                      newMemoryTitle,
-                                                      newMemoryTitle,
-                                                      x == "needs_user_input"
-                                                        ? true
-                                                        : false
-                                                    );
-                                                    setNewMemoryTitle("");
-                                                    setShowAddMemoryInput(
-                                                      false
-                                                    );
-                                                  }
-                                                }}
-                                                width="100%"
-                                                mr="xs"
-                                              />
-                                              <Button
-                                                size="xs"
-                                                color="green"
-                                                onClick={() => {
-                                                  addMemory(
-                                                    newMemoryTitle,
-                                                    newMemoryTitle,
-                                                    x == "needs_user_input"
-                                                      ? true
-                                                      : false
-                                                  );
-                                                  setNewMemoryTitle("");
-                                                  setShowAddMemoryInput(false);
-                                                }}
-                                              >
-                                                Add
-                                              </Button>
-                                              <Button
-                                                size="xs"
-                                                color="red"
-                                                onClick={() => {
-                                                  setNewMemoryTitle("");
-                                                  setShowAddMemoryInput(false);
-                                                }}
-                                                ml="xs"
-                                              >
-                                                Cancel
-                                              </Button>
-                                            </Flex>
-                                          )}
-                                      </>
-                                    )}
-                                  </Box>
-                                </Box>
-                              );
-                            })}
-                        </Card>
-                      </Popover.Dropdown>
-                    </Popover>
                     <ActionIcon onClick={() => setShowSidebar(!showSidebar)}>
                       {showSidebar ? (
                         <IconChevronLeft size={"1rem"} />
@@ -2494,38 +1975,681 @@ export default function SelinAI() {
                                       Chat With Supervisor
                                     </Text>
                                   </Flex>
-                                  <Tooltip
-                                    label={
-                                      <Flex
-                                        direction={"column"}
-                                        style={{
-                                          maxWidth: "400px",
-                                          textWrap: "wrap",
-                                        }}
-                                      >
-                                        <Text>
-                                          Selix Supervisor is a manager for all
-                                          the worker sessions. You can ask it
-                                          question that you'd ask a "supervisor"
-                                          for your outbound:
-                                        </Text>
-                                        <Text>
-                                          - "What's my top priority right now?"
-                                        </Text>
-                                        <Text>
-                                          - "Can you make a new session?"
-                                        </Text>
-                                        <Text>
-                                          - "What happened last week" (coming
-                                          soon)
-                                        </Text>
-                                      </Flex>
-                                    }
+                                  <Box
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                    }}
                                   >
-                                    <ActionIcon>
-                                      <IconInfoCircle />
-                                    </ActionIcon>
-                                  </Tooltip>
+                                    <Popover
+                                      width={450}
+                                      shadow="md"
+                                      position="left"
+                                      withinPortal
+                                      opened={memoryPopupOpen}
+                                      onClose={() => setMemoryPopupOpen(false)}
+                                      closeOnClickOutside={false}
+                                    >
+                                      <Popover.Target>
+                                        <Text
+                                          ml={"auto"}
+                                          size={"xs"}
+                                          color="gray"
+                                          sx={{ pointer: "cursor" }}
+                                          onClick={() =>
+                                            setMemoryPopupOpen((prev) => !prev)
+                                          }
+                                        >
+                                          <Badge color="pink" variant="outline">
+                                            🧑
+                                          </Badge>
+                                        </Text>
+                                      </Popover.Target>
+                                      <Popover.Dropdown>
+                                        <Flex
+                                          justify="space-between"
+                                          align="center"
+                                          mb="xs"
+                                          gap={"4px"}
+                                        >
+                                          <LoadingOverlay
+                                            visible={fetchingMemoryState}
+                                          />
+                                          <Title order={5}>
+                                            🧑 Supervisor Memory
+                                          </Title>
+
+                                          {supervisorMemory?.session_mode && (
+                                            <Tooltip
+                                              label={
+                                                "Current Goal: " +
+                                                supervisorMemory.session_current_goal
+                                              }
+                                              withArrow
+                                            >
+                                              <Badge
+                                                color="gray"
+                                                variant="outline"
+                                                radius={4}
+                                                ml="auto"
+                                              >
+                                                🧑{" "}
+                                                {supervisorMemory.session_mode?.replace(
+                                                  "_",
+                                                  " "
+                                                )}
+                                              </Badge>
+                                            </Tooltip>
+                                          )}
+
+                                          <Button
+                                            variant="subtle"
+                                            color="red"
+                                            size="xs"
+                                            onClick={() =>
+                                              setMemoryPopupOpen(false)
+                                            }
+                                            ml="auto"
+                                          >
+                                            x
+                                          </Button>
+                                        </Flex>
+                                        <Card
+                                          withBorder
+                                          mah={700}
+                                          p="md"
+                                          sx={{ overflow: "auto" }}
+                                        >
+                                          <Flex>
+                                            <Text
+                                              size="sm"
+                                              color="gray"
+                                              fw="500"
+                                            >
+                                              Currently working on:
+                                            </Text>
+                                            <Button
+                                              onClick={() => {
+                                                setMemoryPopupOpen(false);
+                                                setOpenEventLogs(true);
+                                              }}
+                                              size="xs"
+                                              color="teal"
+                                              ml="auto"
+                                              variant="outline"
+                                              pt="2px"
+                                              pb="2px"
+                                              mb="4px"
+                                              leftIcon={
+                                                <IconHistory size={16} />
+                                              }
+                                            >
+                                              Event Logs
+                                            </Button>
+                                          </Flex>
+
+                                          {memoryLineEditMode ? (
+                                            <Textarea
+                                              placeholder="Type your notes here..."
+                                              autosize
+                                              minRows={3}
+                                              value={supervisorMemoryLine}
+                                              onChange={(e) => {
+                                                setSupervisorMemoryLine(
+                                                  e.target.value
+                                                );
+                                                setMemoryStateChanged(true);
+                                              }}
+                                              size="xs"
+                                              mb="0px"
+                                            />
+                                          ) : (
+                                            <HoverCard
+                                              position="right"
+                                              width={200}
+                                              shadow="md"
+                                              withinPortal
+                                            >
+                                              <HoverCard.Target>
+                                                <Text
+                                                  size="xs"
+                                                  p="xs"
+                                                  onClick={() => {
+                                                    setMemoryLineEditMode(true);
+                                                    setMemoryStateChanged(true);
+                                                  }}
+                                                  sx={{ cursor: "pointer" }}
+                                                  dangerouslySetInnerHTML={{
+                                                    __html: (
+                                                      supervisorMemoryLine ||
+                                                      "Click to add notes..."
+                                                    )?.replace(/\n/g, "<br>"),
+                                                  }}
+                                                />
+                                              </HoverCard.Target>
+                                              <HoverCard.Dropdown
+                                                miw={
+                                                  memoryLineHoverData ? 500 : 0
+                                                }
+                                                display={
+                                                  memoryLineHoverData
+                                                    ? "block"
+                                                    : "none"
+                                                }
+                                              >
+                                                <Text
+                                                  size="xs"
+                                                  dangerouslySetInnerHTML={{
+                                                    __html: memoryLineHoverData,
+                                                  }}
+                                                />
+                                              </HoverCard.Dropdown>
+                                            </HoverCard>
+                                          )}
+
+                                          <Text
+                                            align="right"
+                                            size="12px"
+                                            color="gray"
+                                            mt="2px"
+                                            ml="auto"
+                                          >
+                                            Last updated:{" "}
+                                            {supervisorMemory?.memory_line_time_updated
+                                              ? moment
+                                                  .utc(
+                                                    supervisorMemory?.memory_line_time_updated
+                                                  )
+                                                  .local()
+                                                  .fromNow()
+                                              : "N/A"}
+                                          </Text>
+                                          <Flex mt="4px" mb="md">
+                                            <Tooltip
+                                              label="Rewind to previous version"
+                                              withArrow
+                                            >
+                                              <Button
+                                                color="gray"
+                                                size="xs"
+                                                opacity={
+                                                  !supervisorMemory?.old_memory_line
+                                                    ? 0.5
+                                                    : 1
+                                                }
+                                                disabled={
+                                                  !supervisorMemory?.old_memory_line
+                                                }
+                                                onClick={() => {
+                                                  setSupervisorMemoryLine(
+                                                    supervisorMemory?.old_memory_line
+                                                  );
+                                                  setClientMemoryStateUpdatedTime(
+                                                    supervisorMemory?.old_memory_line_time_updated
+                                                  );
+                                                  setMemoryStateChanged(true);
+                                                }}
+                                              >
+                                                ⏮
+                                              </Button>
+                                            </Tooltip>
+                                            <Tooltip
+                                              label="Generate a new memory line"
+                                              withArrow
+                                            >
+                                              <Button
+                                                color="yellow"
+                                                size="xs"
+                                                ml="4px"
+                                                loading={
+                                                  generatingNewMemoryLine
+                                                }
+                                                onClick={() =>
+                                                  generateNewDraftMemoryLine()
+                                                }
+                                              >
+                                                ♺
+                                              </Button>
+                                            </Tooltip>
+                                            <Flex
+                                              ml="auto"
+                                              justify="flex-end"
+                                              style={{
+                                                display:
+                                                  memoryStateChanged ||
+                                                  memoryLineUpdating
+                                                    ? "flex"
+                                                    : "none",
+                                              }}
+                                            >
+                                              {memoryLineUpdating && (
+                                                <Flex mr="md" mt="4px">
+                                                  <Loader size="sm"></Loader>
+                                                </Flex>
+                                              )}
+                                              <Button
+                                                size="xs"
+                                                color="green"
+                                                disabled={
+                                                  !memoryStateChanged ||
+                                                  memoryLineUpdating
+                                                }
+                                                onClick={() => {
+                                                  updateMemoryLineAllSessions(
+                                                    supervisorMemoryLine
+                                                  );
+                                                  setClientMemoryStateUpdatedTime(
+                                                    new Date().toLocaleString()
+                                                  );
+                                                  setMemoryStateChanged(false);
+                                                  setMemoryLineEditMode(false);
+                                                }}
+                                              >
+                                                ✓
+                                              </Button>
+                                              <Button
+                                                size="xs"
+                                                color="red"
+                                                disabled={
+                                                  !memoryStateChanged ||
+                                                  memoryLineUpdating
+                                                }
+                                                ml="xs"
+                                                onClick={() => {
+                                                  setSupervisorMemoryLine(
+                                                    supervisorMemory?.memory_line
+                                                  );
+                                                  setClientMemoryStateUpdatedTime(
+                                                    supervisorMemory?.memory_line_time_updated
+                                                  );
+                                                  setMemoryStateChanged(false);
+                                                  setMemoryLineEditMode(false);
+                                                }}
+                                              >
+                                                ��
+                                              </Button>
+                                            </Flex>
+                                          </Flex>
+
+                                          {supervisorMemoryState &&
+                                            [
+                                              "campaigns",
+                                              "sessions",
+                                              ...Object.keys(
+                                                supervisorMemoryState
+                                              ).filter(
+                                                (x) =>
+                                                  x !== "campaigns" &&
+                                                  x !== "sessions"
+                                              ),
+                                            ].map((x: string) => {
+                                              return (
+                                                <Box mb="md">
+                                                  {x !== "campaigns" &&
+                                                    x !== "sessions" && (
+                                                      <Divider mb="md" />
+                                                    )}
+                                                  {x !== "campaigns" &&
+                                                    x !== "sessions" && (
+                                                      <Text
+                                                        size="sm"
+                                                        color="gray"
+                                                        fw="500"
+                                                      >
+                                                        {
+                                                          selixMemoryTitleTranslations[
+                                                            x
+                                                          ]
+                                                        }
+                                                      </Text>
+                                                    )}
+
+                                                  {Array.isArray(
+                                                    supervisorMemoryState[x]
+                                                  ) &&
+                                                    supervisorMemoryState[x]
+                                                      .filter(
+                                                        (y: any) =>
+                                                          !supervisorMemoryLine?.includes(
+                                                            y.title
+                                                          )
+                                                      )
+                                                      .map((y: any) => (
+                                                        <>
+                                                          <Box
+                                                            id={`memory-${y.memory}`}
+                                                          >
+                                                            <HoverCard
+                                                              width={500}
+                                                              shadow="md"
+                                                              withinPortal
+                                                              position="right"
+                                                            >
+                                                              <HoverCard.Target>
+                                                                <Flex>
+                                                                  <Box
+                                                                    ml="4px"
+                                                                    sx={{
+                                                                      border:
+                                                                        "1px solid",
+                                                                      borderColor:
+                                                                        "gray",
+                                                                      borderRadius:
+                                                                        "8px",
+                                                                      position:
+                                                                        "relative",
+                                                                      display:
+                                                                        "inline-block",
+                                                                      cursor:
+                                                                        "pointer",
+                                                                      fontSize:
+                                                                        "10px",
+                                                                      padding:
+                                                                        "2px",
+                                                                      marginBottom:
+                                                                        "4px",
+                                                                      marginRight:
+                                                                        "4px",
+                                                                      paddingLeft:
+                                                                        "8px",
+                                                                      paddingRight:
+                                                                        "8px",
+                                                                      paddingTop:
+                                                                        "2px",
+                                                                      paddingBottom:
+                                                                        "2px",
+                                                                    }}
+                                                                    onMouseEnter={(
+                                                                      e
+                                                                    ) => {
+                                                                      const target: any =
+                                                                        e.currentTarget;
+                                                                      if (
+                                                                        x ===
+                                                                          "campaigns" ||
+                                                                        x ===
+                                                                          "sessions"
+                                                                      ) {
+                                                                        return;
+                                                                      }
+                                                                      target.querySelector(
+                                                                        ".hover-icons"
+                                                                      )!.style.display =
+                                                                        "flex";
+                                                                    }}
+                                                                    onMouseLeave={(
+                                                                      e
+                                                                    ) => {
+                                                                      const target: any =
+                                                                        e.currentTarget;
+                                                                      if (
+                                                                        x ===
+                                                                          "campaigns" ||
+                                                                        x ===
+                                                                          "sessions"
+                                                                      ) {
+                                                                        return;
+                                                                      }
+                                                                      target.querySelector(
+                                                                        ".hover-icons"
+                                                                      )!.style.display =
+                                                                        "none";
+                                                                    }}
+                                                                  >
+                                                                    <Text
+                                                                      p="0"
+                                                                      m="0"
+                                                                      size="xs"
+                                                                      color="black"
+                                                                    >
+                                                                      {y[
+                                                                        "title"
+                                                                      ].substring(
+                                                                        0,
+                                                                        36
+                                                                      ) +
+                                                                        (y[
+                                                                          "title"
+                                                                        ]
+                                                                          .length >
+                                                                        36
+                                                                          ? "..."
+                                                                          : "")}
+                                                                    </Text>
+                                                                    <Flex
+                                                                      className="hover-icons"
+                                                                      sx={{
+                                                                        display:
+                                                                          "none",
+                                                                        position:
+                                                                          "absolute",
+                                                                        top: "4px",
+                                                                        right:
+                                                                          "4px",
+                                                                        gap: "4px",
+                                                                        backgroundColor:
+                                                                          "white",
+                                                                      }}
+                                                                    >
+                                                                      <Tooltip
+                                                                        label="Mark as Cancelled"
+                                                                        withArrow
+                                                                      >
+                                                                        <ActionIcon
+                                                                          size="xs"
+                                                                          color="red"
+                                                                          onClick={() => {
+                                                                            const id =
+                                                                              y.id;
+                                                                            changeMemoryStatus(
+                                                                              id,
+                                                                              "CANCELLED"
+                                                                            );
+                                                                          }}
+                                                                        >
+                                                                          <IconX
+                                                                            size={
+                                                                              12
+                                                                            }
+                                                                          />
+                                                                        </ActionIcon>
+                                                                      </Tooltip>
+                                                                      <Tooltip
+                                                                        label="Mark as Complete"
+                                                                        withArrow
+                                                                      >
+                                                                        <ActionIcon
+                                                                          size="xs"
+                                                                          color="green"
+                                                                          onClick={() => {
+                                                                            const id =
+                                                                              y.id;
+                                                                            changeMemoryStatus(
+                                                                              id,
+                                                                              "COMPLETE"
+                                                                            );
+                                                                          }}
+                                                                        >
+                                                                          <IconCheck
+                                                                            size={
+                                                                              12
+                                                                            }
+                                                                          />
+                                                                        </ActionIcon>
+                                                                      </Tooltip>
+                                                                    </Flex>
+                                                                  </Box>
+                                                                  {(x ===
+                                                                    "campaigns" ||
+                                                                    x ===
+                                                                      "sessions") && (
+                                                                    <Box
+                                                                      ml="4px"
+                                                                      pt="2px"
+                                                                    >
+                                                                      <IconCloud
+                                                                        size="0.9rem"
+                                                                        color="gray"
+                                                                      />
+                                                                    </Box>
+                                                                  )}
+                                                                </Flex>
+                                                              </HoverCard.Target>
+                                                              <HoverCard.Dropdown
+                                                                maw={500}
+                                                              >
+                                                                <Text
+                                                                  size="xs"
+                                                                  color="black"
+                                                                  fw={400}
+                                                                  dangerouslySetInnerHTML={{
+                                                                    __html:
+                                                                      y[
+                                                                        "memory"
+                                                                      ] &&
+                                                                      y[
+                                                                        "memory"
+                                                                      ].replaceAll(
+                                                                        "\n",
+                                                                        "<br>"
+                                                                      ),
+                                                                  }}
+                                                                />
+                                                              </HoverCard.Dropdown>
+                                                            </HoverCard>
+                                                          </Box>
+                                                        </>
+                                                      ))}
+
+                                                  <Box mt="sm">
+                                                    {(x == "needs_user_input" ||
+                                                      x ==
+                                                        "needs_ai_input") && (
+                                                      <>
+                                                        {!showAddMemoryInput && (
+                                                          <Button
+                                                            variant="outline"
+                                                            ml="auto"
+                                                            size="xs"
+                                                            color="gray"
+                                                            onClick={() => {
+                                                              if (
+                                                                showAddMemoryInput
+                                                              ) {
+                                                                setShowAddMemoryInput(
+                                                                  false
+                                                                );
+                                                                setShowMemoryForKey(
+                                                                  ""
+                                                                );
+                                                              } else {
+                                                                setShowAddMemoryInput(
+                                                                  true
+                                                                );
+                                                                setShowMemoryForKey(
+                                                                  x
+                                                                );
+                                                              }
+                                                            }}
+                                                          >
+                                                            +
+                                                          </Button>
+                                                        )}
+                                                        {showAddMemoryInput &&
+                                                          showMemoryForKey ===
+                                                            x && (
+                                                            <Flex
+                                                              mt="xs"
+                                                              align="center"
+                                                            >
+                                                              <TextInput
+                                                                placeholder="Enter memory title"
+                                                                value={
+                                                                  newMemoryTitle
+                                                                }
+                                                                onChange={(
+                                                                  event
+                                                                ) =>
+                                                                  setNewMemoryTitle(
+                                                                    event
+                                                                      .currentTarget
+                                                                      .value
+                                                                  )
+                                                                }
+                                                                onKeyDown={(
+                                                                  event
+                                                                ) => {
+                                                                  if (
+                                                                    event.key ===
+                                                                    "Enter"
+                                                                  ) {
+                                                                    addMemory(
+                                                                      newMemoryTitle,
+                                                                      newMemoryTitle,
+                                                                      x ==
+                                                                        "needs_user_input"
+                                                                        ? true
+                                                                        : false
+                                                                    );
+                                                                    setNewMemoryTitle(
+                                                                      ""
+                                                                    );
+                                                                    setShowAddMemoryInput(
+                                                                      false
+                                                                    );
+                                                                  }
+                                                                }}
+                                                                width="100%"
+                                                                mr="xs"
+                                                              />
+                                                              <Button
+                                                                size="xs"
+                                                                color="green"
+                                                                onClick={() => {
+                                                                  addMemory(
+                                                                    newMemoryTitle,
+                                                                    newMemoryTitle,
+                                                                    x ==
+                                                                      "needs_user_input"
+                                                                      ? true
+                                                                      : false
+                                                                  );
+                                                                  setNewMemoryTitle(
+                                                                    ""
+                                                                  );
+                                                                  setShowAddMemoryInput(
+                                                                    false
+                                                                  );
+                                                                }}
+                                                              >
+                                                                Add
+                                                              </Button>
+                                                              <Button
+                                                                size="xs"
+                                                                color="red"
+                                                                onClick={() => {
+                                                                  setNewMemoryTitle(
+                                                                    ""
+                                                                  );
+                                                                  setShowAddMemoryInput(
+                                                                    false
+                                                                  );
+                                                                }}
+                                                                ml="xs"
+                                                              >
+                                                                Cancel
+                                                              </Button>
+                                                            </Flex>
+                                                          )}
+                                                      </>
+                                                    )}
+                                                  </Box>
+                                                </Box>
+                                              );
+                                            })}
+                                        </Card>
+                                      </Popover.Dropdown>
+                                    </Popover>
+                                  </Box>
                                 </Flex>
                               </Paper>
                             )}
@@ -3672,6 +3796,53 @@ const SegmentChat = (props: any) => {
     setRecording(false);
   }, [shouldSubmit]);
 
+  const fetchSelixLogs = async (
+    selixLogId: number | null = null
+  ): Promise<MemoryLog[]> => {
+    try {
+      const response = await fetch(`${API_URL}/selix/get_selix_logs`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          ContentType: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch logs");
+      }
+
+      const result = await response.json();
+
+      console.log("Logs fetched successfully");
+
+      return result.logs;
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+      return [] as MemoryLog[];
+    }
+  };
+
+  const {
+    data: logs,
+    refetch,
+    isLoading,
+  } = useQuery({
+    queryKey: ["selix_event_logs_planner_component_segment_chat"],
+    queryFn: async () => {
+      let l: MemoryLog[] = await fetchSelixLogs();
+      l = l
+        .filter((log) => {
+          return log.show_in_session_memory;
+        })
+        .reverse();
+
+      return l;
+    },
+  });
+
+  console.log("logs: ", logs);
+
   let formattedMemoryLine = clientMemoryState;
   const sessions = memoryState?.sessions;
 
@@ -3692,7 +3863,7 @@ const SegmentChat = (props: any) => {
 
   return (
     <>
-      <Paper withBorder shadow="sm" radius={"md"} w={"40%"} h={"100%"}>
+      <Paper withBorder shadow="sm" radius={"md"} w={"40%"} h={"90vh"}>
         <Flex
           px={"md"}
           py={"xs"}
@@ -3706,30 +3877,103 @@ const SegmentChat = (props: any) => {
             <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
             <Text fw={600}>Chat with Selix</Text>
           </Flex>
-          <Badge color="gray" variant="outline" radius={4} ml="auto">
-            {(() => {
-              let emoji = "🧠";
+          <Popover width={360} shadow={"md"} position={"left"} withinPortal>
+            <LoadingOverlay visible={isLoading} zIndex={2} />
+            <Popover.Target>
+              <Badge color="gray" variant="outline" radius={4} ml="auto">
+                {(() => {
+                  let emoji = "🧠";
 
-              switch (props.memory?.session_mode) {
-                case "campaign_builder":
-                  emoji = "⚙️";
-                  break;
-                case "ingestion_mode":
-                  emoji = "🍗";
-                  break;
-                case "supervisor_mode":
-                  emoji = "🧑";
-                  break;
-                default:
-                  emoji = "🧠";
-              }
+                  switch (props.memory?.session_mode) {
+                    case "campaign_builder":
+                      emoji = "⚙️";
+                      break;
+                    case "ingestion_mode":
+                      emoji = "🍗";
+                      break;
+                    case "supervisor_mode":
+                      emoji = "🧑";
+                      break;
+                    default:
+                      emoji = "🧠";
+                  }
 
-              return `${emoji} ${props.memory?.session_mode?.replace(
-                "_",
-                " "
-              )}`;
-            })()}
-          </Badge>
+                  return `${emoji}`;
+                })()}
+              </Badge>
+            </Popover.Target>
+            <Popover.Dropdown>
+              <Flex align={"center"} direction={"column"}>
+                <Flex
+                  justify="space-between"
+                  align="center"
+                  mb="xs"
+                  gap={"4px"}
+                >
+                  <Title order={5}>👷 Worker Memory</Title>
+
+                  {props.memory?.session_mode && (
+                    <Tooltip
+                      label={
+                        "Current Goal: " + props.memory?.session_current_goal
+                      }
+                      withArrow
+                    >
+                      <Badge
+                        color="gray"
+                        variant="outline"
+                        radius={4}
+                        ml="auto"
+                      >
+                        {(() => {
+                          let emoji = "🧠";
+
+                          switch (props.memory?.session_mode) {
+                            case "campaign_builder":
+                              emoji = "⚙️";
+                              break;
+                            case "ingestion_mode":
+                              emoji = "🍗";
+                              break;
+                            case "supervisor_mode":
+                              emoji = "🧑";
+                              break;
+                            default:
+                              emoji = "🧠";
+                          }
+
+                          return `${emoji} ${props.memory?.session_mode?.replace(
+                            "-",
+                            " "
+                          )}`;
+                        })()}
+                      </Badge>
+                    </Tooltip>
+                  )}
+                </Flex>
+                <Card withBorder>
+                  {logs && logs.length > 0 && (
+                    <Text
+                      size="sm"
+                      p="xs"
+                      sx={{
+                        cursor: "pointer",
+                        whiteSpace: "normal",
+                        wordWrap: "break-word",
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: (
+                          logs[0].json_data?.metadata ??
+                          logs[0].json_data?.memory ??
+                          "No memory"
+                        )?.replace(/\n/g, "<br>"),
+                      }}
+                    />
+                  )}
+                </Card>
+              </Flex>
+            </Popover.Dropdown>
+          </Popover>
         </Flex>
         <Divider bg="gray" />
         <div style={{ position: "relative", height: "48vh" }}>
@@ -4840,7 +5084,7 @@ const SelixControlCenter = ({
   }, [{ ...threads }]);
 
   return (
-    <Paper withBorder shadow="sm" w={"60%"} radius={"md"}>
+    <Paper withBorder shadow="sm" w={"60%"} radius={"md"} h={"89vh"}>
       <Modal
         opened={showICPModal}
         onClose={() => {
@@ -5553,6 +5797,7 @@ export const PlannerComponent = ({
       console.log("Task updated successfully:", data);
 
       queryClient.invalidateQueries(["selix_event_logs_planner_component"]);
+      refetch();
 
       showNotification({
         color: "green",
@@ -5589,7 +5834,19 @@ export const PlannerComponent = ({
         setSelectedPersona(project);
 
         if (currentThread?.tasks.length) {
-          setOpenedTaskIndex(currentThread?.tasks.length - 1);
+          let index = 0;
+
+          while (index < currentThread.tasks.length) {
+            const task = currentThread.tasks[index];
+
+            if (task.status === "COMPLETE" || task.status === "CANCELLED") {
+              index += 1;
+            } else {
+              break;
+            }
+          }
+
+          setOpenedTaskIndex(index);
         }
         setTimeout(() => {
           if (taskContainerRef.current) {
@@ -5602,7 +5859,7 @@ export const PlannerComponent = ({
         //show the 'launch campaign' task if a campaign is attached
       }
     })();
-  }, [campaignId]);
+  }, [campaignId, currentThread?.tasks]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -5675,7 +5932,15 @@ export const PlannerComponent = ({
     });
   };
 
-  console.log(valueMapping);
+  const [logIndex, setLogIndex] = useState<number>(
+    logs?.findIndex((log) => log.id === selectedLog?.id) ?? 0
+  );
+
+  useEffect(() => {
+    if (logs) {
+      setSelectedLog(logs[logIndex]);
+    }
+  }, [logIndex, logs]);
 
   const onDragEnd = async (result: {
     destination: { index: number };
@@ -5738,28 +6003,30 @@ export const PlannerComponent = ({
               currentThread?.memory.campaign_id === currentProject?.id && (
                 <Text size={"xs"} color="#E25DEE" fw={600}>
                   Selix Tasks:{" "}
-                  <Select
-                    value={"" + selectedPersona?.id}
-                    data={
-                      personas
-                        ? personas.map((p) => {
-                            return {
-                              value: "" + p.id,
-                              label: `${p.id}: ${p.name}`,
-                            };
-                          })
-                        : []
-                    }
-                    placeholder={"select your archetypes"}
-                    onChange={async (value) => {
-                      if (value) {
-                        await editSession(currentThread.id, +value);
-                        setSelectedPersona(
-                          personas?.find((p) => p.id === +value) ?? null
-                        );
+                  {isInternal && (
+                    <Select
+                      value={"" + selectedPersona?.id}
+                      data={
+                        personas
+                          ? personas.map((p) => {
+                              return {
+                                value: "" + p.id,
+                                label: `${p.id}: ${p.name}`,
+                              };
+                            })
+                          : []
                       }
-                    }}
-                  />
+                      placeholder={"select your archetypes"}
+                      onChange={async (value) => {
+                        if (value) {
+                          await editSession(currentThread.id, +value);
+                          setSelectedPersona(
+                            personas?.find((p) => p.id === +value) ?? null
+                          );
+                        }
+                      }}
+                    />
+                  )}
                   <span className="font-medium text-gray-500">
                     <a
                       href={`/campaign_v2/${currentProject.id}`}
@@ -6024,7 +6291,7 @@ export const PlannerComponent = ({
                             "In Progress",
                           [SelixSessionTaskStatus.COMPLETE]: "Complete",
                           [SelixSessionTaskStatus.CANCELLED]: "Cancelled",
-                          [SelixSessionTaskStatus.BLOCKED]: "⚠️ Blocked",
+                          [SelixSessionTaskStatus.BLOCKED]: "���️ Blocked",
                         };
 
                         return (
@@ -6596,40 +6863,88 @@ export const PlannerComponent = ({
           />
         )}
       </Flex>
-      {logs && logs.length > 0 && (
-        <Tooltip
-          width={500}
-          label={
-            !selectedLog ? (
-              "No Memories"
+      <Flex gap={"8px"} align={"center"}>
+        {logs && logs.length > 0 && (
+          <Tooltip
+            style={{
+              backgroundColor: "white",
+              color: "black",
+              border: "1px solid black",
+            }}
+            width={500}
+            label={
+              !selectedLog ? (
+                "No Memories"
+              ) : (
+                <Flex direction={"column"} align={"center"}>
+                  <Title order={5}>👷 Worker Memory</Title>
+                  <Text>Last Event:</Text>
+                  <Text
+                    style={{ whiteSpace: "normal", wordWrap: "break-word" }}
+                  >
+                    Title: {selectedLog.title}
+                  </Text>
+                  <Text
+                    style={{ whiteSpace: "normal", wordWrap: "break-word" }}
+                  >
+                    {selectedLog.created_date}
+                  </Text>
+                  <Text
+                    size="sm"
+                    p="xs"
+                    sx={{
+                      cursor: "pointer",
+                      whiteSpace: "normal",
+                      wordWrap: "break-word",
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: (
+                        selectedLog.json_data?.metadata ??
+                        selectedLog.json_data?.memory ??
+                        "No memory"
+                      )?.replace(/\n/g, "<br>"),
+                    }}
+                  />
+                  {/* <Text style={{ whiteSpace: "normal", wordWrap: "break-word" }}> */}
+                  {/*   {selectedLog.json_data?.memory} */}
+                  {/* </Text> */}
+                </Flex>
+              )
+            }
+          >
+            {valueMapping.findIndex((item) => item.id === selectedLog?.id) ===
+            valueMapping.length - 1 ? (
+              <Badge color="green" size={"lg"}>
+                Live
+              </Badge>
             ) : (
-              <Flex direction={"column"} align={"center"}>
-                <Text>Last Event:</Text>
-                <Text style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
-                  Title: {selectedLog.title}
-                </Text>
-                <Text style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
-                  {selectedLog.created_date}
-                </Text>
-                <Text style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
-                  {selectedLog.json_data?.memory}
-                </Text>
-              </Flex>
-            )
-          }
-        >
-          {valueMapping.findIndex((item) => item.id === selectedLog?.id) ===
-          valueMapping.length - 1 ? (
-            <Badge color="green" size={"lg"}>
-              Live
-            </Badge>
-          ) : (
-            <Badge color="red" size={"lg"}>
-              Snapshot
-            </Badge>
-          )}
-        </Tooltip>
-      )}
+              <Badge color="red" size={"lg"}>
+                Snapshot
+              </Badge>
+            )}
+          </Tooltip>
+        )}
+        {/* {logs && ( */}
+        {/*   <ActionIcon */}
+        {/*     disabled={logIndex === 0} */}
+        {/*     onClick={() => { */}
+        {/*       setLogIndex((prevState) => prevState - 1); */}
+        {/*     }} */}
+        {/*   > */}
+        {/*     <IconChevronLeft size={"sm"} /> */}
+        {/*   </ActionIcon> */}
+        {/* )} */}
+        {/* {logs && ( */}
+        {/*   <ActionIcon */}
+        {/*     disabled={logIndex === logs.length - 1} */}
+        {/*     onClick={() => { */}
+        {/*       setLogIndex((prevState) => prevState + 1); */}
+        {/*     }} */}
+        {/*   > */}
+        {/*     <IconChevronRight size={"sm"} /> */}
+        {/*   </ActionIcon> */}
+        {/* )} */}
+      </Flex>
     </Paper>
   );
 };
